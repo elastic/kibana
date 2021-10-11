@@ -45,10 +45,11 @@ import { AlertAttributes } from '../signals/types';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, mergeStrategy, ignoreFields, ruleDataClient, ruleDataService }) =>
+  ({ lists, logger, config, ruleDataClient, eventLogService }) =>
   (type) => {
-    const persistenceRuleTypeWrapper = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
-    return persistenceRuleTypeWrapper({
+    const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
+    const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
+    return persistenceRuleType({
       ...type,
       async executor(options) {
         const {
@@ -70,7 +71,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
         const ruleStatusClient = new RuleExecutionLogClient({
           savedObjectsClient,
-          ruleDataService,
+          eventLogService,
+          underlyingClient: config.ruleExecutionLog.underlyingClient,
         });
         const ruleSO = await savedObjectsClient.get<AlertAttributes<typeof params>>(
           'alert',
@@ -80,6 +82,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         const {
           actions,
           name,
+          alertTypeId,
           schedule: { interval },
         } = ruleSO.attributes;
         const refresh = actions.length ? 'wait_for' : false;
@@ -95,9 +98,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         logger.debug(buildRuleMessage(`interval: ${interval}`));
 
         let wroteWarningStatus = false;
-        await ruleStatusClient.logStatusChange({
+        const basicLogArguments = {
           spaceId,
           ruleId: alertId,
+          ruleName: name,
+          ruleType: alertTypeId,
+        };
+        await ruleStatusClient.logStatusChange({
+          ...basicLogArguments,
           newStatus: RuleExecutionStatus['going to run'],
         });
 
@@ -142,8 +150,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   tryCatch(
                     () =>
                       hasReadIndexPrivileges({
-                        spaceId,
-                        ruleId: alertId,
+                        ...basicLogArguments,
                         privileges,
                         logger,
                         buildRuleMessage,
@@ -155,8 +162,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   tryCatch(
                     () =>
                       hasTimestampFields({
-                        spaceId,
-                        ruleId: alertId,
+                        ...basicLogArguments,
                         wroteStatus: wroteStatus as boolean,
                         timestampField: hasTimestampOverride
                           ? (timestampOverride as string)
@@ -196,11 +202,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           logger.warn(gapMessage);
           hasError = true;
           await ruleStatusClient.logStatusChange({
-            spaceId,
-            ruleId: alertId,
+            ...basicLogArguments,
             newStatus: RuleExecutionStatus.failed,
             message: gapMessage,
-            metrics: { gap: gapString },
+            metrics: { executionGap: remainingGap },
           });
         }
 
@@ -279,8 +284,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           if (result.warningMessages.length) {
             const warningMessage = buildRuleMessage(result.warningMessages.join());
             await ruleStatusClient.logStatusChange({
-              spaceId,
-              ruleId: alertId,
+              ...basicLogArguments,
               newStatus: RuleExecutionStatus['partial failure'],
               message: warningMessage,
             });
@@ -344,13 +348,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             if (!hasError && !wroteWarningStatus && !result.warning) {
               await ruleStatusClient.logStatusChange({
-                spaceId,
-                ruleId: alertId,
+                ...basicLogArguments,
                 newStatus: RuleExecutionStatus.succeeded,
                 message: 'succeeded',
                 metrics: {
-                  bulkCreateTimeDurations: result.bulkCreateTimes,
-                  searchAfterTimeDurations: result.searchAfterTimes,
+                  indexingDurations: result.bulkCreateTimes,
+                  searchDurations: result.searchAfterTimes,
                   lastLookBackDate: result.lastLookbackDate?.toISOString(),
                 },
               });
@@ -373,13 +376,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             );
             logger.error(errorMessage);
             await ruleStatusClient.logStatusChange({
-              spaceId,
-              ruleId: alertId,
+              ...basicLogArguments,
               newStatus: RuleExecutionStatus.failed,
               message: errorMessage,
               metrics: {
-                bulkCreateTimeDurations: result.bulkCreateTimes,
-                searchAfterTimeDurations: result.searchAfterTimes,
+                indexingDurations: result.bulkCreateTimes,
+                searchDurations: result.searchAfterTimes,
                 lastLookBackDate: result.lastLookbackDate?.toISOString(),
               },
             });
@@ -393,13 +395,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           logger.error(message);
           await ruleStatusClient.logStatusChange({
-            spaceId,
-            ruleId: alertId,
+            ...basicLogArguments,
             newStatus: RuleExecutionStatus.failed,
             message,
             metrics: {
-              bulkCreateTimeDurations: result.bulkCreateTimes,
-              searchAfterTimeDurations: result.searchAfterTimes,
+              indexingDurations: result.bulkCreateTimes,
+              searchDurations: result.searchAfterTimes,
               lastLookBackDate: result.lastLookbackDate?.toISOString(),
             },
           });

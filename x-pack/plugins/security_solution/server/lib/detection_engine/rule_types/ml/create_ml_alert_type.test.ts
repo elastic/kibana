@@ -15,6 +15,7 @@ import { createMlAlertType } from './create_ml_alert_type';
 
 import { RuleParams } from '../../schemas/rule_schemas';
 import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../../signals/bulk_create_ml_signals');
 
@@ -97,10 +98,9 @@ describe('Machine Learning Alerts', () => {
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
       lists: dependencies.lists,
       logger: dependencies.logger,
-      ignoreFields: [],
-      mergeStrategy: 'allFields',
+      config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
+      eventLogService: dependencies.eventLogService,
     });
     const mlAlertType = securityRuleTypeWrapper(
       createMlAlertType({

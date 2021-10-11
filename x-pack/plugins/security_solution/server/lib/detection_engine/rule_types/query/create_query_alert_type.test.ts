@@ -15,6 +15,7 @@ import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -30,10 +31,9 @@ describe('Custom Query Alerts', () => {
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
     lists: dependencies.lists,
     logger: dependencies.logger,
-    ignoreFields: [],
-    mergeStrategy: 'allFields',
+    config: createMockConfig(),
     ruleDataClient: dependencies.ruleDataClient,
-    ruleDataService: dependencies.ruleDataService,
+    eventLogService: dependencies.eventLogService,
   });
   it('does not send an alert when no events found', async () => {
     const queryAlertType = securityRuleTypeWrapper(

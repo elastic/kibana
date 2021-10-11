@@ -26,7 +26,6 @@ import { PersistenceServices, IRuleDataClient } from '../../../../../rule_regist
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
-import { IRuleDataPluginService } from '../rule_execution_log/types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { BuildRuleMessage } from '../signals/rule_messages';
 import {
@@ -38,6 +37,7 @@ import {
 } from '../signals/types';
 import { AlertsFieldMap, RulesFieldMap } from './field_maps';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { IEventLogService } from '../../../../../event_log/server';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
@@ -94,10 +94,9 @@ export type SecurityAlertType<
 export type CreateSecurityRuleTypeWrapper = (options: {
   lists: SetupPlugins['lists'];
   logger: Logger;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ignoreFields: ConfigType['alertIgnoreFields'];
+  config: ConfigType;
   ruleDataClient: IRuleDataClient;
-  ruleDataService: IRuleDataPluginService;
+  eventLogService: IEventLogService;
 }) => <
   TParams extends RuleParams,
   TState extends AlertTypeState,

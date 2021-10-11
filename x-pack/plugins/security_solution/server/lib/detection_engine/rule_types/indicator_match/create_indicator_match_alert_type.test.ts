@@ -17,6 +17,7 @@ import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { CountResponse } from 'kibana/server';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -54,10 +55,9 @@ describe('Indicator Match Alerts', () => {
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
     lists: dependencies.lists,
     logger: dependencies.logger,
-    ignoreFields: [],
-    mergeStrategy: 'allFields',
+    config: createMockConfig(),
     ruleDataClient: dependencies.ruleDataClient,
-    ruleDataService: dependencies.ruleDataService,
+    eventLogService: dependencies.eventLogService,
   });
 
   it('does not send an alert when no events found', async () => {

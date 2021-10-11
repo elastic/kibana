@@ -364,4 +364,34 @@ Configuration management tools and automation will need to be updated to use the
 === `server.xsrf.token` is no longer valid
 *Details:* The deprecated `server.xsrf.token` setting in the `kibana.yml` file has been removed.
 
+[float]
+=== `newsfeed.defaultLanguage` is no longer valid
+*Details:* Specifying a default language to retrieve newsfeed items is no longer supported.
+
+*Impact:* Newsfeed items will be retrieved based on the browser locale and fallback to 'en' if an item does not have a translation for the locale. Configure {kibana-ref}/i18n-settings-kb.html#general-i18n-settings-kb[`i18n.locale`] to override the default behavior. 
+
+[float]
+=== `xpack.banners.placement` has changed value
+*Details:* `xpack.banners.placement: 'header'` setting in `kibana.yml` has changed value.
+
+*Impact:* Use {kibana-ref}/banners-settings-kb.html#banners-settings-kb[`xpack.banners.placement: 'top'`] instead.
+
+[float]
+=== `cpu.cgroup.path.override` is no longer valid
+*Details:* The deprecated `cpu.cgroup.path.override` setting is no longer supported.
+
+*Impact:* Configure {kibana-ref}/settings.html#ops-cGroupOverrides-cpuPath[`ops.cGroupOverrides.cpuPath`] instead.
+
+[float]
+=== `cpuacct.cgroup.path.override` is no longer valid
+*Details:* The deprecated `cpuacct.cgroup.path.override` setting is no longer supported.
+
+*Impact:* Configure {kibana-ref}/settings.html#ops-cGroupOverrides-cpuAcctPath[`ops.cGroupOverrides.cpuAcctPath`] instead.
+
+[float]
+=== `server.xsrf.whitelist` is no longer valid
+*Details:* The deprecated `server.xsrf.whitelist` setting is no longer supported.
+
+*Impact:* Use {kibana-ref}/settings.html#settings-xsrf-allowlist[`server.xsrf.allowlist`] instead.
+
 // end::notable-breaking-changes[]

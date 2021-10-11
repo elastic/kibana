@@ -13,6 +13,7 @@ import { createEqlAlertType } from './create_eql_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { getEqlRuleParams } from '../../schemas/rule_schemas.mock';
 import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../../rule_execution_log/rule_execution_log_client');
 
@@ -26,10 +27,9 @@ describe('Event correlation alerts', () => {
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
       lists: dependencies.lists,
       logger: dependencies.logger,
-      ignoreFields: [],
-      mergeStrategy: 'allFields',
+      config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
+      eventLogService: dependencies.eventLogService,
     });
     const eqlAlertType = securityRuleTypeWrapper(
       createEqlAlertType({
