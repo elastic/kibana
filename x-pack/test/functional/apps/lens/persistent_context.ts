@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange(
-        'Sep 06, 2015 @ 06:31:44.000',
+        'Sep 6, 2015 @ 06:31:44.000',
         'Sep 18, 2025 @ 06:31:44.000'
       );
       await filterBar.addFilter('ip', 'is', '97.220.3.248');
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should remember time range and pinned filters from discover', async () => {
       await PageObjects.lens.goToTimeRange(
-        'Sep 07, 2015 @ 06:31:44.000',
+        'Sep 7, 2015 @ 06:31:44.000',
         'Sep 19, 2025 @ 06:31:44.000'
       );
       await filterBar.toggleFilterEnabled('ip');

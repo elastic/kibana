@@ -30,7 +30,7 @@ describe('changeTimeFilter()', () => {
   const lt = 1388646000000;
 
   test('should change the timefilter to match the range gt/lt', () => {
-    const filter: any = { range: { '@timestamp': { gt, lt } } };
+    const filter: any = { query: { range: { '@timestamp': { gt, lt } } } };
     changeTimeFilter(timefilter, filter as RangeFilter);
 
     const { to, from } = timefilter.getTime();
@@ -40,7 +40,7 @@ describe('changeTimeFilter()', () => {
   });
 
   test('should change the timefilter to match the range gte/lte', () => {
-    const filter: any = { range: { '@timestamp': { gte: gt, lte: lt } } };
+    const filter: any = { query: { range: { '@timestamp': { gte: gt, lte: lt } } } };
     changeTimeFilter(timefilter, filter as RangeFilter);
 
     const { to, from } = timefilter.getTime();

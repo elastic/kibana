@@ -16,8 +16,12 @@ import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 
+import type {
+  CustomIntegrationsStart,
+  CustomIntegrationsSetup,
+} from 'src/plugins/custom_integrations/public';
+
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
-import type { CustomIntegrationsSetup } from '../../../../src/plugins/custom_integrations/public';
 
 import type {
   DataPublicPluginSetup,
@@ -76,6 +80,7 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  customIntegrations: CustomIntegrationsStart;
 }
 
 export interface FleetStartServices extends CoreStart, FleetStartDeps {

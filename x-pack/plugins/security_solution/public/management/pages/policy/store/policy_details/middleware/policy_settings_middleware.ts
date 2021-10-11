@@ -27,7 +27,7 @@ import { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 
 export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
-  coreStart,
+  { coreStart },
   { dispatch, getState },
   action
 ) => {

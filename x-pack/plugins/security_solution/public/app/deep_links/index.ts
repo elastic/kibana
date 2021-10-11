@@ -48,6 +48,7 @@ import {
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
   UEBA_PATH,
+  CASES_FEATURE_ID,
   HOST_ISOLATION_EXCEPTIONS_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
@@ -362,7 +363,7 @@ export function getDeepLinks(
           return false;
         }
         if (deepLink.id === SecurityPageName.case) {
-          return capabilities == null || capabilities.siem.read_cases === true;
+          return capabilities == null || capabilities[CASES_FEATURE_ID].read_cases === true;
         }
         if (deepLink.id === SecurityPageName.ueba) {
           return enableExperimental.uebaEnabled;
@@ -373,7 +374,7 @@ export function getDeepLinks(
         if (
           deepLink.id === SecurityPageName.case &&
           capabilities != null &&
-          capabilities.siem.crud_cases === false
+          capabilities[CASES_FEATURE_ID].crud_cases === false
         ) {
           return {
             ...deepLink,

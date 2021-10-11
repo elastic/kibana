@@ -17,8 +17,18 @@ import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/ser
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
-import { exceptionListItemToTelemetryEntry, trustedApplicationToTelemetryEntry } from './helpers';
-import { TelemetryEvent, ESLicense, ESClusterInfo, GetEndpointListResponse } from './types';
+import {
+  exceptionListItemToTelemetryEntry,
+  trustedApplicationToTelemetryEntry,
+  ruleExceptionListItemToTelemetryEvent,
+} from './helpers';
+import {
+  TelemetryEvent,
+  ESLicense,
+  ESClusterInfo,
+  GetEndpointListResponse,
+  RuleSearchResult,
+} from './types';
 
 export class TelemetryReceiver {
   private readonly logger: Logger;
@@ -27,6 +37,7 @@ export class TelemetryReceiver {
   private esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
+  private kibanaIndex?: string;
   private readonly max_records = 10_000;
 
   constructor(logger: Logger) {
@@ -35,9 +46,11 @@ export class TelemetryReceiver {
 
   public async start(
     core?: CoreStart,
+    kibanaIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient
   ) {
+    this.kibanaIndex = kibanaIndex;
     this.agentService = endpointContextService?.getAgentService();
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
     this.esClient = core?.elasticsearch.client.asInternalUser;
@@ -84,7 +97,7 @@ export class TelemetryReceiver {
           policy_responses: {
             terms: {
               size: this.max_records,
-              field: 'Endpoint.policy.applied.id',
+              field: 'agent.id',
             },
             aggs: {
               latest_response: {
@@ -234,6 +247,57 @@ export class TelemetryReceiver {
 
     return {
       data: results?.data.map(exceptionListItemToTelemetryEntry) ?? [],
+      total: results?.total ?? 0,
+      page: results?.page ?? 1,
+      per_page: results?.per_page ?? this.max_records,
+    };
+  }
+
+  public async fetchDetectionRules() {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
+    }
+
+    const query: SearchRequest = {
+      expand_wildcards: 'open,hidden',
+      index: `${this.kibanaIndex}*`,
+      ignore_unavailable: true,
+      size: this.max_records,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { term: { 'alert.alertTypeId': 'siem.signals' } },
+              { term: { 'alert.params.immutable': true } },
+            ],
+          },
+        },
+      },
+    };
+
+    return this.esClient.search<RuleSearchResult>(query);
+  }
+
+  public async fetchDetectionExceptionList(listId: string, ruleVersion: number) {
+    if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
+      throw Error('exception list client is unavailable: could not retrieve trusted applications');
+    }
+
+    // Ensure list is created if it does not exist
+    await this.exceptionListClient.createTrustedAppsList();
+
+    const results = await this.exceptionListClient?.findExceptionListsItem({
+      listId: [listId],
+      filter: [],
+      perPage: this.max_records,
+      page: 1,
+      sortField: 'exception-list.created_at',
+      sortOrder: 'desc',
+      namespaceType: ['single'],
+    });
+
+    return {
+      data: results?.data.map((r) => ruleExceptionListItemToTelemetryEvent(r, ruleVersion)) ?? [],
       total: results?.total ?? 0,
       page: results?.page ?? 1,
       per_page: results?.per_page ?? this.max_records,

@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
           await createPipeline({ body: PIPELINE, id: PIPELINE_ID }, true);
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating ingest node pipeline');
+          console.log('[Setup error] Error creating ingest pipeline');
           throw err;
         }
       });
@@ -225,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
           await createPipeline({ body: PIPELINE, id: PIPELINE_ID }, true);
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating ingest node pipeline');
+          console.log('[Setup error] Error creating ingest pipeline');
           throw err;
         }
       });

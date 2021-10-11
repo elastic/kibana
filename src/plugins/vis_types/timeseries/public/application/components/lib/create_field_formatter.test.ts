@@ -75,14 +75,14 @@ describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?, hasColo
     const formatter = createFieldFormatter('colorField', fieldFormatMap, 'html');
 
     expect(formatter(value)).toBe(
-      '<span ng-non-bindable><span style="color:#D36086;background-color:#ffffff">1234567890</span></span>'
+      '<span style="color:#D36086;background-color:#ffffff">1234567890</span>'
     );
   });
 
   it('should return number formatted value wrapped in span for colorField when color rules are applied', () => {
     const formatter = createFieldFormatter('colorField', fieldFormatMap, 'html', true);
 
-    expect(formatter(value)).toBe('<span ng-non-bindable>1,234,567,890</span>');
+    expect(formatter(value)).toBe('1,234,567,890');
   });
 
   it('should return not formatted string value for colorField when color rules are applied', () => {
@@ -95,7 +95,7 @@ describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?, hasColo
     const formatter = createFieldFormatter('urlField', fieldFormatMap, 'html');
 
     expect(formatter(value)).toBe(
-      '<span ng-non-bindable><a href="https://1234567890" target="_blank" rel="noopener noreferrer">1234567890</a></span>'
+      '<a href="https://1234567890" target="_blank" rel="noopener noreferrer">1234567890</a>'
     );
   });
 
