@@ -105,6 +105,17 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
                 }),
               });
             }
+
+            if (setupResponse.data?.packagePolicyUpgradeResults?.length) {
+              notifications.toasts.addError(
+                setupResponse.data.packagePolicyUpgradeResults[0].diff[1].errors[0],
+                {
+                  title: i18n.translate('xpack.fleet.setup.managedPackagePolicyUpgradeError', {
+                    defaultMessage: 'Error upgrading integration policies',
+                  }),
+                }
+              );
+            }
           } catch (err) {
             setInitializationError(err);
           }

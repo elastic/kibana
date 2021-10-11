@@ -32,10 +32,12 @@ import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/ins
 import { getInstallations, installPackage } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
 import { pkgToPkgKey } from './epm/registry';
+import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 
 export interface SetupStatus {
   isInitialized: boolean;
   nonFatalErrors: Array<PreconfigurationError | DefaultPackagesInstallationError>;
+  packagePolicyUpgradeResults: UpgradeManagedPackagePoliciesResult[];
 }
 
 export async function setupFleet(
@@ -90,13 +92,14 @@ async function createSetupSideEffects(
     ...autoUpdateablePackages.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
-  const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
-    soClient,
-    esClient,
-    policies,
-    packages,
-    defaultOutput
-  );
+  const { nonFatalErrors, packagePolicyUpgradeResults } =
+    await ensurePreconfiguredPackagesAndPolicies(
+      soClient,
+      esClient,
+      policies,
+      packages,
+      defaultOutput
+    );
 
   await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
 
@@ -106,6 +109,7 @@ async function createSetupSideEffects(
   return {
     isInitialized: true,
     nonFatalErrors,
+    packagePolicyUpgradeResults,
   };
 }
 

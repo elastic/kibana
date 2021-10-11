@@ -35,6 +35,7 @@ import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
 import { overridePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
+import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { outputService } from './output';
 
@@ -42,6 +43,7 @@ interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
   packages: string[];
   nonFatalErrors: PreconfigurationError[];
+  packagePolicyUpgradeResults: UpgradeManagedPackagePoliciesResult[];
 }
 
 function isPreconfiguredOutputDifferentFromCurrent(
@@ -314,16 +316,15 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
   }
 
-  try {
-    const fulfilledPolicyPackagePolicyIds = fulfilledPolicies.flatMap<string>(
-      ({ policy }) => policy?.package_policies as string[]
-    );
+  const fulfilledPolicyPackagePolicyIds = fulfilledPolicies.flatMap<string>(
+    ({ policy }) => policy?.package_policies as string[]
+  );
 
-    await upgradeManagedPackagePolicies(soClient, esClient, fulfilledPolicyPackagePolicyIds);
-    // Swallow errors that occur when upgrading
-  } catch (error) {
-    appContextService.getLogger().error(error);
-  }
+  const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
+    soClient,
+    esClient,
+    fulfilledPolicyPackagePolicyIds
+  );
 
   return {
     policies: fulfilledPolicies.map((p) =>
@@ -342,6 +343,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     ),
     packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
+    packagePolicyUpgradeResults,
   };
 }
 
