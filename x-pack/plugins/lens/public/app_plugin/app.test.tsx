@@ -1142,6 +1142,27 @@ describe('Lens App', () => {
       });
     });
 
+    it('dispatches update to searchSessionId and dateRange when the user hits refresh', async () => {
+      const { instance, services, lensStore } = await mountWith({});
+      act(() =>
+        instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-7d', to: 'now' },
+        })
+      );
+
+      instance.update();
+      expect(lensStore.dispatch).toHaveBeenCalledWith({
+        type: 'lens/setState',
+        payload: {
+          resolvedDateRange: {
+            fromDate: '2021-01-10T04:00:00.000Z',
+            toDate: '2021-01-10T08:00:00.000Z',
+          },
+          searchSessionId: 'sessionId-2',
+        },
+      });
+    });
+
     it('updates the state if session id changes from the outside', async () => {
       const sessionIdS = new Subject<string>();
       const services = makeDefaultServices(sessionIdS, 'sessionId-1');
