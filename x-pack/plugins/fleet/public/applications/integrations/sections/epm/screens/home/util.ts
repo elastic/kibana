@@ -41,7 +41,7 @@ export function mergeCategoriesAndCount(
   // Count all the categories
   cards.forEach((integration) => {
     integration.categories.forEach((cat) => {
-      addIfMissing(cat, 1, INTEGRATION_CATEGORY_DISPLAY[cat]);
+      addIfMissing(cat, 1, INTEGRATION_CATEGORY_DISPLAY[cat] as string);
     });
   });
 

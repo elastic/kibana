@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { PackageListItem } from '../../common/types/models';
-import type { CustomIntegration } from '../../../../../src/plugins/custom_integrations/common';
+import type { PackageListItem } from '../../../../common/types/models';
+import type { CustomIntegration } from '../../../../../../../src/plugins/custom_integrations/common';
 
-import type { IntegrationCategory } from '../../../../../src/plugins/custom_integrations/common';
+import type { IntegrationCategory } from '../../../../../../../src/plugins/custom_integrations/common';
 
 import { useMergeEprPackagesWithReplacements } from './use_merge_epr_with_replacements';
 
@@ -46,7 +46,7 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements, '')).toEqual([
+    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements)).toEqual([
       {
         name: 'aws',
         release: 'ga',
