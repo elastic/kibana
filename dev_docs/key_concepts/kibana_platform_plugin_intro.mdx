@@ -17,13 +17,13 @@ already existing applications. Did you know that almost everything you see in th
 Kibana UI is built inside a plugin? If you removed all plugins from Kibana, you'd be left with an empty navigation menu, and a set of
 developer tools. The Kibana platform is a blank canvas, just waiting for a developer to come along and create something!
 
-![Kibana personas](assets/kibana_platform_plugin_end_user.png)
+![Kibana personas](../assets/kibana_platform_plugin_end_user.png)
 
 ## 1,000 foot view
 
 At a super high-level, Kibana is composed of **plugins**, **core**, and **Kibana packages**.
 
-![Kibana 1000 ft arch](assets/1000_ft_arch.png)
+![Kibana 1000 ft arch](../assets/1000_ft_arch.png)
 
 **Plugins** provide the majority of all functionality in Kibana. All applications and UIs are defined here.
 
@@ -51,7 +51,7 @@ We try to put only the most stable and fundamental code into `Core`, while optio
 
 Today it looks something like this.
 
-![Core vs platform plugins vs plugins](assets/platform_plugins_core.png)
+![Core vs platform plugins vs plugins](../assets/platform_plugins_core.png)
 
 "Platform plugins" provide core-like functionality, just outside of core, and their public APIs tend to be more volatile. Other plugins may still expose shared services, but they are intended only for usage by a small subset of specific plugins, and may not be generic or "platform-like".
 
@@ -91,7 +91,7 @@ A plugin may register many applications, or none.
 
 Applications are top level pages in the Kibana UI. Dashboard, Canvas, Maps, App Search, etc, are all examples of applications:
 
-![applications in kibana](./assets/applications.png)
+![applications in kibana](../assets/applications.png)
 
 A plugin can register an application by
 adding it to core's application <DocLink id="kibPlatformIntro" section="registry" text="registry"/>.
