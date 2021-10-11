@@ -22,10 +22,22 @@ export class ToolingLog {
     this.written$ = new Rx.Subject();
   }
 
+  /**
+   * Get the current indentation level of the ToolingLog
+   */
   public getIndent() {
     return this.indentWidth;
   }
 
+  /**
+   * Indent the output of the ToolingLog by some character (4 is a good choice usually).
+   *
+   * If provided, the `block` function will be executed and once it's promise is resolved
+   * or rejected the indentation will be reset to its original state.
+   *
+   * @param delta the number of spaces to increase/decrease the indentation
+   * @param block a function to run and reset any indentation changes after
+   */
   public indent<T>(delta = 0, block?: () => Promise<T>) {
     const originalWidth = this.indentWidth;
     this.indentWidth = Math.max(this.indentWidth + delta, 0);
