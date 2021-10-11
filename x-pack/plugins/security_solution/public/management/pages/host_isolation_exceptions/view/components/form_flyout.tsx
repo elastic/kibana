@@ -40,6 +40,10 @@ import {
   useHostIsolationExceptionsSelector,
 } from '../hooks';
 import { HostIsolationExceptionsForm } from './form';
+import {
+  HOST_ISOLATION_EXCEPTION_CREATION_ERROR,
+  HOST_ISOLATION_EXCEPTION_EDIT_ERROR,
+} from './translations';
 
 export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
@@ -110,30 +114,45 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
           type: 'UninitialisedResourceState',
         },
       });
-      toasts.addSuccess(
-        i18n.translate(
-          'xpack.securitySolution.hostIsolationExceptions.form.creationSuccessToastTitle',
-          {
-            defaultMessage: '"{name}" has been added to the host isolation exceptions list.',
-            values: { name: exception?.name },
-          }
-        )
-      );
+      if (exception?.item_id) {
+        toasts.addSuccess(
+          i18n.translate(
+            'xpack.securitySolution.hostIsolationExceptions.form.creationSuccessToastTitle',
+            {
+              defaultMessage: '"{name}" has been updated.',
+              values: { name: exception?.name },
+            }
+          )
+        );
+      } else {
+        toasts.addSuccess(
+          i18n.translate(
+            'xpack.securitySolution.hostIsolationExceptions.form.creationSuccessToastTitle',
+            {
+              defaultMessage: '"{name}" has been added to the host isolation exceptions list.',
+              values: { name: exception?.name },
+            }
+          )
+        );
+      }
     }
-  }, [creationSuccessful, onCancel, dispatch, toasts, exception?.name]);
+  }, [creationSuccessful, onCancel, dispatch, toasts, exception?.name, exception?.item_id]);
 
   useEffect(() => {
     if (creationFailure) {
-      toasts.addDanger(
-        i18n.translate(
-          'xpack.securitySolution.hostIsolationExceptions.form.creationFailureToastTitle',
-          {
-            defaultMessage: 'There was an error creating the exception',
-          }
-        )
-      );
+      if (exception?.item_id) {
+        toasts.addDanger(HOST_ISOLATION_EXCEPTION_EDIT_ERROR);
+      } else {
+        toasts.addDanger(HOST_ISOLATION_EXCEPTION_CREATION_ERROR);
+      }
+      dispatch({
+        type: 'hostIsolationExceptionsFormStateChanged',
+        payload: {
+          type: 'UninitialisedResourceState',
+        },
+      });
     }
-  }, [dispatch, toasts, creationFailure]);
+  }, [dispatch, toasts, creationFailure, exception?.item_id]);
 
   const handleOnCancel = useCallback(() => {
     if (creationInProgress) return;

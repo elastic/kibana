@@ -76,3 +76,16 @@ export const EDIT_HOST_ISOLATION_EXCEPTION_LABEL = i18n.translate(
     defaultMessage: 'Edit Exception',
   }
 );
+export const HOST_ISOLATION_EXCEPTION_CREATION_ERROR = i18n.translate(
+  'xpack.securitySolution.hostIsolationExceptions.form.creationFailureToastTitle',
+  {
+    defaultMessage: 'There was an error creating the exception',
+  }
+);
+
+export const HOST_ISOLATION_EXCEPTION_EDIT_ERROR = i18n.translate(
+  'xpack.securitySolution.hostIsolationExceptions.form.editFailureToastTitle',
+  {
+    defaultMessage: 'There was an error editing the exception',
+  }
+);
