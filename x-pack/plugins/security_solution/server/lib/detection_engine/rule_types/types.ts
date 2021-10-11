@@ -60,7 +60,7 @@ export interface RunOpts<TParams extends RuleParams> {
   bulkCreate: BulkCreate;
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
-  completeRule: CompleteRule;
+  completeRule: CompleteRule<RuleParams>;
   searchAfterSize: number;
   tuple: {
     to: Moment;

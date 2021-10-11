@@ -200,45 +200,9 @@ export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 export const ruleParams = t.intersection([baseRuleParams, typeSpecificRuleParams]);
 export type RuleParams = t.TypeOf<typeof ruleParams>;
 
-export interface CompleteRule {
+export interface CompleteRule<T extends RuleParams> {
   alertId: string;
-  ruleParams: RuleParams;
-  ruleConfig: SanitizedRuleConfig;
-}
-
-export interface MlCompleteRule {
-  alertId: string;
-  ruleParams: MachineLearningRuleParams;
-  ruleConfig: SanitizedRuleConfig;
-}
-
-export interface ThresholdCompleteRule {
-  alertId: string;
-  ruleParams: ThresholdRuleParams;
-  ruleConfig: SanitizedRuleConfig;
-}
-
-export interface ThreatCompleteRule {
-  alertId: string;
-  ruleParams: ThreatRuleParams;
-  ruleConfig: SanitizedRuleConfig;
-}
-
-export interface QueryCompleteRule {
-  alertId: string;
-  ruleParams: QueryRuleParams;
-  ruleConfig: SanitizedRuleConfig;
-}
-
-export interface EqlCompleteRule {
-  alertId: string;
-  ruleParams: EqlRuleParams;
-  ruleConfig: SanitizedRuleConfig;
-}
-
-export interface SavedQueryCompleteRule {
-  alertId: string;
-  ruleParams: SavedQueryRuleParams;
+  ruleParams: T;
   ruleConfig: SanitizedRuleConfig;
 }
 

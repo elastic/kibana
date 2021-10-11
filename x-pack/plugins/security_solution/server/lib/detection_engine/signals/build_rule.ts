@@ -15,7 +15,7 @@ import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../schemas/r
 import { transformTags } from '../routes/rules/utils';
 import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 
-export const buildRuleWithoutOverrides = (completeRule: CompleteRule): RulesSchema => {
+export const buildRuleWithoutOverrides = (completeRule: CompleteRule<RuleParams>): RulesSchema => {
   const ruleParams = completeRule.ruleParams;
   const {
     actions,
@@ -47,7 +47,7 @@ export const buildRuleWithoutOverrides = (completeRule: CompleteRule): RulesSche
 };
 
 export const buildRuleWithOverrides = (
-  completeRule: CompleteRule,
+  completeRule: CompleteRule<RuleParams>,
   eventSource: SignalSource
 ): RulesSchema => {
   const ruleWithoutOverrides = buildRuleWithoutOverrides(completeRule);

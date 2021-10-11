@@ -14,7 +14,7 @@ import {
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { MlCompleteRule } from '../../schemas/rule_schemas';
+import { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
@@ -35,7 +35,7 @@ export const mlExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
-  completeRule: MlCompleteRule;
+  completeRule: CompleteRule<MachineLearningRuleParams>;
   tuple: RuleRangeTuple;
   ml: SetupPlugins['ml'];
   listClient: ListClient;

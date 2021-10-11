@@ -8,7 +8,11 @@
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { ML_RULE_TYPE_ID } from '../../../../../common/constants';
-import { machineLearningRuleParams, MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import {
+  CompleteRule,
+  machineLearningRuleParams,
+  MachineLearningRuleParams,
+} from '../../schemas/rule_schemas';
 import { mlExecutor } from '../../signals/executors/ml';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
 import { CreateRuleOptions } from '../types';
@@ -61,7 +65,7 @@ export const createMlAlertType = (createOptions: CreateRuleOptions) => {
           bulkCreate,
           exceptionItems,
           listClient,
-          rule,
+          completeRule,
           tuple,
           wrapHits,
         },
@@ -76,7 +80,7 @@ export const createMlAlertType = (createOptions: CreateRuleOptions) => {
         listClient,
         logger,
         ml,
-        rule,
+        completeRule: completeRule as CompleteRule<MachineLearningRuleParams>,
         services,
         tuple,
         wrapHits,

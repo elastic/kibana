@@ -18,7 +18,7 @@ import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
-import { ThreatCompleteRule } from '../../schemas/rule_schemas';
+import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 export const threatMatchExecutor = async ({
@@ -36,7 +36,7 @@ export const threatMatchExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
-  completeRule: ThreatCompleteRule;
+  completeRule: CompleteRule<ThreatRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];

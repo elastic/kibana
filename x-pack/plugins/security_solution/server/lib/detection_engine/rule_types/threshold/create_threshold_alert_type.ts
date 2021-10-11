@@ -9,7 +9,7 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { THRESHOLD_RULE_TYPE_ID } from '../../../../../common/constants';
-import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { thresholdExecutor } from '../../signals/executors/threshold';
 import { ThresholdAlertState } from '../../signals/types';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
@@ -66,13 +66,11 @@ export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
     producer: 'security-solution',
     async executor(execOptions) {
       const {
-        runOpts: { buildRuleMessage, bulkCreate, exceptionItems, rule, tuple, wrapHits },
+        runOpts: { buildRuleMessage, bulkCreate, exceptionItems, completeRule, tuple, wrapHits },
         services,
         startedAt,
         state,
       } = execOptions;
-
-      // console.log(JSON.stringify(state));
 
       const result = await thresholdExecutor({
         buildRuleMessage,
@@ -80,7 +78,7 @@ export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
         exceptionItems,
         experimentalFeatures,
         logger,
-        rule,
+        completeRule: completeRule as CompleteRule<ThresholdRuleParams>,
         services,
         startedAt,
         state,

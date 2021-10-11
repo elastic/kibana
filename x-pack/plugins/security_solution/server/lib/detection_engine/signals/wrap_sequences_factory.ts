@@ -8,7 +8,7 @@
 import { WrappedSignalHit, WrapSequences } from './types';
 import { buildSignalGroupFromSequence } from './build_bulk_body';
 import { ConfigType } from '../../../config';
-import { CompleteRule } from '../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 
 export const wrapSequencesFactory =
   ({
@@ -17,7 +17,7 @@ export const wrapSequencesFactory =
     mergeStrategy,
     ignoreFields,
   }: {
-    completeRule: CompleteRule;
+    completeRule: CompleteRule<RuleParams>;
     signalsIndex: string;
     mergeStrategy: ConfigType['alertMergeStrategy'];
     ignoreFields: ConfigType['alertIgnoreFields'];

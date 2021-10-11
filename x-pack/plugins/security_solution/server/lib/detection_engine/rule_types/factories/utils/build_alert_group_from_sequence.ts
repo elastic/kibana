@@ -24,7 +24,7 @@ import {
   ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
 } from '../../field_maps/field_names';
-import { CompleteRule } from '../../../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -
@@ -36,7 +36,7 @@ import { CompleteRule } from '../../../schemas/rule_schemas';
 export const buildAlertGroupFromSequence = (
   logger: Logger,
   sequence: EqlSequence<SignalSource>,
-  completeRule: CompleteRule,
+  completeRule: CompleteRule<RuleParams>,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage
@@ -87,7 +87,7 @@ export const buildAlertGroupFromSequence = (
 
 export const buildAlertRoot = (
   wrappedBuildingBlocks: WrappedRACAlert[],
-  completeRule: CompleteRule,
+  completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage
 ): RACAlert => {

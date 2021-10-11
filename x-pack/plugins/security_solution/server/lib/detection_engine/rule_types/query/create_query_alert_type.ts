@@ -8,7 +8,7 @@
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { QUERY_RULE_TYPE_ID } from '../../../../../common/constants';
-import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
 import { CreateRuleOptions } from '../types';
@@ -69,7 +69,7 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
           bulkCreate,
           exceptionItems,
           listClient,
-          rule,
+          completeRule,
           searchAfterSize,
           tuple,
           wrapHits,
@@ -86,7 +86,7 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
         eventsTelemetry: undefined,
         listClient,
         logger,
-        rule,
+        completeRule: completeRule as CompleteRule<QueryRuleParams>,
         searchAfterSize,
         services,
         tuple,

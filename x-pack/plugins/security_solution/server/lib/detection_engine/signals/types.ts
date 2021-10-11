@@ -299,7 +299,7 @@ export interface SearchAfterAndBulkCreateParams {
     from: moment.Moment;
     maxSignals: number;
   };
-  completeRule: CompleteRule;
+  completeRule: CompleteRule<RuleParams>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];

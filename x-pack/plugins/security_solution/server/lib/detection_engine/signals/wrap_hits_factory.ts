@@ -10,7 +10,7 @@ import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { filterDuplicateSignals } from './filter_duplicate_signals';
 import type { ConfigType } from '../../../config';
-import { CompleteRule } from '../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 
 export const wrapHitsFactory =
   ({
@@ -19,7 +19,7 @@ export const wrapHitsFactory =
     mergeStrategy,
     ignoreFields,
   }: {
-    completeRule: CompleteRule;
+    completeRule: CompleteRule<RuleParams>;
     signalsIndex: string;
     mergeStrategy: ConfigType['alertMergeStrategy'];
     ignoreFields: ConfigType['alertIgnoreFields'];

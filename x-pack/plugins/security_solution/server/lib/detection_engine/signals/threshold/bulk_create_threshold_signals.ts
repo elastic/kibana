@@ -36,11 +36,11 @@ import type {
   BulkCreate,
   WrapHits,
 } from '../types';
-import { ThresholdCompleteRule } from '../../schemas/rule_schemas';
+import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 
 interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
-  completeRule: ThresholdCompleteRule;
+  completeRule: CompleteRule<ThresholdRuleParams>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;

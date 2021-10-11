@@ -18,12 +18,12 @@ import { GenericBulkCreateResponse } from './bulk_create_factory';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
 import { BulkCreate, WrapHits } from './types';
-import { MlCompleteRule } from '../schemas/rule_schemas';
+import { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_schemas';
 import { buildReasonMessageForMlAlert } from './reason_formatters';
 
 interface BulkCreateMlSignalsParams {
   someResult: AnomalyResults;
-  completeRule: MlCompleteRule;
+  completeRule: CompleteRule<MachineLearningRuleParams>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;

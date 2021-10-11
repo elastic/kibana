@@ -37,7 +37,7 @@ describe.each([
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
-    const { services, dependencies, executor } = createRuleTypeMocks();
+    const { dependencies } = createRuleTypeMocks();
 
     const mockPreviewRuleOptions: PreviewRuleOptions = {
       experimentalFeatures: allowedExperimentalValues,
@@ -48,6 +48,7 @@ describe.each([
       ruleDataClient: dependencies.ruleDataClient,
       ruleDataService: dependencies.ruleDataService,
       version: '1.0.0',
+      indexNameOverride: 'mockRuleNameOverride',
     };
 
     server = serverMock.create();

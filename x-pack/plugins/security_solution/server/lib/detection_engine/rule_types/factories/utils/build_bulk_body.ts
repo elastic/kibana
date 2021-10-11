@@ -15,7 +15,7 @@ import { SignalSource, SignalSourceHit, SimpleHit } from '../../../signals/types
 import { RACAlert } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
-import { CompleteRule } from '../../../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 
 const isSourceDoc = (
   hit: SignalSourceHit
@@ -34,7 +34,7 @@ const isSourceDoc = (
  */
 export const buildBulkBody = (
   spaceId: string | null | undefined,
-  completeRule: CompleteRule,
+  completeRule: CompleteRule<RuleParams>,
   doc: SimpleHit,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   ignoreFields: ConfigType['alertIgnoreFields'],

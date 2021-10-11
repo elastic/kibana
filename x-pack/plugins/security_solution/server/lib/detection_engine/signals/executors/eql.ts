@@ -33,7 +33,7 @@ import {
 import { createSearchAfterReturnType, makeFloatString } from '../utils';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
-import { EqlCompleteRule } from '../../schemas/rule_schemas';
+import { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
 
 export const eqlExecutor = async ({
   completeRule,
@@ -48,7 +48,7 @@ export const eqlExecutor = async ({
   wrapHits,
   wrapSequences,
 }: {
-  completeRule: EqlCompleteRule;
+  completeRule: CompleteRule<EqlRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
   experimentalFeatures: ExperimentalFeatures;

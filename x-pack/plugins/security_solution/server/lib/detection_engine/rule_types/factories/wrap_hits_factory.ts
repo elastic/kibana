@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CompleteRule } from '../../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
 import { ConfigType } from '../../../../config';
 import { SimpleHit, WrapHits } from '../../signals/types';
 import { generateId } from '../../signals/utils';
@@ -21,7 +21,7 @@ export const wrapHitsFactory =
     signalsIndex,
     spaceId,
   }: {
-    completeRule: CompleteRule;
+    completeRule: CompleteRule<RuleParams>;
     ignoreFields: ConfigType['alertIgnoreFields'];
     mergeStrategy: ConfigType['alertMergeStrategy'];
     signalsIndex: string;

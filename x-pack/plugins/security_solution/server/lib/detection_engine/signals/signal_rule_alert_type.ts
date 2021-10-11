@@ -150,7 +150,7 @@ export const signalRulesAlertType = ({
             savedObjectsClient: services.savedObjectsClient,
           });
 
-      const completeRule: CompleteRule = {
+      const completeRule: CompleteRule<RuleParams> = {
         alertId,
         ruleConfig: rule,
         ruleParams: params,
@@ -531,7 +531,7 @@ export const signalRulesAlertType = ({
   };
 };
 
-const validateQueryRuleTypes = (completeRule: CompleteRule) => {
+const validateQueryRuleTypes = (completeRule: CompleteRule<RuleParams>) => {
   if (completeRule.ruleParams.type === 'query') {
     return asTypeSpecificCompleteRule(completeRule, queryRuleParams);
   } else {
@@ -550,7 +550,7 @@ const validateQueryRuleTypes = (completeRule: CompleteRule) => {
  * @param schema io-ts schema for the specific rule type the SavedObject claims to be
  */
 export const asTypeSpecificCompleteRule = <T extends t.Mixed>(
-  completeRule: CompleteRule,
+  completeRule: CompleteRule<RuleParams>,
   schema: T
 ) => {
   const [validated, errors] = validateNonExact(completeRule.ruleParams, schema);

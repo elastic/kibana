@@ -8,7 +8,7 @@
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { INDICATOR_RULE_TYPE_ID } from '../../../../../common/constants';
-import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
 import { CreateRuleOptions } from '../types';
@@ -69,7 +69,7 @@ export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) 
           bulkCreate,
           exceptionItems,
           listClient,
-          rule,
+          completeRule,
           searchAfterSize,
           tuple,
           wrapHits,
@@ -86,7 +86,7 @@ export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) 
         eventsTelemetry: undefined,
         listClient,
         logger,
-        rule,
+        completeRule: completeRule as CompleteRule<ThreatRuleParams>,
         searchAfterSize,
         services,
         tuple,

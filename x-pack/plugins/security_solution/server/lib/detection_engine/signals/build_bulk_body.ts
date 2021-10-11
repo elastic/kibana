@@ -22,7 +22,7 @@ import { EqlSequence } from '../../../../common/detection_engine/types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
 import type { ConfigType } from '../../../config';
 import { BuildReasonMessage } from './reason_formatters';
-import { CompleteRule } from '../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 
 /**
  * Formats the search_after result for insertion into the signals index. We first create a
@@ -34,7 +34,7 @@ import { CompleteRule } from '../schemas/rule_schemas';
  * @returns The body that can be added to a bulk call for inserting the signal.
  */
 export const buildBulkBody = (
-  completeRule: CompleteRule,
+  completeRule: CompleteRule<RuleParams>,
   doc: SignalSourceHit,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   ignoreFields: ConfigType['alertIgnoreFields'],
@@ -78,7 +78,7 @@ export const buildBulkBody = (
  */
 export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
-  completeRule: CompleteRule,
+  completeRule: CompleteRule<RuleParams>,
   outputIndex: string,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   ignoreFields: ConfigType['alertIgnoreFields'],
@@ -129,7 +129,7 @@ export const buildSignalGroupFromSequence = (
 
 export const buildSignalFromSequence = (
   events: WrappedSignalHit[],
-  completeRule: CompleteRule,
+  completeRule: CompleteRule<RuleParams>,
   buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(completeRule);
@@ -156,7 +156,7 @@ export const buildSignalFromSequence = (
 
 export const buildSignalFromEvent = (
   event: BaseSignalHit,
-  completeRule: CompleteRule,
+  completeRule: CompleteRule<RuleParams>,
   applyOverrides: boolean,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   ignoreFields: ConfigType['alertIgnoreFields'],

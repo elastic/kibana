@@ -16,7 +16,7 @@ import {
   AlertServices,
 } from '../../../../../../alerting/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { ThresholdCompleteRule } from '../../schemas/rule_schemas';
+import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import {
@@ -55,7 +55,7 @@ export const thresholdExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
-  completeRule: ThresholdCompleteRule;
+  completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
   experimentalFeatures: ExperimentalFeatures;

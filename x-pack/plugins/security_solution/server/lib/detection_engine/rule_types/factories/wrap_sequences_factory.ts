@@ -11,7 +11,7 @@ import { WrapSequences } from '../../signals/types';
 import { buildAlertGroupFromSequence } from './utils/build_alert_group_from_sequence';
 import { ConfigType } from '../../../../config';
 import { WrappedRACAlert } from '../types';
-import { CompleteRule } from '../../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
 
 export const wrapSequencesFactory =
   ({
@@ -22,7 +22,7 @@ export const wrapSequencesFactory =
     spaceId,
   }: {
     logger: Logger;
-    completeRule: CompleteRule;
+    completeRule: CompleteRule<RuleParams>;
     ignoreFields: ConfigType['alertIgnoreFields'];
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;

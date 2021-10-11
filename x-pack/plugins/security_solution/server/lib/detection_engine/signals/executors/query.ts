@@ -19,7 +19,7 @@ import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
-import { QueryCompleteRule, SavedQueryCompleteRule } from '../../schemas/rule_schemas';
+import { CompleteRule, SavedQueryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 
@@ -38,7 +38,7 @@ export const queryExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
-  completeRule: QueryCompleteRule | SavedQueryCompleteRule;
+  completeRule: CompleteRule<QueryRuleParams | SavedQueryRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -96,7 +96,9 @@ export const queryExecutor = async ({
 };
 
 const isSavedQueryCompleteRule = (
-  completeRule: QueryCompleteRule | SavedQueryCompleteRule
-): completeRule is SavedQueryCompleteRule => {
-  return typeof (completeRule as SavedQueryCompleteRule).ruleParams.savedId !== undefined;
+  completeRule: CompleteRule<QueryRuleParams | SavedQueryRuleParams>
+): completeRule is CompleteRule<SavedQueryRuleParams> => {
+  return (
+    typeof (completeRule as CompleteRule<SavedQueryRuleParams>).ruleParams.savedId !== undefined
+  );
 };

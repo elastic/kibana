@@ -34,7 +34,7 @@ import {
   SignalsEnrichment,
   WrapHits,
 } from '../types';
-import { ThreatCompleteRule } from '../../schemas/rule_schemas';
+import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -42,7 +42,7 @@ export interface CreateThreatSignalsOptions {
   alertId: string;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
-  completeRule: ThreatCompleteRule;
+  completeRule: CompleteRule<ThreatRuleParams>;
   concurrentSearches: ConcurrentSearches;
   eventsTelemetry: TelemetryEventsSender | undefined;
   exceptionItems: ExceptionListItemSchema[];
@@ -72,7 +72,7 @@ export interface CreateThreatSignalOptions {
   alertId: string;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
-  completeRule: ThreatCompleteRule;
+  completeRule: CompleteRule<ThreatRuleParams>;
   currentResult: SearchAfterAndBulkCreateReturnType;
   currentThreatList: ThreatListItem[];
   eventsTelemetry: TelemetryEventsSender | undefined;
