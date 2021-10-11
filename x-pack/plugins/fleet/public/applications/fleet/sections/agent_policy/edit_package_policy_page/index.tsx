@@ -687,7 +687,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
                 <h2 id="FleetPackagePolicyPreviousVersionFlyoutTitle">
                   <FormattedMessage
                     id="xpack.fleet.upgradePackagePolicy.previousVersionFlyout.title"
-                    defaultMessage="'{name}' package policy"
+                    defaultMessage="'{name}' integration policy"
                     values={{ name: currentPackagePolicy?.name }}
                   />
                 </h2>
