@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { MetricVisValue } from './metric_value';
-import { MetricInput, VisParams, MetricOptions } from '../../common/types';
+import { VisParams, MetricOptions } from '../../common/types';
 import type { IFieldFormat } from '../../../../field_formats/common';
 import { Datatable } from '../../../../expressions/public';
 import { CustomPaletteState } from '../../../../charts/public';
@@ -22,7 +22,7 @@ import './metric.scss';
 
 export interface MetricVisComponentProps {
   visParams: Pick<VisParams, 'metric' | 'dimensions'>;
-  visData: MetricInput;
+  visData: Datatable;
   fireEvent: (event: any) => void;
   renderComplete: () => void;
 }

@@ -39,7 +39,7 @@ export type MetricInput = Datatable | LensMultiTable;
 
 export interface MetricVisRenderConfig {
   visType: typeof visType;
-  visData: MetricInput;
+  visData: Datatable;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
 }
 
