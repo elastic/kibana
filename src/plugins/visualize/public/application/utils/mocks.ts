@@ -26,7 +26,6 @@ export const createVisualizeServicesMock = () => {
       location: { pathname: '' },
     },
     visualizations,
-    savedVisualizations: visualizations.savedVisualizationsLoader,
     createVisEmbeddableFromObject: visualizations.__LEGACY.createVisEmbeddableFromObject,
   } as unknown as jest.Mocked<VisualizeServices>;
 };

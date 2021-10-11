@@ -11,7 +11,7 @@
     "inspector",
     "savedObjects"
   ],
-  "optionalPlugins": ["usageCollection"],
+  "optionalPlugins": ["usageCollection", "spaces", "savedObjectsTaggingOss"],
   "requiredBundles": ["kibanaUtils", "discover"],
   "extraPublicDirs": ["common/constants", "common/prepare_log_table", "common/expression_functions"],
   "owner": {
