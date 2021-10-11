@@ -37,7 +37,10 @@ import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
 import { ElasticsearchIndexPage } from './pages/elasticsearch/index_page';
 import { ElasticsearchIndexAdvancedPage } from './pages/elasticsearch/index_advanced_page';
 import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
+import { ElasticsearchMLJobsPage } from './pages/elasticsearch/ml_jobs_page';
 import { ElasticsearchNodeAdvancedPage } from './pages/elasticsearch/node_advanced_page';
+import { ElasticsearchCcrPage } from './pages/elasticsearch/ccr_page';
+import { ElasticsearchCcrShardPage } from './pages/elasticsearch/ccr_shard_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 import { LogStashOverviewPage } from './pages/logstash/overview';
@@ -104,6 +107,27 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* ElasticSearch Views */}
+                  <RouteInit
+                    path="/elasticsearch/ml_jobs"
+                    component={ElasticsearchMLJobsPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/ccr/:index/shard/:shardId"
+                    component={ElasticsearchCcrShardPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/ccr"
+                    component={ElasticsearchCcrPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/elasticsearch/indices/:index/advanced"
                     component={ElasticsearchIndexAdvancedPage}

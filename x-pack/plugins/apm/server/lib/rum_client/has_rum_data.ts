@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { SetupUX } from '../../routes/rum_client';
 import {
   SERVICE_NAME,
@@ -16,8 +17,8 @@ import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function hasRumData({
   setup,
-  start,
-  end,
+  start = moment().subtract(24, 'h').valueOf(),
+  end = moment().valueOf(),
 }: {
   setup: SetupUX;
   start?: number;
