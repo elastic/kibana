@@ -8,6 +8,7 @@
 
 import * as Rx from 'rxjs';
 
+import { exec } from 'child_process';
 import { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
 import { Writer } from './writer';
 import { Message, MessageTypes } from './message';
@@ -65,6 +66,11 @@ export class ToolingLog {
 
   public getWritten$() {
     return this.written$.asObservable();
+  }
+
+  public echo(msg: string = '') {
+    // @ts-ignore
+    exec(`echo "${msg}"`).stdout.pipe(process.stdout);
   }
 
   private sendToWriters(type: MessageTypes, args: any[]) {

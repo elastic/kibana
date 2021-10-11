@@ -26,16 +26,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('tre discover test', function describeIndexTests() {
+  describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
       exec(`echo "1 ### some simple msg"`).stdout.pipe(process.stdout);
       exec(`echo "2 ### The \\$HOME variable is $HOME"`).stdout.pipe(process.stdout);
 
-      exec(`echo "3 stdout to stderr"`).stdout.pipe(process.stderr)
-      exec(`echo "4 stderr to stdout"`).stderr.pipe(process.stdout)
+      exec(`echo "3 stdout to stderr"`).stdout.pipe(process.stderr);
+      exec(`echo "4 stderr to stdout"`).stderr.pipe(process.stdout);
 
+      log.echo(`5 ### Test from Tre'`);
       // await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       //
       // // and load a set of makelogs data
