@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 
 export const PROMOTED_DOCUMENTS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.title',
-  { defaultMessage: 'Promoted documents' }
+  { defaultMessage: 'Promoted results' }
 );
 
 export const HIDDEN_DOCUMENTS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.title',
-  { defaultMessage: 'Hidden documents' }
+  { defaultMessage: 'Hidden results' }
 );
