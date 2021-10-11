@@ -1,7 +1,7 @@
 .lnsXyDecorationRotatedWrapper {
   display: inline-block;
   overflow: hidden;
-  line-height: 1.5;
+  line-height: $euiLineHeight;
 
   .lnsXyDecorationRotatedWrapper__label {
     display: inline-block;

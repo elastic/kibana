@@ -190,7 +190,7 @@ export const yAxisConfig: ExpressionFunctionDefinition<
     },
     textVisibility: {
       types: ['boolean'],
-      help: 'Visibility of the marker label',
+      help: 'Visibility of the label on the threshold line',
     },
     fill: {
       types: ['string'],
