@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 import { EuiInMemoryTable, EuiButton, EuiSpacer, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIdentifier } from '../setup_mode/formatting';
 import { isSetupModeFeatureEnabled } from '../../lib/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
 
-export function EuiMonitoringTable({
+export const EuiMonitoringTable: FunctionComponent<Record<any, any>> = ({
   rows: items,
   search = {},
   columns: _columns,
   setupMode,
   productName,
   ...props
-}) {
+}) => {
   const [hasItems, setHasItem] = React.useState(items.length > 0);
 
   if (search.box && !search.box['data-test-subj']) {
@@ -32,15 +32,17 @@ export function EuiMonitoringTable({
 
   if (search) {
     const oldOnChange = search.onChange;
-    search.onChange = (arg) => {
+    search.onChange = (arg: any) => {
       const filteredItems = EuiSearchBar.Query.execute(arg.query, items, props.executeQueryOptions);
       setHasItem(filteredItems.length > 0);
-      oldOnChange && oldOnChange(arg);
+      if (oldOnChange) {
+        oldOnChange(arg);
+      }
       return true;
     };
   }
 
-  const columns = _columns.map((column) => {
+  const columns = _columns.map((column: any) => {
     if (!('sortable' in column)) {
       column.sortable = true;
     }
@@ -78,4 +80,4 @@ export function EuiMonitoringTable({
       {footerContent}
     </div>
   );
-}
+};
