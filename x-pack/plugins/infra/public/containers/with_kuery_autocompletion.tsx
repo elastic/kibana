@@ -83,7 +83,8 @@ class WithKueryAutocompletionComponent extends React.Component<
         query: expression,
         selectionStart: cursorPosition,
         selectionEnd: cursorPosition,
-        indexPatterns: [indexPattern as any], // How to fix this without changing the dependency?
+        // @ts-expect-error (until data service updates to new types)
+        indexPatterns: [indexPattern],
         boolFilter: [],
       })) || [];
 
