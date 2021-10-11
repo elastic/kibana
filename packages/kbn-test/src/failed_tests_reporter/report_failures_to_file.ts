@@ -82,13 +82,19 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
       ? ` #${parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10) + 1}`
       : '';
 
+    const buildUrl = process.env.BUILDKITE_BUILD_URL || '';
+    const jobUrl = process.env.BUILDKITE_JOB_ID
+      ? `${buildUrl}#${process.env.BUILDKITE_JOB_ID}`
+      : '';
+
     const failureJSON = JSON.stringify(
       {
         ...failure,
         hash,
         buildId: process.env.BUJILDKITE_BUILD_ID || '',
         jobId: process.env.BUILDKITE_JOB_ID || '',
-        url: process.env.BUILDKITE_BUILD_URL || '',
+        url: buildUrl,
+        jobUrl,
         jobName: process.env.BUILDKITE_LABEL
           ? `${process.env.BUILDKITE_LABEL}${jobNumberSuffix}`
           : '',
@@ -128,6 +134,30 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
           .join('')}
         <hr />
         <p><strong>${escape(failure.name)}</strong></p>
+        <p>
+          <small>
+            <strong>Failures in tracked branches</strong>: <span class="badge rounded-pill bg-danger">${
+              failure.failureCount || 0
+            }</span>
+            ${
+              failure.githubIssue
+                ? `<br /><a href="${escape(failure.githubIssue)}">${escape(
+                    failure.githubIssue
+                  )}</a>`
+                : ''
+            }
+          </small>
+        </p>
+        ${
+          jobUrl
+            ? `<p>
+              <small>
+                <strong>Buildkite Job</strong><br />
+                <a href="${escape(jobUrl)}">${escape(jobUrl)}</a>
+              </small>
+            </p>`
+            : ''
+        }
         <pre>${escape(failure.failure)}</pre>
         ${screenshotHtml}
         <pre>${escape(failure['system-out'] || '')}</pre>

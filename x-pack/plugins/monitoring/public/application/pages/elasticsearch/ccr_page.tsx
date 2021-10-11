@@ -15,6 +15,7 @@ import { Ccr } from '../../../components/elasticsearch/ccr';
 import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 interface SetupModeProps {
   setupMode: any;
@@ -68,6 +69,7 @@ export const ElasticsearchCcrPage: React.FC<ComponentProps> = ({ clusters }) => 
       cluster={cluster}
     >
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}

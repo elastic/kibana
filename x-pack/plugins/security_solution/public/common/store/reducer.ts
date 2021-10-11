@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineReducers, PreloadedState, AnyAction, Reducer } from 'redux';
+import { combineReducers, AnyAction, Reducer } from 'redux';
 
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
@@ -34,7 +34,10 @@ export type SubPluginsInitReducer = HostsPluginReducer &
  * Factory for the 'initialState' that is used to preload state into the Security App's redux store.
  */
 export const createInitialState = (
-  pluginsInitState: SecuritySubPlugins['store']['initialState'],
+  pluginsInitState: Omit<
+    SecuritySubPlugins['store']['initialState'],
+    'app' | 'dragAndDrop' | 'inputs' | 'sourcerer'
+  >,
   {
     defaultDataView,
     kibanaDataViews,
@@ -46,7 +49,7 @@ export const createInitialState = (
     signalIndexName: string | null;
     enableExperimental: ExperimentalFeatures;
   }
-): PreloadedState<State> => {
+): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
       defaultDataView,
@@ -64,10 +67,10 @@ export const createInitialState = (
       signalIndexName
     ),
   };
-  const preloadedState: PreloadedState<State> = {
+  const preloadedState: State = {
+    ...pluginsInitState,
     app: { ...initialAppState, enableExperimental },
     dragAndDrop: initialDragAndDropState,
-    ...pluginsInitState,
     inputs: createInitialInputsState(),
     sourcerer: {
       ...sourcererModel.initialSourcererState,
@@ -97,6 +100,7 @@ export const createInitialState = (
       signalIndexName,
     },
   };
+
   return preloadedState;
 };
 
