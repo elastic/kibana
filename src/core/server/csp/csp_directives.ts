@@ -58,13 +58,11 @@ export class CspDirectives {
   }
 
   getCspHeader() {
-    return this.getRules().join('; ');
-  }
-
-  getRules() {
-    return [...this.directives.entries()].map(([name, values]) => {
-      return [name, ...values].join(' ');
-    });
+    return [...this.directives.entries()]
+      .map(([name, values]) => {
+        return [name, ...values].join(' ');
+      })
+      .join('; ');
   }
 
   static fromConfig(config: CspConfigType): CspDirectives {

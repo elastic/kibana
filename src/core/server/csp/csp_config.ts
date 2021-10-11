@@ -48,7 +48,6 @@ export class CspConfig implements ICspConfig {
   static readonly DEFAULT = new CspConfig(DEFAULT_CONFIG);
 
   readonly #directives: CspDirectives;
-  // public readonly rules: string[];
   public readonly strict: boolean;
   public readonly warnLegacyBrowsers: boolean;
   public readonly disableEmbedding: boolean;

@@ -45,7 +45,7 @@ const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, addDeprecati
   }
 };
 
-export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
+export const coreDeprecationProvider: ConfigDeprecationProvider = () => [
   rewriteCorsSettings,
   rewriteBasePathDeprecation,
 ];

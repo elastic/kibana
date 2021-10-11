@@ -54,10 +54,6 @@ describe('http resources service', () => {
         await root.start();
         const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
 
-        const scriptSrcCspHeader = response.header['content-security-policy']
-          .split(';')
-          .filter((cspRule: string) => cspRule.startsWith('script-src'));
-        expect(scriptSrcCspHeader.includes('self'));
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
       });
 
@@ -69,7 +65,7 @@ describe('http resources service', () => {
         resources.register({ path: '/render-core', validate: false }, (context, req, res) =>
           res.renderAnonymousCoreApp({
             headers: {
-              'content-security-policy': `${defaultCspRules}`,
+              'content-security-policy': "script-src 'unsafe-eval'",
               'x-kibana': '42',
             },
           })
