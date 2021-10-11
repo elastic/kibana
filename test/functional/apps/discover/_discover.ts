@@ -8,8 +8,8 @@
 
 import expect from '@kbn/expect';
 
+import { exec } from 'child_process';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import {exec} from "child_process";
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
