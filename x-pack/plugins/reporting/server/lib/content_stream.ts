@@ -214,28 +214,30 @@ export class ContentStream extends Duplex {
     return this.jobSize != null && this.bytesRead >= this.jobSize;
   }
 
-  async _read() {
-    try {
-      const content = this.chunksRead ? await this.readChunk() : await this.readHead();
-      if (!content) {
-        this.logger.debug(`Chunk is empty.`);
-        this.push(null);
-        return;
-      }
+  _read() {
+    (this.chunksRead ? this.readChunk() : this.readHead())
+      .then((content) => {
+        if (!content) {
+          this.logger.debug(`Chunk is empty.`);
+          this.push(null);
+          return;
+        }
 
-      const buffer = await this.decode(content);
+        this.decode(content).then(
+          (buffer) => {
+            this.push(buffer);
+            this.chunksRead++;
+            this.bytesRead += buffer.byteLength;
 
-      this.push(buffer);
-      this.chunksRead++;
-      this.bytesRead += buffer.byteLength;
-
-      if (this.isRead()) {
-        this.logger.debug(`Read ${this.bytesRead} of ${this.jobSize} bytes.`);
-        this.push(null);
-      }
-    } catch (error) {
-      this.destroy(error);
-    }
+            if (this.isRead()) {
+              this.logger.debug(`Read ${this.bytesRead} of ${this.jobSize} bytes.`);
+              this.push(null);
+            }
+          },
+          (err) => this.destroy(err)
+        );
+      })
+      .catch((err) => this.destroy(err));
   }
 
   private async removeChunks() {
