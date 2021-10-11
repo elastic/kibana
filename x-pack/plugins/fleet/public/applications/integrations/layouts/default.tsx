@@ -28,6 +28,8 @@ interface Props {
 
 const Illustration = styled(EuiImage)`
   margin-bottom: -68px;
+  position: relative;
+  top: -20px;
   width: 80%;
 `;
 

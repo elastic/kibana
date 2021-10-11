@@ -39,15 +39,13 @@ import { Error, Loading, SettingFlyout } from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
-import { DefaultLayout, WithoutHeaderLayout } from './layouts';
+import { DefaultLayout } from './layouts';
 import { PackageInstallProvider } from './hooks';
 import { useBreadcrumbs, UIExtensionsContext } from './hooks';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
-    <DefaultLayout>
-      <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
-    </DefaultLayout>
+    <DefaultLayout>{children}</DefaultLayout>
   </EuiErrorBoundary>
 );
 
