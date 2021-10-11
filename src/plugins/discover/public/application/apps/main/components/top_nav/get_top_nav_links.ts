@@ -127,7 +127,7 @@ export const getTopNavLinks = ({
           title:
             savedSearch.title ||
             i18n.translate('discover.localMenu.fallbackReportTitle', {
-              defaultMessage: 'Discover search',
+              defaultMessage: 'Untitled discover search',
             }),
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
