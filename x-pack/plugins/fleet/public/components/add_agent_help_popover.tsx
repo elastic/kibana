@@ -24,20 +24,19 @@ export const AddAgentHelpPopover = ({
   closePopover: NoArgCallback<void>;
 }) => {
   const { docLinks } = useStartServices();
-
   return (
-    <EuiPopover button={button} isOpen={true} closePopover={closePopover}>
+    <EuiPopover button={button} isOpen={isOpen} closePopover={closePopover}>
       <div style={{ width: '302px' }}>
         <EuiText size="m">
           <FormattedMessage
-            id="xpack.fleet.policyDetails.unexceptedErrorTitle"
+            id="xpack.fleet.addAgentHelpPopover.popoverBody"
             defaultMessage="For integrations to work successfully, add {elasticAgent} to your host to collect data and send it to Elastic Stack. {learnMoreLink}"
             values={{
               elasticAgent: <strong>Elastic Agent</strong>,
               learnMoreLink: (
                 <EuiLink target="_blank" external href={docLinks.links.fleet.elasticAgent}>
                   <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
+                    id="xpack.fleet.addAgentHelpPopover.documentationLink"
                     defaultMessage="Learn more about Elastic Agent."
                   />
                 </EuiLink>
@@ -47,7 +46,7 @@ export const AddAgentHelpPopover = ({
         </EuiText>
       </div>
       <EuiPopoverFooter>
-        <EuiButton fullWidth size="s">
+        <EuiButton onClick={closePopover} fullWidth size="s">
           Got it
         </EuiButton>
       </EuiPopoverFooter>
