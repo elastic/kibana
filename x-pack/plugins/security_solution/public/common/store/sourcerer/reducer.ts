@@ -13,6 +13,7 @@ import {
   setSelectedDataView,
   setSignalIndexName,
   setSource,
+  setFetchFields,
 } from './actions';
 import { initialSourcererState, SourcererModel, SourcererScopeName } from './model';
 import { validateSelectedPatterns } from './helpers';
@@ -63,6 +64,35 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       ...validateSelectedPatterns(state, payload),
     },
   }))
+  .case(setFetchFields, (state, id) => {
+    console.log('setFetchFields', id, {
+      kibanaDataViews: state.kibanaDataViews.map((dv) =>
+        dv.id === id ? { ...dv, fetchedFields: true } : dv
+      ),
+      stateToReturn: {
+        ...state,
+        ...(state.defaultDataView.id === id
+          ? {
+              defaultDataView: { ...state.defaultDataView, fetchedFields: true },
+            }
+          : {}),
+        kibanaDataViews: state.kibanaDataViews.map((dv) =>
+          dv.id === id ? { ...dv, fetchedFields: true } : dv
+        ),
+      },
+    });
+    return {
+      ...state,
+      ...(state.defaultDataView.id === id
+        ? {
+            defaultDataView: { ...state.defaultDataView, fetchedFields: true },
+          }
+        : {}),
+      kibanaDataViews: state.kibanaDataViews.map((dv) =>
+        dv.id === id ? { ...dv, fetchedFields: true } : dv
+      ),
+    };
+  })
   .case(setSource, (state, { scope, dataView }) => ({
     ...state,
     ...(dataView.id === state.defaultDataView.id

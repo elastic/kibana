@@ -104,7 +104,7 @@ export const getSelectedDataViewSelector = () => {
       browserFields,
       dataViewId,
       docValueFields,
-      indexPattern: getDataView(indexPattern, selectedPatterns.join()),
+      indexPattern: getDataView(indexPattern, 'gay-*'),
       indicesExist,
       loading,
       runtimeMappings,

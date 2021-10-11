@@ -349,8 +349,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      let defaultDataView: SourcererDataView;
-      let kibanaDataViews: SourcererDataView[];
+      let defaultDataView: Pick<SourcererDataView, 'id', 'title', 'patternList'>;
+      let kibanaDataViews: Array<Pick<SourcererDataView, 'id', 'title', 'patternList'>>;
       try {
         // check for/generate default Security Solution Kibana index pattern
         const sourcererDataViews = await coreStart.http.fetch(SOURCERER_API_URL, {

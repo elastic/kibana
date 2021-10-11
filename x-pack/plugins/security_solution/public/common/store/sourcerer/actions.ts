@@ -30,6 +30,8 @@ export const setSource = actionCreator<{
 export const setSignalIndexName =
   actionCreator<{ signalIndexName: string }>('SET_SIGNAL_INDEX_NAME');
 
+export const setFetchFields = actionCreator<string>('SET_FETCH_FIELDS');
+
 export const setSourcererDataViews = actionCreator<{
   defaultDataView: SourcererDataView;
   kibanaDataViews: SourcererDataView[];

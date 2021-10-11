@@ -38,6 +38,7 @@ export interface ManageScopeInit extends Partial<ManageScope> {
 export type SourcererScopeById = Record<SourcererScopeName, ManageScope>;
 
 export interface SourcererDataView {
+  fetchedFields: boolean;
   /** Uniquely identifies a Kibana Index Pattern */
   id: string;
   /**  list of active patterns that return data  */
@@ -70,16 +71,20 @@ export const initSourcererScope: Omit<ManageScope, 'id'> = {
   selectedDataViewId: '',
   selectedPatterns: [],
 };
+export const initDataView = {
+  fetchedFields: false,
+  browserFields: EMPTY_BROWSER_FIELDS,
+  docValueFields: EMPTY_DOCVALUE_FIELD,
+  id: '',
+  indexPattern: EMPTY_INDEX_PATTERN,
+  patternList: [],
+  runtimeMappings: {},
+  title: '',
+};
 
 export const initialSourcererState: SourcererModel = {
   defaultDataView: {
-    browserFields: EMPTY_BROWSER_FIELDS,
-    docValueFields: EMPTY_DOCVALUE_FIELD,
-    id: '',
-    indexPattern: EMPTY_INDEX_PATTERN,
-    patternList: [],
-    runtimeMappings: {},
-    title: '',
+    ...initDataView,
   },
   kibanaDataViews: [],
   signalIndexName: null,

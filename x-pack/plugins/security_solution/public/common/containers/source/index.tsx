@@ -23,12 +23,14 @@ import {
   IndexFieldsStrategyResponse,
 } from '../../../../../timelines/common';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useSourcererDataView } from '../sourcerer';
+import { kibanaDataViewsSelector } from '../../store/sourcerer/selectors';
+import { setFetchFields } from '../../store/sourcerer/actions';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -166,8 +168,6 @@ export const useFetchIndex = (
 
                 previousIndexesName.current = response.indicesExist;
                 setLoading(false);
-                // TODO: Steph/sourcerer all the below formatting should be happening serverside
-                // https://github.com/elastic/security-team/issues/1730
                 setState({
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                   docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
@@ -223,6 +223,11 @@ export const useIndexFields = (
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const dispatch = useDispatch();
+  const getKibanaDataViewsSelector = useMemo(
+    () => sourcererSelectors.kibanaDataViewsSelector(),
+    []
+  );
+  const kibanaDataViews = useDeepEqualSelector(getKibanaDataViewsSelector);
   const { dataViewId, patternList, selectedPatterns } = useSourcererDataView(sourcererScopeName);
   const { addError, addWarning } = useAppToasts();
 
@@ -257,6 +262,7 @@ export const useIndexFields = (
           )
           .subscribe({
             next: (response) => {
+              console.log('response!');
               // TODO: Steph/sourcerer needs better tests
               if (isCompleteResponse(response)) {
                 const signalIndexName = signalIndexNameSelector
@@ -271,7 +277,6 @@ export const useIndexFields = (
                   // if new signal index name is set, there wasn't one before so we need to update detections specifically
                   // technically, we need to update all scopes as there xare can be new fields in signals index
                   // once fields are moved to sourcerer.kibanaDataViews we only need to do this for detections scope
-                  // TODO: Steph/sourcerer https://github.com/elastic/security-team/issues/1730 to be done before 7.16 feature freeze
                   dispatch(
                     sourcererActions.setSource({
                       scope: {
@@ -357,11 +362,14 @@ export const useIndexFields = (
       (dataViewId != null && dataViewId !== refDataViewId.current && selectedPatterns.length > 0) ||
       (selectedPatterns.length > 0 && refSelectedPatterns.current.length === 0)
     ) {
+      console.log('fetchedFields', kibanaDataViews);
+
+      dispatch(sourcererActions.setFetchFields(dataViewId));
       indexFieldsSearch(dataViewId);
     }
     refSelectedPatterns.current = selectedPatterns;
     refDataViewId.current = dataViewId;
-  }, [dataViewId, indexFieldsSearch, selectedPatterns]);
+  }, [dataViewId, dispatch, indexFieldsSearch, selectedPatterns, kibanaDataViews]);
 
   useEffect(() => {
     return () => {

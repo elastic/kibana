@@ -21,7 +21,7 @@ import { SecuritySubPlugins } from '../../app/types';
 import { ManagementPluginReducer } from '../../management';
 import { State } from './types';
 import { AppAction } from './actions';
-import { SourcererDataView, SourcererScopeName } from './sourcerer/model';
+import { initDataView, SourcererDataView, SourcererScopeName } from './sourcerer/model';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 
@@ -95,8 +95,11 @@ export const createInitialState = (
           // indicesExist: initialPatterns[SourcererScopeName.timeline].length > 0,
         },
       },
-      defaultDataView,
-      kibanaDataViews,
+      defaultDataView: {
+        ...initDataView,
+        ...defaultDataView,
+      },
+      kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
     },
   };
