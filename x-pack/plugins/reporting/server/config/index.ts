@@ -41,8 +41,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
             manualSteps: [
               i18n.translate('xpack.reporting.deprecations.reportingIndex.manualStepOne', {
                 defaultMessage:
-                  `Regenerate reports that need to be available for download in Kibana. ` +
-                  `You will not have access to reports that were written into a custom Reporting index.`,
+                  `Regenerate existing reports that you still need to access in 8.0.`,
               }),
             ],
           },
