@@ -9,7 +9,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { DatatableColumn } from '../../../../expressions';
+import { Datatable, DatatableColumn } from '../../../../expressions';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { ColorMode, CustomPaletteState } from '../../../../charts/common';
 import { metricVisRenderer } from '../expression_renderers';
@@ -233,8 +233,8 @@ storiesOf('renderers/visMetric', module)
         config={{
           ...config,
           visData: {
-            ...config.visData,
-            columns: [...config.visData.columns, dayColumn],
+            ...(config.visData as Datatable),
+            columns: [...(config.visData as Datatable).columns, dayColumn],
             rows: dataWithBuckets,
           },
           visConfig: {
@@ -250,7 +250,7 @@ storiesOf('renderers/visMetric', module)
     return (
       <Render
         renderer={metricVisRenderer}
-        config={{ ...config, visData: { ...config.visData, rows: [] } }}
+        config={{ ...config, visData: { ...config.visData, rows: [] } as Datatable }}
         {...containerSize}
       />
     );
