@@ -13656,7 +13656,6 @@
     "xpack.infra.sourceConfiguration.anomalyThresholdTitle": "异常严重性阈值",
     "xpack.infra.sourceConfiguration.applySettingsButtonLabel": "应用",
     "xpack.infra.sourceConfiguration.discardSettingsButtonLabel": "丢弃",
-    "xpack.infra.sourceConfiguration.documentedFields": "已记录字段",
     "xpack.infra.sourceConfiguration.fieldEmptyErrorMessage": "字段不得为空。",
     "xpack.infra.sourceConfiguration.fieldLogColumnTitle": "字段",
     "xpack.infra.sourceConfiguration.indicesSectionTitle": "索引",

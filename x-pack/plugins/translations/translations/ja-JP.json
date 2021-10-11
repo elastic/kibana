@@ -13469,7 +13469,6 @@
     "xpack.infra.sourceConfiguration.anomalyThresholdTitle": "異常重要度しきい値",
     "xpack.infra.sourceConfiguration.applySettingsButtonLabel": "適用",
     "xpack.infra.sourceConfiguration.discardSettingsButtonLabel": "破棄",
-    "xpack.infra.sourceConfiguration.documentedFields": "文書化されたフィールド",
     "xpack.infra.sourceConfiguration.fieldEmptyErrorMessage": "このフィールドは未入力のままにできません。",
     "xpack.infra.sourceConfiguration.fieldLogColumnTitle": "フィールド",
     "xpack.infra.sourceConfiguration.indicesSectionTitle": "インデックス",
