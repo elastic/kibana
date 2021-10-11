@@ -8,7 +8,7 @@
 
 const Path = require('path');
 
-/**1
+/**
  * Absolute path to the distributable directory
  */
 exports.distDir = Path.resolve(__dirname, '../shared_built_assets');
