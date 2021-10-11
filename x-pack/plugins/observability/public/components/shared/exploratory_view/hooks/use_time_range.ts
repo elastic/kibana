@@ -16,6 +16,7 @@ import {
 
 import { ReportViewType, SeriesUrl } from '../types';
 import { ReportTypes } from '../configurations/constants';
+import { parseRelativeDate } from '../components/date_range_picker';
 
 export const combineTimeRanges = (
   reportType: ReportViewType,
@@ -36,12 +37,13 @@ export const combineTimeRanges = (
       !isEmpty(series.reportDefinitions) &&
       series.time
     ) {
-      const seriesTo = new Date(series.time.to);
-      const seriesFrom = new Date(series.time.from);
-      if (!to || seriesTo > new Date(to)) {
+      const seriesFrom = parseRelativeDate(series.time.from)!;
+      const seriesTo = parseRelativeDate(series.time.to, { roundUp: true })!;
+
+      if (!to || seriesTo > parseRelativeDate(to, { roundUp: true })) {
         to = series.time.to;
       }
-      if (!from || seriesFrom < new Date(from)) {
+      if (!from || seriesFrom < parseRelativeDate(from)) {
         from = series.time.from;
       }
     }

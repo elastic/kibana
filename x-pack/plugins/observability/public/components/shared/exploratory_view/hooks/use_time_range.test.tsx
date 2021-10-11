@@ -12,6 +12,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useExpViewTimeRange } from './use_time_range';
 import { ReportTypes } from '../configurations/constants';
 import { createKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { TRANSACTION_DURATION } from '../configurations/constants/elasticsearch_fieldnames';
 
 const mockSingleSeries = [
   {
@@ -19,103 +20,89 @@ const mockSingleSeries = [
     dataType: 'ux',
     breakdown: 'user_agent.name',
     time: { from: 'now-15m', to: 'now' },
+    selectedMetricField: TRANSACTION_DURATION,
+    reportDefinitions: { 'service.name': ['elastic-co'] },
   },
 ];
 
 const mockMultipleSeries = [
-  {
-    name: 'performance-distribution',
-    dataType: 'ux',
-    breakdown: 'user_agent.name',
-    time: { from: 'now-15m', to: 'now' },
-  },
+  ...mockSingleSeries,
   {
     name: 'kpi-over-time',
     dataType: 'synthetics',
     breakdown: 'user_agent.name',
-    time: { from: 'now-15m', to: 'now' },
+    time: { from: 'now-30m', to: 'now' },
+    selectedMetricField: TRANSACTION_DURATION,
+    reportDefinitions: { 'service.name': ['elastic-co'] },
   },
 ];
 
 describe('useExpViewTimeRange', function () {
   const storage = createKbnUrlStateStorage({ useHash: false });
-  storage.set(allSeriesKey, mockSingleSeries);
-  storage.set(reportTypeKey, ReportTypes.KPI);
 
-  function Wrapper() {
-    return (
-      <UrlStorageContextProvider storage={storage}>
-        <div />
-      </UrlStorageContextProvider>
-    );
+  function Wrapper({ children }: { children: JSX.Element }) {
+    return <UrlStorageContextProvider storage={storage}>{children}</UrlStorageContextProvider>;
   }
-  it.skip('should return expected result when there is one series', async function () {
+  it('should return expected result when there is one series', async function () {
+    await storage.set(allSeriesKey, mockSingleSeries);
+    await storage.set(reportTypeKey, ReportTypes.KPI);
+
     const { result } = renderHook(() => useExpViewTimeRange(), {
       wrapper: Wrapper,
     });
 
-    expect(result.current).toEqual({});
-
-    // expect(setData).toHaveBeenCalledTimes(2);
-    // expect(setData).toHaveBeenLastCalledWith(
-    //   expect.objectContaining({
-    //     allSeries: [
-    //       {
-    //         name: 'performance-distribution',
-    //         dataType: 'ux',
-    //         breakdown: 'user_agent.name',
-    //         time: { from: 'now-15m', to: 'now' },
-    //       },
-    //     ],
-    //     firstSeries: {
-    //       name: 'performance-distribution',
-    //       dataType: 'ux',
-    //       breakdown: 'user_agent.name',
-    //       time: { from: 'now-15m', to: 'now' },
-    //     },
-    //   })
-    // );
+    expect(result.current).toEqual({
+      from: 'now-15m',
+      to: 'now',
+    });
   });
 
-  // it('should return expected result when there are multiple series series', function () {
-  //   const setData = setupTestComponent(mockMultipleSeries);
-  //
-  //   expect(setData).toHaveBeenCalledTimes(2);
-  //   expect(setData).toHaveBeenLastCalledWith(
-  //     expect.objectContaining({
-  //       allSeries: [
-  //         {
-  //           name: 'performance-distribution',
-  //           dataType: 'ux',
-  //           breakdown: 'user_agent.name',
-  //           time: { from: 'now-15m', to: 'now' },
-  //         },
-  //         {
-  //           name: 'kpi-over-time',
-  //           dataType: 'synthetics',
-  //           breakdown: 'user_agent.name',
-  //           time: { from: 'now-15m', to: 'now' },
-  //         },
-  //       ],
-  //       firstSeries: {
-  //         name: 'performance-distribution',
-  //         dataType: 'ux',
-  //         breakdown: 'user_agent.name',
-  //         time: { from: 'now-15m', to: 'now' },
-  //       },
-  //     })
-  //   );
-  // });
-  //
-  // it('should return expected result when there are no series', function () {
-  //   const setData = setupTestComponent([]);
-  //
-  //   expect(setData).toHaveBeenCalledTimes(1);
-  //   expect(setData).toHaveBeenLastCalledWith(
-  //     expect.objectContaining({
-  //       allSeries: [],
-  //       firstSeries: undefined,
-  //     })
-  //   );
-  // });
+  it('should return expected result when there are multiple KPI series', async function () {
+    await storage.set(allSeriesKey, mockMultipleSeries);
+    await storage.set(reportTypeKey, ReportTypes.KPI);
+
+    const { result } = renderHook(() => useExpViewTimeRange(), {
+      wrapper: Wrapper,
+    });
+
+    expect(result.current).toEqual({
+      from: 'now-15m',
+      to: 'now',
+    });
+  });
+
+  it('should return expected result when there are multiple distribution series with relative dates', async function () {
+    await storage.set(allSeriesKey, mockMultipleSeries);
+    await storage.set(reportTypeKey, ReportTypes.DISTRIBUTION);
+
+    const { result } = renderHook(() => useExpViewTimeRange(), {
+      wrapper: Wrapper,
+    });
+
+    expect(result.current).toEqual({
+      from: 'now-30m',
+      to: 'now',
+    });
+  });
+
+  it('should return expected result when there are multiple distribution series with absolute dates', async function () {
+    // from:'2021-10-11T09:55:39.551Z',to:'2021-10-11T10:55:41.516Z')))
+    mockMultipleSeries[0].time.from = '2021-10-11T09:55:39.551Z';
+    mockMultipleSeries[0].time.to = '2021-10-11T11:55:41.516Z';
+
+    mockMultipleSeries[1].time.from = '2021-01-11T09:55:39.551Z';
+    mockMultipleSeries[1].time.to = '2021-10-11T10:55:41.516Z';
+
+    await storage.set(allSeriesKey, mockMultipleSeries);
+    await storage.set(reportTypeKey, ReportTypes.DISTRIBUTION);
+
+    const { result } = renderHook(() => useExpViewTimeRange(), {
+      wrapper: Wrapper,
+    });
+
+    expect(result.current).toEqual({
+      from: '2021-01-11T09:55:39.551Z',
+      to: '2021-10-11T11:55:41.516Z',
+    });
+  });
 });
