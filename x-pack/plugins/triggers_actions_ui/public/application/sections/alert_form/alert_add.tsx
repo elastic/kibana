@@ -17,10 +17,12 @@ import {
   AlertFlyoutCloseReason,
   IErrorObject,
   AlertAddProps,
+  RuleTypeIndex,
 } from '../../../types';
-import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
+import { AlertForm } from './alert_form';
+import { getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_errors';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
-import { createAlert } from '../../lib/alert_api';
+import { createAlert, loadAlertTypes } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmAlertSave } from './confirm_alert_save';
 import { ConfirmAlertClose } from './confirm_alert_close';
@@ -30,6 +32,7 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasAlertChanged, haveAlertParamsChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
+import { DEFAULT_ALERT_INTERVAL } from '../../constants';
 
 const AlertAdd = ({
   consumer,
@@ -39,26 +42,28 @@ const AlertAdd = ({
   canChangeTrigger,
   alertTypeId,
   initialValues,
+
   reloadAlerts,
   onSave,
   metadata,
+  ...props
 }: AlertAddProps) => {
   const onSaveHandler = onSave ?? reloadAlerts;
-  const initialAlert: InitialAlert = useMemo(
-    () => ({
+
+  const initialAlert: InitialAlert = useMemo(() => {
+    return {
       params: {},
       consumer,
       alertTypeId,
       schedule: {
-        interval: '1m',
+        interval: DEFAULT_ALERT_INTERVAL,
       },
       actions: [],
       tags: [],
       notifyWhen: 'onActionGroupChange',
       ...(initialValues ? initialValues : {}),
-    }),
-    [alertTypeId, consumer, initialValues]
-  );
+    };
+  }, [alertTypeId, consumer, initialValues]);
 
   const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
     alert: initialAlert,
@@ -67,6 +72,10 @@ const AlertAdd = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
+  const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
+    props.ruleTypeIndex
+  );
+  const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
 
   const setAlert = (value: InitialAlert) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
@@ -89,6 +98,19 @@ const AlertAdd = ({
       setAlertProperty('alertTypeId', alertTypeId);
     }
   }, [alertTypeId]);
+
+  useEffect(() => {
+    if (!props.ruleTypeIndex) {
+      (async () => {
+        const alertTypes = await loadAlertTypes({ http });
+        const index: RuleTypeIndex = new Map();
+        for (const alertType of alertTypes) {
+          index.set(alertType.id, alertType);
+        }
+        setRuleTypeIndex(index);
+      })();
+    }
+  }, [props.ruleTypeIndex, http]);
 
   useEffect(() => {
     if (isEmpty(alert.params) && !isEmpty(initialAlertParams)) {
@@ -115,6 +137,21 @@ const AlertAdd = ({
     })();
   }, [alert, actionTypeRegistry]);
 
+  useEffect(() => {
+    if (alert.alertTypeId && ruleTypeIndex) {
+      const type = ruleTypeIndex.get(alert.alertTypeId);
+      if (type?.defaultScheduleInterval && !changedFromDefaultInterval) {
+        setAlertProperty('schedule', { interval: type.defaultScheduleInterval });
+      }
+    }
+  }, [alert.alertTypeId, ruleTypeIndex, alert.schedule.interval, changedFromDefaultInterval]);
+
+  useEffect(() => {
+    if (alert.schedule.interval !== DEFAULT_ALERT_INTERVAL && !changedFromDefaultInterval) {
+      setChangedFromDefaultInterval(true);
+    }
+  }, [alert.schedule.interval, changedFromDefaultInterval]);
+
   const checkForChangesAndCloseFlyout = () => {
     if (
       hasAlertChanged(alert, initialAlert, false) ||
@@ -138,9 +175,11 @@ const AlertAdd = ({
   };
 
   const alertType = alert.alertTypeId ? ruleTypeRegistry.get(alert.alertTypeId) : null;
+
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
-    alertType
+    alertType,
+    alert.alertTypeId ? ruleTypeIndex?.get(alert.alertTypeId) : undefined
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this alert
