@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 // @ts-ignore
 import { Listing } from '../../../components/logstash/listing';
@@ -29,6 +29,9 @@ import { DetailStatus } from '../../../components/logstash/detail_status';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { AlertsCallout } from '../../../alerts/callout';
 import { useCharts } from '../../hooks/use_charts';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
 
 export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -42,6 +45,7 @@ export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters })
   });
 
   const [data, setData] = useState({} as any);
+  const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const title = i18n.translate('xpack.monitoring.logstash.node.advanced.routeTitle', {
     defaultMessage: 'Logstash - {nodeName} - Advanced',
@@ -60,19 +64,30 @@ export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters })
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/node/${match.params.uuid}`;
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        ccs,
+    if (services.http?.fetch && clusterUuid) {
+      const response = await services.http?.fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          ccs,
+          timeRange: {
+            min: bounds.min.toISOString(),
+            max: bounds.max.toISOString(),
+          },
+          is_advanced: true,
+        }),
+      });
+      setData(response);
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        alertTypeIds: [RULE_LOGSTASH_VERSION_MISMATCH],
+        clusterUuid,
         timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
         },
-        is_advanced: true,
-      }),
-    });
-
-    setData(response);
+      });
+      setAlerts(alertsResponse);
+    }
   }, [
     ccs,
     clusterUuid,
@@ -105,7 +120,7 @@ export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters })
         <EuiPageBody>
           <EuiPanel>{data.nodeSummary && <DetailStatus stats={data.nodeSummary} />}</EuiPanel>
           <EuiSpacer size="m" />
-          <AlertsCallout alerts={{}} />
+          <AlertsCallout alerts={alerts} />
           <EuiPageContent>
             <EuiFlexGrid columns={2} gutterSize="s">
               {metricsToShow.map((metric, index) => (

@@ -32,6 +32,7 @@ export interface CommonAlertState {
 export interface CommonAlertFilter {
   nodeUuid?: string;
   shardId?: string;
+  shardIndex?: string;
 }
 
 export interface CommonAlertParamDetail {

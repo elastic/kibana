@@ -9,13 +9,13 @@ import React from 'react';
 import { render } from 'react-dom';
 import { get, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { HttpStart } from 'kibana/public';
+import { HttpStart, IHttpFetchError } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Legacy } from '../../legacy_shims';
 import { SetupModeEnterButton } from '../../components/setup_mode/enter_button';
 import { SetupModeFeature } from '../../../common/enums';
 import { ISetupModeContext } from '../../components/setup_mode/setup_mode_context';
-import { State as GlobalState } from '../../application/global_state_context';
+import { State as GlobalState } from '../contexts/global_state_context';
 
 function isOnPage(hash: string) {
   return includes(window.location.hash, hash);
@@ -23,6 +23,7 @@ function isOnPage(hash: string) {
 
 let globalState: GlobalState;
 let httpService: HttpStart;
+let errorHandler: (error: IHttpFetchError) => void;
 
 interface ISetupModeState {
   enabled: boolean;
@@ -65,8 +66,8 @@ export const fetchCollectionData = async (uuid?: string, fetchWithoutClusterUuid
     });
     return response;
   } catch (err) {
-    // TODO: handle errors
-    throw new Error(err);
+    errorHandler(err);
+    throw err;
   }
 };
 
@@ -122,8 +123,8 @@ export const disableElasticsearchInternalCollection = async () => {
     const response = await httpService.post(url);
     return response;
   } catch (err) {
-    // TODO: handle errors
-    throw new Error(err);
+    errorHandler(err);
+    throw err;
   }
 };
 
@@ -161,10 +162,12 @@ export const setSetupModeMenuItem = () => {
 export const initSetupModeState = async (
   state: GlobalState,
   http: HttpStart,
+  handleErrors: (error: IHttpFetchError) => void,
   callback?: () => void
 ) => {
   globalState = state;
   httpService = http;
+  errorHandler = handleErrors;
   if (callback) {
     setupModeState.callback = callback;
   }
