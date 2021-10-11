@@ -14,6 +14,7 @@ import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { getHostIsolationExceptionItems } from '../service';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 
+jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
 jest.mock('../service');
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
 

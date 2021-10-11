@@ -181,7 +181,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               <p>
                 {i18n.translate('xpack.securitySolution.trustedApps.assignmentSectionDescription', {
                   defaultMessage:
-                    'You can assign this trusted application globally across all policies or assign it to specific policies.',
+                    'Assign this trusted application globally across all policies, or assign it to specific policies.',
                 })}
               </p>
             </EuiText>
