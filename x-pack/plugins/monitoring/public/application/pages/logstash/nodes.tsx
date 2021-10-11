@@ -16,6 +16,7 @@ import { LogstashTemplate } from './logstash_template';
 import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
+import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 
 interface SetupModeProps {
   setupMode: any;
@@ -68,7 +69,7 @@ export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
     >
       <div>
         <SetupModeRenderer
-          productName="logstash"
+          productName={LOGSTASH_SYSTEM_ID}
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
