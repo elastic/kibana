@@ -4,6 +4,9 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
+export BUILDKITE_TOKEN
+
 echo '--- Install buildkite dependencies'
 cd '.buildkite'
 retry 5 15 yarn install
@@ -12,9 +15,6 @@ cd -
 node .buildkite/scripts/lifecycle/print_agent_links.js || true
 
 echo '--- Job Environment Setup'
-
-BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
-export BUILDKITE_TOKEN
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
 {
