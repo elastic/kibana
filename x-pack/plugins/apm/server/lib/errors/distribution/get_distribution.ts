@@ -21,6 +21,8 @@ export async function getErrorDistribution({
   setup,
   start,
   end,
+  comparisonStart,
+  comparisonEnd,
 }: {
   environment: string;
   kuery: string;
@@ -29,22 +31,33 @@ export async function getErrorDistribution({
   setup: Setup;
   start: number;
   end: number;
+  comparisonStart: number;
+  comparisonEnd: number;
 }) {
   const bucketSize = getBucketSize({ start, end });
-  const { buckets, noHits } = await getBuckets({
+  const commonProps = {
     environment,
     kuery,
     serviceName,
     groupId,
-    bucketSize,
     setup,
+    bucketSize,
+  };
+  const currentPeriodPromise = await getBuckets({
+    ...commonProps,
     start,
     end,
   });
+  const previousPeriodPromise = await getBuckets({
+    ...commonProps,
+    start: comparisonStart,
+    end: comparisonEnd,
+  });
 
   return {
-    noHits,
-    buckets,
+    noHits: [currentPeriodPromise.noHits, previousPeriodPromise.noHits],
+    currentPeriod: currentPeriodPromise.buckets,
+    previousPeriod: previousPeriodPromise.buckets,
     bucketSize,
   };
 }
