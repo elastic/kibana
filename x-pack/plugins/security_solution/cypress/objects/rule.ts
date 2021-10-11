@@ -71,10 +71,6 @@ export interface OverrideRule extends CustomRule {
   timestampOverride: string;
 }
 
-export interface EventCorrelationRule extends CustomRule {
-  language: string;
-}
-
 export interface ThreatIndicatorRule extends CustomRule {
   indicatorIndexPattern: string[];
   indicatorMappingField: string;
@@ -329,7 +325,7 @@ export const getEqlRule = (): CustomRule => ({
   maxSignals: 100,
 });
 
-export const getCCSEqlRule = (): EventCorrelationRule => ({
+export const getCCSEqlRule = (): CustomRule => ({
   customQuery: 'any where process.name == "run-parts"',
   name: 'New EQL Rule',
   index: [`${ccsRemoteName}:run-parts`],
@@ -345,7 +341,6 @@ export const getCCSEqlRule = (): EventCorrelationRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
-  language: 'eql',
 });
 
 export const getEqlSequenceRule = (): CustomRule => ({

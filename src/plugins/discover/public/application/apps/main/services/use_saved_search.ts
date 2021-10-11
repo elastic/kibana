@@ -7,7 +7,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, merge, Subject } from 'rxjs';
-import { debounceTime, filter, tap } from 'rxjs/operators';
+import { debounceTime, filter, tap, skip } from 'rxjs/operators';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { SearchSource } from '../../../../../../data/common';
@@ -141,7 +141,7 @@ export const useSavedSearch = ({
      * to notify when data completed loading and to start a new autorefresh loop
      */
     let autoRefreshDoneCb: AutoRefreshDoneFn | undefined;
-    const fetch$ = merge(
+    let fetch$ = merge(
       refetch$,
       filterManager.getFetches$(),
       timefilter.getFetch$(),
@@ -163,6 +163,13 @@ export const useSavedSearch = ({
       data.query.queryString.getUpdates$(),
       searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
     ).pipe(debounceTime(100));
+
+    /**
+     * Skip initial fetch when discover:searchOnPageLoad is disabled.
+     */
+    if (initialFetchStatus === FetchStatus.UNINITIALIZED) {
+      fetch$ = fetch$.pipe(skip(1));
+    }
 
     const subscription = fetch$.subscribe((val) => {
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {

@@ -17,7 +17,7 @@ import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
-export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
+export const DASHBOARD_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'Dashboard',
 });
 
@@ -25,31 +25,9 @@ export function RumHome() {
   const { observability } = useApmPluginContext();
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
-  const { isSmall, isXXL } = useBreakpoints();
-
-  const envStyle = isSmall ? {} : { maxWidth: 500 };
-
   return (
     <CsmSharedContextProvider>
-      <PageTemplateComponent
-        pageHeader={
-          isXXL
-            ? {
-                pageTitle: i18n.translate('xpack.apm.ux.overview', {
-                  defaultMessage: 'Dashboard',
-                }),
-                rightSideItems: [
-                  <DatePicker />,
-                  <div style={envStyle}>
-                    <EnvironmentFilter />
-                  </div>,
-                  <UserPercentile />,
-                  <WebApplicationSelect />,
-                ],
-              }
-            : { children: <PageHeader /> }
-        }
-      >
+      <PageTemplateComponent pageHeader={{ children: <PageHeader /> }}>
         <RumOverview />
       </PageTemplateComponent>
     </CsmSharedContextProvider>
@@ -57,33 +35,31 @@ export function RumHome() {
 }
 
 function PageHeader() {
-  const { isSmall } = useBreakpoints();
+  const sizes = useBreakpoints();
 
-  const envStyle = isSmall ? {} : { maxWidth: 400 };
+  const datePickerStyle = sizes.isMedium ? {} : { maxWidth: '70%' };
 
   return (
     <div style={{ width: '100%' }}>
       <EuiFlexGroup wrap>
         <EuiFlexItem>
           <EuiTitle>
-            <h1>{UX_LABEL}</h1>
+            <h1 className="eui-textNoWrap">{DASHBOARD_LABEL}</h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem style={{ alignItems: 'flex-end', ...datePickerStyle }}>
           <DatePicker />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup wrap>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <WebApplicationSelect />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <UserPercentile />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <div style={envStyle}>
-            <EnvironmentFilter />
-          </div>
+        <EuiFlexItem>
+          <EnvironmentFilter />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
