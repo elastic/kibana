@@ -24,7 +24,6 @@ export const SavedSearchURLConflictCallout = ({
   spaces,
   history,
 }: SavedSearchURLConflictCalloutProps) => {
-  console.log('SavedSearchURLConflictCallout', savedSearch)
   if (spaces && savedSearch?.id && savedSearch?.sharingSavedObjectProps?.outcome === 'conflict') {
     const otherObjectId = savedSearch.sharingSavedObjectProps?.aliasTargetId;
 

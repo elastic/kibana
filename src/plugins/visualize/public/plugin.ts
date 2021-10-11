@@ -28,7 +28,6 @@ import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../kibana_utils/public';
-import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 import { VisualizeConstants } from './application/visualize_constants';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
