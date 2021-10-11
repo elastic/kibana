@@ -19,6 +19,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
+  const kibanaServer = getService('kibanaServer');
+
+  interface UrlData {
+    appName: string;
+    subUrl: string;
+    opts: { useActualUrl: boolean };
+  }
+  const timeAndNav = (range: { from: string; to: string }) => (urlData: UrlData) => async () => {
+    await kibanaServer.uiSettings.replace({ 'timepicker:timeDefaults': JSON.stringify(range) });
+    await nav(urlData);
+
+    async function nav(urlObj: UrlData) {
+      const { appName, subUrl, opts } = urlObj;
+      const { useActualUrl } = opts;
+      await PageObjects.common.navigateToUrl(appName, subUrl, { useActualUrl });
+    }
+  };
+
+  const today = moment().format('MMM D, YYYY');
+  const from = `${today} @ 00:00:00.000`;
+  const to = `${today} @ 23:59:59.999`;
+
+  const navToday = timeAndNav({ from, to })({
+    appName: 'home',
+    subUrl: '/tutorial_directory/sampleData',
+    opts: { useActualUrl: true },
+  });
 
   describe('sample data', function describeIndexTests() {
     before(async () => {
@@ -31,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
+      await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
     });
 
     it('should display registered flights sample data sets', async () => {
@@ -81,13 +109,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should launch sample flights data set dashboard', async () => {
+        await navToday();
         await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const todayYearMonthDay = moment().format('MMM D, YYYY');
-        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(17);
       });
@@ -109,25 +134,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should launch sample logs data set dashboard', async () => {
+        await navToday();
         await PageObjects.home.launchSampleDashboard('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const todayYearMonthDay = moment().format('MMM D, YYYY');
-        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(13);
       });
 
       it('should launch sample ecommerce data set dashboard', async () => {
+        await navToday();
         await PageObjects.home.launchSampleDashboard('ecommerce');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const todayYearMonthDay = moment().format('MMM D, YYYY');
-        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(15);
       });
