@@ -99,7 +99,8 @@ export function TransactionDurationAlertTrigger(props: Props) {
       });
       if (interval && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
+          endpoint:
+            'GET /internal/apm/alerts/chart_preview/transaction_duration',
           params: {
             query: {
               aggregationType: params.aggregationType,
