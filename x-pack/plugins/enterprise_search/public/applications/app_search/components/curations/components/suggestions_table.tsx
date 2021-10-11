@@ -68,7 +68,7 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
     field: 'promoted',
     name: i18n.translate(
       'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.column.promotedDocumentsTableHeader',
-      { defaultMessage: 'Promoted documents' }
+      { defaultMessage: 'Promoted results' }
     ),
     render: (promoted: string[]) => <span>{promoted.length}</span>,
   },
