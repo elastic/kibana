@@ -63,7 +63,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
           iconType="boxesHorizontal"
           data-test-subj="discoverIndexPatternActions"
           aria-label={i18n.translate('discover.fieldChooser.indexPatterns.actionsPopoverLabel', {
-            defaultMessage: 'Index pattern settings',
+            defaultMessage: 'Data view settings',
           })}
           onClick={() => {
             setIsAddIndexPatternFieldPopoverOpen(!isAddIndexPatternFieldPopoverOpen);
@@ -84,7 +84,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
             }}
           >
             {i18n.translate('discover.fieldChooser.indexPatterns.addFieldButton', {
-              defaultMessage: 'Add field to index pattern',
+              defaultMessage: 'Add field to data view',
             })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
@@ -99,7 +99,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
             }}
           >
             {i18n.translate('discover.fieldChooser.indexPatterns.manageFieldButton', {
-              defaultMessage: 'Manage index pattern fields',
+              defaultMessage: 'Manage data view fields',
             })}
           </EuiContextMenuItem>,
         ]}
