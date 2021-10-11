@@ -56,6 +56,8 @@ jest.mock('../../../../common/hooks/use_license', () => {
   };
 });
 
+jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
+
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
     'Add a trusted application to improve performance or alleviate conflicts with other ' +

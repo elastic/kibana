@@ -5,15 +5,27 @@
  * 2.0.
  */
 
-import { renderHook, RenderHookResult, RenderResult } from '@testing-library/react-hooks';
+import { act, renderHook, RenderHookResult, RenderResult } from '@testing-library/react-hooks';
 import { useHttp, useCurrentUser } from '../../lib/kibana';
 import { EndpointPrivileges, useEndpointPrivileges } from './use_endpoint_privileges';
 import { fleetGetCheckPermissionsHttpMock } from '../../../management/pages/endpoint_hosts/mocks';
 import { securityMock } from '../../../../../security/public/mocks';
 import { appRoutesService } from '../../../../../fleet/common';
 import { AuthenticatedUser } from '../../../../../security/common';
+import { licenseService } from '../../hooks/use_license';
 
 jest.mock('../../lib/kibana');
+jest.mock('../../hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('When using useEndpointPrivileges hook', () => {
   let authenticatedUser: AuthenticatedUser;
@@ -33,6 +45,7 @@ describe('When using useEndpointPrivileges hook', () => {
     fleetApiMock = fleetGetCheckPermissionsHttpMock(
       useHttp() as Parameters<typeof fleetGetCheckPermissionsHttpMock>[0]
     );
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
 
     render = () => {
       const hookRenderResponse = renderHook(() => useEndpointPrivileges());
@@ -74,8 +87,10 @@ describe('When using useEndpointPrivileges hook', () => {
     });
 
     // Release the API response
-    releaseApiResponse!();
-    await fleetApiMock.waitForApi();
+    await act(async () => {
+      fleetApiMock.waitForApi();
+      releaseApiResponse!();
+    });
     expect(result.current).toEqual({
       canAccessEndpointManagement: true,
       canAccessFleet: true,
