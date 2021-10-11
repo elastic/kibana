@@ -24,6 +24,7 @@ import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../components/doc_table/lib/get_sort';
+import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
 
 export function useDiscoverState({
   services,
@@ -34,7 +35,7 @@ export function useDiscoverState({
   savedSearch: SavedSearch;
   history: History;
 }) {
-  const { uiSettings: config, data, filterManager, indexPatterns } = services;
+  const { uiSettings: config, data, filterManager, indexPatterns, storage } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
   const { timefilter } = data.query.timefilter;
 
@@ -53,13 +54,14 @@ export function useDiscoverState({
             config,
             data,
             savedSearch,
+            storage,
           }),
         storeInSessionStorage: config.get('state:storeInSessionStorage'),
         history,
         toasts: services.core.notifications.toasts,
         uiSettings: config,
       }),
-    [config, data, history, savedSearch, services.core.notifications.toasts]
+    [config, data, history, savedSearch, services.core.notifications.toasts, storage]
   );
 
   const { appStateContainer } = stateContainer;
@@ -99,6 +101,11 @@ export function useDiscoverState({
 
     return () => stopSync();
   }, [stateContainer, filterManager, data, indexPattern]);
+
+  useEffect(() => {
+    const chartHidden = Boolean(storage.get(CHART_HIDDEN_KEY));
+    setState({ hideChart: chartHidden });
+  }, [storage]);
 
   /**
    * Track state changes that should trigger a fetch
@@ -155,11 +162,12 @@ export function useDiscoverState({
         config,
         data,
         savedSearch: newSavedSearch,
+        storage,
       });
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
-    [indexPattern, services, config, data, stateContainer]
+    [services, indexPattern, config, data, storage, stateContainer]
   );
 
   /**
@@ -204,10 +212,11 @@ export function useDiscoverState({
       config,
       data,
       savedSearch,
+      storage,
     });
     stateContainer.replaceUrlAppState(newAppState);
     setState(newAppState);
-  }, [config, data, savedSearch, reset, stateContainer]);
+  }, [config, data, savedSearch, reset, stateContainer, storage]);
 
   /**
    * Trigger data fetching on indexPattern or savedSearch changes
