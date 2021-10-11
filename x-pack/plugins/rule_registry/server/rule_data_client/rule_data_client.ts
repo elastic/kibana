@@ -150,12 +150,7 @@ export class RuleDataClient implements IRuleDataClient {
         );
       } else {
         try {
-          await pRetry(
-            async () => {
-              await resourceInstaller.installAndUpdateNamespaceLevelResources(indexInfo, namespace);
-            },
-            { retries: 2 }
-          );
+          await resourceInstaller.installAndUpdateNamespaceLevelResources(indexInfo, namespace);
           return indexLevelResourcesResult.right;
         } catch (e) {
           throw new RuleDataWriterInitializationError(
