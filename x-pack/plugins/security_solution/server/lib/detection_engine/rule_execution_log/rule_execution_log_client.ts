@@ -6,34 +6,40 @@
  */
 
 import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
-import { RuleRegistryAdapter } from './rule_registry_adapter/rule_registry_adapter';
+import { IEventLogService } from '../../../../../event_log/server';
+import { EventLogAdapter } from './event_log_adapter/event_log_adapter';
 import { SavedObjectsAdapter } from './saved_objects_adapter/saved_objects_adapter';
 import {
-  ExecutionMetric,
-  ExecutionMetricArgs,
+  LogExecutionMetricsArgs,
   FindBulkExecutionLogArgs,
   FindExecutionLogArgs,
-  IRuleDataPluginService,
   IRuleExecutionLogClient,
   LogStatusChangeArgs,
   UpdateExecutionLogArgs,
+  UnderlyingLogClient,
 } from './types';
 
 export interface RuleExecutionLogClientArgs {
-  ruleDataService: IRuleDataPluginService;
   savedObjectsClient: SavedObjectsClientContract;
+  eventLogService: IEventLogService;
+  underlyingClient: UnderlyingLogClient;
 }
-
-const RULE_REGISTRY_LOG_ENABLED = false;
 
 export class RuleExecutionLogClient implements IRuleExecutionLogClient {
   private client: IRuleExecutionLogClient;
 
-  constructor({ ruleDataService, savedObjectsClient }: RuleExecutionLogClientArgs) {
-    if (RULE_REGISTRY_LOG_ENABLED) {
-      this.client = new RuleRegistryAdapter(ruleDataService);
-    } else {
-      this.client = new SavedObjectsAdapter(savedObjectsClient);
+  constructor({
+    savedObjectsClient,
+    eventLogService,
+    underlyingClient,
+  }: RuleExecutionLogClientArgs) {
+    switch (underlyingClient) {
+      case UnderlyingLogClient.savedObjects:
+        this.client = new SavedObjectsAdapter(savedObjectsClient);
+        break;
+      case UnderlyingLogClient.eventLog:
+        this.client = new EventLogAdapter(eventLogService);
+        break;
     }
   }
 
@@ -53,8 +59,8 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
     return this.client.delete(id);
   }
 
-  public async logExecutionMetric<T extends ExecutionMetric>(args: ExecutionMetricArgs<T>) {
-    return this.client.logExecutionMetric(args);
+  public async logExecutionMetrics(args: LogExecutionMetricsArgs) {
+    return this.client.logExecutionMetrics(args);
   }
 
   public async logStatusChange(args: LogStatusChangeArgs) {

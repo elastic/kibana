@@ -44,6 +44,7 @@ describe('buildAlert', () => {
     const ruleSO = {
       attributes: {
         actions: [],
+        alertTypeId: 'siem.signals',
         createdAt: new Date().toISOString(),
         createdBy: 'gandalf',
         params: getQueryRuleParams(),

@@ -14,12 +14,11 @@ import {
   ruleStatusSavedObjectsClientFactory,
 } from './rule_status_saved_objects_client';
 import {
-  ExecutionMetric,
-  ExecutionMetricArgs,
+  LogExecutionMetricsArgs,
   FindBulkExecutionLogArgs,
   FindExecutionLogArgs,
   IRuleExecutionLogClient,
-  LegacyMetrics,
+  ExecutionMetrics,
   LogStatusChangeArgs,
   UpdateExecutionLogArgs,
 } from '../types';
@@ -28,14 +27,16 @@ import { assertUnreachable } from '../../../../../common';
 // 1st is mutable status, followed by 5 most recent failures
 export const MAX_RULE_STATUSES = 6;
 
-const METRIC_FIELDS = {
-  [ExecutionMetric.executionGap]: 'gap',
-  [ExecutionMetric.searchDurationMax]: 'searchAfterTimeDurations',
-  [ExecutionMetric.indexingDurationMax]: 'bulkCreateTimeDurations',
-  [ExecutionMetric.indexingLookback]: 'lastLookBackDate',
-} as const;
-
-const getMetricField = <T extends ExecutionMetric>(metric: T) => METRIC_FIELDS[metric];
+const convertMetricFields = (
+  metrics: ExecutionMetrics
+): Pick<
+  IRuleStatusSOAttributes,
+  'gap' | 'searchAfterTimeDurations' | 'bulkCreateTimeDurations'
+> => ({
+  gap: metrics.executionGap?.humanize(),
+  searchAfterTimeDurations: metrics.searchDurations,
+  bulkCreateTimeDurations: metrics.indexingDurations,
+});
 
 export class SavedObjectsAdapter implements IRuleExecutionLogClient {
   private ruleStatusClient: RuleStatusSavedObjectsClient;
@@ -66,16 +67,12 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
     await this.ruleStatusClient.delete(id);
   }
 
-  public async logExecutionMetric<T extends ExecutionMetric>({
-    ruleId,
-    metric,
-    value,
-  }: ExecutionMetricArgs<T>) {
+  public async logExecutionMetrics({ ruleId, metrics }: LogExecutionMetricsArgs) {
     const [currentStatus] = await this.getOrCreateRuleStatuses(ruleId);
 
     await this.ruleStatusClient.update(currentStatus.id, {
       ...currentStatus.attributes,
-      [getMetricField(metric)]: value,
+      ...convertMetricFields(metrics),
     });
   }
 
@@ -158,11 +155,11 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
 const buildRuleStatusAttributes: (
   status: RuleExecutionStatus,
   message?: string,
-  metrics?: LegacyMetrics
+  metrics?: ExecutionMetrics
 ) => Partial<IRuleStatusSOAttributes> = (status, message, metrics = {}) => {
   const now = new Date().toISOString();
   const baseAttributes: Partial<IRuleStatusSOAttributes> = {
-    ...metrics,
+    ...convertMetricFields(metrics),
     status:
       status === RuleExecutionStatus.warning ? RuleExecutionStatus['partial failure'] : status,
     statusDate: now,

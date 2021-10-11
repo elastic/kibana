@@ -14,6 +14,7 @@ import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { createMlAlertType } from './create_ml_alert_type';
 
 import { RuleParams } from '../../schemas/rule_schemas';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../../signals/bulk_create_ml_signals');
 
@@ -97,11 +98,10 @@ describe('Machine Learning Alerts', () => {
       experimentalFeatures: allowedExperimentalValues,
       lists: dependencies.lists,
       logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
+      config: createMockConfig(),
       ml: mlMock,
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
+      eventLogService: dependencies.eventLogService,
       version: '1.0.0',
     });
 
