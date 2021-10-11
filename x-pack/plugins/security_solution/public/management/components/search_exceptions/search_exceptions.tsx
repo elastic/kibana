@@ -32,7 +32,7 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     defaultIncludedPolicies,
     defaultExcludedPolicies,
   }) => {
-    const isPlatinumPlus = useEndpointPrivileges().isPlatinumPlus;
+    const { isPlatinumPlus } = useEndpointPrivileges();
     const [query, setQuery] = useState<string>(defaultValue);
     const [includedPolicies, setIncludedPolicies] = useState<string>(defaultIncludedPolicies || '');
     const [excludedPolicies, setExcludedPolicies] = useState<string>(defaultExcludedPolicies || '');

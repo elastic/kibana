@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
 import {
   editTrustedAppFetchError,
@@ -71,6 +72,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     const location = useTrustedAppsSelector(getCurrentLocation);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const docLinks = useKibana().services.docLinks;
+    const [isFormDirty, setIsFormDirty] = useState(false);
 
     const dataTestSubj = flyoutProps['data-test-subj'];
 
@@ -132,7 +134,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
           type: 'trustedAppCreationDialogFormStateUpdated',
           payload: { entry: newFormState.item, isValid: newFormState.isValid },
         });
-        if (formValues !== newFormState.item) {
+        if (_.isEqual(formValues, newFormState.item)) {
           setIsFormDirty(true);
         }
       },
@@ -140,12 +142,19 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       [dispatch, formValues]
     );
 
-    const [isFormDirty, setIsFormDirty] = useState(false);
     const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
       'trustedAppsByPolicyEnabled'
     );
 
-    const isGlobal = isGlobalEffectScope((formValues as NewTrustedApp).effectScope);
+    const isGlobal = useMemo(() => {
+      return isGlobalEffectScope((formValues as NewTrustedApp).effectScope);
+    }, [formValues]);
+
+    const showExpiredLicenseBanner = useMemo(() => {
+      return (
+        isTrustedAppsByPolicyEnabled && !isPlatinumPlus && isEditMode && (!isGlobal || isFormDirty)
+      );
+    }, [isTrustedAppsByPolicyEnabled, isPlatinumPlus, isEditMode, isGlobal, isFormDirty]);
 
     // If there was a failure trying to retrieve the Trusted App for edit item,
     // then redirect back to the list ++ show toast message.
@@ -200,31 +209,28 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        {isTrustedAppsByPolicyEnabled &&
-          !isPlatinumPlus &&
-          isEditMode &&
-          (!isGlobal || isFormDirty) && (
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseTitle',
-                { defaultMessage: 'Expired License' }
-              )}
-              color="warning"
-              iconType="help"
-              data-test-subj={getTestId('expired-license-callout')}
-            >
+        {showExpiredLicenseBanner && (
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseTitle',
+              { defaultMessage: 'Expired License' }
+            )}
+            color="warning"
+            iconType="help"
+            data-test-subj={getTestId('expired-license-callout')}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseMessage"
+              defaultMessage="Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies. For more information, see our "
+            />
+            <EuiLink external href={`${docLinks.links.securitySolution.trustedApps}`}>
               <FormattedMessage
-                id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseMessage"
-                defaultMessage="Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies. For more information, see our "
+                id="xpack.securitySolution.trustedapps.docsLink"
+                defaultMessage="Trusted applications documentation."
               />
-              <EuiLink external href={`${docLinks.links.securitySolution.trustedApps}`}>
-                <FormattedMessage
-                  id="xpack.securitySolution.trustedapps.docsLink"
-                  defaultMessage="Trusted applications documentation."
-                />
-              </EuiLink>
-            </EuiCallOut>
-          )}
+            </EuiLink>
+          </EuiCallOut>
+        )}
         <EuiFlyoutBody>
           <EuiText size="xs">
             <h3>

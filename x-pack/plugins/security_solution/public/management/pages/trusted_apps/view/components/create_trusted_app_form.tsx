@@ -218,7 +218,9 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
 
     const isPlatinumPlus = useLicense().isPlatinumPlus();
 
-    const isGlobal = isGlobalEffectScope(trustedApp.effectScope);
+    const isGlobal = useMemo(() => {
+      return isGlobalEffectScope(trustedApp.effectScope);
+    }, [trustedApp]);
 
     const hideAssignmentSection = useMemo(() => {
       return !isPlatinumPlus && (!isEditMode || (isGlobal && !isDirty));

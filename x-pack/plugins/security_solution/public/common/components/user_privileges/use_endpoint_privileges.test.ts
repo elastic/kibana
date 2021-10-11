@@ -60,6 +60,7 @@ describe('When using useEndpointPrivileges hook', () => {
       canAccessEndpointManagement: false,
       canAccessFleet: false,
       loading: true,
+      isPlatinumPlus: true,
     });
 
     // Make user service available
@@ -69,6 +70,7 @@ describe('When using useEndpointPrivileges hook', () => {
       canAccessEndpointManagement: false,
       canAccessFleet: false,
       loading: true,
+      isPlatinumPlus: true,
     });
 
     // Release the API response
@@ -78,6 +80,7 @@ describe('When using useEndpointPrivileges hook', () => {
       canAccessEndpointManagement: true,
       canAccessFleet: true,
       loading: false,
+      isPlatinumPlus: true,
     });
   });
 
@@ -99,6 +102,7 @@ describe('When using useEndpointPrivileges hook', () => {
       canAccessEndpointManagement: false,
       canAccessFleet: true, // this is only true here because I did not adjust the API mock
       loading: false,
+      isPlatinumPlus: true,
     });
   });
 
@@ -115,6 +119,7 @@ describe('When using useEndpointPrivileges hook', () => {
       canAccessEndpointManagement: false,
       canAccessFleet: false,
       loading: false,
+      isPlatinumPlus: true,
     });
   });
 });

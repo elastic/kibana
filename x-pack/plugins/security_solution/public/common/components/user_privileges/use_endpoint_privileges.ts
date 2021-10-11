@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCurrentUser, useHttp } from '../../lib/kibana';
 import { appRoutesService, CheckPermissionsResponse } from '../../../../../fleet/common';
-import { useLicense } from '../../hooks/__mocks__/use_license';
+import { useLicense } from '../../hooks/use_license';
 
 export interface EndpointPrivileges {
   loading: boolean;
