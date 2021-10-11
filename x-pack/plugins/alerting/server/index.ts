@@ -43,6 +43,14 @@ export {
   AlertingAuthorizationEntity,
 } from './authorization';
 
+export {
+  extractEntityAndBoundaryReferences,
+  injectEntityAndBoundaryIds,
+  GeoContainmentParams,
+  GeoContainmentExtractedParams,
+  GEO_CONTAINMENT_ID,
+} from './saved_objects/geo_containment/migrations';
+
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 
 export const config: PluginConfigDescriptor<AlertsConfigType> = {

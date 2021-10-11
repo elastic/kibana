@@ -15,12 +15,14 @@ import {
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertTypeParams,
   RuleParamsAndRefs,
+  extractEntityAndBoundaryReferences,
+  injectEntityAndBoundaryIds,
+  GeoContainmentExtractedParams,
+  GeoContainmentParams,
+  GEO_CONTAINMENT_ID,
 } from '../../../../alerting/server';
-import { Query } from '../../../../../../src/plugins/data/common/query';
 
-export const GEO_CONTAINMENT_ID = '.geo-containment';
 export const ActionGroupId = 'Tracked entity contained';
 export const RecoveryActionGroupId = 'notGeoContained';
 
@@ -104,26 +106,6 @@ export const ParamsSchema = schema.object({
   boundaryIndexQuery: schema.maybe(schema.any({})),
 });
 
-export interface GeoContainmentParams extends AlertTypeParams {
-  index: string;
-  indexId: string;
-  geoField: string;
-  entity: string;
-  dateField: string;
-  boundaryType: string;
-  boundaryIndexTitle: string;
-  boundaryIndexId: string;
-  boundaryGeoField: string;
-  boundaryNameField?: string;
-  indexQuery?: Query;
-  boundaryIndexQuery?: Query;
-}
-interface GeoContainmentExtractedParams
-  extends Omit<GeoContainmentParams, 'indexId' | 'boundaryIndexId'> {
-  boundaryIndexQuery?: Query;
-  indexRef: string;
-  boundaryIndexRef: string;
-}
 export interface GeoContainmentState extends AlertTypeState {
   shapesFilters: Record<string, unknown>;
   shapesIdsNamesMap: Record<string, unknown>;
@@ -190,47 +172,13 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
       extractReferences: (
         params: GeoContainmentParams
       ): RuleParamsAndRefs<GeoContainmentExtractedParams> => {
-        const { indexId, boundaryIndexId, ...otherParams } = params;
-        const references = [
-          {
-            name: `tracked_index_${indexId}`,
-            type: 'index-pattern',
-            id: indexId as string,
-          },
-          {
-            name: `boundary_index_${boundaryIndexId}`,
-            type: 'index-pattern',
-            id: boundaryIndexId as string,
-          },
-        ];
-        return {
-          params: {
-            ...otherParams,
-            indexRef: `tracked_index_${indexId}`,
-            boundaryIndexRef: `boundary_index_${boundaryIndexId}`,
-          },
-          references,
-        };
+        return extractEntityAndBoundaryReferences(params);
       },
       injectReferences: (
         params: GeoContainmentExtractedParams,
         references: SavedObjectReference[]
       ) => {
-        const { indexRef, boundaryIndexRef, ...otherParams } = params;
-        const { id: indexId = null } = references.find((ref) => ref.name === indexRef) || {};
-        const { id: boundaryIndexId = null } =
-          references.find((ref) => ref.name === boundaryIndexRef) || {};
-        if (!indexId) {
-          throw new Error(`Index "${indexId}" not found in references array`);
-        }
-        if (!boundaryIndexId) {
-          throw new Error(`Boundary index "${boundaryIndexId}" not found in references array`);
-        }
-        return {
-          ...otherParams,
-          indexId,
-          boundaryIndexId,
-        } as GeoContainmentParams;
+        return injectEntityAndBoundaryIds(params, references);
       },
     },
   };

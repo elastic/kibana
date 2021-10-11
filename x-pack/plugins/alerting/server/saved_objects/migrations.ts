@@ -19,6 +19,7 @@ import {
 import { RawAlert, RawAlertAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+import { extractIndexAndBoundaryRefsFromGeoContainmentStackAlert } from './geo_containment/migrations';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -117,7 +118,8 @@ export function getMigrations(
     pipeMigrations(
       setLegacyId,
       getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured),
-      addRuleIdsToLegacyNotificationReferences
+      addRuleIdsToLegacyNotificationReferences,
+      extractIndexAndBoundaryRefsFromGeoContainmentStackAlert
     )
   );
 
