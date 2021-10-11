@@ -50,7 +50,6 @@ export const ElasticsearchCcrShardPage: React.FC<ComponentProps> = () => {
     }
   }, [cluster, generateBreadcrumbs, index, shardId]);
   const ccs = globalState.ccs;
-  const [data, setData] = useState({} as any);
   const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.ccr.shard.title', {

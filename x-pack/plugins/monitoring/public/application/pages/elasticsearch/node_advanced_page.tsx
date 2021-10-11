@@ -38,7 +38,6 @@ export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = () => {
 
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
-  const [data, setData] = useState({} as any);
   const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const cluster = find(clusters, {
