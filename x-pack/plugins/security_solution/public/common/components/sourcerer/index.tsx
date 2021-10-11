@@ -68,7 +68,12 @@ const StyledBadge = styled(EuiBadge)`
   margin-left: 8px;
 `;
 
+const SECURITY_DATA_VIEW_ID = 'detections';
+
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
+  const [{ pageName, detailName }] = useRouteSpy();
+  const isAlertsOrRulesDetailsPage =
+    pageName === SecurityPageName.alerts || (SecurityPageName.rules && detailName != null);
   const dispatch = useDispatch();
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
   const { defaultDataView, kibanaDataViews, signalIndexName, sourcererScope } = useSelector<
@@ -78,9 +83,17 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const { selectedDataViewId, selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
-  const [dataViewId, setDataViewId] = useState<string>(selectedDataViewId ?? defaultDataView.id);
+  const [dataViewId, setDataViewId] = useState<string>(
+    isAlertsOrRulesDetailsPage ? SECURITY_DATA_VIEW_ID : selectedDataViewId ?? defaultDataView.id
+  );
 
   const { patternList, selectablePatterns } = useMemo(() => {
+    if (isAlertsOrRulesDetailsPage && signalIndexName) {
+      return {
+        patternList: [signalIndexName],
+        selectablePatterns: [signalIndexName],
+      };
+    }
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
     return theDataView != null
       ? {
@@ -91,7 +104,20 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           selectablePatterns: theDataView.patternList,
         }
       : { patternList: [], selectablePatterns: [] };
-  }, [kibanaDataViews, dataViewId]);
+  }, [isAlertsOrRulesDetailsPage, kibanaDataViews, signalIndexName, dataViewId]);
+
+  const alertsOptions = useMemo(
+    () =>
+      signalIndexName
+        ? [
+            {
+              label: signalIndexName,
+              value: signalIndexName,
+            },
+          ]
+        : [],
+    [signalIndexName]
+  );
 
   const selectableOptions = useMemo(
     () =>
@@ -100,32 +126,47 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         value: indexName,
         disabled: !selectablePatterns.includes(indexName),
       })),
-    [selectablePatterns, patternList]
+    [patternList, selectablePatterns]
   );
 
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    selectedPatterns.map((indexName) => ({
-      label: indexName,
-      value: indexName,
-    }))
+    isAlertsOrRulesDetailsPage
+      ? alertsOptions
+      : selectedPatterns.map((indexName) => ({
+          label: indexName,
+          value: indexName,
+        }))
   );
 
   const defaultSelectedOptions = useMemo(
     () =>
-      getScopePatternListSelection(
-        kibanaDataViews.find((dataView) => dataView.id === dataViewId),
-        scopeId,
-        signalIndexName
-      ).map((indexSelected: string) => ({
-        label: indexSelected,
-        value: indexSelected,
-      })),
-    [dataViewId, kibanaDataViews, scopeId, signalIndexName]
+      isAlertsOrRulesDetailsPage
+        ? alertsOptions
+        : getScopePatternListSelection(
+            kibanaDataViews.find((dataView) => dataView.id === dataViewId),
+            scopeId,
+            signalIndexName
+          ).map((indexSelected: string) => ({
+            label: indexSelected,
+            value: indexSelected,
+          })),
+    [
+      alertsOptions,
+      dataViewId,
+      isAlertsOrRulesDetailsPage,
+      kibanaDataViews,
+      scopeId,
+      signalIndexName,
+    ]
   );
 
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
-  const isModified = !defaultSelectedOptions.every((option) =>
-    selectedOptions.find((selectedOption) => option.value === selectedOption.value)
+  const isModified = useMemo(
+    () =>
+      !defaultSelectedOptions.every((option) =>
+        selectedOptions.find((selectedOption) => option.value === selectedOption.value)
+      ),
+    [defaultSelectedOptions, selectedOptions]
   );
 
   const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
@@ -195,7 +236,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         title={i18n.SOURCERER}
       >
         {i18n.SOURCERER}
-        {isModified && <StyledBadge>{i18n.BADGE_TITLE}</StyledBadge>}
+        {isModified && <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>}
       </StyledButton>
     ),
     [loading, setPopoverIsOpenCb, isModified]
@@ -203,42 +244,69 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const dataViewSelectOptions = useMemo(
     () =>
-      kibanaDataViews.map(({ title, id }) => ({
-        inputDisplay:
-          id === defaultDataView.id ? (
-            <span data-test-subj="security-option-super">
-              <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_DATA_VIEW_LABEL}
-              {isModified && id === dataViewId && <StyledBadge>{i18n.BADGE_TITLE}</StyledBadge>}
-            </span>
-          ) : (
-            <span data-test-subj="dataView-option-super">
-              <EuiIcon type="logoKibana" size="s" /> {title}
-            </span>
-          ),
-        value: id,
-      })),
-    [dataViewId, defaultDataView.id, isModified, kibanaDataViews]
+      isAlertsOrRulesDetailsPage
+        ? [
+            {
+              inputDisplay: (
+                <span data-test-subj="security-alerts-option-super">
+                  <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_SECURITY_DATA_VIEW_LABEL}
+                  <StyledBadge>{i18n.ALERTS_BADGE_TITLE}</StyledBadge>
+                </span>
+              ),
+              value: SECURITY_DATA_VIEW_ID,
+            },
+          ]
+        : kibanaDataViews.map(({ title, id }) => ({
+            inputDisplay:
+              id === defaultDataView.id ? (
+                <span data-test-subj="security-option-super">
+                  <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_DATA_VIEW_LABEL}
+                  {isModified && id === dataViewId && (
+                    <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>
+                  )}
+                </span>
+              ) : (
+                <span data-test-subj="dataView-option-super">
+                  <EuiIcon type="logoKibana" size="s" /> {title}
+                </span>
+              ),
+            value: id,
+          })),
+    [dataViewId, defaultDataView.id, isAlertsOrRulesDetailsPage, isModified, kibanaDataViews]
   );
 
   useEffect(() => {
     setDataViewId((prevSelectedOption) =>
-      selectedDataViewId != null && !deepEqual(selectedDataViewId, prevSelectedOption)
+      isAlertsOrRulesDetailsPage
+        ? SECURITY_DATA_VIEW_ID
+        : selectedDataViewId != null && !deepEqual(selectedDataViewId, prevSelectedOption)
         ? selectedDataViewId
         : prevSelectedOption
     );
-  }, [selectedDataViewId]);
+  }, [isAlertsOrRulesDetailsPage, selectedDataViewId]);
+
   useEffect(() => {
     setSelectedOptions(
-      selectedPatterns.map((indexName) => ({
-        label: indexName,
-        value: indexName,
-      }))
+      isAlertsOrRulesDetailsPage
+        ? alertsOptions
+        : selectedPatterns.map((indexName) => ({
+            label: indexName,
+            value: indexName,
+          }))
     );
-  }, [selectedPatterns]);
+  }, [alertsOptions, isAlertsOrRulesDetailsPage, selectedPatterns]);
 
   const tooltipContent = useMemo(
-    () => (isPopoverOpen ? null : selectedPatterns.join(', ')),
-    [selectedPatterns, isPopoverOpen]
+    () =>
+      isPopoverOpen
+        ? null
+        : (isAlertsOrRulesDetailsPage
+            ? signalIndexName
+              ? [signalIndexName]
+              : []
+            : selectedPatterns
+          ).join(', '),
+    [isPopoverOpen, isAlertsOrRulesDetailsPage, signalIndexName, selectedPatterns]
   );
 
   const [expandAdvancedOptions, setExpandAdvancedOptions] = useState(false);
@@ -248,9 +316,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, []);
   const advancedIndicies: string[] = [];
   const indiciesInCallout = advancedIndicies.join(',');
-  const [{ pageName, detailName }] = useRouteSpy();
-  const isReadOnly =
-    pageName === SecurityPageName.alerts || (SecurityPageName.rules && detailName != null);
+
   const callOutMessage = useMemo(
     () => i18n.CALL_OUT_MESSAGE(indiciesInCallout),
     [indiciesInCallout]
@@ -272,7 +338,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           <EuiPopoverTitle>
             <>{i18n.SELECT_INDEX_PATTERNS}</>
           </EuiPopoverTitle>
-          {isReadOnly && advancedIndicies?.length > 0 && (
+          {isAlertsOrRulesDetailsPage && advancedIndicies?.length > 0 && (
             <EuiCallOut iconType="info" title={i18n.CALL_OUT_TITLE}>
               <p>{callOutMessage}</p>
             </EuiCallOut>
@@ -282,12 +348,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
             <StyledFormRow label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}>
               <EuiSuperSelect
                 data-test-subj="sourcerer-select"
-                placeholder={i18n.PICK_INDEX_PATTERNS}
+                disabled={isAlertsOrRulesDetailsPage}
                 fullWidth
-                options={dataViewSelectOptions}
-                valueOfSelected={dataViewId}
                 onChange={onChangeSuper}
-                disabled={isReadOnly}
+                options={dataViewSelectOptions}
+                placeholder={i18n.PICK_INDEX_PATTERNS}
+                valueOfSelected={dataViewId}
               />
             </StyledFormRow>
 
@@ -310,11 +376,11 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                 placeholder={i18n.PICK_INDEX_PATTERNS}
                 renderOption={renderOption}
                 selectedOptions={selectedOptions}
-                isDisabled={isReadOnly}
+                isDisabled={isAlertsOrRulesDetailsPage}
               />
             </FormRow>
 
-            {!isReadOnly && (
+            {!isAlertsOrRulesDetailsPage && (
               <StyledFormRow>
                 <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>

@@ -20,14 +20,31 @@ export const SOURCERER = i18n.translate('xpack.securitySolution.indexPatterns.da
   defaultMessage: 'Data sources',
 });
 
-export const BADGE_TITLE = i18n.translate('xpack.securitySolution.indexPatterns.badgeTitle', {
-  defaultMessage: 'Modified',
-});
+export const MODIFIED_BADGE_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.modifiedBadgeTitle',
+  {
+    defaultMessage: 'Modified',
+  }
+);
+
+export const ALERTS_BADGE_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.modifiedBadgeTitle',
+  {
+    defaultMessage: 'Alerts',
+  }
+);
 
 export const SIEM_DATA_VIEW_LABEL = i18n.translate(
   'xpack.securitySolution.indexPatterns.kipLabel',
   {
     defaultMessage: 'Default Security Kibana Index Pattern',
+  }
+);
+
+export const SIEM_SECURITY_DATA_VIEW_LABEL = i18n.translate(
+  'xpack.securitySolution.indexPatterns.securityDataViewLabel',
+  {
+    defaultMessage: 'Security Data View',
   }
 );
 
