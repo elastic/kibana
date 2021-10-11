@@ -218,6 +218,17 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
+    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
+      map((err) => {
+        logger.warning(
+          i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
+            defaultMessage: `Reporting encountered an uncaught error on the page that will be ignored: {err}`,
+            values: { err: err.toString() },
+          })
+        );
+      })
+    );
+
     const pageRequestFailed$ = Rx.fromEvent<puppeteer.HTTPRequest>(page, 'requestfailed').pipe(
       map((req) => {
         const failure = req.failure && req.failure();
@@ -229,7 +240,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    return Rx.merge(consoleMessages$, pageRequestFailed$);
+    return Rx.merge(consoleMessages$, uncaughtExceptionPageError$, pageRequestFailed$);
   }
 
   getProcessLogger(browser: puppeteer.Browser, logger: LevelLogger): Rx.Observable<void> {
@@ -264,21 +275,10 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
-      mergeMap((err) => {
-        return Rx.throwError(
-          i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
-            defaultMessage: `Reporting encountered an error on the page: {err}`,
-            values: { err: err.toString() },
-          })
-        );
-      })
-    );
-
     const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
       mergeMap(() => Rx.throwError(getChromiumDisconnectedError()))
     );
 
-    return Rx.merge(pageError$, uncaughtExceptionPageError$, browserDisconnect$);
+    return Rx.merge(pageError$, browserDisconnect$);
   }
 }

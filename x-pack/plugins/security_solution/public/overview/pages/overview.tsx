@@ -164,10 +164,10 @@ const OverviewComponent = () => {
                       <EuiFlexItem grow={1}>
                         {riskyHostsEnabled && (
                           <RiskyHostLinks
-                            deleteQuery={deleteQuery}
-                            from={from}
-                            setQuery={setQuery}
-                            to={to}
+                            timerange={{
+                              from,
+                              to,
+                            }}
                           />
                         )}
                       </EuiFlexItem>
