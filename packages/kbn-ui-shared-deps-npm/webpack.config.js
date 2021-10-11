@@ -144,6 +144,13 @@ module.exports = (_, argv) => {
     optimization: {
       minimize: false,
       noEmitOnErrors: true,
+      splitChunks: {
+        chunks: () => false,
+        cacheGroups: {
+          default: false,
+          defaultVendors: false,
+        },
+      },
     },
 
     performance: {
@@ -154,6 +161,9 @@ module.exports = (_, argv) => {
     },
 
     plugins: [
+      // new webpack.optimize.MinChunkSizePlugin({
+      //   minChunkSize: 500000,
+      // }),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,
         cleanAfterEveryBuildPatterns: [
