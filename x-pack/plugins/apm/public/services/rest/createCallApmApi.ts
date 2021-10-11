@@ -28,7 +28,7 @@ import type {
   APIEndpoint,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server';
-import { InspectResponse } from '../../../typings/common';
+import { InspectResponse } from '../../../../observability/typings/common';
 
 export type APMClientOptions = Omit<
   FetchOptions,

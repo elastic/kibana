@@ -4,7 +4,7 @@ Transactions are stored in two different formats:
 
 #### Individual transactions document
 
-A single transaction with a latency of 2ms
+A single transaction event where `transaction.duration.us` is the latency.
 
 ```json
 {
@@ -18,7 +18,7 @@ A single transaction with a latency of 2ms
 or
 
 #### Aggregated (metric) document
-A pre-aggregated document where `_doc_count` is the number of original transactions, and `transaction.duration.histogram` is the latency distribution. 
+A pre-aggregated document where `_doc_count` is the number of transaction events, and `transaction.duration.histogram` is the latency distribution. 
 
 ```json
 {
@@ -34,7 +34,7 @@ A pre-aggregated document where `_doc_count` is the number of original transacti
 }
 ```
 
-The decision to use aggregated transactions or not is determined in [`getSearchAggregatedTransactions`](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L53-L79) and then used to [specify the index](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/suggestions/get_suggestions.ts#L30-L32) and the [latency field](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/alerts/chart_preview/get_transaction_duration.ts#L62-L65)
+The decision to use aggregated transactions or not is determined in [`getSearchAggregatedTransactions`](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L53-L79) and then used to specify [the transaction index](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/suggestions/get_suggestions.ts#L30-L32) and [the latency field](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/alerts/chart_preview/get_transaction_duration.ts#L62-L65)
 
 ### Latency
 
@@ -77,7 +77,7 @@ Noteworthy fields: `transaction.duration.us`, `transaction.duration.histogram`
 }
 ```
 
-Please note: `metricset.name: transaction` was only recently introduced. To retain backwards compatability we still use the old filter `{ "exists": { "field": "transaction.duration.histogram" }}` when filtering for aggregated transactions.
+Please note: `metricset.name: transaction` was only recently introduced. To retain backwards compatability we still use the old filter `{ "exists": { "field": "transaction.duration.histogram" }}` when filtering for aggregated transactions ([see example](https://github.com/elastic/kibana/blob/2c8686770e64b82cf8e1db5a22327d40d5f8ce45/x-pack/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L89-L95)).
 
 ### Throughput
 
