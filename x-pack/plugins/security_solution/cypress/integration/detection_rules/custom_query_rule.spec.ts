@@ -346,7 +346,7 @@ describe('Custom detection rules deletion and edition', () => {
     it('Only modifies rule active status on enable/disable', () => {
       activatesRule();
 
-      cy.intercept('GET', `/api/detection_engine/rules?id=`).as('fetchRuleDetails');
+      cy.intercept('GET', `/api/detection_engine/rules?id=*`).as('fetchRuleDetails');
 
       goToRuleDetails();
 
@@ -409,7 +409,7 @@ describe('Custom detection rules deletion and edition', () => {
       cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
       fillAboutRule(getEditedRule());
 
-      cy.intercept('GET', '/api/detection_engine/rules?id').as('getRule');
+      cy.intercept('GET', '/api/detection_engine/rules?id*').as('getRule');
 
       saveEditedRule();
 

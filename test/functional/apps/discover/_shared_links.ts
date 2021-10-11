@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
-          const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
+          const re = new RegExp(baseUrl + '/goto/.+$');
           await PageObjects.share.checkShortenUrl();
           await retry.try(async () => {
             const actualUrl = await PageObjects.share.getSharedUrl();
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
-        const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
+        const re = new RegExp(baseUrl + '/goto/.+$');
         await PageObjects.share.checkShortenUrl();
         let actualUrl: string = '';
         await retry.try(async () => {

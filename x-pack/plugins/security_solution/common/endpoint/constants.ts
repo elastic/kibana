@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+export const ENDPOINT_ACTIONS_INDEX = '.logs-endpoint.actions-default';
+export const ENDPOINT_ACTION_RESPONSES_INDEX = '.logs-endpoint.action.responses-default';
+
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 
@@ -17,8 +20,14 @@ export const metadataCurrentIndexPattern = 'metrics-endpoint.metadata_current_*'
 /** The metadata Transform Name prefix with NO (package) version) */
 export const metadataTransformPrefix = 'endpoint.metadata_current-default';
 
-/** The metadata Transform Name prefix with NO namespace and NO (package) version) */
-export const metadataTransformPattern = 'endpoint.metadata_current-*';
+// metadata transforms pattern for matching all metadata transform ids
+export const METADATA_TRANSFORMS_PATTERN = 'endpoint.metadata_*';
+
+// united metadata transform id
+export const METADATA_UNITED_TRANSFORM = 'endpoint.metadata_united-default';
+
+// united metadata transform destination index
+export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default';
 
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';

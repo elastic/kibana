@@ -19,7 +19,7 @@ import { getThroughputChartsForBackend } from '../lib/backends/get_throughput_ch
 import { getErrorRateChartsForBackend } from '../lib/backends/get_error_rate_charts_for_backend';
 
 const topBackendsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/top_backends',
+  endpoint: 'GET /internal/apm/backends/top_backends',
   params: t.intersection([
     t.type({
       query: t.intersection([
@@ -38,9 +38,8 @@ const topBackendsRoute = createApmServerRoute({
   },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-
-    const { start, end } = setup;
-    const { environment, offset, numBuckets, kuery } = resources.params.query;
+    const { environment, offset, numBuckets, kuery, start, end } =
+      resources.params.query;
 
     const opts = { setup, start, end, numBuckets, environment, kuery };
 
@@ -66,7 +65,7 @@ const topBackendsRoute = createApmServerRoute({
 });
 
 const upstreamServicesForBackendRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/{backendName}/upstream_services',
+  endpoint: 'GET /internal/apm/backends/{backendName}/upstream_services',
   params: t.intersection([
     t.type({
       path: t.type({
@@ -83,11 +82,9 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
   },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-
-    const { start, end } = setup;
     const {
       path: { backendName },
-      query: { environment, offset, numBuckets, kuery },
+      query: { environment, offset, numBuckets, kuery, start, end },
     } = resources.params;
 
     const opts = {
@@ -124,7 +121,7 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
 });
 
 const backendMetadataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/{backendName}/metadata',
+  endpoint: 'GET /internal/apm/backends/{backendName}/metadata',
   params: t.type({
     path: t.type({
       backendName: t.string,
@@ -139,7 +136,7 @@ const backendMetadataRoute = createApmServerRoute({
     const { params } = resources;
     const { backendName } = params.path;
 
-    const { start, end } = setup;
+    const { start, end } = params.query;
 
     const metadata = await getMetadataForBackend({
       backendName,
@@ -153,7 +150,7 @@ const backendMetadataRoute = createApmServerRoute({
 });
 
 const backendLatencyChartsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/{backendName}/charts/latency',
+  endpoint: 'GET /internal/apm/backends/{backendName}/charts/latency',
   params: t.type({
     path: t.type({
       backendName: t.string,
@@ -167,9 +164,7 @@ const backendLatencyChartsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { backendName } = params.path;
-    const { kuery, environment, offset } = params.query;
-
-    const { start, end } = setup;
+    const { kuery, environment, offset, start, end } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getLatencyChartsForBackend({
@@ -198,7 +193,7 @@ const backendLatencyChartsRoute = createApmServerRoute({
 });
 
 const backendThroughputChartsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/{backendName}/charts/throughput',
+  endpoint: 'GET /internal/apm/backends/{backendName}/charts/throughput',
   params: t.type({
     path: t.type({
       backendName: t.string,
@@ -212,9 +207,7 @@ const backendThroughputChartsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { backendName } = params.path;
-    const { kuery, environment, offset } = params.query;
-
-    const { start, end } = setup;
+    const { kuery, environment, offset, start, end } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getThroughputChartsForBackend({
@@ -243,7 +236,7 @@ const backendThroughputChartsRoute = createApmServerRoute({
 });
 
 const backendFailedTransactionRateChartsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/{backendName}/charts/error_rate',
+  endpoint: 'GET /internal/apm/backends/{backendName}/charts/error_rate',
   params: t.type({
     path: t.type({
       backendName: t.string,
@@ -257,9 +250,7 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { backendName } = params.path;
-    const { kuery, environment, offset } = params.query;
-
-    const { start, end } = setup;
+    const { kuery, environment, offset, start, end } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getErrorRateChartsForBackend({

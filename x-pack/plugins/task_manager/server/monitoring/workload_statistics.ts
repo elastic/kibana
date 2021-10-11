@@ -147,8 +147,19 @@ export function createWorkloadAggregator(
             missing: { field: 'task.schedule' },
           },
           ownerIds: {
-            cardinality: {
-              field: 'task.ownerId',
+            filter: {
+              range: {
+                'task.startedAt': {
+                  gte: 'now-1w/w',
+                },
+              },
+            },
+            aggs: {
+              ownerIds: {
+                cardinality: {
+                  field: 'task.ownerId',
+                },
+              },
             },
           },
           idleTasks: {
@@ -213,7 +224,7 @@ export function createWorkloadAggregator(
 
       const taskTypes = aggregations.taskType.buckets;
       const nonRecurring = aggregations.nonRecurringTasks.doc_count;
-      const ownerIds = aggregations.ownerIds.value;
+      const ownerIds = aggregations.ownerIds.ownerIds.value;
 
       const {
         overdue: {
@@ -448,7 +459,9 @@ export interface WorkloadAggregationResponse {
     doc_count: number;
   };
   ownerIds: {
-    value: number;
+    ownerIds: {
+      value: number;
+    };
   };
   [otherAggs: string]: estypes.AggregationsAggregate;
 }

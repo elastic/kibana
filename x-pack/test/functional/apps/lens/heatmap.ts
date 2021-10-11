@@ -73,8 +73,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openPalettePanel('lnsHeatmap');
       await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '10', {
         clearWithKeyboard: true,
+        typeCharByChar: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 

@@ -23,8 +23,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useStartServices } from '../../../../../hooks';
 import { Loading } from '../../../components';
-import type { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../../../hooks';
+
+import type { IntegrationCardItem } from '../../../../../../common/types/models';
 
 import { PackageCard } from './package_card';
 
@@ -32,11 +33,12 @@ export interface ListProps {
   isLoading?: boolean;
   controls?: ReactNode;
   title: string;
-  list: PackageList;
+  list: IntegrationCardItem[];
   initialSearch?: string;
   setSelectedCategory: (category: string) => void;
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
+  callout?: JSX.Element | null;
 }
 
 export function PackageListGrid({
@@ -48,6 +50,7 @@ export function PackageListGrid({
   onSearchChange,
   setSelectedCategory,
   showMissingIntegrationMessage = false,
+  callout,
 }: ListProps) {
   const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
@@ -77,7 +80,7 @@ export function PackageListGrid({
   } else {
     const filteredList = searchTerm
       ? list.filter((item) =>
-          (localSearchRef.current!.search(searchTerm) as PackageList)
+          (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
             .map((match) => match[searchIdField])
             .includes(item[searchIdField])
         )
@@ -104,6 +107,7 @@ export function PackageListGrid({
           }}
           onChange={onQueryChange}
         />
+        {callout ? callout : null}
         <EuiSpacer />
         {gridContent}
         {showMissingIntegrationMessage && (
@@ -141,7 +145,7 @@ function ControlsColumn({ controls, title }: ControlsColumnProps) {
 }
 
 interface GridColumnProps {
-  list: PackageList;
+  list: IntegrationCardItem[];
   showMissingIntegrationMessage?: boolean;
 }
 

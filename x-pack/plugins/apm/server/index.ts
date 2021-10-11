@@ -7,12 +7,13 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  PluginInitializerContext,
   PluginConfigDescriptor,
+  PluginInitializerContext,
 } from 'src/core/server';
 import { APMOSSConfig } from 'src/plugins/apm_oss/server';
-import { APMPlugin } from './plugin';
+import { maxSuggestions } from '../../observability/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
+import { APMPlugin } from './plugin';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -40,8 +41,6 @@ const configSchema = schema.object({
   ),
   telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
   metricsInterval: schema.number({ defaultValue: 30 }),
-  maxServiceEnvironments: schema.number({ defaultValue: 100 }),
-  maxServiceSelection: schema.number({ defaultValue: 50 }),
   profilingEnabled: schema.boolean({ defaultValue: false }),
   agent: schema.object({
     migrations: schema.object({
@@ -52,7 +51,17 @@ const configSchema = schema.object({
 
 // plugin config
 export const config: PluginConfigDescriptor<APMXPackConfig> = {
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
+  deprecations: ({ deprecate, renameFromRoot }) => [
+    deprecate('enabled', '8.0.0'),
+    renameFromRoot(
+      'xpack.apm.maxServiceEnvironments',
+      `uiSettings.overrides[${maxSuggestions}]`
+    ),
+    renameFromRoot(
+      'xpack.apm.maxServiceSelections',
+      `uiSettings.overrides[${maxSuggestions}]`
+    ),
+  ],
   exposeToBrowser: {
     serviceMapEnabled: true,
     ui: true,
@@ -91,8 +100,6 @@ export function mergeConfigs(
     'xpack.apm.serviceMapMaxTracesPerRequest':
       apmConfig.serviceMapMaxTracesPerRequest,
     'xpack.apm.ui.enabled': apmConfig.ui.enabled,
-    'xpack.apm.maxServiceEnvironments': apmConfig.maxServiceEnvironments,
-    'xpack.apm.maxServiceSelection': apmConfig.maxServiceSelection,
     'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
     'xpack.apm.ui.transactionGroupBucketSize':
       apmConfig.ui.transactionGroupBucketSize,

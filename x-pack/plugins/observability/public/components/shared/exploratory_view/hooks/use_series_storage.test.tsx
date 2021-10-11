@@ -6,37 +6,41 @@
  */
 
 import React, { useEffect } from 'react';
-
-import { UrlStorageContextProvider, useSeriesStorage } from './use_series_storage';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { Route, Router } from 'react-router-dom';
 import { render } from '@testing-library/react';
+import { UrlStorageContextProvider, useSeriesStorage } from './use_series_storage';
+import { getHistoryFromUrl } from '../rtl_helpers';
+import type { AppDataType } from '../types';
 
-const mockSingleSeries = {
-  'performance-distribution': {
-    reportType: 'data-distribution',
-    dataType: 'ux',
+const mockSingleSeries = [
+  {
+    name: 'performance-distribution',
+    dataType: 'ux' as AppDataType,
     breakdown: 'user_agent.name',
     time: { from: 'now-15m', to: 'now' },
   },
-};
+];
 
-const mockMultipleSeries = {
-  'performance-distribution': {
-    reportType: 'data-distribution',
-    dataType: 'ux',
+const mockMultipleSeries = [
+  {
+    name: 'performance-distribution',
+    dataType: 'ux' as AppDataType,
     breakdown: 'user_agent.name',
     time: { from: 'now-15m', to: 'now' },
   },
-  'kpi-over-time': {
-    reportType: 'kpi-over-time',
-    dataType: 'synthetics',
+  {
+    name: 'kpi-over-time',
+    dataType: 'synthetics' as AppDataType,
     breakdown: 'user_agent.name',
     time: { from: 'now-15m', to: 'now' },
   },
-};
+];
 
-describe('userSeries', function () {
+describe('userSeriesStorage', function () {
   function setupTestComponent(seriesData: any) {
     const setData = jest.fn();
+
     function TestComponent() {
       const data = useSeriesStorage();
 
@@ -48,11 +52,20 @@ describe('userSeries', function () {
     }
 
     render(
-      <UrlStorageContextProvider
-        storage={{ get: jest.fn().mockReturnValue(seriesData), set: jest.fn() }}
-      >
-        <TestComponent />
-      </UrlStorageContextProvider>
+      <Router history={getHistoryFromUrl('/app/observability/exploratory-view/configure')}>
+        <Route path={'/app/observability/exploratory-view/:mode'}>
+          <UrlStorageContextProvider
+            storage={{
+              get: jest
+                .fn()
+                .mockImplementation((key: string) => (key === 'sr' ? seriesData : null)),
+              set: jest.fn(),
+            }}
+          >
+            <TestComponent />
+          </UrlStorageContextProvider>
+        </Route>
+      </Router>
     );
 
     return setData;
@@ -63,69 +76,100 @@ describe('userSeries', function () {
     expect(setData).toHaveBeenCalledTimes(2);
     expect(setData).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        allSeries: {
-          'performance-distribution': {
-            breakdown: 'user_agent.name',
+        allSeries: [
+          {
+            name: 'performance-distribution',
             dataType: 'ux',
-            reportType: 'data-distribution',
+            breakdown: 'user_agent.name',
             time: { from: 'now-15m', to: 'now' },
           },
-        },
-        allSeriesIds: ['performance-distribution'],
+        ],
         firstSeries: {
-          breakdown: 'user_agent.name',
+          name: 'performance-distribution',
           dataType: 'ux',
-          reportType: 'data-distribution',
+          breakdown: 'user_agent.name',
           time: { from: 'now-15m', to: 'now' },
         },
-        firstSeriesId: 'performance-distribution',
       })
     );
   });
 
-  it('should return expected result when there are multiple series series', function () {
+  it('should return expected result when there are multiple series', function () {
     const setData = setupTestComponent(mockMultipleSeries);
 
     expect(setData).toHaveBeenCalledTimes(2);
     expect(setData).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        allSeries: {
-          'performance-distribution': {
-            breakdown: 'user_agent.name',
+        allSeries: [
+          {
+            name: 'performance-distribution',
             dataType: 'ux',
-            reportType: 'data-distribution',
+            breakdown: 'user_agent.name',
             time: { from: 'now-15m', to: 'now' },
           },
-          'kpi-over-time': {
-            reportType: 'kpi-over-time',
+          {
+            name: 'kpi-over-time',
             dataType: 'synthetics',
             breakdown: 'user_agent.name',
             time: { from: 'now-15m', to: 'now' },
           },
-        },
-        allSeriesIds: ['performance-distribution', 'kpi-over-time'],
+        ],
         firstSeries: {
-          breakdown: 'user_agent.name',
+          name: 'performance-distribution',
           dataType: 'ux',
-          reportType: 'data-distribution',
+          breakdown: 'user_agent.name',
           time: { from: 'now-15m', to: 'now' },
         },
-        firstSeriesId: 'performance-distribution',
       })
     );
   });
 
   it('should return expected result when there are no series', function () {
-    const setData = setupTestComponent({});
+    const setData = setupTestComponent([]);
 
-    expect(setData).toHaveBeenCalledTimes(2);
+    expect(setData).toHaveBeenCalledTimes(1);
     expect(setData).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        allSeries: {},
-        allSeriesIds: [],
+        allSeries: [],
         firstSeries: undefined,
-        firstSeriesId: undefined,
       })
     );
+  });
+
+  it('ensures that only one series has a breakdown', () => {
+    function wrapper({ children }: { children: React.ReactElement }) {
+      return (
+        <UrlStorageContextProvider
+          storage={{
+            get: jest
+              .fn()
+              .mockImplementation((key: string) => (key === 'sr' ? mockMultipleSeries : null)),
+            set: jest.fn(),
+          }}
+        >
+          {children}
+        </UrlStorageContextProvider>
+      );
+    }
+    const { result } = renderHook(() => useSeriesStorage(), { wrapper });
+
+    act(() => {
+      result.current.setSeries(1, mockMultipleSeries[1]);
+    });
+
+    expect(result.current.allSeries).toEqual([
+      {
+        name: 'performance-distribution',
+        dataType: 'ux',
+        breakdown: 'user_agent.name',
+        time: { from: 'now-15m', to: 'now' },
+      },
+      {
+        name: 'kpi-over-time',
+        dataType: 'synthetics',
+        breakdown: undefined,
+        time: { from: 'now-15m', to: 'now' },
+      },
+    ]);
   });
 });

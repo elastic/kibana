@@ -19,6 +19,8 @@ import type {
 } from '../../constants';
 import type { ValueOf } from '../../types';
 
+import type { CustomIntegrationIcon } from '../../../../../../src/plugins/custom_integrations/common';
+
 import type {
   PackageSpecManifest,
   PackageSpecIcon,
@@ -43,7 +45,7 @@ export interface DefaultPackagesInstallationError {
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
 export type InstallSource = 'registry' | 'upload';
 
-export type EpmPackageInstallStatus = 'installed' | 'installing';
+export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
 
 export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
@@ -349,6 +351,7 @@ export interface EpmPackageAdditions {
   assets: AssetsGroupedByServiceByType;
   removable?: boolean;
   notice?: string;
+  keepPoliciesUpToDate?: boolean;
 }
 
 type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
@@ -360,6 +363,18 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   id: string;
 };
+
+export interface IntegrationCardItem {
+  url: string;
+  release?: 'beta' | 'experimental' | 'ga';
+  description: string;
+  name: string;
+  title: string;
+  version: string;
+  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
+  integration: string;
+  id: string;
+}
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -377,21 +392,31 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
+  keep_policies_up_to_date: boolean;
 }
 
 export interface PackageUsageStats {
   agent_policy_count: number;
 }
 
-export type Installable<T> = Installed<T> | NotInstalled<T>;
+export type Installable<T> = Installed<T> | Installing<T> | NotInstalled<T> | InstallFailed<T>;
 
 export type Installed<T = {}> = T & {
   status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
 };
 
+export type Installing<T = {}> = T & {
+  status: InstallationStatus['Installing'];
+  savedObject: SavedObject<Installation>;
+};
+
 export type NotInstalled<T = {}> = T & {
   status: InstallationStatus['NotInstalled'];
+};
+
+export type InstallFailed<T = {}> = T & {
+  status: InstallationStatus['InstallFailed'];
 };
 
 export type AssetReference = KibanaAssetReference | EsAssetReference;

@@ -6,7 +6,7 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
+import { Agent, PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
@@ -544,6 +544,16 @@ export type HostMetadata = Immutable<{
   };
   host: Host;
   data_stream: DataStream;
+}>;
+
+export type UnitedAgentMetadata = Immutable<{
+  agent: {
+    id: string;
+  };
+  united: {
+    endpoint: HostMetadata;
+    agent: Agent;
+  };
 }>;
 
 export interface LegacyEndpointEvent {
