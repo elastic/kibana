@@ -706,7 +706,7 @@
           "EcsHttp",
           " | undefined; log?: Pick<",
           "EcsLog",
-          ", \"origin\" | \"original\" | \"file\" | \"syslog\"> | undefined; network?: ",
+          ", \"origin\" | \"file\" | \"syslog\"> | undefined; network?: ",
           "EcsNetwork",
           " | undefined; observer?: ",
           "EcsObserver",

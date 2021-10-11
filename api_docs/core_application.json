@@ -1664,7 +1664,7 @@
             "tags": [],
             "label": "euiIconType",
             "description": [
-              "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precendence over the `icon` property."
+              "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precedence over the `icon` property."
             ],
             "signature": [
               "string | undefined"

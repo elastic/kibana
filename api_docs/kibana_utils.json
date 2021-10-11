@@ -1486,7 +1486,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -1516,6 +1516,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
@@ -7113,7 +7127,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -7143,6 +7157,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
@@ -8686,7 +8714,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -8716,6 +8744,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,

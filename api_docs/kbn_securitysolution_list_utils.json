@@ -2774,7 +2774,7 @@
             "label": "bool",
             "description": [],
             "signature": [
-              "{ must?: unknown; must_not?: unknown; should?: unknown[] | undefined; filter?: unknown; minimum_should_match?: number | undefined; }"
+              "QueryDslBoolQuery"
             ],
             "path": "packages/kbn-securitysolution-list-utils/src/build_exception_filter/index.ts",
             "deprecated": false
@@ -3265,7 +3265,7 @@
             "label": "nested",
             "description": [],
             "signature": [
-              "{ path: string; query: unknown; score_mode: string; }"
+              "QueryDslNestedQuery"
             ],
             "path": "packages/kbn-securitysolution-list-utils/src/build_exception_filter/index.ts",
             "deprecated": false

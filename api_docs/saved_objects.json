@@ -2120,14 +2120,6 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/types.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/types.ts"
-          },
-          {
-            "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
           },
           {

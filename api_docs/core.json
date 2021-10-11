@@ -1603,43 +1603,9 @@
             "label": "links",
             "description": [],
             "signature": [
-              "{ readonly settings: string; readonly apm: { readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; }; readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; readonly suricataModule: string; readonly zeekModule: string; }; readonly auditbeat: { readonly base: string; readonly auditdModule: string; readonly systemModule: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly libbeat: { readonly getStarted: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly autocompleteChanges: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Readonly<{ guide: string; infrastructureThreshold: string; logsThreshold: string; metricsThreshold: string; monitorStatus: string; monitorUptime: string; tlsCertificate: string; uptimeDurationAnomaly: string; }>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; }>; readonly ecs: { readonly guide: string; }; }"
+              "{ readonly settings: string; readonly apm: { readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; }; readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; readonly suricataModule: string; readonly zeekModule: string; }; readonly auditbeat: { readonly base: string; readonly auditdModule: string; readonly systemModule: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly libbeat: { readonly getStarted: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly autocompleteChanges: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Readonly<{ guide: string; infrastructureThreshold: string; logsThreshold: string; metricsThreshold: string; monitorStatus: string; monitorUptime: string; tlsCertificate: string; uptimeDurationAnomaly: string; }>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly spaces: Readonly<{ kibanaLegacyUrlAliases: string; kibanaDisableLegacyUrlAliasesApi: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; learnMoreBlog: string; }>; readonly ecs: { readonly guide: string; }; readonly clients: { readonly guide: string; readonly goOverview: string; readonly javaIndex: string; readonly jsIntro: string; readonly netGuide: string; readonly perlGuide: string; readonly phpGuide: string; readonly pythonGuide: string; readonly rubyOverview: string; readonly rustGuide: string; }; }"
             ],
             "path": "src/core/public/doc_links/doc_links_service.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-public.DomainDeprecationDetails",
-        "type": "Interface",
-        "tags": [],
-        "label": "DomainDeprecationDetails",
-        "description": [],
-        "signature": [
-          "DomainDeprecationDetails",
-          " extends ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.DeprecationsDetails",
-            "text": "DeprecationsDetails"
-          }
-        ],
-        "path": "src/core/server/deprecations/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-public.DomainDeprecationDetails.domainId",
-            "type": "string",
-            "tags": [],
-            "label": "domainId",
-            "description": [],
-            "path": "src/core/server/deprecations/types.ts",
             "deprecated": false
           }
         ],
@@ -8283,6 +8249,45 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.ConfigDeprecationContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConfigDeprecationContext",
+        "description": [
+          "\nDeprecation context provided to {@link ConfigDeprecation | config deprecations}\n"
+        ],
+        "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ConfigDeprecationContext.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "The current Kibana version, e.g `7.16.1`, `8.0.0`"
+            ],
+            "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ConfigDeprecationContext.branch",
+            "type": "string",
+            "tags": [],
+            "label": "branch",
+            "description": [
+              "The current Kibana branch, e.g `7.x`, `7.16`, `master`"
+            ],
+            "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.ConfigDeprecationFactory",
         "type": "Interface",
         "tags": [],
@@ -8306,7 +8311,13 @@
               "(deprecatedKey: string, removeBy: string, details?: Partial<",
               "DeprecatedConfigDetails",
               "> | undefined) => ",
-              "ConfigDeprecation"
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecation",
+                "text": "ConfigDeprecation"
+              }
             ],
             "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
             "deprecated": false,
@@ -8371,7 +8382,13 @@
               "(deprecatedKey: string, removeBy: string, details?: Partial<",
               "DeprecatedConfigDetails",
               "> | undefined) => ",
-              "ConfigDeprecation"
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecation",
+                "text": "ConfigDeprecation"
+              }
             ],
             "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
             "deprecated": false,
@@ -8436,7 +8453,13 @@
               "(oldKey: string, newKey: string, details?: Partial<",
               "DeprecatedConfigDetails",
               "> | undefined) => ",
-              "ConfigDeprecation"
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecation",
+                "text": "ConfigDeprecation"
+              }
             ],
             "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
             "deprecated": false,
@@ -8501,7 +8524,13 @@
               "(oldKey: string, newKey: string, details?: Partial<",
               "DeprecatedConfigDetails",
               "> | undefined) => ",
-              "ConfigDeprecation"
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecation",
+                "text": "ConfigDeprecation"
+              }
             ],
             "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
             "deprecated": false,
@@ -8566,7 +8595,13 @@
               "(unusedKey: string, details?: Partial<",
               "DeprecatedConfigDetails",
               "> | undefined) => ",
-              "ConfigDeprecation"
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecation",
+                "text": "ConfigDeprecation"
+              }
             ],
             "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
             "deprecated": false,
@@ -8617,7 +8652,13 @@
               "(unusedKey: string, details?: Partial<",
               "DeprecatedConfigDetails",
               "> | undefined) => ",
-              "ConfigDeprecation"
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecation",
+                "text": "ConfigDeprecation"
+              }
             ],
             "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
             "deprecated": false,
@@ -9552,7 +9593,9 @@
             "type": "string",
             "tags": [],
             "label": "documentationUrl",
-            "description": [],
+            "description": [
+              "(optional) link to the documentation for more details on the deprecation."
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -9565,7 +9608,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "requireRestart",
-            "description": [],
+            "description": [
+              "(optional) specify the fix for this deprecation requires a full kibana restart."
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -9578,7 +9623,9 @@
             "type": "Object",
             "tags": [],
             "label": "correctiveActions",
-            "description": [],
+            "description": [
+              "corrective action needed to fix this deprecation."
+            ],
             "signature": [
               "{ api?: { path: string; method: \"PUT\" | \"POST\"; body?: { [key: string]: any; } | undefined; } | undefined; manualSteps: string[]; }"
             ],
@@ -16832,6 +16879,123 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.ConfigDeprecation",
+        "type": "Type",
+        "tags": [],
+        "label": "ConfigDeprecation",
+        "description": [
+          "\nConfiguration deprecation returned from {@link ConfigDeprecationProvider} that handles a single deprecation from the configuration.\n"
+        ],
+        "signature": [
+          "(config: Readonly<{ [x: string]: any; }>, fromPath: string, addDeprecation: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.AddConfigDeprecation",
+            "text": "AddConfigDeprecation"
+          },
+          ", context: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecationContext",
+            "text": "ConfigDeprecationContext"
+          },
+          ") => void | ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecationCommand",
+            "text": "ConfigDeprecationCommand"
+          }
+        ],
+        "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ConfigDeprecation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [
+              "must not be mutated, return {@link ConfigDeprecationCommand} to change config shape."
+            ],
+            "signature": [
+              "{ readonly [x: string]: any; }"
+            ],
+            "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ConfigDeprecation.$2",
+            "type": "string",
+            "tags": [],
+            "label": "fromPath",
+            "description": [],
+            "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ConfigDeprecation.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "addDeprecation",
+            "description": [],
+            "signature": [
+              "(details: ",
+              "DeprecatedConfigDetails",
+              ") => void"
+            ],
+            "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.ConfigDeprecation.$3.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "details",
+                "description": [],
+                "signature": [
+                  "DeprecatedConfigDetails"
+                ],
+                "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ConfigDeprecation.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecationContext",
+                "text": "ConfigDeprecationContext"
+              }
+            ],
+            "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.ConfigDeprecationProvider",
         "type": "Type",
         "tags": [],
@@ -16849,7 +17013,13 @@
             "text": "ConfigDeprecationFactory"
           },
           ") => ",
-          "ConfigDeprecation",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecation",
+            "text": "ConfigDeprecation"
+          },
           "[]"
         ],
         "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
@@ -17974,7 +18144,7 @@
           "EcsHttp",
           " | undefined; log?: Pick<",
           "EcsLog",
-          ", \"origin\" | \"original\" | \"file\" | \"syslog\"> | undefined; network?: ",
+          ", \"origin\" | \"file\" | \"syslog\"> | undefined; network?: ",
           "EcsNetwork",
           " | undefined; observer?: ",
           "EcsObserver",
