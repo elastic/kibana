@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { useActions, useValues } from 'kea';
 import moment from 'moment';
 
 import {
@@ -40,8 +41,13 @@ import {
   UTC_TITLE,
 } from '../../constants';
 
+import { SourceLogic } from '../../source_logic';
+
+import { SynchronizationLogic } from './synchronization_logic';
+
 interface Props {
   blockedWindow: BlockedWindow;
+  index: number;
 }
 
 const syncOptions = [
@@ -93,7 +99,9 @@ const daySelectOptions = DAYS_OF_WEEK_VALUES.map((day) => ({
 })) as EuiSelectOption[];
 daySelectOptions.push({ text: ALL_DAYS_LABEL, value: 'all' });
 
-export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
+export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow, index }) => {
+  const { contentSource } = useValues(SourceLogic);
+  const { removeBlockedWindow } = useActions(SynchronizationLogic({ contentSource }));
   const handleSyncTypeChange = () => '#TODO';
   const handleStartDateChange = () => '#TODO';
   const handleEndDateChange = () => '#TODO';
@@ -163,7 +171,7 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill color="danger">
+          <EuiButton fill color="danger" onClick={() => removeBlockedWindow(index)}>
             {REMOVE_BUTTON}
           </EuiButton>
         </EuiFlexItem>

@@ -55,6 +55,7 @@ interface SynchronizationActions {
   setNavigatingBetweenTabs(navigatingBetweenTabs: boolean): boolean;
   handleSelectedTabChanged(tabId: TabId): TabId;
   addBlockedWindow(): void;
+  removeBlockedWindow(index: number): number;
   updateFrequencySettings(): void;
   updateObjectsAndAssetsSettings(): void;
   resetSyncSettings(): void;
@@ -104,6 +105,7 @@ export const SynchronizationLogic = kea<
     setContentExtractionChecked: (checked: boolean) => checked,
     updateServerSettings: (body: ServerSyncSettingsBody) => body,
     setServerSchedule: (schedule: IndexingSchedule) => schedule,
+    removeBlockedWindow: (index: number) => index,
     updateFrequencySettings: true,
     updateObjectsAndAssetsSettings: true,
     resetSyncSettings: true,
@@ -173,6 +175,13 @@ export const SynchronizationLogic = kea<
           const schedule = cloneDeep(state);
           const blockedWindows = schedule.blockedWindows || [];
           blockedWindows.push(emptyBlockedWindow);
+          schedule.blockedWindows = blockedWindows;
+          return schedule;
+        },
+        removeBlockedWindow: (state, index) => {
+          const schedule = cloneDeep(state);
+          const blockedWindows = schedule.blockedWindows || [];
+          blockedWindows.splice(index, 1);
           schedule.blockedWindows = blockedWindows;
           return schedule;
         },

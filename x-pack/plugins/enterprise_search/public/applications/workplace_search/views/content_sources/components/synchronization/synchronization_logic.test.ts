@@ -111,6 +111,13 @@ describe('SynchronizationLogic', () => {
         expect(SynchronizationLogic.values.schedule.full).toEqual('P1DT30M');
       });
     });
+
+    it('removeBlockedWindow', () => {
+      SynchronizationLogic.actions.addBlockedWindow();
+      SynchronizationLogic.actions.removeBlockedWindow(0);
+
+      expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([]);
+    });
   });
 
   describe('listeners', () => {
