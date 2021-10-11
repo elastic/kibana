@@ -96,16 +96,12 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 
 export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
   const url = new URL(
     `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
   );
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
-    url.searchParams.set('kibana.version', kibanaVersion);
-  }
+  setKibanaVersion(url);
+
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {

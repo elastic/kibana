@@ -17,12 +17,13 @@ import { Result } from '../../../result';
 import { Result as ResultType, ResultAction } from '../../../result/types';
 
 interface Props {
-  result: ResultType;
   actions: ResultAction[];
   dragHandleProps?: DraggableProvidedDragHandleProps;
+  result: ResultType;
+  index?: number;
 }
 
-export const CurationResult: React.FC<Props> = ({ result, actions, dragHandleProps }) => {
+export const CurationResult: React.FC<Props> = ({ actions, dragHandleProps, result, index }) => {
   const {
     isMetaEngine,
     engine: { schema },
@@ -36,6 +37,7 @@ export const CurationResult: React.FC<Props> = ({ result, actions, dragHandlePro
         isMetaEngine={isMetaEngine}
         schemaForTypeHighlights={schema}
         dragHandleProps={dragHandleProps}
+        resultPosition={typeof index === 'undefined' ? undefined : index + 1}
       />
       <EuiSpacer size="m" />
     </>
