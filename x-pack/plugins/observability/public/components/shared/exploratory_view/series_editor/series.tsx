@@ -7,6 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiPanel, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { BuilderItem } from '../types';
 import { SeriesActions } from './columns/series_actions';
@@ -26,6 +27,10 @@ const StyledAccordion = styled(EuiAccordion)`
   .euiAccordion__optionalAction {
     flex-grow: 1;
     flex-shrink: 1;
+  }
+
+  .euiAccordion__childWrapper {
+    overflow: visible;
   }
 `;
 
@@ -47,6 +52,7 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
       <StyledAccordion
         id={`exploratoryViewSeriesAccordion${id}`}
         forceState={isExpanded ? 'open' : 'closed'}
+        aria-label={ACCORDION_LABEL}
         onToggle={toggleExpanded}
         arrowDisplay={!seriesProps.series.dataType ? 'none' : undefined}
         extraAction={
@@ -91,3 +97,10 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
     </EuiPanel>
   );
 }
+
+export const ACCORDION_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.accordion.label',
+  {
+    defaultMessage: 'Toggle series information',
+  }
+);

@@ -6,7 +6,8 @@
  */
 import { useState, useEffect } from 'react';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import { fetchClusters } from '../../lib/fetch_clusters';
+import { useRequestErrorHandler } from './use_request_error_handler';
 
 export function useClusters(clusterUuid?: string | null, ccs?: any, codePaths?: string[]) {
   const { services } = useKibana<{ data: any }>();
@@ -17,48 +18,31 @@ export function useClusters(clusterUuid?: string | null, ccs?: any, codePaths?: 
 
   const [clusters, setClusters] = useState([] as any);
   const [loaded, setLoaded] = useState<boolean | null>(false);
-
-  let url = '../api/monitoring/v1/clusters';
-  if (clusterUuid) {
-    url += `/${clusterUuid}`;
-  }
+  const handleRequestError = useRequestErrorHandler();
 
   useEffect(() => {
-    const fetchClusters = async () => {
+    async function makeRequest() {
       try {
-        const response = await services.http?.fetch(url, {
-          method: 'POST',
-          body: JSON.stringify({
-            ccs,
+        if (services.http?.fetch) {
+          const response = await fetchClusters({
             timeRange: {
               min,
               max,
             },
+            fetch: services.http.fetch,
+            clusterUuid,
             codePaths,
-          }),
-        });
-
-        setClusters(formatClusters(response));
-      } catch (err) {
-        // TODO: handle errors
+          });
+          setClusters(response);
+        }
+      } catch (e) {
+        handleRequestError(e);
       } finally {
         setLoaded(true);
       }
-    };
-
-    fetchClusters();
-  }, [ccs, services.http, codePaths, url, min, max]);
+    }
+    makeRequest();
+  }, [handleRequestError, clusterUuid, ccs, services.http, codePaths, min, max]);
 
   return { clusters, loaded };
-}
-
-function formatClusters(clusters: any) {
-  return clusters.map(formatCluster);
-}
-
-function formatCluster(cluster: any) {
-  if (cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID) {
-    cluster.cluster_name = 'Standalone Cluster';
-  }
-  return cluster;
 }

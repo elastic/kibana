@@ -10,7 +10,8 @@ import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLExplorerLink } from './MLExplorerLink';
 
-describe('MLExplorerLink', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/113695
+describe.skip('MLExplorerLink', () => {
   it('should produce the correct URL with jobId', async () => {
     const href = await getRenderedHref(
       () => (

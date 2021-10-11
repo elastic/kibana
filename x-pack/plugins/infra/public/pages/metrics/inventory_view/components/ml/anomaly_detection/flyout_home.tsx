@@ -16,6 +16,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import moment from 'moment';
 import { EuiTabs } from '@elastic/eui';
 import { EuiTab } from '@elastic/eui';
+import { MLJobsAwaitingNodeWarning } from '../../../../../../../../ml/public';
 import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
 import {
@@ -120,14 +121,18 @@ export const FlyoutHome = (props: Props) => {
 
         <EuiFlyoutBody
           banner={
-            tab === 'jobs' &&
-            hasJobs && (
-              <JobsEnabledCallout
-                hasHostJobs={hostJobSummaries.length > 0}
-                hasK8sJobs={k8sJobSummaries.length > 0}
-                jobIds={jobIds}
-              />
-            )
+            <>
+              {tab === 'jobs' && hasJobs && (
+                <>
+                  <JobsEnabledCallout
+                    hasHostJobs={hostJobSummaries.length > 0}
+                    hasK8sJobs={k8sJobSummaries.length > 0}
+                    jobIds={jobIds}
+                  />
+                </>
+              )}
+              <MLJobsAwaitingNodeWarning jobIds={jobIds} />
+            </>
           }
         >
           {tab === 'jobs' && (

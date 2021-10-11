@@ -40,7 +40,7 @@ export class SavedObjectsExportError extends Error {
   }
 
   /**
-   * Error returned when a {@link SavedObjectsExportTransform | export tranform} threw an error
+   * Error returned when a {@link SavedObjectsExportTransform | export transform} threw an error
    */
   static objectTransformError(objects: SavedObject[], cause: Error) {
     return new SavedObjectsExportError(
@@ -54,7 +54,7 @@ export class SavedObjectsExportError extends Error {
   }
 
   /**
-   * Error returned when a {@link SavedObjectsExportTransform | export tranform} performed an invalid operation
+   * Error returned when a {@link SavedObjectsExportTransform | export transform} performed an invalid operation
    * during the transform, such as removing objects from the export, or changing an object's type or id.
    */
   static invalidTransformError(objectKeys: string[]) {

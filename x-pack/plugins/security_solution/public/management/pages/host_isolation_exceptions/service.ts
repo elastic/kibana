@@ -6,6 +6,7 @@
  */
 
 import {
+  CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -63,4 +64,27 @@ export async function getHostIsolationExceptionItems({
     },
   });
   return entries;
+}
+
+export async function createHostIsolationExceptionItem({
+  http,
+  exception,
+}: {
+  http: HttpStart;
+  exception: CreateExceptionListItemSchema;
+}): Promise<ExceptionListItemSchema> {
+  await ensureHostIsolationExceptionsListExists(http);
+  return http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    body: JSON.stringify(exception),
+  });
+}
+
+export async function deleteHostIsolationExceptionItems(http: HttpStart, id: string) {
+  await ensureHostIsolationExceptionsListExists(http);
+  return http.delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    query: {
+      id,
+      namespace_type: 'agnostic',
+    },
+  });
 }

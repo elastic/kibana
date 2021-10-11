@@ -39,15 +39,13 @@ import { Error, Loading, SettingFlyout } from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
-import { DefaultLayout, WithoutHeaderLayout } from './layouts';
+import { DefaultLayout } from './layouts';
 import { PackageInstallProvider } from './hooks';
 import { useBreadcrumbs, UIExtensionsContext } from './hooks';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
-    <DefaultLayout>
-      <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
-    </DefaultLayout>
+    <DefaultLayout>{children}</DefaultLayout>
   </EuiErrorBoundary>
 );
 
@@ -201,13 +199,15 @@ export const IntegrationsAppContext: React.FC<{
                 <EuiThemeProvider darkMode={isDarkMode}>
                   <UIExtensionsContext.Provider value={extensions}>
                     <FleetStatusProvider>
-                      <Router history={history}>
-                        <AgentPolicyContextProvider>
-                          <PackageInstallProvider notifications={startServices.notifications}>
-                            {children}
-                          </PackageInstallProvider>
-                        </AgentPolicyContextProvider>
-                      </Router>
+                      <startServices.customIntegrations.ContextProvider>
+                        <Router history={history}>
+                          <AgentPolicyContextProvider>
+                            <PackageInstallProvider notifications={startServices.notifications}>
+                              {children}
+                            </PackageInstallProvider>
+                          </AgentPolicyContextProvider>
+                        </Router>
+                      </startServices.customIntegrations.ContextProvider>
                     </FleetStatusProvider>
                   </UIExtensionsContext.Provider>
                 </EuiThemeProvider>

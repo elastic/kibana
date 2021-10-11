@@ -15,6 +15,7 @@ import type {
 } from './types';
 
 const noopAddDeprecationFactory: () => AddConfigDeprecation = () => () => undefined;
+
 /**
  * Applies deprecations on given configuration and passes addDeprecation hook.
  * This hook is used for logging any deprecation warning using provided logger.
@@ -32,8 +33,8 @@ export const applyDeprecations = (
     set: [],
     unset: [],
   };
-  deprecations.forEach(({ deprecation, path }) => {
-    const commands = deprecation(result, path, createAddDeprecation(path));
+  deprecations.forEach(({ deprecation, path, context }) => {
+    const commands = deprecation(result, path, createAddDeprecation(path), context);
     if (commands) {
       if (commands.set) {
         changedPaths.set.push(...commands.set.map((c) => c.path));
