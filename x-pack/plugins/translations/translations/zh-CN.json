@@ -13659,7 +13659,6 @@
     "xpack.infra.sourceConfiguration.documentedFields": "已记录字段",
     "xpack.infra.sourceConfiguration.fieldEmptyErrorMessage": "字段不得为空。",
     "xpack.infra.sourceConfiguration.fieldLogColumnTitle": "字段",
-    "xpack.infra.sourceConfiguration.fieldsSectionTitle": "字段",
     "xpack.infra.sourceConfiguration.indicesSectionTitle": "索引",
     "xpack.infra.sourceConfiguration.logColumnsSectionTitle": "日志列",
     "xpack.infra.sourceConfiguration.logIndicesDescription": "用于匹配包含日志数据的索引的索引模式",

@@ -13472,7 +13472,6 @@
     "xpack.infra.sourceConfiguration.documentedFields": "文書化されたフィールド",
     "xpack.infra.sourceConfiguration.fieldEmptyErrorMessage": "このフィールドは未入力のままにできません。",
     "xpack.infra.sourceConfiguration.fieldLogColumnTitle": "フィールド",
-    "xpack.infra.sourceConfiguration.fieldsSectionTitle": "フィールド",
     "xpack.infra.sourceConfiguration.indicesSectionTitle": "インデックス",
     "xpack.infra.sourceConfiguration.logColumnsSectionTitle": "ログ列",
     "xpack.infra.sourceConfiguration.logIndicesDescription": "ログデータを含む一致するインデックスのインデックスパターンです",

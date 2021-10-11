@@ -14,7 +14,7 @@ import {
   LogIndexPatternReference,
 } from '../../../../common/log_sources';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
-import { useCompositeFormElement, useFormElement } from './form_elements';
+import { useFormElement } from './form_elements';
 import {
   FormValidationError,
   validateIndexPattern,
