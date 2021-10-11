@@ -12,6 +12,8 @@ import { rangeQuery } from '../../../../../observability/server';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../helpers/setup_request';
+import { apmMlAnomalyQuery } from '../../../../common/utils/apm_ml_anomaly_query';
+import { ML_TRANSACTION_LATENCY_DETECTOR_INDEX } from '../../../../common/anomaly_detection';
 
 export type ESResponse = Exclude<
   PromiseReturnType<typeof anomalySeriesFetcher>,
@@ -40,7 +42,7 @@ export function anomalySeriesFetcher({
         query: {
           bool: {
             filter: [
-              { terms: { result_type: ['model_plot', 'record'] } },
+              ...apmMlAnomalyQuery(ML_TRANSACTION_LATENCY_DETECTOR_INDEX),
               { term: { partition_field_value: serviceName } },
               { term: { by_field_value: transactionType } },
               ...rangeQuery(start, end, 'timestamp'),

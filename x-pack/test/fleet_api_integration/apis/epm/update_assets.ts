@@ -225,12 +225,9 @@ export default function (providerContext: FtrProviderContext) {
               limit: '10000',
             },
           },
-          number_of_routing_shards: '30',
-          number_of_shards: '1',
           query: {
             default_field: ['logs_test_name', 'new_field_name'],
           },
-          refresh_interval: '5s',
         },
       });
       const resUserSettings = await es.transport.request({
@@ -432,6 +429,7 @@ export default function (providerContext: FtrProviderContext) {
         install_status: 'installed',
         install_started_at: res.attributes.install_started_at,
         install_source: 'registry',
+        keep_policies_up_to_date: false,
       });
     });
   });

@@ -6,8 +6,6 @@
  */
 
 import React, { FC, useMemo } from 'react';
-
-import { EuiFlexItem } from '@elastic/eui';
 import { Feature, Point } from 'geojson';
 import type { FieldDataRowProps } from '../../stats_table/types/field_data_row';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
@@ -15,6 +13,7 @@ import { EmbeddedMapComponent } from '../../embedded_map';
 import { convertWKTGeoToLonLat, getGeoPointsLayer } from './format_utils';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { ExamplesList } from '../../examples_list';
+import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
 export const DEFAULT_GEO_REGEX = RegExp('(?<lat>.+) (?<lon>.+)');
 
@@ -63,17 +62,12 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
     <ExpandedRowContent dataTestSubj={'dataVisualizerGeoPointContent'}>
       <DocumentStatsTable config={config} />
       {formattedResults && Array.isArray(formattedResults.examples) && (
-        <EuiFlexItem>
-          <ExamplesList examples={formattedResults.examples} />
-        </EuiFlexItem>
+        <ExamplesList examples={formattedResults.examples} />
       )}
       {formattedResults && Array.isArray(formattedResults.layerList) && (
-        <EuiFlexItem
-          className={'dataVisualizerMapWrapper'}
-          data-test-subj={'dataVisualizerEmbeddedMap'}
-        >
+        <ExpandedRowPanel className={'dvPanel__wrapper dvMap__wrapper'} grow={true}>
           <EmbeddedMapComponent layerList={formattedResults.layerList} />
-        </EuiFlexItem>
+        </ExpandedRowPanel>
       )}
     </ExpandedRowContent>
   );

@@ -17,7 +17,7 @@ pageLoadAssetSize:
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
-  embeddable: 312874
+  embeddable: 99999
   embeddableEnhanced: 41145
   enterpriseSearch: 35741
   esUiShared: 326654
@@ -64,7 +64,6 @@ pageLoadAssetSize:
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
   security: 95864
-  securityOss: 30806
   share: 99061
   snapshotRestore: 79032
   spaces: 57868
@@ -81,7 +80,6 @@ pageLoadAssetSize:
   usageCollection: 39762
   visDefaultEditor: 50178
   visTypeMarkdown: 30896
-  visTypeMetric: 42790
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
@@ -116,3 +114,6 @@ pageLoadAssetSize:
   expressions: 239290
   securitySolution: 231753
   customIntegrations: 28810
+  expressionMetricVis: 23121
+  visTypeMetric: 23332
+  dataViews: 42000

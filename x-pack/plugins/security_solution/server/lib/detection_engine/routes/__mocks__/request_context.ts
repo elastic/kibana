@@ -35,8 +35,8 @@ type SecuritySolutionRequestHandlerContextMock = SecuritySolutionRequestHandlerC
         asCurrentUser: {
           updateByQuery: jest.Mock;
           search: jest.Mock;
-          transport: {
-            request: jest.Mock;
+          security: {
+            hasPrivileges: jest.Mock;
           };
         };
       };

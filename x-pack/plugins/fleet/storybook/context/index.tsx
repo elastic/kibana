@@ -13,11 +13,13 @@ import { createBrowserHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { ScopedHistory } from '../../../../../src/core/public';
+import { getStorybookContextProvider } from '../../../../../src/plugins/custom_integrations/storybook';
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
 
-// TODO: This is a contract leak, and should be on the context, rather than a setter.
+// TODO: These are contract leaks, and should be on the context, rather than a setter.
 import { setHttpClient } from '../../public/hooks/use_request';
+import { setCustomIntegrations } from '../../public/services/custom_integrations';
 
 import { getApplication } from './application';
 import { getChrome } from './chrome';
@@ -25,6 +27,7 @@ import { getHttp } from './http';
 import { getUiSettings } from './ui_settings';
 import { getNotifications } from './notifications';
 import { stubbedStartServices } from './stubs';
+import { getDocLinks } from './doc_links';
 
 // TODO: clintandrewhall - this is not ideal, or complete.  The root context of Fleet applications
 // requires full start contracts of its dependencies.  As a result, we have to mock all of those contracts
@@ -34,15 +37,16 @@ import { stubbedStartServices } from './stubs';
 // Expect this to grow as components that are given Stories need access to mocked services.
 export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
   children: storyChildren,
-  storyContext,
 }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();
   const history = new ScopedHistory(browserHistory, basepath);
 
   const startServices: FleetStartServices = {
+    ...stubbedStartServices,
     application: getApplication(),
     chrome: getChrome(),
+    docLinks: getDocLinks(),
     http: getHttp(),
     notifications: getNotifications(),
     uiSettings: getUiSettings(),
@@ -54,10 +58,16 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
     injectedMetadata: {
       getInjectedVar: () => null,
     },
-    ...stubbedStartServices,
+    customIntegrations: {
+      ContextProvider: getStorybookContextProvider(),
+    },
   };
 
   setHttpClient(startServices.http);
+  setCustomIntegrations({
+    getAppendCustomIntegrations: async () => [],
+    getReplacementCustomIntegrations: async () => [],
+  });
 
   const config = {
     enabled: true,

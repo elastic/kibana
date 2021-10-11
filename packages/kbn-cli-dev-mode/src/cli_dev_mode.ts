@@ -48,7 +48,6 @@ const GRACEFUL_TIMEOUT = 30000;
 
 export type SomeCliArgs = Pick<
   CliArgs,
-  | 'quiet'
   | 'silent'
   | 'verbose'
   | 'disableOptimizer'
@@ -108,7 +107,7 @@ export class CliDevMode {
   private subscription?: Rx.Subscription;
 
   constructor({ cliArgs, config, log }: { cliArgs: SomeCliArgs; config: CliDevConfig; log?: Log }) {
-    this.log = log || new CliLog(!!cliArgs.quiet, !!cliArgs.silent);
+    this.log = log || new CliLog(!!cliArgs.silent);
 
     if (cliArgs.basePath) {
       this.basePathProxy = new BasePathProxyServer(this.log, config.http, config.dev);
@@ -163,7 +162,7 @@ export class CliDevMode {
       runExamples: cliArgs.runExamples,
       cache: cliArgs.cache,
       dist: cliArgs.dist,
-      quiet: !!cliArgs.quiet,
+      quiet: false,
       silent: !!cliArgs.silent,
       verbose: !!cliArgs.verbose,
       watch: cliArgs.watch,
@@ -289,8 +288,8 @@ export class CliDevMode {
             await reporter.timings({
               timings: [
                 {
-                  group: 'yarn start',
-                  id: 'started',
+                  group: 'scripts/kibana',
+                  id: 'dev server started',
                   ms: Date.now() - this.startTime!,
                   meta: { success },
                 },
@@ -313,7 +312,7 @@ export class CliDevMode {
             await reporter.timings({
               timings: [
                 {
-                  group: 'yarn start',
+                  group: 'scripts/kibana',
                   id: 'dev server restart',
                   ms,
                   meta: {

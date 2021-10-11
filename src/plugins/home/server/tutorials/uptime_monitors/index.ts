@@ -57,5 +57,6 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions([], context),
     elasticCloud: cloudInstructions(),
     onPremElasticCloud: onPremCloudInstructions(),
+    integrationBrowserCategories: ['web', 'security'],
   };
 }
