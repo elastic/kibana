@@ -348,7 +348,7 @@ function FieldPanelHeader({
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
-              defaultMessage: 'Edit index pattern field',
+              defaultMessage: 'Edit data view field',
             })}
           >
             <EuiButtonIcon
@@ -356,7 +356,7 @@ function FieldPanelHeader({
               iconType="pencil"
               data-test-subj="lnsFieldListPanelEdit"
               aria-label={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
-                defaultMessage: 'Edit index pattern field',
+                defaultMessage: 'Edit data view field',
               })}
             />
           </EuiToolTip>
@@ -366,7 +366,7 @@ function FieldPanelHeader({
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.lens.indexPattern.removeFieldLabel', {
-              defaultMessage: 'Remove index pattern field',
+              defaultMessage: 'Remove data view field',
             })}
           >
             <EuiButtonIcon
@@ -375,7 +375,7 @@ function FieldPanelHeader({
               data-test-subj="lnsFieldListPanelRemove"
               color="danger"
               aria-label={i18n.translate('xpack.lens.indexPattern.removeFieldLabel', {
-                defaultMessage: 'Remove index pattern field',
+                defaultMessage: 'Remove data view field',
               })}
             />
           </EuiToolTip>
