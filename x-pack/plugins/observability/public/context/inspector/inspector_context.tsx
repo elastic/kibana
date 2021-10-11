@@ -8,8 +8,8 @@
 import React, { createContext, ReactNode, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { RequestAdapter } from '../../../../../../src/plugins/inspector/common';
-import { InspectResponse } from '../../../typings/common';
 import { FetcherResult } from '../../hooks/use_fetcher';
+import { InspectResponse } from '../../../typings/common';
 
 export interface InspectorContextValue {
   addInspectorRequest: <Data>(result: FetcherResult<Data>) => void;
@@ -23,11 +23,7 @@ const value: InspectorContextValue = {
 
 export const InspectorContext = createContext<InspectorContextValue>(value);
 
-export function InspectorContextProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function InspectorContextProvider({ children }: { children: ReactNode }) {
   const history = useHistory();
   const { inspectorAdapters } = value;
 
@@ -37,8 +33,7 @@ export function InspectorContextProvider({
       _inspect?: InspectResponse;
     }>
   ) {
-    const operations =
-      result.data?._inspect ?? result.data?.mainStatisticsData?._inspect ?? [];
+    const operations = result.data?._inspect ?? result.data?.mainStatisticsData?._inspect ?? [];
 
     operations.forEach((operation) => {
       if (operation.response) {
