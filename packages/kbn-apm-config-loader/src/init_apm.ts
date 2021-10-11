@@ -38,5 +38,5 @@ export const initApm = (
 
   apm.start(apmConfig);
   // eslint-disable-next-line no-console
-  console.log('>>> in init APM', apm.isStarted());
+  console.log('>>> in init APM', apm.isStarted(), require.resolve('elastic-apm-node'));
 };
