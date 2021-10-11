@@ -15,6 +15,7 @@ import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 import { schema } from '@kbn/config-schema';
 import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
 
+import type { ConfigDeprecationContext } from './deprecation';
 import { ConfigService, Env, RawPackageInfo } from '.';
 
 import { getEnvOptions } from './__mocks__/env';
@@ -473,6 +474,43 @@ test('logs deprecation warning during validation', async () => {
       ],
     ]
   `);
+});
+
+test('calls `applyDeprecations` with the correct parameters', async () => {
+  const cfg = { foo: { bar: 1 } };
+  const rawConfig = getRawConfigProvider(cfg);
+  const configService = new ConfigService(rawConfig, defaultEnv, logger);
+
+  const context: ConfigDeprecationContext = {
+    branch: defaultEnv.packageInfo.branch,
+    version: defaultEnv.packageInfo.version,
+  };
+
+  const deprecationA = jest.fn();
+  const deprecationB = jest.fn();
+
+  configService.addDeprecationProvider('foo', () => [deprecationA]);
+  configService.addDeprecationProvider('bar', () => [deprecationB]);
+
+  await configService.validate();
+
+  expect(mockApplyDeprecations).toHaveBeenCalledTimes(1);
+  expect(mockApplyDeprecations).toHaveBeenCalledWith(
+    cfg,
+    [
+      {
+        deprecation: deprecationA,
+        path: 'foo',
+        context,
+      },
+      {
+        deprecation: deprecationB,
+        path: 'bar',
+        context,
+      },
+    ],
+    expect.any(Function)
+  );
 });
 
 test('does not log warnings for silent deprecations during validation', async () => {

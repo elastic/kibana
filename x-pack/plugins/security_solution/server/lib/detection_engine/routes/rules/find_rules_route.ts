@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { Logger } from 'src/core/server';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
 import {
   findRulesSchema,
@@ -18,8 +19,12 @@ import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
 
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions/legacy_get_bulk_rule_actions_saved_object';
+
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
+  logger: Logger,
   isRuleRegistryEnabled: boolean
 ) => {
   router.get(
@@ -44,6 +49,7 @@ export const findRulesRoute = (
       try {
         const { query } = request;
         const rulesClient = context.alerting?.getRulesClient();
+        const savedObjectsClient = context.core.savedObjects.client;
 
         if (!rulesClient) {
           return siemResponse.error({ statusCode: 404 });
@@ -62,12 +68,15 @@ export const findRulesRoute = (
         });
         const alertIds = rules.data.map((rule) => rule.id);
 
-        const ruleStatuses = await execLogClient.findBulk({
-          ruleIds: alertIds,
-          logsCount: 1,
-          spaceId: context.securitySolution.getSpaceId(),
-        });
-        const transformed = transformFindAlerts(rules, ruleStatuses);
+        const [ruleStatuses, ruleActions] = await Promise.all([
+          execLogClient.findBulk({
+            ruleIds: alertIds,
+            logsCount: 1,
+            spaceId: context.securitySolution.getSpaceId(),
+          }),
+          legacyGetBulkRuleActionsSavedObject({ alertIds, savedObjectsClient, logger }),
+        ]);
+        const transformed = transformFindAlerts(rules, ruleStatuses, ruleActions);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {

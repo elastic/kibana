@@ -25,7 +25,7 @@ export function usingServerProcess<T>(
 ) {
   return Rx.using(
     (): ProcResource => {
-      const proc = execa.node(script, [...argv, '--logging.json=false'], {
+      const proc = execa.node(script, argv, {
         stdio: 'pipe',
         nodeOptions: [
           ...process.execArgv,

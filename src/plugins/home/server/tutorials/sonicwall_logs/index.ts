@@ -56,5 +56,6 @@ export function sonicwallLogsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['network', 'security'],
   };
 }

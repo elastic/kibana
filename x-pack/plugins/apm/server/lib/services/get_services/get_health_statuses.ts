@@ -14,11 +14,15 @@ interface AggregationParams {
   environment: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }
 
 export const getHealthStatuses = async ({
   environment,
   setup,
+  start,
+  end,
 }: AggregationParams) => {
   if (!setup.ml) {
     return [];
@@ -27,6 +31,8 @@ export const getHealthStatuses = async ({
   const anomalies = await getServiceAnomalies({
     setup,
     environment,
+    start,
+    end,
   });
 
   return anomalies.serviceAnomalies.map((anomalyStats) => {

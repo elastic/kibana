@@ -158,17 +158,21 @@ export const DataGrid: FC<Props> = memo(
               );
 
               return (
-                <DecisionPathPopover
-                  analysisType={analysisType}
-                  predictedValue={predictedValue}
-                  predictedProbability={predictedProbability}
-                  baseline={baseline}
-                  featureImportance={parsedFIArray}
-                  topClasses={topClasses}
-                  predictionFieldName={
-                    predictionFieldName ? predictionFieldName.replace('_prediction', '') : undefined
-                  }
-                />
+                <div data-test-subj="mlDFAFeatureImportancePopover">
+                  <DecisionPathPopover
+                    analysisType={analysisType}
+                    predictedValue={predictedValue}
+                    predictedProbability={predictedProbability}
+                    baseline={baseline}
+                    featureImportance={parsedFIArray}
+                    topClasses={topClasses}
+                    predictionFieldName={
+                      predictionFieldName
+                        ? predictionFieldName.replace('_prediction', '')
+                        : undefined
+                    }
+                  />
+                </div>
               );
             },
             featureInfluence: ({

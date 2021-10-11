@@ -67,6 +67,15 @@
         enabled: true,
       },
       {
+        groupName: 'babel',
+        packageNames: ['@types/babel__core'],
+        matchPackagePatterns: ["^@babel", "^babel-plugin"],
+        reviewers: ['team:kibana-operations'],
+        matchBaseBranches: ['master'],
+        labels: ['Team:Operations', 'release_note:skip'],
+        enabled: true,
+      },
+      {
         groupName: 'vega related modules',
         packageNames: ['vega', 'vega-lite', 'vega-schema-url-parser', 'vega-tooltip'],
         reviewers: ['team:kibana-vis-editors'],
@@ -77,10 +86,9 @@
       {
         groupName: 'platform security modules',
         packageNames: [
-          'broadcast-channel', 
-          'jsonwebtoken', '@types/jsonwebtoken', 
-          'node-forge', '@types/node-forge', 
-          'require-in-the-middle', 
+          'broadcast-channel',
+          'node-forge', '@types/node-forge',
+          'require-in-the-middle',
           'tough-cookie', '@types/tough-cookie',
           'xml-crypto', '@types/xml-crypto'
         ],

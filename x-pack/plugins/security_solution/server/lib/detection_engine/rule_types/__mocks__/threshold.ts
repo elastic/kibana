@@ -25,7 +25,6 @@ import { TypeOfFieldMap } from '../../../../../../rule_registry/common/field_map
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ANCHOR_DATE } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { flattenWithPrefix } from '../factories/utils/flatten_with_prefix';
 import { RulesFieldMap } from '../field_maps';
 import {
@@ -60,19 +59,8 @@ export const mockThresholdResults = {
                   {
                     key: 'tardigrade',
                     doc_count: 3,
-                    top_threshold_hits: {
-                      hits: {
-                        total: {
-                          value: 1,
-                          relation: 'eq',
-                        },
-                        hits: [
-                          {
-                            ...sampleDocNoSortId(),
-                            'host.name': 'tardigrade',
-                          },
-                        ],
-                      },
+                    max_timestamp: {
+                      value_as_string: '2020-04-20T21:26:30.000Z',
                     },
                     cardinality_count: {
                       value: 3,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { CSSProperties, HTMLAttributes, memo, useCallback, useMemo, useState } from 'react';
 import {
   CommonProps,
   EuiContextMenuPanel,
@@ -16,13 +16,19 @@ import {
 import {
   ContextMenuItemNavByRouter,
   ContextMenuItemNavByRouterProps,
-} from './context_menu_item_nav_by_rotuer';
+} from './context_menu_item_nav_by_router';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 export interface ContextMenuWithRouterSupportProps
   extends CommonProps,
     Pick<EuiPopoverProps, 'button' | 'anchorPosition' | 'panelPaddingSize'> {
   items: ContextMenuItemNavByRouterProps[];
+  /**
+   * The max width for the popup menu. Default is `32ch`.
+   * **Note** that when used (default behaviour), all menu item's `truncateText` prop will be
+   * overwritten to `true`. Setting this prop's value to `undefined` will suppress the default behaviour.
+   */
+  maxWidth?: CSSProperties['maxWidth'];
 }
 
 /**
@@ -31,7 +37,7 @@ export interface ContextMenuWithRouterSupportProps
  * Menu also supports automatically closing the popup when an item is clicked.
  */
 export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportProps>(
-  ({ items, button, panelPaddingSize, anchorPosition, ...commonProps }) => {
+  ({ items, button, panelPaddingSize, anchorPosition, maxWidth = '32ch', ...commonProps }) => {
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -47,6 +53,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         return (
           <ContextMenuItemNavByRouter
             {...itemProps}
+            textTruncate={Boolean(maxWidth) || itemProps.textTruncate}
             onClick={(ev) => {
               handleCloseMenu();
               if (itemProps.onClick) {
@@ -56,7 +63,20 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           />
         );
       });
-    }, [handleCloseMenu, items]);
+    }, [handleCloseMenu, items, maxWidth]);
+
+    type AdditionalPanelProps = Partial<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>>;
+    const additionalContextMenuPanelProps = useMemo<AdditionalPanelProps>(() => {
+      const newAdditionalProps: AdditionalPanelProps = {
+        style: {},
+      };
+
+      if (maxWidth) {
+        newAdditionalProps.style!.maxWidth = maxWidth;
+      }
+
+      return newAdditionalProps;
+    }, [maxWidth]);
 
     return (
       <EuiPopover
@@ -73,7 +93,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         isOpen={isOpen}
         closePopover={handleCloseMenu}
       >
-        <EuiContextMenuPanel items={menuItems} />
+        <EuiContextMenuPanel {...additionalContextMenuPanelProps} items={menuItems} />
       </EuiPopover>
     );
   }

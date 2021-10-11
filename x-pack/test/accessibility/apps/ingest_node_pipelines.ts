@@ -14,14 +14,14 @@ export default function ({ getService, getPageObjects }: any) {
   const log = getService('log');
   const a11y = getService('a11y'); /* this is the wrapping service around axe */
 
-  describe('Ingest Node Pipelines', async () => {
+  describe('Ingest Pipelines', async () => {
     before(async () => {
       await putSamplePipeline(esClient);
       await common.navigateToApp('ingestPipelines');
     });
 
     it('List View', async () => {
-      await retry.waitFor('Ingest Node Pipelines page to be visible', async () => {
+      await retry.waitFor('Ingest Pipelines page to be visible', async () => {
         await common.navigateToApp('ingestPipelines');
         return testSubjects.exists('pipelineDetailsLink') ? true : false;
       });

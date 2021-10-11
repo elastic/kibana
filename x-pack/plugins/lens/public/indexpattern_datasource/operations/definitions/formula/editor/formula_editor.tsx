@@ -549,6 +549,8 @@ export function FormulaEditor({
       dimension: { width: 320, height: 200 },
       fixedOverflowWidgets: true,
       matchBrackets: 'always',
+      // Undocumented Monaco option to force left margin width
+      lineDecorationsWidth: 16,
     },
   };
 

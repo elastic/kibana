@@ -519,11 +519,19 @@ export default async function ({ readConfigFile }) {
             cluster: ['monitor', 'manage_index_templates'],
             indices: [
               {
-                names: ['geo_shapes*'],
+                names: ['*'],
                 privileges: ['all'],
               },
             ],
           },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         ingest_pipelines_user: {

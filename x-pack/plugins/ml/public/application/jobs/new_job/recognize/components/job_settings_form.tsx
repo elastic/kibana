@@ -269,7 +269,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
         >
           <FormattedMessage
             id="xpack.ml.newJob.recognize.createJobButtonLabel"
-            defaultMessage="Create {numberOfJobs, plural, zero {Job} one {Job} other {Jobs}}"
+            defaultMessage="Create {numberOfJobs, plural, zero {job} one {job} other {jobs}}"
             values={{ numberOfJobs: jobs.length }}
           />
         </EuiButton>

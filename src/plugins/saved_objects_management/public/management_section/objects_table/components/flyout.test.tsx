@@ -47,9 +47,9 @@ describe('Flyout', () => {
         ]),
       } as any,
       http,
-      allowedTypes: ['search', 'index-pattern', 'visualization'],
       search,
       basePath,
+      allowedTypes: [],
     };
   });
 

@@ -13,7 +13,7 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 import { kueryRt, rangeRt } from './default_api_types';
 
 const fallbackToTransactionsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fallback_to_transactions',
+  endpoint: 'GET /internal/apm/fallback_to_transactions',
   params: t.partial({
     query: t.intersection([kueryRt, t.partial(rangeRt.props)]),
   }),
@@ -22,13 +22,15 @@ const fallbackToTransactionsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const {
       params: {
-        query: { kuery },
+        query: { kuery, start, end },
       },
     } = resources;
     return {
       fallbackToTransactions: await getIsUsingTransactionEvents({
         setup,
         kuery,
+        start,
+        end,
       }),
     };
   },
