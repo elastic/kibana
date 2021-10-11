@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
+import { ZipUrlTLSFields } from './zip_url_tls_fields';
 import { MonacoEditorLangId } from '../types';
 
 enum SourceType {
@@ -36,7 +37,6 @@ interface SourceConfig {
 interface Props {
   onChange: (sourceConfig: SourceConfig) => void;
   defaultConfig?: SourceConfig;
-  setIsInlineScript: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const defaultValues = {
@@ -48,11 +48,7 @@ export const defaultValues = {
   params: '',
 };
 
-export const SourceField = ({
-  onChange,
-  defaultConfig = defaultValues,
-  setIsInlineScript,
-}: Props) => {
+export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) => {
   const [sourceType, setSourceType] = useState<SourceType>(
     defaultConfig.inlineScript ? SourceType.INLINE : SourceType.ZIP
   );
@@ -101,6 +97,7 @@ export const SourceField = ({
               data-test-subj="syntheticsBrowserZipUrl"
             />
           </EuiFormRow>
+          <ZipUrlTLSFields />
           <EuiFormRow
             label={
               <FormattedMessage
@@ -251,7 +248,6 @@ export const SourceField = ({
       autoFocus="selected"
       onTabClick={(tab) => {
         setSourceType(tab.id as SourceType);
-        setIsInlineScript(tab.id === SourceType.INLINE);
         if (tab.id !== sourceType) {
           setConfig(defaultValues);
         }

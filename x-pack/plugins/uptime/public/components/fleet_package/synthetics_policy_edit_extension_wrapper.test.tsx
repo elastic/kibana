@@ -56,6 +56,10 @@ const defaultNewPolicy: NewPackagePolicy = {
             dataset: 'http',
           },
           vars: {
+            metadata: {
+              value: JSON.stringify({ is_tls_enabled: true }),
+              type: 'yaml',
+            },
             type: {
               value: 'http',
               type: 'text',
@@ -382,7 +386,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('true');
     expect(verificationMode).toBeInTheDocument();
     expect(verificationMode.value).toEqual(
-      `${defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE].value}`
+      `${defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]}`
     );
 
     // ensure other monitor type options are not in the DOM
@@ -566,6 +570,17 @@ describe('<SyntheticsPolicyEditExtension />', () => {
         })
       );
     });
+  });
+
+  it('shows tls fields when metadata.is_tls_enabled is true', async () => {
+    const { getByLabelText } = render(<WrappedComponent />);
+    const verificationMode = getByLabelText('Verification mode') as HTMLInputElement;
+    const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
+    expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('true');
+    expect(verificationMode).toBeInTheDocument();
+    expect(verificationMode.value).toEqual(
+      `${defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]}`
+    );
   });
 
   it('handles browser validation', async () => {
@@ -1057,5 +1072,31 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(queryByLabelText('Url')).not.toBeInTheDocument();
     expect(queryByLabelText('Proxy URL')).not.toBeInTheDocument();
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
+  });
+
+  it('hides tls fields when metadata.is_tls_enabled is false', async () => {
+    const { getByLabelText, queryByLabelText } = render(
+      <WrappedComponent
+        policy={{
+          ...defaultCurrentPolicy,
+          inputs: [
+            {
+              ...defaultNewPolicy.inputs[0],
+              enabled: false,
+            },
+            {
+              ...defaultNewPolicy.inputs[1],
+              enabled: true,
+            },
+            defaultNewPolicy.inputs[2],
+            defaultNewPolicy.inputs[3],
+          ],
+        }}
+      />
+    );
+    const verificationMode = queryByLabelText('Verification mode');
+    const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
+    expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('false');
+    expect(verificationMode).not.toBeInTheDocument();
   });
 });

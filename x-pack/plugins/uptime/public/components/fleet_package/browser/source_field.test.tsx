@@ -10,6 +10,7 @@ import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { SourceField, defaultValues } from './source_field';
+import { BrowserSimpleFieldsContextProvider } from '../contexts';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
@@ -33,35 +34,18 @@ jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
 });
 
 const onChange = jest.fn();
-const setIsInlineScript = jest.fn();
 
 describe('<SourceField />', () => {
   const WrappedComponent = () => {
-    return <SourceField onChange={onChange} setIsInlineScript={setIsInlineScript} />;
+    return (
+      <BrowserSimpleFieldsContextProvider>
+        <SourceField onChange={onChange} />
+      </BrowserSimpleFieldsContextProvider>
+    );
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('calls setIsInlineScript', async () => {
-    render(<WrappedComponent />);
-
-    const inlineTab = screen.getByTestId('syntheticsSourceTab__inline');
-    fireEvent.click(inlineTab);
-
-    await waitFor(() => {
-      expect(setIsInlineScript).toBeCalledWith(true);
-    });
-
-    setIsInlineScript.mockClear();
-
-    const zipUrlTab = screen.getByTestId('syntheticsSourceTab__zipUrl');
-    fireEvent.click(zipUrlTab);
-
-    await waitFor(() => {
-      expect(setIsInlineScript).toBeCalledWith(false);
-    });
   });
 
   it('calls onChange', async () => {

@@ -4,35 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import 'jest-canvas-mock';
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
-import { render } from '../../lib/helper/rtl_helpers';
-import { TLSFields } from './tls_fields';
-import { ConfigKeys, VerificationMode } from './types';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { render } from '../../../lib/helper/rtl_helpers';
+import { ZipUrlTLSFields } from './zip_url_tls_fields';
+import { ConfigKeys, VerificationMode } from '../types';
 import {
-  TLSFieldsContextProvider,
+  BrowserSimpleFieldsContextProvider,
   PolicyConfigContextProvider,
-  defaultTLSFields as defaultValues,
-} from './contexts';
+  defaultBrowserSimpleFields as defaultValues,
+} from '../contexts';
 
-// ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
-describe('<TLSFields />', () => {
+describe('<SourceField />', () => {
   const WrappedComponent = ({ isEnabled = true }: { isEnabled?: boolean }) => {
     return (
-      <PolicyConfigContextProvider defaultIsTLSEnabled={isEnabled}>
-        <TLSFieldsContextProvider defaultValues={defaultValues}>
-          <TLSFields />
-        </TLSFieldsContextProvider>
-      </PolicyConfigContextProvider>
+      <BrowserSimpleFieldsContextProvider defaultValues={defaultValues}>
+        <PolicyConfigContextProvider defaultIsZipUrlTLSEnabled={isEnabled}>
+          <ZipUrlTLSFields />
+        </PolicyConfigContextProvider>
+      </BrowserSimpleFieldsContextProvider>
     );
   };
-  it('renders TLSFields', () => {
-    const { getByLabelText, getByText } = render(<WrappedComponent />);
+  it('renders ZipUrlTLSFields', () => {
+    const { getByLabelText, getByText } = render(<WrappedComponent isEnabled={false} />);
+
+    const toggle = getByText('Enable TLS configuration for ZIP URL');
+
+    fireEvent.click(toggle);
 
     expect(getByText('Certificate settings')).toBeInTheDocument();
     expect(getByText('Supported TLS protocols')).toBeInTheDocument();
@@ -42,7 +46,7 @@ describe('<TLSFields />', () => {
     expect(getByLabelText('Verification mode')).toBeInTheDocument();
   });
 
-  it('updates fields and calls onChange', async () => {
+  it('updates fields', async () => {
     const { getByLabelText } = render(<WrappedComponent />);
 
     const clientCertificate = getByLabelText('Client certificate') as HTMLInputElement;

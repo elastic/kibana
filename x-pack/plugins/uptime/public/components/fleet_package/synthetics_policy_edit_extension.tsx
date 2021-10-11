@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
 import {
-  useMonitorTypeContext,
+  usePolicyConfigContext,
   useTCPSimpleFieldsContext,
   useTCPAdvancedFieldsContext,
   useICMPSimpleFieldsContext,
@@ -37,17 +37,17 @@ interface SyntheticsPolicyEditExtensionProps {
   newPolicy: PackagePolicyEditExtensionComponentProps['newPolicy'];
   onChange: PackagePolicyEditExtensionComponentProps['onChange'];
   defaultConfig: Partial<ICustomFields>;
-  isTLSEnabled: boolean;
 }
+
 /**
  * Exports Synthetics-specific package policy instructions
  * for use in the Fleet app create / edit package policy
  */
 export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionProps>(
-  ({ newPolicy, onChange, defaultConfig, isTLSEnabled }) => {
+  ({ newPolicy, onChange, defaultConfig }) => {
     useTrackPageview({ app: 'fleet', path: 'syntheticsEdit' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsEdit', delay: 15000 });
-    const { monitorType } = useMonitorTypeContext();
+    const { monitorType, isTLSEnabled, isZipUrlTLSEnabled } = usePolicyConfigContext();
     const { fields: httpSimpleFields } = useHTTPSimpleFieldsContext();
     const { fields: tcpSimpleFields } = useTCPSimpleFieldsContext();
     const { fields: icmpSimpleFields } = useICMPSimpleFieldsContext();
@@ -57,17 +57,27 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
     const { fields: browserSimpleFields } = useBrowserSimpleFieldsContext();
     const { fields: browserAdvancedFields } = useBrowserAdvancedFieldsContext();
 
+    const metadata = useMemo(
+      () => ({
+        is_tls_enabled: isTLSEnabled,
+        is_zip_url_tls_enabled: isZipUrlTLSEnabled,
+      }),
+      [isTLSEnabled, isZipUrlTLSEnabled]
+    );
+
     const policyConfig: PolicyConfig = {
       [DataStream.HTTP]: {
         ...httpSimpleFields,
         ...httpAdvancedFields,
         ...tlsFields,
+        [ConfigKeys.METADATA]: metadata,
         [ConfigKeys.NAME]: newPolicy.name,
       } as HTTPFields,
       [DataStream.TCP]: {
         ...tcpSimpleFields,
         ...tcpAdvancedFields,
         ...tlsFields,
+        [ConfigKeys.METADATA]: metadata,
         [ConfigKeys.NAME]: newPolicy.name,
       } as TCPFields,
       [DataStream.ICMP]: {
@@ -77,7 +87,7 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
       [DataStream.BROWSER]: {
         ...browserSimpleFields,
         ...browserAdvancedFields,
-        ...tlsFields,
+        [ConfigKeys.METADATA]: metadata,
         [ConfigKeys.NAME]: newPolicy.name,
       } as BrowserFields,
     };
@@ -91,7 +101,7 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
       monitorType,
     });
 
-    return <CustomFields isTLSEnabled={isTLSEnabled} validate={validate[monitorType]} />;
+    return <CustomFields validate={validate[monitorType]} />;
   }
 );
 SyntheticsPolicyEditExtension.displayName = 'SyntheticsPolicyEditExtension';

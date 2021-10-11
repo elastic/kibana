@@ -14,7 +14,11 @@ import {
 } from '../common/normalizers';
 
 import { defaultBrowserSimpleFields, defaultBrowserAdvancedFields } from '../contexts';
-import { tlsNormalizers } from '../tls/normalizers';
+import {
+  tlsNormalizers,
+  tlsJsonToObjectNormalizer,
+  tlsStringToObjectNormalizer,
+} from '../tls/normalizers';
 
 export type BrowserNormalizerMap = Record<keyof BrowserFields, Normalizer>;
 
@@ -32,6 +36,7 @@ export const getBrowserJsonToJavascriptNormalizer = (key: ConfigKeys) => {
 };
 
 export const browserNormalizers: BrowserNormalizerMap = {
+  [ConfigKeys.METADATA]: getBrowserJsonToJavascriptNormalizer(ConfigKeys.METADATA),
   [ConfigKeys.SOURCE_ZIP_URL]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_URL),
   [ConfigKeys.SOURCE_ZIP_USERNAME]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_USERNAME),
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_PASSWORD),
@@ -40,6 +45,32 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKeys.PARAMS]: getBrowserNormalizer(ConfigKeys.PARAMS),
   [ConfigKeys.SCREENSHOTS]: getBrowserNormalizer(ConfigKeys.SCREENSHOTS),
   [ConfigKeys.SYNTHETICS_ARGS]: getBrowserJsonToJavascriptNormalizer(ConfigKeys.SYNTHETICS_ARGS),
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: (fields) =>
+    tlsJsonToObjectNormalizer(
+      fields?.[ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]?.value,
+      ConfigKeys.TLS_CERTIFICATE_AUTHORITIES
+    ),
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE]: (fields) =>
+    tlsJsonToObjectNormalizer(
+      fields?.[ConfigKeys.ZIP_URL_TLS_CERTIFICATE]?.value,
+      ConfigKeys.TLS_CERTIFICATE
+    ),
+  [ConfigKeys.ZIP_URL_TLS_KEY]: (fields) =>
+    tlsJsonToObjectNormalizer(fields?.[ConfigKeys.ZIP_URL_TLS_KEY]?.value, ConfigKeys.TLS_KEY),
+  [ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]: (fields) =>
+    tlsStringToObjectNormalizer(
+      fields?.[ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]?.value,
+      ConfigKeys.TLS_KEY_PASSPHRASE
+    ),
+  [ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]: (fields) =>
+    tlsStringToObjectNormalizer(
+      fields?.[ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]?.value,
+      ConfigKeys.TLS_VERIFICATION_MODE
+    ),
+  [ConfigKeys.ZIP_URL_TLS_VERSION]: (fields) =>
+    tlsJsonToObjectNormalizer(
+      fields?.[ConfigKeys.ZIP_URL_TLS_VERSION]?.value,
+      ConfigKeys.TLS_VERSION
+    ),
   ...commonNormalizers,
-  ...tlsNormalizers,
 };

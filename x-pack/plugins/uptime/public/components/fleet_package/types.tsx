@@ -77,6 +77,7 @@ export enum ConfigKeys {
   APM_SERVICE_NAME = 'service.name',
   HOSTS = 'hosts',
   MAX_REDIRECTS = 'max_redirects',
+  METADATA = 'metadata',
   MONITOR_TYPE = 'type',
   NAME = 'name',
   PASSWORD = 'password',
@@ -113,6 +114,17 @@ export enum ConfigKeys {
   URLS = 'urls',
   USERNAME = 'username',
   WAIT = 'wait',
+  ZIP_URL_TLS_CERTIFICATE_AUTHORITIES = 'source.zip_url.ssl.certificate_authorities',
+  ZIP_URL_TLS_CERTIFICATE = 'source.zip_url.ssl.certificate',
+  ZIP_URL_TLS_KEY = 'source.zip_url.ssl.key',
+  ZIP_URL_TLS_KEY_PASSPHRASE = 'source.zip_url.ssl.key_passphrase',
+  ZIP_URL_TLS_VERIFICATION_MODE = 'source.zip_url.ssl.verification_mode',
+  ZIP_URL_TLS_VERSION = 'source.zip_url.ssl.supported_protocols',
+}
+
+export interface Metadata {
+  is_tls_enabled?: boolean;
+  is_zip_url_tls_enabled?: boolean;
 }
 
 export interface ICommonFields {
@@ -124,11 +136,13 @@ export interface ICommonFields {
 }
 
 export type IHTTPSimpleFields = {
+  [ConfigKeys.METADATA]: Metadata;
   [ConfigKeys.MAX_REDIRECTS]: string;
   [ConfigKeys.URLS]: string;
 } & ICommonFields;
 
 export type ITCPSimpleFields = {
+  [ConfigKeys.METADATA]: Metadata;
   [ConfigKeys.HOSTS]: string;
 } & ICommonFields;
 
@@ -138,30 +152,21 @@ export type IICMPSimpleFields = {
 } & ICommonFields;
 
 export interface ITLSFields {
-  [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
-    value: string;
-    isEnabled: boolean;
-  };
-  [ConfigKeys.TLS_CERTIFICATE]: {
-    value: string;
-    isEnabled: boolean;
-  };
-  [ConfigKeys.TLS_KEY]: {
-    value: string;
-    isEnabled: boolean;
-  };
-  [ConfigKeys.TLS_KEY_PASSPHRASE]: {
-    value: string;
-    isEnabled: boolean;
-  };
-  [ConfigKeys.TLS_VERIFICATION_MODE]: {
-    value: VerificationMode;
-    isEnabled: boolean;
-  };
-  [ConfigKeys.TLS_VERSION]: {
-    value: TLSVersion[];
-    isEnabled: boolean;
-  };
+  [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]?: string;
+  [ConfigKeys.TLS_CERTIFICATE]?: string;
+  [ConfigKeys.TLS_KEY]?: string;
+  [ConfigKeys.TLS_KEY_PASSPHRASE]?: string;
+  [ConfigKeys.TLS_VERIFICATION_MODE]?: VerificationMode;
+  [ConfigKeys.TLS_VERSION]?: TLSVersion[];
+}
+
+export interface IZipUrlTLSFields {
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]?: ITLSFields[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES];
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE]?: ITLSFields[ConfigKeys.TLS_CERTIFICATE];
+  [ConfigKeys.ZIP_URL_TLS_KEY]?: ITLSFields[ConfigKeys.TLS_KEY];
+  [ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]?: ITLSFields[ConfigKeys.TLS_KEY_PASSPHRASE];
+  [ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]?: ITLSFields[ConfigKeys.TLS_VERIFICATION_MODE];
+  [ConfigKeys.ZIP_URL_TLS_VERSION]?: ITLSFields[ConfigKeys.TLS_VERSION];
 }
 
 export interface IHTTPAdvancedFields {
@@ -187,13 +192,15 @@ export interface ITCPAdvancedFields {
 }
 
 export type IBrowserSimpleFields = {
+  [ConfigKeys.METADATA]: Metadata;
   [ConfigKeys.SOURCE_INLINE]: string;
   [ConfigKeys.SOURCE_ZIP_URL]: string;
   [ConfigKeys.SOURCE_ZIP_FOLDER]: string;
   [ConfigKeys.SOURCE_ZIP_USERNAME]: string;
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: string;
   [ConfigKeys.PARAMS]: string;
-} & ICommonFields;
+} & ICommonFields &
+  IZipUrlTLSFields;
 
 export interface IBrowserAdvancedFields {
   [ConfigKeys.SYNTHETICS_ARGS]: string[];
@@ -203,7 +210,7 @@ export interface IBrowserAdvancedFields {
 export type HTTPFields = IHTTPSimpleFields & IHTTPAdvancedFields & ITLSFields;
 export type TCPFields = ITCPSimpleFields & ITCPAdvancedFields & ITLSFields;
 export type ICMPFields = IICMPSimpleFields;
-export type BrowserFields = IBrowserSimpleFields & IBrowserAdvancedFields & ITLSFields;
+export type BrowserFields = IBrowserSimpleFields & IBrowserAdvancedFields;
 
 export type ICustomFields = HTTPFields &
   TCPFields &

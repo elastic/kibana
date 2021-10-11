@@ -14,7 +14,7 @@ import {
   HTTPContextProvider,
   BrowserContextProvider,
   ICMPSimpleFieldsContextProvider,
-  MonitorTypeContextProvider,
+  PolicyConfigContextProvider,
   TLSFieldsContextProvider,
 } from './contexts';
 import { CustomFields } from './custom_fields';
@@ -57,7 +57,7 @@ describe('<CustomFields />', () => {
   }) => {
     return (
       <HTTPContextProvider>
-        <MonitorTypeContextProvider>
+        <PolicyConfigContextProvider>
           <TCPContextProvider>
             <BrowserContextProvider>
               <ICMPSimpleFieldsContextProvider>
@@ -71,7 +71,7 @@ describe('<CustomFields />', () => {
               </ICMPSimpleFieldsContextProvider>
             </BrowserContextProvider>
           </TCPContextProvider>
-        </MonitorTypeContextProvider>
+        </PolicyConfigContextProvider>
       </HTTPContextProvider>
     );
   };
@@ -141,15 +141,11 @@ describe('<CustomFields />', () => {
     expect(verificationMode).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value);
-      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY].value);
-      expect(clientKeyPassphrase.value).toEqual(
-        defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value
-      );
-      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE].value);
-      expect(verificationMode.value).toEqual(
-        defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE].value
-      );
+      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]);
+      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY]);
+      expect(clientKeyPassphrase.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE]);
+      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE]);
+      expect(verificationMode.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]);
     });
   });
 
@@ -232,8 +228,8 @@ describe('<CustomFields />', () => {
       )
     ).toBeInTheDocument();
 
-    // expect tls options not be available for browser
-    expect(queryByLabelText('Enable TLS configuration')).toBeInTheDocument();
+    // expect tls options to be available for browser
+    expect(queryByLabelText('Enable TLS configuration for ZIP URL')).toBeInTheDocument();
 
     // ensure at least one browser advanced option is present
     advancedOptionsButton = getByText('Advanced Browser options');

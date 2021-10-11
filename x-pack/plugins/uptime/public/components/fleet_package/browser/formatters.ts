@@ -11,12 +11,19 @@ import {
   commonFormatters,
   arrayToJsonFormatter,
   stringToJsonFormatter,
+  objectToJsonFormatter,
 } from '../common/formatters';
-import { tlsFormatters } from '../tls/formatters';
+import {
+  tlsFormatters,
+  tlsValueToYamlFormatter,
+  tlsValueToStringFormatter,
+  tlsArrayToYamlFormatter,
+} from '../tls/formatters';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
 export const browserFormatters: BrowserFormatMap = {
+  [ConfigKeys.METADATA]: (fields) => objectToJsonFormatter(fields[ConfigKeys.METADATA]),
   [ConfigKeys.SOURCE_ZIP_URL]: null,
   [ConfigKeys.SOURCE_ZIP_USERNAME]: null,
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: null,
@@ -26,6 +33,17 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKeys.SCREENSHOTS]: null,
   [ConfigKeys.SYNTHETICS_ARGS]: (fields) =>
     arrayToJsonFormatter(fields[ConfigKeys.SYNTHETICS_ARGS]),
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: (fields) =>
+    tlsValueToYamlFormatter(fields[ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]),
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE]: (fields) =>
+    tlsValueToYamlFormatter(fields[ConfigKeys.ZIP_URL_TLS_CERTIFICATE]),
+  [ConfigKeys.ZIP_URL_TLS_KEY]: (fields) =>
+    tlsValueToYamlFormatter(fields[ConfigKeys.ZIP_URL_TLS_KEY]),
+  [ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]: (fields) =>
+    tlsValueToStringFormatter(fields[ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]),
+  [ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]: (fields) =>
+    tlsValueToStringFormatter(fields[ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]),
+  [ConfigKeys.ZIP_URL_TLS_VERSION]: (fields) =>
+    tlsArrayToYamlFormatter(fields[ConfigKeys.ZIP_URL_TLS_VERSION]),
   ...commonFormatters,
-  ...tlsFormatters,
 };
