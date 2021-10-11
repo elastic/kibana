@@ -95,7 +95,7 @@ describe('<CustomFields />', () => {
   });
 
   it('does not show monitor type dropdown when isEditable is true', async () => {
-    const { getByText, getByLabelText, queryByLabelText } = render(<WrappedComponent isEditable />);
+    const { queryByLabelText } = render(<WrappedComponent isEditable />);
     const monitorType = queryByLabelText('Monitor Type') as HTMLInputElement;
 
     expect(monitorType).not.toBeInTheDocument();
