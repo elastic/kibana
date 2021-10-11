@@ -7,10 +7,10 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
-import { AUTO_UPDATE_PACKAGES } from '../../common';
+import { AUTO_UPDATE_PACKAGES, KEEP_POLICIES_UP_TO_DATE_PACKAGES } from '../../common';
 
 import { appContextService } from './app_context';
-import { getPackageInfo } from './epm/packages';
+import { getInstallation, getPackageInfo } from './epm/packages';
 import { packagePolicyService } from './package_policy';
 
 /**
@@ -37,9 +37,19 @@ export const upgradeManagedPackagePolicies = async (
       pkgVersion: packagePolicy.package.version,
     });
 
+    const installedPackage = await getInstallation({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+    });
+
+    const isPolicyVersionAlignedWithInstalledVersion =
+      packageInfo.version === installedPackage?.version;
+
     const shouldUpgradePolicies =
-      AUTO_UPDATE_PACKAGES.some((pkg) => pkg.name === packageInfo.name) ||
-      packageInfo.keepPoliciesUpToDate;
+      !isPolicyVersionAlignedWithInstalledVersion &&
+      (KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === packageInfo.name) ||
+        AUTO_UPDATE_PACKAGES.some((pkg) => pkg.name === packageInfo.name) ||
+        packageInfo.keepPoliciesUpToDate);
 
     if (shouldUpgradePolicies) {
       policyIdsToUpgrade.push(packagePolicy.id);

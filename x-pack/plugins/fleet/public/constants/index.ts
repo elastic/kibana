@@ -22,6 +22,7 @@ export {
   // Preconfiguration
   AUTO_UPDATE_PACKAGES,
   DEFAULT_PACKAGES,
+  KEEP_POLICIES_UP_TO_DATE_PACKAGES,
 } from '../../common/constants';
 
 export * from './page_paths';
