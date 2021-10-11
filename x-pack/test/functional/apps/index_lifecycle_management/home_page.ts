@@ -16,7 +16,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const esClient = getService('es');
 
-  describe('Home page', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/114473 and https://github.com/elastic/kibana/issues/114474
+  describe.skip('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });
