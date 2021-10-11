@@ -195,6 +195,9 @@ describe('ServerMetricsCollector', () => {
 
     waitSubject.next('go');
     await Promise.all([res1, res2]);
+    // Give the event-loop one more cycle to allow concurrent connections to be
+    // up to date before collecting
+    await new Promise((resolve) => setTimeout(resolve, 0));
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
   });
