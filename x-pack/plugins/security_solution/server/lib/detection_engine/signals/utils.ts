@@ -136,7 +136,6 @@ export const hasReadIndexPrivileges = async (args: {
 };
 
 export const hasTimestampFields = async (args: {
-  wroteStatus: boolean;
   timestampField: string;
   ruleName: string;
   // any is derived from here
@@ -151,7 +150,6 @@ export const hasTimestampFields = async (args: {
   buildRuleMessage: BuildRuleMessage;
 }): Promise<boolean> => {
   const {
-    wroteStatus,
     timestampField,
     ruleName,
     timestampFieldCapsResponse,
@@ -163,7 +161,7 @@ export const hasTimestampFields = async (args: {
     buildRuleMessage,
   } = args;
 
-  if (!wroteStatus && isEmpty(timestampFieldCapsResponse.body.indices)) {
+  if (isEmpty(timestampFieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
     )} was found. This warning will continue to appear until a matching index is created or this rule is de-activated. ${
@@ -180,10 +178,9 @@ export const hasTimestampFields = async (args: {
     });
     return true;
   } else if (
-    !wroteStatus &&
-    (isEmpty(timestampFieldCapsResponse.body.fields) ||
-      timestampFieldCapsResponse.body.fields[timestampField] == null ||
-      timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null)
+    isEmpty(timestampFieldCapsResponse.body.fields) ||
+    timestampFieldCapsResponse.body.fields[timestampField] == null ||
+    timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null
   ) {
     // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
     // warning
@@ -206,7 +203,7 @@ export const hasTimestampFields = async (args: {
     });
     return true;
   }
-  return wroteStatus;
+  return false;
 };
 
 export const checkPrivileges = async (
