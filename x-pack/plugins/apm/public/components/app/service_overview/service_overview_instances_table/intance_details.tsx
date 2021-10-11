@@ -34,7 +34,7 @@ import { getCloudIcon, getContainerIcon } from '../../../shared/service_icons';
 import { useInstanceDetailsFetcher } from './use_instance_details_fetcher';
 
 type ServiceInstanceDetails =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 interface Props {
   serviceName: string;
