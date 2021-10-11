@@ -553,25 +553,34 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    * @private
    */
   private parseSchema(spec: VegaSpec) {
-    const schema = schemaParser(spec.$schema);
-    const isVegaLite = schema.library === 'vega-lite';
-    const libVersion = isVegaLite ? vegaLiteVersion : vegaVersion;
+    try {
+      const schema = schemaParser(spec.$schema);
+      const isVegaLite = schema.library === 'vega-lite';
+      const libVersion = isVegaLite ? vegaLiteVersion : vegaVersion;
 
-    if (versionCompare(schema.version, libVersion) > 0) {
-      this._onWarning(
-        i18n.translate('visTypeVega.vegaParser.notValidLibraryVersionForInputSpecWarningMessage', {
-          defaultMessage:
-            'The input spec uses {schemaLibrary} {schemaVersion}, but current version of {schemaLibrary} is {libraryVersion}.',
-          values: {
-            schemaLibrary: schema.library,
-            schemaVersion: schema.version,
-            libraryVersion: libVersion,
-          },
-        })
+      if (versionCompare(schema.version, libVersion) > 0) {
+        this._onWarning(
+          i18n.translate(
+            'visTypeVega.vegaParser.notValidLibraryVersionForInputSpecWarningMessage',
+            {
+              defaultMessage:
+                'The input spec uses {schemaLibrary} {schemaVersion}, but current version of {schemaLibrary} is {libraryVersion}.',
+              values: {
+                schemaLibrary: schema.library,
+                schemaVersion: schema.version,
+                libraryVersion: libVersion,
+              },
+            }
+          )
+        );
+      }
+
+      return { isVegaLite, libVersion };
+    } catch (e) {
+      throw Error(
+        'The URL for the JSON "$schema" is incorrect. Correct the URL, then click Update.'
       );
     }
-
-    return { isVegaLite, libVersion };
   }
 
   /**
