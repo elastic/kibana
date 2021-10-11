@@ -55,4 +55,24 @@ describe('Breakdowns', function () {
     });
     expect(setSeries).toHaveBeenCalledTimes(1);
   });
+
+  it('should disable breakdowns when a different series has a breakdown', function () {
+    const initSeries = {
+      data: [mockUxSeries, { ...mockUxSeries, breakdown: undefined }],
+      breakdown: USER_AGENT_OS,
+    };
+
+    render(
+      <Breakdowns
+        seriesId={1}
+        seriesConfig={dataViewSeries}
+        series={{ ...mockUxSeries, breakdown: undefined }}
+      />,
+      { initSeries }
+    );
+
+    const button = screen.getByText('No breakdown');
+
+    expect(button).toHaveAttribute('disabled');
+  });
 });
