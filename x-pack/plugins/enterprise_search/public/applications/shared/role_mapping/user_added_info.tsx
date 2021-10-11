@@ -12,8 +12,9 @@ import { EuiCallOut, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 import { USERNAME_LABEL, EMAIL_LABEL } from '../constants';
 
 import {
-  KIBANA_ACCESS_ERROR_DESCRIPTION,
-  KIBANA_ACCESS_ERROR_MESSAGE,
+  KIBANA_ACCESS_WARNING_TITLE,
+  KIBANA_ACCESS_WARNING_DESCRIPTION,
+  KIBANA_ACCESS_WARNING_ERROR_MESSAGE,
   ROLE_LABEL,
 } from './constants';
 
@@ -26,10 +27,10 @@ interface Props {
 
 const kibanaAccessWarning = (
   <>
-    <EuiCallOut title="Kibana Access Warning" color="warning" iconType="help">
-      <EuiText size="s">{KIBANA_ACCESS_ERROR_MESSAGE}</EuiText>
+    <EuiCallOut title={KIBANA_ACCESS_WARNING_TITLE} color="warning" iconType="help">
+      <EuiText size="s">{KIBANA_ACCESS_WARNING_ERROR_MESSAGE}</EuiText>
       <EuiSpacer />
-      <EuiText size="s">{KIBANA_ACCESS_ERROR_DESCRIPTION}</EuiText>
+      <EuiText size="s">{KIBANA_ACCESS_WARNING_DESCRIPTION}</EuiText>
     </EuiCallOut>
     <EuiSpacer />
   </>

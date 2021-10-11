@@ -127,7 +127,7 @@ describe('UserAddedInfo', () => {
         <EuiCallOut
           color="warning"
           iconType="help"
-          title="Kibana Access Warning"
+          title="Kibana access warning"
         >
           <EuiText
             size="s"
