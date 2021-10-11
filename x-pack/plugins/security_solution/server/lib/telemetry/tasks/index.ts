@@ -10,13 +10,13 @@ import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
 import { createTelemetryEndpointTaskConfig } from './endpoint';
 import { createTelemetrySecurityListTaskConfig } from './security_lists';
 
-export function createTelemetryTaskConfigs(
-  maxSecurityListTelemetryBatch: number,
-  maxEndpointTelemetryBatch: number
-): SecurityTelemetryTaskConfig[] {
+const MAX_SECURITY_LIST_TELEMETRY_BATCH = 100;
+const MAX_ENDPOINT_TELEMETRY_BATCH = 1_000;
+
+export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
   return [
     createTelemetryDiagnosticsTaskConfig(),
-    createTelemetryEndpointTaskConfig(maxEndpointTelemetryBatch),
-    createTelemetrySecurityListTaskConfig(maxSecurityListTelemetryBatch),
+    createTelemetryEndpointTaskConfig(MAX_SECURITY_LIST_TELEMETRY_BATCH),
+    createTelemetrySecurityListTaskConfig(MAX_ENDPOINT_TELEMETRY_BATCH),
   ];
 }
