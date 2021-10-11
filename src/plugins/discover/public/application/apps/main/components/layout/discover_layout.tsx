@@ -26,7 +26,7 @@ import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { esFilters, IndexPatternField } from '../../../../../../../data/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../../common';
 import { popularizeField } from '../../../../helpers/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
@@ -75,7 +75,10 @@ export function DiscoverLayout({
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
-  const viewMode = useMemo(() => state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL, [state.viewMode]);
+  const viewMode = useMemo(() => {
+    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
+    return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
+  }, [uiSettings, state.viewMode]);
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {

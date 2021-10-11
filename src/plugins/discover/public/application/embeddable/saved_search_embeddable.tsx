@@ -35,6 +35,7 @@ import {
   DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
+  SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import * as columnActions from '../apps/main/components/doc_table/actions/columns';
@@ -383,6 +384,7 @@ export class SavedSearchEmbeddable
     }
 
     if (
+      this.services.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
       this.savedSearch.viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
       searchProps.services &&
       searchProps.indexPattern &&

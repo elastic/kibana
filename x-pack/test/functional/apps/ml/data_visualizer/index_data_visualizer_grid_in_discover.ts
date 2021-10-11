@@ -10,8 +10,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 import { TestData, MetricFieldVisConfig } from './types';
 
+const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 const farequoteIndexPatternTestData: TestData = {
-  suiteTitle: 'index pattern',
+  suiteTitle: 'farequote index pattern',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'ft_farequote',
   fieldNameFilters: ['airline', '@timestamp'],
@@ -536,11 +537,13 @@ const sampleLogTestData: TestData = {
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
   const ml = getService('ml');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const toasts = getService('toasts');
 
+  /** Discover page helpers **/
   const assertHitCount = async (expectedHitCount: string) => {
     await retry.tryForTime(2 * 1000, async () => {
       // Close side bar to ensure Discover hit count shows
@@ -554,10 +557,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
+  const assertViewModeToggleNotExists = async () => {
+    await retry.tryForTime(2 * 1000, async () => {
+      await testSubjects.missingOrFail('dscViewModeToggle');
+    });
+  };
+
   const assertViewModeToggleExists = async () => {
     await retry.tryForTime(2 * 1000, async () => {
       await testSubjects.existOrFail('dscViewModeToggle');
     });
+  };
+
+  const assertFieldStatsTableNotExists = async () => {
+    await testSubjects.missingOrFail('dscFieldStatsEmbeddedContent');
   };
 
   const clickViewModeFieldStatsButton = async () => {
@@ -568,20 +581,67 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
+  const selectIndexPattern = async (indexPattern: string) => {
+    await retry.tryForTime(2 * 1000, async () => {
+      await PageObjects.discover.selectIndexPattern(indexPattern);
+      const indexPatternTitle = await testSubjects.getVisibleText('indexPattern-switch-link');
+      expect(indexPatternTitle).to.be(indexPattern);
+    });
+  };
+
+  const clearAdvancedSetting = async (propertyName: string) => {
+    await retry.tryForTime(2 * 1000, async () => {
+      await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
+        shouldUseHashForSubUrl: false,
+      });
+      if ((await PageObjects.settings.getAdvancedSettingCheckbox(propertyName)) === 'true') {
+        await PageObjects.settings.clearAdvancedSettings(propertyName);
+      }
+    });
+  };
+
+  const setAdvancedSettingCheckbox = async (propertyName: string, checkedState: boolean) => {
+    await retry.tryForTime(2 * 1000, async () => {
+      await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
+        shouldUseHashForSubUrl: false,
+      });
+      await testSubjects.click('settings');
+      await toasts.dismissAllToasts();
+      await PageObjects.settings.toggleAdvancedSettingCheckbox(propertyName, checkedState);
+    });
+  };
+
+  function runTestsWhenDisabled(testData: TestData) {
+    it('should not show view mode toggle or Field stats table', async function () {
+      await PageObjects.common.navigateToApp('discover');
+      if (testData.isSavedSearch) {
+        await retry.tryForTime(2 * 1000, async () => {
+          await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
+        });
+      } else {
+        await selectIndexPattern(testData.sourceIndexOrSavedSearch);
+      }
+
+      await PageObjects.timePicker.setAbsoluteRange(
+        'Jan 1, 2016 @ 00:00:00.000',
+        'Nov 1, 2020 @ 00:00:00.000'
+      );
+
+      await assertViewModeToggleNotExists();
+      await assertFieldStatsTableNotExists();
+    });
+  }
+
   function runTests(testData: TestData) {
     describe(`with ${testData.suiteTitle}`, function () {
-      it('displays the Field statistics table', async function () {
+      it(`displays the 'Field statistics' table content correctly`, async function () {
         await PageObjects.common.navigateToApp('discover');
         if (testData.isSavedSearch) {
           await retry.tryForTime(2 * 1000, async () => {
             await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
           });
         } else {
-          await retry.tryForTime(2 * 1000, async () => {
-            await PageObjects.discover.selectIndexPattern(testData.sourceIndexOrSavedSearch);
-            const indexPatternTitle = await testSubjects.getVisibleText('indexPattern-switch-link');
-            expect(indexPatternTitle).to.be(testData.sourceIndexOrSavedSearch);
-          });
+          await selectIndexPattern(testData.sourceIndexOrSavedSearch);
         }
         await PageObjects.timePicker.setAbsoluteRange(
           'Jan 1, 2016 @ 00:00:00.000',
@@ -620,7 +680,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  describe('field statistics', function () {
+  describe('field statistics in Discover', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
@@ -639,13 +699,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
       await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
       await ml.testResources.deleteSavedSearches();
+      await clearAdvancedSetting(SHOW_FIELD_STATISTICS);
     });
 
-    runTests(farequoteIndexPatternTestData);
-    runTests(farequoteKQLSearchTestData);
-    runTests(farequoteLuceneSearchTestData);
-    runTests(farequoteKQLFiltersSearchTestData);
-    runTests(farequoteLuceneFiltersSearchTestData);
-    runTests(sampleLogTestData);
+    describe('when enabled', function () {
+      before(async function () {
+        await setAdvancedSettingCheckbox(SHOW_FIELD_STATISTICS, true);
+      });
+
+      after(async function () {
+        await clearAdvancedSetting(SHOW_FIELD_STATISTICS);
+      });
+
+      runTests(farequoteIndexPatternTestData);
+      runTests(farequoteKQLSearchTestData);
+      runTests(farequoteLuceneSearchTestData);
+      runTests(farequoteKQLFiltersSearchTestData);
+      runTests(farequoteLuceneFiltersSearchTestData);
+      runTests(sampleLogTestData);
+    });
+
+    describe('when disabled', function () {
+      before(async function () {
+        // Ensure that the setting is set to default state which is false
+        await setAdvancedSettingCheckbox(SHOW_FIELD_STATISTICS, false);
+      });
+
+      runTestsWhenDisabled(farequoteIndexPatternTestData);
+      runTestsWhenDisabled(farequoteKQLSearchTestData);
+    });
   });
 }
