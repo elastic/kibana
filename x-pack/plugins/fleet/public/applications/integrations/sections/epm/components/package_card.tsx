@@ -29,7 +29,7 @@ export function PackageCard({
   version,
   icons,
   integration,
-  uiInternalPathUrl,
+  url,
   release,
 }: PackageCardProps) {
   const betaBadgeLabel = release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined;
@@ -49,9 +49,10 @@ export function PackageCard({
           size="xl"
         />
       }
-      href={uiInternalPathUrl}
+      href={url}
       betaBadgeLabel={betaBadgeLabel}
       betaBadgeTooltipContent={betaBadgeLabelTooltipContent}
+      target={url.startsWith('http') || url.startsWith('https') ? '_blank' : undefined}
     />
   );
 }
