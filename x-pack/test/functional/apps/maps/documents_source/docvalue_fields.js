@@ -44,7 +44,7 @@ export default function ({ getPageObjects, getService }) {
     it('should format date fields as epoch_millis when data driven styling is applied to a date field', async () => {
       await PageObjects.maps.loadSavedMap('document example with data driven styles on date field');
       const { rawResponse: response } = await PageObjects.maps.getResponse();
-      const targetHit = response.hits.hits.find(hit => {
+      const targetHit = response.hits.hits.find((hit) => {
         return hit._id === 'AU_x3_g4GFA8no6QjkSR';
       });
       expect(targetHit).not.to.be(undefined);
