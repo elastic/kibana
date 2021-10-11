@@ -14,6 +14,7 @@ import { allowedExperimentalValues } from '../../../../../common/experimental_fe
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -31,10 +32,9 @@ describe('Custom Query Alerts', () => {
       experimentalFeatures: allowedExperimentalValues,
       lists: dependencies.lists,
       logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
+      config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
+      eventLogService: dependencies.eventLogService,
       version: '1.0.0',
     });
 
@@ -79,10 +79,9 @@ describe('Custom Query Alerts', () => {
       experimentalFeatures: allowedExperimentalValues,
       lists: dependencies.lists,
       logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
+      config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
+      eventLogService: dependencies.eventLogService,
       version: '1.0.0',
     });
 
