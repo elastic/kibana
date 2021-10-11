@@ -8,9 +8,11 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+import { SavedObjectReference } from 'kibana/server';
 import type { LocatorDependencies } from './locator';
-import type { LocatorDefinition, LocatorPublic, ILocatorClient } from './types';
+import type { LocatorDefinition, LocatorPublic, ILocatorClient, LocatorData } from './types';
 import { Locator } from './locator';
+import { LocatorMigrationFunction, LocatorsMigrationMap } from '.';
 
 export type LocatorClientDependencies = LocatorDependencies;
 
@@ -46,6 +48,12 @@ export class LocatorClient implements ILocatorClient {
     return this.locators.get(id);
   }
 
+  protected getOrThrow<P extends SerializableRecord>(id: string): LocatorPublic<P> {
+    const locator = this.locators.get(id);
+    if (!locator) throw new Error(`Locator [ID = "${id}"] is not registered.`);
+    return locator;
+  }
+
   public migrations(): { [locatorId: string]: MigrateFunctionsObject } {
     const migrations: { [locatorId: string]: MigrateFunctionsObject } = {};
 
@@ -55,4 +63,66 @@ export class LocatorClient implements ILocatorClient {
 
     return migrations;
   }
+
+  // PersistableStateService -----------------------------------------------------------------------
+
+  public telemetry(
+    state: LocatorData,
+    collector: Record<string, unknown>
+  ): Record<string, unknown> {
+    for (const locator of this.locators.values()) {
+      collector = locator.telemetry(state.state, collector);
+    }
+
+    return collector;
+  }
+
+  public inject(state: LocatorData, references: SavedObjectReference[]): LocatorData {
+    const locator = this.getOrThrow(state.id);
+    return {
+      ...state,
+      state: locator.inject(state.state, references),
+    };
+  }
+
+  public extract(state: LocatorData): { state: LocatorData; references: SavedObjectReference[] } {
+    const locator = this.getOrThrow(state.id);
+    const extracted = locator.extract(state.state);
+    return {
+      state: {
+        ...state,
+        state: extracted.state,
+      },
+      references: extracted.references,
+    };
+  }
+
+  public readonly getAllMigrations = (): LocatorsMigrationMap => {
+    const locatorParamsMigrations = this.migrations();
+    const locatorMigrations: LocatorsMigrationMap = {};
+    const versions = new Set<string>();
+
+    for (const migrationMap of Object.values(locatorParamsMigrations))
+      for (const version of Object.keys(migrationMap)) versions.add(version);
+
+    for (const version of versions.values()) {
+      const migration: LocatorMigrationFunction = (locator) => {
+        const locatorMigrationsMap = locatorParamsMigrations[locator.id];
+        if (!locatorMigrationsMap) return locator;
+
+        const migrationFunction = locatorMigrationsMap[version];
+        if (!migrationFunction) return locator;
+
+        return {
+          ...locator,
+          version,
+          state: migrationFunction(locator.state),
+        };
+      };
+
+      locatorMigrations[version] = migration;
+    }
+
+    return locatorMigrations;
+  };
 }

@@ -7,14 +7,12 @@
  */
 
 import type {
-  SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectsServiceSetup,
   SavedObjectsType,
 } from 'kibana/server';
 import type { LocatorData } from 'src/plugins/share/common/url_service';
 import type { ServerUrlService } from '..';
-import type { ShortUrlSavedObjectAttributes } from '../short_urls/storage/saved_object_short_url_storage';
 
 export const registerUrlServiceSavedObjectType = (
   so: Pick<SavedObjectsServiceSetup, 'registerType'>,
@@ -77,41 +75,25 @@ export const registerUrlServiceSavedObjectType = (
       },
     },
     migrations: () => {
-      const locatorMigrations = service.locators.migrations();
-      const savedObjectMigrations: SavedObjectMigrationMap = {};
-      const versions = new Set<string>();
+      const locatorMigrations = service.locators.getAllMigrations();
+      const savedObjectLocatorMigrations: SavedObjectMigrationMap = {};
 
-      for (const migrationMap of Object.values(locatorMigrations))
-        for (const version of Object.keys(migrationMap)) versions.add(version);
-
-      for (const version of versions.values()) {
-        const migration: SavedObjectMigrationFn<
-          ShortUrlSavedObjectAttributes,
-          ShortUrlSavedObjectAttributes
-        > = (doc) => {
+      for (const [version, locatorMigration] of Object.entries(locatorMigrations)) {
+        savedObjectLocatorMigrations[version] = (doc) => {
           const locator = JSON.parse(doc.attributes.locatorJSON) as LocatorData;
-          const locatorMigrationsMap = locatorMigrations[locator.id];
-          if (!locatorMigrationsMap) return doc;
-
-          const migrationFunction = locatorMigrationsMap[version];
-          if (!migrationFunction) return doc;
-
           doc.attributes = {
             ...doc.attributes,
             locatorJSON: JSON.stringify({
               ...locator,
               version,
-              state: migrationFunction(locator.state),
+              state: locatorMigration(locator),
             }),
           };
-
           return doc;
         };
-
-        savedObjectMigrations[version] = migration;
       }
 
-      return savedObjectMigrations;
+      return savedObjectLocatorMigrations;
     },
   };
 

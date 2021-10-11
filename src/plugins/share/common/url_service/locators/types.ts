@@ -8,13 +8,18 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { DependencyList } from 'react';
-import { MigrateFunctionsObject, PersistableState } from 'src/plugins/kibana_utils/common';
+import {
+  MigrateFunction,
+  PersistableState,
+  PersistableStateService,
+  VersionedState,
+} from 'src/plugins/kibana_utils/common';
 import type { FormatSearchParamsOptions } from './redirect';
 
 /**
  * URL locator registry.
  */
-export interface ILocatorClient {
+export interface ILocatorClient extends PersistableStateService<LocatorData> {
   /**
    * Create and register a new locator.
    *
@@ -28,11 +33,6 @@ export interface ILocatorClient {
    * @param id Unique ID of the locator.
    */
   get<P extends SerializableRecord>(id: string): undefined | LocatorPublic<P>;
-
-  /**
-   * Returns a combined map of all migrations for all registered locators.
-   */
-  migrations(): { [locatorId: string]: MigrateFunctionsObject };
 }
 
 /**
@@ -146,3 +146,22 @@ export interface KibanaLocation<S = object> {
    */
   state: S;
 }
+
+/**
+ * Represents a serializable state of a locator. Includes locator ID, version
+ * and its params.
+ */
+export interface LocatorData<LocatorParams extends SerializableRecord = SerializableRecord>
+  extends VersionedState<LocatorParams>,
+    SerializableRecord {
+  /**
+   * Locator ID.
+   */
+  id: string;
+}
+
+export interface LocatorsMigrationMap {
+  [semver: string]: LocatorMigrationFunction;
+}
+
+export type LocatorMigrationFunction = MigrateFunction<LocatorData, LocatorData>;
