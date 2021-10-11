@@ -62,9 +62,13 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   const { isLoading, error, sendRequest: refreshAgentPolicy } = agentPolicyRequest;
   const queryParams = new URLSearchParams(useLocation().search);
   const openEnrollmentFlyoutOpenByDefault = queryParams.get('openEnrollmentFlyout') === 'true';
+  const openAddAgentHelpPopoverOpenByDefault = queryParams.get('showAddAgentHelp') === 'true';
   const [redirectToAgentPolicyList] = useState<boolean>(false);
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
     openEnrollmentFlyoutOpenByDefault
+  );
+  const [isAddAgentHelpPopoverOpen, setIsAddAgentHelpPopoverOpen] = useState<boolean>(
+    openAddAgentHelpPopoverOpenByDefault
   );
   const agentStatusRequest = useGetAgentStatus(policyId);
   const { refreshAgentStatus } = agentStatusRequest;
@@ -152,7 +156,16 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     [isFleetReady, navigateToApp, routeState]
   );
 
-  const addAgentLink = <EuiLink onClick={() => setIsEnrollmentFlyoutOpen(true)}>Add agent</EuiLink>;
+  const addAgentLink = (
+    <EuiLink
+      onClick={() => {
+        setIsAddAgentHelpPopoverOpen(false);
+        setIsEnrollmentFlyoutOpen(true);
+      }}
+    >
+      Add agent
+    </EuiLink>
+  );
   const headerRightContent = useMemo(
     () =>
       agentPolicy ? (
@@ -195,8 +208,10 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
                 ) : (
                   <AddAgentHelpPopover
                     button={addAgentLink}
-                    isOpen={true}
-                    closePopover={console.log}
+                    isOpen={isAddAgentHelpPopoverOpen}
+                    closePopover={() => {
+                      setIsAddAgentHelpPopoverOpen(false);
+                    }}
                   />
                 ),
             },
@@ -250,7 +265,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         </EuiFlexGroup>
       ) : undefined,
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [agentPolicy, policyId, agentStatus]
+    [agentPolicy, policyId, agentStatus, isAddAgentHelpPopoverOpen]
   );
 
   const headerTabs = useMemo(() => {
