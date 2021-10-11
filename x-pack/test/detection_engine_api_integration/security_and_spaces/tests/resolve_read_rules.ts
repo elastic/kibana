@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(readRulesExactMatchRes.body.outcome).to.eql(undefined);
       });
 
-      it('should create a rule and a "conflicting rule" where the SO _id matches the originId of a migrated rule', async () => {
+      it('should create a rule and a "conflicting rule" where the SO _id matches the sourceId (see legacy-url-alias SO) of a migrated rule', async () => {
         // mimic a rule SO that was inserted accidentally
         // we have to insert this outside of esArchiver otherwise kibana will migrate this
         // and we won't have a conflict

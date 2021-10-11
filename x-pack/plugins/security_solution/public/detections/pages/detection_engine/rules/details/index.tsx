@@ -263,11 +263,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         capabilities: { actions },
       },
       timelines: timelinesUi,
-      http,
       spaces: spacesApi,
     },
   } = useKibana();
-  const { basePath } = http;
   const hasActionsPrivileges = useMemo(() => {
     if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
       return actions.show;
@@ -287,7 +285,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       const outcome = rule.outcome;
       if (spacesApi && outcome === 'aliasMatch') {
         // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
-        const path = basePath.prepend(`rules/id/${rule.id}`);
+        const path = `rules/id/${rule.id}${window.location.search}${window.location.hash}`;
         spacesApi.ui.redirectLegacyUrl(
           path,
           i18nTranslate.translate(
@@ -299,15 +297,15 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         );
       }
     }
-  }, [rule, basePath, spacesApi]);
+  }, [rule, spacesApi]);
 
   const getLegacyUrlConflictCallout = useMemo(() => {
     const outcome = rule?.outcome;
-    if (spacesApi && outcome === 'conflict') {
+    if (rule != null && spacesApi && outcome === 'conflict') {
       const aliasTargetId = rule?.alias_target_id!; // This is always defined if outcome === 'conflict'
       // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
       // callout with a warning for the user, and provide a way for them to navigate to the other rule.
-      const otherRulePath = basePath.prepend(`rules/id/${aliasTargetId}`);
+      const otherRulePath = `rules/id/${aliasTargetId}${window.location.search}${window.location.hash}`;
       return (
         <>
           <EuiSpacer />
@@ -318,7 +316,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 defaultMessage: 'rule',
               }
             ),
-            currentObjectId: rule?.id!,
+            currentObjectId: rule.id,
             otherObjectId: aliasTargetId,
             otherObjectPath: otherRulePath,
           })}
@@ -326,7 +324,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       );
     }
     return null;
-  }, [rule, basePath, spacesApi]);
+  }, [rule, spacesApi]);
 
   useEffect(() => {
     if (!hasIndexRead) {
