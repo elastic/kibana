@@ -308,6 +308,7 @@ export const SynchronizationLogic = kea<
               full: values.schedule.full,
               incremental: values.schedule.incremental,
               delete: values.schedule.delete,
+              blocked_windows: formatBlockedWindowsForServer(values.schedule.blockedWindows),
             },
           },
         },
@@ -349,4 +350,17 @@ export const stripScheduleSeconds = (schedule: IndexingSchedule): IndexingSchedu
   if (permissions) _schedule.permissions = getISOStringWithoutSeconds(permissions);
 
   return _schedule;
+};
+
+const formatBlockedWindowsForServer = (
+  blockedWindows?: BlockedWindow[]
+): ServerBlockedWindow[] | undefined => {
+  if (!blockedWindows || blockedWindows.length < 1) return [];
+
+  return blockedWindows.map(({ jobType, day, start, end }) => ({
+    job_type: jobType,
+    day,
+    start,
+    end,
+  }));
 };
