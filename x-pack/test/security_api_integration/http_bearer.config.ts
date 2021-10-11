@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     security: { disableTestUser: true },
     services,
     junit: {
-      reportName: 'X-Pack Security API Integration Tests (HTTP Basic)',
+      reportName: 'X-Pack Security API Integration Tests (HTTP Bearer)',
     },
 
     esTestCluster: {
