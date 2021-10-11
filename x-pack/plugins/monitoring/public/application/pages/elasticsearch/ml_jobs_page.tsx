@@ -34,7 +34,7 @@ export const ElasticsearchMLJobsPage: React.FC<ComponentProps> = ({ clusters }) 
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
-  });
+  }) as any;
 
   useEffect(() => {
     if (cluster) {

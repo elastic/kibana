@@ -30,7 +30,7 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
-  });
+  }) as any;
   const [data, setData] = useState({} as any);
   const [showSystemIndices, setShowSystemIndices] = useLocalStorage<boolean>(
     'showSystemIndices',
