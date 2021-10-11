@@ -448,3 +448,18 @@ export const SMTP_CALLOUT_LABEL = i18n.translate(
 export const SMTP_LINK_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.smtpLinkLabel', {
   defaultMessage: 'SMTP configuration is provided',
 });
+
+export const KIBANA_ACCESS_ERROR_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.kibanaAccessErrorMessage',
+  {
+    defaultMessage:
+      'This Elasticsearch user does not have an Enterprise Search role in Elasticsearch. They may not have access to Kibana.',
+  }
+);
+
+export const KIBANA_ACCESS_ERROR_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.kibanaAccessErrorDescription',
+  {
+    defaultMessage: 'Consider giving them the "enterprise-search-user" role.',
+  }
+);

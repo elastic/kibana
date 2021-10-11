@@ -7,22 +7,44 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
 import { USERNAME_LABEL, EMAIL_LABEL } from '../constants';
 
-import { ROLE_LABEL } from './constants';
+import {
+  KIBANA_ACCESS_ERROR_DESCRIPTION,
+  KIBANA_ACCESS_ERROR_MESSAGE,
+  ROLE_LABEL,
+} from './constants';
 
 interface Props {
   username: string;
   email: string;
   roleType: string;
+  showKibanaAccessWarning: boolean;
 }
+
+const kibanaAccessWarning = (
+  <>
+    <EuiCallOut title="Kibana Access Warning" color="warning" iconType="help">
+      <EuiText size="s">{KIBANA_ACCESS_ERROR_MESSAGE}</EuiText>
+      <EuiSpacer />
+      <EuiText size="s">{KIBANA_ACCESS_ERROR_DESCRIPTION}</EuiText>
+    </EuiCallOut>
+    <EuiSpacer />
+  </>
+);
 
 const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
 
-export const UserAddedInfo: React.FC<Props> = ({ username, email, roleType }) => (
+export const UserAddedInfo: React.FC<Props> = ({
+  username,
+  email,
+  roleType,
+  showKibanaAccessWarning,
+}) => (
   <>
+    {showKibanaAccessWarning && kibanaAccessWarning}
     <EuiText size="s">
       <strong>{USERNAME_LABEL}</strong>
     </EuiText>
