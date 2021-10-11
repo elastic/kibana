@@ -35,7 +35,7 @@ const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
   ALERT_RULE_TYPE_ID_NON_TYPED;
 
 type ErrorDistributionAPIResponse =
-  APIReturnType<'GET /api/apm/services/{serviceName}/errors/distribution'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
 
 interface FormattedBucket {
   x0: number;
