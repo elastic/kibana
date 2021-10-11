@@ -7,7 +7,6 @@
 
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { applyMiddleware, createStore, Store } from 'redux';
-import uuid from 'uuid';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
