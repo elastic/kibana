@@ -33,7 +33,7 @@ describe('ServiceList', () => {
 
     const callApmApiSpy = getCallApmApiSpy().mockImplementation(
       ({ endpoint }) => {
-        if (endpoint === 'GET /api/apm/fallback_to_transactions') {
+        if (endpoint === 'GET /internal/apm/fallback_to_transactions') {
           return Promise.resolve({ fallbackToTransactions: false });
         }
         return Promise.reject(`Response for ${endpoint} is not defined`);

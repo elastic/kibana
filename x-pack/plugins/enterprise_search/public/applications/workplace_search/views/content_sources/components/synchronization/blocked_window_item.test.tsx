@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiComboBox, EuiDatePicker, EuiSuperSelect } from '@elastic/eui';
+import { EuiDatePickerRange, EuiSelect, EuiSuperSelect } from '@elastic/eui';
 
 import { BlockedWindowItem } from './blocked_window_item';
 
@@ -20,8 +20,8 @@ describe('BlockedWindowItem', () => {
   it('renders', () => {
     const wrapper = shallow(<BlockedWindowItem {...props} />);
 
-    expect(wrapper.find(EuiComboBox)).toHaveLength(1);
+    expect(wrapper.find(EuiSelect)).toHaveLength(1);
     expect(wrapper.find(EuiSuperSelect)).toHaveLength(1);
-    expect(wrapper.find(EuiDatePicker)).toHaveLength(2);
+    expect(wrapper.find(EuiDatePickerRange)).toHaveLength(1);
   });
 });
