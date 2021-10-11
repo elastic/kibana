@@ -20,6 +20,7 @@ import { ItemTemplate } from './item_template';
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
 // @ts-ignore
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -77,6 +78,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
       pageType="indices"
     >
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}

@@ -241,7 +241,10 @@ export function getState({
       initialAppState = appStateContainer.getState();
     },
     resetAppState: () => {
-      const defaultState = getStateDefaults ? getStateDefaults() : {};
+      const defaultState = handleSourceColumnState(
+        getStateDefaults ? getStateDefaults() : {},
+        uiSettings
+      );
       setState(appStateContainerModified, defaultState);
     },
     getPreviousAppState: () => previousAppState,

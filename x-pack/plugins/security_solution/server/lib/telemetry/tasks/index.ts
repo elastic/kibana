@@ -8,3 +8,4 @@
 export { TelemetryDiagTask as DiagnosticTask } from './diagnostic';
 export { TelemetryEndpointTask as EndpointTask } from './endpoint';
 export { TelemetryExceptionListsTask as ExceptionListsTask } from './security_lists';
+export { TelemetryDetectionRulesTask as DetectionRulesTask } from './detection_rule';
