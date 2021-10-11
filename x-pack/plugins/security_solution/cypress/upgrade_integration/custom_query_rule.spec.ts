@@ -5,42 +5,24 @@
  * 2.0.
  */
 
-import {
-  ALERT_DETAILS_CELLS,
-  ALERT_DETAILS_NETWORK_CELLS,
-  RULE_NAME,
-  SERVER_SIDE_EVENT_COUNT,
-} from '../screens/alerts_detection_rules';
+import { ALERT_DETAILS_CELLS, SERVER_SIDE_EVENT_COUNT } from '../screens/alerts_detection_rules';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
   ABOUT_DETAILS,
-  ABOUT_INVESTIGATION_NOTES,
   ABOUT_RULE_DESCRIPTION,
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
-  FALSE_POSITIVES_DETAILS,
   getDetails,
-  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
-  INVESTIGATION_NOTES_MARKDOWN,
-  INVESTIGATION_NOTES_TOGGLE,
-  MITRE_ATTACK_DETAILS,
-  REFERENCE_URLS_DETAILS,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
   RUNS_EVERY_DETAILS,
   SCHEDULE_DETAILS,
   SEVERITY_DETAILS,
-  TAGS_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
 } from '../screens/rule_details';
 
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../tasks/alerts';
 import { waitForPageToBeLoaded } from '../tasks/common';
 import { waitForRulesTableToBeLoaded, goToRuleDetails } from '../tasks/alerts_detection_rules';
 import { loginAndWaitForPage } from '../tasks/login';
