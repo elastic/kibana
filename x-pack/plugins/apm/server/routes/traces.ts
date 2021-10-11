@@ -17,7 +17,7 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 import { getTransaction } from '../lib/transactions/get_transaction';
 
 const tracesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/traces',
+  endpoint: 'GET /internal/apm/traces',
   params: t.type({
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
@@ -41,7 +41,7 @@ const tracesRoute = createApmServerRoute({
 });
 
 const tracesByIdRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/traces/{traceId}',
+  endpoint: 'GET /internal/apm/traces/{traceId}',
   params: t.type({
     path: t.type({
       traceId: t.string,
@@ -60,7 +60,7 @@ const tracesByIdRoute = createApmServerRoute({
 });
 
 const rootTransactionByTraceIdRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/traces/{traceId}/root_transaction',
+  endpoint: 'GET /internal/apm/traces/{traceId}/root_transaction',
   params: t.type({
     path: t.type({
       traceId: t.string,
@@ -76,7 +76,7 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
 });
 
 const transactionByIdRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/transactions/{transactionId}',
+  endpoint: 'GET /internal/apm/transactions/{transactionId}',
   params: t.type({
     path: t.type({
       transactionId: t.string,
