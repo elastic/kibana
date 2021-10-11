@@ -81,7 +81,7 @@ export const horizontalBarVisTypeDefinition = {
             truncate: 100,
           },
           title: {
-            text: defaultCountLabel,
+            text: '',
           },
           style: {},
         },
