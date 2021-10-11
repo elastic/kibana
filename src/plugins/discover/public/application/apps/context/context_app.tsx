@@ -44,7 +44,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   /**
    * Context app state
    */
-  const { appState, setAppState } = useContextAppState({ indexPattern, services });
+  const { appState, setAppState } = useContextAppState({ services });
   const prevAppState = useRef<AppState>();
 
   /**

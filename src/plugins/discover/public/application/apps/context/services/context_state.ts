@@ -36,6 +36,12 @@ export interface AppState {
    * Number of records to be fetched after the anchor records (older records)
    */
   successorCount: number;
+  /**
+   * Array of the used sorting [[field,direction],...]
+   * this is actually not needed in Discover Context, there's no sorting
+   * but it's used in the DocTable component
+   */
+  sort?: string[][];
 }
 
 interface GlobalState {
