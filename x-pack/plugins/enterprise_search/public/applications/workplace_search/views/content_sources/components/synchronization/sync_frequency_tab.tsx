@@ -24,26 +24,24 @@ import {
 import { SourceLogic } from '../../source_logic';
 
 import { FrequencyItem } from './frequency_item';
+import { SynchronizationLogic } from './synchronization_logic';
 
 export const SyncFrequency: React.FC = () => {
+  const { contentSource } = useValues(SourceLogic);
   const {
-    contentSource: {
-      indexing: {
-        schedule: {
-          full: fullDuration,
-          incremental: incrementalDuration,
-          delete: deleteDuration,
-          permissions: permissionsDuration,
-          estimates: {
-            full: fullEstimate,
-            incremental: incrementalEstimate,
-            delete: deleteEstimate,
-            permissions: permissionsEstimate,
-          },
-        },
+    schedule: {
+      full: fullDuration,
+      incremental: incrementalDuration,
+      delete: deleteDuration,
+      permissions: permissionsDuration,
+      estimates: {
+        full: fullEstimate,
+        incremental: incrementalEstimate,
+        delete: deleteEstimate,
+        permissions: permissionsEstimate,
       },
     },
-  } = useValues(SourceLogic);
+  } = useValues(SynchronizationLogic({ contentSource }));
 
   return (
     <>
