@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const security = getService('security');
-  const log = getService('log');
 
   describe('docvalue_fields', () => {
     before(async () => {
