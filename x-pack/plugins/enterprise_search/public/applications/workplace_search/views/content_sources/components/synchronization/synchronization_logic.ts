@@ -84,8 +84,8 @@ interface SynchronizationValues {
 export const emptyBlockedWindow: BlockedWindow = {
   jobType: 'full',
   day: 'monday',
-  start: moment().set('hour', 11).set('minutes', 0),
-  end: moment().set('hour', 13).set('minutes', 0),
+  start: '11:00:00Z',
+  end: '13:00:00Z',
 };
 
 export const SynchronizationLogic = kea<

@@ -129,7 +129,7 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
               <EuiDatePicker
                 showTimeSelect
                 showTimeSelectOnly
-                selected={moment(blockedWindow.start, 'HH:mm:ssZ')}
+                selected={moment(blockedWindow.start, 'HH:mm:ssZ').utc()}
                 onChange={handleStartDateChange}
                 dateFormat="h:mm A"
                 timeFormat="h:mm A"
@@ -139,7 +139,7 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
               <EuiDatePicker
                 showTimeSelect
                 showTimeSelectOnly
-                selected={moment(blockedWindow.end, 'HH:mm:ssZ')}
+                selected={moment(blockedWindow.end, 'HH:mm:ssZ').utc()}
                 onChange={handleEndDateChange}
                 dateFormat="h:mm A"
                 timeFormat="h:mm A"
