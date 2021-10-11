@@ -19,7 +19,10 @@ export const mockFlashMessagesActions = {
 };
 
 export const mockFlashMessageHelpers = {
+  // handle_api_errors.ts
   flashAPIErrors: jest.fn(),
+  toastAPIErrors: jest.fn(),
+  // flash_messages_logic.ts
   setSuccessMessage: jest.fn(),
   setErrorMessage: jest.fn(),
   setQueuedSuccessMessage: jest.fn(),

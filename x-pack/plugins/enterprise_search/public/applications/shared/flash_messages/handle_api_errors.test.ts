@@ -7,9 +7,14 @@
 
 import '../../__mocks__/kea_logic/kibana_logic.mock';
 
+jest.mock('./set_message_helpers', () => ({
+  flashErrorToast: jest.fn(),
+}));
+
 import { FlashMessagesLogic } from './flash_messages_logic';
 
-import { flashAPIErrors, getErrorsFromHttpResponse } from './handle_api_errors';
+import { flashAPIErrors, getErrorsFromHttpResponse, toastAPIErrors } from './handle_api_errors';
+import { flashErrorToast } from './set_message_helpers';
 
 describe('flashAPIErrors', () => {
   const mockHttpError = {
@@ -71,6 +76,39 @@ describe('flashAPIErrors', () => {
       expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
         { type: 'error', message: expect.any(String) },
       ]);
+    }
+  });
+});
+
+describe('toastAPIErrors', () => {
+  const mockHttpError = {
+    body: {
+      statusCode: 404,
+      error: 'Not Found',
+      message: 'Could not find X,Could not find Y,Something else bad happened',
+      attributes: {
+        errors: ['Could not find X', 'Could not find Y', 'Something else bad happened'],
+      },
+    },
+  } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('converts API errors into flash messages', () => {
+    toastAPIErrors(mockHttpError);
+
+    expect(flashErrorToast).toHaveBeenNthCalledWith(1, 'Could not find X');
+    expect(flashErrorToast).toHaveBeenNthCalledWith(1, 'Could not find X');
+    expect(flashErrorToast).toHaveBeenNthCalledWith(1, 'Could not find X');
+  });
+
+  it('displays a generic error message and re-throws non-API errors', () => {
+    try {
+      toastAPIErrors(Error('whatever') as any);
+    } catch (e) {
+      expect(flashErrorToast).toHaveBeenCalledWith(expect.any(String));
     }
   });
 });
