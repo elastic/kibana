@@ -79,7 +79,7 @@ export function runFtrCli() {
             err: err.message,
             ...flags,
           });
-          log.indent(-log.indent());
+          log.indent(-log.getIndent());
           log.error(err);
           process.exitCode = 1;
         } else {
