@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import getosSync from 'getos';
+import getOsSync from 'getos';
 import { promisify } from 'util';
 
-const getos = promisify(getosSync);
+const getOs = promisify(getOsSync);
 
 const distroSupportsUnprivilegedUsernamespaces = (distro: string) => {
   // Debian 7 and 8 don't support usernamespaces by default
@@ -38,11 +38,10 @@ interface OsSummary {
 }
 
 export async function getDefaultChromiumSandboxDisabled(): Promise<OsSummary> {
-  const os = await getos();
+  const os = await getOs();
 
-  if (os.os === 'linux' && !distroSupportsUnprivilegedUsernamespaces(os.dist)) {
-    return { os, disableSandbox: true };
-  } else {
-    return { os, disableSandbox: false };
-  }
+  return {
+    os,
+    disableSandbox: os.os === 'linux' && !distroSupportsUnprivilegedUsernamespaces(os.dist),
+  };
 }

@@ -102,14 +102,6 @@ export const createMockConfigSchema = (
       port: 80,
       ...overrides.kibanaServer,
     },
-    capture: {
-      browser: {
-        chromium: {
-          disableSandbox: true,
-        },
-      },
-      ...overrides.capture,
-    },
     queue: {
       indexInterval: 'week',
       pollEnabled: true,

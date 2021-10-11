@@ -72,7 +72,6 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     capture: {
       maxAttempts: true,
       timeouts: { openUrl: true, renderComplete: true, waitForElements: true },
-      networkPolicy: false, // show as [redacted]
       zoom: true,
     },
     csv: { maxSizeBytes: true, scroll: { size: true, duration: true } },
