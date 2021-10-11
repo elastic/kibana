@@ -21,7 +21,7 @@ export interface IShortUrlClientFactory<D> {
 }
 
 export type IShortUrlClientFactoryProvider<D> = (params: {
-  locators: Pick<ILocatorClient, 'get'>;
+  locators: ILocatorClient;
 }) => IShortUrlClientFactory<D>;
 
 /**

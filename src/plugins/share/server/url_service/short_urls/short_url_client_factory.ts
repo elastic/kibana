@@ -22,9 +22,9 @@ export interface ServerShortUrlClientFactoryDependencies {
   currentVersion: string;
 
   /**
-   * Part of locators service necessary for short URLs.
+   * Locators service.
    */
-  locators?: Pick<ILocatorClient, 'get'>;
+  locators: ILocatorClient;
 }
 
 export interface ServerShortUrlClientFactoryCreateParams {
