@@ -9,7 +9,6 @@
 import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -35,6 +34,11 @@ import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
 import { SavedSearch } from '../../../../saved_searches';
 import { handleSourceColumnState } from '../../../helpers/state_helpers';
+import { DiscoverServices } from '../../../../build_services';
+import { getStateDefaults } from '../utils/get_state_defaults';
+import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
+import { SortPairArr } from '../components/doc_table/lib/get_sort';
+import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 
 export interface AppState {
   /**
@@ -85,24 +89,10 @@ interface GetStateParams {
    */
   getStateDefaults?: () => AppState;
   /**
-   * Determins the use of long vs. short/hashed urls
-   */
-  storeInSessionStorage?: boolean;
-  /**
    * Browser history
    */
   history: History;
-  /**
-   * Core's notifications.toasts service
-   * In case it is passed in,
-   * kbnUrlStateStorage will use it notifying about inner errors
-   */
-  toasts?: NotificationsStart['toasts'];
-
-  /**
-   * core ui settings service
-   */
-  uiSettings: IUiSettingsClient;
+  services: DiscoverServices;
 }
 
 export interface GetStateReturn {
@@ -118,7 +108,7 @@ export interface GetStateReturn {
    * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
-    indexPattern: IndexPattern,
+    savedSearch: SavedSearch,
     filterManager: FilterManager,
     data: DataPublicPluginStart
   ) => () => void;
@@ -157,7 +147,9 @@ export interface GetStateReturn {
   /**
    * Reset AppState to default, discarding all changes
    */
-  resetAppState: () => void;
+  resetAppState: (savedSearch: SavedSearch) => void;
+
+  switchIndexPattern: (indexPattern: IndexPattern, nextIndexPattern: IndexPattern) => void;
 }
 const APP_STATE_URL_KEY = '_a';
 
@@ -165,14 +157,12 @@ const APP_STATE_URL_KEY = '_a';
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export function getState({
-  getStateDefaults,
-  storeInSessionStorage = false,
-  history,
-  toasts,
-  uiSettings,
-}: GetStateParams): GetStateReturn {
-  const defaultAppState = getStateDefaults ? getStateDefaults() : {};
+export function getState({ history, services }: GetStateParams): GetStateReturn {
+  const { uiSettings } = services;
+  const { data, uiSettings: config } = services;
+  const storeInSessionStorage = uiSettings.get('state:storeInSessionStorage');
+  const toasts = services.core.notifications.toasts;
+  const defaultAppState = {};
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
@@ -234,9 +224,15 @@ export function getState({
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
-    resetAppState: () => {
+    resetAppState: (savedSearch: SavedSearch) => {
       const defaultState = handleSourceColumnState(
-        getStateDefaults ? getStateDefaults() : {},
+        getStateDefaults
+          ? getStateDefaults({
+              config,
+              data,
+              savedSearch,
+            })
+          : {},
         uiSettings
       );
       setState(appStateContainerModified, defaultState);
@@ -244,11 +240,22 @@ export function getState({
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
-    initializeAndSync: (
-      indexPattern: IndexPattern,
-      filterManager: FilterManager,
-      data: DataPublicPluginStart
-    ) => {
+    initializeAndSync: (savedSearch: SavedSearch, filterManager: FilterManager) => {
+      const indexPattern = savedSearch.searchSource.getField('index')!;
+      const appState = getStateDefaults({
+        config,
+        data,
+        savedSearch,
+      });
+      const mergedState = handleSourceColumnState(
+        {
+          ...appState,
+          ...appStateFromUrl,
+        },
+        uiSettings
+      );
+      setState(appStateContainerModified, mergedState);
+
       if (appStateContainer.getState().index !== indexPattern.id) {
         // used index pattern is different than the given by url/state which is invalid
         setState(appStateContainerModified, { index: indexPattern.id });
@@ -287,6 +294,20 @@ export function getState({
         stopSyncingGlobalStateWithUrl();
         stop();
       };
+    },
+    switchIndexPattern: (indexPattern, nextIndexPattern) => {
+      const state = appStateContainer.getState();
+      if (nextIndexPattern && indexPattern) {
+        const nextAppState = getSwitchIndexPatternAppState(
+          indexPattern,
+          nextIndexPattern,
+          state.columns || [],
+          (state.sort || []) as SortPairArr[],
+          uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
+          uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+        );
+        setState(appStateContainerModified, nextAppState);
+      }
     },
   };
 }

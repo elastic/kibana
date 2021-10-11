@@ -11,9 +11,7 @@ import { useParams } from 'react-router-dom';
 import type { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/public';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
-import { getState } from './services/discover_state';
 import { DiscoverMainApp } from './discover_main_app';
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/breadcrumbs';
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getUrlTracker } from '../../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
@@ -36,8 +34,7 @@ export interface DiscoverMainProps {
 interface DiscoverLandingParams {
   id: string;
 }
-
-export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
+function useSavedSearchStore(services: DiscoverServices, history: History) {
   const {
     core,
     chrome,
@@ -46,10 +43,6 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     toastNotifications,
     http: { basePath },
   } = services;
-
-  const dataViews = useDataViews(services);
-  const { list, get } = dataViews;
-
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
 
   const { id } = useParams<DiscoverLandingParams>();
@@ -61,22 +54,13 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
       try {
         const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
         await data.indexPatterns.ensureDefaultDataView();
-        /**
-        const indexPatternData = await resolveIndexPattern(
-          ip,
-          loadedSavedSearch.searchSource,
-          toastNotifications
-        );
+        /** this would need a rewrite
+         const indexPatternData = await resolveIndexPattern(
+         ip,
+         loadedSavedSearch.searchSource,
+         toastNotifications
+         );
          **/
-        if (loadedSavedSearch && !loadedSavedSearch?.searchSource.getField('index')) {
-          const { appStateContainer } = getState({ history, uiSettings });
-          const { index, timefield } = appStateContainer.getState();
-          const loadedIndexPattern = await get(
-            index ?? services.uiSettings.get('defaultIndex'),
-            timefield ?? ''
-          );
-          loadedSavedSearch.searchSource.setField('index', loadedIndexPattern);
-        }
         setSavedSearch(loadedSavedSearch);
         if (savedSearchId) {
           chrome.recentlyAccessed.add(
@@ -107,7 +91,6 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
 
     loadSavedSearch();
   }, [
-    get,
     basePath,
     chrome.recentlyAccessed,
     uiSettings,
@@ -119,13 +102,13 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     toastNotifications,
   ]);
 
-  useEffect(() => {
-    chrome.setBreadcrumbs(
-      savedSearch && savedSearch.title
-        ? getSavedSearchBreadcrumbs(savedSearch.title)
-        : getRootBreadcrumbs()
-    );
-  }, [chrome, savedSearch]);
+  return savedSearch;
+}
+
+export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
+  const dataViews = useDataViews(services);
+  const savedSearch = useSavedSearchStore(services, history);
+  const { list } = dataViews;
 
   if (!savedSearch || !list) {
     return <LoadingIndicator />;

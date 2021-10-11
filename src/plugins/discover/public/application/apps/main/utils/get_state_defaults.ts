@@ -43,7 +43,7 @@ export function getStateDefaults({
       ? getDefaultSort(indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
       : sort,
     columns,
-    index: indexPattern!.id,
+    index: indexPattern?.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')),
     hideChart: undefined,

@@ -13,65 +13,51 @@ import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../../build_services';
 import { SavedSearch } from '../../../../saved_searches';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
-import {
-  MODIFY_COLUMNS_ON_SWITCH,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../../common';
 import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../../types';
-import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
-import { SortPairArr } from '../components/doc_table/lib/get_sort';
-import { DataViewListItem } from '../../../../../../data_views/common';
 import { DiscoverContext } from './discover_context';
 
 export function useDiscoverState({
   services,
   history,
   savedSearch,
-  indexPatternList,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
-  /**
-   * List of available index patterns
-   */
-  indexPatternList: DataViewListItem[];
 }) {
-  const { uiSettings: config, data, filterManager, indexPatterns } = services;
+  const { uiSettings: config, data, filterManager } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
   const { timefilter } = data.query.timefilter;
+  const [indexPattern, setIndexPattern] = useState(savedSearch.searchSource.getField('index'));
 
-  const indexPattern = savedSearch.searchSource.getField('index')!;
   const {
     dataViews: { get },
   } = useContext(DiscoverContext);
 
-  const searchSource = useMemo(() => {
-    savedSearch.searchSource.setField('index', indexPattern);
-    return savedSearch.searchSource.createChild();
-  }, [savedSearch, indexPattern]);
+  const searchSource = useMemo(() => savedSearch.searchSource.createChild(), [savedSearch]);
 
-  const stateContainer = useMemo(
-    () =>
-      getState({
-        getStateDefaults: () =>
-          getStateDefaults({
-            config,
-            data,
-            savedSearch,
-          }),
-        storeInSessionStorage: config.get('state:storeInSessionStorage'),
-        history,
-        toasts: services.core.notifications.toasts,
-        uiSettings: config,
-      }),
-    [config, data, history, savedSearch, services.core.notifications.toasts]
-  );
+  const stateContainer = useMemo(() => getState({ history, services }), [services, history]);
 
   const { appStateContainer } = stateContainer;
+
+  useEffect(() => {
+    const load = async () => {
+      if (!savedSearch?.searchSource.getField('index')) {
+        const { index, timefield } = appStateContainer.getState();
+        const loadedIndexPattern = await get(
+          index ?? services.uiSettings.get('defaultIndex'),
+          timefield ?? ''
+        );
+        savedSearch.searchSource.setField('index', loadedIndexPattern);
+        setIndexPattern(loadedIndexPattern);
+      } else if (savedSearch?.searchSource.getField('index')) {
+        setIndexPattern(savedSearch?.searchSource.getField('index'));
+      }
+    };
+    load();
+  }, [appStateContainer, get, savedSearch.searchSource, services.uiSettings]);
 
   const [state, setState] = useState(appStateContainer.getState());
 
@@ -103,11 +89,15 @@ export function useDiscoverState({
     useNewFieldsApi,
   });
 
+  /**
+   * Start syncing of state to URL of state if searchSource is complete (existing index pattern)
+   */
   useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
-
-    return () => stopSync();
-  }, [stateContainer, filterManager, data, indexPattern]);
+    if (savedSearch.searchSource.getField('index')) {
+      const stopSync = stateContainer.initializeAndSync(savedSearch, filterManager, data);
+      return () => stopSync();
+    }
+  }, [stateContainer, filterManager, data, config, savedSearch]);
 
   /**
    * Track state changes that should trigger a fetch
@@ -132,6 +122,7 @@ export function useDiscoverState({
          */
         const nextIndexPattern = await get(nextState.index, nextState.timefield || '');
         savedSearch.searchSource.setField('index', nextIndexPattern);
+        setIndexPattern(nextIndexPattern);
         reset();
       }
 
@@ -141,20 +132,7 @@ export function useDiscoverState({
       setState(nextState);
     });
     return () => unsubscribe();
-  }, [
-    config,
-    indexPatterns,
-    appStateContainer,
-    setState,
-    state,
-    refetch$,
-    data$,
-    reset,
-    savedSearch.searchSource,
-    indexPatternList,
-    services,
-    get,
-  ]);
+  }, [appStateContainer, get, refetch$, reset, savedSearch.searchSource, state]);
 
   /**
    * function to revert any changes to a given saved search
@@ -181,19 +159,9 @@ export function useDiscoverState({
   const onChangeIndexPattern = useCallback(
     async (id: string) => {
       const nextIndexPattern = await get(id, '');
-      if (nextIndexPattern && indexPattern) {
-        const nextAppState = getSwitchIndexPatternAppState(
-          indexPattern,
-          nextIndexPattern,
-          state.columns || [],
-          (state.sort || []) as SortPairArr[],
-          config.get(MODIFY_COLUMNS_ON_SWITCH),
-          config.get(SORT_DEFAULT_ORDER_SETTING)
-        );
-        stateContainer.setAppState(nextAppState);
-      }
+      stateContainer.switchIndexPattern(indexPattern!, nextIndexPattern!);
     },
-    [get, indexPattern, state.columns, state.sort, config, stateContainer]
+    [get, indexPattern, stateContainer]
   );
   /**
    * Function triggered when the user changes the query in the search bar
@@ -214,20 +182,6 @@ export function useDiscoverState({
     },
     [stateContainer]
   );
-
-  useEffect(() => {
-    if (!savedSearch || !savedSearch.id) {
-      return;
-    }
-    // handling pushing to state of a persisted saved object
-    const newAppState = getStateDefaults({
-      config,
-      data,
-      savedSearch,
-    });
-    stateContainer.replaceUrlAppState(newAppState);
-    setState(newAppState);
-  }, [config, data, savedSearch, reset, stateContainer]);
 
   /**
    * Trigger data fetching on indexPattern or savedSearch changes

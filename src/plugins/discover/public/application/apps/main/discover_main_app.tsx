@@ -8,13 +8,18 @@
 import React, { useCallback, useEffect } from 'react';
 import { History } from 'history';
 import { DiscoverLayout } from './components/layout';
-import { setBreadcrumbsTitle } from '../../helpers/breadcrumbs';
+import {
+  getRootBreadcrumbs,
+  getSavedSearchBreadcrumbs,
+  setBreadcrumbsTitle,
+} from '../../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './services/use_discover_state';
 import { useUrl } from './services/use_url';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { DataViewListItem } from '../../../../../data_views/common';
+import { LoadingIndicator } from '../../components/common/loading_indicator';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -96,6 +101,18 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const resetCurrentSavedSearch = useCallback(() => {
     resetSavedSearch(savedSearch.id);
   }, [resetSavedSearch, savedSearch]);
+
+  useEffect(() => {
+    chrome.setBreadcrumbs(
+      savedSearch && savedSearch.title
+        ? getSavedSearchBreadcrumbs(savedSearch.title)
+        : getRootBreadcrumbs()
+    );
+  }, [chrome, savedSearch]);
+
+  if (!indexPattern) {
+    return <LoadingIndicator />;
+  }
 
   return (
     <DiscoverLayoutMemoized
