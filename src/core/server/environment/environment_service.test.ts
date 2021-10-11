@@ -145,7 +145,7 @@ describe('UuidService', () => {
 
         expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
         expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
-          /Detected an unhandled Promise rejection: Error: something went wrong\n.*at Object.<anonymous> \(/
+          /Detected an unhandled Promise rejection: Error: something went wrong\n.*at /
         );
       });
 
