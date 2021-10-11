@@ -59,7 +59,7 @@ export class DeprecationsClient {
       };
     }
 
-    const { body, method, path } = correctiveActions.api;
+    const { body, method, path, omitContextFromBody = false } = correctiveActions.api;
     try {
       await this.http.fetch<void>({
         path,
@@ -67,7 +67,7 @@ export class DeprecationsClient {
         asSystemRequest: true,
         body: JSON.stringify({
           ...body,
-          deprecationDetails: { domainId },
+          ...(omitContextFromBody ? {} : { deprecationDetails: { domainId } }),
         }),
       });
       return { status: 'ok' };
