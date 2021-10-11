@@ -66,21 +66,19 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           }),
           correctiveActions: {
             manualSteps: [
-              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOne', {
-                defaultMessage: `Set 'xpack.reporting.roles.enabled' to 'false' in your kibana configs.`,
+              i18n.translate('xpack.reporting.deprecations.reportingRoles.manuakklStepOne', {
+                defaultMessage: `Set "xpack.reporting.roles.enabled" to "false" in kibana.yml.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepTwo', {
                 defaultMessage:
-                  `Create new roles that grant privileges to create reports using ` +
-                  `Kibana application privileges under **Management > Security > Roles**.`,
+                  `Create one or more roles that grant the Kibana application ` +
+                  `privilege for reporting from **Management > Security > Roles**.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepThree', {
                 defaultMessage:
-                  `Users that previously were granted reporting privileges from having the ` +
-                  `"reporting_user" role, or other role specified by "xpack.reporting.roles.allow", ` +
-                  `will no longer automatically have reporting privileges. Those users will ` +
-                  `need to be re-granted privileges using a new role, which you create, that ` +
-                  `includes Kibana application privileges for creating reports.`,
+                  `Grant reporting privileges to users by assigning one of the new roles. ` +
+                  `Users assigned a reporting role specified in "xpack.reporting.roles.allow" ` +
+                  `will no longer have reporting privileges, they must be assigned an application privilege based role.`,
               }),
             ],
           },
