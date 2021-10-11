@@ -12,7 +12,7 @@ import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from 
 export const Instructions: FC = () => {
   return (
     <div>
-      <EuiFlexGroup>
+      <EuiFlexGroup data-test-subj="createFromCsvInstructions">
         <EuiFlexItem>
           <EuiText>
             <p>

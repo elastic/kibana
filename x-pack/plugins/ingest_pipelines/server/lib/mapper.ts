@@ -37,7 +37,7 @@ export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
 
   const fileData = parseAndValidate(file);
   const mapping = convertCsvToMapping(fileData, copyAction);
-  
+
   if (mapping === null) {
     return null;
   }
@@ -83,7 +83,7 @@ function convertCsvToMapping(rows: any[], copyFieldAction: FieldCopyAction) {
   if (rows.length < 1) {
     return null;
   }
-  
+
   for (const row of rows) {
     // Skip rows that don't have a source field
     if (!row.source_field || !row.source_field.trim()) continue;

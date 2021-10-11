@@ -10,7 +10,6 @@ import { FieldCopyAction } from '../../common/types';
 
 describe('mapper', () => {
   describe('mapToIngestPipeline()', () => {
-
     it('empty file returns null', () => {
       expect(mapToIngestPipeline('', FieldCopyAction.Copy)).toBeNull();
     });
@@ -23,41 +22,52 @@ describe('mapper', () => {
 
       expect(() => {
         mapToIngestPipeline(invalidCsv, FieldCopyAction.Copy);
-      }).toThrow(new Error('Error reading file: An unexpected issue occured during the processing of the file'));
+      }).toThrow(
+        new Error(
+          'Error reading file: An unexpected issue occured during the processing of the file'
+        )
+      );
     });
 
     it('missing the required headers errors', () => {
-      const noHeadersCsv =
-        'srcip,,,,source.address,Copying srcip to source.address';
+      const noHeadersCsv = 'srcip,,,,source.address,Copying srcip to source.address';
 
       expect(() => {
         mapToIngestPipeline(noHeadersCsv, FieldCopyAction.Copy);
-      }).toThrow(new Error('Required headers are missing: Required source_field, destination_field missing in CSV'));
+      }).toThrow(
+        new Error(
+          'Required headers are missing: Required source_field, destination_field missing in CSV'
+        )
+      );
     });
 
     it('unacceptable format action errors', () => {
       const badFormatCsv =
         'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcport,,invalid_action,,source.port,\n';
-    
+
       expect(() => {
         mapToIngestPipeline(badFormatCsv, FieldCopyAction.Copy);
-      }).toThrow(new Error('Unaccepted format action: Acceptable actions uppercase, lowercase, to_boolean, to_integer, to_float, to_array, to_string, parse_timestamp'));
+      }).toThrow(
+        new Error(
+          'Unaccepted format action: Acceptable actions uppercase, lowercase, to_boolean, to_integer, to_float, to_array, to_string, parse_timestamp'
+        )
+      );
     });
 
     describe('successful mapping', () => {
       it('duplicate row handled', () => {
         const duplciateRow =
-            'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcip,,,,source.address,Copying srcip to source.address\nsrcip,,,,source.address,Copying srcip to source.address\n';
+          'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcip,,,,source.address,Copying srcip to source.address\nsrcip,,,,source.address,Copying srcip to source.address\n';
         const expectedJson = {
-          "processors": [
+          processors: [
             {
-              "set": {
-                "field": "source.address",
-                "if": "ctx.srcip != null",
-                "value": "{{srcip}}"
-              }
-            } 
-          ]
+              set: {
+                field: 'source.address',
+                if: 'ctx.srcip != null',
+                value: '{{srcip}}',
+              },
+            },
+          ],
         };
         expect(mapToIngestPipeline(duplciateRow, FieldCopyAction.Copy)).toEqual(expectedJson);
       });
@@ -65,82 +75,87 @@ describe('mapper', () => {
       describe('timestamp formatting', () => {
         it('default handling', () => {
           const defaultTimestamp =
-          'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsome_timestamp,,,,@timestamp,\n';
+            'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsome_timestamp,,,,@timestamp,\n';
 
           const expectedJson = {
-            "processors": [
+            processors: [
               {
-                "date": {
-                  "field": "some_timestamp",
-                  "formats": ["UNIX_MS"],
-                  "timezone": "UTC",
-                  "target_field": "@timestamp",
-                  "ignore_failure": true
-                }
-              } 
-            ]
+                date: {
+                  field: 'some_timestamp',
+                  formats: ['UNIX_MS'],
+                  timezone: 'UTC',
+                  target_field: '@timestamp',
+                  ignore_failure: true,
+                },
+              },
+            ],
           };
           expect(mapToIngestPipeline(defaultTimestamp, FieldCopyAction.Copy)).toEqual(expectedJson);
         });
 
         it('specified handling', () => {
-          const timestampSpecifics = 'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsome_timestamp,,parse_timestamp,UNIX,destination_timestamp,\n';
-        
+          const timestampSpecifics =
+            'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsome_timestamp,,parse_timestamp,UNIX,destination_timestamp,\n';
+
           const expectedJson = {
-            "processors": [
+            processors: [
               {
-                "date": {
-                  "field": "some_timestamp",
-                  "formats": ["UNIX"],
-                  "timezone": "UTC",
-                  "target_field": "destination_timestamp",
-                  "ignore_failure": true
-                }
-              } 
-            ]
+                date: {
+                  field: 'some_timestamp',
+                  formats: ['UNIX'],
+                  timezone: 'UTC',
+                  target_field: 'destination_timestamp',
+                  ignore_failure: true,
+                },
+              },
+            ],
           };
-          expect(mapToIngestPipeline(timestampSpecifics, FieldCopyAction.Copy)).toEqual(expectedJson);
+          expect(mapToIngestPipeline(timestampSpecifics, FieldCopyAction.Copy)).toEqual(
+            expectedJson
+          );
         });
       });
 
       describe('field copy action', () => {
         it('copy', () => {
-          const copyFile = 'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nts,copy,,,timestamp,\n';
-        
+          const copyFile =
+            'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nts,copy,,,timestamp,\n';
+
           const expectedJson = {
-            "processors": [
+            processors: [
               {
-                "set": {
-                  "field": "timestamp",
-                  "value": "{{ts}}",
-                  "if": "ctx.ts != null"
-                }
-              } 
-            ]
+                set: {
+                  field: 'timestamp',
+                  value: '{{ts}}',
+                  if: 'ctx.ts != null',
+                },
+              },
+            ],
           };
           expect(mapToIngestPipeline(copyFile, FieldCopyAction.Rename)).toEqual(expectedJson);
         });
         it('rename', () => {
-          const renameFile = 'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nhostip,,to_array,,host.ip,\n';
-        
+          const renameFile =
+            'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nhostip,,to_array,,host.ip,\n';
+
           const expectedJson = {
-            "processors": [
+            processors: [
               {
-                "rename": {
-                  "field": "hostip",
-                  "target_field": "host.ip",
-                  "ignore_missing": true
-                }
+                rename: {
+                  field: 'hostip',
+                  target_field: 'host.ip',
+                  ignore_missing: true,
+                },
               },
               {
-                "append": {
-                  "field": "host.ip",
-                  "value": [],
-                  "ignore_failure": true,
-                  "if": "ctx.host?.ip != null"
-                }
-              }
-            ]
+                append: {
+                  field: 'host.ip',
+                  value: [],
+                  ignore_failure: true,
+                  if: 'ctx.host?.ip != null',
+                },
+              },
+            ],
           };
           expect(mapToIngestPipeline(renameFile, FieldCopyAction.Rename)).toEqual(expectedJson);
         });
@@ -148,86 +163,84 @@ describe('mapper', () => {
 
       it('successful mapping example file', () => {
         const validCsv =
-            'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\n' +
-            'srcip,,,,source.address,Copying srcip to source.address\n' +
-            'new_event.srcip,,,,source.ip,\n' +
-            'some_timestamp_field,,parse_timestamp,,@timestamp,\n' +
-            'srcport,rename,to_integer,,source.port,\n' +
-            'log_level,rename,uppercase,,log.level,\n' +
-            'hostip,,to_array,,host.ip,\n';
-        
+          'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\n' +
+          'srcip,,,,source.address,Copying srcip to source.address\n' +
+          'new_event.srcip,,,,source.ip,\n' +
+          'some_timestamp_field,,parse_timestamp,,@timestamp,\n' +
+          'srcport,rename,to_integer,,source.port,\n' +
+          'log_level,rename,uppercase,,log.level,\n' +
+          'hostip,,to_array,,host.ip,\n';
+
         const expectedJson = {
-          "processors": [
+          processors: [
             {
-              "set": {
-                "field": "source.address",
-                "if": "ctx.srcip != null",
-                "value": "{{srcip}}"
-              }
+              set: {
+                field: 'source.address',
+                if: 'ctx.srcip != null',
+                value: '{{srcip}}',
+              },
             },
             {
-              "set": {
-                "field": "source.ip",
-                "value": "{{new_event.srcip}}",
-                "if": "ctx.new_event?.srcip != null"
-              }
+              set: {
+                field: 'source.ip',
+                value: '{{new_event.srcip}}',
+                if: 'ctx.new_event?.srcip != null',
+              },
             },
             {
-              "date": {
-                "field": "some_timestamp_field",
-                "target_field": "@timestamp",
-                "formats": [
-                  "UNIX_MS"
-                ],
-                "timezone": "UTC",
-                "ignore_failure": true
-              }
+              date: {
+                field: 'some_timestamp_field',
+                target_field: '@timestamp',
+                formats: ['UNIX_MS'],
+                timezone: 'UTC',
+                ignore_failure: true,
+              },
             },
             {
-              "rename": {
-                "field": "srcport",
-                "target_field": "source.port",
-                "ignore_missing": true
-              }
+              rename: {
+                field: 'srcport',
+                target_field: 'source.port',
+                ignore_missing: true,
+              },
             },
             {
-              "convert": {
-                "field": "source.port",
-                "type": "long",
-                "ignore_missing": true,
-                "ignore_failure": true
-              }
+              convert: {
+                field: 'source.port',
+                type: 'long',
+                ignore_missing: true,
+                ignore_failure: true,
+              },
             },
             {
-              "rename": {
-                "field": "log_level",
-                "target_field": "log.level",
-                "ignore_missing": true
-              }
+              rename: {
+                field: 'log_level',
+                target_field: 'log.level',
+                ignore_missing: true,
+              },
             },
             {
-              "uppercase": {
-                "field": "log.level",
-                "ignore_missing": true,
-                "ignore_failure": true
-              }
+              uppercase: {
+                field: 'log.level',
+                ignore_missing: true,
+                ignore_failure: true,
+              },
             },
             {
-              "set": {
-                "field": "host.ip",
-                "value": "{{hostip}}",
-                "if": "ctx.hostip != null"
-              }
+              set: {
+                field: 'host.ip',
+                value: '{{hostip}}',
+                if: 'ctx.hostip != null',
+              },
             },
             {
-              "append": {
-                "field": "host.ip",
-                "value": [],
-                "ignore_failure": true,
-                "if": "ctx.host?.ip != null"
-              }
-            }
-          ]
+              append: {
+                field: 'host.ip',
+                value: [],
+                ignore_failure: true,
+                if: 'ctx.host?.ip != null',
+              },
+            },
+          ],
         };
         expect(mapToIngestPipeline(validCsv, FieldCopyAction.Copy)).toEqual(expectedJson);
       });

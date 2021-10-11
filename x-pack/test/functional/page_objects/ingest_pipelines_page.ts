@@ -72,8 +72,30 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       return await Promise.all(pipelines.map((pipeline) => getPipelineName(pipeline)));
     },
 
-    async createPipelineFromCsv() {
-      // TODO
+    async createPipelineFromCsv({ name, file }: { name: string; file: string }) {
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createNewPipelineFromCsv');
+
+      await testSubjects.exists('createFromCsvInstructions');
+
+      // TODO upload file
+      // await testSubjects.setValue('csvFilePicker > input', file);
+
+      await testSubjects.click('processFileButton');
+
+      await testSubjects.exists('pipelineMappingsJSONEditor');
+
+      await testSubjects.exists('copyToClipboard');
+      await testSubjects.exists('downloadJson');
+
+      await testSubjects.click('continueToCreate');
+
+      await testSubjects.exists('pipelineForm');
+
+      await testSubjects.setValue('nameField > input', name);
+      await testSubjects.click('submitButton');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
     },
   };
 }
