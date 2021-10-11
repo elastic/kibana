@@ -127,6 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
           error: 'Bad Request',
           message: 'Cannot process request outside of preboot stage.',
           statusCode: 400,
+          attributes: { type: 'outside_preboot_stage' },
         });
 
       // Run 30 consequent requests with 1.5s delay to check if Kibana is up and running.
