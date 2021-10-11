@@ -46,7 +46,7 @@ export const AddAgentHelpPopover = ({
         </EuiText>
       </div>
       <EuiPopoverFooter>
-        <EuiButton onClick={closePopover} fullWidth size="s">
+        <EuiButton onClick={closePopover} fill fullWidth size="s">
           Got it
         </EuiButton>
       </EuiPopoverFooter>
