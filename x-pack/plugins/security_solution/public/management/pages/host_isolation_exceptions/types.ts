@@ -30,7 +30,7 @@ export interface HostIsolationExceptionsPageState {
     status: AsyncResourceState<ExceptionListItemSchema>;
   };
   form: {
-    entry: CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined;
+    entry?: CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
     status: AsyncResourceState<ExceptionListItemSchema>;
   };
 }

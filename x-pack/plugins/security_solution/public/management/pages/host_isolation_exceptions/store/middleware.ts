@@ -13,6 +13,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { CoreStart, HttpSetup, HttpStart } from 'kibana/public';
 import { matchPath } from 'react-router-dom';
+import { transformNewItemOutput } from '@kbn/securitysolution-list-hooks';
 import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
 import { AppLocation, Immutable, ImmutableObject } from '../../../../../common/endpoint/types';
 import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/store';
@@ -67,6 +68,39 @@ export const createHostIsolationExceptionsPageMiddleware = (
     }
   };
 };
+
+async function createHostIsolationException(
+  store: ImmutableMiddlewareAPI<HostIsolationExceptionsPageState, AppAction>,
+  http: HttpStart
+) {
+  const { dispatch } = store;
+  const entry = transformNewItemOutput(
+    store.getState().form.entry as CreateExceptionListItemSchema
+  );
+  dispatch({
+    type: 'hostIsolationExceptionsFormStateChanged',
+    payload: {
+      type: 'LoadingResourceState',
+      // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
+      previousState: entry,
+    },
+  });
+  try {
+    const response = await createHostIsolationExceptionItem({
+      http,
+      exception: entry,
+    });
+    dispatch({
+      type: 'hostIsolationExceptionsFormStateChanged',
+      payload: createLoadedResourceState(response),
+    });
+  } catch (error) {
+    dispatch({
+      type: 'hostIsolationExceptionsFormStateChanged',
+      payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
+    });
+  }
+}
 
 async function createHostIsolationException(
   store: ImmutableMiddlewareAPI<HostIsolationExceptionsPageState, AppAction>,
