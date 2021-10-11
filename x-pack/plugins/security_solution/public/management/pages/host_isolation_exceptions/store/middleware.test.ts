@@ -14,8 +14,12 @@ import {
   createSpyMiddleware,
   MiddlewareActionSpyHelper,
 } from '../../../../common/store/test_utils';
-import { isFailedResourceState, isLoadedResourceState } from '../../../state';
-import { getHostIsolationExceptionItems } from '../service';
+import {
+  isFailedResourceState,
+  isLoadedResourceState,
+  isLoadingResourceState,
+} from '../../../state';
+import { getHostIsolationExceptionItems, deleteHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 import { initialHostIsolationExceptionsPageState } from './builders';
 import { createHostIsolationExceptionsPageMiddleware } from './middleware';
@@ -24,6 +28,7 @@ import { getListFetchError } from './selector';
 
 jest.mock('../service');
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
+const deleteHostIsolationExceptionItemsMock = deleteHostIsolationExceptionItems as jest.Mock;
 
 const fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
 
@@ -136,6 +141,71 @@ describe('Host isolation exceptions middleware', () => {
         message: 'error message',
         statusCode: 500,
         error: 'Internal Server Error',
+      });
+    });
+  });
+
+  describe('When deleting an item from host isolation exceptions', () => {
+    beforeEach(() => {
+      deleteHostIsolationExceptionItemsMock.mockClear();
+      deleteHostIsolationExceptionItemsMock.mockReturnValue(undefined);
+      getHostIsolationExceptionItemsMock.mockClear();
+      getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+      store.dispatch({
+        type: 'hostIsolationExceptionsMarkToDelete',
+        payload: {
+          id: '1',
+        },
+      });
+    });
+
+    it('should call the delete exception API when a delete is submitted and advertise a loading status', async () => {
+      const waiter = Promise.all([
+        // delete loading action
+        spyMiddleware.waitForAction('hostIsolationExceptionsDeleteStatusChanged', {
+          validate({ payload }) {
+            return isLoadingResourceState(payload);
+          },
+        }),
+        // delete finished action
+        spyMiddleware.waitForAction('hostIsolationExceptionsDeleteStatusChanged', {
+          validate({ payload }) {
+            return isLoadedResourceState(payload);
+          },
+        }),
+      ]);
+      store.dispatch({
+        type: 'hostIsolationExceptionsSubmitDelete',
+      });
+      await waiter;
+      expect(deleteHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith(
+        fakeCoreStart.http,
+        '1'
+      );
+    });
+
+    it('should dispatch a failure if the API returns an error', async () => {
+      deleteHostIsolationExceptionItemsMock.mockRejectedValue({
+        body: { message: 'error message', statusCode: 500, error: 'Internal Server Error' },
+      });
+      store.dispatch({
+        type: 'hostIsolationExceptionsSubmitDelete',
+      });
+      await spyMiddleware.waitForAction('hostIsolationExceptionsDeleteStatusChanged', {
+        validate({ payload }) {
+          return isFailedResourceState(payload);
+        },
+      });
+    });
+
+    it('should reload the host isolation exception lists after delete', async () => {
+      store.dispatch({
+        type: 'hostIsolationExceptionsSubmitDelete',
+      });
+      await spyMiddleware.waitForAction('hostIsolationExceptionsPageDataChanged', {
+        validate({ payload }) {
+          return isLoadingResourceState(payload);
+        },
       });
     });
   });
