@@ -77,13 +77,21 @@ async function withFleetAgent(
 }
 
 export async function FleetCypressCliTestRunner(context: FtrProviderContext) {
+  await startFleetAgent(context, 'run');
+}
+
+export async function FleetCypressVisualTestRunner(context: FtrProviderContext) {
+  await startFleetAgent(context, 'open');
+}
+
+function startFleetAgent(context: FtrProviderContext, cypressCommand: string) {
   const log = context.getService('log');
   const config = context.getService('config');
-  await withFleetAgent(
+  return withFleetAgent(
     context,
     {
       artifacts: {
-        // TODO take latest version dynamically
+        // TODO take latest version dynamically from https://artifacts-api.elastic.co/v1/versions/
         'elastic-agent': '8.0.0-SNAPSHOT',
         'fleet-server': '8.0.0-SNAPSHOT',
       },
@@ -92,7 +100,7 @@ export async function FleetCypressCliTestRunner(context: FtrProviderContext) {
       withProcRunner(log, async (procs) => {
         await procs.run('cypress', {
           cmd: 'yarn',
-          args: ['cypress:run'],
+          args: [`cypress:${cypressCommand}`],
           cwd: resolve(__dirname, '../../plugins/fleet'),
           env: {
             FORCE_COLOR: '1',
@@ -118,52 +126,5 @@ export async function FleetCypressCliTestRunner(context: FtrProviderContext) {
           wait: true,
         });
       })
-  );
-}
-
-export async function FleetCypressVisualTestRunner(context: FtrProviderContext) {
-  const log = context.getService('log');
-  const config = context.getService('config');
-
-  await withFleetAgent(
-    context,
-    {
-      artifacts: {
-        'elastic-agent': '8.0.0-SNAPSHOT',
-        'fleet-server': '8.0.0-SNAPSHOT',
-      },
-    },
-    (runnerEnv) =>
-      withProcRunner(
-        log,
-        async (procs) =>
-          await procs.run('cypress', {
-            cmd: 'yarn',
-            args: ['cypress:open'],
-            cwd: resolve(__dirname, '../../plugins/fleet'),
-            env: {
-              FORCE_COLOR: '1',
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              CYPRESS_protocol: config.get('servers.kibana.protocol'),
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              CYPRESS_hostname: config.get('servers.kibana.hostname'),
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              CYPRESS_configport: config.get('servers.kibana.port'),
-              CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-              CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-              CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
-              CYPRESS_KIBANA_URL: Url.format({
-                protocol: config.get('servers.kibana.protocol'),
-                hostname: config.get('servers.kibana.hostname'),
-                port: config.get('servers.kibana.port'),
-              }),
-              ...runnerEnv,
-              ...process.env,
-            },
-            wait: true,
-          })
-      )
   );
 }
