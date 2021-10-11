@@ -128,6 +128,12 @@ export function FieldSelect({
       selectedOptions = [{ label: value!, id: 'INVALID_FIELD' }];
     }
   } else {
+    if (fieldsSelector === '*' && !value && groupedOptions.length) {
+      const group = groupedOptions[0];
+      const options = group?.options;
+      selectedOptions = options && options.length ? [options[0]] : [];
+      onChange(selectedOptions);
+    }
     if (value && fields[fieldsSelector] && !selectedOptions.length) {
       onChange([]);
     }
