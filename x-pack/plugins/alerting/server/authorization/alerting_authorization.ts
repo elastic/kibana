@@ -21,6 +21,7 @@ import {
   asFiltersBySpaceId,
   AlertingAuthorizationFilterOpts,
 } from './alerting_authorization_kuery';
+import { Console } from 'console';
 
 export enum AlertingAuthorizationEntity {
   Rule = 'rule',
@@ -100,7 +101,10 @@ export class AlertingAuthorization {
     this.spaceId = getSpaceId(request);
 
     this.featuresIds = getSpace(request)
-      .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
+      .then((maybeSpace) => {
+        console.error('ARE THERE ANY DISABLED FEATURES?', maybeSpace?.disabledFeatures);
+        return new Set(maybeSpace?.disabledFeatures ?? []);
+      })
       .then(
         (disabledFeatures) =>
           new Set(
@@ -116,7 +120,8 @@ export class AlertingAuthorization {
               .map((feature) => feature.id)
           )
       )
-      .catch(() => {
+      .catch((err) => {
+        console.error('FAILED TO GET FEATURE IDS', err);
         // failing to fetch the space means the user is likely not privileged in the
         // active space at all, which means that their list of features should be empty
         return new Set();
@@ -163,10 +168,17 @@ export class AlertingAuthorization {
 
   public async ensureAuthorized({ ruleTypeId, consumer, operation, entity }: EnsureAuthorizedOpts) {
     const { authorization } = this;
-
+    console.error('SPACE ID', this.spaceId);
+    console.error('CONSUMER', consumer);
+    console.error('this.featureIds', await this.featuresIds);
+    const allPossibleConsumers = await this.allPossibleConsumers;
+    console.error('ALL POSSIBLE CONSUMERS', Array.from(allPossibleConsumers));
     const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
+
+    console.error('IS AVAILABLE CONSUMER', isAvailableConsumer);
     if (authorization && this.shouldCheckAuthorization()) {
       const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
+      console.error('RULE TYPE', ruleType);
       const requiredPrivilegesByScope = {
         consumer: authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation),
         producer: authorization.actions.alerting.get(
@@ -198,6 +210,9 @@ export class AlertingAuthorization {
                 requiredPrivilegesByScope.producer,
               ],
       });
+      console.error('HAS ALL REQUESTED', hasAllRequested);
+      console.error('USERNAME', username);
+      console.error('PRIVILEGES', JSON.stringify(privileges, null, 2));
 
       if (!isAvailableConsumer) {
         /**
@@ -220,6 +235,7 @@ export class AlertingAuthorization {
       }
 
       if (hasAllRequested) {
+        console.error('LOGGING SUCCESSFUL AUTHORIZATION');
         this.auditLogger.logAuthorizationSuccess(
           username,
           ruleTypeId,
@@ -255,6 +271,7 @@ export class AlertingAuthorization {
         );
       }
     } else if (!isAvailableConsumer) {
+      console.error('ABOUT TO THROW A BOOM IN ENSURE AUTHORIZED');
       throw Boom.forbidden(
         this.auditLogger.logAuthorizationFailure(
           '',

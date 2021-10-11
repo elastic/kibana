@@ -440,16 +440,23 @@ export class RulesClient {
   }: {
     id: string;
   }): Promise<ResolvedSanitizedRule<Params>> {
+    console.error('ARE WE HERE??????');
     const { saved_object: result, ...resolveResponse } =
       await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
     try {
+      console.error('ATTRIBUTES', {
+        alertTypeId: result.attributes.alertTypeId,
+        consumer: result.attributes.consumer,
+      });
       await this.authorization.ensureAuthorized({
         ruleTypeId: result.attributes.alertTypeId,
         consumer: result.attributes.consumer,
         operation: ReadOperations.Get,
         entity: AlertingAuthorizationEntity.Rule,
       });
+      console.error('WE MADE IT PAST THE ENSURE AUTHORIZED');
     } catch (error) {
+      console.error('WE THREW AN ERROR IN ENSURE AUTHORIZED');
       this.auditLogger?.log(
         ruleAuditEvent({
           action: RuleAuditAction.RESOLVE,

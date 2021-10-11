@@ -103,6 +103,7 @@ export const readRulesRoute = (
           });
         }
       } catch (err) {
+        console.error('READ RULES ROUTE ERROR', err);
         const error = transformError(err);
         return siemResponse.error({
           body: error.message,

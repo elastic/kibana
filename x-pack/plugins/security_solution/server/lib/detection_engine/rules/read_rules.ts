@@ -27,6 +27,7 @@ export const readRules = async ({
 }: ReadRuleOptions): Promise<
   SanitizedAlert<RuleParams> | ResolvedSanitizedRule<RuleParams> | null
 > => {
+  console.error('WE ARE INSIDE READ RULES');
   if (id != null) {
     try {
       const rule = await rulesClient.resolve({ id });
@@ -43,6 +44,7 @@ export const readRules = async ({
       if (err?.output?.statusCode === 404) {
         return null;
       } else {
+        console.error('IS THIS THE ERROR?', err);
         // throw non-404 as they would be 500 or other internal errors
         throw err;
       }

@@ -102,6 +102,7 @@ export class SpacesClient implements ISpacesClient {
   }
 
   public async get(id: string) {
+    console.error('SPACES REPOSITORY', await this.getAll());
     const savedObject = await this.repository.get('space', id);
     return this.transformSavedObjectToSpace(savedObject);
   }

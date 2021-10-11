@@ -49,5 +49,5 @@ export const assertUnreachable = (
   x: never, // This should always be a type of "never"
   message = 'Unknown Field in switch statement'
 ): never => {
-  throw new Error(`${message}: ${x}`);
+  throw new Error(`${message}: ${JSON.stringify(x, null, 2)}`);
 };
