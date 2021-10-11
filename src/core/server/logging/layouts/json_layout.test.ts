@@ -76,15 +76,17 @@ test('`createConfigSchema()` creates correct schema.', () => {
   expect(layoutSchema.validate({ type: 'json' })).toEqual({ type: 'json' });
 });
 
-test('`format()` correctly formats record.', () => {
+test('`format()` correctly formats record and includes correct ECS version.', () => {
   const layout = new JsonLayout();
 
   for (const record of records) {
-    expect(layout.format(record)).toMatchSnapshot();
+    const { ecs, ...restOfRecord } = JSON.parse(layout.format(record));
+    expect(ecs).toStrictEqual({ version: '8.0.0' });
+    expect(restOfRecord).toMatchSnapshot();
   }
 });
 
-test('`format()` correctly formats record with meta-data and correct ECS version', () => {
+test('`format()` correctly formats record with meta-data', () => {
   const layout = new JsonLayout();
 
   expect(
@@ -104,7 +106,7 @@ test('`format()` correctly formats record with meta-data and correct ECS version
       })
     )
   ).toStrictEqual({
-    ecs: { version: '1.12.0' },
+    ecs: { version: expect.any(String) },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     log: {
       level: 'DEBUG',

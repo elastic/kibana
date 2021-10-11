@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { LoadingPage } from './pages/loading_page';
 import { LicensePage } from './pages/license_page';
 import { ClusterOverview } from './pages/cluster/overview_page';
+import { ClusterListing } from './pages/home/cluster_listing';
 import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalStateProvider } from './global_state_context';
 import { ExternalConfigContext, ExternalConfig } from './external_config_context';
@@ -21,25 +22,38 @@ import { RouteInit } from './route_init';
 import { NoDataPage } from './pages/no_data';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
 import { BeatsOverviewPage } from './pages/beats/overview';
-import { BeatsInstancesPage } from './pages/beats/instances';
+import {
+  CODE_PATH_ELASTICSEARCH,
+  CODE_PATH_BEATS,
+  CODE_PATH_KIBANA,
+  CODE_PATH_LOGSTASH,
+  CODE_PATH_APM,
+} from '../../common/constants';
 import { BeatsInstancePage } from './pages/beats/instance';
 import { ApmOverviewPage, ApmInstancesPage, ApmInstancePage } from './pages/apm';
 import { KibanaOverviewPage } from './pages/kibana/overview';
 import { KibanaInstancesPage } from './pages/kibana/instances';
+import { KibanaInstancePage } from './pages/kibana/instance';
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
 import { ElasticsearchIndexPage } from './pages/elasticsearch/index_page';
 import { ElasticsearchIndexAdvancedPage } from './pages/elasticsearch/index_advanced_page';
 import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
+import { ElasticsearchMLJobsPage } from './pages/elasticsearch/ml_jobs_page';
 import { ElasticsearchNodeAdvancedPage } from './pages/elasticsearch/node_advanced_page';
+import { ElasticsearchCcrPage } from './pages/elasticsearch/ccr_page';
+import { ElasticsearchCcrShardPage } from './pages/elasticsearch/ccr_shard_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
-import {
-  CODE_PATH_ELASTICSEARCH,
-  CODE_PATH_KIBANA,
-  CODE_PATH_BEATS,
-  CODE_PATH_APM,
-} from '../../common/constants';
+import { LogStashOverviewPage } from './pages/logstash/overview';
+import { LogStashNodesPage } from './pages/logstash/nodes';
+import { LogStashPipelinesPage } from './pages/logstash/pipelines';
+import { LogStashPipelinePage } from './pages/logstash/pipeline';
+import { BeatsInstancesPage } from './pages/beats/instances';
+import { LogStashNodeAdvancedPage } from './pages/logstash/advanced';
+// import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
+import { LogStashNodePage } from './pages/logstash/node';
+import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
 
 export const renderApp = (
   core: CoreStart,
@@ -82,9 +96,10 @@ const MonitoringApp: React.FC<{
                   />
                   <RouteInit
                     path="/home"
-                    component={Home}
+                    component={ClusterListing}
                     codePaths={['all']}
-                    fetchAllClusters={false}
+                    fetchAllClusters={true}
+                    unsetGlobalState={true}
                   />
                   <RouteInit
                     path="/overview"
@@ -94,6 +109,27 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* ElasticSearch Views */}
+                  <RouteInit
+                    path="/elasticsearch/ml_jobs"
+                    component={ElasticsearchMLJobsPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/ccr/:index/shard/:shardId"
+                    component={ElasticsearchCcrShardPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/ccr"
+                    component={ElasticsearchCcrPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/elasticsearch/indices/:index/advanced"
                     component={ElasticsearchIndexAdvancedPage}
@@ -145,6 +181,13 @@ const MonitoringApp: React.FC<{
 
                   {/* Kibana Views */}
                   <RouteInit
+                    path="/kibana/instances/:instance"
+                    component={KibanaInstancePage}
+                    codePaths={[CODE_PATH_KIBANA]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
                     path="/kibana/instances"
                     component={KibanaInstancesPage}
                     codePaths={[CODE_PATH_KIBANA]}
@@ -177,6 +220,56 @@ const MonitoringApp: React.FC<{
                     path="/beats"
                     component={BeatsOverviewPage}
                     codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
+                  {/* Logstash Routes */}
+                  <RouteInit
+                    path="/logstash/nodes"
+                    component={LogStashNodesPage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash/node/:uuid/advanced"
+                    component={LogStashNodeAdvancedPage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash/node/:uuid/pipelines"
+                    component={LogStashNodePipelinesPage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash/node/:uuid"
+                    component={LogStashNodePage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash/pipelines/:id/:hash?"
+                    component={LogStashPipelinePage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash/pipelines"
+                    component={LogStashPipelinesPage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash"
+                    component={LogStashOverviewPage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
                     fetchAllClusters={false}
                   />
 
@@ -216,8 +309,4 @@ const MonitoringApp: React.FC<{
       </ExternalConfigContext.Provider>
     </KibanaContextProvider>
   );
-};
-
-const Home: React.FC<{}> = () => {
-  return <div>Home page (Cluster listing)</div>;
 };
