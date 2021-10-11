@@ -108,7 +108,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   const { notifications } = useStartServices();
 
   const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
-    // Do not show the switch if the package is set to always keep policies up to date
     if (KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name)) {
       return false;
     }
