@@ -16,18 +16,24 @@ import {
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { useUiSetting } from '../ui_settings';
-import { Props } from './code_editor';
-import './register_languages';
+import type { Props } from './code_editor';
 
-export * from './languages';
+export * from './languages/constants';
 
 const LazyBaseEditor = React.lazy(() => import('./code_editor'));
 
-const Fallback = () => (
-  <EuiDelayRender>
-    <EuiLoadingContent lines={3} />
-  </EuiDelayRender>
-);
+const Fallback: React.FunctionComponent<{ height: Props['height'] }> = ({ height }) => {
+  return (
+    <>
+      {/* when height is known, set minHeight to avoid layout shift */}
+      <div style={height ? { minHeight: height } : {}}>
+        <EuiDelayRender>
+          <EuiLoadingContent lines={3} />
+        </EuiDelayRender>
+      </div>
+    </>
+  );
+};
 
 export type CodeEditorProps = Props;
 
@@ -40,7 +46,7 @@ export const CodeEditor: React.FunctionComponent<Props> = (props) => {
   const darkMode = useUiSetting<boolean>('theme:darkMode');
   return (
     <EuiErrorBoundary>
-      <React.Suspense fallback={<Fallback />}>
+      <React.Suspense fallback={<Fallback height={props.height} />}>
         <LazyBaseEditor {...props} useDarkTheme={darkMode} />
       </React.Suspense>
     </EuiErrorBoundary>
@@ -71,7 +77,7 @@ export const CodeEditorField: React.FunctionComponent<Props> = (props) => {
             style={{ ...style, padding: theme.paddingSizes.m }}
             readOnly={options?.readOnly}
           >
-            <Fallback />
+            <Fallback height={props.height} />
           </EuiFormControlLayout>
         }
       >
