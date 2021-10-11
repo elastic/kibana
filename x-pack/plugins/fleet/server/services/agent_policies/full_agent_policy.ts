@@ -75,7 +75,7 @@ export async function getFullAgentPolicy(
     id: agentPolicy.id,
     outputs: {
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
-        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(output);
+        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(output, standalone);
 
         return acc;
       }, {}),
@@ -179,8 +179,8 @@ function transformOutputToFullPolicyOutput(
 
   if (standalone) {
     delete newOutput.api_key;
-    newOutput.username = 'ES_USERNAME';
-    newOutput.password = 'ES_PASSWORD';
+    newOutput.username = '{ES_USERNAME}';
+    newOutput.password = '{ES_PASSWORD}';
   }
 
   return newOutput;

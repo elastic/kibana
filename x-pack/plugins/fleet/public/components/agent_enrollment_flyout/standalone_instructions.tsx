@@ -23,16 +23,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { safeDump } from 'js-yaml';
 
-import { useStartServices, useLink, sendGetOneAgentPolicyFull } from '../../hooks';
+import {
+  useStartServices,
+  useLink,
+  sendGetOneAgentPolicyFull,
+  sendGetOneAgentPolicy,
+} from '../../hooks';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../services';
 
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 import type { BaseProps } from './types';
+import {PackagePolicy} from "../../../common";
 
 type Props = BaseProps;
 
-const RUN_INSTRUCTIONS = './elastic-agent install';
-
+export const elasticAgentPolicy = '';
 export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPolicies }) => {
   const { getHref } = useLink();
   const core = useStartServices();
@@ -40,12 +45,48 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
 
   const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(agentPolicy?.id);
   const [fullAgentPolicy, setFullAgentPolicy] = useState<any | undefined>();
+  const [isK8s, setIsK8s] = useState<string | undefined>("isLoading");
+  const [yaml, setYaml] = useState<string | string>("");
+  const [runInstructions, setRunInstructions] = useState<string | string>("");
+  const [downloadLink, setDownloadLink] = useState<string | undefined>();
+  const [policyMessage, setPolicyMessage] = useState<string | undefined>("");
+  const [applyMessage, setApplyMessage] = useState<string | undefined>("");
+  const [downloadMessage, setDownloadMessage] = useState<string | undefined>("");
 
-  const downloadLink = selectedPolicyId
-    ? core.http.basePath.prepend(
-        `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?standalone=true`
-      )
-    : undefined;
+
+
+  useEffect(() => {
+    async function checkifK8s() {
+      if (!selectedPolicyId) {
+        return;
+      }
+      const agentPolicyRequest = await sendGetOneAgentPolicy(selectedPolicyId);
+      const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
+
+      if (!agentPolicy) {
+        setIsK8s("false");
+        return;
+      }
+      let found = false;
+      (agentPolicy.package_policies as PackagePolicy[]).forEach(({ package: pkg }) => {
+        if (!pkg) {
+          return;
+        }
+        if (pkg.name == "kubernetes") {
+          found = true;
+          return;
+        }
+      });
+
+      if (found) {
+        setIsK8s("true");
+      } else {
+        setIsK8s("false");
+      }
+    }
+    checkifK8s()
+  }, [selectedPolicyId, notifications.toasts]);
+
 
   useEffect(() => {
     async function fetchFullPolicy() {
@@ -53,7 +94,13 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
         if (!selectedPolicyId) {
           return;
         }
-        const res = await sendGetOneAgentPolicyFull(selectedPolicyId, { standalone: true });
+        let query = { standalone: true, kubernetes: false };
+        let downloandLinkUrl = `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?standalone=true`;
+        if (isK8s == "true"){
+          query = { standalone: true, kubernetes: true };
+          downloandLinkUrl = `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?kubernetes=true`;
+        }
+        const res = await sendGetOneAgentPolicyFull(selectedPolicyId, query);
         if (res.error) {
           throw res.error;
         }
@@ -61,18 +108,46 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
         if (!res.data) {
           throw new Error('No data while fetching full agent policy');
         }
-
         setFullAgentPolicy(res.data.item);
+        setDownloadLink(core.http.basePath.prepend(
+          downloandLinkUrl
+        ));
       } catch (error) {
         notifications.toasts.addError(error, {
           title: 'Error',
         });
       }
     }
-    fetchFullPolicy();
-  }, [selectedPolicyId, notifications.toasts]);
+    if (isK8s != "isLoading") {
+        fetchFullPolicy()
+    }
+  }, [selectedPolicyId, notifications.toasts, isK8s],);
 
-  const yaml = useMemo(() => fullAgentPolicyToYaml(fullAgentPolicy, safeDump), [fullAgentPolicy]);
+  useMemo(() => setYamlInstructions(), [fullAgentPolicy]);
+
+  function setYamlInstructions(){
+    if (isK8s == "true") {
+        if (typeof fullAgentPolicy === 'object') {
+          return;
+        }
+        setYaml(fullAgentPolicy);
+        setRunInstructions('kubectl apply -f elastic-agent.yml');
+        setPolicyMessage("Copy or download the Kubernetes manifest inside the Kubernetes cluster. Modify {ESUsernameVariable}, {ESPasswordVariable} and {ESHostVariable} in the Daemonset environment variables and apply the manifest.");
+        setApplyMessage("From the directory where the Kubernetes manifest is downloaded, run the apply command.");
+        setDownloadMessage("Download Manifest");
+    } else {
+        if (typeof fullAgentPolicy === 'string') {
+          return;
+        }
+        setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump));
+        setRunInstructions('./elastic-agent install');
+        setPolicyMessage("Copy this policy to the {fileName} on the host where the Elastic Agent is installed. Modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of {fileName} to use your Elasticsearch credentials.");
+        setApplyMessage("From the agent directory, run this command to install, enroll and start an Elastic Agent. You can reuse this command to set up agents on more than one host. Requires administrator privileges.");
+        setDownloadMessage("Download Policy");
+    }
+  }
+
+
   const steps = [
     DownloadStep(),
     !agentPolicy
@@ -87,11 +162,12 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
           <EuiText>
             <FormattedMessage
               id="xpack.fleet.agentEnrollment.stepConfigureAgentDescription"
-              defaultMessage="Copy this policy to the {fileName} on the host where the Elastic Agent is installed. Modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of {fileName} to use your Elasticsearch credentials."
+              defaultMessage={policyMessage}
               values={{
                 fileName: <EuiCode>elastic-agent.yml</EuiCode>,
                 ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
                 ESPasswordVariable: <EuiCode>ES_PASSWORD</EuiCode>,
+                ESHostVariable: <EuiCode>ES_HOST</EuiCode>,
                 outputSection: <EuiCode>outputs</EuiCode>,
               }}
             />
@@ -113,7 +189,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
                 <EuiButton iconType="download" href={downloadLink} isDisabled={!downloadLink}>
                   <FormattedMessage
                     id="xpack.fleet.agentEnrollment.downloadPolicyButton"
-                    defaultMessage="Download policy"
+                    defaultMessage={downloadMessage}
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -135,12 +211,12 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
           <EuiText>
             <FormattedMessage
               id="xpack.fleet.agentEnrollment.stepRunAgentDescription"
-              defaultMessage="From the agent directory, run this command to install, enroll and start an Elastic Agent. You can reuse this command to set up agents on more than one host. Requires administrator privileges."
+              defaultMessage={applyMessage}
             />
             <EuiSpacer size="m" />
-            <EuiCodeBlock fontSize="m">{RUN_INSTRUCTIONS}</EuiCodeBlock>
+            <EuiCodeBlock fontSize="m">{runInstructions}</EuiCodeBlock>
             <EuiSpacer size="m" />
-            <EuiCopy textToCopy={RUN_INSTRUCTIONS}>
+            <EuiCopy textToCopy={runInstructions}>
               {(copy) => (
                 <EuiButton onClick={copy} iconType="copyClipboard">
                   <FormattedMessage
