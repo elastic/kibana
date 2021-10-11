@@ -56,6 +56,10 @@ const StyledButton = styled(EuiButtonEmpty)`
 
 const ResetButton = styled(EuiButtonEmpty)`
   width: fit-content;
+  &:enabled:focus,
+  &:focus {
+    background-color: transparent;
+  }
 `;
 interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -236,9 +240,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
         >
           {i18n.SOURCERER}
           {isModified && <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>}
+          {isOnlyDetectionAlerts && <StyledBadge>{i18n.ALERTS_BADGE_TITLE}</StyledBadge>}
         </StyledButton>
       ),
-      [loading, setPopoverIsOpenCb, isModified]
+      [loading, setPopoverIsOpenCb, isModified, isOnlyDetectionAlerts]
     );
 
     const dataViewSelectOptions = useMemo(
@@ -313,13 +318,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
     const onExpandAdvancedOptionsClicked = useCallback(() => {
       setExpandAdvancedOptions((prevState) => !prevState);
     }, []);
-    const advancedIndicies: string[] = [];
-    const indiciesInCallout = advancedIndicies.join(',');
-
-    const callOutMessage = useMemo(
-      () => i18n.CALL_OUT_MESSAGE(indiciesInCallout),
-      [indiciesInCallout]
-    );
 
     return (
       <EuiToolTip position="top" content={tooltipContent}>
@@ -337,10 +335,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
             <EuiPopoverTitle>
               <>{i18n.SELECT_INDEX_PATTERNS}</>
             </EuiPopoverTitle>
-            {isOnlyDetectionAlerts && advancedIndicies?.length > 0 && (
-              <EuiCallOut iconType="info" title={i18n.CALL_OUT_TITLE}>
-                <p>{callOutMessage}</p>
-              </EuiCallOut>
+            {isAlertsOrRulesDetailsPage && (
+              <EuiCallOut size="s" iconType="iInCircle" title={i18n.CALL_OUT_TITLE} />
             )}
             <EuiSpacer size="s" />
             <EuiForm component="form">
@@ -377,6 +373,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
               <FormRow
                 label={i18n.INDEX_PATTERNS_LABEL}
                 $expandAdvancedOptions={expandAdvancedOptions}
+                helpText={isOnlyDetectionAlerts ? undefined : i18n.INDEX_PATTERNS_DESCRIPTIONS}
               >
                 <EuiComboBox
                   data-test-subj="sourcerer-combo-box"
