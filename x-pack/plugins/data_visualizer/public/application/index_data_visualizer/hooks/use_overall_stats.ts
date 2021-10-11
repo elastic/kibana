@@ -142,11 +142,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           )
         : of(undefined);
 
-    const sub = forkJoin({
-      nonAggregatableOverallStatsResp: nonAggregatableOverallStats$,
-      aggregatableOverallStatsResp: aggregatableOverallStats$,
-    }).pipe(
-      mergeMap(({ nonAggregatableOverallStatsResp, aggregatableOverallStatsResp }) => {
+    const sub = combineLatest([nonAggregatableOverallStats$, aggregatableOverallStats$]).pipe(
+      mergeMap(([nonAggregatableOverallStatsResp, aggregatableOverallStatsResp]) => {
         const aggregatableOverallStats = processAggregatableFieldsExistResponse(
           aggregatableOverallStatsResp?.rawResponse,
           aggregatableFields,

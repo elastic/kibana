@@ -184,8 +184,6 @@ export const fieldStatsSearchServiceProvider = (
                     safeFieldName: getSafeAggregationName(field.fieldName ?? '', idx),
                   });
                 }),
-                // @todo: throttle
-                timeout(1000),
               ]);
 
               results.forEach((r, idx) => {
