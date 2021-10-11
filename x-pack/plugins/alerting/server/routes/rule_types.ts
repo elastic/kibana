@@ -22,6 +22,8 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       isExportable,
       actionVariables,
       authorizedConsumers,
+      minimumScheduleInterval,
+      defaultScheduleInterval,
       ...rest
     }) => ({
       ...rest,
@@ -33,6 +35,8 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       is_exportable: isExportable,
       action_variables: actionVariables,
       authorized_consumers: authorizedConsumers,
+      minimum_schedule_interval: minimumScheduleInterval,
+      default_schedule_interval: defaultScheduleInterval,
     })
   );
 };
