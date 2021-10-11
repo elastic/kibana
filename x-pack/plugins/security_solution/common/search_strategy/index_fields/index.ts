@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { IFieldSubType } from '@kbn/es-query';
-import type { IIndexPattern } from 'src/plugins/data/public';
-import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
-import { DocValueFields, Maybe } from '../common';
+import type { IFieldSubType } from '@kbn/es-query';
+
+import type {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IIndexPattern,
+} from '../../../../../../src/plugins/data/common';
+import type { DocValueFields, Maybe } from '../common';
 
 interface FieldInfo {
   category: string;
@@ -66,12 +70,7 @@ export interface BrowserField {
   name: string;
   searchable: boolean;
   type: string;
-  subType?: {
-    [key: string]: unknown;
-    nested?: {
-      path: string;
-    };
-  };
+  subType?: IFieldSubType;
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;

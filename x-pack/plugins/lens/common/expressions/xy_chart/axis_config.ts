@@ -192,6 +192,10 @@ export const yAxisConfig: ExpressionFunctionDefinition<
       types: ['boolean'],
       help: 'Visibility of the marker label',
     },
+    textVisibility: {
+      types: ['boolean'],
+      help: 'Visibility of the label on the threshold line',
+    },
     fill: {
       types: ['string'],
       options: ['none', 'above', 'below'],
