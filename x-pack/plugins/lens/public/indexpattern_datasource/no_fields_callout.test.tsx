@@ -16,7 +16,7 @@ describe('NoFieldCallout', () => {
       <EuiCallOut
         color="warning"
         size="s"
-        title="No fields exist in this data view."
+        title="No fields exist in this index pattern."
       />
     `);
   });
