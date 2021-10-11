@@ -53,7 +53,7 @@ jest.mock('../../../common/containers/sourcerer', () => {
 
   return {
     ...originalModule,
-    useDataViewByScope: jest.fn().mockReturnValue({
+    useSourcererDataView: jest.fn().mockReturnValue({
       browserFields: mockBrowserFields,
       docValueFields: mockDocValueFields,
       loading: false,

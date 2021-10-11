@@ -35,9 +35,7 @@ export interface ManageScopeInit extends Partial<ManageScope> {
   id: SourcererScopeName;
 }
 
-export type SourcererScopeById = {
-  [id in SourcererScopeName]: ManageScope;
-};
+export type SourcererScopeById = Record<SourcererScopeName | string, ManageScope>;
 
 export interface SourcererDataView {
   /** Uniquely identifies a Kibana Index Pattern */
@@ -55,7 +53,7 @@ export interface SourcererDataView {
   runtimeMappings: MappingRuntimeFields;
   // the index pattern value passed to the search to make the query
   // includes fields and a title with active index names
-  indexPattern: IIndexPattern;
+  indexPattern: Omit<IIndexPattern, 'fieldFormatMap'>;
 }
 
 // ManageSourcerer

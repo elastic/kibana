@@ -23,7 +23,7 @@ import { inputsActions } from '../../common/store/inputs';
 import { State, createStore } from '../../common/store';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
-import { useDataViewByScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -57,7 +57,7 @@ const mockHistory = {
   createHref: jest.fn(),
   listen: jest.fn(),
 };
-const mockUseSourcererScope = useDataViewByScope as jest.Mock;
+const mockUseSourcererScope = useSourcererDataView as jest.Mock;
 describe('Hosts - rendering', () => {
   test('it renders the Setup Instructions text when no index is available', async () => {
     mockUseSourcererScope.mockReturnValue({

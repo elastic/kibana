@@ -16,7 +16,7 @@ import { mockEventViewerResponse, mockEventViewerResponseWithEvents } from './mo
 import { StatefulEventsViewer } from '.';
 import { EventsViewer } from './events_viewer';
 import { defaultHeaders } from './default_headers';
-import { useDataViewByScope } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../../containers/sourcerer';
 import {
   mockBrowserFields,
   mockDocValueFields,
@@ -95,7 +95,7 @@ jest.mock('../../../timelines/containers', () => ({
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
-const mockUseSourcererScope: jest.Mock = useDataViewByScope as jest.Mock;
+const mockUseSourcererScope: jest.Mock = useSourcererDataView as jest.Mock;
 jest.mock('../../containers/sourcerer');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;

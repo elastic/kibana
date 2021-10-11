@@ -11,7 +11,7 @@ import { Router } from 'react-router-dom';
 import { waitFor } from '@testing-library/react';
 import '../../common/mock/match_media';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query';
-import { useDataViewByScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import {
   TestProviders,
   mockGlobalState,
@@ -70,7 +70,7 @@ const mockProps = {
   capabilitiesFetched: true,
   hasMlUserPermissions: true,
 };
-const mockUseSourcererScope = useDataViewByScope as jest.Mock;
+const mockUseSourcererScope = useSourcererDataView as jest.Mock;
 describe('Network page - rendering', () => {
   test('it renders the Setup Instructions text when no index is available', () => {
     mockUseSourcererScope.mockReturnValue({

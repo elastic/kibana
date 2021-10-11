@@ -27,7 +27,7 @@ jest.mock('../../common/containers/sourcerer', () => {
 
   return {
     ...originalModule,
-    useDataViewByScope: jest.fn().mockReturnValue({
+    useSourcererDataView: jest.fn().mockReturnValue({
       indicesExist: true,
     }),
   };

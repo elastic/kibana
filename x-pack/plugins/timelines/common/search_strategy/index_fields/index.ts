@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IFieldSubType } from '@kbn/es-query';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
-import {
+import type { IFieldSubType } from '@kbn/es-query';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
+import type {
   IEsSearchRequest,
   IEsSearchResponse,
   IIndexPattern,
 } from '../../../../../../src/plugins/data/common';
-import { DocValueFields, Maybe } from '../common';
+import type { DocValueFields, Maybe } from '../common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
 
@@ -81,12 +81,7 @@ export interface BrowserField {
   name: string;
   searchable: boolean;
   type: string;
-  subType?: {
-    [key: string]: unknown;
-    nested?: {
-      path: string;
-    };
-  };
+  subType?: IFieldSubType;
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
