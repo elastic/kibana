@@ -19,6 +19,7 @@ import { KibanaInstances } from '../../../components/kibana/instances';
 import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 
 export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const { cluster_uuid: clusterUuid, ccs } = useContext(GlobalStateContext);
@@ -79,7 +80,7 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
     >
       <div data-test-subj="monitoringKibanaInstancesApp">
         <SetupModeRenderer
-          productName="kibana"
+          productName={KIBANA_SYSTEM_ID}
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
