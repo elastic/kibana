@@ -109,11 +109,14 @@ import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
 import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
 // eslint-disable-next-line no-restricted-imports
 import { legacyIsNotificationAlertExecutor } from './lib/detection_engine/notifications/legacy_types';
+import { IEventLogClientService, IEventLogService } from '../../event_log/server';
+import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
+  eventLog: IEventLogService;
   features: FeaturesSetup;
   lists?: ListPluginSetup;
   ml?: MlSetup;
@@ -121,20 +124,21 @@ export interface SetupPlugins {
   security?: SecuritySetup;
   spaces?: SpacesSetup;
   taskManager?: TaskManagerSetupContract;
-  usageCollection?: UsageCollectionSetup;
   telemetry?: TelemetryPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface StartPlugins {
   alerting: AlertPluginStartContract;
+  cases?: CasesPluginStartContract;
   data: DataPluginStart;
+  eventLog: IEventLogClientService;
   fleet?: FleetStartContract;
   licensing: LicensingPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
+  security: SecurityPluginStart;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
-  security: SecurityPluginStart;
-  cases?: CasesPluginStartContract;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -202,6 +206,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
+    const eventLogService = plugins.eventLog;
+    registerEventLogProvider(eventLogService);
+
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
@@ -210,8 +217,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         getSpaceId: () => plugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
         getExecutionLogClient: () =>
           new RuleExecutionLogClient({
-            ruleDataService: plugins.ruleRegistry.ruleDataService,
             savedObjectsClient: context.core.savedObjects.client,
+            eventLogService,
+            underlyingClient: config.ruleExecutionLog.underlyingClient,
           }),
       })
     );
@@ -262,11 +270,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         experimentalFeatures,
         lists: plugins.lists,
         logger: this.logger,
-        mergeStrategy: this.config.alertMergeStrategy,
-        ignoreFields: this.config.alertIgnoreFields,
+        config: this.config,
         ml: plugins.ml,
         ruleDataClient,
-        ruleDataService,
+        eventLogService,
         version: this.context.env.packageInfo.version,
       };
 
@@ -318,10 +325,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
-        mergeStrategy: this.config.alertMergeStrategy,
-        ignoreFields: this.config.alertIgnoreFields,
+        config: this.config,
         experimentalFeatures,
-        ruleDataService: plugins.ruleRegistry.ruleDataService,
+        eventLogService,
       });
       const ruleNotificationType = legacyRulesNotificationAlertType({
         logger: this.logger,
@@ -458,7 +464,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptionListsClient: exceptionListClient,
     });
 
-    this.telemetryReceiver.start(core, this.endpointAppContextService, exceptionListClient);
+    const globalConfig = this.context.config.legacy.get();
+    this.telemetryReceiver.start(
+      core,
+      globalConfig.kibana.index,
+      this.endpointAppContextService,
+      exceptionListClient
+    );
 
     this.telemetryEventsSender.start(
       plugins.telemetry,
