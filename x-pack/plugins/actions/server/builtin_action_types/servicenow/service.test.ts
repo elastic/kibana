@@ -40,7 +40,7 @@ const getImportSetAPIResponse = (update = false) => ({
       table: 'incident',
       display_name: 'number',
       display_value: 'INC01',
-      record_link: 'https://dev102283.service-now.com/api/now/table/incident/1',
+      record_link: 'https://example.com/api/now/table/incident/1',
       status: update ? 'updated' : 'inserted',
       sys_id: '1',
     },
@@ -117,7 +117,7 @@ const expectImportedIncident = (update: boolean) => {
     axios,
     logger,
     configurationUtilities,
-    url: 'https://dev102283.service-now.com/api/x_elas2_inc_int/elastic_api/health',
+    url: 'https://example.com/api/x_elas2_inc_int/elastic_api/health',
     method: 'get',
   });
 
@@ -125,7 +125,7 @@ const expectImportedIncident = (update: boolean) => {
     axios,
     logger,
     configurationUtilities,
-    url: 'https://dev102283.service-now.com/api/now/import/x_elas2_inc_int_elastic_incident',
+    url: 'https://example.com/api/now/import/x_elas2_inc_int_elastic_incident',
     method: 'post',
     data: {
       u_short_description: 'title',
@@ -138,7 +138,7 @@ const expectImportedIncident = (update: boolean) => {
     axios,
     logger,
     configurationUtilities,
-    url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
+    url: 'https://example.com/api/now/v2/table/incident/1',
     method: 'get',
   });
 };
@@ -151,7 +151,7 @@ describe('ServiceNow service', () => {
       {
         // The trailing slash at the end of the url is intended.
         // All API calls need to have the trailing slash removed.
-        config: { apiUrl: 'https://dev102283.service-now.com/' },
+        config: { apiUrl: 'https://example.com/' },
         secrets: { username: 'admin', password: 'admin' },
       },
       logger,
@@ -227,7 +227,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
+        url: 'https://example.com/api/now/v2/table/incident/1',
         method: 'get',
       });
     });
@@ -235,7 +235,7 @@ describe('ServiceNow service', () => {
     test('it should call request with correct arguments when table changes', async () => {
       service = createExternalService(
         {
-          config: { apiUrl: 'https://dev102283.service-now.com/' },
+          config: { apiUrl: 'https://example.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
@@ -252,7 +252,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident/1',
+        url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
         method: 'get',
       });
     });
@@ -287,7 +287,7 @@ describe('ServiceNow service', () => {
           title: 'INC01',
           id: '1',
           pushedDate: '2020-03-10T12:24:20.000Z',
-          url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=1',
+          url: 'https://example.com/nav_to.do?uri=incident.do?sys_id=1',
         });
       });
 
@@ -300,7 +300,7 @@ describe('ServiceNow service', () => {
       test('it should call request with correct arguments when table changes', async () => {
         service = createExternalService(
           {
-            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
@@ -314,7 +314,7 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://dev102283.service-now.com/api/x_elas2_sir_int/elastic_api/health',
+          url: 'https://example.com/api/x_elas2_sir_int/elastic_api/health',
           method: 'get',
         });
 
@@ -322,7 +322,7 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://dev102283.service-now.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
+          url: 'https://example.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
           method: 'post',
           data: { u_short_description: 'title', u_description: 'desc' },
         });
@@ -331,13 +331,11 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident/1',
+          url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
           method: 'get',
         });
 
-        expect(res.url).toEqual(
-          'https://dev102283.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=1'
-        );
+        expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
       });
 
       test('it should throw an error when the application is not installed', async () => {
@@ -350,7 +348,7 @@ describe('ServiceNow service', () => {
             incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
           })
         ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to create incident. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown Reason: unknown'
+          '[Action][ServiceNow]: Unable to create incident. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
         );
       });
 
@@ -386,7 +384,7 @@ describe('ServiceNow service', () => {
       beforeEach(() => {
         service = createExternalService(
           {
-            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
@@ -405,7 +403,7 @@ describe('ServiceNow service', () => {
           title: 'INC01',
           id: '1',
           pushedDate: '2020-03-10T12:24:20.000Z',
-          url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=1',
+          url: 'https://example.com/nav_to.do?uri=incident.do?sys_id=1',
         });
 
         expect(requestMock).toHaveBeenCalledTimes(2);
@@ -413,7 +411,7 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://dev102283.service-now.com/api/now/v2/table/incident',
+          url: 'https://example.com/api/now/v2/table/incident',
           method: 'post',
           data: { short_description: 'title', description: 'desc' },
         });
@@ -422,7 +420,7 @@ describe('ServiceNow service', () => {
       test('it should call request with correct arguments when table changes', async () => {
         service = createExternalService(
           {
-            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
@@ -440,14 +438,12 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident',
+          url: 'https://example.com/api/now/v2/table/sn_si_incident',
           method: 'post',
           data: { short_description: 'title', description: 'desc' },
         });
 
-        expect(res.url).toEqual(
-          'https://dev102283.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=1'
-        );
+        expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
       });
     });
   });
@@ -462,7 +458,7 @@ describe('ServiceNow service', () => {
           title: 'INC01',
           id: '1',
           pushedDate: '2020-03-10T12:24:20.000Z',
-          url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=1',
+          url: 'https://example.com/nav_to.do?uri=incident.do?sys_id=1',
         });
       });
 
@@ -474,7 +470,7 @@ describe('ServiceNow service', () => {
       test('it should call request with correct arguments when table changes', async () => {
         service = createExternalService(
           {
-            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
@@ -487,7 +483,7 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://dev102283.service-now.com/api/x_elas2_sir_int/elastic_api/health',
+          url: 'https://example.com/api/x_elas2_sir_int/elastic_api/health',
           method: 'get',
         });
 
@@ -495,7 +491,7 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://dev102283.service-now.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
+          url: 'https://example.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
           method: 'post',
           data: { u_short_description: 'title', u_description: 'desc', elastic_incident_id: '1' },
         });
@@ -504,13 +500,11 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident/1',
+          url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
           method: 'get',
         });
 
-        expect(res.url).toEqual(
-          'https://dev102283.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=1'
-        );
+        expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
       });
 
       test('it should throw an error when the application is not installed', async () => {
@@ -524,7 +518,7 @@ describe('ServiceNow service', () => {
             incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
           })
         ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to update incident with id 1. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown Reason: unknown'
+          '[Action][ServiceNow]: Unable to update incident with id 1. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
         );
       });
 
@@ -562,7 +556,7 @@ describe('ServiceNow service', () => {
       beforeEach(() => {
         service = createExternalService(
           {
-            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
@@ -582,7 +576,7 @@ describe('ServiceNow service', () => {
           title: 'INC01',
           id: '1',
           pushedDate: '2020-03-10T12:24:20.000Z',
-          url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=1',
+          url: 'https://example.com/nav_to.do?uri=incident.do?sys_id=1',
         });
 
         expect(requestMock).toHaveBeenCalledTimes(2);
@@ -590,7 +584,7 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
+          url: 'https://example.com/api/now/v2/table/incident/1',
           method: 'patch',
           data: { short_description: 'title', description: 'desc' },
         });
@@ -599,7 +593,7 @@ describe('ServiceNow service', () => {
       test('it should call request with correct arguments when table changes', async () => {
         service = createExternalService(
           {
-            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
@@ -618,14 +612,12 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident/1',
+          url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
           method: 'patch',
           data: { short_description: 'title', description: 'desc' },
         });
 
-        expect(res.url).toEqual(
-          'https://dev102283.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=1'
-        );
+        expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
       });
     });
   });
@@ -641,7 +633,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/table/sys_dictionary?sysparm_query=name=task^ORname=incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
+        url: 'https://example.com/api/now/table/sys_dictionary?sysparm_query=name=task^ORname=incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
       });
     });
 
@@ -656,7 +648,7 @@ describe('ServiceNow service', () => {
     test('it should call request with correct arguments when table changes', async () => {
       service = createExternalService(
         {
-          config: { apiUrl: 'https://dev102283.service-now.com/' },
+          config: { apiUrl: 'https://example.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
@@ -673,7 +665,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/table/sys_dictionary?sysparm_query=name=task^ORname=sn_si_incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
+        url: 'https://example.com/api/now/table/sys_dictionary?sysparm_query=name=task^ORname=sn_si_incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
       });
     });
 
@@ -709,7 +701,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
       });
     });
 
@@ -724,7 +716,7 @@ describe('ServiceNow service', () => {
     test('it should call request with correct arguments when table changes', async () => {
       service = createExternalService(
         {
-          config: { apiUrl: 'https://dev102283.service-now.com/' },
+          config: { apiUrl: 'https://example.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
@@ -742,7 +734,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
       });
     });
 
@@ -769,7 +761,7 @@ describe('ServiceNow service', () => {
 
   describe('getUrl', () => {
     test('it returns the instance url', async () => {
-      expect(service.getUrl()).toBe('https://dev102283.service-now.com');
+      expect(service.getUrl()).toBe('https://example.com');
     });
   });
 
@@ -828,7 +820,7 @@ describe('ServiceNow service', () => {
       test('it does not log if useOldApi = true', async () => {
         service = createExternalService(
           {
-            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,

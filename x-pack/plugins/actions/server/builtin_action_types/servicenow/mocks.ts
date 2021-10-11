@@ -151,15 +151,15 @@ const createSIRMock = (): jest.Mocked<ExternalServiceSIR> => {
   return service;
 };
 
-const externalServiceMock = {
+export const externalServiceMock = {
   create: createMock,
 };
 
-const externalServiceSIRMock = {
+export const externalServiceSIRMock = {
   create: createSIRMock,
 };
 
-const executorParams: ExecutorSubActionPushParams = {
+export const executorParams: ExecutorSubActionPushParams = {
   incident: {
     externalId: 'incident-3',
     short_description: 'Incident title',
@@ -169,7 +169,7 @@ const executorParams: ExecutorSubActionPushParams = {
     impact: '3',
     category: 'software',
     subcategory: 'os',
-    correlation_id: 'alertID',
+    correlation_id: 'ruleId',
     correlation_display: 'Alerting',
   },
   comments: [
@@ -184,7 +184,7 @@ const executorParams: ExecutorSubActionPushParams = {
   ],
 };
 
-const sirParams: PushToServiceApiParamsSIR = {
+export const sirParams: PushToServiceApiParamsSIR = {
   incident: {
     externalId: 'incident-3',
     short_description: 'Incident title',
@@ -195,7 +195,7 @@ const sirParams: PushToServiceApiParamsSIR = {
     malware_url: ['https://example.com'],
     category: 'software',
     subcategory: 'os',
-    correlation_id: 'alertID',
+    correlation_id: 'ruleId',
     correlation_display: 'Alerting',
     priority: '1',
   },
@@ -211,7 +211,7 @@ const sirParams: PushToServiceApiParamsSIR = {
   ],
 };
 
-const observables: Observable[] = [
+export const observables: Observable[] = [
   {
     value: '5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9',
     type: ObservableTypes.sha256,
@@ -226,13 +226,4 @@ const observables: Observable[] = [
   },
 ];
 
-const apiParams = executorParams;
-
-export {
-  externalServiceMock,
-  executorParams,
-  apiParams,
-  sirParams,
-  externalServiceSIRMock,
-  observables,
-};
+export const apiParams = executorParams;

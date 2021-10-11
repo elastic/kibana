@@ -68,13 +68,13 @@ const expectAddObservables = (single: boolean) => {
     axios,
     logger,
     configurationUtilities,
-    url: 'https://dev102283.service-now.com/api/x_elas2_sir_int/elastic_api/health',
+    url: 'https://example.com/api/x_elas2_sir_int/elastic_api/health',
     method: 'get',
   });
 
   const url = single
-    ? 'https://dev102283.service-now.com/api/x_elas2_sir_int/elastic_api/incident/incident-1/observables'
-    : 'https://dev102283.service-now.com/api/x_elas2_sir_int/elastic_api/incident/incident-1/observables/bulk';
+    ? 'https://example.com/api/x_elas2_sir_int/elastic_api/incident/incident-1/observables'
+    : 'https://example.com/api/x_elas2_sir_int/elastic_api/incident/incident-1/observables/bulk';
 
   const data = single ? observables[0] : observables;
 
@@ -94,7 +94,7 @@ describe('ServiceNow SIR service', () => {
   beforeEach(() => {
     service = createExternalServiceSIR(
       {
-        config: { apiUrl: 'https://dev102283.service-now.com/' },
+        config: { apiUrl: 'https://example.com/' },
         secrets: { username: 'admin', password: 'admin' },
       },
       logger,
