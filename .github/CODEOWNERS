@@ -39,6 +39,7 @@
 /src/plugins/visualize/ @elastic/kibana-vis-editors
 /src/plugins/visualizations/ @elastic/kibana-vis-editors
 /src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_metric/ @elastic/kibana-vis-editors
 /src/plugins/url_forwarding/ @elastic/kibana-vis-editors
 /packages/kbn-tinymath/ @elastic/kibana-vis-editors
 /x-pack/test/functional/apps/lens @elastic/kibana-vis-editors

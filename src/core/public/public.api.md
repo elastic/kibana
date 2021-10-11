@@ -612,6 +612,7 @@ export interface DocLinksStart {
             readonly ruleChangeLog: string;
             readonly detectionsReq: string;
             readonly networkMap: string;
+            readonly troubleshootGaps: string;
         };
         readonly query: {
             readonly eql: string;
@@ -703,6 +704,7 @@ export interface DocLinksStart {
             datastreamsNamingScheme: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
+            learnMoreBlog: string;
         }>;
         readonly ecs: {
             readonly guide: string;
