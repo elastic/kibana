@@ -134,7 +134,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
           type: 'trustedAppCreationDialogFormStateUpdated',
           payload: { entry: newFormState.item, isValid: newFormState.isValid },
         });
-        if (_.isEqual(formValues, newFormState.item)) {
+        if (_.isEqual(formValues, newFormState.item) === false) {
           setIsFormDirty(true);
         }
       },
