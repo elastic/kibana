@@ -30,7 +30,7 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { getAlertAnnotations } from './get_alert_annotations';
 
 type Alert = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
+  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
 >;
 
 const euiColorDanger = 'red';
