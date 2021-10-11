@@ -41,7 +41,7 @@ Domain rules are registered by *Observability*, *Security*, <<maps, Maps>> and <
 | Detect complex conditions in the *Logs*, *Metrics*, and *Uptime* apps.
 
 | {security-guide}/prebuilt-rules.html[Security rules]
-| Detect suspicous source events with pre-built or custom rules and create alerts when a rule’s conditions are met.
+| Detect suspicious source events with pre-built or custom rules and create alerts when a rule’s conditions are met.
 
 | <<geo-alerting, Maps rules>>
 | Run an {es} query to determine if any documents are currently contained in any boundaries from a specified boundary index and generate alerts when a rule's conditions are met.
