@@ -52,7 +52,7 @@ import { getFullAgentPolicy } from './agent_policies';
 import {FullAgentConfigMap} from "../../common/types/models/agent_cm";
 import {fullAgentConfigMapToYaml} from "../../common/services/agent_cm_to_yaml";
 import { safeDump } from 'js-yaml';
-import {elasticAgentManifest} from "../../../../../../x-pack/plugins/fleet/public/components/agent_enrollment_flyout/elastic_agent_manifest";
+import {elasticAgentManifest} from "../../public/components/agent_enrollment_flyout/elastic_agent_manifest";
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
 class AgentPolicyService {
