@@ -11,7 +11,8 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const security = getService('security');
 
-  describe('docvalue_fields', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/114418
+  describe.skip('docvalue_fields', () => {
     before(async () => {
       await security.testUser.setRoles(['global_maps_read', 'test_logstash_reader'], false);
       await PageObjects.maps.loadSavedMap('document example');
