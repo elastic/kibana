@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { Action } from 'redux';
 import { HostIsolationExceptionsPageState } from '../types';
 
@@ -46,7 +49,7 @@ export type HostIsolationExceptionsMarkToEdit = Action<'hostIsolationExceptionsM
 };
 
 export type HostIsolationExceptionsSubmitEdit = Action<'hostIsolationExceptionsSubmitEdit'> & {
-  payload: HostIsolationExceptionsPageState['form']['entry'];
+  payload: UpdateExceptionListItemSchema;
 };
 
 export type HostIsolationExceptionsPageAction =

@@ -16,7 +16,7 @@ import { HostIsolationExceptionsPageState } from '../types';
 import { initialHostIsolationExceptionsPageState } from './builders';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
-import { createUninitialisedResourceState, isLoadedResourceState } from '../../../state';
+import { createUninitialisedResourceState } from '../../../state';
 
 type StateReducer = ImmutableReducer<HostIsolationExceptionsPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (

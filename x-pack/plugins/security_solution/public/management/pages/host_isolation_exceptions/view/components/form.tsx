@@ -37,7 +37,7 @@ interface ExceptionIpEntry {
   field: 'destination.ip';
   operator: 'included';
   type: 'match';
-  value: '';
+  value: string;
 }
 
 export const HostIsolationExceptionsForm: React.FC<{

@@ -14,7 +14,7 @@ import {
 import { CoreStart, HttpSetup, HttpStart } from 'kibana/public';
 import { matchPath } from 'react-router-dom';
 import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
-import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
+import { AppLocation, Immutable, ImmutableObject } from '../../../../../common/endpoint/types';
 import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
@@ -213,7 +213,7 @@ async function loadHostIsolationExceptionsItem(
 async function updateHostIsolationExceptionsItem(
   store: ImmutableMiddlewareAPI<HostIsolationExceptionsPageState, AppAction>,
   http: HttpSetup,
-  exception: UpdateExceptionListItemSchema
+  exception: ImmutableObject<UpdateExceptionListItemSchema>
 ) {
   const { dispatch } = store;
   dispatch({
