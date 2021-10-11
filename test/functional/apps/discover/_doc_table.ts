@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover doc table', function describeIndexTests() {
     const rowsHardLimit = 500;
 
-    before(async function () {
+    before(async () => {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
@@ -40,6 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
 
+    after(async () => await kibanaServer.uiSettings.unset('timepicker:timeDefaults'));
+
     it('should show records by default', async function () {
       // with the default range the number of hits is ~14000
       const rows = await PageObjects.discover.getDocTableRows();
@@ -48,13 +50,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should refresh the table content when changing time window', async function () {
       const initialRows = await PageObjects.discover.getDocTableRows();
-
-      const fromTime = 'Sep 20, 2015 @ 23:00:00.000';
-      const toTime = 'Sep 20, 2015 @ 23:14:00.000';
-
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.discover.waitUntilSearchingHasFinished();
-
+      const from = 'Sep 20, 2015 @ 23:00:00.000';
+      const to = 'Sep 20, 2015 @ 23:14:00.000';
+      await kibanaServer.uiSettings.replace({
+        'timepicker:timeDefaults': JSON.stringify({ from, to }),
+      });
+      await PageObjects.common.navigateToApp('discover');
       const finalRows = await PageObjects.discover.getDocTableRows();
       expect(finalRows.length).to.be.below(initialRows.length);
       await PageObjects.timePicker.setDefaultAbsoluteRange();
