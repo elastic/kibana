@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pRetry from 'p-retry';
 import { BulkRequest } from '@elastic/elasticsearch/api/types';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { Either, isLeft } from 'fp-ts/lib/Either';
@@ -139,7 +138,11 @@ export class RuleDataClient implements IRuleDataClient {
     const alias = indexInfo.getPrimaryAlias(namespace);
 
     // Wait until both index and namespace level resources have been installed / updated.
-    const waitUntilReady = async () => {
+    const prepareForWriting = async () => {
+      if (!isWriteEnabled()) {
+        throw new RuleDataWriteDisabledError();
+      }
+
       const indexLevelResourcesResult = await this.options.waitUntilReadyForWriting;
 
       if (isLeft(indexLevelResourcesResult)) {
@@ -162,16 +165,12 @@ export class RuleDataClient implements IRuleDataClient {
       }
     };
 
-    const waitUntilReadyResult = waitUntilReady();
+    const prepareForWritingResult = prepareForWriting();
 
     return {
       bulk: async (request: BulkRequest) => {
-        return waitUntilReadyResult
+        return prepareForWritingResult
           .then((clusterClient) => {
-            if (!isWriteEnabled()) {
-              throw new RuleDataWriteDisabledError();
-            }
-
             const requestWithDefaultParameters = {
               ...request,
               require_alias: true,
