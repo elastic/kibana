@@ -953,21 +953,6 @@
       "children": [
         {
           "parentPluginId": "eventLog",
-          "id": "def-server.IEventLogService.isEnabled",
-          "type": "Function",
-          "tags": [],
-          "label": "isEnabled",
-          "description": [],
-          "signature": [
-            "() => boolean"
-          ],
-          "path": "x-pack/plugins/event_log/server/types.ts",
-          "deprecated": false,
-          "children": [],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "eventLog",
           "id": "def-server.IEventLogService.isLoggingEntries",
           "type": "Function",
           "tags": [],

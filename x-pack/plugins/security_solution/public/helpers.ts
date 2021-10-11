@@ -9,7 +9,14 @@ import { isEmpty } from 'lodash/fp';
 import { matchPath } from 'react-router-dom';
 
 import { CoreStart } from '../../../../src/core/public';
-import { ALERTS_PATH, APP_ID, EXCEPTIONS_PATH, RULES_PATH, UEBA_PATH } from '../common/constants';
+import {
+  ALERTS_PATH,
+  APP_ID,
+  EXCEPTIONS_PATH,
+  RULES_PATH,
+  UEBA_PATH,
+  RISKY_HOSTS_INDEX_PREFIX,
+} from '../common/constants';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -146,4 +153,8 @@ export const isDetectionsPath = (pathname: string): boolean => {
     path: `(${ALERTS_PATH}|${RULES_PATH}|${UEBA_PATH}|${EXCEPTIONS_PATH})`,
     strict: false,
   });
+};
+
+export const getHostRiskIndex = (spaceId: string): string => {
+  return `${RISKY_HOSTS_INDEX_PREFIX}${spaceId}`;
 };
