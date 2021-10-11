@@ -22,25 +22,43 @@ import { parseConfig, Config } from './ci_stats_config';
 const BASE_URL = 'https://ci-stats.kibana.dev';
 
 export interface CiStatsMetric {
+  /** Top-level categorization for the metric, e.g. "page load bundle size" */
   group: string;
+  /** Specific sub-set of the "group", e.g. "dashboard" */
   id: string;
+  /** integer value recorded as the value of this metric */
   value: number;
+  /** optional limit which will generate an error on PRs when the metric exceeds the limit */
   limit?: number;
+  /**
+   * path, relative to the repo, where the config file contianing limits
+   * is kept. Linked from PR comments instructing contributors how to fix
+   * their PRs.
+   */
   limitConfigPath?: string;
+  /** Arbitrary key-value pairs which can be used for additional filtering/reporting */
   meta?: CiStatsMetadata;
 }
 
 export interface CiStatsMetadata {
+  /**
+   * Arbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric
+   * objects stored in the ci-stats service
+   */
   [key: string]: string | string[] | number | boolean | undefined;
 }
 export interface CiStatsTiming {
+  /** Top-level categorization for the timing, e.g. "scripts/foo", process type, etc. */
   group: string;
+  /** Specific timing (witin the "group" being tracked) e.g. "total" */
   id: string;
+  /** time in milliseconds which should be recorded */
   ms: number;
+  /** hash of key-value pairs which will be stored with the timing for additional filtering and reporting */
   meta?: CiStatsMetadata;
 }
 
-export interface ReqOptions {
+interface ReqOptions {
   auth: boolean;
   path: string;
   body: any;
@@ -57,19 +75,32 @@ export interface TimingsOptions {
 }
 
 export interface MetricsOptions {
+  /** Default metadata to add to each metric */
   defaultMeta?: CiStatsMetadata;
 }
 export class CiStatsReporter {
+  /**
+   * Create a CiStatsReporter by inspecting the ENV for the necessary config
+   */
   static fromEnv(log: ToolingLog) {
     return new CiStatsReporter(parseConfig(log), log);
   }
 
   constructor(private config: Config | undefined, private log: ToolingLog) {}
 
+  /**
+   * Determine if CI_STATS is explicitly disabled by the environment. To determine
+   * if the CiStatsReporter has enough information in the environment to send metrics
+   * for builds use #hasBuildConfig().
+   */
   isEnabled() {
     return process.env.CI_STATS_DISABLED !== 'true';
   }
 
+  /**
+   * Determines if the CiStatsReporter is disabled by the environment, or properly
+   * configured and able to send stats
+   */
   hasBuildConfig() {
     return this.isEnabled() && !!this.config?.apiToken && !!this.config?.buildId;
   }
