@@ -46,7 +46,7 @@ export interface Props {
     propName: string,
     value: unknown,
     newLayerType?: LAYER_TYPE
-  ) => void;
+  ) => Promise<void>;
 }
 
 interface State {
@@ -140,10 +140,10 @@ export class EditLayerPanel extends Component<Props, State> {
     }
   }
 
-  _onSourceChange = (...args: OnSourceChangeArgs[]) => {
+  _onSourceChange = async (...args: OnSourceChangeArgs[]) => {
     for (let i = 0; i < args.length; i++) {
       const { propName, value, newLayerType } = args[i];
-      this.props.updateSourceProp(this.props.selectedLayer!.getId(), propName, value, newLayerType);
+      await this.props.updateSourceProp(this.props.selectedLayer!.getId(), propName, value, newLayerType);
     }
   };
 

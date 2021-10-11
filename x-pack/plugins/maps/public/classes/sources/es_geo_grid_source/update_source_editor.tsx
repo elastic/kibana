@@ -7,20 +7,40 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { GRID_RESOLUTION, LAYER_TYPE } from '../../../../common/constants';
+import uuid from 'uuid/v4';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
+import { AGG_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isMetricCountable } from '../../util/is_metric_countable';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
+import { IndexPatternField, indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { RenderAsSelect } from './render_as_select';
+import { AggDescriptor } from '../../../../common/descriptor_types';
+import { OnSourceChangeArgs } from '../source';
 
-export class UpdateSourceEditor extends Component {
-  state = {
-    fields: null,
+interface Props {
+  currentLayerType?: string;
+  indexPatternId: string;
+  onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
+  metrics: AggDescriptor[];
+  renderAs: RENDER_AS;
+  resolution: GRID_RESOLUTION;
+}
+
+interface State {
+  metricsEditorKey: string;
+  fields: IndexPatternField[];
+  loadError?: string;
+}
+
+export class UpdateSourceEditor extends Component<Props, State> {
+  private _isMounted?: boolean;
+  state: State = {
+    fields: [],
+    metricsEditorKey: uuid(),
   };
 
   componentDidMount() {
@@ -59,11 +79,11 @@ export class UpdateSourceEditor extends Component {
     });
   }
 
-  _onMetricsChange = (metrics) => {
+  _onMetricsChange = (metrics: AggDescriptor[]) => {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
-  _onResolutionChange = (resolution) => {
+  _onResolutionChange = async (resolution: GRID_RESOLUTION, metrics: AggDescriptor[]) => {
     let newLayerType;
     if (
       this.props.currentLayerType === LAYER_TYPE.VECTOR ||
@@ -81,21 +101,36 @@ export class UpdateSourceEditor extends Component {
       throw new Error('Unexpected layer-type');
     }
 
-    this.props.onChange({ propName: 'resolution', value: resolution, newLayerType });
+    await this.props.onChange(
+      { propName: 'metrics', value: metrics },
+      { propName: 'resolution', value: resolution, newLayerType }
+    );
+
+    // Metrics editor persists metrics in state.
+    // Reset metricsEditorKey to force new instance and new internal state with latest metrics
+    this.setState({ metricsEditorKey: uuid() });
   };
 
-  _onRequestTypeSelect = (requestType) => {
+  _onRequestTypeSelect = (requestType: RENDER_AS) => {
     this.props.onChange({ propName: 'requestType', value: requestType });
   };
 
   _renderMetricsPanel() {
     const metricsFilter =
       this.props.currentLayerType === LAYER_TYPE.HEATMAP
-        ? (metric) => {
-            //these are countable metrics, where blending heatmap color blobs make sense
-            return isMetricCountable(metric.value);
+        ? (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
+            // these are countable metrics, where blending heatmap color blobs make sense
+            return metric.value ? isMetricCountable(metric.value) : false;
           }
-        : null;
+        : undefined;
+
+    const isMetricDisabledDueToMvt = (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
+      return (
+        this.props.resolution === GRID_RESOLUTION.SUPER_FINE &&
+        (metric.value === AGG_TYPE.TERMS || metric.value === AGG_TYPE.PERCENTILE)
+      );
+    };
+
     const allowMultipleMetrics = this.props.currentLayerType !== LAYER_TYPE.HEATMAP;
     return (
       <EuiPanel>
@@ -106,8 +141,10 @@ export class UpdateSourceEditor extends Component {
         </EuiTitle>
         <EuiSpacer size="m" />
         <MetricsEditor
+          key={this.state.metricsEditorKey}
           allowMultipleMetrics={allowMultipleMetrics}
           metricsFilter={metricsFilter}
+          metricsDisabledDueToMvt={isMetricDisabledDueToMvt}
           fields={this.state.fields}
           metrics={this.props.metrics}
           onChange={this._onMetricsChange}
@@ -136,6 +173,7 @@ export class UpdateSourceEditor extends Component {
             includeSuperFine={this.props.currentLayerType !== LAYER_TYPE.HEATMAP}
             resolution={this.props.resolution}
             onChange={this._onResolutionChange}
+            metrics={this.props.metrics}
           />
           <RenderAsSelect
             isColumnCompressed

@@ -31,8 +31,8 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    updateSourceProp: (id: string, propName: string, value: unknown, newLayerType?: LAYER_TYPE) =>
-      dispatch(updateSourceProp(id, propName, value, newLayerType)),
+    updateSourceProp: async (id: string, propName: string, value: unknown, newLayerType?: LAYER_TYPE) =>
+      await dispatch(updateSourceProp(id, propName, value, newLayerType)),
   };
 }
 
