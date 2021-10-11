@@ -24,13 +24,12 @@ import { SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
 import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prompt';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV, RESET_BUTTON } from '../../../../constants';
-import { DIFFERENT_SYNC_TYPES_DOCS_URL, SYNC_BEST_PRACTICES_DOCS_URL } from '../../../../routes';
+import { DIFFERENT_SYNC_TYPES_DOCS_URL } from '../../../../routes';
 import {
   SOURCE_FREQUENCY_DESCRIPTION,
   SOURCE_SYNC_FREQUENCY_TITLE,
   BLOCKED_TIME_WINDOWS_TITLE,
-  DIFFERENT_SYNC_TYPES_LINK_LABEL,
-  SYNC_BEST_PRACTICES_LINK_LABEL,
+  SYNC_FREQUENCY_LINK_LABEL,
   SYNC_UNSAVED_CHANGES_MESSAGE,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
@@ -89,12 +88,7 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiLink href={DIFFERENT_SYNC_TYPES_DOCS_URL} external>
-          {DIFFERENT_SYNC_TYPES_LINK_LABEL}
-        </EuiLink>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiLink href={SYNC_BEST_PRACTICES_DOCS_URL} external>
-          {SYNC_BEST_PRACTICES_LINK_LABEL}
+          {SYNC_FREQUENCY_LINK_LABEL}
         </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
