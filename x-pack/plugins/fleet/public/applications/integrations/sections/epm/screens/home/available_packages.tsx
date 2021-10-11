@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { EuiHorizontalRule } from '@elastic/eui';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -19,20 +20,21 @@ import {
   useLink,
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
-import type { PackageList } from '../../../../types';
+import type { PackageList, PackageListItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
-import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
-
-import type { PackageListItem } from '../../../../types';
-
-import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type {
+  CustomIntegration,
+  IntegrationCategory,
+} from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import { useMergeEprPackagesWithReplacements } from '../../../../../../hooks/use_merge_epr_with_replacements';
 
+import { IntegrationPreference } from '../../components/integration_preference';
+
 import { mergeAndReplaceCategoryCounts } from './util';
-import { CategoryFacets } from './category_facets';
 import type { CategoryFacet } from './category_facets';
+import { CategoryFacets } from './category_facets';
 
 import type { CategoryParams } from '.';
 import { getParams, categoryExists, mapToCard } from '.';
@@ -181,17 +183,23 @@ export const AvailablePackages: React.FC = memo(() => {
     return null;
   }
 
-  const controls = categories ? (
-    <CategoryFacets
-      showCounts={false}
-      isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
-      categories={categories}
-      selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategoryFacet) => {
-        setSelectedCategory(id);
-      }}
-    />
-  ) : null;
+  // TODO: clintandrewhall - figure out the right logic for the onChange.
+  let controls = [<EuiHorizontalRule />, <IntegrationPreference onChange={() => {}} />];
+
+  if (categories) {
+    controls = [
+      <CategoryFacets
+        showCounts={false}
+        isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={({ id }: CategoryFacet) => {
+          setSelectedCategory(id);
+        }}
+      />,
+      ...controls,
+    ];
+  }
 
   const cards = eprAndCustomPackages.map((item) => {
     return mapToCard(getAbsolutePath, getHref, item);

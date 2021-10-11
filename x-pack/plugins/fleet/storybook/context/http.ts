@@ -74,6 +74,7 @@ export const getHttp = (basepath = BASE_PATH) => {
         return await import('./fixtures/integration.okta');
       }
 
+      action(path)('KP: UNSUPPORTED ROUTE');
       return {};
     }) as HttpHandler,
   } as unknown as HttpStart;
