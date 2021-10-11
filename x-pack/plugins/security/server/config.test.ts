@@ -27,6 +27,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -80,6 +81,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -133,6 +135,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -311,6 +314,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "oidc": Object {
@@ -342,6 +346,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "oidc": Object {
@@ -373,6 +378,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -391,6 +397,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -412,6 +419,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -1485,6 +1493,7 @@ describe('createConfig()', () => {
           "enabled": true,
           "schemes": Array [
             "apikey",
+            "bearer",
           ],
         },
         "providers": Object {
