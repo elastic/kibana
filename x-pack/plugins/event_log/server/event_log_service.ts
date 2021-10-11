@@ -55,16 +55,12 @@ export class EventLogService implements IEventLogService {
     this.kibanaVersion = kibanaVersion;
   }
 
-  public isEnabled(): boolean {
-    return this.config.enabled;
-  }
-
   public isLoggingEntries(): boolean {
-    return this.isEnabled() && this.config.logEntries;
+    return this.config.logEntries;
   }
 
   public isIndexingEntries(): boolean {
-    return this.isEnabled() && this.config.indexEntries;
+    return this.config.indexEntries;
   }
 
   registerProviderActions(provider: string, actions: string[]): void {

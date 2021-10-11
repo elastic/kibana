@@ -19,17 +19,20 @@ import {
   EuiDroppable,
   EuiDraggable,
   euiDragDropReorder,
+  EuiBadge,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../data_panel';
 
 import { DEMOTE_DOCUMENT_ACTION } from '../../constants';
+import { PROMOTED_DOCUMENTS_TITLE } from '../constants';
 import { CurationLogic } from '../curation_logic';
 import { AddResultButton, CurationResult, convertToResultFormat } from '../results';
 
 export const PromotedDocuments: React.FC = () => {
-  const { curation, promotedIds, promotedDocumentsLoading } = useValues(CurationLogic);
+  const { curation, isAutomated, promotedIds, promotedDocumentsLoading } = useValues(CurationLogic);
   const documents = curation.promoted;
   const hasDocuments = documents.length > 0;
 
@@ -41,40 +44,45 @@ export const PromotedDocuments: React.FC = () => {
     }
   };
 
+  const CountBadge: React.FC = () => <EuiBadge color="accent">{documents.length}</EuiBadge>;
+
   return (
     <DataPanel
-      filled
-      iconType="starFilled"
-      title={
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.title',
-            { defaultMessage: 'Promoted documents' }
-          )}
-        </h2>
-      }
-      subtitle={i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.description',
-        {
-          defaultMessage:
-            'Promoted results appear before organic results. Documents can be re-ordered.',
-        }
-      )}
+      iconType={CountBadge}
+      title={<h2>{PROMOTED_DOCUMENTS_TITLE}</h2>}
       action={
-        hasDocuments && (
-          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-            <EuiFlexItem>
-              <AddResultButton />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonEmpty onClick={clearPromotedIds} iconType="menuDown" size="s">
+        isAutomated ? (
+          <EuiText color="subdued" size="s">
+            <p>
+              <em>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.removeAllButtonLabel',
-                  { defaultMessage: 'Demote all' }
+                  'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.managedByAppSearchDescription',
+                  { defaultMessage: 'This curation is being automated by App Search' }
                 )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </em>
+            </p>
+          </EuiText>
+        ) : (
+          hasDocuments && (
+            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+              <EuiFlexItem>
+                <EuiButtonEmpty
+                  onClick={clearPromotedIds}
+                  color="danger"
+                  size="s"
+                  disabled={isAutomated}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.removeAllButtonLabel',
+                    { defaultMessage: 'Demote all' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <AddResultButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )
         )
       }
       isLoading={promotedDocumentsLoading}
@@ -82,24 +90,30 @@ export const PromotedDocuments: React.FC = () => {
       {hasDocuments ? (
         <EuiDragDropContext onDragEnd={reorderPromotedIds}>
           <EuiDroppable droppableId="PromotedDocuments" spacing="m">
-            {documents.map((document, i: number) => (
+            {documents.map((document, index) => (
               <EuiDraggable
-                index={i}
+                index={index}
                 key={document.id}
                 draggableId={document.id}
                 customDragHandle
                 spacing="none"
+                isDragDisabled={isAutomated}
               >
                 {(provided) => (
                   <CurationResult
                     key={document.id}
+                    index={index}
                     result={convertToResultFormat(document)}
-                    actions={[
-                      {
-                        ...DEMOTE_DOCUMENT_ACTION,
-                        onClick: () => removePromotedId(document.id),
-                      },
-                    ]}
+                    actions={
+                      isAutomated
+                        ? []
+                        : [
+                            {
+                              ...DEMOTE_DOCUMENT_ACTION,
+                              onClick: () => removePromotedId(document.id),
+                            },
+                          ]
+                    }
                     dragHandleProps={provided.dragHandleProps}
                   />
                 )}
@@ -109,13 +123,22 @@ export const PromotedDocuments: React.FC = () => {
         </EuiDragDropContext>
       ) : (
         <EuiEmptyPrompt
-          body={i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.emptyDescription',
-            {
-              defaultMessage:
-                'Star documents from the organic results below, or search and promote a result manually.',
-            }
-          )}
+          body={
+            isAutomated
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.automatedEmptyDescription',
+                  {
+                    defaultMessage: "We haven't identified any documents to promote",
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.emptyDescription',
+                  {
+                    defaultMessage:
+                      'Star documents from the organic results below, or search and promote a result manually.',
+                  }
+                )
+          }
           actions={<AddResultButton />}
         />
       )}
