@@ -27,7 +27,7 @@ import {
   LensAppState,
   DispatchSetState,
 } from '../state_management';
-import { getIndexPatternsObjects, getIndexPatternsIds } from '../utils';
+import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -363,8 +363,11 @@ export const LensTopNavMenu = ({
         trackUiEvent('app_date_change');
       } else {
         // Query has changed, renew the session id.
-        // Time change will be picked up by the time subscription
-        dispatchSetState({ searchSessionId: data.search.session.start() });
+        // recalculate resolvedDateRange (relevant for relative time range)
+        dispatchSetState({
+          searchSessionId: data.search.session.start(),
+          resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+        });
         trackUiEvent('app_query_change');
       }
       if (newQuery) {
