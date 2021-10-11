@@ -16,7 +16,7 @@ const POST_URL = `http://localhost:5601${PDF_V2_DASHBOARD_ECOMMERCE}`;
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const supertestNoAuth = getService('supertestWithoutAuth');
+  const supertest = getService('supertestWithoutAuth');
   const reportingAPI = getService('reportingAPI');
   const log = getService('log');
 
@@ -31,10 +31,10 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllSchedules();
     });
 
-    it(`listing API shows the user's schedules`, async () => {
+    it(`listing API`, async () => {
       {
         log.info(`testing that there are no schedules`);
-        const list = await supertestNoAuth.get('/api/reporting/schedules/list');
+        const list = await supertest.get('/api/reporting/schedules/list');
         expect(list.status).eql(200);
         const schedules = JSON.parse(list.text).schedules as ConcreteTaskInstance[];
         expectSnapshot(schedules).toMatchInline(`Array []`);
@@ -52,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         expectSnapshot(schedule).toMatchInline(`
           Object {
             "attempts": 0,
+            "created_by": null,
             "retryAt": null,
             "startedAt": null,
             "state": Object {},
@@ -63,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       {
         log.info(`testing that the schedule appears in the listing`);
-        const list = await supertestNoAuth.get('/api/reporting/schedules/list');
+        const list = await supertest.get('/api/reporting/schedules/list');
         expect(list.status).eql(200);
         const schedules = JSON.parse(list.text).schedules as ConcreteTaskInstance[];
         const [task] = schedules;
@@ -117,6 +118,26 @@ export default function ({ getService }: FtrProviderContext) {
           }
         `);
       }
+    });
+
+    it(`delete API`, async () => {
+      const exportType = 'printablePdfV2';
+
+      log.info(`adding a scheduled report`);
+      const scheduleResponse = await reportingAPI.scheduleReport(exportType, POST_URL, {
+        minutes: 2,
+      });
+      expect(scheduleResponse.status).eql(200);
+      const schedule = JSON.parse(scheduleResponse.text).schedule;
+      const scheduleId = schedule.id;
+      expect(schedule.params.created_by == null).to.eql(true);
+
+      log.info(`testing that schedule can be deleted`);
+      const deleted = await supertest
+        .delete(`/api/reporting/schedules/delete/${scheduleId}`)
+        .set('kbn-xsrf', 'xxx')
+        .auth('elastic', 'changeme');
+      expectSnapshot(deleted.text).toMatchInline(`"{\\"deleted\\":true}"`);
     });
   });
 }
