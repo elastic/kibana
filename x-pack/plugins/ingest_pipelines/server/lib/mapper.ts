@@ -31,25 +31,28 @@ interface Mapping {
 }
 
 export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
-  if (!copyAction) {
-    throw new Error(
-      i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.noDefaultAction', {
-        defaultMessage: 'Error parsing file',
-      })
-    );
-  }
-
   if (!file || file.length === 0) {
     return null;
   }
 
+  const fileData = parseAndValidate(file);
+  const mapping = convertCsvToMapping(fileData, copyAction);
+  
+  if (mapping === null) {
+    return null;
+  }
+  return generatePipeline(mapping);
+}
+
+function parseAndValidate(file: string) {
   const config: Papa.ParseConfig = {
     header: true,
     skipEmptyLines: true,
   };
-  const parseOutput = Papa.parse(file, config);
-  const { data, errors, meta } = parseOutput;
 
+  const parseOutput = Papa.parse(file, config);
+
+  const { data, errors, meta } = parseOutput;
   if (errors.length > 0) {
     throw new Error(
       i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.parseErrors', {
@@ -71,15 +74,16 @@ export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
     );
   }
 
-  const mapping = convertCsvToMapping(data, copyAction);
-  if (mapping === null) {
-    return null;
-  }
-  return generatePipeline(mapping);
+  return data;
 }
 
 function convertCsvToMapping(rows: any[], copyFieldAction: FieldCopyAction) {
   const mapping = new Map();
+
+  if (rows.length < 1) {
+    return null;
+  }
+  
   for (const row of rows) {
     // Skip rows that don't have a source field
     if (!row.source_field || !row.source_field.trim()) continue;
