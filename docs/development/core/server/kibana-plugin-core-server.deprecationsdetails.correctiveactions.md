@@ -4,6 +4,8 @@
 
 ## DeprecationsDetails.correctiveActions property
 
+corrective action needed to fix this deprecation.
+
 <b>Signature:</b>
 
 ```typescript

@@ -17,6 +17,8 @@ import { AppSearchPageTemplate } from '../layout';
 
 import { TotalStats, TotalCharts, RecentApiLogs } from './components';
 
+import { SuggestedCurationsCallout } from './components/suggested_curations_callout';
+
 import { EngineOverviewLogic } from './';
 
 export const EngineOverviewMetrics: React.FC = () => {
@@ -38,6 +40,7 @@ export const EngineOverviewMetrics: React.FC = () => {
       isLoading={dataLoading}
       data-test-subj="EngineOverview"
     >
+      <SuggestedCurationsCallout />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <TotalStats />

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM API tests trial apm_8.0.0 Service Map with data /api/apm/service-map returns the correct data 3`] = `
+exports[`APM API tests trial apm_8.0.0 Service Map with data /internal/apm/service-map returns the correct data 3`] = `
 Array [
   Object {
     "data": Object {
@@ -1376,7 +1376,7 @@ Array [
 ]
 `;
 
-exports[`APM API tests trial apm_8.0.0 Service Map with data /api/apm/service-map with ML data with the default apm user returns the correct anomaly stats 3`] = `
+exports[`APM API tests trial apm_8.0.0 Service Map with data /internal/apm/service-map with ML data with the default apm user returns the correct anomaly stats 3`] = `
 Object {
   "elements": Array [
     Object {

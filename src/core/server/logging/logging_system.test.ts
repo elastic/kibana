@@ -15,11 +15,6 @@ jest.mock('fs', () => ({
 
 const dynamicProps = { process: { pid: expect.any(Number) } };
 
-jest.mock('@kbn/legacy-logging', () => ({
-  ...(jest.requireActual('@kbn/legacy-logging') as any),
-  setupLoggingRotate: jest.fn().mockImplementation(() => Promise.resolve({})),
-}));
-
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
 let mockConsoleLog: jest.SpyInstance;
 

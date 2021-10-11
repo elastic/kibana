@@ -98,6 +98,7 @@ export class LensAttributes {
   layers: Record<string, PersistedIndexPatternLayer>;
   visualization: XYState;
   layerConfigs: LayerConfig[];
+  isMultiSeries: boolean;
 
   constructor(layerConfigs: LayerConfig[]) {
     this.layers = {};
@@ -114,6 +115,7 @@ export class LensAttributes {
     });
 
     this.layerConfigs = layerConfigs;
+    this.isMultiSeries = layerConfigs.length > 1;
     this.layers = this.getLayers();
     this.visualization = this.getXyState();
   }
@@ -505,7 +507,7 @@ export class LensAttributes {
       const existFilter = filter as ExistsFilter;
 
       if (isExistsFilter(existFilter)) {
-        const fieldName = existFilter.exists?.field;
+        const fieldName = existFilter.query.exists?.field;
         const kql = `${fieldName} : *`;
         if (baseFilters.length > 0) {
           baseFilters += ` and ${kql}`;
@@ -612,7 +614,11 @@ export class LensAttributes {
       valueLabels: 'hide',
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X' as XYCurveType,
-      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      axisTitlesVisibilitySettings: {
+        x: true,
+        yLeft: !this.isMultiSeries,
+        yRight: !this.isMultiSeries,
+      },
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       preferredSeriesType: 'line',
