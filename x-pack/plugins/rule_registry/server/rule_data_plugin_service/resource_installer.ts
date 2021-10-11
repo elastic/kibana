@@ -138,11 +138,11 @@ export class ResourceInstaller {
     });
   }
 
-  private async updateIndexMappings(indexInfo: IndexInfo) {
+  private async updateIndexMappings(indexInfo: IndexInfo, namespace: string) {
     const { logger } = this.options;
 
     const aliases = indexInfo.basePattern;
-    const backingIndices = indexInfo.getPatternForBackingIndices();
+    const backingIndices = indexInfo.getPatternForBackingIndices(namespace);
 
     logger.debug(`Updating mappings of existing concrete indices for ${indexInfo.baseName}`);
 
@@ -193,8 +193,8 @@ export class ResourceInstaller {
 
     // Install / update the index template
     await this.installNamespacedIndexTemplate(indexInfo, namespace);
-    // Update index mappings for all namespaces of the index
-    await this.updateIndexMappings(indexInfo);
+    // Update index mappings for indices matching this namespace.
+    await this.updateIndexMappings(indexInfo, namespace);
 
     // If we find a concrete backing index which is the write index for the alias here, we shouldn't
     // be making a new concrete index. We return early because we don't need a new write target.
