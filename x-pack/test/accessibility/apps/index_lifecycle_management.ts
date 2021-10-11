@@ -57,7 +57,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     throw new Error(`Could not find ${policyName} in policy table`);
   };
 
-  describe('Index Lifecycle Management', async () => {
+  // FLAKY
+  // https://github.com/elastic/kibana/issues/114541
+  // https://github.com/elastic/kibana/issues/114542
+  describe.skip('Index Lifecycle Management', async () => {
     before(async () => {
       await esClient.ilm.putLifecycle({ policy: POLICY_NAME, body: POLICY_ALL_PHASES });
       await esClient.indices.putIndexTemplate({
