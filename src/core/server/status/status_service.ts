@@ -100,7 +100,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         });
         return coreOverall;
       }),
-      distinctUntilChanged(isDeepStrictEqual),
+      distinctUntilChanged<ServiceStatus<unknown>>(isDeepStrictEqual),
       shareReplay(1)
     );
 
