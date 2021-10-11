@@ -66,7 +66,6 @@ pageLoadAssetSize:
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
   security: 95864
-  securityOss: 30806
   spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
@@ -82,7 +81,6 @@ pageLoadAssetSize:
   usageCollection: 39762
   visDefaultEditor: 50178
   visTypeMarkdown: 30896
-  visTypeMetric: 42790
   visTypeTable: 95078
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
@@ -119,3 +117,6 @@ pageLoadAssetSize:
   share: 100298
   snapshotRestore: 63225
   customIntegrations: 28810
+  expressionMetricVis: 23121
+  visTypeMetric: 23332
+  dataViews: 42000

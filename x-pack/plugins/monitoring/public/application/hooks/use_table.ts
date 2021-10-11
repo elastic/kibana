@@ -6,7 +6,6 @@
  */
 
 import { useState, useCallback } from 'react';
-import { EUI_SORT_ASCENDING } from '../../../common/constants';
 import { euiTableStorageGetter, euiTableStorageSetter } from '../../components/table';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
@@ -83,22 +82,18 @@ export function useTable(storageKey: string) {
 
   // get initial state from localStorage
   const [sorting, setSorting] = useState<Sorting>(storageData.sort || { sort: {} });
-  const cleanSortingData = (sortData: Sorting) => {
-    const sort = sortData || { sort: {} };
-
-    if (!sort.sort.field) {
-      sort.sort.field = 'name';
-    }
-    if (!sort.sort.direction) {
-      sort.sort.direction = EUI_SORT_ASCENDING;
-    }
-
-    return sort;
-  };
 
   const [query, setQuery] = useState('');
 
-  const onTableChange = ({ page, sort }: { page: Page; sort: Sorting['sort'] }) => {
+  const onTableChange = ({
+    page,
+    sort,
+    queryText,
+  }: {
+    page: Page;
+    sort: Sorting['sort'];
+    queryText: string;
+  }) => {
     setPagination({
       ...pagination,
       ...{
@@ -109,11 +104,14 @@ export function useTable(storageKey: string) {
         pageSizeOptions: PAGE_SIZE_OPTIONS,
       },
     });
-    setSorting(cleanSortingData({ sort }));
+    setSorting({ sort });
     setLocalStorageData(storage, {
       page,
-      sort: { sort },
+      sort: {
+        sort,
+      },
     });
+    setQuery(queryText);
   };
 
   const getPaginationRouteOptions = useCallback(() => {
@@ -136,33 +134,6 @@ export function useTable(storageKey: string) {
       sorting,
       pagination,
       onTableChange,
-      fetchMoreData: ({
-        page,
-        sort,
-        queryText,
-      }: {
-        page: Page;
-        sort: Sorting;
-        queryText: string;
-      }) => {
-        setPagination({
-          ...pagination,
-          ...{
-            initialPageSize: page.size,
-            pageSize: page.size,
-            initialPageIndex: page.index,
-            pageIndex: page.index,
-            pageSizeOptions: PAGE_SIZE_OPTIONS,
-          },
-        });
-        setSorting(cleanSortingData(sort));
-        setQuery(queryText);
-
-        setLocalStorageData(storage, {
-          page,
-          sort,
-        });
-      },
     };
   };
 

@@ -32,6 +32,7 @@ import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_ran
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
 import { ApmPluginStartDeps } from '../../plugin';
 import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
+import { RedirectWithDefaultDateRange } from '../shared/redirect_with_default_date_range';
 import { apmRouter } from './apm_route_config';
 import { TrackPageview } from './track_pageview';
 
@@ -58,24 +59,26 @@ export function ApmAppRoot({
           <i18nCore.Context>
             <TimeRangeIdContextProvider>
               <RouterProvider history={history} router={apmRouter as any}>
-                <TrackPageview>
-                  <BreadcrumbsContextProvider>
-                    <UrlParamsProvider>
-                      <LicenseProvider>
-                        <AnomalyDetectionJobsContextProvider>
-                          <InspectorContextProvider>
-                            <ApmThemeProvider>
-                              <MountApmHeaderActionMenu />
+                <RedirectWithDefaultDateRange>
+                  <TrackPageview>
+                    <BreadcrumbsContextProvider>
+                      <UrlParamsProvider>
+                        <LicenseProvider>
+                          <AnomalyDetectionJobsContextProvider>
+                            <InspectorContextProvider>
+                              <ApmThemeProvider>
+                                <MountApmHeaderActionMenu />
 
-                              <Route component={ScrollToTopOnPathChange} />
-                              <RouteRenderer />
-                            </ApmThemeProvider>
-                          </InspectorContextProvider>
-                        </AnomalyDetectionJobsContextProvider>
-                      </LicenseProvider>
-                    </UrlParamsProvider>
-                  </BreadcrumbsContextProvider>
-                </TrackPageview>
+                                <Route component={ScrollToTopOnPathChange} />
+                                <RouteRenderer />
+                              </ApmThemeProvider>
+                            </InspectorContextProvider>
+                          </AnomalyDetectionJobsContextProvider>
+                        </LicenseProvider>
+                      </UrlParamsProvider>
+                    </BreadcrumbsContextProvider>
+                  </TrackPageview>
+                </RedirectWithDefaultDateRange>
               </RouterProvider>
             </TimeRangeIdContextProvider>
           </i18nCore.Context>

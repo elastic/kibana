@@ -64,3 +64,13 @@ export async function getHostIsolationExceptionItems({
   });
   return entries;
 }
+
+export async function deleteHostIsolationExceptionItems(http: HttpStart, id: string) {
+  await ensureHostIsolationExceptionsListExists(http);
+  return http.delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    query: {
+      id,
+      namespace_type: 'agnostic',
+    },
+  });
+}

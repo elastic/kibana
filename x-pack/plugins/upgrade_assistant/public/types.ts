@@ -10,7 +10,6 @@ import { ManagementSetup } from 'src/plugins/management/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SharePluginSetup } from 'src/plugins/share/public';
 import { CoreStart } from 'src/core/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
 import { BreadcrumbService } from './application/lib/breadcrumbs';
@@ -26,7 +25,6 @@ export interface SetupDependencies {
   management: ManagementSetup;
   share: SharePluginSetup;
   cloud?: CloudSetup;
-  usageCollection?: UsageCollectionSetup;
 }
 
 export interface StartDependencies {

@@ -52,7 +52,6 @@ describe('Reindex deprecation flyout', () => {
     httpRequestsMockHelpers.setReindexStatusResponse({
       reindexOp: null,
       warnings: [],
-      indexGroup: null,
       hasRequiredPrivileges: true,
     });
 
