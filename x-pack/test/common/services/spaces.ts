@@ -27,10 +27,6 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
       log.debug('creating space');
       const { data, status, statusText } = await axios.post('/api/spaces/space', space);
 
-      console.error('DATA FROM CREATE SPACES', JSON.stringify(data, null, 2));
-      console.error('STATUS FROM CREATE SPACES', status);
-      console.error('STATUS TEXT FROM CREATE SPACES', statusText);
-
       if (status !== 200) {
         throw new Error(
           `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`

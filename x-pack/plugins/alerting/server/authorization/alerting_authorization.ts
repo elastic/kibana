@@ -116,7 +116,7 @@ export class AlertingAuthorization {
               .map((feature) => feature.id)
           )
       )
-      .catch((err) => {
+      .catch(() => {
         // failing to fetch the space means the user is likely not privileged in the
         // active space at all, which means that their list of features should be empty
         return new Set();
@@ -163,8 +163,8 @@ export class AlertingAuthorization {
 
   public async ensureAuthorized({ ruleTypeId, consumer, operation, entity }: EnsureAuthorizedOpts) {
     const { authorization } = this;
-    const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
 
+    const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
       const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
       const requiredPrivilegesByScope = {
