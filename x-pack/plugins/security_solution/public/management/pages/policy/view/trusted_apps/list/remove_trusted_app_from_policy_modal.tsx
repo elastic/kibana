@@ -67,7 +67,7 @@ export const RemoveTrustedAppFromPolicyModal = memo<RemoveTrustedAppFromPolicyMo
     const handleModalConfirm = useCallback(() => {
       dispatch({
         type: 'policyArtifactsUpdateTrustedApps',
-        payload: { action: 'remove', artifacts: trustedApps, trustedAppIds: [] },
+        payload: { action: 'remove', artifacts: trustedApps },
       });
     }, [dispatch, trustedApps]);
 

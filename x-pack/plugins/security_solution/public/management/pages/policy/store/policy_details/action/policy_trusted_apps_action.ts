@@ -8,7 +8,7 @@
 import { Action } from 'redux';
 import { AsyncResourceState } from '../../../../../state';
 import {
-  PostTrustedAppCreateResponse,
+  PutTrustedAppUpdateResponse,
   GetTrustedAppsListResponse,
   TrustedApp,
   MaybeImmutable,
@@ -25,14 +25,12 @@ export interface PolicyArtifactsUpdateTrustedApps {
   payload: {
     action: 'assign' | 'remove';
     artifacts: MaybeImmutable<TrustedApp[]>;
-    /** @deprecated */
-    trustedAppIds: string[];
   };
 }
 
 export interface PolicyArtifactsUpdateTrustedAppsChanged {
   type: 'policyArtifactsUpdateTrustedAppsChanged';
-  payload: AsyncResourceState<PostTrustedAppCreateResponse[]>;
+  payload: AsyncResourceState<PutTrustedAppUpdateResponse[]>;
 }
 
 export interface PolicyArtifactsAssignableListExistDataChanged {
