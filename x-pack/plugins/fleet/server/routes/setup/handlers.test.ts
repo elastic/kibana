@@ -49,6 +49,7 @@ describe('FleetSetupHandler', () => {
       Promise.resolve({
         isInitialized: true,
         nonFatalErrors: [],
+        packagePolicyUpgradeResults: [],
       })
     );
     await fleetSetupHandler(context, request, response);
