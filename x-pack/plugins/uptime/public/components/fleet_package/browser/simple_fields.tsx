@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useEffect, useState, useCallback } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
 import { ConfigKeys, Validation } from '../types';

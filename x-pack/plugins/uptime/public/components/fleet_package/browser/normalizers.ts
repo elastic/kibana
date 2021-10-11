@@ -14,11 +14,7 @@ import {
 } from '../common/normalizers';
 
 import { defaultBrowserSimpleFields, defaultBrowserAdvancedFields } from '../contexts';
-import {
-  tlsNormalizers,
-  tlsJsonToObjectNormalizer,
-  tlsStringToObjectNormalizer,
-} from '../tls/normalizers';
+import { tlsJsonToObjectNormalizer, tlsStringToObjectNormalizer } from '../tls/normalizers';
 
 export type BrowserNormalizerMap = Record<keyof BrowserFields, Normalizer>;
 

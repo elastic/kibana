@@ -7,7 +7,7 @@
 import 'jest-canvas-mock';
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { ZipUrlTLSFields } from './zip_url_tls_fields';
 import { ConfigKeys, VerificationMode } from '../types';

@@ -14,7 +14,6 @@ import {
   objectToJsonFormatter,
 } from '../common/formatters';
 import {
-  tlsFormatters,
   tlsValueToYamlFormatter,
   tlsValueToStringFormatter,
   tlsArrayToYamlFormatter,
