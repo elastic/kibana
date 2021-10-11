@@ -17,7 +17,7 @@ import archives_metadata from '../../common/fixtures/es_archiver/archives_metada
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
-type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
+type ThroughputReturn = APIReturnType<'GET /internal/apm/services/{serviceName}/throughput'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
@@ -92,7 +92,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         kuery?: string;
       }) {
         const response = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
           params: {
             path: {
               serviceName: 'synth-go',
@@ -166,7 +166,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Throughput when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
       const response = await apmApiClient.readUser({
-        endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+        endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
         params: {
           path: {
             serviceName: 'opbeans-java',
@@ -195,7 +195,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('when querying without kql filter', () => {
         before(async () => {
           const response = await apmApiClient.readUser({
-            endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+            endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
             params: {
               path: {
                 serviceName: 'opbeans-java',
@@ -249,7 +249,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('with kql filter to force transaction-based UI', () => {
         before(async () => {
           const response = await apmApiClient.readUser({
-            endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+            endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
             params: {
               path: {
                 serviceName: 'opbeans-java',
@@ -285,7 +285,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       before(async () => {
         const response = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
           params: {
             path: {
               serviceName: 'opbeans-java',
