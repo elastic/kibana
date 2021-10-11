@@ -42,7 +42,7 @@ const handler = async (request: http.IncomingMessage, response: http.ServerRespo
   // Import Set API: Create or update incident
   if (
     pathName.includes('x_elas2_inc_int_elastic_incident') ||
-    pathName.includes('x_elas2_inc_int_elastic_incident')
+    pathName.includes('x_elas2_sir_int_elastic_si_incident')
   ) {
     const update = data?.elastic_incident_id != null;
     return sendResponse(response, {
