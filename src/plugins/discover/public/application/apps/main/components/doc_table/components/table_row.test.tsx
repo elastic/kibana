@@ -16,8 +16,8 @@ import { indexPatternWithTimefieldMock } from '../../../../../../__mocks__/index
 import { uiSettingsMock } from '../../../../../../__mocks__/ui_settings';
 import { DocViewsRegistry } from '../../../../../doc_views/doc_views_registry';
 
-jest.mock('../lib/row_formatter', () => {
-  const originalModule = jest.requireActual('../lib/row_formatter');
+jest.mock('../lib/formatters/row_formatter', () => {
+  const originalModule = jest.requireActual('../lib/formatters/row_formatter');
   return {
     ...originalModule,
     formatRow: () => <span>mocked_document_cell</span>,
