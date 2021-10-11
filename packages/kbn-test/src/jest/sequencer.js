@@ -24,7 +24,7 @@ class ParallelSequencer extends Sequencer {
       testPaths.add(test.path);
     }
 
-    const chunkSize = Math.ceil(tests.length / this.jobsCount);
+    const chunkSize = Math.ceil(testPaths.size / this.jobsCount);
     const minIndex = this.jobIndex * chunkSize;
     const maxIndex = minIndex + chunkSize;
 
