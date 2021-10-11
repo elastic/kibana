@@ -289,6 +289,8 @@ export class DocLinksService {
         },
         transforms: {
           guide: `${ELASTICSEARCH_DOCS}transforms.html`,
+          // TODO add valid docs URL
+          alertingRules: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-alerts.html`,
         },
         visualize: {
           guide: `${KIBANA_DOCS}dashboard.html`,
@@ -314,6 +316,8 @@ export class DocLinksService {
           apmRules: `${KIBANA_DOCS}apm-alerts.html`,
           emailAction: `${KIBANA_DOCS}email-action-type.html`,
           emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
+          emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
+          emailExchangeClientIdConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-tenant-id`,
           generalSettings: `${KIBANA_DOCS}alert-action-settings-kb.html#general-alert-action-settings`,
           indexAction: `${KIBANA_DOCS}index-action-type.html`,
           esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,
@@ -357,6 +361,10 @@ export class DocLinksService {
           mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
           mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
           runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
+        },
+        spaces: {
+          kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
+          kibanaDisableLegacyUrlAliasesApi: `${KIBANA_DOCS}spaces-api-disable-legacy-url-aliases.html`,
         },
         watcher: {
           jiraAction: `${ELASTICSEARCH_DOCS}actions-jira.html`,
@@ -472,9 +480,23 @@ export class DocLinksService {
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
+          learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
+        },
+        clients: {
+          /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
+          goOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/overview.html`,
+          javaIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/index.html`,
+          jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/introduction.html`,
+          netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
+          perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/current/index.html`,
+          phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/index.html`,
+          pythonGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
+          rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
+          rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/current/index.html`,
         },
       },
     });
@@ -694,6 +716,10 @@ export interface DocLinksStart {
       mappingRolesFieldRules: string;
       runAsPrivilege: string;
     }>;
+    readonly spaces: Readonly<{
+      kibanaLegacyUrlAliases: string;
+      kibanaDisableLegacyUrlAliasesApi: string;
+    }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
     readonly plugins: Record<string, string>;
@@ -711,9 +737,22 @@ export interface DocLinksStart {
       datastreamsNamingScheme: string;
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
+      learnMoreBlog: string;
     }>;
     readonly ecs: {
       readonly guide: string;
+    };
+    readonly clients: {
+      readonly guide: string;
+      readonly goOverview: string;
+      readonly javaIndex: string;
+      readonly jsIntro: string;
+      readonly netGuide: string;
+      readonly perlGuide: string;
+      readonly phpGuide: string;
+      readonly pythonGuide: string;
+      readonly rubyOverview: string;
+      readonly rustGuide: string;
     };
   };
 }

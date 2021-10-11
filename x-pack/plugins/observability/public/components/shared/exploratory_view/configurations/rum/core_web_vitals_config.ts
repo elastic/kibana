@@ -11,6 +11,7 @@ import {
   FieldLabels,
   FILTER_RECORDS,
   REPORT_METRIC_FIELD,
+  ReportTypes,
   USE_BREAK_DOWN_COLUMN,
 } from '../constants';
 import { buildPhraseFilter } from '../utils';
@@ -38,7 +39,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
 
   return {
     defaultSeriesType: 'bar_horizontal_percentage_stacked',
-    reportType: 'core-web-vitals',
+    reportType: ReportTypes.CORE_WEB_VITAL,
     seriesTypes: ['bar_horizontal_percentage_stacked'],
     xAxisColumn: {
       sourceField: USE_BREAK_DOWN_COLUMN,
@@ -153,5 +154,6 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
       { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
       { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
     ],
+    query: { query: 'transaction.type: "page-load"', language: 'kuery' },
   };
 }
