@@ -13,7 +13,8 @@ import { MVT_SOURCE_LAYER_NAME } from '../../../../plugins/maps/common/constants
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('getTile', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/114471
+  describe.skip('getTile', () => {
     it('should return vector tile containing document', async () => {
       const resp = await supertest
         .get(

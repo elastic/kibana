@@ -584,10 +584,17 @@ export const EditPackagePolicyForm = memo<{
                         fill
                         data-test-subj="saveIntegration"
                       >
-                        <FormattedMessage
-                          id="xpack.fleet.editPackagePolicy.saveButton"
-                          defaultMessage="Save integration"
-                        />
+                        {isUpgrade ? (
+                          <FormattedMessage
+                            id="xpack.fleet.editPackagePolicy.upgradeButton"
+                            defaultMessage="Upgrade integration"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.editPackagePolicy.saveButton"
+                            defaultMessage="Save integration"
+                          />
+                        )}
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -680,7 +687,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
                 <h2 id="FleetPackagePolicyPreviousVersionFlyoutTitle">
                   <FormattedMessage
                     id="xpack.fleet.upgradePackagePolicy.previousVersionFlyout.title"
-                    defaultMessage="'{name}' package policy"
+                    defaultMessage="'{name}' integration policy"
                     values={{ name: currentPackagePolicy?.name }}
                   />
                 </h2>
