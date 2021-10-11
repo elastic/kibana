@@ -42,7 +42,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
               i18n.translate('xpack.reporting.deprecations.reportingIndex.manualStepOne', {
                 defaultMessage: `Remove the "xpack.reporting.index" setting.`,
               }),
-              i18n.translate('xpack.reporting.deprecations.reportingIndex.manualStepOne', {
+              i18n.translate('xpack.reporting.deprecations.reportingIndex.manualStepTwo', {
                 defaultMessage: `Regenerate existing reports that you still need to access in 8.0.`,
               }),
             ],
