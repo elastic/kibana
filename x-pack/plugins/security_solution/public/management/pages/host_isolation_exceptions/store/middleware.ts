@@ -13,7 +13,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { CoreStart, HttpSetup, HttpStart } from 'kibana/public';
 import { matchPath } from 'react-router-dom';
-import { transformNewItemOutput } from '@kbn/securitysolution-list-hooks';
+import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
@@ -22,12 +22,14 @@ import { parseQueryFilterToKQL } from '../../../common/utils';
 import {
   createFailedResourceState,
   createLoadedResourceState,
+  createLoadingResourceState,
 } from '../../../state/async_resource_builders';
 import {
   deleteHostIsolationExceptionItems,
   getHostIsolationExceptionItems,
   createHostIsolationExceptionItem,
   getOneHostIsolationExceptionItem,
+  updateOneHostIsolationExceptionItem,
 } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 import { getCurrentListPageDataState, getCurrentLocation, getItemToDelete } from './selector';
@@ -58,6 +60,10 @@ export const createHostIsolationExceptionsPageMiddleware = (
 
     if (action.type === 'hostIsolationExceptionsMarkToEdit') {
       loadHostIsolationExceptionsItem(store, coreStart.http, action.payload.id);
+    }
+
+    if (action.type === 'hostIsolationExceptionsSubmitEdit') {
+      updateHostIsolationExceptionsItem(store, coreStart.http, action.payload);
     }
   };
 };
@@ -196,6 +202,48 @@ async function loadHostIsolationExceptionsItem(
     dispatch({
       type: 'hostIsolationExceptionsFormEntryChanged',
       payload: exception,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'hostIsolationExceptionsFormStateChanged',
+      payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
+    });
+  }
+}
+async function updateHostIsolationExceptionsItem(
+  store: ImmutableMiddlewareAPI<HostIsolationExceptionsPageState, AppAction>,
+  http: HttpSetup,
+  exception: UpdateExceptionListItemSchema
+) {
+  const { dispatch } = store;
+  dispatch({
+    type: 'hostIsolationExceptionsFormStateChanged',
+    // @ts-ignore will be fixed with when AsyncResourceState is refactored (#830)
+    payload: createLoadingResourceState(exception),
+  });
+
+  try {
+    const entry = transformOutput(exception as UpdateExceptionListItemSchema);
+    // Clean unnecessary fields for update action
+    [
+      'created_at',
+      'created_by',
+      'created_at',
+      'created_by',
+      'list_id',
+      'tie_breaker_id',
+      'updated_at',
+      'updated_by',
+    ].forEach((field) => {
+      delete entry[field as keyof UpdateExceptionListItemSchema];
+    });
+    const response: ExceptionListItemSchema = await updateOneHostIsolationExceptionItem(
+      http,
+      entry
+    );
+    dispatch({
+      type: 'hostIsolationExceptionsFormStateChanged',
+      payload: createLoadedResourceState(response),
     });
   } catch (error) {
     dispatch({

@@ -45,6 +45,10 @@ export type HostIsolationExceptionsMarkToEdit = Action<'hostIsolationExceptionsM
   };
 };
 
+export type HostIsolationExceptionsSubmitEdit = Action<'hostIsolationExceptionsSubmitEdit'> & {
+  payload: HostIsolationExceptionsPageState['form']['entry'];
+};
+
 export type HostIsolationExceptionsPageAction =
   | HostIsolationExceptionsPageDataChanged
   | HostIsolationExceptionsCreateEntry
@@ -53,4 +57,5 @@ export type HostIsolationExceptionsPageAction =
   | HostIsolationExceptionsSubmitDelete
   | HostIsolationExceptionsDeleteStatusChanged
   | HostIsolationExceptionsFormEntryChanged
-  | HostIsolationExceptionsMarkToEdit;
+  | HostIsolationExceptionsMarkToEdit
+  | HostIsolationExceptionsSubmitEdit;

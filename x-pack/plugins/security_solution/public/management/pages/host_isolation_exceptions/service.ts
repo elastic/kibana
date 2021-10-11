@@ -102,3 +102,13 @@ export async function getOneHostIsolationExceptionItem(
     },
   });
 }
+
+export async function updateOneHostIsolationExceptionItem(
+  http: HttpStart,
+  exception: UpdateExceptionListItemSchema
+): Promise<ExceptionListItemSchema> {
+  await ensureHostIsolationExceptionsListExists(http);
+  return http.put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    body: JSON.stringify(exception),
+  });
+}
