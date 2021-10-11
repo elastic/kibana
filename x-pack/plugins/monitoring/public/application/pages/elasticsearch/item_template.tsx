@@ -25,6 +25,7 @@ export const ItemTemplate: React.FC<ItemTemplateProps> = (props) => {
     },
     {
       id: 'advanced',
+      testSubj: 'esItemDetailAdvancedLink',
       label: i18n.translate('xpack.monitoring.esItemNavigation.advancedLinkText', {
         defaultMessage: 'Advanced',
       }),
