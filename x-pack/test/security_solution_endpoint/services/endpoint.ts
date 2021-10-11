@@ -163,7 +163,7 @@ export class EndpointTestResources extends FtrService {
     // else we just want to make sure the index has data, thus just having one in the index will do
     const size = ids.length || 1;
 
-    await this.retry.waitFor('wait for endpoints hosts', async () => {
+    await this.retry.waitForWithTimeout('wait for endpoints hosts', 60 * 1000, async () => {
       try {
         const searchResponse = await this.esClient.search({
           index: metadataCurrentIndexPattern,
