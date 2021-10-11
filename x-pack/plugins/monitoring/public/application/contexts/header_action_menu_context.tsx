@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export const StatusIcon: FunctionComponent<Props>;
+import React from 'react';
+import { AppMountParameters } from 'kibana/public';
+
+interface ContextProps {
+  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+}
+
+export const HeaderActionMenuContext = React.createContext<ContextProps>({});
