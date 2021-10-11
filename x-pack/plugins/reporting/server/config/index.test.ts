@@ -39,11 +39,9 @@ describe('deprecations', () => {
   ['.foo', '.reporting'].forEach((index) => {
     it('logs a warning if index is set', () => {
       const { messages } = applyReportingDeprecations({ index, roles: { enabled: false } });
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Multitenancy by changing \\"kibana.index\\" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details",
-        ]
-      `);
+      expect(messages).toMatchObject([
+        'Multitenancy by changing "xpack.reporting.index" will not be supported in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details',
+      ]);
     });
   });
 
