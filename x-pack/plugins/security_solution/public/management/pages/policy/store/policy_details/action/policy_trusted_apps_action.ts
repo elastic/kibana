@@ -10,6 +10,8 @@ import { AsyncResourceState } from '../../../../../state';
 import {
   PostTrustedAppCreateResponse,
   GetTrustedAppsListResponse,
+  TrustedApp,
+  MaybeImmutable,
 } from '../../../../../../../common/endpoint/types';
 import { PolicyArtifactsState } from '../../../types';
 
@@ -21,6 +23,9 @@ export interface PolicyArtifactsAssignableListPageDataChanged {
 export interface PolicyArtifactsUpdateTrustedApps {
   type: 'policyArtifactsUpdateTrustedApps';
   payload: {
+    action: 'assign' | 'remove';
+    artifacts: MaybeImmutable<TrustedApp[]>;
+    /** @deprecated */
     trustedAppIds: string[];
   };
 }
@@ -58,13 +63,6 @@ export interface PolicyDetailsListOfAllPoliciesStateChanged
 export type PolicyDetailsTrustedAppsForceListDataRefresh =
   Action<'policyDetailsTrustedAppsForceListDataRefresh'>;
 
-export interface PolicyDetailsRemoveArtifactIds
-  extends Action<'policyDetailsTrustedAppsRemoveIds'> {
-  payload: {
-    artifactIds: string[];
-  };
-}
-
 export type PolicyDetailsArtifactsResetRemove = Action<'policyDetailsArtifactsResetRemove'>;
 
 export interface PolicyDetailsTrustedAppsRemoveListStateChanged
@@ -86,5 +84,4 @@ export type PolicyTrustedAppsAction =
   | PolicyDetailsListOfAllPoliciesStateChanged
   | PolicyDetailsTrustedAppsForceListDataRefresh
   | PolicyDetailsTrustedAppsRemoveListStateChanged
-  | PolicyDetailsArtifactsResetRemove
-  | PolicyDetailsRemoveArtifactIds;
+  | PolicyDetailsArtifactsResetRemove;

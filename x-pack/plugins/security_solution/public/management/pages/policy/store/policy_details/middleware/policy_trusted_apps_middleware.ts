@@ -36,6 +36,7 @@ import {
   Immutable,
   ImmutableArray,
   ImmutableObject,
+  MaybeImmutable,
   PostTrustedAppCreateRequest,
   TrustedApp,
 } from '../../../../../../../common/endpoint/types';
@@ -53,8 +54,6 @@ import { parseQueryFilterToKQL } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../trusted_apps/constants';
 import { PolicyDetailsAction } from '../action';
 import { ServerApiError } from '../../../../../../common/types';
-import { toUpdateTrustedApp } from '../../../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
-import { isGlobalEffectScope } from '../../../../trusted_apps/state/type_guards';
 
 const P_MAP_OPTIONS = Object.freeze<pMap.Options>({
   concurrency: 5,
@@ -96,8 +95,13 @@ export const policyTrustedAppsMiddlewareRunner: MiddlewareRunner = async (
       break;
 
     case 'policyArtifactsUpdateTrustedApps':
-      if (getCurrentArtifactsLocation(state).show === 'list') {
+      if (
+        getCurrentArtifactsLocation(state).show === 'list' &&
+        action.payload.action === 'assign'
+      ) {
         await updateTrustedApps(store, trustedAppsService, action.payload.trustedAppIds);
+      } else if (action.payload.action === 'remove') {
+        removeTrustedAppsFromPolicy(context, store, action.payload.artifacts);
       }
 
       break;
@@ -106,11 +110,6 @@ export const policyTrustedAppsMiddlewareRunner: MiddlewareRunner = async (
       if (getCurrentArtifactsLocation(state).show === 'list') {
         await searchTrustedApps(store, trustedAppsService, action.payload.filter);
       }
-
-      break;
-
-    case 'policyDetailsTrustedAppsRemoveIds':
-      removeTrustedAppsFromPolicy(context, store, action.payload.artifacts);
 
       break;
   }
@@ -392,7 +391,7 @@ const fetchAllPoliciesIfNeeded = async (
 const removeTrustedAppsFromPolicy = async (
   { trustedAppsService }: MiddlewareRunnerContext,
   { getState, dispatch }: PolicyDetailsStore,
-  trustedApps: TrustedApp[]
+  trustedApps: MaybeImmutable<TrustedApp[]>
 ): Promise<void> => {
   const state = getState();
 
@@ -413,29 +412,14 @@ const removeTrustedAppsFromPolicy = async (
       throw new Error('current policy id not found');
     }
 
-    await pMap(
-      trustedApps,
-      async (trustedApp) => {
-        await trustedAppsService.updateTrustedApp(
-          { id: trustedApp.id },
-          {
-            ...toUpdateTrustedApp(trustedApp),
-            effectScope: {
-              type: 'policy',
-              policies: (isGlobalEffectScope(trustedApp)
-                ? trustedApp.effectScope.policies
-                : []
-              ).filter((trustedAppPolicyId) => trustedAppPolicyId !== currentPolicyId),
-            },
-          }
-        );
-      },
-      P_MAP_OPTIONS
+    const response = await trustedAppsService.removePolicyFromTrustedApps(
+      currentPolicyId,
+      trustedApps
     );
 
     dispatch({
       type: 'policyDetailsTrustedAppsRemoveListStateChanged',
-      payload: createLoadedResourceState({ artifacts: trustedApps, response: true }),
+      payload: createLoadedResourceState({ artifacts: trustedApps, response }),
     });
 
     dispatch({

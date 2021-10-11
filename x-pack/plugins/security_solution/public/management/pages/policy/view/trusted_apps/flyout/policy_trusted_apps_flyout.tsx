@@ -85,7 +85,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
   const handleOnConfirmAction = useCallback(() => {
     dispatch({
       type: 'policyArtifactsUpdateTrustedApps',
-      payload: { trustedAppIds: selectedArtifactIds },
+      payload: { action: 'assign', trustedAppIds: selectedArtifactIds, artifacts: [] },
     });
   }, [dispatch, selectedArtifactIds]);
 

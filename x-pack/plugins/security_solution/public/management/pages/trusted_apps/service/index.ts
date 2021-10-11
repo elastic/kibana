@@ -31,6 +31,7 @@ import {
   GetOneTrustedAppResponse,
   GetTrustedAppsSummaryRequest,
   TrustedApp,
+  MaybeImmutable,
 } from '../../../../../common/endpoint/types';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
@@ -52,11 +53,11 @@ export interface TrustedAppsService {
   ): ReturnType<typeof sendGetEndpointSpecificPackagePolicies>;
   assignPolicyToTrustedApps(
     policyId: string,
-    trustedApps: TrustedApp[]
+    trustedApps: MaybeImmutable<TrustedApp[]>
   ): Promise<PutTrustedAppUpdateResponse[]>;
   removePolicyFromTrustedApps(
     policyId: string,
-    trustedApps: TrustedApp[]
+    trustedApps: MaybeImmutable<TrustedApp[]>
   ): Promise<PutTrustedAppUpdateResponse[]>;
 }
 
@@ -120,7 +121,7 @@ export class TrustedAppsHttpService implements TrustedAppsService {
    */
   assignPolicyToTrustedApps(
     policyId: string,
-    trustedApps: TrustedApp[]
+    trustedApps: MaybeImmutable<TrustedApp[]>
   ): Promise<PutTrustedAppUpdateResponse[]> {
     return this._handleAssignOrRemovePolicyId('assign', policyId, trustedApps);
   }
@@ -133,7 +134,7 @@ export class TrustedAppsHttpService implements TrustedAppsService {
    */
   removePolicyFromTrustedApps(
     policyId: string,
-    trustedApps: TrustedApp[]
+    trustedApps: MaybeImmutable<TrustedApp[]>
   ): Promise<PutTrustedAppUpdateResponse[]> {
     return this._handleAssignOrRemovePolicyId('remove', policyId, trustedApps);
   }
@@ -141,7 +142,7 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   private _handleAssignOrRemovePolicyId(
     action: 'assign' | 'remove',
     policyId: string,
-    trustedApps: TrustedApp[]
+    trustedApps: MaybeImmutable<TrustedApp[]>
   ): Promise<PutTrustedAppUpdateResponse[]> {
     if (policyId.trim() === '') {
       throw new Error('policy ID is required');
@@ -154,14 +155,14 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     return pMap(
       trustedApps,
       async (trustedApp) => {
-        if (isGlobalEffectScope(trustedApp)) {
+        if (isGlobalEffectScope(trustedApp.effectScope)) {
           throw new Error(
             `Unable to update trusted app [${trustedApp.id}] policy assignment. It's effectScope is 'global'`
           );
         }
 
-        const policies: string[] = isGlobalEffectScope(trustedApp)
-          ? trustedApp.effectScope.policies
+        const policies: string[] = !isGlobalEffectScope(trustedApp.effectScope)
+          ? [...trustedApp.effectScope.policies]
           : [];
 
         const indexOfPolicyId = policies.indexOf(policyId);

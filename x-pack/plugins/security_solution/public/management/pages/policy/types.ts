@@ -17,6 +17,7 @@ import {
   MaybeImmutable,
   GetTrustedAppsListResponse,
   TrustedApp,
+  PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
@@ -81,7 +82,7 @@ export interface PolicyAssignedTrustedApps {
 
 export interface PolicyRemoveTrustedApps {
   artifacts: TrustedApp[];
-  response: true;
+  response: PutTrustedAppUpdateResponse[];
 }
 
 /**
