@@ -19,9 +19,6 @@ export const config: PluginConfigDescriptor = {
       legacyMultiTenancy: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
-      indexUpgrade: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
     }),
   }),
 };
