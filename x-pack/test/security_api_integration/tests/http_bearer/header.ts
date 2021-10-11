@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(401);
     });
 
-    it('rejects invalidateded access token via authorization Bearer header', async () => {
+    it('rejects invalidated access token via authorization Bearer header', async () => {
       const { accessToken } = await createToken();
       await es.security.invalidateToken({ body: { token: accessToken } });
 
