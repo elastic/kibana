@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './normalize_error';
-export * from './remove_leading_slash';
-export * from './query_params';
+export const appendQueryParam = (url: string, key: string, value: string): string => {
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}${key}=${value}`;
+};
