@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { Logger } from 'src/core/server';
+import { Logger, SavedObjectReference } from 'src/core/server';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoContainmentExecutor } from './geo_containment';
 import {
@@ -16,6 +16,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   AlertTypeParams,
+  RuleParamsAndRefs,
 } from '../../../../alerting/server';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 
@@ -117,6 +118,12 @@ export interface GeoContainmentParams extends AlertTypeParams {
   indexQuery?: Query;
   boundaryIndexQuery?: Query;
 }
+interface GeoContainmentExtractedParams
+  extends Omit<GeoContainmentParams, 'indexId' | 'boundaryIndexId'> {
+  boundaryIndexQuery?: Query;
+  indexRef: string;
+  boundaryIndexRef: string;
+}
 export interface GeoContainmentState extends AlertTypeState {
   shapesFilters: Record<string, unknown>;
   shapesIdsNamesMap: Record<string, unknown>;
@@ -140,7 +147,7 @@ export interface GeoContainmentInstanceContext extends AlertInstanceContext {
 
 export type GeoContainmentAlertType = AlertType<
   GeoContainmentParams,
-  never, // Only use if defining useSavedObjectReferences hook
+  GeoContainmentExtractedParams,
   GeoContainmentState,
   GeoContainmentInstanceState,
   GeoContainmentInstanceContext,
@@ -179,5 +186,53 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
     actionVariables,
     minimumLicenseRequired: 'gold',
     isExportable: true,
+    useSavedObjectReferences: {
+      extractReferences: (
+        params: GeoContainmentParams
+      ): RuleParamsAndRefs<GeoContainmentExtractedParams> => {
+        const { indexId, boundaryIndexId, ...otherParams } = params;
+
+        const references = [
+          {
+            name: `tracked_index_${indexId}`,
+            type: 'index-pattern',
+            id: indexId as string,
+          },
+          {
+            name: `boundary_index_${boundaryIndexId}`,
+            type: 'index-pattern',
+            id: boundaryIndexId as string,
+          },
+        ];
+        return {
+          params: {
+            ...otherParams,
+            indexRef: `tracked_index_${indexId}`,
+            boundaryIndexRef: `boundary_index_${boundaryIndexId}`,
+          },
+          references,
+        };
+      },
+      injectReferences: (
+        params: GeoContainmentExtractedParams,
+        references: SavedObjectReference[]
+      ) => {
+        const { indexRef, boundaryIndexRef, ...otherParams } = params;
+        const { id: indexId = null } = references.find((ref) => ref.name === indexRef) || {};
+        const { id: boundaryIndexId = null } =
+          references.find((ref) => ref.name === boundaryIndexRef) || {};
+        if (!indexId) {
+          throw new Error(`Index "${indexId}" not found in references array`);
+        }
+        if (!boundaryIndexId) {
+          throw new Error(`Boundary index "${boundaryIndexId}" not found in references array`);
+        }
+        return {
+          ...otherParams,
+          indexId,
+          boundaryIndexId,
+        } as GeoContainmentParams;
+      },
+    },
   };
 }
