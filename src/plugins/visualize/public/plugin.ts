@@ -28,6 +28,7 @@ import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../kibana_utils/public';
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 import { VisualizeConstants } from './application/visualize_constants';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
@@ -194,7 +195,6 @@ export class VisualizePlugin
           data: pluginsStart.data,
           localStorage: new Storage(localStorage),
           navigation: pluginsStart.navigation,
-          savedVisualizations: pluginsStart.visualizations.savedVisualizationsLoader,
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
