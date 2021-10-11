@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
+import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prompt';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV, RESET_BUTTON } from '../../../../constants';
 import { DIFFERENT_SYNC_TYPES_DOCS_URL, SYNC_BEST_PRACTICES_DOCS_URL } from '../../../../routes';
@@ -30,6 +31,7 @@ import {
   BLOCKED_TIME_WINDOWS_TITLE,
   DIFFERENT_SYNC_TYPES_LINK_LABEL,
   SYNC_BEST_PRACTICES_LINK_LABEL,
+  SYNC_UNSAVED_CHANGES_MESSAGE,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
 import { SourceLayout } from '../source_layout';
@@ -105,6 +107,10 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
       pageViewTelemetry="source_synchronization_frequency"
       isLoading={false}
     >
+      <UnsavedChangesPrompt
+        hasUnsavedChanges={hasUnsavedFrequencyChanges}
+        messageText={SYNC_UNSAVED_CHANGES_MESSAGE}
+      />
       <ViewContentHeader
         title={NAV.SYNCHRONIZATION_FREQUENCY}
         description={SOURCE_FREQUENCY_DESCRIPTION}
