@@ -8981,6 +8981,8 @@ var _execa = _interopRequireDefault(__webpack_require__(134));
 
 var _axios = _interopRequireDefault(__webpack_require__(177));
 
+var _http = _interopRequireDefault(__webpack_require__(199));
+
 var _ci_stats_config = __webpack_require__(218);
 
 /*
@@ -8990,6 +8992,7 @@ var _ci_stats_config = __webpack_require__(218);
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+// @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
 
 class CiStatsReporter {
@@ -9189,7 +9192,8 @@ class CiStatsReporter {
           url: path,
           baseURL: BASE_URL,
           headers,
-          data: body
+          data: body,
+          adapter: _http.default
         });
         return true;
       } catch (error) {
