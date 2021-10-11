@@ -18,7 +18,7 @@ import { GenericEndpointInlineEditableTableLogic } from './generic_endpoint_inli
 describe('GenericEndpointInlineEditableTableLogic', () => {
   const { mount } = new LogicMounter(GenericEndpointInlineEditableTableLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
+  const { toastAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     isLoading: false,
@@ -126,7 +126,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         logic.actions.addItem(item, onSuccess);
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(toastAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -174,7 +174,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         logic.actions.deleteItem(item, onSuccess);
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(toastAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -228,7 +228,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         logic.actions.updateItem(item, onSuccess);
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(toastAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -294,7 +294,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
 
         // It again calls back to the configured 'onReorder' to reset the order
         expect(DEFAULT_LOGIC_PARAMS.onReorder).toHaveBeenCalledWith(oldItems);
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(toastAPIErrors).toHaveBeenCalledWith('error');
       });
 
       it('does nothing if there are no reorder props', async () => {

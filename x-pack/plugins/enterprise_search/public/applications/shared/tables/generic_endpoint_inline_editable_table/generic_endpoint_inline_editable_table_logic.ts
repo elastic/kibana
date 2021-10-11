@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../flash_messages';
+import { toastAPIErrors } from '../../flash_messages';
 
 import { HttpLogic } from '../../http';
 
@@ -89,7 +89,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
         onAdd(item, itemsFromResponse);
         onSuccess();
       } catch (e) {
-        flashAPIErrors(e);
+        toastAPIErrors(e);
       } finally {
         actions.clearLoading();
       }
@@ -105,7 +105,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
         onDelete(item, itemsFromResponse);
         onSuccess();
       } catch (e) {
-        flashAPIErrors(e);
+        toastAPIErrors(e);
       } finally {
         actions.clearLoading();
       }
@@ -124,7 +124,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
         onUpdate(item, itemsFromResponse);
         onSuccess();
       } catch (e) {
-        flashAPIErrors(e);
+        toastAPIErrors(e);
       } finally {
         actions.clearLoading();
       }
@@ -150,7 +150,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
         onSuccess();
       } catch (e) {
         onReorder(oldItems);
-        flashAPIErrors(e);
+        toastAPIErrors(e);
       }
 
       actions.clearLoading();
