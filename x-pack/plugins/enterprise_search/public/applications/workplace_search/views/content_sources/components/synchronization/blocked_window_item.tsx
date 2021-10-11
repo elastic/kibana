@@ -101,10 +101,9 @@ daySelectOptions.push({ text: ALL_DAYS_LABEL, value: 'all' });
 
 export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow, index }) => {
   const { contentSource } = useValues(SourceLogic);
-  const { removeBlockedWindow } = useActions(SynchronizationLogic({ contentSource }));
-  const handleSyncTypeChange = () => '#TODO';
-  const handleStartDateChange = () => '#TODO';
-  const handleEndDateChange = () => '#TODO';
+  const { removeBlockedWindow, setBlockedTimeWindow } = useActions(
+    SynchronizationLogic({ contentSource })
+  );
 
   return (
     <>
@@ -117,7 +116,7 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow, index }) => 
           <EuiSuperSelect
             valueOfSelected={blockedWindow.jobType}
             options={syncOptions}
-            onChange={handleSyncTypeChange}
+            onChange={(value) => setBlockedTimeWindow(index, 'jobType', value)}
             itemClassName="blockedWindowSelectItem"
             popoverClassName="blockedWindowSelectPopover"
           />
@@ -126,7 +125,11 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow, index }) => 
           <EuiText>{ON_LABEL}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 130 }}>
-          <EuiSelect value={blockedWindow.day} options={daySelectOptions} />
+          <EuiSelect
+            value={blockedWindow.day}
+            onChange={(e) => setBlockedTimeWindow(index, 'day', e.target.value)}
+            options={daySelectOptions}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>{BETWEEN_LABEL}</EuiText>
@@ -138,7 +141,10 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow, index }) => 
                 showTimeSelect
                 showTimeSelectOnly
                 selected={moment(blockedWindow.start, 'HH:mm:ssZ').utc()}
-                onChange={handleStartDateChange}
+                onChange={(value) =>
+                  value &&
+                  setBlockedTimeWindow(index, 'start', `${value.utc().format('HH:mm:ss')}Z`)
+                }
                 dateFormat="h:mm A"
                 timeFormat="h:mm A"
               />
@@ -148,7 +154,9 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow, index }) => 
                 showTimeSelect
                 showTimeSelectOnly
                 selected={moment(blockedWindow.end, 'HH:mm:ssZ').utc()}
-                onChange={handleEndDateChange}
+                onChange={(value) =>
+                  value && setBlockedTimeWindow(index, 'end', `${value.utc().format('HH:mm:ss')}Z`)
+                }
                 dateFormat="h:mm A"
                 timeFormat="h:mm A"
               />

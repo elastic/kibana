@@ -20,10 +20,18 @@ import {
   BLOCKED_TIME_WINDOWS_PATH,
   getContentSourcePath,
 } from '../../../../routes';
-import { BlockedWindow, IndexingSchedule, SyncJobType, TimeUnit } from '../../../../types';
+import {
+  BlockedWindow,
+  DayOfWeek,
+  IndexingSchedule,
+  SyncJobType,
+  TimeUnit,
+} from '../../../../types';
 
 import { SYNC_SETTINGS_UPDATED_MESSAGE } from '../../constants';
 import { SourceLogic } from '../../source_logic';
+
+type BlockedWindowPropType = 'jobType' | 'day' | 'start' | 'end';
 
 interface ServerBlockedWindow {
   job_type: string;
@@ -66,6 +74,15 @@ interface SynchronizationActions {
     value: string,
     unit: TimeUnit
   ): { type: SyncJobType; value: number; unit: TimeUnit };
+  setBlockedTimeWindow(
+    index: number,
+    prop: BlockedWindowPropType,
+    value: string
+  ): {
+    index: number;
+    prop: BlockedWindowPropType;
+    value: string;
+  };
   setContentExtractionChecked(checked: boolean): boolean;
   setServerSchedule(schedule: IndexingSchedule): IndexingSchedule;
   updateServerSettings(body: ServerSyncSettingsBody): ServerSyncSettingsBody;
@@ -101,6 +118,11 @@ export const SynchronizationLogic = kea<
       type,
       value,
       unit,
+    }),
+    setBlockedTimeWindow: (index: number, prop: BlockedWindowPropType, value: string) => ({
+      index,
+      prop,
+      value,
     }),
     setContentExtractionChecked: (checked: boolean) => checked,
     updateServerSettings: (body: ServerSyncSettingsBody) => body,
@@ -182,6 +204,29 @@ export const SynchronizationLogic = kea<
           const schedule = cloneDeep(state);
           const blockedWindows = schedule.blockedWindows;
           blockedWindows!.splice(index, 1);
+          schedule.blockedWindows = blockedWindows;
+          return schedule;
+        },
+        setBlockedTimeWindow: (state, { index, prop, value }) => {
+          const schedule = cloneDeep(state);
+          const blockedWindows = schedule.blockedWindows;
+          const blockedWindow = blockedWindows![index];
+
+          switch (prop) {
+            case 'jobType':
+              blockedWindow.jobType = value as SyncJobType;
+              break;
+            case 'day':
+              blockedWindow.day = value as DayOfWeek | 'all';
+              break;
+            case 'start':
+              blockedWindow.start = value;
+              break;
+            case 'end':
+              blockedWindow.end = value;
+              break;
+          }
+          blockedWindows![index] = blockedWindow;
           schedule.blockedWindows = blockedWindows;
           return schedule;
         },

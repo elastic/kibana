@@ -38,6 +38,16 @@ describe('SynchronizationLogic', () => {
   const { navigateToUrl } = mockKibanaValues;
   const { mount } = new LogicMounter(SynchronizationLogic);
   const contentSource = fullContentSources[0];
+  const sourceWthNoBlockedWindows = {
+    ...contentSource,
+    indexing: {
+      ...contentSource.indexing,
+      schedule: {
+        ...contentSource.indexing.schedule,
+        blockedWindows: undefined,
+      },
+    },
+  };
 
   const defaultValues = {
     navigatingBetweenTabs: false,
@@ -65,10 +75,23 @@ describe('SynchronizationLogic', () => {
       expect(SynchronizationLogic.values.navigatingBetweenTabs).toEqual(true);
     });
 
-    it('addBlockedWindow', () => {
-      SynchronizationLogic.actions.addBlockedWindow();
+    describe('addBlockedWindow', () => {
+      it('creates and populates empty array when undefined', () => {
+        mount({}, { contentSource: sourceWthNoBlockedWindows });
+        SynchronizationLogic.actions.addBlockedWindow();
 
-      expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([emptyBlockedWindow]);
+        expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([emptyBlockedWindow]);
+      });
+
+      it('adds item when list has items', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.addBlockedWindow();
+
+        expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([
+          emptyBlockedWindow,
+          emptyBlockedWindow,
+        ]);
+      });
     });
 
     it('setThumbnailsChecked', () => {
@@ -117,6 +140,38 @@ describe('SynchronizationLogic', () => {
       SynchronizationLogic.actions.removeBlockedWindow(0);
 
       expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([]);
+    });
+  });
+
+  describe('setBlockedTimeWindow', () => {
+    it('sets "jobType"', () => {
+      SynchronizationLogic.actions.addBlockedWindow();
+      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'jobType', 'incremental');
+
+      expect(SynchronizationLogic.values.schedule.blockedWindows![0].jobType).toEqual(
+        'incremental'
+      );
+    });
+
+    it('sets "day"', () => {
+      SynchronizationLogic.actions.addBlockedWindow();
+      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'day', 'tuesday');
+
+      expect(SynchronizationLogic.values.schedule.blockedWindows![0].day).toEqual('tuesday');
+    });
+
+    it('sets "start"', () => {
+      SynchronizationLogic.actions.addBlockedWindow();
+      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'start', '9:00:00Z');
+
+      expect(SynchronizationLogic.values.schedule.blockedWindows![0].start).toEqual('9:00:00Z');
+    });
+
+    it('sets "end"', () => {
+      SynchronizationLogic.actions.addBlockedWindow();
+      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'end', '11:00:00Z');
+
+      expect(SynchronizationLogic.values.schedule.blockedWindows![0].end).toEqual('11:00:00Z');
     });
   });
 
@@ -183,6 +238,7 @@ describe('SynchronizationLogic', () => {
 
     describe('updateFrequencySettings', () => {
       it('calls updateServerSettings method', async () => {
+        SynchronizationLogic.actions.addBlockedWindow();
         const updateServerSettingsSpy = jest.spyOn(
           SynchronizationLogic.actions,
           'updateServerSettings'
@@ -196,6 +252,35 @@ describe('SynchronizationLogic', () => {
                 full: 'P1D',
                 incremental: 'PT2H',
                 delete: 'PT10M',
+                blocked_windows: [
+                  {
+                    day: 'monday',
+                    end: '13:00:00Z',
+                    job_type: 'full',
+                    start: '11:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        });
+      });
+
+      it('handles case where blockedWindows undefined', async () => {
+        const updateServerSettingsSpy = jest.spyOn(
+          SynchronizationLogic.actions,
+          'updateServerSettings'
+        );
+        SynchronizationLogic.actions.updateFrequencySettings();
+
+        expect(updateServerSettingsSpy).toHaveBeenCalledWith({
+          content_source: {
+            indexing: {
+              schedule: {
+                full: 'P1D',
+                incremental: 'PT2H',
+                delete: 'PT10M',
+                blocked_windows: [],
               },
             },
           },
