@@ -33,11 +33,27 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       scale: 'ratio',
       timeScale: false,
     }),
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
   } as unknown as GenericOperationDefinition,
-  terms: { input: 'field' } as GenericOperationDefinition,
-  sum: { input: 'field', filterable: true } as GenericOperationDefinition,
-  last_value: { input: 'field' } as GenericOperationDefinition,
-  max: { input: 'field' } as GenericOperationDefinition,
+  terms: {
+    input: 'field',
+    getPossibleOperationForField: () => ({ scale: 'ordinal' }),
+  } as unknown as GenericOperationDefinition,
+  sum: {
+    input: 'field',
+    filterable: true,
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
+  last_value: {
+    input: 'field',
+    getPossibleOperationForField: ({ type }) => ({
+      scale: type === 'string' ? 'ordinal' : 'ratio',
+    }),
+  } as GenericOperationDefinition,
+  max: {
+    input: 'field',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
   count: {
     input: 'field',
     filterable: true,
@@ -50,8 +66,12 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       scale: 'ratio',
       timeScale: false,
     }),
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
   } as unknown as GenericOperationDefinition,
-  derivative: { input: 'fullReference' } as GenericOperationDefinition,
+  derivative: {
+    input: 'fullReference',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
   moving_average: {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
@@ -66,8 +86,12 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       references,
     }),
     getErrorMessage: () => ['mock error'],
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
   } as unknown as GenericOperationDefinition,
-  cumulative_sum: { input: 'fullReference' } as GenericOperationDefinition,
+  cumulative_sum: {
+    input: 'fullReference',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
 };
 
 describe('formula', () => {
@@ -1227,6 +1251,30 @@ invalid: "
             operationDefinitionMap
           )
         ).toEqual(undefined);
+      }
+    });
+
+    it('returns errors if the returned type of an operation is not supported by Formula', () => {
+      // check only "valid" operations which are strictly not supported by Formula
+      // as for last_value with ordinal data
+      const formulas = [
+        { formula: 'last_value(dest)' },
+        { formula: 'terms(dest)' },
+        { formula: 'moving_average(last_value(dest), window=7)', errorFormula: 'last_value(dest)' },
+      ];
+      for (const { formula, errorFormula } of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([
+          `The return value type of the operation ${
+            errorFormula ?? formula
+          } is not supported in Formula.`,
+        ]);
       }
     });
 
