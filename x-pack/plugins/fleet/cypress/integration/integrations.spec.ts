@@ -25,9 +25,7 @@ import {
 describe('Add Integration', () => {
   const integration = 'Apache';
 
-  before(() => {});
-
-  after(() => {
+  afterEach(() => {
     deleteIntegrations(integration);
   });
   it('should display Apache integration in the Policies list once installed ', () => {
