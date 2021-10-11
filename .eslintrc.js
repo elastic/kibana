@@ -1596,7 +1596,6 @@ module.exports = {
      */
     {
       files: [
-        'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
         'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
         'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
