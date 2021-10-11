@@ -98,8 +98,8 @@ export function getIndexPatternDatasource({
   const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
     core.notifications.toasts.addError(err, {
-      title: i18n.translate('xpack.lens.indexPattern.dataViewLoadError', {
-        defaultMessage: 'Error loading data view',
+      title: i18n.translate('xpack.lens.indexPattern.indexPatternLoadError', {
+        defaultMessage: 'Error loading index pattern',
       }),
     });
 
