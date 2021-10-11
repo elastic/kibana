@@ -36,6 +36,8 @@ import {
   AlertTypeParams,
   ActionVariable,
   AlertType as CommonAlertType,
+  RuleMonitoringSummary,
+  RuleExecutionSummary,
 } from '../../alerting/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
@@ -55,6 +57,8 @@ export {
   AlertNotifyWhenType,
   AlertTypeParams,
   ResolvedRule,
+  RuleMonitoringSummary,
+  RuleExecutionSummary,
 };
 export {
   ActionType,

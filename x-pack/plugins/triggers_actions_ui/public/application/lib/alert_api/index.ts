@@ -23,3 +23,5 @@ export { unmuteAlertInstance } from './unmute_alert';
 export { unmuteAlert, unmuteAlerts } from './unmute';
 export { updateAlert } from './update';
 export { resolveRule } from './resolve_rule';
+export { loadRuleMonitoringSummary } from './rule_monitoring';
+export { loadRuleMonitoringOverview } from './rule_monitoring';

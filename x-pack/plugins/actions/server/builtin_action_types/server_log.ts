@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { curry } from 'lodash';
+import { curry, random } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
@@ -64,6 +64,7 @@ async function executor(
   const actionId = execOptions.actionId;
   const params = execOptions.params;
 
+  await new Promise<void>((done) => setTimeout(() => done(), random(10000, 25000)));
   const sanitizedMessage = withoutControlCharacters(params.message);
   try {
     (logger[params.level] as Logger['info'])<LogMeta>(`Server log: ${sanitizedMessage}`);

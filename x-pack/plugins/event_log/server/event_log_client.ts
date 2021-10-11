@@ -8,10 +8,11 @@
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IClusterClient, KibanaRequest } from 'src/core/server';
+import { estypes } from '@elastic/elasticsearch';
 import { SpacesServiceStart } from '../../spaces/server';
 
 import { EsContext } from './es';
-import { IEventLogClient } from './types';
+import { IEventLogClient, IValidatedEvent } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
@@ -101,6 +102,33 @@ export class EventLogClient implements IEventLogClient {
       ids,
       findOptions,
       legacyIds,
+    });
+  }
+
+  async aggregateEventsBySavedObjectIds<T>(
+    type: string,
+    ids: string[],
+    aggs: Record<string, estypes.AggregationsAggregationContainer>,
+    filter?: string,
+    size?: number
+  ): Promise<{
+    aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
+    data: IValidatedEvent[];
+  }> {
+    const space = await this.spacesService?.getActiveSpace(this.request);
+    const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
+
+    // verify the user has the required permissions to view this saved objects
+    await this.savedObjectGetter(type, ids);
+
+    return await this.esContext.esAdapter.summarizeEventsBySavedObjectIds<T>({
+      index: this.esContext.esNames.indexPattern,
+      namespace,
+      type,
+      ids,
+      aggs,
+      filter,
+      size,
     });
   }
 }

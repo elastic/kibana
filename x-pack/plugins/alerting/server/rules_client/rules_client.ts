@@ -7,7 +7,7 @@
 
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
+import { omit, isEqual, map, uniq, pick, truncate, trim, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
 import {
@@ -38,6 +38,7 @@ import {
   AlertWithLegacyId,
   SanitizedAlertWithLegacyId,
   PartialAlertWithLegacyId,
+  RuleMonitoringSummary,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -73,7 +74,7 @@ import { ruleAuditEvent, RuleAuditAction } from './audit_events';
 import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField } from './lib';
 import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
-
+import { ruleMonitoringSummaryFromEventLog } from '../lib/rule_monitoring_summary_from_event_log';
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
 }
@@ -148,6 +149,7 @@ export interface FindResult<Params extends AlertTypeParams> {
   perPage: number;
   total: number;
   data: Array<SanitizedAlert<Params>>;
+  aggregations: unknown;
 }
 
 export interface CreateOptions<Params extends AlertTypeParams> {
@@ -538,6 +540,271 @@ export class RulesClient {
     });
   }
 
+  public async getMonitoringSummary({
+    id,
+    dateStart,
+  }: GetAlertInstanceSummaryParams): Promise<RuleMonitoringSummary> {
+    this.logger.debug(`getMonitoringSummary(): getting rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedAlertWithLegacyId;
+
+    await this.authorization.ensureAuthorized({
+      ruleTypeId: rule.alertTypeId,
+      consumer: rule.consumer,
+      operation: ReadOperations.GetAlertSummary,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
+
+    const dateNow = new Date();
+
+    // default duration of monitoring is 7 days
+    const defaultDateStart = new Date(dateNow.valueOf() - 7 * 24 * 60 * 60 * 1000);
+    const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    this.logger.debug(`getMonitoringSummary(): search the event log for rule ${id}`);
+    let events: IEvent[];
+    try {
+      const queryResults = await eventLogClient.findEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {
+          page: 1,
+          per_page: 10000,
+          start: parsedDateStart.toISOString(),
+          end: dateNow.toISOString(),
+          sort_order: 'desc',
+        },
+        rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
+      events = queryResults.data;
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getAlertInstanceSummary(): error searching event log for alert ${id}: ${err.message}`
+      );
+      events = [];
+    }
+
+    return ruleMonitoringSummaryFromEventLog({
+      rule,
+      events,
+      dateStart: parsedDateStart.toISOString(),
+      dateEnd: dateNow.toISOString(),
+    });
+  }
+
+  public async getMonitoringOverview({ dateStart }) {
+    // Get rules that user has access to
+    const { data: rules } = await this.find({ options: { perPage: 10000 } });
+    const ruleIds = (rules ?? []).map(({ id }) => id);
+
+    const dateNow = new Date();
+
+    // default duration of monitoring is 7 days
+    const defaultDateStart = new Date(dateNow.valueOf() - 7 * 24 * 60 * 60 * 1000);
+    const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    this.logger.debug(`getMonitoringOverview(): search the event log for rules ${ruleIds}`);
+    let overview: Record<string, estypes.AggregationsAggregate> | unknown;
+    let alerts: Record<string, estypes.AggregationsAggregate> | unknown;
+    let errorReasons: Record<string, estypes.AggregationsAggregate> | unknown;
+    const errorMessages: Record<string, number> = {};
+    try {
+      const overviewResult = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        ruleIds,
+        {
+          ruleTypeAvgDuration: {
+            terms: {
+              field: 'rule.category',
+              size: 10,
+              order: { averageDuration: 'desc' },
+            },
+            aggs: {
+              averageDuration: {
+                avg: {
+                  field: 'event.duration',
+                },
+              },
+            },
+          },
+          ruleTypeAvgDelay: {
+            terms: {
+              field: 'rule.category',
+              size: 10,
+              order: { averageDelay: 'desc' },
+            },
+            aggs: {
+              averageDelay: {
+                avg: {
+                  field: 'kibana.task.schedule_delay',
+                },
+              },
+            },
+          },
+          ruleTypeNumFailures: {
+            terms: {
+              field: 'rule.category',
+              size: 10,
+              order: { failures: 'desc' },
+            },
+            aggs: {
+              failures: {
+                filter: { term: { 'event.outcome': 'failure' } },
+                aggs: {
+                  failureStats: { value_count: { field: 'event.outcome' } },
+                },
+              },
+            },
+          },
+          ruleAvgDuration: {
+            terms: {
+              field: 'rule.id',
+              size: 10,
+              order: { averageDuration: 'desc' },
+            },
+            aggs: {
+              averageDuration: {
+                avg: {
+                  field: 'event.duration',
+                },
+              },
+              ruleName: {
+                terms: {
+                  field: 'rule.name',
+                  size: 1,
+                },
+              },
+            },
+          },
+          ruleAvgDelay: {
+            terms: {
+              field: 'rule.id',
+              size: 10,
+              order: { averageDelay: 'desc' },
+            },
+            aggs: {
+              averageDelay: {
+                avg: {
+                  field: 'kibana.task.schedule_delay',
+                },
+              },
+              ruleName: {
+                terms: {
+                  field: 'rule.name',
+                  size: 1,
+                },
+              },
+            },
+          },
+          ruleNumFailures: {
+            terms: {
+              field: 'rule.id',
+              size: 10,
+              order: { failures: 'desc' },
+            },
+            aggs: {
+              failures: {
+                filter: { term: { 'event.outcome': 'failure' } },
+                aggs: {
+                  failureStats: { value_count: { field: 'event.outcome' } },
+                },
+              },
+              ruleName: {
+                terms: {
+                  field: 'rule.name',
+                  size: 1,
+                },
+              },
+            },
+          },
+        },
+        'event.provider:alerting AND event.action:execute'
+      );
+      overview = overviewResult.aggregations;
+      const errorResult = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        ruleIds,
+        {
+          error: {
+            terms: {
+              field: 'event.reason',
+              size: 10,
+            },
+          },
+        },
+        'event.provider:alerting AND event.action:execute AND event.outcome:failure',
+        10000
+      );
+      errorReasons = errorResult.aggregations;
+
+      // parse out error messages and count them
+      // we do this because error messages are mapped as text fields so we can't aggregate on them
+      for (const d of errorResult.data) {
+        const msg: string | undefined = d?.error?.message;
+        if (msg) {
+          if (errorMessages.hasOwnProperty(msg)) {
+            errorMessages[msg]++;
+          } else {
+            errorMessages[msg] = 1;
+          }
+        }
+      }
+
+      const alertsResult = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        ruleIds,
+        {
+          overTime: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: '1h',
+            },
+            aggs: {
+              ruleType: {
+                terms: {
+                  field: 'event.category',
+                  size: 100,
+                },
+              },
+              rule: {
+                terms: {
+                  field: 'rule.id',
+                  size: 100,
+                },
+                aggs: {
+                  ruleName: {
+                    terms: {
+                      field: 'rule.name',
+                      size: 1,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        'event.provider:alerting AND event.action:new-instance'
+      );
+      alerts = alertsResult.aggregations;
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getAlertInstanceSummary(): error searching event log for rules ${ruleIds}: ${err.message}`
+      );
+    }
+
+    return {
+      ...(overview ? { overview } : {}),
+      ...(alerts ? { alerts } : {}),
+      errors: {
+        ...(errorReasons ? { reasons: errorReasons } : {}),
+        ...(errorMessages ? { messages: errorMessages } : {}),
+      },
+    };
+  }
+
   public async find<Params extends AlertTypeParams = never>({
     options: { fields, ...options } = {},
   }: { options?: FindOptions } = {}): Promise<FindResult<Params>> {
@@ -567,6 +834,7 @@ export class RulesClient {
       per_page: perPage,
       total,
       saved_objects: data,
+      aggregations,
     } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       ...options,
       sortField: mapSortField(options.sortField),
@@ -579,6 +847,13 @@ export class RulesClient {
           : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
+      aggs: {
+        ruleType: {
+          terms: {
+            field: 'alert.attributes.alertTypeId',
+          },
+        },
+      },
     });
 
     const authorizedData = data.map(({ id, attributes, references }) => {
@@ -622,6 +897,7 @@ export class RulesClient {
       perPage,
       total,
       data: authorizedData,
+      aggregations,
     };
   }
 

@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { range } from 'lodash';
+import { range, random } from 'lodash';
 import { AlertType } from '../../../../plugins/alerting/server';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
@@ -62,7 +62,8 @@ export const alertType: AlertType<
   }) {
     const count = (state.count ?? 0) + 1;
 
-    range(instances)
+    await new Promise<void>((done) => setTimeout(() => done(), instances * random(10000, 25000)));
+    range(random(instances))
       .map(() => uuid.v4())
       .forEach((id: string) => {
         services

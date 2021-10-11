@@ -32,3 +32,53 @@ export interface AlertInstanceStatus {
   actionSubgroup?: string;
   activeStartDate?: string;
 }
+
+export interface RuleMonitoringSummary {
+  id: string;
+  name: string;
+  tags: string[];
+  rule_type_id: string;
+  consumer: string;
+  mute_all: boolean;
+  throttle: string | null;
+  enabled: boolean;
+  start_date: string;
+  end_date: string;
+  avg_duration: number;
+  avg_delay: number;
+  avg_action_duration: number;
+  avg_action_delay: number;
+  num_successful_executions: number;
+  num_failed_executions: number;
+  num_successful_actions: number;
+  num_failed_actions: number;
+  num_alerts: number;
+  executions: RuleExecutionSummary[];
+  actions: ActionExecutionSummary[];
+}
+
+export interface RuleExecutionSummary {
+  start?: string;
+  end?: string;
+  delay?: number;
+  outcome?: string;
+  duration?: number;
+  status?: string;
+  num_recovered_alerts: number;
+  recovered_alert_ids: string[];
+  num_new_alerts: number;
+  new_alert_ids: string[];
+  num_active_alerts: number;
+  active_alert_ids: string[];
+  error_message?: string;
+}
+
+export interface ActionExecutionSummary {
+  start?: string;
+  end?: string;
+  delay?: number;
+  outcome?: string;
+  duration?: number;
+  status?: string;
+  error_message?: string;
+}
