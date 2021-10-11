@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { OSQUERY_INTEGRATION_NAME, BASE_PATH } from './constants';
+export { DEFAULT_DARK_MODE, OSQUERY_INTEGRATION_NAME, BASE_PATH } from './constants';
 
 export const PLUGIN_ID = 'osquery';
 export const PLUGIN_NAME = 'Osquery';
