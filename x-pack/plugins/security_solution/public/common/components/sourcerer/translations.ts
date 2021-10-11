@@ -98,3 +98,10 @@ export const PICK_INDEX_PATTERNS = i18n.translate(
     defaultMessage: 'Pick index patterns',
   }
 );
+
+export const ALERTS_CHECKBOX_LABEL = i18n.translate(
+  'xpack.securitySolution.indexPatterns.onlyDetectionAlertsLabel',
+  {
+    defaultMessage: 'Show only detection alerts',
+  }
+);
