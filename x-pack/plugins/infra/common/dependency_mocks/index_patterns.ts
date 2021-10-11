@@ -7,13 +7,8 @@
 
 import { from, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import {
-  fieldList,
-  FieldSpec,
-  DataView,
-  DataViewsContract,
-  RuntimeField,
-} from 'src/plugins/data/common';
+import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
+import { fieldList, FieldSpec, RuntimeField } from '../../../../../src/plugins/data/common';
 
 type IndexPatternMock = Pick<
   DataView,

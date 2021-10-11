@@ -10,7 +10,8 @@ import { from, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { CoreStart } from '../../../../../src/core/public';
 import { FieldSpec } from '../../../../../src/plugins/data/common';
-import { DataView, DataViewField, DataViewsContract } from '../../../../../src/plugins/data/common';
+import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/public';
+import { DataViewField } from '../../../../../src/plugins/data_views/common';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { Pick2 } from '../../common/utility_types';
 

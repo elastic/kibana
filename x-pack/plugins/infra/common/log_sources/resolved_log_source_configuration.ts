@@ -6,7 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { DataView, DataViewsContract } from '../../../../../src/plugins/data/common';
+import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
 import { ObjectEntries } from '../utility_types';
 import { ResolveLogSourceConfigurationError } from './errors';
 import {
