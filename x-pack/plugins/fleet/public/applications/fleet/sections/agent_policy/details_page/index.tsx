@@ -38,7 +38,7 @@ import {
   useFleetStatus,
   useIntraAppState,
 } from '../../../hooks';
-import { Loading, Error, AgentEnrollmentFlyout } from '../../../components';
+import { Loading, Error, AgentEnrollmentFlyout, AddAgentHelpPopover } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
@@ -152,6 +152,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     [isFleetReady, navigateToApp, routeState]
   );
 
+  const addAgentLink = <EuiLink onClick={() => setIsEnrollmentFlyoutOpen(true)}>Add agent</EuiLink>;
   const headerRightContent = useMemo(
     () =>
       agentPolicy ? (
@@ -192,7 +193,11 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
                     showAgentText
                   />
                 ) : (
-                  <EuiLink onClick={() => setIsEnrollmentFlyoutOpen(true)}>Add agent</EuiLink>
+                  <AddAgentHelpPopover
+                    button={addAgentLink}
+                    isOpen={true}
+                    closePopover={console.log}
+                  />
                 ),
             },
             { isDivider: true },
