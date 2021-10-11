@@ -14,20 +14,16 @@ import userEvent from '@testing-library/user-event';
 import { HostIsolationExceptionsFormFlyout } from './form_flyout';
 import { act } from 'react-dom/test-utils';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../common/constants';
-import { getOneHostIsolationExceptionItem } from '../../service';
 import uuid from 'uuid';
 import { createEmptyHostIsolationException } from '../../utils';
 
 jest.mock('../../service.ts');
-const getOneHostIsolationExceptionItemMock = getOneHostIsolationExceptionItem as jest.Mock;
 
 describe('When on the host isolation exceptions flyout form', () => {
   let mockedContext: AppContextTestRender;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
-
-  // const createHostIsolationExceptionItemMock = createHostIsolationExceptionItem as jest.mock;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
@@ -129,24 +125,6 @@ describe('When on the host isolation exceptions flyout form', () => {
     const fakeId = 'dc5d1d00-2766-11ec-981f-7f84cfc8764f';
     beforeEach(() => {
       mockedContext.history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=edit&id=${fakeId}`);
-      getOneHostIsolationExceptionItemMock.mockReset();
-      getOneHostIsolationExceptionItemMock.mockImplementation(async () => {
-        return {
-          ...createEmptyHostIsolationException(),
-          name: 'name edit me',
-          description: 'initial description',
-          id: fakeId,
-          item_id: uuid.v4(),
-          entries: [
-            {
-              field: 'destination.ip',
-              operator: 'included',
-              type: 'match',
-              value: '10.0.0.5',
-            },
-          ],
-        };
-      });
     });
 
     describe('without loaded data', () => {
@@ -169,12 +147,23 @@ describe('When on the host isolation exceptions flyout form', () => {
     describe('with loaded data', () => {
       beforeEach(async () => {
         mockedContext.store.dispatch({
-          type: 'hostIsolationExceptionsMarkToEdit',
+          type: 'hostIsolationExceptionsFormEntryChanged',
           payload: {
+            ...createEmptyHostIsolationException(),
+            name: 'name edit me',
+            description: 'initial description',
             id: fakeId,
+            item_id: uuid.v4(),
+            entries: [
+              {
+                field: 'destination.ip',
+                operator: 'included',
+                type: 'match',
+                value: '10.0.0.5',
+              },
+            ],
           },
         });
-        await waitForAction('hostIsolationExceptionsFormEntryChanged');
         renderResult = render();
       });
 
