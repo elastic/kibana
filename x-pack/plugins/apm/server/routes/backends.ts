@@ -19,7 +19,7 @@ import { getThroughputChartsForBackend } from '../lib/backends/get_throughput_ch
 import { getErrorRateChartsForBackend } from '../lib/backends/get_error_rate_charts_for_backend';
 
 const topBackendsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/top_backends',
+  endpoint: 'GET /internal/apm/backends/top_backends',
   params: t.intersection([
     t.type({
       query: t.intersection([
@@ -65,7 +65,7 @@ const topBackendsRoute = createApmServerRoute({
 });
 
 const upstreamServicesForBackendRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/{backendName}/upstream_services',
+  endpoint: 'GET /internal/apm/backends/{backendName}/upstream_services',
   params: t.intersection([
     t.type({
       path: t.type({
@@ -121,7 +121,7 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
 });
 
 const backendMetadataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/{backendName}/metadata',
+  endpoint: 'GET /internal/apm/backends/{backendName}/metadata',
   params: t.type({
     path: t.type({
       backendName: t.string,
@@ -150,7 +150,7 @@ const backendMetadataRoute = createApmServerRoute({
 });
 
 const backendLatencyChartsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/{backendName}/charts/latency',
+  endpoint: 'GET /internal/apm/backends/{backendName}/charts/latency',
   params: t.type({
     path: t.type({
       backendName: t.string,
@@ -193,7 +193,7 @@ const backendLatencyChartsRoute = createApmServerRoute({
 });
 
 const backendThroughputChartsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/{backendName}/charts/throughput',
+  endpoint: 'GET /internal/apm/backends/{backendName}/charts/throughput',
   params: t.type({
     path: t.type({
       backendName: t.string,
@@ -236,7 +236,7 @@ const backendThroughputChartsRoute = createApmServerRoute({
 });
 
 const backendFailedTransactionRateChartsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/backends/{backendName}/charts/error_rate',
+  endpoint: 'GET /internal/apm/backends/{backendName}/charts/error_rate',
   params: t.type({
     path: t.type({
       backendName: t.string,
