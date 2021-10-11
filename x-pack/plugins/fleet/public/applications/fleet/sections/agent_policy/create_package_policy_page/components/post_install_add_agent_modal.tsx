@@ -9,7 +9,9 @@ import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { AgentPolicy, PackageInfo } from '../../../types';
+import type { AgentPolicy, PackageInfo } from '../../../../types';
+
+const toTitleCase = (str: string) => str.charAt(0).toUpperCase() + str.substr(1);
 
 export const PostInstallAddAgentModal: React.FunctionComponent<{
   onConfirm: () => void;
@@ -23,6 +25,9 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
         <FormattedMessage
           id="xpack.fleet.agentPolicy.postInstallAddAgentModal"
           defaultMessage="{packageName} integration added"
+          values={{
+            packageName: toTitleCase(packageInfo.title),
+          }}
         />
       }
       onCancel={onCancel}
@@ -43,7 +48,10 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
     >
       <FormattedMessage
         id="xpack.fleet.agentPolicy.postInstallAddAgentModalDescription"
-        defaultMessage="To complete this integration, add <b>Elastic Agent</b> to your hosts to collect data and send it to ELastic Stack"
+        defaultMessage="To complete this integration, add {boldAgent} to your hosts to collect data and send it to Elastic Stack"
+        values={{
+          boldAgent: <b>Elastic Agent</b>,
+        }}
       />
     </EuiConfirmModal>
   );

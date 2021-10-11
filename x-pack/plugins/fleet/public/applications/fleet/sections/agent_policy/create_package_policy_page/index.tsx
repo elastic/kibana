@@ -27,7 +27,12 @@ import type { ApplicationStart } from 'kibana/public';
 import { safeLoad } from 'js-yaml';
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import type { AgentPolicy, NewPackagePolicy, CreatePackagePolicyRouteState } from '../../../types';
+import type {
+  AgentPolicy,
+  NewPackagePolicy,
+  PackagePolicy,
+  CreatePackagePolicyRouteState,
+} from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
@@ -104,6 +109,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
   // Agent policy state
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
+
+  // only used to store the resulting package policy once saved
+  const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
 
   // Retrieve agent count
   const agentPolicyId = agentPolicy?.id;
@@ -256,9 +264,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const savePackagePolicy = useCallback(async () => {
     setFormState('LOADING');
     const result = await sendCreatePackagePolicy(packagePolicy);
-    setFormState('SUBMITTED');
+    setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
     return result;
-  }, [packagePolicy]);
+  }, [packagePolicy, agentCount]);
   const doOnSaveNavigation = useRef<boolean>(true);
 
   // Detect if user left page
@@ -267,6 +275,32 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       doOnSaveNavigation.current = false;
     };
   }, []);
+
+  const navigateAddAgent = (policy?: PackagePolicy) => {
+    alert('this is when we will navigate to add agent');
+    onSaveNavigate(policy);
+  };
+  const navigateTourTooltip = (policy?: PackagePolicy) => {
+    alert('this is when we will navigate with a tour tooltip');
+    onSaveNavigate(policy);
+  };
+
+  const onSaveNavigate = useCallback(
+    (policy?: PackagePolicy) => {
+      if (doOnSaveNavigation.current) {
+        if (routeState && routeState.onSaveNavigateTo && policy) {
+          handleNavigateTo(
+            typeof routeState.onSaveNavigateTo === 'function'
+              ? routeState.onSaveNavigateTo(policy)
+              : routeState.onSaveNavigateTo
+          );
+        } else {
+          history.push(getPath('policy_details', { policyId: agentPolicy!.id }));
+        }
+      }
+    },
+    [agentPolicy, getPath, handleNavigateTo, history, routeState]
+  );
 
   const onSubmit = useCallback(async () => {
     if (formState === 'VALID' && hasErrors) {
@@ -279,26 +313,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     }
     const { error, data } = await savePackagePolicy();
     if (!error) {
-      if (doOnSaveNavigation.current) {
-        if (routeState && routeState.onSaveNavigateTo) {
-          handleNavigateTo(
-            typeof routeState.onSaveNavigateTo === 'function'
-              ? routeState.onSaveNavigateTo(data!.item)
-              : routeState.onSaveNavigateTo
-          );
-        } else {
-          history.push(
-            getPath('policy_details', {
-              policyId: agentPolicy!.id,
-            })
-          );
-        }
-      }
-      const hasAgentsAssigned = agentCount && agentPolicy;
-      const fromPolicyWithoutAgentsAssigned = from === 'policy' && !hasAgentsAssigned;
+      setSavedPackagePolicy(data!.item);
 
-      const fromPackageWithoutAgentsAssigned =
-        from === 'package' && packageInfo && !hasAgentsAssigned;
+      const hasAgentsAssigned = agentCount && agentPolicy;
+      if (!hasAgentsAssigned) {
+        setFormState('SUBMITTED_NO_AGENTS');
+        return;
+      }
+      onSaveNavigate(data!.item);
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
@@ -307,30 +329,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             packagePolicyName: packagePolicy.name,
           },
         }),
-        text: fromPackageWithoutAgentsAssigned
-          ? toMountPoint(
-              // To render the link below we need to mount this JSX in the success toast
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.integrationsContextaddAgentNextNotificationMessage"
-                defaultMessage="Next, {link} to start ingesting data."
-                values={{
-                  link: (
-                    <EuiLink
-                      href={getHref('integration_details_policies', {
-                        pkgkey: `${packageInfo!.name}-${packageInfo!.version}`,
-                        addAgentToPolicyId: agentPolicy!.id,
-                      })}
-                    >
-                      {i18n.translate(
-                        'xpack.fleet.createPackagePolicy.integrationsContextAddAgentLinkMessage',
-                        { defaultMessage: 'add an agent' }
-                      )}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            )
-          : hasAgentsAssigned
+        text: hasAgentsAssigned
           ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
               defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
               values: {
@@ -351,16 +350,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     hasErrors,
     agentCount,
     savePackagePolicy,
-    from,
+    onSaveNavigate,
     agentPolicy,
-    packageInfo,
     notifications.toasts,
     packagePolicy.name,
-    getHref,
-    routeState,
-    handleNavigateTo,
-    history,
-    getPath,
   ]);
 
   const integrationInfo = useMemo(
@@ -495,6 +488,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             agentPolicy={agentPolicy}
             onConfirm={onSubmit}
             onCancel={() => setFormState('VALID')}
+          />
+        )}
+        {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (
+          <PostInstallAddAgentModal
+            packageInfo={packageInfo}
+            agentPolicy={agentPolicy}
+            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+            onCancel={() => navigateTourTooltip(savedPackagePolicy)}
           />
         )}
         {packageInfo && (
