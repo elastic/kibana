@@ -50,6 +50,13 @@ const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
   defaultMessage: 'Index patterns',
 });
 
+const securityDataView = i18n.translate(
+  'indexPatternManagement.indexPatternTable.badge.securityDataViewTitle',
+  {
+    defaultMessage: 'Security Data View',
+  }
+);
+
 interface Props extends RouteComponentProps {
   canSave: boolean;
   showCreateDialog?: boolean;
@@ -114,6 +121,10 @@ export const IndexPatternTable = ({
           </EuiButtonEmpty>
           &emsp;
           <EuiBadgeGroup gutterSize="s">
+            {index.id && index.id === 'security-solution' && (
+              <EuiBadge key="security-solution">{securityDataView}</EuiBadge>
+            )}
+
             {index.tags &&
               index.tags.map(({ key: tagKey, name: tagName }) => (
                 <EuiBadge key={tagKey}>{tagName}</EuiBadge>
