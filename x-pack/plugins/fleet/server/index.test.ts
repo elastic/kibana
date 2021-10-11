@@ -6,6 +6,7 @@
  */
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+
 import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 
 import { config } from '.';
