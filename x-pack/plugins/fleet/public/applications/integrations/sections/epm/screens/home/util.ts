@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 import { INTEGRATION_CATEGORY_DISPLAY } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { IntegrationCardItem } from '../../../../../../../common/types/models';
@@ -40,8 +41,11 @@ export function mergeCategoriesAndCount(
 
   // Count all the categories
   cards.forEach((integration) => {
-    integration.categories.forEach((cat) => {
-      addIfMissing(cat, 1, INTEGRATION_CATEGORY_DISPLAY[cat] as string);
+    integration.categories.forEach((cat: string) => {
+      const title = INTEGRATION_CATEGORY_DISPLAY[cat as IntegrationCategory]
+        ? INTEGRATION_CATEGORY_DISPLAY[cat as IntegrationCategory]
+        : cat;
+      addIfMissing(cat, 1, title);
     });
   });
 
