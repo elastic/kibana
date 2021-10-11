@@ -23,7 +23,7 @@ import { EngineLogic, generateEnginePath } from '../engine';
 import { DELETE_CONFIRMATION_MESSAGE, DELETE_SUCCESS_MESSAGE } from './constants';
 import { Curation, CurationsAPIResponse } from './types';
 
-type CurationsPageTabs = 'overview' | 'settings';
+type CurationsPageTabs = 'overview' | 'history' | 'settings';
 
 interface CurationsValues {
   dataLoading: boolean;

@@ -19,6 +19,7 @@ import { EuiTab } from '@elastic/eui';
 import { getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 
 import { Curations } from './curations';
+import { CurationsHistory } from './curations_history';
 import { CurationsOverview } from './curations_overview';
 import { CurationsSettings } from './curations_settings';
 
@@ -70,7 +71,10 @@ describe('Curations', () => {
     expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(1, 'overview');
 
     tabs.at(1).simulate('click');
-    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(2, 'settings');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(2, 'history');
+
+    tabs.at(2).simulate('click');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(3, 'settings');
   });
 
   it('renders an overview view', () => {
@@ -83,12 +87,22 @@ describe('Curations', () => {
     expect(wrapper.find(CurationsOverview)).toHaveLength(1);
   });
 
+  it('renders a history view', () => {
+    setMockValues({ ...values, selectedPageTab: 'history' });
+    const wrapper = shallow(<Curations />);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(1).prop('isSelected')).toEqual(true);
+
+    expect(wrapper.find(CurationsHistory)).toHaveLength(1);
+  });
+
   it('renders a settings view', () => {
     setMockValues({ ...values, selectedPageTab: 'settings' });
     const wrapper = shallow(<Curations />);
     const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
 
-    expect(tabs.at(1).prop('isSelected')).toEqual(true);
+    expect(tabs.at(2).prop('isSelected')).toEqual(true);
 
     expect(wrapper.find(CurationsSettings)).toHaveLength(1);
   });
