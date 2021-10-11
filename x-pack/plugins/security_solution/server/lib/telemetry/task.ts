@@ -111,9 +111,11 @@ export class SecurityTelemetryTask {
   };
 
   public start = async (taskManager: TaskManagerStartContract) => {
+    const taskId = this.getTaskId();
+    this.logger.debug(`[task ${taskId}]: attempting to schedule`);
     try {
       await taskManager.ensureScheduled({
-        id: this.getTaskId(),
+        id: taskId,
         taskType: this.config.type,
         scope: ['securitySolution'],
         schedule: {
@@ -123,23 +125,24 @@ export class SecurityTelemetryTask {
         params: { version: this.config.version },
       });
     } catch (e) {
-      this.logger.error(`Error scheduling task, received ${e.message}`);
+      this.logger.error(`[task ${taskId}]: error scheduling task, received ${e.message}`);
     }
   };
 
   public runTask = async (taskId: string, executionPeriod: TaskExecutionPeriod) => {
-    this.logger.debug(`Running task ${taskId}`);
+    this.logger.debug(`[task ${taskId}]: attempting to run`);
     if (taskId !== this.getTaskId()) {
-      this.logger.debug(`Outdated task running: ${taskId}`);
+      this.logger.debug(`[task ${taskId}]: outdated task`);
       return 0;
     }
 
     const isOptedIn = await this.sender.isTelemetryOptedIn();
     if (!isOptedIn) {
-      this.logger.debug(`Telemetry is not opted-in.`);
+      this.logger.debug(`[task ${taskId}]: telemetry is not opted-in`);
       return 0;
     }
 
+    this.logger.debug(`[task ${taskId}]: running task`);
     return this.config.runTask(taskId, this.logger, this.receiver, this.sender, executionPeriod);
   };
 }

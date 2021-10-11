@@ -75,7 +75,7 @@ export class TelemetryEventsSender {
     this.receiver = receiver;
 
     if (taskManager && this.telemetryTasks) {
-      this.logger.debug(`starting security telemetry tasks`);
+      this.logger.debug(`Starting security telemetry tasks`);
       this.telemetryTasks.forEach((task) => task.start(taskManager));
     }
 
