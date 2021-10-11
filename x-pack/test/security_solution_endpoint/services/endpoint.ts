@@ -7,10 +7,12 @@
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { Client } from '@elastic/elasticsearch';
+import semverLte from 'semver/functions/lte';
 import { FtrService } from '../../functional/ftr_provider_context';
 import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
+  METADATA_UNITED_TRANSFORM,
 } from '../../../plugins/security_solution/common/endpoint/constants';
 import { EndpointError } from '../../../plugins/security_solution/server';
 import {
@@ -29,8 +31,12 @@ export class EndpointTestResources extends FtrService {
   private readonly kbnClient = this.ctx.getService('kibanaServer');
   private readonly transform = this.ctx.getService('transform');
 
-  private generateTransformId(endpointPackageVersion?: string): string {
-    return `${metadataTransformPrefix}-${endpointPackageVersion ?? ''}`;
+  private generateMetadataTransformId(endpointPackageVersion?: string): string {
+    return `${metadataTransformPrefix}-${endpointPackageVersion ?? '*'}`;
+  }
+
+  private generateUnitedTransformId(endpointPackageVersion?: string): string {
+    return `${METADATA_UNITED_TRANSFORM}-${endpointPackageVersion ?? '*'}`;
   }
 
   /**
@@ -38,26 +44,19 @@ export class EndpointTestResources extends FtrService {
    *
    * @param [endpointPackageVersion] if set, it will be used to get the specific transform this this package version. Else just returns first one found
    */
-  async getTransform(endpointPackageVersion?: string): Promise<TransformPivotConfig> {
-    const transformId = this.generateTransformId(endpointPackageVersion);
+   private async getTransform(transformId: string): Promise<TransformPivotConfig> {
     let transform: TransformPivotConfig | undefined;
 
-    if (endpointPackageVersion) {
-      await this.transform.api.waitForTransformToExist(transformId);
+    await this.transform.api.waitForTransformToExist(transformId);
 
-      transform = (
-        (
-          await this.transform.api
-            .getTransform(transformId)
-            .catch(catchAndWrapError)
-            .then((response: { body: GetTransformsResponseSchema }) => response)
-        ).body as GetTransformsResponseSchema
-      ).transforms[0];
-    } else {
-      transform = (
-        await this.transform.api.getTransformList(100).catch(catchAndWrapError)
-      ).transforms.find((t) => t.id.startsWith(transformId));
-    }
+    transform = (
+      (
+        await this.transform.api
+          .getTransform(transformId)
+          .catch(catchAndWrapError)
+          .then((response: { body: GetTransformsResponseSchema }) => response)
+      ).body as GetTransformsResponseSchema
+    ).transforms[0];
 
     if (!transform) {
       throw new EndpointError('Endpoint metadata transform not found');
@@ -71,8 +70,20 @@ export class EndpointTestResources extends FtrService {
     /** Used to update the transform installed with the given package version */
     endpointPackageVersion?: string
   ): Promise<void> {
-    const transform = await this.getTransform(endpointPackageVersion).catch(catchAndWrapError);
+    const transformId = this.generateMetadataTransformId(endpointPackageVersion);
+    const transform = await this.getTransform(transformId).catch(catchAndWrapError);
     await this.transform.api.updateTransform(transform.id, { frequency }).catch(catchAndWrapError);
+  }
+
+  async setUnitedTransformFrequency(frequency: string, endpointPackageVersion: string) {
+    const MIN_REQUIRED_VERSION = '1.2.0';
+    // united transform doesn't exist before 1.2.0
+    if (semverLte(endpointPackageVersion, MIN_REQUIRED_VERSION)) {
+      return;
+    }
+    const transformId = this.generateUnitedTransformId(endpointPackageVersion);
+    const transform = await this.getTransform(transformId).catch(catchAndWrapError);
+    return this.transform.api.updateTransform(transform.id, { frequency }).catch(catchAndWrapError);
   }
 
   /**
