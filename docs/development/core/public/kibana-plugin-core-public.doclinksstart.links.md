@@ -143,6 +143,7 @@ readonly links: {
             readonly ruleChangeLog: string;
             readonly detectionsReq: string;
             readonly networkMap: string;
+            readonly troubleshootGaps: string;
         };
         readonly query: {
             readonly eql: string;
@@ -213,6 +214,10 @@ readonly links: {
             mappingRolesFieldRules: string;
             runAsPrivilege: string;
         }>;
+        readonly spaces: Readonly<{
+            kibanaLegacyUrlAliases: string;
+            kibanaDisableLegacyUrlAliasesApi: string;
+        }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
         readonly plugins: Record<string, string>;
@@ -230,6 +235,7 @@ readonly links: {
             datastreamsNamingScheme: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
+            learnMoreBlog: string;
         }>;
         readonly ecs: {
             readonly guide: string;

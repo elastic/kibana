@@ -29,7 +29,6 @@ import {
   isFilters as oldIsFilters,
   isExistsFilter as oldIsExistsFilter,
   isMatchAllFilter as oldIsMatchAllFilter,
-  isMissingFilter as oldIsMissingFilter,
   isPhraseFilter as oldIsPhraseFilter,
   isPhrasesFilter as oldIsPhrasesFilter,
   isRangeFilter as oldIsRangeFilter,
@@ -51,7 +50,6 @@ import {
   PhraseFilter as oldPhraseFilter,
   MatchAllFilter as oldMatchAllFilter,
   CustomFilter as oldCustomFilter,
-  MissingFilter as oldMissingFilter,
   RangeFilter as oldRangeFilter,
   KueryNode as oldKueryNode,
   FilterMeta as oldFilterMeta,
@@ -171,12 +169,6 @@ const isExistsFilter = oldIsExistsFilter;
  * @removeBy 8.1
  */
 const isMatchAllFilter = oldIsMatchAllFilter;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
-const isMissingFilter = oldIsMissingFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
@@ -350,12 +342,6 @@ type CustomFilter = oldCustomFilter;
  * @deprecated Import from the "@kbn/es-query" package directly instead.
  * @removeBy 8.1
  */
-type MissingFilter = oldMissingFilter;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
 type RangeFilter = oldRangeFilter;
 
 /**
@@ -408,7 +394,6 @@ export {
   isFilters,
   isExistsFilter,
   isMatchAllFilter,
-  isMissingFilter,
   isPhraseFilter,
   isPhrasesFilter,
   isRangeFilter,
@@ -437,7 +422,6 @@ export {
   PhraseFilter,
   MatchAllFilter,
   CustomFilter,
-  MissingFilter,
   RangeFilter,
   KueryNode,
   FilterMeta,

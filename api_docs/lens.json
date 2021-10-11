@@ -1794,6 +1794,19 @@
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.YConfig.iconPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconPosition",
+            "description": [],
+            "signature": [
+              "\"above\" | \"below\" | \"left\" | \"right\" | \"auto\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2798,9 +2811,21 @@
             "description": [],
             "signature": [
               "{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; visualization: VisualizationState; query: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               "; filters: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]; }"
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -2874,9 +2899,21 @@
             "description": [],
             "signature": [
               "{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }; }; visualization: VisualizationState; query: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               "; filters: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]; }"
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -2958,9 +2995,21 @@
                 "text": "OperationTypePre712"
               },
               "; }>; }>; }; }; query: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               "; visualization: VisualizationState; filters: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]; }"
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -3151,9 +3200,21 @@
             "text": "LensDocShapePost712"
           },
           "<unknown>, \"title\" | \"expression\" | \"visualizationType\"> & { state: Pick<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }; }; visualization: unknown; query: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "; filters: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[]; }, \"filters\" | \"query\" | \"visualization\" | \"datasourceMetaData\"> & { datasourceStates: { indexpattern: Pick<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }, \"currentIndexPatternId\"> & { layers: Record<string, Pick<{ columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }, never> & { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; } | { operationType: \"date_histogram\"; params: { interval: string; timeZone?: string | undefined; }; }>; }>; }; }; }; }"
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -3177,9 +3238,21 @@
             "text": "LensDocShapePost712"
           },
           "<unknown>, \"title\" | \"expression\" | \"visualizationType\"> & { state: Pick<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }; }; visualization: unknown; query: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           "; filters: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[]; }, \"filters\" | \"query\" | \"visualization\" | \"datasourceMetaData\"> & { datasourceStates: { indexpattern: Pick<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }, \"currentIndexPatternId\"> & { layers: Record<string, Pick<{ columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }, never> & { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; } | { operationType: \"date_histogram\"; params: { interval: string; }; }>; }>; }; }; }; }"
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -3984,7 +4057,13 @@
             "text": "PersistableFilter"
           },
           " extends ",
-          "Filter"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          }
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -4027,7 +4106,13 @@
             "text": "PersistableFilterMeta"
           },
           " extends ",
-          "FilterMeta"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.FilterMeta",
+            "text": "FilterMeta"
+          }
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,

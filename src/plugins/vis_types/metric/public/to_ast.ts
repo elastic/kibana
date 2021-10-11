@@ -9,7 +9,6 @@
 import { get } from 'lodash';
 import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { MetricVisExpressionFunctionDefinition } from './metric_vis_fn';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
@@ -63,8 +62,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     });
   }
 
-  // @ts-expect-error
-  const metricVis = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
+  const metricVis = buildExpressionFunction('metricVis', {
     percentageMode,
     colorSchema,
     colorMode: metricColorMode,

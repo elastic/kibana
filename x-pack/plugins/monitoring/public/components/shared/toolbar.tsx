@@ -40,14 +40,8 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
         return;
       }
       handleTimeChange(selectedTime.start, selectedTime.end);
-      state.time = {
-        from: selectedTime.start,
-        to: selectedTime.end,
-      };
-      Legacy.shims.timefilter.setTime(state.time);
-      state.save?.();
     },
-    [handleTimeChange, state]
+    [handleTimeChange]
   );
 
   const onRefreshChange = useCallback(
