@@ -79,7 +79,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     type: 'select',
     description: i18n.translate('discover.advancedSettings.sortDefaultOrderText', {
       defaultMessage:
-        'Controls the default sort direction for time based index patterns in the Discover app.',
+        'Controls the default sort direction for time based data views in the Discover app.',
     }),
     category: ['discover'],
     schema: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
@@ -149,7 +149,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     description: i18n.translate('discover.advancedSettings.context.tieBreakerFieldsText', {
       defaultMessage:
         'A comma-separated list of fields to use for tie-breaking between documents that have the same timestamp value. ' +
-        'From this list the first field that is present and sortable in the current index pattern is used.',
+        'From this list the first field that is present and sortable in the current data view is used.',
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
@@ -173,11 +173,11 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
-      defaultMessage: 'Modify columns when changing index patterns',
+      defaultMessage: 'Modify columns when changing data views',
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchText', {
-      defaultMessage: 'Remove columns that are not available in the new index pattern.',
+      defaultMessage: 'Remove columns that are not available in the new data view.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
