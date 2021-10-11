@@ -6,15 +6,20 @@
  */
 
 import { find, first } from 'lodash';
+import { State } from '../application/contexts/global_state_context';
 
-export function getClusterFromClusters(clusters, globalState, unsetGlobalState = false) {
+export function getClusterFromClusters(
+  clusters: any,
+  globalState: State,
+  unsetGlobalState = false
+) {
   const cluster = (() => {
     const existingCurrent = find(clusters, { cluster_uuid: globalState.cluster_uuid });
     if (existingCurrent) {
       return existingCurrent;
     }
 
-    const firstCluster = first(clusters);
+    const firstCluster: any = first(clusters);
     if (firstCluster && firstCluster.cluster_uuid) {
       return firstCluster;
     }
@@ -25,7 +30,9 @@ export function getClusterFromClusters(clusters, globalState, unsetGlobalState =
   if (cluster && cluster.license) {
     globalState.cluster_uuid = unsetGlobalState ? undefined : cluster.cluster_uuid;
     globalState.ccs = unsetGlobalState ? undefined : cluster.ccs;
-    globalState.save();
+    if (globalState.save) {
+      globalState.save();
+    }
     return cluster;
   }
 
