@@ -9,13 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ElasticsearchMLJobs } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import type { MLJobs } from '../../../types';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 interface SetupModeProps {
   setupMode: any;
@@ -80,6 +81,7 @@ export const ElasticsearchMLJobsPage: React.FC<ComponentProps> = ({ clusters }) 
     >
       <div data-test-subj="elasticsearchMLJobsListingPage">
         <SetupModeRenderer
+          productName={ELASTICSEARCH_SYSTEM_ID}
           render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}

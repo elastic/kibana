@@ -143,8 +143,9 @@ interface SyncIndexItem<T> {
   permissions?: T;
 }
 
-interface IndexingSchedule extends SyncIndexItem<string> {
+export interface IndexingSchedule extends SyncIndexItem<string> {
   estimates: SyncIndexItem<SyncEstimate>;
+  blockedWindows?: BlockedWindow[];
 }
 
 export type SyncJobType = 'full' | 'incremental' | 'delete' | 'permissions';
@@ -162,7 +163,7 @@ export type DayOfWeek = typeof DAYS_OF_WEEK_VALUES[number];
 
 export interface BlockedWindow {
   jobType: SyncJobType;
-  day: DayOfWeek;
+  day: DayOfWeek | 'all';
   start: Moment;
   end: Moment;
 }
