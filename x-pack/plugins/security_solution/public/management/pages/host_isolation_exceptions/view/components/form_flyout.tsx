@@ -117,7 +117,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
       if (exception?.item_id) {
         toasts.addSuccess(
           i18n.translate(
-            'xpack.securitySolution.hostIsolationExceptions.form.creationSuccessToastTitle',
+            'xpack.securitySolution.hostIsolationExceptions.form.editingSuccessToastTitle',
             {
               defaultMessage: '"{name}" has been updated.',
               values: { name: exception?.name },
