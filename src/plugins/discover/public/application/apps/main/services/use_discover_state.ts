@@ -27,7 +27,7 @@ export function useDiscoverState({
   savedSearch: SavedSearch;
   history: History;
 }) {
-  const { uiSettings: config, data, filterManager } = services;
+  const { uiSettings: config, data } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
   const { timefilter } = data.query.timefilter;
   const [indexPattern, setIndexPattern] = useState(savedSearch.searchSource.getField('index'));
@@ -39,6 +39,7 @@ export function useDiscoverState({
   const searchSource = useMemo(() => savedSearch.searchSource.createChild(), [savedSearch]);
 
   const stateContainer = useMemo(() => getState({ history, services }), [services, history]);
+  const [state, setState] = useState(stateContainer.appStateContainer.getState());
 
   const { appStateContainer } = stateContainer;
 
@@ -58,8 +59,6 @@ export function useDiscoverState({
     };
     load();
   }, [appStateContainer, get, savedSearch.searchSource, services.uiSettings]);
-
-  const [state, setState] = useState(appStateContainer.getState());
 
   /**
    * Search session logic
@@ -94,10 +93,15 @@ export function useDiscoverState({
    */
   useEffect(() => {
     if (savedSearch.searchSource.getField('index')) {
-      const stopSync = stateContainer.initializeAndSync(savedSearch, filterManager, data);
+      const prevState = stateContainer.appStateContainer.getState();
+      const stopSync = stateContainer.initializeAndSync(savedSearch);
+      const nextState = stateContainer.appStateContainer.getState();
+      if (!isEqual(prevState, nextState)) {
+        setState(nextState);
+      }
       return () => stopSync();
     }
-  }, [stateContainer, filterManager, data, config, savedSearch]);
+  }, [stateContainer, savedSearch, setState, indexPattern]);
 
   /**
    * Track state changes that should trigger a fetch

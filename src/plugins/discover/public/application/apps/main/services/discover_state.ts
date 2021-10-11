@@ -23,7 +23,6 @@ import {
   DataPublicPluginStart,
   esFilters,
   Filter,
-  FilterManager,
   IndexPattern,
   Query,
   SearchSessionInfoProvider,
@@ -107,11 +106,7 @@ export interface GetStateReturn {
   /**
    * Initialize state with filters and query,  start state syncing
    */
-  initializeAndSync: (
-    savedSearch: SavedSearch,
-    filterManager: FilterManager,
-    data: DataPublicPluginStart
-  ) => () => void;
+  initializeAndSync: (savedSearch: SavedSearch) => () => void;
   /**
    * Start sync between state and URL
    */
@@ -158,8 +153,7 @@ const APP_STATE_URL_KEY = '_a';
  * Used to sync URL with UI state
  */
 export function getState({ history, services }: GetStateParams): GetStateReturn {
-  const { uiSettings } = services;
-  const { data, uiSettings: config } = services;
+  const { uiSettings, filterManager, data, uiSettings: config } = services;
   const storeInSessionStorage = uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
   const defaultAppState = {};
@@ -240,21 +234,25 @@ export function getState({ history, services }: GetStateParams): GetStateReturn 
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
-    initializeAndSync: (savedSearch: SavedSearch, filterManager: FilterManager) => {
+    initializeAndSync: (savedSearch: SavedSearch) => {
       const indexPattern = savedSearch.searchSource.getField('index')!;
       const appState = getStateDefaults({
         config,
         data,
         savedSearch,
       });
-      const mergedState = handleSourceColumnState(
-        {
-          ...appState,
-          ...appStateFromUrl,
-        },
-        uiSettings
-      );
-      setState(appStateContainerModified, mergedState);
+      if (savedSearch.id) {
+        setState(appStateContainerModified, appState);
+      } else {
+        const mergedState = handleSourceColumnState(
+          {
+            ...appState,
+            ...appStateFromUrl,
+          },
+          uiSettings
+        );
+        setState(appStateContainerModified, mergedState);
+      }
 
       if (appStateContainer.getState().index !== indexPattern.id) {
         // used index pattern is different than the given by url/state which is invalid
