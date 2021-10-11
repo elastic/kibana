@@ -92,6 +92,26 @@ describe('SynchronizationLogic', () => {
       expect(SynchronizationLogic.values.thumbnailsChecked).toEqual(true);
       expect(SynchronizationLogic.values.contentExtractionChecked).toEqual(true);
     });
+
+    describe('setSyncFrequency', () => {
+      it('sets "days"', () => {
+        SynchronizationLogic.actions.setSyncFrequency('full', '1', 'days');
+
+        expect(SynchronizationLogic.values.schedule.full).toEqual('P1D');
+      });
+
+      it('sets "hours"', () => {
+        SynchronizationLogic.actions.setSyncFrequency('full', '10', 'hours');
+
+        expect(SynchronizationLogic.values.schedule.full).toEqual('P1DT10H');
+      });
+
+      it('sets "minutes"', () => {
+        SynchronizationLogic.actions.setSyncFrequency('full', '30', 'minutes');
+
+        expect(SynchronizationLogic.values.schedule.full).toEqual('P1DT30M');
+      });
+    });
   });
 
   describe('listeners', () => {

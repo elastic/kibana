@@ -60,6 +60,11 @@ interface SynchronizationActions {
   resetSyncSettings(): void;
   updateSyncEnabled(enabled: boolean): boolean;
   setThumbnailsChecked(checked: boolean): boolean;
+  setSyncFrequency(
+    type: SyncJobType,
+    value: string,
+    unit: TimeUnit
+  ): { type: SyncJobType; value: number; unit: TimeUnit };
   setContentExtractionChecked(checked: boolean): boolean;
   setServerSchedule(schedule: IndexingSchedule): IndexingSchedule;
   updateServerSettings(body: ServerSyncSettingsBody): ServerSyncSettingsBody;
@@ -92,6 +97,11 @@ export const SynchronizationLogic = kea<
     handleSelectedTabChanged: (tabId: TabId) => tabId,
     updateSyncEnabled: (enabled: boolean) => enabled,
     setThumbnailsChecked: (checked: boolean) => checked,
+    setSyncFrequency: (type: SyncJobType, value: string, unit: TimeUnit) => ({
+      type,
+      value,
+      unit,
+    }),
     setContentExtractionChecked: (checked: boolean) => checked,
     updateServerSettings: (body: ServerSyncSettingsBody) => body,
     updateSyncSettings: true,
@@ -138,6 +148,34 @@ export const SynchronizationLogic = kea<
       {
         resetSyncSettings: () => stripScheduleSeconds(props.contentSource.indexing.schedule),
         setServerSchedule: (_, schedule) => schedule,
+        setSyncFrequency: (state, { type, value, unit }) => {
+          let currentValue;
+          const schedule = cloneDeep(state);
+          const duration = schedule[type];
+
+          switch (unit) {
+            case 'days':
+              currentValue = moment.duration(duration).days();
+              break;
+            case 'hours':
+              currentValue = moment.duration(duration).hours();
+              break;
+            default:
+              currentValue = moment.duration(duration).minutes();
+              break;
+          }
+
+          // momentJS doesn't seem to have a way to simply set the minutes/hours/days, so we have
+          // to subtract the current value and then add the new value.
+          // https://momentjs.com/docs/#/durations/
+          schedule[type] = moment
+            .duration(duration)
+            .subtract(currentValue, unit)
+            .add(value, unit)
+            .toISOString();
+
+          return schedule;
+        },
       },
     ],
   }),

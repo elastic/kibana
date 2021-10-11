@@ -47,6 +47,7 @@ export const SyncFrequency: React.FC = () => {
     <>
       <EuiSpacer />
       <FrequencyItem
+        type="full"
         label={FULL_SYNC_LABEL}
         description={FULL_SYNC_DESCRIPTION}
         duration={fullDuration}
@@ -54,6 +55,7 @@ export const SyncFrequency: React.FC = () => {
       />
       <EuiHorizontalRule />
       <FrequencyItem
+        type="incremental"
         label={INCREMENTAL_SYNC_LABEL}
         description={INCREMENTAL_SYNC_DESCRIPTION}
         duration={incrementalDuration}
@@ -61,6 +63,7 @@ export const SyncFrequency: React.FC = () => {
       />
       <EuiHorizontalRule />
       <FrequencyItem
+        type="delete"
         label={DELETION_SYNC_LABEL}
         description={DELETION_SYNC_DESCRIPTION}
         duration={deleteDuration}
@@ -70,6 +73,7 @@ export const SyncFrequency: React.FC = () => {
         <>
           <EuiHorizontalRule />
           <FrequencyItem
+            type="permissions"
             label={PERMISSIONS_SYNC_LABEL}
             description={PERMISSIONS_SYNC_DESCRIPTION}
             duration={permissionsDuration}
