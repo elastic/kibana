@@ -35,12 +35,20 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         pathname: '/app/security',
       },
     },
+
+    esTestCluster: {
+      ...xpackFunctionalConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=true'],
+    },
+
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         // if you return an empty string here the kibana server will not start properly but an empty array works
         ...getRegistryUrlAsArray(),
+        '--xpack.fleet.enabled=true',
+        '--xpack.security.enabled=true',
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
