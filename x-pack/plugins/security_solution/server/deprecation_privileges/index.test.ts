@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { updateSecuritySolutionPrivileges } from '.';
+import {
+  DeprecationsServiceSetup,
+  GetDeprecationsContext,
+  RegisterDeprecationsConfig,
+} from 'src/core/server';
+import { loggingSystemMock } from 'src/core/server/mocks';
+
+import { registerPrivilegeDeprecations, updateSecuritySolutionPrivileges } from '.';
 
 describe('deprecations', () => {
   describe('create cases privileges from siem privileges without cases sub-feature', () => {
@@ -34,6 +41,7 @@ describe('deprecations', () => {
           ],
           "siem": Array [
             "all",
+            "read",
           ],
         }
       `);
@@ -46,6 +54,7 @@ describe('deprecations', () => {
             "all",
           ],
           "siem": Array [
+            "read",
             "all",
           ],
         }
@@ -71,7 +80,7 @@ describe('deprecations', () => {
       expect(updateSecuritySolutionPrivileges(['minimal_all'])).toMatchInlineSnapshot(`
         Object {
           "siem": Array [
-            "all",
+            "minimal_all",
           ],
         }
       `);
@@ -81,7 +90,7 @@ describe('deprecations', () => {
       expect(updateSecuritySolutionPrivileges(['minimal_read'])).toMatchInlineSnapshot(`
         Object {
           "siem": Array [
-            "read",
+            "minimal_read",
           ],
         }
       `);
@@ -92,7 +101,8 @@ describe('deprecations', () => {
         .toMatchInlineSnapshot(`
         Object {
           "siem": Array [
-            "all",
+            "minimal_read",
+            "minimal_all",
           ],
         }
       `);
@@ -105,6 +115,7 @@ describe('deprecations', () => {
             "all",
           ],
           "siem": Array [
+            "minimal_all",
             "all",
           ],
         }
@@ -119,6 +130,7 @@ describe('deprecations', () => {
           ],
           "siem": Array [
             "all",
+            "minimal_read",
           ],
         }
       `);
@@ -131,7 +143,8 @@ describe('deprecations', () => {
             "all",
           ],
           "siem": Array [
-            "all",
+            "minimal_all",
+            "cases_all",
           ],
         }
       `);
@@ -145,7 +158,9 @@ describe('deprecations', () => {
             "all",
           ],
           "siem": Array [
-            "all",
+            "minimal_all",
+            "cases_read",
+            "cases_all",
           ],
         }
       `);
@@ -159,7 +174,9 @@ describe('deprecations', () => {
             "all",
           ],
           "siem": Array [
-            "all",
+            "minimal_all",
+            "cases_all",
+            "cases_read",
           ],
         }
       `);
@@ -173,6 +190,7 @@ describe('deprecations', () => {
           ],
           "siem": Array [
             "all",
+            "cases_read",
           ],
         }
       `);
@@ -185,7 +203,8 @@ describe('deprecations', () => {
             "read",
           ],
           "siem": Array [
-            "all",
+            "minimal_all",
+            "read",
           ],
         }
       `);
@@ -199,6 +218,7 @@ describe('deprecations', () => {
           ],
           "siem": Array [
             "read",
+            "minimal_read",
           ],
         }
       `);
@@ -212,7 +232,8 @@ describe('deprecations', () => {
             "read",
           ],
           "siem": Array [
-            "all",
+            "minimal_all",
+            "cases_read",
           ],
         }
       `);
@@ -226,7 +247,9 @@ describe('deprecations', () => {
             "read",
           ],
           "siem": Array [
-            "all",
+            "minimal_all",
+            "read",
+            "cases_read",
           ],
         }
       `);
@@ -240,7 +263,8 @@ describe('deprecations', () => {
             "read",
           ],
           "siem": Array [
-            "read",
+            "minimal_read",
+            "cases_read",
           ],
         }
       `);
@@ -254,7 +278,8 @@ describe('deprecations', () => {
             "all",
           ],
           "siem": Array [
-            "read",
+            "minimal_read",
+            "cases_all",
           ],
         }
       `);
@@ -268,7 +293,9 @@ describe('deprecations', () => {
             "all",
           ],
           "siem": Array [
-            "read",
+            "minimal_read",
+            "cases_read",
+            "cases_all",
           ],
         }
       `);
@@ -282,9 +309,174 @@ describe('deprecations', () => {
             "all",
           ],
           "siem": Array [
-            "read",
+            "minimal_read",
+            "cases_all",
+            "cases_read",
           ],
         }
+      `);
+    });
+  });
+
+  describe('registerPrivilegeDeprecations', () => {
+    const mockContext = {
+      esClient: jest.fn(),
+      savedObjectsClient: jest.fn(),
+    } as unknown as GetDeprecationsContext;
+    const getDeprecations = jest.fn();
+    const getKibanaRolesByFeatureId = jest.fn();
+    const mockDeprecationsService: DeprecationsServiceSetup = {
+      registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => {
+        getDeprecations.mockImplementation(deprecationContext.getDeprecations);
+      },
+    };
+
+    beforeAll(() => {
+      registerPrivilegeDeprecations({
+        deprecationsService: mockDeprecationsService,
+        getKibanaRolesByFeatureId,
+        logger: loggingSystemMock.createLogger(),
+      });
+    });
+    beforeEach(() => {
+      getKibanaRolesByFeatureId.mockReset();
+    });
+
+    test('getDeprecations return the errors from getKibanaRolesByFeatureId', async () => {
+      const errorResponse = {
+        errors: [
+          {
+            correctiveActions: {
+              manualSteps: [
+                "A user with the 'manage_security' cluster privilege is required to perform this check.",
+              ],
+            },
+            level: 'fetch_error',
+            message: 'Error retrieving roles for privilege deprecations: Test error',
+            title: 'Error in privilege deprecations services',
+          },
+        ],
+      };
+      getKibanaRolesByFeatureId.mockResolvedValue(errorResponse);
+      const response = await getDeprecations(mockContext);
+      expect(response).toEqual(errorResponse.errors);
+    });
+
+    test('getDeprecations return empty array when securitySolutionCases privileges are already set up', async () => {
+      getKibanaRolesByFeatureId.mockResolvedValue({
+        roles: [
+          {
+            _transform_error: [],
+            _unrecognized_applications: [],
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  bar: ['bar-privilege-1'],
+                  securitySolutionCases: ['read'],
+                  siem: ['minimal_read', 'cases_read'],
+                },
+                spaces: ['securitySolutions'],
+              },
+            ],
+            metadata: {
+              _reserved: true,
+            },
+            name: 'first_role',
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        ],
+      });
+      const response = await getDeprecations(mockContext);
+      expect(response).toMatchInlineSnapshot(`Array []`);
+    });
+
+    test('happy path build securitySolutionCases privileges from  siem privileges', async () => {
+      getKibanaRolesByFeatureId.mockResolvedValue({
+        roles: [
+          {
+            _transform_error: [],
+            _unrecognized_applications: [],
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  bar: ['bar-privilege-1'],
+                  siem: ['minimal_all', 'cases_read'],
+                },
+                spaces: ['securitySolutions'],
+              },
+            ],
+            metadata: {
+              _reserved: true,
+            },
+            name: 'first_role',
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        ],
+      });
+      const response = await getDeprecations(mockContext);
+      expect(response).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "correctiveActions": Object {
+              "api": Object {
+                "body": Object {
+                  "elasticsearch": Object {
+                    "cluster": Array [],
+                    "indices": Array [],
+                    "run_as": Array [],
+                  },
+                  "kibana": Array [
+                    Object {
+                      "base": Array [],
+                      "feature": Object {
+                        "bar": Array [
+                          "bar-privilege-1",
+                        ],
+                        "securitySolutionCases": Array [
+                          "read",
+                        ],
+                        "siem": Array [
+                          "minimal_all",
+                          "cases_read",
+                        ],
+                      },
+                      "spaces": Array [
+                        "securitySolutions",
+                      ],
+                    },
+                  ],
+                  "metadata": Object {
+                    "_reserved": true,
+                  },
+                },
+                "method": "PUT",
+                "omitContextFromBody": true,
+                "path": "/api/security/role/first_role",
+              },
+              "manualSteps": Array [],
+            },
+            "deprecationType": "feature",
+            "level": "warning",
+            "message": "The \\"Security\\" feature will be split into two separate features in 8.0. The \\"first_role\\" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.",
+            "title": "The \\"first_role\\" role needs to be updated",
+          },
+        ]
       `);
     });
   });

@@ -21,24 +21,15 @@ interface Deps {
 export const updateSecuritySolutionPrivileges = (
   siemPrivileges: string[]
 ): Partial<Record<typeof SERVER_APP_ID | typeof CASES_FEATURE_ID, string[]>> => {
-  const siemPrivs = new Set<string>();
   const casesPrivs = new Set<string>();
 
   for (const priv of siemPrivileges) {
     switch (priv) {
       case 'all':
-        siemPrivs.add('all');
         casesPrivs.add('all');
         break;
       case 'read':
-        siemPrivs.add('read');
         casesPrivs.add('read');
-        break;
-      case 'minimal_all':
-        siemPrivs.add('all');
-        break;
-      case 'minimal_read':
-        siemPrivs.add('read');
         break;
       case 'cases_all':
         casesPrivs.add('all');
@@ -49,12 +40,6 @@ export const updateSecuritySolutionPrivileges = (
     }
   }
 
-  const newSiemPrivileges: string[] = siemPrivs.has('all')
-    ? ['all']
-    : siemPrivs.has('read')
-    ? ['read']
-    : [];
-
   const casePrivileges: string[] = casesPrivs.has('all')
     ? ['all']
     : casesPrivs.has('read')
@@ -62,9 +47,9 @@ export const updateSecuritySolutionPrivileges = (
     : [];
 
   return {
-    ...(newSiemPrivileges.length > 0
+    ...(siemPrivileges.length > 0
       ? {
-          [SERVER_APP_ID]: newSiemPrivileges,
+          [SERVER_APP_ID]: siemPrivileges,
         }
       : {}),
     ...(casePrivileges.length > 0
@@ -94,7 +79,13 @@ export const registerPrivilegeDeprecations = ({
       if (responseRoles.errors && responseRoles.errors.length > 0) {
         return responseRoles.errors;
       }
-
+      if (
+        responseRoles.roles?.some((role) =>
+          role.kibana.some((privilege) => privilege.feature[CASES_FEATURE_ID] != null)
+        )
+      ) {
+        return [];
+      }
       try {
         const roles = responseRoles.roles ?? [];
         deprecatedRoles = roles.map<DeprecationsDetails>((role) => {
@@ -145,6 +136,7 @@ export const registerPrivilegeDeprecations = ({
                 method: 'PUT',
                 path: `/api/security/role/${encodeURIComponent(role.name)}`,
                 body: updatedRole,
+                omitContextFromBody: true,
               },
               manualSteps: [],
             },
