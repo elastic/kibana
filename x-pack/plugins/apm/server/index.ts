@@ -74,7 +74,7 @@ export type APMXPackConfig = TypeOf<typeof configSchema>;
 export type APMConfig = ReturnType<typeof mergeConfigs>;
 
 // plugin config and ui indices settings
-// All options should be documented in the APM configuration settings
+// All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/master/docs/settings/apm-settings.asciidoc
 // and be included on cloud allow list unless there are specific reasons not to
 export function mergeConfigs(
   apmOssConfig: APMOSSConfig,
