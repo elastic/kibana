@@ -43,7 +43,7 @@ export interface ManageScopeInit extends Partial<ManageScope> {
   id: SourcererScopeName;
 }
 
-export type SourcererScopeById = Record<SourcererScopeName | string, ManageScope>;
+export type SourcererScopeById = Record<SourcererScopeName, ManageScope>;
 
 export interface KibanaDataView {
   /** Uniquely identifies a Kibana Index Pattern */
@@ -65,16 +65,7 @@ export interface SourcererModel {
   sourcererScopes: SourcererScopeById;
 }
 
-export const initSourcererScope: Pick<
-  ManageScope,
-  | 'browserFields'
-  | 'docValueFields'
-  | 'errorMessage'
-  | 'indexPattern'
-  | 'indicesExist'
-  | 'loading'
-  | 'selectedPatterns'
-> = {
+export const initSourcererScope: Omit<ManageScope, 'id'> = {
   browserFields: EMPTY_BROWSER_FIELDS,
   docValueFields: EMPTY_DOCVALUE_FIELD,
   errorMessage: null,
