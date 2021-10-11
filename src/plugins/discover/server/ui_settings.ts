@@ -33,9 +33,10 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
       defaultMessage: 'Default columns',
     }),
-    value: ['Document'],
+    value: [''],
     description: i18n.translate('discover.advancedSettings.defaultColumnsText', {
-      defaultMessage: 'Columns displayed by default in the Discovery tab',
+      defaultMessage:
+        'Columns displayed by default in the Discovery tab. If empty, `Document` column will be displayed.',
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),

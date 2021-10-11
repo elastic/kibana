@@ -19,7 +19,7 @@ function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) 
   if (savedSearch.columns && savedSearch.columns.length > 0) {
     return [...savedSearch.columns];
   }
-  if (isEqual(config.get(DEFAULT_COLUMNS_SETTING), ['Document'])) {
+  if (isEqual(config.get(DEFAULT_COvLUMNS_SETTING), [''])) {
     return ['_source'];
   }
   return [...config.get(DEFAULT_COLUMNS_SETTING)];
