@@ -445,6 +445,7 @@
     "@emotion/jest": "^11.3.0",
     "@istanbuljs/schema": "^0.1.2",
     "@jest/reporters": "^26.6.2",
+    "@jest/test-sequencer": "^26.6.2",
     "@kbn/babel-code-parser": "link:bazel-bin/packages/kbn-babel-code-parser",
     "@kbn/babel-preset": "link:bazel-bin/packages/kbn-babel-preset",
     "@kbn/cli-dev-mode": "link:bazel-bin/packages/kbn-cli-dev-mode",

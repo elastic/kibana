@@ -57,6 +57,7 @@ RUNTIME_DEPS = [
     "@npm//jest-snapshot",
     "@npm//jest-styled-components",
     "@npm//@jest/reporters",
+    "@npm//@jest/test-sequencer",
     "@npm//joi",
     "@npm//mustache",
     "@npm//parse-link-header",

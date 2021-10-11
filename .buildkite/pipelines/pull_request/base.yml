@@ -120,6 +120,7 @@ steps:
     agents:
       queue: n2-4
     timeout_in_minutes: 120
+    parallelism: 2
     key: jest-integration
 
   - command: .buildkite/scripts/steps/test/api_integration.sh
@@ -132,8 +133,9 @@ steps:
   - command: .buildkite/scripts/steps/test/jest.sh
     label: 'Jest Tests'
     agents:
-      queue: c2-16
+      queue: c2-4
     timeout_in_minutes: 120
+    parallelism: 4
     key: jest
 
   - command: .buildkite/scripts/steps/lint.sh
