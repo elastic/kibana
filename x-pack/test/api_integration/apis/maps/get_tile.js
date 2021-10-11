@@ -32,7 +32,7 @@ export default function ({ getService }) {
       expect(layer.length).to.be(3); // 2 docs + the metadata feature
 
       // Verify ES document
-      const feature = layer.feature.find(feature => {
+      const feature = layer.feature.find((feature) => {
         return feature.properties._id === 'AU_x3_BsGFA8no6Qjjug';
       });
       expect(feature).not.to.be(undefined);
@@ -49,7 +49,7 @@ export default function ({ getService }) {
       expect(feature.loadGeometry()).to.eql([[{ x: 44, y: 2382 }]]);
 
       // Verify metadata feature
-      const metadataFeature = layer.feature.find(feature => {
+      const metadataFeature = layer.feature.find((feature) => {
         return feature.properties.__kbn_metadata_feature__;
       });
       expect(metadataFeature).not.to.be(undefined);
