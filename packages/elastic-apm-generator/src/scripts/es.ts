@@ -13,6 +13,7 @@ import pLimit from 'p-limit';
 import yargs from 'yargs/yargs';
 import { toElasticsearchOutput } from '..';
 import { simpleTrace } from './examples/01_simple_trace';
+import { distributedTrace } from './examples/02_distributed_trace';
 
 yargs(process.argv.slice(2))
   .command(
@@ -53,6 +54,13 @@ yargs(process.argv.slice(2))
         case 'simple-trace':
           events = simpleTrace(from, to);
           break;
+
+        case 'distributed-trace':
+          events = distributedTrace(from, to);
+          break;
+
+        default:
+          throw new Error('Unknown example: ' + argv._[1]);
       }
 
       const docs = toElasticsearchOutput(events, argv['apm-server-version'] as string);

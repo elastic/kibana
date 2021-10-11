@@ -34,12 +34,12 @@ export function getTransactionMetrics(events: Fields[]) {
     .map((transaction) => {
       return {
         ...transaction,
-        ['trace.root']: transaction['parent.id'] === undefined,
+        ['transaction.root']: transaction['parent.id'] === undefined,
       };
     });
 
   const metricsets = aggregate(transactions, [
-    'trace.root',
+    'transaction.root',
     'transaction.name',
     'transaction.type',
     'event.outcome',
@@ -51,6 +51,7 @@ export function getTransactionMetrics(events: Fields[]) {
     'host.name',
     'container.id',
     'kubernetes.pod.name',
+    'transaction.upstream.hash',
   ]);
 
   return metricsets.map((metricset) => {
@@ -67,6 +68,7 @@ export function getTransactionMetrics(events: Fields[]) {
     return {
       ...metricset.key,
       'transaction.duration.histogram': sortAndCompressHistogram(histogram),
+      'metricset.name': 'transaction',
       _doc_count: metricset.events.length,
     };
   });

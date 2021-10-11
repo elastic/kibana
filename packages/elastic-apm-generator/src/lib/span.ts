@@ -24,7 +24,11 @@ export class Span extends BaseSpan {
     return this;
   }
 
-  destination(resource: string, type?: string, name?: string) {
+  destination(resource?: string, type?: string, name?: string) {
+    if (!resource) {
+      resource = this.fields['span.subtype'];
+    }
+
     if (!type) {
       type = this.fields['span.type'];
     }

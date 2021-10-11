@@ -21,11 +21,32 @@ type KeyOfSource<T> = Record<
   (T extends Record<string, { terms: { missing_bucket: true } }> ? null : never) | string | number
 >;
 
-type KeysOfSources<T extends any[]> = T extends [infer U, ...infer V]
-  ? KeyOfSource<U> & KeysOfSources<V>
-  : T extends Array<infer U>
-  ? KeyOfSource<U>
-  : {};
+type KeysOfSources<T extends any[]> = T extends [infer U1]
+  ? KeyOfSource<U1>
+  : T extends [infer U1, infer U2]
+  ? KeyOfSource<U1> & KeyOfSource<U2>
+  : T extends [infer U1, infer U2, infer U3]
+  ? KeyOfSource<U1> & KeyOfSource<U2> & KeyOfSource<U3>
+  : T extends [infer U1, infer U2, infer U3, infer U4]
+  ? KeyOfSource<U1> & KeyOfSource<U2> & KeyOfSource<U3> & KeyOfSource<U4>
+  : T extends [infer U1, infer U2, infer U3, infer U4, infer U5]
+  ? KeyOfSource<U1> & KeyOfSource<U2> & KeyOfSource<U3> & KeyOfSource<U4> & KeyOfSource<U5>
+  : T extends [infer U1, infer U2, infer U3, infer U4, infer U5, infer U6]
+  ? KeyOfSource<U1> &
+      KeyOfSource<U2> &
+      KeyOfSource<U3> &
+      KeyOfSource<U4> &
+      KeyOfSource<U5> &
+      KeyOfSource<U6>
+  : T extends [infer U1, infer U2, infer U3, infer U4, infer U5, infer U6, infer U7]
+  ? KeyOfSource<U1> &
+      KeyOfSource<U2> &
+      KeyOfSource<U3> &
+      KeyOfSource<U4> &
+      KeyOfSource<U5> &
+      KeyOfSource<U6> &
+      KeyOfSource<U7>
+  : never;
 
 type CompositeKeysOf<TAggregationContainer extends estypes.AggregationsAggregationContainer> =
   TAggregationContainer extends {

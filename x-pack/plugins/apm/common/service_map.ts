@@ -53,9 +53,16 @@ export interface ConnectionElement {
   data: ConnectionNode | ConnectionEdge;
 }
 
+export interface ConnectionStats {
+  throughputPerMinute: number;
+  failurePercentage: number | null;
+  averageLatency: number;
+}
+
 export interface Connection {
   source: ConnectionNode;
   destination: ConnectionNode;
+  stats?: ConnectionStats;
 }
 
 export interface NodeStats {

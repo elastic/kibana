@@ -10,7 +10,7 @@ import { Fields } from './entity';
 import { Serializable } from './serializable';
 import { Span } from './span';
 import { Transaction } from './transaction';
-import { generateTraceId } from './utils/generate_id';
+import { generatePathHash, generateTraceId } from './utils/generate_id';
 
 export class BaseSpan extends Serializable {
   private readonly _children: BaseSpan[] = [];
@@ -30,9 +30,19 @@ export class BaseSpan extends Serializable {
       ? span.fields['span.id']
       : span.fields['transaction.id'];
 
+    this.fields['transaction.upstream.hash'] =
+      span.fields['span.destination.service.hash'] || span.fields['transaction.upstream.hash'];
+
     if (this.isSpan()) {
+      if (this.fields['span.destination.service.resource']) {
+        this.fields['span.destination.service.hash'] = generatePathHash(
+          (span.fields['transaction.upstream.hash'] ?? '') +
+            this.fields['span.destination.service.resource']
+        );
+      }
       this.fields['transaction.id'] = span.fields['transaction.id'];
     }
+
     this._children.forEach((child) => {
       child.parent(this);
     });

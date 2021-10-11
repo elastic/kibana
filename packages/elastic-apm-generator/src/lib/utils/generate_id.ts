@@ -12,8 +12,12 @@ let seq = 0;
 
 const namespace = 'f38d5b83-8eee-4f5b-9aa6-2107e15a71e3';
 
-function generateId() {
-  return uuidv5(String(seq++), namespace).replace(/-/g, '');
+function generateId(seed?: string) {
+  return uuidv5(seed || String(seq++), namespace).replace(/-/g, '');
+}
+
+export function generatePathHash(seed: string) {
+  return generateId(seed);
 }
 
 export function generateEventId() {

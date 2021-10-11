@@ -23,8 +23,13 @@ import {
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 import { ServiceAnomaliesResponse } from './get_service_anomalies';
 import { groupResourceNodes } from './group_resource_nodes';
+import {
+  asDuration,
+  asPercent,
+  asTransactionRate,
+} from '../../../common/utils/formatters';
 
-function getConnectionNodeId(node: ConnectionNode): string {
+export function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
     // use a prefix to distinguish exernal destination ids from services
     return `>${node[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
@@ -164,6 +169,13 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
         id: getConnectionId({ source: sourceData, destination: targetData }),
         sourceData,
         targetData,
+        label: connection.stats
+          ? `${asDuration(
+              connection.stats.averageLatency
+            )} / ${asTransactionRate(
+              connection.stats.throughputPerMinute ?? 0
+            )} / ${asPercent(connection.stats.failurePercentage, 1)}`
+          : '',
       };
     })
     .filter((connection) => connection.source !== connection.target);

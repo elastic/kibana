@@ -178,6 +178,23 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         width: 1,
         'source-arrow-shape': 'none',
         'z-index': zIndexEdge,
+        label: (el) => {
+          return el.data('label');
+        },
+        'edge-text-rotation': 'autorotate',
+      },
+    },
+    {
+      selector: 'edge[label]',
+      css: {
+        'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
+        'font-size': '9px',
+        'background-color': theme.eui.euiTooltipBackgroundColor,
+        color: theme.eui.euiColorHighlight,
+        'text-background-opacity': 0.6,
+        'text-background-padding': '4px',
+        'text-wrap': 'wrap',
+        // 'background-opacity': 0.9,
       },
     },
     {

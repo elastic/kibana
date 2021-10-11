@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { isActivePlatinumLicense } from '../../common/license_check';
 import { invalidLicenseMessage } from '../../common/service_map';
@@ -23,6 +24,9 @@ const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
   params: t.type({
     query: t.intersection([
+      t.type({
+        experimental: toBooleanRt,
+      }),
       t.partial({
         serviceName: t.string,
       }),
@@ -47,7 +51,7 @@ const serviceMapRoute = createApmServerRoute({
 
     const setup = await setupRequest(resources);
     const {
-      query: { serviceName, environment, start, end },
+      query: { serviceName, environment, start, end, experimental },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -65,6 +69,7 @@ const serviceMapRoute = createApmServerRoute({
       logger,
       start,
       end,
+      experimental,
     });
   },
 });

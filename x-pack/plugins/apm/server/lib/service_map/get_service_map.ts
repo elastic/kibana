@@ -26,6 +26,7 @@ import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { transformServiceMapResponses } from './transform_service_map_responses';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { getConnectionsExperimental } from './get_connections_experimental';
 
 export interface IEnvOptions {
   setup: Setup;
@@ -35,6 +36,7 @@ export interface IEnvOptions {
   logger: Logger;
   start: number;
   end: number;
+  experimental: boolean;
 }
 
 async function getConnectionData({
@@ -43,7 +45,17 @@ async function getConnectionData({
   environment,
   start,
   end,
+  experimental,
 }: IEnvOptions) {
+  if (experimental) {
+    return getConnectionsExperimental({
+      serviceName,
+      start,
+      end,
+      apmEventClient: setup.apmEventClient,
+    });
+  }
+
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
       setup,
@@ -172,28 +184,31 @@ export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export function getServiceMap(options: IEnvOptions) {
-  return withApmSpan('get_service_map', async () => {
-    const { logger } = options;
-    const anomaliesPromise = getServiceAnomalies(
-      options
+  return withApmSpan(
+    options.experimental ? 'get_service_map_experimental' : 'get_service_map',
+    async () => {
+      const { logger } = options;
+      const anomaliesPromise = getServiceAnomalies(
+        options
 
-      // always catch error to avoid breaking service maps if there is a problem with ML
-    ).catch((error) => {
-      logger.warn(`Unable to retrieve anomalies for service maps.`);
-      logger.error(error);
-      return DEFAULT_ANOMALIES;
-    });
+        // always catch error to avoid breaking service maps if there is a problem with ML
+      ).catch((error) => {
+        logger.warn(`Unable to retrieve anomalies for service maps.`);
+        logger.error(error);
+        return DEFAULT_ANOMALIES;
+      });
 
-    const [connectionData, servicesData, anomalies] = await Promise.all([
-      getConnectionData(options),
-      getServicesData(options),
-      anomaliesPromise,
-    ]);
+      const [connectionData, servicesData, anomalies] = await Promise.all([
+        getConnectionData(options),
+        getServicesData(options),
+        anomaliesPromise,
+      ]);
 
-    return transformServiceMapResponses({
-      ...connectionData,
-      services: servicesData,
-      anomalies,
-    });
-  });
+      return transformServiceMapResponses({
+        ...connectionData,
+        services: servicesData,
+        anomalies,
+      });
+    }
+  );
 }

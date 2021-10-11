@@ -18,6 +18,10 @@ export function getSpanDestinationMetrics(events: Fields[]) {
     'service.environment',
     'service.name',
     'span.destination.service.resource',
+    'span.destination.service.hash',
+    'transaction.upstream.hash',
+    'span.type',
+    'span.subtype',
   ]);
 
   return metricsets.map((metricset) => {

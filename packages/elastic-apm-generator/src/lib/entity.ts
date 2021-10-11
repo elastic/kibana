@@ -30,7 +30,9 @@ export type Fields = Partial<{
     values: number[];
     counts: number[];
   };
-  'transaction.sampled': true;
+  'transaction.upstream.hash': string;
+  'transaction.sampled': boolean;
+  'transaction.root': boolean;
   'service.name': string;
   'service.environment': string;
   'service.node.name': string;
@@ -44,6 +46,7 @@ export type Fields = Partial<{
   'span.destination.service.type': string;
   'span.destination.service.response_time.sum.us': number;
   'span.destination.service.response_time.count': number;
+  'span.destination.service.hash': string;
   'span.self_time.count': number;
   'span.self_time.sum.us': number;
 }>;

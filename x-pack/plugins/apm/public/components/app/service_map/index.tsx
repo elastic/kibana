@@ -131,6 +131,7 @@ export function ServiceMap({
             end,
             environment,
             serviceName,
+            experimental: 'true',
           },
         },
       });
