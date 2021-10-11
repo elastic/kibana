@@ -155,19 +155,25 @@ export class ResourceInstaller {
   private async updateAliasWriteIndexMapping({ index, alias }: ConcreteIndexInfo) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
-    const simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
+    const simulatedIndexTemplate = await clusterClient.indices.simulateIndexTemplate({
       name: index,
     });
-    const simulatedMapping = get(simulatedIndexMapping, ['body', 'template', 'mappings']);
+    const simulatedMapping = get(simulatedIndexTemplate, ['body', 'template', 'mappings']);
+    const simulatedSettings = get(simulatedIndexTemplate, ['body', 'template', 'settings']);
 
     try {
       await clusterClient.indices.putMapping({
         index,
         body: simulatedMapping,
       });
+
+      await clusterClient.indices.putSettings({
+        index,
+        body: simulatedSettings,
+      });
       return;
     } catch (err) {
-      logger.error(`Failed to PUT mapping for alias ${alias}: ${err.message}`);
+      logger.error(`Failed to PUT mappings or settings for alias ${alias}: ${err.message}`);
       throw err;
     }
   }
