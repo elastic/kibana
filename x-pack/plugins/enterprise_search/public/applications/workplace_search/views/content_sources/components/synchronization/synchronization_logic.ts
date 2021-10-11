@@ -180,8 +180,8 @@ export const SynchronizationLogic = kea<
         },
         removeBlockedWindow: (state, index) => {
           const schedule = cloneDeep(state);
-          const blockedWindows = schedule.blockedWindows || [];
-          blockedWindows.splice(index, 1);
+          const blockedWindows = schedule.blockedWindows;
+          blockedWindows!.splice(index, 1);
           schedule.blockedWindows = blockedWindows;
           return schedule;
         },

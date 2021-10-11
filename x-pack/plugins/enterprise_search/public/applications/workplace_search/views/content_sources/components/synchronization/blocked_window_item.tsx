@@ -72,7 +72,7 @@ const syncOptions = [
     ),
   },
   {
-    value: 'deletion',
+    value: 'delete',
     inputDisplay: DELETION_SYNC_LABEL,
     dropdownDisplay: (
       <>
