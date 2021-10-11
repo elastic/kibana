@@ -226,7 +226,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       defaultMessage: 'Maximum table cell height',
     }),
     value: 115,
-    description: i18n.translate('core.ui_settings.params.maxCellHeightText', {
+    description: i18n.translate('discover.advancedSettings.maxCellHeightText', {
       defaultMessage:
         'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
     }),
