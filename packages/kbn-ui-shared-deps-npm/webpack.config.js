@@ -161,9 +161,6 @@ module.exports = (_, argv) => {
     },
 
     plugins: [
-      // new webpack.optimize.MinChunkSizePlugin({
-      //   minChunkSize: 500000,
-      // }),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,
         cleanAfterEveryBuildPatterns: [
