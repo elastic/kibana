@@ -69,7 +69,13 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('Generating signals from source indexes', () => {
+    beforeEach(async () => {
+      await deleteSignalsIndex(supertest);
+      await createSignalsIndex(supertest);
+    });
+
     afterEach(async () => {
+      await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
     });
 

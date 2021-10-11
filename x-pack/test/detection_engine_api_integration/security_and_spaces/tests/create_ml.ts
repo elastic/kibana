@@ -24,9 +24,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createRuleWithExceptionEntries,
-  createSignalsIndex,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getOpenSignals,
 } from '../../utils';
 import {
@@ -104,10 +102,10 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
+      // await createSignalsIndex(supertest);
     });
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
+      // await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
     });
 

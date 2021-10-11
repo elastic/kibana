@@ -91,13 +91,13 @@ export default ({ getService }: FtrProviderContext) => {
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host).sort();
         expect(hits).to.eql([
           {
-            os: { name: 'Linux' },
-          },
-          {
             os: { name: 'Windows' },
           },
           {
             os: { name: 'Macos' },
+          },
+          {
+            os: { name: 'Linux' },
           },
           {
             os: { name: 'Linux' },
@@ -134,13 +134,13 @@ export default ({ getService }: FtrProviderContext) => {
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
           expect(hits).to.eql([
             {
-              os: { name: 'Windows' },
-            },
-            {
               os: { name: 'Macos' },
             },
             {
               os: { name: 'Linux' },
+            },
+            {
+              os: { name: 'Windows' },
             },
           ]);
         });

@@ -1397,6 +1397,6 @@ export const getOpenSignals = async (
   // Critically important that we wait for rule success AND refresh the write index in that order before we
   // assert that no signals were created. Otherwise, signals could be written but not available to query yet
   // when we search, causing tests that check that signals are NOT created to pass when they should fail.
-  await refreshIndex(es, rule.output_index);
+  await refreshIndex(es, '.alerts-security.alerts-default*');
   return getSignalsByIds(supertest, [rule.id]);
 };

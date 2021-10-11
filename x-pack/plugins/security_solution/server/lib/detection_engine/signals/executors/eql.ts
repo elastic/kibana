@@ -71,17 +71,16 @@ export const eqlExecutor = async ({
     result.warning = true;
   }
   try {
-    const signalIndexVersion = await getIndexVersion(
-      services.scopedClusterClient.asCurrentUser,
-      ruleParams.outputIndex
-    );
-    if (
-      !experimentalFeatures.ruleRegistryEnabled &&
-      isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })
-    ) {
-      throw new Error(
-        `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
+    if (!experimentalFeatures.ruleRegistryEnabled) {
+      const signalIndexVersion = await getIndexVersion(
+        services.scopedClusterClient.asCurrentUser,
+        ruleParams.outputIndex
       );
+      if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
+        throw new Error(
+          `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
+        );
+      }
     }
   } catch (err) {
     if (err.statusCode === 403) {

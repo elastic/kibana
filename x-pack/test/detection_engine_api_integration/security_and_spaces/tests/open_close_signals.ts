@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('open_close_signals', () => {
-    describe('validation checks', () => {
+    describe.skip('validation checks', () => {
       it('should not give errors when querying and the signals index does not exist yet', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
