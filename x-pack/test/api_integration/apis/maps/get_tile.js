@@ -14,6 +14,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/114471
+  // FLAKY: https://github.com/elastic/kibana/issues/114417
   describe.skip('getTile', () => {
     it('should return vector tile containing document', async () => {
       const resp = await supertest
