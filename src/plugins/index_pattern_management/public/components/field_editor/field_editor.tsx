@@ -46,11 +46,7 @@ import {
   ES_FIELD_TYPES,
   DataPublicPluginStart,
 } from '../../../../../plugins/data/public';
-import {
-  context as contextType,
-  CodeEditor,
-  CodeEditorProps,
-} from '../../../../kibana_react/public';
+import { context as contextType, CodeEditor } from '../../../../kibana_react/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
