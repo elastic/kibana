@@ -28,7 +28,7 @@ export function useInstanceDetailsFetcher({
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+          'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
         params: {
           path: {
             serviceName,

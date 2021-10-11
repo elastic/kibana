@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import { SemVer } from 'semver';
 import { CoreStart, CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 
 import { PLUGIN, INDEX_NAMES } from '../common/constants';
@@ -27,16 +27,18 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
   private readonly license: License;
   private readonly logger: Logger;
 
-  constructor(ctx: PluginInitializerContext) {
+  constructor(private ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
     this.license = new License();
   }
 
-  setup({ http, getStartServices }: CoreSetup, { licensing, features }: SetupDependencies) {
+  setup({ http }: CoreSetup, { features }: SetupDependencies) {
     this.license.setup({
       pluginName: PLUGIN.getI18nName(i18n),
       logger: this.logger,
     });
+
+    const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
 
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
@@ -45,6 +47,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
       lib: {
         handleEsError,
       },
+      kibanaVersion,
     };
 
     features.registerElasticsearchFeature({
