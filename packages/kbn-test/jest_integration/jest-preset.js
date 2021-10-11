@@ -25,5 +25,4 @@ module.exports = {
   coverageReporters: !!process.env.CI
     ? [['json', { file: 'jest-integration.json' }]]
     : ['html', 'text'],
-  testSequencer: '<rootDir>/packages/kbn-test/src/jest/sequencer.js',
 };

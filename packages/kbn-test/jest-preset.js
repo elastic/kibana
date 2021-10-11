@@ -85,6 +85,9 @@ module.exports = {
   // This option allows use of a custom test runner
   testRunner: 'jest-circus/runner',
 
+  // Splits tests in CI easily, no effect locally
+  testSequencer: '<rootDir>/packages/kbn-test/src/jest/sequencer.js',
+
   // A map from regular expressions to paths to transformers
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
