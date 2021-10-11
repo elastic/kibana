@@ -27,7 +27,7 @@ export interface ManageScope {
   docValueFields: DocValueFields[];
   errorMessage: string | null;
   id: SourcererScopeName;
-  indexPattern: IIndexPattern;
+  indexPattern: Omit<IIndexPattern, 'fieldFormatMap'>;
   indicesExist: boolean | undefined | null;
   loading: boolean;
   selectedPatterns: string[];
@@ -37,9 +37,7 @@ export interface ManageScopeInit extends Partial<ManageScope> {
   id: SourcererScopeName;
 }
 
-export type SourcererScopeById = {
-  [id in SourcererScopeName]: ManageScope;
-};
+export type SourcererScopeById = Record<SourcererScopeName | string, ManageScope>;
 
 export type KibanaIndexPatterns = Array<{ id: string; title: string }>;
 
@@ -51,7 +49,16 @@ export interface SourcererModel {
   sourcererScopes: SourcererScopeById;
 }
 
-export const initSourcererScope = {
+export const initSourcererScope: Pick<
+  ManageScope,
+  | 'browserFields'
+  | 'docValueFields'
+  | 'errorMessage'
+  | 'indexPattern'
+  | 'indicesExist'
+  | 'loading'
+  | 'selectedPatterns'
+> = {
   browserFields: EMPTY_BROWSER_FIELDS,
   docValueFields: EMPTY_DOCVALUE_FIELD,
   errorMessage: null,
