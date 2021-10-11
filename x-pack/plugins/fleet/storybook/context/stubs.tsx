@@ -9,7 +9,6 @@ import type { FleetStartServices } from '../../public/plugin';
 
 type Stubs =
   | 'storage'
-  | 'docLinks'
   | 'data'
   | 'deprecations'
   | 'fatalErrors'
@@ -22,7 +21,6 @@ type StubbedStartServices = Pick<FleetStartServices, Stubs>;
 
 export const stubbedStartServices: StubbedStartServices = {
   storage: {} as FleetStartServices['storage'],
-  docLinks: {} as FleetStartServices['docLinks'],
   data: {} as FleetStartServices['data'],
   deprecations: {} as FleetStartServices['deprecations'],
   fatalErrors: {} as FleetStartServices['fatalErrors'],
