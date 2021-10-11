@@ -77,7 +77,13 @@
             "text": "DiscoverAppLocatorParams"
           },
           " extends ",
-          "SerializableRecord"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
@@ -153,7 +159,13 @@
                 "text": "RefreshInterval"
               },
               " & ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ") | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -169,7 +181,13 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -185,7 +203,13 @@
               "\nOptionally set a query."
             ],
             "signature": [
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -262,7 +286,13 @@
             ],
             "signature": [
               "(string[][] & ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ") | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -380,7 +410,13 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/url_generator.ts",
@@ -396,7 +432,13 @@
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined"
             ],
             "path": "src/plugins/discover/public/url_generator.ts",
@@ -890,7 +932,13 @@
             "label": "query",
             "description": [],
             "signature": [
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined"
             ],
             "path": "src/plugins/discover/public/application/embeddable/types.ts",
@@ -904,7 +952,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/application/embeddable/types.ts",
@@ -1119,6 +1173,10 @@
           "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": true,
           "references": [
+            {
+              "plugin": "observability",
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
+            },
             {
               "plugin": "osquery",
               "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
