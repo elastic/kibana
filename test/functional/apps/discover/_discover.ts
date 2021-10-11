@@ -30,8 +30,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
-      exec(`echo "### some simple msg"`).stdout.pipe(process.stdout);
-      exec(`echo "### The \\$HOME variable is $HOME"`).stdout.pipe(process.stdout);
+      exec(`echo "1 ### some simple msg"`).stdout.pipe(process.stdout);
+      exec(`echo "2 ### The \\$HOME variable is $HOME"`).stdout.pipe(process.stdout);
+
+      exec(`echo "3 stdout to stderr"`).stdout.pipe(process.stderr)
+      exec(`echo "4 stderr to stdout"`).stderr.pipe(process.stdout)
 
       // await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       //
