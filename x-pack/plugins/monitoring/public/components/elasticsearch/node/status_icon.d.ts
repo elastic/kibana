@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export const PageLoading: FunctionComponent<Props>;
-export const License: FunctionComponent<Props>;
+import { FunctionComponent } from 'react';
+
+export const NodeStatusIcon: FunctionComponent<NodeStatusIconProps>;
+export interface NodeStatusIconProps {
+  isOnline: boolean;
+  status: string;
+}
