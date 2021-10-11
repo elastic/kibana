@@ -16,7 +16,7 @@ export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {
     let key;
 
     if (isRangeFilter(obj)) {
-      key = keys(obj.range)[0];
+      key = keys(obj.query.range)[0];
     }
 
     return Boolean(key && key === timeFieldName);
