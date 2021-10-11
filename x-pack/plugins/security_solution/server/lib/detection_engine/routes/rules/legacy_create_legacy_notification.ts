@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { Logger } from 'src/core/server';
+
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyUpdateOrCreateRuleActionsSavedObject } from '../../rule_actions/legacy_update_or_create_rule_actions_saved_object';
@@ -25,7 +27,10 @@ import { legacyCreateNotifications } from '../../notifications/legacy_create_not
  * @deprecated Once we no longer have legacy notifications and "side car actions" this can be removed.
  * @param router The router
  */
-export const legacyCreateLegacyNotificationRoute = (router: SecuritySolutionPluginRouter): void => {
+export const legacyCreateLegacyNotificationRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+): void => {
   router.post(
     {
       path: '/internal/api/detection/legacy/notifications',
@@ -95,6 +100,7 @@ export const legacyCreateLegacyNotificationRoute = (router: SecuritySolutionPlug
           savedObjectsClient,
           actions,
           throttle: interval,
+          logger,
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : 'unknown';

@@ -225,12 +225,9 @@ export default function (providerContext: FtrProviderContext) {
               limit: '10000',
             },
           },
-          number_of_routing_shards: '30',
-          number_of_shards: '1',
           query: {
             default_field: ['logs_test_name', 'new_field_name'],
           },
-          refresh_interval: '5s',
         },
       });
       const resUserSettings = await es.transport.request({

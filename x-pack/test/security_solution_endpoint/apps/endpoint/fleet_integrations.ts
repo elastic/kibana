@@ -6,13 +6,29 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  deleteMetadataStream,
+  deleteAllDocsFromMetadataCurrentIndex,
+} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { fleetIntegrations, trustedApps } = getPageObjects(['trustedApps', 'fleetIntegrations']);
   const policyTestResources = getService('policyTestResources');
   const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
 
   describe('When in the Fleet application', function () {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
+        useCreate: true,
+      });
+      await browser.refresh();
+    });
+    after(async () => {
+      await deleteMetadataStream(getService);
+      await deleteAllDocsFromMetadataCurrentIndex(getService);
+    });
     describe('and on the Endpoint Integration details page', () => {
       beforeEach(async () => {
         await fleetIntegrations.navigateToIntegrationDetails(

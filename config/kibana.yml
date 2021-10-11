@@ -84,28 +84,27 @@
 #pid.file: /run/kibana/kibana.pid
 
 # Set the value of this setting to off to suppress all logging output, or to debug to log everything.
-# logging.root.level: debug
+#logging.root.level: debug
 
 # Enables you to specify a file where Kibana stores log output.
-# logging.appenders.default:
-#   type: file
-#   fileName: /var/logs/kibana.log
-
+#logging.appenders.default:
+#  type: file
+#  fileName: /var/logs/kibana.log
 
 # Logs queries sent to Elasticsearch.
-# logging.loggers:
-#   - name: elasticsearch.queries
-#     level: debug
+#logging.loggers:
+#  - name: elasticsearch.queries
+#    level: debug
 
 # Logs http responses.
-# logging.loggers:
-#   - name: http.server.response
-#     level: debug
+#logging.loggers:
+#  - name: http.server.response
+#    level: debug
 
 # Logs system usage information.
-# logging.loggers:
-#   - name: metrics.ops
-#     level: debug
+#logging.loggers:
+#  - name: metrics.ops
+#    level: debug
 
 # Set the interval in milliseconds to sample system and process performance
 # metrics. Minimum is 100ms. Defaults to 5000.
