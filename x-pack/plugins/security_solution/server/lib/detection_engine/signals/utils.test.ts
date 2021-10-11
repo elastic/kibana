@@ -783,6 +783,7 @@ describe('utils', () => {
       const res = await hasTimestampFields({
         wroteStatus: false,
         timestampField,
+        executionId: 'executionId',
         ruleName: 'myfakerulename',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
@@ -827,6 +828,7 @@ describe('utils', () => {
       const res = await hasTimestampFields({
         wroteStatus: false,
         timestampField,
+        executionId: 'executionId',
         ruleName: 'myfakerulename',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
@@ -857,6 +859,7 @@ describe('utils', () => {
       const res = await hasTimestampFields({
         wroteStatus: false,
         timestampField,
+        executionId: 'executionId',
         ruleName: 'Endpoint Security',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
@@ -887,6 +890,7 @@ describe('utils', () => {
       const res = await hasTimestampFields({
         wroteStatus: false,
         timestampField,
+        executionId: 'executionId',
         ruleName: 'NOT Endpoint Security',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,

@@ -38,6 +38,7 @@ export interface ExecutionMetrics {
 }
 
 export interface LogStatusChangeArgs {
+  executionId?: string;
   ruleId: string;
   ruleName: string;
   ruleType: string;
@@ -51,6 +52,7 @@ export interface LogStatusChangeArgs {
 }
 
 export interface UpdateExecutionLogArgs {
+  executionId?: string;
   id: string;
   attributes: IRuleStatusSOAttributes;
   ruleName: string;
@@ -64,6 +66,7 @@ export interface CreateExecutionLogArgs {
 }
 
 export interface LogExecutionMetricsArgs {
+  executionId?: string;
   ruleId: string;
   ruleName: string;
   ruleType: string;

@@ -97,6 +97,7 @@ export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
+  executionId: string;
   ruleStatusClient: IRuleExecutionLogClient;
   ruleId: string;
   ruleName: string;
@@ -107,6 +108,7 @@ export const hasReadIndexPrivileges = async (args: {
     privileges,
     logger,
     buildRuleMessage,
+    executionId,
     ruleStatusClient,
     ruleId,
     ruleName,
@@ -128,6 +130,7 @@ export const hasReadIndexPrivileges = async (args: {
     )}`;
     logger.error(buildRuleMessage(errorString));
     await ruleStatusClient.logStatusChange({
+      executionId,
       message: errorString,
       ruleId,
       ruleName,
@@ -147,6 +150,7 @@ export const hasReadIndexPrivileges = async (args: {
     )}`;
     logger.error(buildRuleMessage(errorString));
     await ruleStatusClient.logStatusChange({
+      executionId,
       message: errorString,
       ruleId,
       ruleName,
@@ -162,6 +166,7 @@ export const hasReadIndexPrivileges = async (args: {
 export const hasTimestampFields = async (args: {
   wroteStatus: boolean;
   timestampField: string;
+  executionId: string;
   ruleName: string;
   // any is derived from here
   // node_modules/@elastic/elasticsearch/api/kibana.d.ts
@@ -178,6 +183,7 @@ export const hasTimestampFields = async (args: {
   const {
     wroteStatus,
     timestampField,
+    executionId,
     ruleName,
     timestampFieldCapsResponse,
     inputIndices,
@@ -199,6 +205,7 @@ export const hasTimestampFields = async (args: {
     }`;
     logger.error(buildRuleMessage(errorString.trimEnd()));
     await ruleStatusClient.logStatusChange({
+      executionId,
       message: errorString.trimEnd(),
       ruleId,
       ruleName,
@@ -227,6 +234,7 @@ export const hasTimestampFields = async (args: {
     )}`;
     logger.error(buildRuleMessage(errorString));
     await ruleStatusClient.logStatusChange({
+      executionId,
       message: errorString,
       ruleId,
       ruleName,

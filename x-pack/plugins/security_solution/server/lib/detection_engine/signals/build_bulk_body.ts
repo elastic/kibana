@@ -16,6 +16,7 @@ import {
   BaseSignalHit,
   SignalSource,
   WrappedSignalHit,
+  SignalHitExecutionId,
 } from './types';
 import { buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
@@ -31,12 +32,17 @@ import { BuildReasonMessage } from './reason_formatters';
  * then the event object, and finally we strip away any additional temporary data that was added
  * such as the "threshold_result".
  * @param ruleSO The rule saved object to build overrides
+ * @param executionId Unique id representing a specific rule execution
  * @param doc The SignalSourceHit with "_source", "fields", and additional data such as "threshold_result"
+ * @param mergeStrategy Specific merge strategy for building alert from source/fields
+ * @param ignoreFields Array of fields that should be ignored and never merged
+ * @param buildReasonMessage Function for building reason message string
  * @returns The body that can be added to a bulk call for inserting the signal.
  */
 export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit,
+  executionId: string,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   ignoreFields: ConfigType['alertIgnoreFields'],
   buildReasonMessage: BuildReasonMessage
@@ -60,11 +66,20 @@ export const buildBulkBody = (
   } = mergedDoc._source || {
     threshold_result: null,
   };
-  const signalHit: SignalHit = {
+  // TODO: Modify upstream types?
+  const signalHit: SignalHit & SignalHitExecutionId = {
     ...filteredSource,
     [TIMESTAMP]: timestamp,
     event,
-    signal,
+    signal: {
+      ...signal,
+      rule: {
+        ...signal.rule,
+        execution: {
+          uuid: executionId,
+        },
+      },
+    },
   };
   return signalHit;
 };
@@ -76,6 +91,9 @@ export const buildBulkBody = (
  * @param sequence The raw ES documents that make up the sequence
  * @param ruleSO SavedObject representing the rule that found the sequence
  * @param outputIndex Index to write the resulting signals to
+ * @param mergeStrategy Specific merge strategy for building alert from source/fields
+ * @param ignoreFields Array of fields that should be ignored and never merged
+ * @param buildReasonMessage Function for building reason message string
  */
 export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,

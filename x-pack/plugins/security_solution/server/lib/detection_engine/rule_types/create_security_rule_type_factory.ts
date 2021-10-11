@@ -49,6 +49,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
       async executor(options) {
         const {
           alertId,
+          executionId,
           params,
           previousStartedAt,
           startedAt,
@@ -92,6 +93,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
         let wroteWarningStatus = false;
         const basicLogArguments = {
           spaceId,
+          executionId,
           ruleId: alertId,
           ruleName: name,
           ruleType: alertTypeId,

@@ -42,6 +42,7 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
+      'executionId',
       'missingFields',
       [],
       buildReasonMessage
@@ -114,6 +115,7 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
+      'executionId',
       'missingFields',
       [],
       buildReasonMessage
@@ -200,6 +202,7 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
+      'executionId',
       'missingFields',
       [],
       buildReasonMessage
@@ -272,6 +275,7 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
+      'executionId',
       'missingFields',
       [],
       buildReasonMessage
@@ -341,6 +345,7 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
+      'executionId',
       'missingFields',
       [],
       buildReasonMessage
@@ -409,6 +414,7 @@ describe('buildBulkBody', () => {
     const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
       ruleSO,
       doc,
+      'executionId',
       'missingFields',
       [],
       buildReasonMessage
@@ -473,6 +479,7 @@ describe('buildBulkBody', () => {
     const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
       ruleSO,
       doc,
+      'executionId',
       'missingFields',
       [],
       buildReasonMessage

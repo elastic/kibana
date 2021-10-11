@@ -14,11 +14,13 @@ import type { ConfigType } from '../../../config';
 export const wrapHitsFactory =
   ({
     ruleSO,
+    executionId,
     signalsIndex,
     mergeStrategy,
     ignoreFields,
   }: {
     ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+    executionId: string;
     signalsIndex: string;
     mergeStrategy: ConfigType['alertMergeStrategy'];
     ignoreFields: ConfigType['alertIgnoreFields'];
@@ -33,7 +35,14 @@ export const wrapHitsFactory =
           String(doc._version),
           ruleSO.attributes.params.ruleId ?? ''
         ),
-        _source: buildBulkBody(ruleSO, doc, mergeStrategy, ignoreFields, buildReasonMessage),
+        _source: buildBulkBody(
+          ruleSO,
+          doc,
+          executionId,
+          mergeStrategy,
+          ignoreFields,
+          buildReasonMessage
+        ),
       },
     ]);
 

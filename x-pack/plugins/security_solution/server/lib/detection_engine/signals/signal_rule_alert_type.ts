@@ -122,6 +122,7 @@ export const signalRulesAlertType = ({
     minimumLicenseRequired: 'basic',
     isExportable: false,
     async executor({
+      executionId,
       previousStartedAt,
       startedAt,
       state,
@@ -162,6 +163,7 @@ export const signalRulesAlertType = ({
       let wroteWarningStatus = false;
       const basicLogArguments = {
         spaceId,
+        executionId,
         ruleId: alertId,
         ruleName: name,
         ruleType: alertTypeId,
@@ -279,6 +281,7 @@ export const signalRulesAlertType = ({
 
         const wrapHits = wrapHitsFactory({
           ruleSO: savedObject,
+          executionId,
           signalsIndex: params.outputIndex,
           mergeStrategy,
           ignoreFields,

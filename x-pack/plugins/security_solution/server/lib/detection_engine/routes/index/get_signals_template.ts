@@ -24,8 +24,8 @@ import signalExtraFields from './signal_extra_fields.json';
   @description This value represents the template version assumed by app code.
   If this number is greater than the user's signals index version, the
   detections UI will attempt to update the signals template and roll over to
-  a new signals index. 
-  
+  a new signals index.
+
   Since we create a new index for new versions, this version on an existing index should never change.
 
   If making mappings changes in a patch release, this number should be incremented by 1.
@@ -33,7 +33,7 @@ import signalExtraFields from './signal_extra_fields.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 57;
+export const SIGNALS_TEMPLATE_VERSION = 67;
 /**
   @constant
   @type {number}
@@ -43,8 +43,8 @@ export const SIGNALS_TEMPLATE_VERSION = 57;
 
   This version number can change over time on existing indices as we add backwards compatibility fields.
 
-  If any .siem-signals-<space id> indices have an aliases_version less than this value, the detections 
-  UI will call create_index_route and and go through the index update process. Increment this number if 
+  If any .siem-signals-<space id> indices have an aliases_version less than this value, the detections
+  UI will call create_index_route and and go through the index update process. Increment this number if
   making changes to the field aliases we use to make signals forwards-compatible.
 */
 export const SIGNALS_FIELD_ALIASES_VERSION = 1;
@@ -52,7 +52,7 @@ export const SIGNALS_FIELD_ALIASES_VERSION = 1;
 /**
   @constant
   @type {number}
-  @description This value represents the minimum required index version (SIGNALS_TEMPLATE_VERSION) for EQL 
+  @description This value represents the minimum required index version (SIGNALS_TEMPLATE_VERSION) for EQL
   rules to write signals correctly. If the write index has a `version` less than this value, the EQL rule
   will throw an error on execution.
 */

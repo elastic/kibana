@@ -253,6 +253,16 @@ export interface SignalHit {
   [key: string]: SearchTypes;
 }
 
+export interface SignalHitExecutionId {
+  signal: {
+    rule: {
+      execution: {
+        uuid: string;
+      };
+    };
+  };
+}
+
 export interface AlertAttributes<T extends RuleParams = RuleParams> {
   actions: RuleAlertAction[];
   alertTypeId: string;

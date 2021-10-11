@@ -31,10 +31,17 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
     return {}; // TODO Implement
   }
 
-  public async update({ attributes, spaceId, ruleName, ruleType }: UpdateExecutionLogArgs) {
-    // execution events are immutable, so we just log a status change istead of updating previous
+  public async update({
+    attributes,
+    executionId,
+    spaceId,
+    ruleName,
+    ruleType,
+  }: UpdateExecutionLogArgs) {
+    // execution events are immutable, so we just log a status change instead of updating previous
     if (attributes.status) {
       this.eventLogClient.logStatusChange({
+        executionId,
         ruleName,
         ruleType,
         ruleId: attributes.alertId,
@@ -49,6 +56,7 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
   }
 
   public async logExecutionMetrics({
+    executionId,
     ruleId,
     spaceId,
     ruleType,
@@ -56,6 +64,7 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
     metrics,
   }: LogExecutionMetricsArgs) {
     this.eventLogClient.logExecutionMetrics({
+      executionId,
       ruleId,
       ruleName,
       ruleType,
@@ -73,7 +82,9 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
 
   public async logStatusChange(args: LogStatusChangeArgs) {
     if (args.metrics) {
+      // TODO: Await here?
       this.logExecutionMetrics({
+        executionId: args.executionId,
         ruleId: args.ruleId,
         ruleName: args.ruleName,
         ruleType: args.ruleType,

@@ -37,6 +37,7 @@ interface FindExecutionLogArgs {
 }
 
 interface LogExecutionMetricsArgs {
+  executionId?: string;
   ruleId: string;
   ruleName: string;
   ruleType: string;
@@ -71,6 +72,7 @@ export class EventLogClient implements IExecLogEventLogClient {
   }
 
   public logExecutionMetrics({
+    executionId,
     ruleId,
     ruleName,
     ruleType,
@@ -97,6 +99,7 @@ export class EventLogClient implements IExecLogEventLogClient {
                 total_search_duration_ms: metrics.totalSearchDuration,
                 total_indexing_duration_ms: metrics.totalIndexingDuration,
               },
+              uuid: executionId,
             },
           },
         },
@@ -114,6 +117,7 @@ export class EventLogClient implements IExecLogEventLogClient {
   }
 
   public logStatusChange({
+    executionId,
     ruleId,
     ruleName,
     ruleType,
@@ -139,6 +143,7 @@ export class EventLogClient implements IExecLogEventLogClient {
             execution: {
               status: newStatus,
               status_order: statusSeverityDict[newStatus],
+              uuid: executionId,
             },
           },
         },
