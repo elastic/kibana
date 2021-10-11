@@ -12,7 +12,11 @@ import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
 import { PageLoading } from '../../components';
-import { getSetupModeState, isSetupModeFeatureEnabled } from '../setup_mode/setup_mode';
+import {
+  getSetupModeState,
+  isSetupModeFeatureEnabled,
+  updateSetupModeData,
+} from '../setup_mode/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
 
 export interface TabMenuItem {
@@ -54,7 +58,12 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   }, [getPageData, currentTimerange]);
 
   const onRefresh = () => {
-    getPageData?.().catch((err) => {
+    const requests = [getPageData?.()];
+    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
+      requests.push(updateSetupModeData());
+    }
+
+    Promise.allSettled(requests).then((results) => {
       // TODO: handle errors
     });
   };

@@ -26,7 +26,11 @@ jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
 
-import { SynchronizationLogic, emptyBlockedWindow } from './synchronization_logic';
+import {
+  SynchronizationLogic,
+  emptyBlockedWindow,
+  stripScheduleSeconds,
+} from './synchronization_logic';
 
 describe('SynchronizationLogic', () => {
   const { http } = mockHttpValues;
@@ -38,9 +42,12 @@ describe('SynchronizationLogic', () => {
   const defaultValues = {
     navigatingBetweenTabs: false,
     hasUnsavedObjectsAndAssetsChanges: false,
+    hasUnsavedFrequencyChanges: true,
     contentExtractionChecked: true,
     thumbnailsChecked: true,
     blockedWindows: [],
+    schedule: contentSource.indexing.schedule,
+    cachedSchedule: contentSource.indexing.schedule,
   };
 
   beforeEach(() => {
@@ -217,6 +224,19 @@ describe('SynchronizationLogic', () => {
 
         expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
+    });
+  });
+
+  describe('stripScheduleSeconds', () => {
+    it('handles case where permissions not present', () => {
+      const schedule = {
+        full: 'P3D',
+        incremental: 'P5D',
+        delete: 'PT2H',
+      };
+      const stripped = stripScheduleSeconds(schedule as any);
+
+      expect(stripped.permissions).toBeUndefined();
     });
   });
 });
