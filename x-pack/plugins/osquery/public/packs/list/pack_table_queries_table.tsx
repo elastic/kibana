@@ -24,7 +24,6 @@ const columns = [
   {
     field: 'query',
     name: 'Query',
-    // eslint-disable-next-line react/display-name
     render: (query: string) => (
       <EuiCodeBlock language="sql" fontSize="s" paddingSize="s">
         {query}

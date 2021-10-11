@@ -980,7 +980,7 @@ export function overridePackageInputs(
         ({ name }) => name === input.policy_template
       );
 
-      // Ignore any policy template removes in the new package version
+      // Ignore any policy templates removed in the new package version
       if (!policyTemplate) {
         return false;
       }
@@ -996,21 +996,26 @@ export function overridePackageInputs(
   ];
 
   for (const override of inputsOverride) {
-    let originalInput = inputs.find((i) => i.type === override.type);
+    let originalInput = inputs.find(
+      (i) => i.type === override.type && i.policy_template === override.policy_template
+    );
 
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically
-    // occurs when inputs or package policies are added/removed between versions.
+    // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
       inputs.push(override as NewPackagePolicyInput);
       continue;
     }
 
-    if (typeof override.enabled !== 'undefined') {
+    // For flags like this, we only want to override the original value if it was set
+    // as `undefined` in the original object. An explicit true/false value should be
+    // persisted from the original object to the result after the override process is complete.
+    if (originalInput.enabled === undefined && override.enabled !== undefined) {
       originalInput.enabled = override.enabled;
     }
 
-    if (typeof override.keep_enabled !== 'undefined') {
+    if (originalInput.keep_enabled === undefined && override.keep_enabled !== undefined) {
       originalInput.keep_enabled = override.keep_enabled;
     }
 
@@ -1029,7 +1034,7 @@ export function overridePackageInputs(
           continue;
         }
 
-        if (typeof stream.enabled !== 'undefined' && originalStream) {
+        if (originalStream?.enabled === undefined) {
           originalStream.enabled = stream.enabled;
         }
 
@@ -1092,7 +1097,14 @@ function deepMergeVars(original: any, override: any): any {
 
   for (const { name, ...overrideVal } of overrideVars) {
     const originalVar = original.vars[name];
+
     result.vars[name] = { ...originalVar, ...overrideVal };
+
+    // Ensure that any value from the original object is persisted on the newly merged resulting object,
+    // even if we merge other data about the given variable
+    if (originalVar?.value) {
+      result.vars[name].value = originalVar.value;
+    }
   }
 
   return result;

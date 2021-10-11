@@ -179,7 +179,7 @@ export const isEventLogServiceEnabledRoute = (
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       logger.info(`test if event logger is enabled`);
-      return res.ok({ body: { isEnabled: eventLogService.isEnabled() } });
+      return res.ok({ body: { isEnabled: true } });
     }
   );
 };

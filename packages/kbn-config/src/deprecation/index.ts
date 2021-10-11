@@ -9,6 +9,7 @@
 export type {
   ConfigDeprecation,
   ConfigDeprecationCommand,
+  ConfigDeprecationContext,
   ConfigDeprecationWithContext,
   ConfigDeprecationFactory,
   AddConfigDeprecation,

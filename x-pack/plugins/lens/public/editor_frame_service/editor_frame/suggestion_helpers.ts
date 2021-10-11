@@ -25,7 +25,6 @@ import { LayerType, layerTypes } from '../../../common';
 import { getLayerType } from './config_panel/add_layer';
 import {
   LensDispatch,
-  selectSuggestion,
   switchVisualization,
   DatasourceStates,
   VisualizationState,
@@ -116,6 +115,7 @@ export function getSuggestions({
     } else {
       dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
         datasourceState,
+        (layerId) => isLayerSupportedByVisualization(layerId, [layerTypes.DATA]),
         activeData
       );
     }
@@ -164,24 +164,21 @@ export function getVisualizeFieldSuggestions({
   datasourceMap,
   datasourceStates,
   visualizationMap,
-  activeVisualization,
-  visualizationState,
   visualizeTriggerFieldContext,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   visualizationMap: VisualizationMap;
-  activeVisualization: Visualization;
   subVisualizationId?: string;
-  visualizationState: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
 }): Suggestion | undefined {
+  const activeVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
   const suggestions = getSuggestions({
     datasourceMap,
     datasourceStates,
     visualizationMap,
     activeVisualization,
-    visualizationState,
+    visualizationState: undefined,
     visualizeTriggerFieldContext,
   });
   if (suggestions.length) {
@@ -230,19 +227,18 @@ export function switchToSuggestion(
     Suggestion,
     'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId'
   >,
-  type: 'SWITCH_VISUALIZATION' | 'SELECT_SUGGESTION' = 'SELECT_SUGGESTION'
+  clearStagedPreview?: boolean
 ) {
-  const pickedSuggestion = {
-    newVisualizationId: suggestion.visualizationId,
-    initialState: suggestion.visualizationState,
-    datasourceState: suggestion.datasourceState,
-    datasourceId: suggestion.datasourceId!,
-  };
-
   dispatchLens(
-    type === 'SELECT_SUGGESTION'
-      ? selectSuggestion(pickedSuggestion)
-      : switchVisualization(pickedSuggestion)
+    switchVisualization({
+      suggestion: {
+        newVisualizationId: suggestion.visualizationId,
+        visualizationState: suggestion.visualizationState,
+        datasourceState: suggestion.datasourceState,
+        datasourceId: suggestion.datasourceId!,
+      },
+      clearStagedPreview,
+    })
   );
 }
 

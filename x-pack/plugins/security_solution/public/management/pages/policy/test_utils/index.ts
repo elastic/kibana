@@ -6,13 +6,13 @@
  */
 
 import {
-  GetTrustedListAppsResponse,
+  GetTrustedAppsListResponse,
   PostTrustedAppCreateResponse,
 } from '../../../../../common/endpoint/types';
 
 import { createSampleTrustedApps, createSampleTrustedApp } from '../../trusted_apps/test_utils';
 
-export const getMockListResponse: () => GetTrustedListAppsResponse = () => ({
+export const getMockListResponse: () => GetTrustedAppsListResponse = () => ({
   data: createSampleTrustedApps({}),
   per_page: 100,
   page: 1,
