@@ -110,7 +110,33 @@ export function FailedTransactionsCorrelations({
           {
             width: '100px',
             field: 'pValue',
-            name: 'p-value',
+            name: (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.correlations.failedTransactions.correlationsTable.pValueDescription',
+                  {
+                    defaultMessage:
+                      'The chance of seeing at least this count of the field name & field value for failed transactions given its prevalence in successful transactions.',
+                  }
+                )}
+              >
+                <>
+                  {i18n.translate(
+                    'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
+                    {
+                      defaultMessage: 'p-value',
+                    }
+                  )}
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="questionInCircle"
+                    className="eui-alignTop"
+                  />
+                </>
+              </EuiToolTip>
+            ),
+
             render: (pValue: number) => pValue.toPrecision(3),
             sortable: true,
           },
