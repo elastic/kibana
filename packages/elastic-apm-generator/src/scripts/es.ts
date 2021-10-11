@@ -14,6 +14,8 @@ import yargs from 'yargs/yargs';
 import { toElasticsearchOutput } from '..';
 import { simpleTrace } from './examples/01_simple_trace';
 import { distributedTrace } from './examples/02_distributed_trace';
+import { messaging } from './examples/03_messaging';
+import { opbeansLoadBalancer } from './examples/04_opbeans_load_balancer';
 
 yargs(process.argv.slice(2))
   .command(
@@ -23,7 +25,7 @@ yargs(process.argv.slice(2))
       return y
         .positional('scenario', {
           describe: 'scenario to run',
-          choices: ['simple-trace'],
+          choices: ['simple-trace', 'distributed-trace', 'messaging', 'opbeans-lb'],
           demandOption: true,
         })
         .option('target', {
@@ -57,6 +59,14 @@ yargs(process.argv.slice(2))
 
         case 'distributed-trace':
           events = distributedTrace(from, to);
+          break;
+
+        case 'messaging':
+          events = messaging(from, to);
+          break;
+
+        case 'opbeans-lb':
+          events = opbeansLoadBalancer(from, to);
           break;
 
         default:

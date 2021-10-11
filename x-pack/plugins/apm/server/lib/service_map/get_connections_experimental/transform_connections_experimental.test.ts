@@ -43,8 +43,8 @@ describe('transformConnectionsExperimental', () => {
               metrics: {
                 'agent.name': 'go',
                 'span.destination.service.resource': 'http://service-b',
-                'span.type': null,
-                'span.subtype': null,
+                'span.type': 'external',
+                'span.subtype': 'http',
                 'service.environment': 'production',
               },
             },
@@ -83,8 +83,8 @@ describe('transformConnectionsExperimental', () => {
               metrics: {
                 'agent.name': 'java',
                 'span.destination.service.resource': 'http://service-c',
-                'span.type': null,
-                'span.subtype': null,
+                'span.type': 'external',
+                'span.subtype': 'http',
                 'service.environment': 'production',
               },
             },
@@ -168,34 +168,19 @@ describe('transformConnectionsExperimental', () => {
       },
     ];
 
-    it('returns a connection between a + b', () => {
+    it('returns a connection between a + b and b + c', () => {
       expect(
         transformConnectionsExperimental({
           spanConnectionsResponse,
           transactionConnectionsResponse,
           start: 0,
           end: 0,
-        }).find(
-          (connection) =>
-            connection.source.id === 'Service A' &&
-            connection.destination.id === 'Service B'
-        )
-      ).toBeTruthy();
-    });
-
-    it('returns a connection between b + c', () => {
-      expect(
-        transformConnectionsExperimental({
-          spanConnectionsResponse,
-          transactionConnectionsResponse,
-          start: 0,
-          end: 0,
-        }).find(
-          (connection) =>
-            connection.source.id === 'Service B' &&
-            connection.destination.id === 'Service C'
-        )
-      ).toBeTruthy();
+        })
+          .map((connection) =>
+            [connection.source.id, connection.destination.id].join(' => ')
+          )
+          .sort()
+      ).toEqual(['Service A => Service B', 'Service B => Service C']);
     });
   });
 
@@ -232,7 +217,7 @@ describe('transformConnectionsExperimental', () => {
       return {
         doc_count: stats.throughputPerMinute,
         latency: {
-          value: stats.averageLatency,
+          value: stats.averageLatency * stats.throughputPerMinute,
         },
         count: {
           value: stats.throughputPerMinute,
@@ -483,6 +468,363 @@ describe('transformConnectionsExperimental', () => {
         // @ts-expect-error
         expect(expectedStats[id]).toEqual(connection.stats);
       });
+    });
+  });
+
+  describe('scenario - opbeans load balancer', () => {
+    const spanConnectionsResponse = [
+      {
+        key: {
+          serviceName: 'opbeans-go',
+          upstreamHash: null,
+          downstreamHash: 'ff6213bab82c54adae3a5cb764b223c4',
+        },
+        doc_count: 16,
+        latency: {
+          value: 5.43e8,
+        },
+        count: {
+          value: 543.0,
+        },
+        failed: {
+          doc_count: 0,
+          count: {
+            value: 0.0,
+          },
+        },
+        successful: {
+          doc_count: 16,
+          count: {
+            value: 543.0,
+          },
+        },
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'go',
+                'span.destination.service.resource': 'opbeans:3000',
+                'span.type': 'external',
+                'span.subtype': 'http',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: {
+          serviceName: 'opbeans-java',
+          upstreamHash: null,
+          downstreamHash: 'ff6213bab82c54adae3a5cb764b223c4',
+        },
+        doc_count: 16,
+        latency: {
+          value: 5.43e8,
+        },
+        count: {
+          value: 543.0,
+        },
+        failed: {
+          doc_count: 0,
+          count: {
+            value: 0.0,
+          },
+        },
+        successful: {
+          doc_count: 16,
+          count: {
+            value: 543.0,
+          },
+        },
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'java',
+                'span.destination.service.resource': 'opbeans:3000',
+                'span.type': 'external',
+                'span.subtype': 'http',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: {
+          serviceName: 'opbeans-nodejs',
+          upstreamHash: null,
+          downstreamHash: 'ff6213bab82c54adae3a5cb764b223c4',
+        },
+        doc_count: 16,
+        latency: {
+          value: 5.43e8,
+        },
+        count: {
+          value: 543.0,
+        },
+        failed: {
+          doc_count: 0,
+          count: {
+            value: 0.0,
+          },
+        },
+        successful: {
+          doc_count: 16,
+          count: {
+            value: 543.0,
+          },
+        },
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'nodejs',
+                'span.destination.service.resource': 'opbeans:3000',
+                'span.type': 'external',
+                'span.subtype': 'http',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: {
+          serviceName: 'opbeans-ruby',
+          upstreamHash: null,
+          downstreamHash: 'ff6213bab82c54adae3a5cb764b223c4',
+        },
+        doc_count: 16,
+        latency: {
+          value: 5.43e8,
+        },
+        count: {
+          value: 543.0,
+        },
+        failed: {
+          doc_count: 0,
+          count: {
+            value: 0.0,
+          },
+        },
+        successful: {
+          doc_count: 16,
+          count: {
+            value: 543.0,
+          },
+        },
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'ruby',
+                'span.destination.service.resource': 'opbeans:3000',
+                'span.type': 'external',
+                'span.subtype': 'http',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+    ];
+    const transactionConnectionsResponse = [
+      {
+        key: {
+          serviceName: 'apm-server',
+          upstreamHash: null,
+        },
+        doc_count: 12,
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:34:33.646Z'],
+              metrics: {
+                'agent.name': 'go',
+                'service.environment': null,
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: {
+          serviceName: 'opbeans-go',
+          upstreamHash: null,
+        },
+        doc_count: 543,
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'go',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: {
+          serviceName: 'opbeans-go',
+          upstreamHash: 'ff6213bab82c54adae3a5cb764b223c4',
+        },
+        doc_count: 543,
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'go',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: {
+          serviceName: 'opbeans-java',
+          upstreamHash: null,
+        },
+        doc_count: 543,
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'java',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: {
+          serviceName: 'opbeans-java',
+          upstreamHash: 'ff6213bab82c54adae3a5cb764b223c4',
+        },
+        doc_count: 543,
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'java',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: {
+          serviceName: 'opbeans-nodejs',
+          upstreamHash: null,
+        },
+        doc_count: 543,
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'nodejs',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: {
+          serviceName: 'opbeans-nodejs',
+          upstreamHash: 'ff6213bab82c54adae3a5cb764b223c4',
+        },
+        doc_count: 543,
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'nodejs',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: {
+          serviceName: 'opbeans-ruby',
+          upstreamHash: null,
+        },
+        doc_count: 543,
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'ruby',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: {
+          serviceName: 'opbeans-ruby',
+          upstreamHash: 'ff6213bab82c54adae3a5cb764b223c4',
+        },
+        doc_count: 543,
+        latest: {
+          top: [
+            {
+              sort: ['2021-10-11T13:31:00.000Z'],
+              metrics: {
+                'agent.name': 'ruby',
+                'service.environment': 'production',
+              },
+            },
+          ],
+        },
+      },
+    ];
+
+    it('reports external connections', () => {
+      const connections = transformConnectionsExperimental({
+        spanConnectionsResponse,
+        transactionConnectionsResponse,
+        start: 0,
+        end: 0,
+      });
+
+      expect(
+        connections
+          .map((connection) =>
+            [connection.source.id, connection.destination.id].join(' => ')
+          )
+          .sort()
+      ).toEqual(
+        [
+          'opbeans-go => >opbeans:3000',
+          'opbeans-java => >opbeans:3000',
+          'opbeans-ruby => >opbeans:3000',
+          'opbeans-nodejs => >opbeans:3000',
+          '>opbeans:3000 => opbeans-go',
+          '>opbeans:3000 => opbeans-java',
+          '>opbeans:3000 => opbeans-nodejs',
+          '>opbeans:3000 => opbeans-ruby',
+        ].sort()
+      );
     });
   });
 });

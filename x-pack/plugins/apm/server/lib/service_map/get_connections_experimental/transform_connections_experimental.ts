@@ -104,10 +104,18 @@ export function transformConnectionsExperimental({
   );
 
   transactionConnections.forEach((connection) => {
-    const upstreamHash = connection['transaction.upstream.hash'];
+    const upstreamHash = String(connection['transaction.upstream.hash']);
 
-    if (upstreamHash && !connectionsByUpstreamHash[upstreamHash]) {
-      connectionsByUpstreamHash[upstreamHash] = [connection];
+    const connectionsForUpstreamHash =
+      connectionsByUpstreamHash[upstreamHash] || [];
+
+    if (
+      !connectionsForUpstreamHash.some((c) => {
+        return c['service.name'] === connection['service.name'];
+      })
+    ) {
+      connectionsForUpstreamHash.push(connection);
+      connectionsByUpstreamHash[upstreamHash] = connectionsForUpstreamHash;
     }
   });
 
@@ -197,7 +205,11 @@ export function transformConnectionsExperimental({
     while (edge && edge.caller['span.destination.service.hash']) {
       let source = getConnectionNode(edge.caller, 'service');
       let stats: ConnectionStats | undefined = edge.stats;
-      if (!edge.callees.length || edge.callees.length > 1) {
+      if (
+        !edge.callees.length ||
+        edge.callees.length > 1 ||
+        edge.caller['span.type'] !== 'external'
+      ) {
         const destination = getConnectionNode(edge.caller, 'external');
         connectionsForServiceMap.push({
           source,
