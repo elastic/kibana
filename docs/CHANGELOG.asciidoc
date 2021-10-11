@@ -97,7 +97,6 @@ Dashboard::
 * Read App State from URL on Soft Refresh {kibana-pull}109354[#109354]
 Discover::
 * Fixes opening the same saved search {kibana-pull}111127[#111127]
-* Fixes export that does not contain relative time filter {kibana-pull}110459[#110459]
 * Fixes cleaning error state in 7.14 {kibana-pull}110036[#110036]
 * Fixes performance regression in sidebar {kibana-pull}109999[#109999]
 Elastic Security::
