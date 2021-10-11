@@ -77,7 +77,7 @@ describe('<BrowserAdvancedFields />', () => {
 
     expect(
       getByText(
-        /Use this option to apply these monitor settings to a subset of the tests in your suite./
+        /Use these options to apply these monitor settings to a subset of the tests in your suite./
       )
     ).toBeInTheDocument();
   });
