@@ -74,6 +74,10 @@ export const getHttp = (basepath = BASE_PATH) => {
         return await import('./fixtures/integration.okta');
       }
 
+      if (path.startsWith('/api/fleet/check-permissions')) {
+        return { success: true };
+      }
+
       return {};
     }) as HttpHandler,
   } as unknown as HttpStart;

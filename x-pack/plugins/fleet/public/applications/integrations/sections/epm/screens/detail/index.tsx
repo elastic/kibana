@@ -8,10 +8,12 @@ import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import type { EuiToolTipProps } from '@elastic/eui';
 import {
   EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -19,6 +21,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -62,6 +65,7 @@ import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
+
 import './index.scss';
 
 export interface DetailParams {
@@ -98,6 +102,9 @@ export function Detail() {
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
   const permissionCheck = usePermissionCheck();
+  const missingSecurityConfiguration =
+    !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
+  const userCanInstallIntegrations = hasWriteCapabilities && permissionCheck.data?.success;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
@@ -331,10 +338,9 @@ export function Detail() {
               { isDivider: true },
               {
                 content: (
-                  // eslint-disable-next-line @elastic/eui/href-or-on-click
-                  <EuiButton
+                  <EuiButtonWithTooltip
                     fill
-                    isDisabled={!hasWriteCapabilities}
+                    isDisabled={!userCanInstallIntegrations}
                     iconType="plusInCircle"
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
@@ -345,6 +351,23 @@ export function Detail() {
                     })}
                     onClick={handleAddIntegrationPolicyClick}
                     data-test-subj="addIntegrationPolicyButton"
+                    tooltip={
+                      !userCanInstallIntegrations
+                        ? {
+                            content: missingSecurityConfiguration ? (
+                              <FormattedMessage
+                                id="xpack.fleetp.epm.addPackagePolicyButtonSecurityRequiredTooltip"
+                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the minimum required privileges. Contact your administrator."
+                              />
+                            ) : (
+                              <FormattedMessage
+                                id="xpack.fleetp.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
+                                defaultMessage="To add Elastic Agent integrations, you must have the minimum required privileges. Contact your adminstrator."
+                              />
+                            ),
+                          }
+                        : undefined
+                    }
                   >
                     <FormattedMessage
                       id="xpack.fleet.epm.addPackagePolicyButtonText"
@@ -353,7 +376,7 @@ export function Detail() {
                         packageName: integrationInfo?.title || packageInfo.title,
                       }}
                     />
-                  </EuiButton>
+                  </EuiButtonWithTooltip>
                 ),
               },
             ].map((item, index) => (
@@ -374,16 +397,17 @@ export function Detail() {
         </>
       ) : undefined,
     [
-      getHref,
-      handleAddIntegrationPolicyClick,
-      hasWriteCapabilities,
-      integration,
-      integrationInfo,
       packageInfo,
-      packageInstallStatus,
-      pkgkey,
       updateAvailable,
+      packageInstallStatus,
+      userCanInstallIntegrations,
+      getHref,
+      pkgkey,
+      integration,
       agentPolicyIdFromContext,
+      handleAddIntegrationPolicyClick,
+      missingSecurityConfiguration,
+      integrationInfo?.title,
     ]
   );
 
@@ -411,11 +435,7 @@ export function Detail() {
       },
     ];
 
-    if (
-      hasWriteCapabilities &&
-      permissionCheck.data?.success &&
-      packageInstallStatus === InstallStatus.installed
-    ) {
+    if (userCanInstallIntegrations && packageInstallStatus === InstallStatus.installed) {
       tabs.push({
         id: 'policies',
         name: (
@@ -451,7 +471,7 @@ export function Detail() {
       });
     }
 
-    if (hasWriteCapabilities && permissionCheck.data?.success) {
+    if (userCanInstallIntegrations) {
       tabs.push({
         id: 'settings',
         name: (
@@ -493,18 +513,32 @@ export function Detail() {
     panel,
     getHref,
     integration,
-    hasWriteCapabilities,
-    permissionCheck.data?.success,
+    userCanInstallIntegrations,
     packageInstallStatus,
     CustomAssets,
     showCustomTab,
   ]);
+
+  const securityCallout = missingSecurityConfiguration ? (
+    <>
+      <EuiCallOut
+        color="warning"
+        iconType="lock"
+        title="Security needs to be enabled in order to add Elastic Agent integrations"
+      >
+        In order to fully use Fleet, you must enable Elasticsearch and Kibana security features.
+        Follow the <a href="/app/fleet">steps in this guide</a> to enable security.
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
+  ) : undefined;
 
   return (
     <WithHeaderLayout
       leftColumn={headerLeftContent}
       rightColumn={headerRightContent}
       rightColumnGrow={false}
+      topContent={securityCallout}
       tabs={headerTabs}
       tabsClassName="fleet__epm__shiftNavTabs"
     >
@@ -546,3 +580,16 @@ export function Detail() {
     </WithHeaderLayout>
   );
 }
+
+type EuiButtonPropsFull = Parameters<typeof EuiButton>[0];
+
+const EuiButtonWithTooltip: React.FC<EuiButtonPropsFull & { tooltip?: Partial<EuiToolTipProps> }> =
+  ({ tooltip: tooltipProps, ...buttonProps }) => {
+    return tooltipProps ? (
+      <EuiToolTip {...tooltipProps}>
+        <EuiButton {...buttonProps} />
+      </EuiToolTip>
+    ) : (
+      <EuiButton {...buttonProps} />
+    );
+  };
