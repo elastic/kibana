@@ -38,7 +38,6 @@ RUNTIME_DEPS = [
   "//packages/kbn-monaco",
   "//packages/kbn-std",
   "//packages/kbn-ui-shared-deps-npm",
-  "//packages/kbn-utils",
 ]
 
 TYPES_DEPS = [
@@ -50,7 +49,6 @@ TYPES_DEPS = [
   "//packages/kbn-monaco",
   "//packages/kbn-std",
   "//packages/kbn-ui-shared-deps-npm",
-  "//packages/kbn-utils",
   "@npm//@elastic/eui",
   "@npm//webpack",
 ]
