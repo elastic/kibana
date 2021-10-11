@@ -9,6 +9,7 @@ import { Pagination } from '@elastic/eui';
 import {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createSelector } from 'reselect';
 import { Immutable } from '../../../../../common/endpoint/types';
@@ -108,3 +109,7 @@ export const getDeleteError: HostIsolationExceptionsSelector<ServerApiError | un
       return status.error;
     }
   });
+
+export const getExceptionToEdit: HostIsolationExceptionsSelector<
+  UpdateExceptionListItemSchema | undefined
+> = (state) => (state.form.entry ? (state.form.entry as UpdateExceptionListItemSchema) : undefined);

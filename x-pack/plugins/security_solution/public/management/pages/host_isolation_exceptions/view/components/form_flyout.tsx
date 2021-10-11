@@ -33,7 +33,7 @@ import {
   isLoadingResourceState,
 } from '../../../../state/async_resource_state';
 import { HostIsolationExceptionsPageAction } from '../../store/action';
-import { getCurrentLocation } from '../../store/selector';
+import { getCurrentLocation, getExceptionToEdit } from '../../store/selector';
 import { createEmptyHostIsolationException } from '../../utils';
 import {
   useHostIsolationExceptionsNavigateCallback,
@@ -57,7 +57,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
     isFailedResourceState(state.form.status)
   );
 
-  const exceptionToEdit = useHostIsolationExceptionsSelector((state) => state.form.entry);
+  const exceptionToEdit = useHostIsolationExceptionsSelector(getExceptionToEdit);
 
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
@@ -83,7 +83,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
         return;
       }
       // load the exception to edit
-      if (!exceptionToEdit) {
+      if (!exceptionToEdit || location.id !== exceptionToEdit.id) {
         dispatch({
           type: 'hostIsolationExceptionsMarkToEdit',
           payload: { id: location.id! },
