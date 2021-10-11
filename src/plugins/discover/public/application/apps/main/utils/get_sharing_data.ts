@@ -54,15 +54,13 @@ export async function getSharingData(
   }
 
   return {
-    getSearchSource: (absoluteTime: boolean): SearchSourceFields => {
-      if (absoluteTime) {
-        searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(index));
-      } else {
-        searchSource.setField(
-          'filter',
-          data.query.timefilter.timefilter.createRelativeFilter(index)
-        );
-      }
+    getSearchSource: (absoluteTime?: boolean): SearchSourceFields => {
+      const filter = absoluteTime
+        ? data.query.timefilter.timefilter.createFilter(index)
+        : data.query.timefilter.timefilter.createRelativeFilter(index);
+
+      searchSource.setField('filter', filter);
+
       return searchSource.getSerializedFields(true);
     },
     columns,
