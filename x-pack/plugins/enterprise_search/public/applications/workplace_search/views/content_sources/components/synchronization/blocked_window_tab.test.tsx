@@ -24,9 +24,11 @@ describe('BlockedWindows', () => {
   const mockActions = {
     addBlockedWindow,
   };
+  const contentSource = { ...fullContentSources[0] };
+  contentSource.indexing.schedule.blockedWindows = [blockedWindow] as any;
   const mockValues = {
-    blockedWindows: [blockedWindow],
-    contentSource: fullContentSources[0],
+    contentSource,
+    schedule: contentSource.indexing.schedule,
   };
 
   beforeEach(() => {
@@ -41,7 +43,7 @@ describe('BlockedWindows', () => {
   });
 
   it('renders empty state', () => {
-    setMockValues({ blockedWindows: [] });
+    setMockValues({ schedule: { blockedWindows: [] } });
     const wrapper = shallow(<BlockedWindows />);
 
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);

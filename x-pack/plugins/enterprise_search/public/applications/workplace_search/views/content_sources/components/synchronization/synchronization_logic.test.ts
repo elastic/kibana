@@ -45,7 +45,6 @@ describe('SynchronizationLogic', () => {
     hasUnsavedFrequencyChanges: false,
     contentExtractionChecked: true,
     thumbnailsChecked: true,
-    blockedWindows: [],
     schedule: contentSource.indexing.schedule,
     cachedSchedule: contentSource.indexing.schedule,
   };
@@ -69,7 +68,7 @@ describe('SynchronizationLogic', () => {
     it('addBlockedWindow', () => {
       SynchronizationLogic.actions.addBlockedWindow();
 
-      expect(SynchronizationLogic.values.blockedWindows).toEqual([emptyBlockedWindow]);
+      expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([emptyBlockedWindow]);
     });
 
     it('setThumbnailsChecked', () => {

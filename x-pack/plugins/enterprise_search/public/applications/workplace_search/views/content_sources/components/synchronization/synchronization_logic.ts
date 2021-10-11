@@ -76,7 +76,6 @@ interface SynchronizationValues {
   hasUnsavedObjectsAndAssetsChanges: boolean;
   thumbnailsChecked: boolean;
   contentExtractionChecked: boolean;
-  blockedWindows: BlockedWindow[];
   cachedSchedule: IndexingSchedule;
   schedule: IndexingSchedule;
 }
@@ -115,12 +114,6 @@ export const SynchronizationLogic = kea<
       false,
       {
         setNavigatingBetweenTabs: (_, navigatingBetweenTabs) => navigatingBetweenTabs,
-      },
-    ],
-    blockedWindows: [
-      props.contentSource.indexing.schedule.blockedWindows || [],
-      {
-        addBlockedWindow: (state, _) => [...state, emptyBlockedWindow],
       },
     ],
     thumbnailsChecked: [
@@ -174,6 +167,13 @@ export const SynchronizationLogic = kea<
             .add(value, unit)
             .toISOString();
 
+          return schedule;
+        },
+        addBlockedWindow: (state, _) => {
+          const schedule = cloneDeep(state);
+          const blockedWindows = schedule.blockedWindows || [];
+          blockedWindows.push(emptyBlockedWindow);
+          schedule.blockedWindows = blockedWindows;
           return schedule;
         },
       },
