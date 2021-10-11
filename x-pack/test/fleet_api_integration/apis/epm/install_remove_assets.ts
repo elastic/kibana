@@ -414,6 +414,7 @@ const expectAssetsInstalled = ({
       id: 'sample_dashboard',
     });
     expect(resDashboard.id).equal('sample_dashboard');
+    expect(resDashboard.references.map((ref: any) => ref.id).includes('sample_tag')).equal(true);
     const resDashboard2 = await kibanaServer.savedObjects.get({
       type: 'dashboard',
       id: 'sample_dashboard2',
@@ -444,6 +445,11 @@ const expectAssetsInstalled = ({
       id: 'sample_security_rule',
     });
     expect(resSecurityRule.id).equal('sample_security_rule');
+    const resTag = await kibanaServer.savedObjects.get({
+      type: 'tag',
+      id: 'sample_tag',
+    });
+    expect(resTag.id).equal('sample_tag');
     const resIndexPattern = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'test-*',
@@ -520,6 +526,10 @@ const expectAssetsInstalled = ({
         {
           id: 'sample_security_rule',
           type: 'security-rule',
+        },
+        {
+          id: 'sample_tag',
+          type: 'tag',
         },
         {
           id: 'sample_visualization',
@@ -607,6 +617,7 @@ const expectAssetsInstalled = ({
         { id: '4c758d70-ecf1-56b3-b704-6d8374841b34', type: 'epm-packages-assets' },
         { id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58', type: 'epm-packages-assets' },
         { id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2', type: 'epm-packages-assets' },
+        { id: 'b265a5e0-c00b-5eda-ac44-2ddbd36d9ad0', type: 'epm-packages-assets' },
         { id: '53c94591-aa33-591d-8200-cd524c2a0561', type: 'epm-packages-assets' },
         { id: 'b658d2d4-752e-54b8-afc2-4c76155c1466', type: 'epm-packages-assets' },
       ],
@@ -618,6 +629,7 @@ const expectAssetsInstalled = ({
       install_status: 'installed',
       install_started_at: res.attributes.install_started_at,
       install_source: 'registry',
+      keep_policies_up_to_date: false,
     });
   });
 };

@@ -66,6 +66,7 @@ describe('config schema', () => {
           "idleTimeout": "PT1H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -119,6 +120,7 @@ describe('config schema', () => {
           "idleTimeout": "PT1H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -171,6 +173,7 @@ describe('config schema', () => {
           "idleTimeout": "PT1H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
   });
@@ -1738,7 +1741,7 @@ describe('createConfig()', () => {
           },
         },
       })
-    ).toThrow('[audit.appender.2.type]: expected value to equal [legacy-appender]');
+    ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
   });
 
   it('rejects an ignore_filter when no appender is configured', () => {

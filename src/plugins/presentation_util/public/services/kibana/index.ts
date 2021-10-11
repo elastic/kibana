@@ -8,6 +8,7 @@
 
 import { capabilitiesServiceFactory } from './capabilities';
 import { dashboardsServiceFactory } from './dashboards';
+import { overlaysServiceFactory } from './overlays';
 import { labsServiceFactory } from './labs';
 import {
   PluginServiceProviders,
@@ -20,6 +21,7 @@ import { PresentationUtilServices } from '..';
 
 export { capabilitiesServiceFactory } from './capabilities';
 export { dashboardsServiceFactory } from './dashboards';
+export { overlaysServiceFactory } from './overlays';
 export { labsServiceFactory } from './labs';
 
 export const providers: PluginServiceProviders<
@@ -29,6 +31,7 @@ export const providers: PluginServiceProviders<
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
+  overlays: new PluginServiceProvider(overlaysServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<
