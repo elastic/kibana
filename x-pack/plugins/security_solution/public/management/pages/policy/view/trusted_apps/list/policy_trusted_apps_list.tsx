@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiLoadingSpinner, EuiSpacer, EuiText, Pagination } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiText, Pagination, EuiPageTemplate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
@@ -24,6 +24,7 @@ import {
   getTrustedAppsAllPoliciesById,
   isPolicyTrustedAppListLoading,
   policyIdFromParams,
+  doesTrustedAppExistsLoading,
 } from '../../../store/policy_details/selectors';
 import {
   getPolicyDetailPath,
@@ -47,6 +48,7 @@ export const PolicyTrustedAppsList = memo(() => {
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
   const hasTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
   const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
+  const isTrustedAppExistsCheckLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
   const trustedAppItems = usePolicyDetailsSelector(getPolicyTrustedAppList);
   const pagination = usePolicyDetailsSelector(getPolicyTrustedAppsListPagination);
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
@@ -173,21 +175,16 @@ export const PolicyTrustedAppsList = memo(() => {
     setCardExpanded({});
   }, [trustedAppItems]);
 
-  if (hasTrustedApps.loading) {
+  if (hasTrustedApps.loading || isTrustedAppExistsCheckLoading) {
     return (
-      <div>
+      <EuiPageTemplate template="centeredContent">
         <EuiLoadingSpinner
           className="essentialAnimation"
           size="xl"
           data-test-subj={DATA_TEST_SUBJ}
         />
-      </div>
+      </EuiPageTemplate>
     );
-  }
-
-  if (!hasTrustedApps.hasTrustedApps) {
-    // TODO: implement empty state (task #1645)
-    return <div>{'No trusted application'}</div>;
   }
 
   return (

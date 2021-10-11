@@ -362,7 +362,13 @@
         "description": [],
         "signature": [
           "<P extends ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">(locator: ",
           {
             "pluginId": "share",
@@ -1899,7 +1905,13 @@
         "<unknown>; navigate(options: ",
         "RedirectOptions",
         "<",
-        "SerializableRecord",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.SerializableRecord",
+          "text": "SerializableRecord"
+        },
         ">): void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
@@ -1930,7 +1942,13 @@
         "<unknown>; navigate(options: ",
         "RedirectOptions",
         "<",
-        "SerializableRecord",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.SerializableRecord",
+          "text": "SerializableRecord"
+        },
         ">): void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
@@ -2050,7 +2068,13 @@
           "(opts: ",
           "RedirectOptions",
           "<",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">, { lzCompress }: ",
           "FormatSearchParamsOptions",
           ") => URLSearchParams"
@@ -2068,7 +2092,13 @@
             "signature": [
               "RedirectOptions",
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">"
             ],
             "path": "src/plugins/share/common/url_service/locators/redirect/format_search_params.ts",
@@ -2102,7 +2132,13 @@
         "description": [],
         "signature": [
           "<P extends ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">(locator: ",
           {
             "pluginId": "share",
