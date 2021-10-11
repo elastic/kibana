@@ -48,7 +48,7 @@ export class DeprecationsClient {
   public resolveDeprecation = async (
     details: DomainDeprecationDetails
   ): Promise<ResolveDeprecationResponse> => {
-    const { domainId, correctiveActions, omitDeprecationDetails = false } = details;
+    const { domainId, correctiveActions } = details;
     // explicit check required for TS type guard
     if (typeof correctiveActions.api !== 'object') {
       return {
@@ -59,7 +59,7 @@ export class DeprecationsClient {
       };
     }
 
-    const { body, method, path } = correctiveActions.api;
+    const { body, method, path, omitContextFromBody = false } = correctiveActions.api;
     try {
       await this.http.fetch<void>({
         path,
@@ -67,7 +67,7 @@ export class DeprecationsClient {
         asSystemRequest: true,
         body: JSON.stringify({
           ...body,
-          ...(omitDeprecationDetails ? {} : { deprecationDetails: { domainId } }),
+          ...(omitContextFromBody ? {} : { deprecationDetails: { domainId } }),
         }),
       });
       return { status: 'ok' };

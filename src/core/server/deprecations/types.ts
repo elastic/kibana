@@ -69,6 +69,8 @@ export interface DeprecationsDetails {
       body?: {
         [key: string]: any;
       };
+      /* Allow to omit context in the request of the body */
+      omitContextFromBody?: boolean;
     };
     /**
      * Specify a list of manual steps users need to follow to
@@ -78,8 +80,6 @@ export interface DeprecationsDetails {
      */
     manualSteps: string[];
   };
-  /* Allow to omit the attribute "deprecationDetails" in the request of the body */
-  omitDeprecationDetails?: boolean;
 }
 
 /**

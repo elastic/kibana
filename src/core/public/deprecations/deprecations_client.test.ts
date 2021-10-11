@@ -212,10 +212,10 @@ describe('DeprecationsClient', () => {
             body: {
               extra_param: 123,
             },
+            omitContextFromBody: true,
           },
           manualSteps: ['manual-step'],
         },
-        omitDeprecationDetails: true,
       };
       const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
