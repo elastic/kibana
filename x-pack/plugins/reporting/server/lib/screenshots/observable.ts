@@ -17,6 +17,7 @@ import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
+import { getRenderErrors } from './get_render_errors';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
@@ -28,6 +29,7 @@ const DEFAULT_SCREENSHOT_CLIP_WIDTH = 1800;
 interface ScreenSetupData {
   elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   timeRange: string | null;
+  renderErrors: string[];
   error?: Error;
 }
 
@@ -98,19 +100,31 @@ export function getScreenshots$(
               await waitForRenderComplete(captureConfig, driver, layout, logger);
             }),
             mergeMap(async () => {
+              // Read any data-render-error's so that users can be notified when something went wrong
+              return {
+                renderErrors: await getRenderErrors(driver, layout, logger),
+              };
+            }),
+            mergeMap(async ({ renderErrors }) => {
               return await Promise.all([
                 getTimeRange(driver, layout, logger),
                 getElementPositionAndAttributes(driver, layout, logger),
               ]).then(([timeRange, elementsPositionAndAttributes]) => ({
                 elementsPositionAndAttributes,
                 timeRange,
+                renderErrors,
               }));
             }),
             catchError((err) => {
               checkPageIsOpen(driver); // if browser has closed, throw a relevant error about it
 
               logger.error(err);
-              return Rx.of({ elementsPositionAndAttributes: null, timeRange: null, error: err });
+              return Rx.of({
+                elementsPositionAndAttributes: null,
+                timeRange: null,
+                error: err,
+                renderErrors: [],
+              });
             })
           );
 
@@ -123,11 +137,12 @@ export function getScreenshots$(
                 ? data.elementsPositionAndAttributes
                 : getDefaultElementPosition(layout.getViewport(1));
               const screenshots = await getScreenshots(driver, elements, logger);
-              const { timeRange, error: setupError } = data;
+              const { timeRange, error: setupError, renderErrors } = data;
               return {
                 timeRange,
                 screenshots,
                 error: setupError,
+                renderErrors,
                 elementsPositionAndAttributes: elements,
               };
             })
