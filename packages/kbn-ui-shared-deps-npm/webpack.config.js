@@ -144,13 +144,6 @@ module.exports = (_, argv) => {
     optimization: {
       minimize: false,
       noEmitOnErrors: true,
-      splitChunks: {
-        chunks: () => false,
-        cacheGroups: {
-          default: false,
-          defaultVendors: false,
-        },
-      },
     },
 
     performance: {
