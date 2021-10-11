@@ -12,10 +12,11 @@ steps:
 
   - wait
 
-  - command: .buildkite/scripts/steps/build_kibana.sh
-    label: Build Kibana Distribution and Plugins
+  - label: ":factory_worker: Build Kibana Distribution and Plugins"
+    command: .buildkite/scripts/steps/build_kibana.sh
     agents:
       queue: c2-16
+    key: build
 
   - label: ":muscle: Performance Tests"
     command: .buildkite/scripts/steps/functional/performance.sh
