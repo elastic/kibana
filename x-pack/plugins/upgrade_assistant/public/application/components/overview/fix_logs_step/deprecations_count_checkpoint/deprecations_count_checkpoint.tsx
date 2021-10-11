@@ -136,7 +136,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
       <EuiButton
         color={calloutTint}
         onClick={onResetClick}
-        isLoading={isDeletingCache}
+        isLoading={isDeletingCache || isLoading}
         data-test-subj="resetLastStoredDate"
       >
         {i18nTexts.resetCounterButton}
