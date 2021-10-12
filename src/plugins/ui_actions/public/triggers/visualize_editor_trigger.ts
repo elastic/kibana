@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './row_click_trigger';
-export * from './visualize_field_trigger';
-export * from './visualize_editor_trigger';
-export * from './visualize_geo_field_trigger';
-export * from './default_trigger';
+import { Trigger } from '.';
+
+export const VISUALIZE_EDITOR_TRIGGER = 'VISUALIZE_EDITOR_TRIGGER';
+export const visualizeEditorTrigger: Trigger = {
+  id: VISUALIZE_EDITOR_TRIGGER,
+  title: 'Convert legacy visualizations to Lens',
+  description: 'Triggered when user to navigate from a legacy visualization to Lens.',
+};

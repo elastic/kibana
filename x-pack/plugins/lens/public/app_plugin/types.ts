@@ -31,6 +31,8 @@ import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_taggi
 import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
+  VisualizeEditorContext,
+  ACTION_CONVERT_TO_LENS,
 } from '../../../../../src/plugins/ui_actions/public';
 import type {
   EmbeddableEditorState,
@@ -93,8 +95,8 @@ export interface LensTopNavMenuProps {
 }
 
 export interface HistoryLocationState {
-  type: typeof ACTION_VISUALIZE_LENS_FIELD;
-  payload: VisualizeFieldContext;
+  type: typeof ACTION_VISUALIZE_LENS_FIELD | typeof ACTION_CONVERT_TO_LENS;
+  payload: VisualizeFieldContext | VisualizeEditorContext[];
 }
 
 export interface LensAppServices {

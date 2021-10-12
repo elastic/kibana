@@ -25,7 +25,10 @@ import {
   IndexPattern as IndexPatternInstance,
   indexPatterns as indexPatternsUtils,
 } from '../../../../../src/plugins/data/public';
-import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
+import {
+  VisualizeFieldContext,
+  VisualizeEditorContext,
+} from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -212,7 +215,7 @@ export async function loadInitialState({
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
-  initialContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext[];
   options?: InitializationOptions;
 }): Promise<IndexPatternPrivateState> {
   const { isFullEditor } = options ?? {};
@@ -242,8 +245,17 @@ export async function loadInitialState({
   // * start with the indexPattern in context
   // * then fallback to the required ones
   // * then as last resort use a random one from the available list
+  const indexPatternIds = [];
+  if (Array.isArray(initialContext)) {
+    for (let layerIdx = 0; layerIdx < initialContext.length; layerIdx++) {
+      const layerContext = initialContext[layerIdx];
+      indexPatternIds.push(layerContext.indexPatternId);
+    }
+  } else if (initialContext) {
+    indexPatternIds.push(initialContext.indexPatternId);
+  }
   const availableIndexPatternIds = [
-    initialContext?.indexPatternId,
+    ...indexPatternIds,
     ...requiredPatterns,
     indexPatternRefs[0]?.id,
   ].filter((id) => id != null && availableIndexPatterns.has(id));
@@ -261,7 +273,13 @@ export async function loadInitialState({
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: {},
-    patterns: initialContext ? [initialContext.indexPatternId] : requiredPatterns,
+    // patterns: initialContext && indexPatternId ? [indexPatternId] : requiredPatterns,
+    // patterns: Array.isArray(initialContext)
+    //   ? indexPatternIds
+    //   : initialContext && indexPatternId
+    //   ? [indexPatternId]
+    //   : requiredPatterns,
+    patterns: initialContext ? indexPatternIds : requiredPatterns,
   });
   if (state) {
     return {

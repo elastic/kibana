@@ -65,12 +65,14 @@ import {
   UiActionsStart,
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
+  VISUALIZE_EDITOR_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
 import type { VisualizationType } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
+import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
 import type { LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
@@ -343,6 +345,11 @@ export class LensPlugin {
     startDependencies.uiActions.addTriggerAction(
       VISUALIZE_FIELD_TRIGGER,
       visualizeFieldAction(core.application)
+    );
+
+    startDependencies.uiActions.addTriggerAction(
+      VISUALIZE_EDITOR_TRIGGER,
+      visualizeTSVBAction(core.application)
     );
 
     return {

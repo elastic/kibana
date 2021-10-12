@@ -30,6 +30,8 @@ export {
   Trigger,
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
+  VISUALIZE_EDITOR_TRIGGER,
+  visualizeEditorTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeGeoFieldTrigger,
   ROW_CLICK_TRIGGER,
@@ -38,8 +40,10 @@ export {
 } from './triggers';
 export {
   VisualizeFieldContext,
+  VisualizeEditorContext,
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,
+  ACTION_CONVERT_TO_LENS,
 } from './types';
 export { ActionExecutionContext, ActionExecutionMeta } from './actions';

@@ -9,7 +9,12 @@
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { UiActionsService } from './service';
-import { rowClickTrigger, visualizeFieldTrigger, visualizeGeoFieldTrigger } from './triggers';
+import {
+  rowClickTrigger,
+  visualizeFieldTrigger,
+  visualizeGeoFieldTrigger,
+  visualizeEditorTrigger,
+} from './triggers';
 
 export type UiActionsSetup = Pick<
   UiActionsService,
@@ -31,6 +36,7 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   public setup(core: CoreSetup): UiActionsSetup {
     this.service.registerTrigger(rowClickTrigger);
     this.service.registerTrigger(visualizeFieldTrigger);
+    this.service.registerTrigger(visualizeEditorTrigger);
     this.service.registerTrigger(visualizeGeoFieldTrigger);
     return this.service;
   }

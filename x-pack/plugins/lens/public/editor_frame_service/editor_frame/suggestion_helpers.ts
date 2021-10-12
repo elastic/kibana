@@ -9,7 +9,10 @@ import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Datatable } from 'src/plugins/expressions';
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
+import {
+  VisualizeFieldContext,
+  VisualizeEditorContext,
+} from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
   Datasource,
@@ -22,6 +25,8 @@ import {
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
 import { LayerType, layerTypes } from '../../../common';
+import { SeriesType } from '../../../common/expressions';
+
 import { getLayerType } from './config_panel/add_layer';
 import {
   LensDispatch,
@@ -72,7 +77,7 @@ export function getSuggestions({
   subVisualizationId?: string;
   visualizationState: unknown;
   field?: unknown;
-  visualizeTriggerFieldContext?: VisualizeFieldContext;
+  visualizeTriggerFieldContext?: VisualizeFieldContext | VisualizeEditorContext[];
   activeData?: Record<string, Datatable>;
   mainPalette?: PaletteOutput;
 }): Suggestion[] {
@@ -100,12 +105,22 @@ export function getSuggestions({
   const datasourceTableSuggestions = datasources.flatMap(([datasourceId, datasource]) => {
     const datasourceState = datasourceStates[datasourceId].state;
     let dataSourceSuggestions;
+    // context is used to pass the state from location to datasource
     if (visualizeTriggerFieldContext) {
-      dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField(
-        datasourceState,
-        visualizeTriggerFieldContext.indexPatternId,
-        visualizeTriggerFieldContext.fieldName
-      );
+      // used for navigating from VizEditor to Lens
+      if (Array.isArray(visualizeTriggerFieldContext)) {
+        dataSourceSuggestions = datasource.getDatasourceSuggestionsForTSVBCharts(
+          datasourceState,
+          visualizeTriggerFieldContext
+        );
+      } else {
+        // used for navigating from Discover to Lens
+        dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField(
+          datasourceState,
+          visualizeTriggerFieldContext.indexPatternId,
+          visualizeTriggerFieldContext.fieldName
+        );
+      }
     } else if (field) {
       dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(
         datasourceState,
@@ -160,6 +175,15 @@ export function getSuggestions({
     .sort((a, b) => b.score - a.score);
 }
 
+interface StateWithLayers {
+  [prop: string]: unknown;
+  layers: Array<Record<string, unknown>>;
+}
+interface SuggestionMultipleLayers extends Suggestion {
+  datasourceState: StateWithLayers;
+  visualizationState: StateWithLayers;
+}
+
 export function getVisualizeFieldSuggestions({
   datasourceMap,
   datasourceStates,
@@ -170,7 +194,7 @@ export function getVisualizeFieldSuggestions({
   datasourceStates: DatasourceStates;
   visualizationMap: VisualizationMap;
   subVisualizationId?: string;
-  visualizeTriggerFieldContext?: VisualizeFieldContext;
+  visualizeTriggerFieldContext?: VisualizeFieldContext | VisualizeEditorContext[];
 }): Suggestion | undefined {
   const activeVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
   const suggestions = getSuggestions({
@@ -181,6 +205,62 @@ export function getVisualizeFieldSuggestions({
     visualizationState: undefined,
     visualizeTriggerFieldContext,
   });
+
+  if (visualizeTriggerFieldContext && Array.isArray(visualizeTriggerFieldContext)) {
+    const allSuggestions = suggestions.filter(
+      (s) => s.visualizationId === activeVisualization?.id
+    ) as SuggestionMultipleLayers[];
+
+    let suggestion = allSuggestions[0];
+    const initialSuggestionLayers = suggestion.visualizationState.layers;
+    if (activeVisualization.updateConfiguration) {
+      const visState = activeVisualization.updateConfiguration({
+        prevState: suggestion.visualizationState,
+        layerId: initialSuggestionLayers[0].layerId as string,
+        seriesType: visualizeTriggerFieldContext[0].chartType as SeriesType,
+        palette: visualizeTriggerFieldContext[0].palette,
+        color: visualizeTriggerFieldContext[0].color,
+      }) as StateWithLayers;
+
+      suggestion = {
+        ...suggestion,
+        visualizationState: visState,
+      };
+    }
+    const initialLayersModified = suggestion.visualizationState.layers;
+
+    for (let suggestionIdx = 1; suggestionIdx < allSuggestions.length; suggestionIdx++) {
+      const currentSuggestion = allSuggestions[suggestionIdx];
+      const currentSuggestionsLayers = currentSuggestion.visualizationState.layers;
+      if (activeVisualization.updateConfiguration) {
+        const currentState = activeVisualization.updateConfiguration({
+          prevState: currentSuggestion.visualizationState,
+          layerId: currentSuggestionsLayers[0].layerId as string,
+          seriesType: visualizeTriggerFieldContext[suggestionIdx].chartType as SeriesType,
+          palette: visualizeTriggerFieldContext[suggestionIdx].palette,
+          color: visualizeTriggerFieldContext[suggestionIdx].color,
+        }) as StateWithLayers;
+
+        initialLayersModified.push(...currentState.layers);
+      }
+      suggestion = {
+        ...suggestion,
+        datasourceState: {
+          ...suggestion.datasourceState,
+          layers: {
+            ...suggestion.datasourceState.layers,
+            ...currentSuggestion.datasourceState.layers,
+          },
+        },
+        visualizationState: {
+          ...suggestion.visualizationState,
+          layers: initialLayersModified,
+        },
+      };
+    }
+    return suggestion;
+  }
+
   if (suggestions.length) {
     return suggestions.find((s) => s.visualizationId === activeVisualization?.id) || suggestions[0];
   }

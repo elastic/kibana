@@ -28,7 +28,10 @@ import {
   LensByReferenceInput,
   LensByValueInput,
 } from '../embeddable/embeddable';
-import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actions/public';
+import {
+  ACTION_VISUALIZE_LENS_FIELD,
+  ACTION_CONVERT_TO_LENS,
+} from '../../../../../src/plugins/ui_actions/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
@@ -165,8 +168,11 @@ export async function mountApp(
       });
     }
   };
+  // get state from location, used for nanigating from Visualize/Discover to Lens
   const initialContext =
-    historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD
+    historyLocationState &&
+    (historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD ||
+      historyLocationState.type === ACTION_CONVERT_TO_LENS)
       ? historyLocationState.payload
       : undefined;
 

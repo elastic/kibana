@@ -31,6 +31,7 @@ import type {
   UiActionsStart,
   RowClickContext,
   VisualizeFieldContext,
+  VisualizeEditorContext,
 } from '../../../../src/plugins/ui_actions/public';
 
 import {
@@ -39,6 +40,7 @@ import {
   LENS_TOGGLE_ACTION,
 } from './datatable_visualization/components/constants';
 import type { LensInspector } from './lens_inspector_service';
+import { SeriesType } from '../common/expressions';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -170,7 +172,7 @@ export interface Datasource<T = unknown, P = unknown> {
   initialize: (
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext,
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext[],
     options?: InitializationOptions
   ) => Promise<T>;
 
@@ -238,6 +240,10 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T,
     field: unknown,
     filterFn: (layerId: string) => boolean
+  ) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForTSVBCharts: (
+    state: T,
+    context: VisualizeEditorContext[]
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
     state: T,
@@ -490,6 +496,14 @@ interface VisualizationDimensionChangeProps<T> {
   frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
 }
 
+interface VisualizationConfigurationChangeProps<T> {
+  layerId: string;
+  seriesType?: SeriesType;
+  color?: string;
+  prevState: T;
+  palette?: PaletteOutput;
+}
+
 /**
  * Object passed to `getSuggestions` of a visualization.
  * It contains a possible table the current datasource could
@@ -703,6 +717,10 @@ export interface Visualization<T = unknown> {
    */
   removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
 
+  /**
+   * Update the configuration for the visualization. This is used to update the state
+   */
+  updateConfiguration?: (props: VisualizationConfigurationChangeProps<T>) => T;
   /**
    * Additional editor that gets rendered inside the dimension popover.
    * This can be used to configure dimension-specific options

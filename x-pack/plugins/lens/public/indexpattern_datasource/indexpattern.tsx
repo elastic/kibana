@@ -40,6 +40,7 @@ import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
+  getDatasourceSuggestionsForTSVBCharts,
 } from './indexpattern_suggestions';
 
 import { isDraggedField, normalizeOperationDataType } from './utils';
@@ -48,7 +49,10 @@ import { IndexPatternColumn, getErrorMessages, insertNewColumn } from './operati
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
+import {
+  VisualizeFieldContext,
+  VisualizeEditorContext,
+} from '../../../../../src/plugins/ui_actions/public';
 import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
@@ -127,7 +131,7 @@ export function getIndexPatternDatasource({
     async initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
-      initialContext?: VisualizeFieldContext,
+      initialContext?: VisualizeFieldContext | VisualizeEditorContext[],
       options?: InitializationOptions
     ) {
       return loadInitialState({
@@ -437,6 +441,7 @@ export function getIndexPatternDatasource({
     },
     getDatasourceSuggestionsFromCurrentState,
     getDatasourceSuggestionsForVisualizeField,
+    getDatasourceSuggestionsForTSVBCharts,
 
     getErrorMessages(state) {
       if (!state) {

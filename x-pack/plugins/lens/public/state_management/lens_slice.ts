@@ -6,7 +6,7 @@
  */
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
-import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
+import { VisualizeFieldContext, VisualizeEditorContext } from 'src/plugins/ui_actions/public';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
@@ -127,7 +127,7 @@ export const initEmpty = createAction(
     initialContext,
   }: {
     newState: Partial<LensAppState>;
-    initialContext?: VisualizeFieldContext;
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext[];
   }) {
     return { payload: { layerId: generateId(), newState, initialContext } };
   }
@@ -367,7 +367,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }: {
         payload: {
           newState: Partial<LensAppState>;
-          initialContext: VisualizeFieldContext | undefined;
+          initialContext: VisualizeFieldContext | VisualizeEditorContext[] | undefined;
           layerId: string;
         };
       }

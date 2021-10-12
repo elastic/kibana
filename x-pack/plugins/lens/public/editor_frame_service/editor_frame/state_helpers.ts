@@ -20,7 +20,10 @@ import {
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
-import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
+import {
+  VisualizeFieldContext,
+  VisualizeEditorContext,
+} from '../../../../../../src/plugins/ui_actions/public';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { ErrorMessage } from '../types';
 import {
@@ -34,7 +37,7 @@ export async function initializeDatasources(
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates,
   references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext,
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext[],
   options?: InitializationOptions
 ) {
   const states: DatasourceStates = {};

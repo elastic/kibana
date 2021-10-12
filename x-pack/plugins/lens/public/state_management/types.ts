@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
+import { VisualizeFieldContext, VisualizeEditorContext } from 'src/plugins/ui_actions/public';
 import { EmbeddableEditorState } from 'src/plugins/embeddable/public';
 import { Filter, Query, SavedQuery } from '../../../../../src/plugins/data/public';
 import { Document } from '../persistence';
@@ -59,6 +59,6 @@ export interface LensStoreDeps {
   lensServices: LensAppServices;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-  initialContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext[];
   embeddableEditorIncomingState?: EmbeddableEditorState;
 }

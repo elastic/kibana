@@ -181,7 +181,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
         <div className="tvbEditor" data-test-subj="tvbVisEditor">
           {!this.props.vis.params.use_kibana_indexes && <UseIndexPatternModeCallout />}
           <div className="tvbEditor--hideForReporting">
-            <VisPicker currentVisType={model.type} onChange={this.handleChange} />
+            <VisPicker currentVisType={model.type} onChange={this.handleChange} model={model} />
           </div>
           <VisEditorVisualization
             dirty={this.state.dirty}

@@ -7,6 +7,7 @@
 
 import { flatten, minBy, pick, mapValues, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { VisualizeEditorContext } from '../../../../../src/plugins/ui_actions/public';
 import { generateId } from '../id_generator';
 import type { DatasourceSuggestion, TableChangeType } from '../types';
 import { columnToOperation } from './indexpattern';
@@ -21,6 +22,8 @@ import {
   getExistingColumnGroups,
   isReferenced,
   getReferencedColumnIds,
+  getSplitByTermsLayer,
+  getSplitByFiltersLayer,
 } from './operations';
 import { hasField } from './utils';
 import type {
@@ -30,7 +33,6 @@ import type {
   IndexPatternField,
 } from './types';
 import { documentField } from './document_field';
-
 export type IndexPatternSuggestion = DatasourceSuggestion<IndexPatternPrivateState>;
 
 function buildSuggestion({
@@ -125,6 +127,85 @@ export function getDatasourceSuggestionsForField(
     } else {
       return getExistingLayerSuggestionsForField(state, mostEmptyLayerId, field);
     }
+  }
+}
+
+// Called when the user navigates from TSVB to Lens
+export function getDatasourceSuggestionsForTSVBCharts(
+  state: IndexPatternPrivateState,
+  context: VisualizeEditorContext[]
+): IndexPatternSuggestion[] {
+  const layers = Object.keys(state.layers);
+  const layerIds = layers.filter(
+    (id) => state.layers[id].indexPatternId === context[0].indexPatternId
+  );
+  if (layerIds.length !== 0) return [];
+  return getEmptyLayersSuggestionsForTSVBCharts(state, context);
+}
+
+function getEmptyLayersSuggestionsForTSVBCharts(
+  state: IndexPatternPrivateState,
+  context: VisualizeEditorContext[]
+): IndexPatternSuggestion[] {
+  const suggestions: IndexPatternSuggestion[] = [];
+  for (let layerIdx = 0; layerIdx < context.length; layerIdx++) {
+    const layer = context[layerIdx];
+    const indexPattern = state.indexPatterns[layer.indexPatternId];
+    if (!indexPattern) return [];
+
+    const field = indexPattern.getFieldByName(layer.fieldName) || documentField;
+    const newId = generateId();
+    let newLayer: IndexPatternLayer | undefined;
+    if (indexPattern.timeFieldName) {
+      newLayer = createNewLayerWithMetricAggregatioFromVizEditor(indexPattern, field, layer);
+    }
+    if (newLayer) {
+      suggestions.push(
+        buildSuggestion({
+          state,
+          updatedLayer: newLayer,
+          layerId: newId,
+          changeType: 'initial',
+        })
+      );
+    }
+  }
+  return suggestions;
+}
+
+function createNewLayerWithMetricAggregatioFromVizEditor(
+  indexPattern: IndexPattern,
+  field: IndexPatternField,
+  layer: VisualizeEditorContext
+): IndexPatternLayer | undefined {
+  const { agg, isFullReference, timeFieldName, params, splitMode, splitFilters } = layer;
+
+  const dateField = indexPattern.getFieldByName(timeFieldName!);
+  const splitField = layer.splitField ? indexPattern.getFieldByName(layer.splitField) : null;
+  // generate the layer for split by terms
+  if (splitMode === 'terms' && splitField) {
+    return getSplitByTermsLayer(indexPattern, field, splitField, dateField, layer);
+    // generate the layer for split by filters
+  } else if (splitMode === 'filters' && splitFilters && splitFilters.length) {
+    return getSplitByFiltersLayer(indexPattern, field, dateField, layer);
+  } else {
+    return insertNewColumn({
+      op: 'date_histogram',
+      layer: insertNewColumn({
+        op: agg as OperationType,
+        layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
+        columnId: generateId(),
+        field: !isFullReference ? field : undefined,
+        columnParams: params ?? undefined,
+        incompleteFieldName: isFullReference ? field.name : undefined,
+        indexPattern,
+        visualizationGroups: [],
+      }),
+      columnId: generateId(),
+      field: dateField,
+      indexPattern,
+      visualizationGroups: [],
+    });
   }
 }
 
@@ -354,6 +435,7 @@ export function getDatasourceSuggestionsFromCurrentState(
   filterLayers: (layerId: string) => boolean = () => true
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
   const layers = Object.entries(state.layers || {}).filter(([layerId]) => filterLayers(layerId));
+  // console.dir(state.layers);
 
   if (layers.length > 1) {
     // Return suggestions that reduce the data to each layer individually

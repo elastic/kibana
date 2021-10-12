@@ -10,6 +10,7 @@ import { I18nStart, IUiSettingsClient, CoreStart } from 'src/core/public';
 import { createGetterSetter } from '../../../kibana_utils/public';
 import { ChartsPluginStart } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
+import type { UiActionsStart } from '../../../ui_actions/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -23,3 +24,5 @@ export const [getDataStart, setDataStart] = createGetterSetter<DataPublicPluginS
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 
 export const [getCharts, setCharts] = createGetterSetter<ChartsPluginStart>('ChartsPluginStart');
+
+export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UiActions');

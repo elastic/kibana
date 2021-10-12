@@ -470,6 +470,33 @@ export const getXyVisualization = ({
     };
   },
 
+  updateConfiguration({ prevState, layerId, seriesType, palette, color }) {
+    const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
+    if (!foundLayer) {
+      return prevState;
+    }
+    const newLayer = { ...foundLayer };
+    if (seriesType) {
+      newLayer.seriesType = seriesType;
+    }
+    if (palette) {
+      newLayer.palette = palette;
+    }
+
+    newLayer.yConfig = [
+      {
+        color,
+        forAccessor: newLayer.accessors[0],
+      },
+    ];
+    const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
+
+    return {
+      ...prevState,
+      layers: newLayers,
+    };
+  },
+
   removeDimension({ prevState, layerId, columnId, frame }) {
     const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {

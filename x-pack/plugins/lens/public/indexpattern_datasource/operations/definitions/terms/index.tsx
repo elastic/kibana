@@ -211,7 +211,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
-  buildColumn({ layer, field, indexPattern }) {
+  buildColumn({ layer, field, indexPattern }, params) {
     const existingMetricColumn = Object.entries(layer.columns)
       .filter(([columnId]) => isSortableByColumn(layer, columnId))
       .map(([id]) => id)[0];
@@ -228,7 +228,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
+        size: params ? params.size : previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
         orderBy: existingMetricColumn
           ? {
               type: 'column',
@@ -236,7 +236,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             }
           : { type: 'alphabetical', fallback: true },
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
-        otherBucket: !indexPattern.hasRestrictions,
+        otherBucket: params ? params.otherBucket : !indexPattern.hasRestrictions,
         missingBucket: false,
       },
     };

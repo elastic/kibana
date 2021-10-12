@@ -8,6 +8,7 @@
 import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from 'kibana/public';
 import { Query } from 'src/plugins/data/common';
+import { VisualizeEditorContext } from '../../../../../../src/plugins/ui_actions/public';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
@@ -30,6 +31,7 @@ import type {
   IndexPatternPrivateState,
 } from '../types';
 import { getSortScoreByPriority } from './operations';
+import type { Filter } from './definitions';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
 import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
@@ -51,6 +53,9 @@ interface ColumnChange {
   targetGroup?: string;
   shouldResetLabel?: boolean;
   incompleteParams?: ColumnAdvancedParams;
+  incompleteFieldName?: string;
+  columnParams?: Record<string, unknown>;
+  filterParams?: Filter[];
   initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
 }
 
@@ -184,6 +189,9 @@ export function insertNewColumn({
   targetGroup,
   shouldResetLabel,
   incompleteParams,
+  incompleteFieldName,
+  columnParams,
+  filterParams,
   initialParams,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
@@ -215,7 +223,9 @@ export function insertNewColumn({
     return updateDefaultLabels(
       addOperationFn(
         layer,
-        operationDefinition.buildColumn({ ...baseOptions, layer }),
+        filterParams?.length
+          ? operationDefinition.buildColumn({ ...baseOptions, layer }, { filters: filterParams })
+          : operationDefinition.buildColumn({ ...baseOptions, layer }),
         columnId,
         visualizationGroups,
         targetGroup
@@ -244,9 +254,12 @@ export function insertNewColumn({
       if (validOperations.length === 1) {
         const def = validOperations[0];
 
-        const validFields =
+        let validFields =
           def.input === 'field' ? indexPattern.fields.filter(def.getPossibleOperationForField) : [];
 
+        if (incompleteFieldName) {
+          validFields = validFields.filter((validField) => validField.name === incompleteFieldName);
+        }
         if (def.input === 'none') {
           tempLayer = insertNewColumn({
             layer: tempLayer,
@@ -355,7 +368,7 @@ export function insertNewColumn({
     };
   }
 
-  const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field });
+  const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field }, columnParams);
   const isBucketed = Boolean(possibleOperation.isBucketed);
   const addOperationFn = isBucketed ? addBucket : addMetric;
   return updateDefaultLabels(
@@ -1468,4 +1481,84 @@ export function getManagedColumnsFrom(
     queue.push(...allNodes[nextId]);
   }
   return store.filter(([, column]) => column);
+}
+
+export function getSplitByTermsLayer(
+  indexPattern: IndexPattern,
+  field: IndexPatternField,
+  splitField: IndexPatternField,
+  dateField: IndexPatternField | undefined,
+  layer: VisualizeEditorContext
+): IndexPatternLayer {
+  const { agg, isFullReference, params } = layer;
+  return insertNewColumn({
+    op: 'terms',
+    layer: insertNewColumn({
+      op: 'date_histogram',
+      layer: insertNewColumn({
+        op: agg as OperationType,
+        layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
+        columnId: generateId(),
+        field: !isFullReference ? field : undefined,
+        columnParams: params ?? undefined,
+        incompleteFieldName: isFullReference ? field.name : undefined,
+        indexPattern,
+        visualizationGroups: [],
+      }),
+      columnId: generateId(),
+      field: dateField,
+      indexPattern,
+      visualizationGroups: [],
+    }),
+    columnId: generateId(),
+    field: splitField,
+    columnParams: params ?? undefined,
+    indexPattern,
+    visualizationGroups: [],
+  });
+}
+
+export function getSplitByFiltersLayer(
+  indexPattern: IndexPattern,
+  field: IndexPatternField,
+  dateField: IndexPatternField | undefined,
+  layer: VisualizeEditorContext
+): IndexPatternLayer {
+  const { agg, isFullReference, params, splitFilters } = layer;
+  const filterParams = splitFilters?.map((param) => {
+    const query = param.filter ? param.filter.query : '';
+    const language = param.filter ? param.filter.language : 'kuery';
+    return {
+      input: {
+        query,
+        language,
+      },
+      label: param.label ?? '',
+    };
+  });
+  return insertNewColumn({
+    op: 'filters',
+    layer: insertNewColumn({
+      op: 'date_histogram',
+      layer: insertNewColumn({
+        op: agg as OperationType,
+        layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
+        columnId: generateId(),
+        field: !isFullReference ? field : undefined,
+        columnParams: params ?? undefined,
+        incompleteFieldName: isFullReference ? field.name : undefined,
+        indexPattern,
+        visualizationGroups: [],
+      }),
+      columnId: generateId(),
+      field: dateField,
+      indexPattern,
+      visualizationGroups: [],
+    }),
+    columnId: generateId(),
+    field: undefined,
+    filterParams,
+    indexPattern,
+    visualizationGroups: [],
+  });
 }

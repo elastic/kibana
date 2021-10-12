@@ -78,7 +78,7 @@ export interface Series {
   chart_type: string;
   color: string;
   color_rules?: ColorRules[];
-  fill?: number;
+  fill?: string;
   filter?: Query;
   formatter: string;
   hidden?: boolean;

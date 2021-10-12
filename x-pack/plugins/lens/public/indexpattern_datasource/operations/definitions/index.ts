@@ -96,7 +96,7 @@ export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceF
 export { IncompleteColumn } from './column_types';
 
 export { TermsIndexPatternColumn } from './terms';
-export { FiltersIndexPatternColumn } from './filters';
+export { FiltersIndexPatternColumn, Filter } from './filters';
 export { CardinalityIndexPatternColumn } from './cardinality';
 export { PercentileIndexPatternColumn } from './percentile';
 export {

@@ -21,7 +21,9 @@ import {
   setCoreStart,
   setDataStart,
   setCharts,
+  setUiActions,
 } from './services';
+import type { UiActionsStart } from '../../../ui_actions/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { ChartsPluginStart } from '../../../charts/public';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
@@ -37,6 +39,7 @@ export interface MetricsPluginSetupDependencies {
 export interface MetricsPluginStartDependencies {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
+  uiActions: UiActionsStart;
 }
 
 /** @internal */
@@ -62,11 +65,12 @@ export class MetricsPlugin implements Plugin<void, void> {
     visualizations.createBaseVisualization(metricsVisDefinition);
   }
 
-  public start(core: CoreStart, { data, charts }: MetricsPluginStartDependencies) {
+  public start(core: CoreStart, { data, charts, uiActions }: MetricsPluginStartDependencies) {
     setCharts(charts);
     setI18n(core.i18n);
     setFieldFormats(data.fieldFormats);
     setDataStart(data);
     setCoreStart(core);
+    setUiActions(uiActions);
   }
 }
