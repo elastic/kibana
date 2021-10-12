@@ -227,6 +227,7 @@ export type RegistrySearchResult = Pick<
   | 'internal'
   | 'data_streams'
   | 'policy_templates'
+  | 'categories'
 >;
 
 export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
@@ -376,6 +377,7 @@ export interface IntegrationCardItem {
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   integration: string;
   id: string;
+  categories: string[];
 }
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;

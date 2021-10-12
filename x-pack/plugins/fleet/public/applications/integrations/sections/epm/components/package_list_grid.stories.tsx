@@ -47,6 +47,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
       {
         title: 'Package Two',
@@ -58,6 +59,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
       {
         title: 'Package Three',
@@ -69,6 +71,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
       {
         title: 'Package Four',
@@ -80,6 +83,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
       {
         title: 'Package Five',
@@ -91,6 +95,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
       {
         title: 'Package Six',
@@ -102,6 +107,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
     ]}
     onSearchChange={action('onSearchChange')}

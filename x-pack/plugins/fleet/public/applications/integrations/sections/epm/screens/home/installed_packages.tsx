@@ -23,6 +23,7 @@ import { CategoryFacets } from './category_facets';
 
 import type { CategoryParams } from '.';
 import { getParams, categoryExists, mapToCard } from '.';
+import { ALL_CATEGORY } from './category_facets';
 
 const AnnouncementLink = () => {
   const { docLinks } = useStartServices();
@@ -114,12 +115,15 @@ export const InstalledPackages: React.FC = memo(() => {
   const categories: CategoryFacet[] = useMemo(
     () => [
       {
-        id: '',
+        ...ALL_CATEGORY,
         count: allInstalledPackages.length,
       },
       {
         id: 'updates_available',
         count: updatablePackages.length,
+        title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
+          defaultMessage: 'Updates available',
+        }),
       },
     ],
     [allInstalledPackages.length, updatablePackages.length]
@@ -135,7 +139,6 @@ export const InstalledPackages: React.FC = memo(() => {
 
   const controls = (
     <CategoryFacets
-      showCounts={true}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategoryFacet) => setSelectedCategory(id)}

@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -26,16 +27,28 @@ import type { CustomIntegration } from '../../../../../../../../../../src/plugin
 
 import type { PackageListItem } from '../../../../types';
 
-import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type { IntegrationCardItem } from '../../../../../../../common/types/models';
 
-import { useMergeEprPackagesWithReplacements } from '../../../../../../hooks/use_merge_epr_with_replacements';
+import { useMergeEprPackagesWithReplacements } from '../../../../hooks/use_merge_epr_with_replacements';
 
-import { mergeAndReplaceCategoryCounts } from './util';
-import { CategoryFacets } from './category_facets';
+import { mergeCategoriesAndCount } from './util';
+import { ALL_CATEGORY, CategoryFacets } from './category_facets';
 import type { CategoryFacet } from './category_facets';
 
 import type { CategoryParams } from '.';
 import { getParams, categoryExists, mapToCard } from '.';
+
+function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
+  if (!doesPackageHaveIntegrations(pkg)) {
+    return pkg.categories;
+  }
+
+  const allCategories = pkg.policy_templates?.reduce((accumulator, integration) => {
+    return [...accumulator, ...(integration.categories || [])];
+  }, pkg.categories || []);
+
+  return _.uniq(allCategories);
+}
 
 // Packages can export multiple integrations, aka `policy_templates`
 // In the case where packages ship >1 `policy_templates`, we flatten out the
@@ -43,13 +56,24 @@ import { getParams, categoryExists, mapToCard } from '.';
 // each integration is displayed as its own tile
 const packageListToIntegrationsList = (packages: PackageList): PackageList => {
   return packages.reduce((acc: PackageList, pkg) => {
-    const { policy_templates: policyTemplates = [], ...restOfPackage } = pkg;
+    const {
+      policy_templates: policyTemplates = [],
+      categories: topCategories = [],
+      ...restOfPackage
+    } = pkg;
+
+    const topPackage = {
+      ...restOfPackage,
+      categories: getAllCategoriesFromIntegrations(pkg),
+    };
+
     return [
       ...acc,
-      restOfPackage,
+      topPackage,
       ...(doesPackageHaveIntegrations(pkg)
         ? policyTemplates.map((integration) => {
-            const { name, title, description, icons } = integration;
+            const { name, title, description, icons, categories = [] } = integration;
+            const allCategories = [...topCategories, ...categories];
             return {
               ...restOfPackage,
               id: `${restOfPackage}-${name}`,
@@ -57,6 +81,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
               title,
               description,
               icons: icons || restOfPackage.icons,
+              categories: _.uniq(allCategories),
             };
           })
         : []),
@@ -72,14 +97,11 @@ const title = i18n.translate('xpack.fleet.epmList.allTitle', {
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
 export const AvailablePackages: React.FC = memo(() => {
   useBreadcrumbs('integrations_all');
-
   const { selectedCategory, searchParam } = getParams(
     useParams<CategoryParams>(),
     useLocation().search
   );
-
   const history = useHistory();
-
   const { getHref, getAbsolutePath } = useLink();
 
   function setSelectedCategory(categoryId: string) {
@@ -89,7 +111,6 @@ export const AvailablePackages: React.FC = memo(() => {
     })[1];
     history.push(url);
   }
-
   function setSearchTerm(search: string) {
     // Use .replace so the browser's back button is not tied to single keystroke
     history.replace(
@@ -97,84 +118,51 @@ export const AvailablePackages: React.FC = memo(() => {
     );
   }
 
-  const { data: allCategoryPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages({
+  const { data: eprPackages, isLoading: isLoadingAllPackages } = useGetPackages({
     category: '',
   });
-
-  const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
-    category: selectedCategory,
-  });
-
-  const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories({
-    include_policy_templates: true,
-  });
-
-  const eprPackages = useMemo(
-    () => packageListToIntegrationsList(categoryPackagesRes?.response || []),
-    [categoryPackagesRes]
+  const eprIntegrationList = useMemo(
+    () => packageListToIntegrationsList(eprPackages?.response || []),
+    [eprPackages]
   );
-
-  const allEprPackages = useMemo(
-    () => packageListToIntegrationsList(allCategoryPackagesRes?.response || []),
-    [allCategoryPackagesRes]
-  );
-
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
-
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
     useMergeEprPackagesWithReplacements(
-      eprPackages || [],
-      replacementCustomIntegrations || [],
-      selectedCategory as IntegrationCategory
+      eprIntegrationList || [],
+      replacementCustomIntegrations || []
     );
-
   const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
     useGetAppendCustomIntegrations();
-
-  const filteredAddableIntegrations = appendCustomIntegrations
-    ? appendCustomIntegrations.filter((integration: CustomIntegration) => {
-        if (!selectedCategory) {
-          return true;
-        }
-        return integration.categories.indexOf(selectedCategory as IntegrationCategory) >= 0;
-      })
-    : [];
-
   const eprAndCustomPackages: Array<CustomIntegration | PackageListItem> = [
     ...mergedEprPackages,
-    ...filteredAddableIntegrations,
+    ...(appendCustomIntegrations || []),
   ];
-
-  eprAndCustomPackages.sort((a, b) => {
+  const cards: IntegrationCardItem[] = eprAndCustomPackages.map((item) => {
+    return mapToCard(getAbsolutePath, getHref, item);
+  });
+  cards.sort((a, b) => {
     return a.title.localeCompare(b.title);
   });
 
+  const { data: eprCategories, isLoading: isLoadingCategories } = useGetCategories({
+    include_policy_templates: true,
+  });
   const categories = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] =
-      isLoadingCategories ||
-      isLoadingAppendCustomIntegrations ||
-      !appendCustomIntegrations ||
-      !categoriesRes
+      isLoadingCategories || !eprCategories
         ? []
-        : mergeAndReplaceCategoryCounts(
-            categoriesRes.response as CategoryFacet[],
-            appendCustomIntegrations
+        : mergeCategoriesAndCount(
+            eprCategories.response as Array<{ id: string; title: string; count: number }>,
+            cards
           );
-
     return [
       {
-        id: '',
-        count: (allEprPackages?.length || 0) + (appendCustomIntegrations?.length || 0),
+        ...ALL_CATEGORY,
+        count: cards.length,
       },
       ...(eprAndCustomCategories ? eprAndCustomCategories : []),
     ] as CategoryFacet[];
-  }, [
-    allEprPackages?.length,
-    appendCustomIntegrations,
-    categoriesRes,
-    isLoadingAppendCustomIntegrations,
-    isLoadingCategories,
-  ]);
+  }, [cards, eprCategories, isLoadingCategories]);
 
   if (!isLoadingCategories && !categoryExists(selectedCategory, categories)) {
     history.replace(pagePathGetters.integrations_all({ category: '', searchTerm: searchParam })[1]);
@@ -183,7 +171,6 @@ export const AvailablePackages: React.FC = memo(() => {
 
   const controls = categories ? (
     <CategoryFacets
-      showCounts={false}
       isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       categories={categories}
       selectedCategory={selectedCategory}
@@ -193,17 +180,20 @@ export const AvailablePackages: React.FC = memo(() => {
     />
   ) : null;
 
-  const cards = eprAndCustomPackages.map((item) => {
-    return mapToCard(getAbsolutePath, getHref, item);
+  const filteredCards = cards.filter((c) => {
+    if (selectedCategory === '') {
+      return true;
+    }
+    return c.categories.includes(selectedCategory);
   });
 
   return (
     <PackageListGrid
-      isLoading={isLoadingCategoryPackages}
+      isLoading={isLoadingAllPackages}
       title={title}
       controls={controls}
       initialSearch={searchParam}
-      list={cards}
+      list={filteredCards}
       setSelectedCategory={setSelectedCategory}
       onSearchChange={setSearchTerm}
       showMissingIntegrationMessage

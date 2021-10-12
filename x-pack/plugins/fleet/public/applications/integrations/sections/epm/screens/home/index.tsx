@@ -72,6 +72,7 @@ export const mapToCard = (
     name: 'name' in item ? item.name || '' : '',
     version: 'version' in item ? item.version || '' : '',
     release: 'release' in item ? item.release : undefined,
+    categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
   };
 };
 
