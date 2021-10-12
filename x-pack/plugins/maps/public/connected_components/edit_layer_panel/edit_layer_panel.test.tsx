@@ -87,7 +87,7 @@ const mockLayer = {
 const defaultProps = {
   selectedLayer: mockLayer,
   fitToBounds: () => {},
-  updateSourceProp: () => {},
+  updateSourceProps: async () => {},
 };
 
 describe('EditLayerPanel', () => {

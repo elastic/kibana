@@ -29,7 +29,7 @@ export type OnSourceChangeArgs = {
 };
 
 export type SourceEditorArgs = {
-  onChange: (...args: OnSourceChangeArgs[]) => void;
+  onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
   currentLayerType?: string;
 };
 

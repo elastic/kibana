@@ -44,14 +44,12 @@ interface Props {
   onChange: (metric: AggDescriptor) => void;
   onRemove: () => void;
   metricsFilter?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
-  metricsDisabledDueToMvt?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
   showRemoveButton: boolean;
 }
 
 export function MetricEditor({
   fields,
   metricsFilter,
-  metricsDisabledDueToMvt,
   metric,
   onChange,
   showRemoveButton,
@@ -214,7 +212,6 @@ export function MetricEditor({
           onChange={onAggChange}
           value={metric.type}
           metricsFilter={metricsFilter}
-          metricsDisabledDueToMvt={metricsDisabledDueToMvt}
           compressed
         />
       </EuiFormRow>

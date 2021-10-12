@@ -14,7 +14,7 @@ import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/const
 const defaultProps = {
   currentLayerType: LAYER_TYPE.VECTOR,
   indexPatternId: 'foobar',
-  onChange: () => {},
+  onChange: async () => {},
   metrics: [],
   renderAs: RENDER_AS.POINT,
   resolution: GRID_RESOLUTION.COARSE,

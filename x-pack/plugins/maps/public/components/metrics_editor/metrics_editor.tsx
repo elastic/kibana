@@ -26,7 +26,6 @@ interface Props {
   fields: IndexPatternField[];
   onChange: (metrics: AggDescriptor[]) => void;
   metricsFilter?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
-  metricsDisabledDueToMvt?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
 }
 
 interface State {
@@ -86,7 +85,6 @@ export class MetricsEditor extends Component<Props, State> {
             metric={metric}
             fields={this.props.fields}
             metricsFilter={this.props.metricsFilter}
-            metricsDisabledDueToMvt={this.props.metricsDisabledDueToMvt}
             showRemoveButton={index > 0}
             onRemove={onRemove}
           />
