@@ -52,7 +52,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
         addDeprecation({
           level: 'warning',
           title: i18n.translate('xpack.reporting.deprecations.reportingRoles.title', {
-            defaultMessage: 'The "{fromPath}.roles.enabled" default is changing',
+            defaultMessage: 'Setting "{fromPath}.roles" is deprecated',
             values: { fromPath },
           }),
           // TODO: once scheduled reports is released, restate this to say that we have no access to scheduled reporting.
