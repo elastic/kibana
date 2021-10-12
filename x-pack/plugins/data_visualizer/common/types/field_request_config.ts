@@ -14,7 +14,7 @@ export interface Percentile {
 }
 
 export interface FieldRequestConfig {
-  fieldName?: string;
+  fieldName: string;
   type: JobFieldType;
   cardinality: number;
 }
@@ -29,6 +29,7 @@ export interface DocumentCounts {
 }
 
 export interface FieldVisStats {
+  error?: Error;
   cardinality?: number;
   count?: number;
   sampleCount?: number;
@@ -57,4 +58,11 @@ export interface FieldVisStats {
   examples?: Array<string | object>;
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
+}
+
+export interface DVErrorObject {
+  causedBy?: string;
+  message: string;
+  statusCode?: number;
+  fullError?: Error;
 }

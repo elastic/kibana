@@ -174,15 +174,3 @@ export type BatchStats =
   | DateFieldStats
   | DocumentCountStats
   | FieldExamples;
-
-export type FieldStats =
-  | NumericFieldStats
-  | StringFieldStats
-  | BooleanFieldStats
-  | DateFieldStats
-  // | DocumentCountStats
-  | FieldExamples;
-
-export function isValidFieldStats(arg: unknown): arg is FieldStats {
-  return isPopulatedObject(arg, ['fieldName', 'type', 'count']);
-}

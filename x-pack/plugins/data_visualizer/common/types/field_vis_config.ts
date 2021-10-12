@@ -23,7 +23,7 @@ export interface MetricFieldVisStats {
 // which display the field information.
 export interface FieldVisConfig {
   type: JobFieldType;
-  fieldName?: string;
+  fieldName: string;
   displayName?: string;
   existsInDocs: boolean;
   aggregatable: boolean;

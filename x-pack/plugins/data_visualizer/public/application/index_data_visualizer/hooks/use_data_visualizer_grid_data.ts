@@ -403,7 +403,7 @@ export const useDataVisualizerGridData = (
   }, [overallStats, showEmptyFields]);
 
   const configs = useMemo(() => {
-    const fieldStats = strategyResponse.response.fieldStats;
+    const fieldStats = strategyResponse.fieldStats;
     let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
     if (visibleFieldTypes && visibleFieldTypes.length > 0) {
       combinedConfigs = combinedConfigs.filter(
@@ -416,12 +416,17 @@ export const useDataVisualizerGridData = (
       );
     }
 
-    if (Array.isArray(fieldStats)) {
-      combinedConfigs = combinedConfigs.map((c) => ({
-        ...c,
-        loading: false,
-        stats: { ...c.stats, ...fieldStats.find((r) => r.fieldName === c.fieldName) },
-      }));
+    if (fieldStats) {
+      combinedConfigs = combinedConfigs.map((c) => {
+        const loadedFullStats = fieldStats.get(c.fieldName);
+        return loadedFullStats
+          ? {
+              ...c,
+              loading: false,
+              stats: { ...c.stats, ...loadedFullStats },
+            }
+          : c;
+      });
     }
 
     return combinedConfigs;
@@ -430,7 +435,7 @@ export const useDataVisualizerGridData = (
     metricConfigs,
     visibleFieldTypes,
     visibleFieldNames,
-    strategyResponse.response.fieldStats,
+    strategyResponse.fieldStats,
   ]);
 
   // Some actions open up fly-out or popup

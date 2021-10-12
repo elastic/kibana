@@ -6,16 +6,9 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common';
 import type { TimeBucketsInterval } from '../services/time_buckets';
 import type { RuntimeField } from '../../../../../src/plugins/data/common';
-import type { FieldRequestConfig } from '../types';
-import type { ISearchStrategy } from '../../../../../src/plugins/data/server';
-import { isPopulatedObject } from '../utils/object_utils';
-import { FieldStats } from '../../server/types';
+import { FieldStats } from '../../public/application/index_data_visualizer/types/field_stats';
 
 export interface FieldStatsCommonRequestParams {
   index: string;
@@ -43,39 +36,9 @@ export interface OverallStatsSearchStrategyParams {
   nonAggregatableFields: string[];
 }
 
-export interface FieldStatsSearchStrategyParams {
-  sessionId?: string;
-  earliest?: number;
-  latest?: number;
-  aggInterval: TimeBucketsInterval;
-  intervalMs?: number;
-  searchQuery?: any;
-  samplerShardSize: number;
-  index: string;
-  timeFieldName?: string;
-  runtimeFieldMap: Record<string, RuntimeField>;
-  metricConfigs: FieldRequestConfig[];
-  nonMetricConfigs: FieldRequestConfig[];
-}
-
-export function isFieldStatsSearchStrategyParams(
-  arg: unknown
-): arg is FieldStatsSearchStrategyParams {
-  return isPopulatedObject(arg, ['index', 'samplerShardSize', 'metricConfigs', 'nonMetricConfigs']);
-}
-
-export interface FieldStatRawResponse {
-  loading?: boolean;
-  ccsWarning: boolean;
-  took: 0;
-  fieldStats: Record<string, FieldStats>;
-}
-export type FieldStatsRequest = IKibanaSearchRequest<FieldStatsSearchStrategyParams>;
-export type FieldStatsResponse = IKibanaSearchResponse<FieldStatRawResponse>;
-
-export interface FieldStatsSearchStrategyReturnBase<TRawResponse extends FieldStatRawResponse> {
+export interface FieldStatsSearchStrategyReturnBase {
   progress: FieldStatsSearchStrategyProgress;
-  response: TRawResponse;
+  fieldStats: Map<string, FieldStats> | undefined;
   startFetch: () => void;
   cancelFetch: () => void;
 }
@@ -86,8 +49,6 @@ export interface FieldStatsSearchStrategyProgress {
   loaded: number;
   total: number;
 }
-
-export type FieldStatsSearchStrategy = ISearchStrategy<FieldStatsRequest, FieldStatsResponse>;
 
 export interface FieldData {
   fieldName: string;

@@ -5,25 +5,31 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
 import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { get } from 'lodash';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import {
-  buildBaseFilterCriteria,
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type { FieldStatsCommonRequestParams } from '../../../../../common/search_strategy/types';
 import type { Aggs, Bucket, Field, StringFieldStats } from '../../types/field_stats';
+import {
+  DataPublicPluginStart,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '../../../../../../../../src/plugins/data/public';
+import { FieldStatsError, isIKibanaSearchResponse } from '../../types/field_stats';
+import { extractErrorProperties } from '../../utils/error_utils';
 
 export const getStringFieldStatsRequest = (params: FieldStatsCommonRequestParams, field: Field) => {
-  const { index, timeFieldName, earliestMs, latestMs, query, runtimeFieldMap, samplerShardSize } =
-    params;
+  const { index, query, runtimeFieldMap, samplerShardSize } = params;
 
   const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
   const aggs: Aggs = {};
 
@@ -54,11 +60,7 @@ export const getStringFieldStatsRequest = (params: FieldStatsCommonRequestParams
   }
 
   const searchBody = {
-    query: {
-      bool: {
-        filter: filterCriteria,
-      },
-    },
+    query,
     aggs: buildSamplerAggregation(aggs, samplerShardSize),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
@@ -70,41 +72,54 @@ export const getStringFieldStatsRequest = (params: FieldStatsCommonRequestParams
   };
 };
 
-export const fetchStringFieldStats = async (
-  esClient: ElasticsearchClient,
+export const fetchStringFieldStats = (
+  data: DataPublicPluginStart,
   params: FieldStatsCommonRequestParams,
-  field: Field
-): Promise<StringFieldStats> => {
+  field: Field,
+  options: ISearchOptions
+): Observable<StringFieldStats | FieldStatsError> => {
   const { samplerShardSize } = params;
   const request: SearchRequest = getStringFieldStatsRequest(params, field);
 
-  const { body } = await esClient.search(request);
+  return data.search
+    .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
+    .pipe(
+      catchError((e) =>
+        of({
+          fieldName: field.fieldName,
+          error: extractErrorProperties(e),
+        } as FieldStatsError)
+      ),
+      switchMap((resp) => {
+        if (!isIKibanaSearchResponse(resp)) return of(resp);
+        const aggregations = resp.rawResponse.aggregations;
+        const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
 
-  const aggregations = body.aggregations;
-  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+        const safeFieldName = field.safeFieldName;
 
-  const safeFieldName = field.safeFieldName;
+        const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
+        if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
+          topAggsPath.push('top');
+        }
 
-  const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
-  if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-    topAggsPath.push('top');
-  }
+        const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
 
-  const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
+        const stats = {
+          fieldName: field.fieldName,
+          isTopValuesSampled:
+            field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
+          topValues,
+          topValuesSampleSize: topValues.reduce(
+            (acc, curr) => acc + curr.doc_count,
+            get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
+          ),
+          topValuesSamplerShardSize:
+            field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
+              ? SAMPLER_TOP_TERMS_SHARD_SIZE
+              : samplerShardSize,
+        };
 
-  const stats = {
-    fieldName: field.fieldName,
-    isTopValuesSampled: field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
-    topValues,
-    topValuesSampleSize: topValues.reduce(
-      (acc, curr) => acc + curr.doc_count,
-      get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
-    ),
-    topValuesSamplerShardSize:
-      field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
-        ? SAMPLER_TOP_TERMS_SHARD_SIZE
-        : samplerShardSize,
-  };
-
-  return stats;
+        return of(stats);
+      })
+    );
 };

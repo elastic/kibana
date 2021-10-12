@@ -8,18 +8,12 @@
 import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
 import { StartDeps, SetupDeps } from './types';
 import { dataVisualizerRoutes } from './routes';
-import { FIELD_STATS_SEARCH_STRATEGY } from '../common/search_strategy/constants';
-import { myEnhancedSearchStrategyProvider } from './search_strategy/field_stats_search_strategy';
 
 export class DataVisualizerPlugin implements Plugin {
   constructor() {}
 
   setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
     dataVisualizerRoutes(coreSetup);
-    coreSetup.getStartServices().then(([_, depsStart]) => {
-      const myStrategy = myEnhancedSearchStrategyProvider(depsStart.data);
-      plugins.data.search.registerSearchStrategy(FIELD_STATS_SEARCH_STRATEGY, myStrategy);
-    });
   }
 
   start(core: CoreStart) {}

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { isPopulatedObject } from '../../../../common/utils/object_utils';
+import { DVErrorObject } from '../utils/error_utils';
+import { IKibanaSearchResponse, RuntimeField } from '../../../../../../../src/plugins/data/common';
+import { TimeBucketsInterval } from '../../../../common/services/time_buckets';
 
 export interface FieldData {
   fieldName: string;
@@ -46,6 +50,15 @@ export interface Aggs {
 export interface Bucket {
   doc_count: number;
 }
+
+export interface FieldStatsError {
+  fieldName: string;
+  error: DVErrorObject;
+}
+
+export const isIKibanaSearchResponse = (arg: unknown): arg is IKibanaSearchResponse => {
+  return isPopulatedObject(arg, ['rawResponse']);
+};
 
 export interface NumericFieldStats {
   fieldName: string;
@@ -180,7 +193,8 @@ export type FieldStats =
   | BooleanFieldStats
   | DateFieldStats
   // | DocumentCountStats
-  | FieldExamples;
+  | FieldExamples
+  | FieldStatsError;
 
 export function isValidFieldStats(arg: unknown): arg is FieldStats {
   return isPopulatedObject(arg, ['fieldName', 'type', 'count']);

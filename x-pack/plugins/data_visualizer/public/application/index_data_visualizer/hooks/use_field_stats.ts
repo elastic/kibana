@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { Subscription } from 'rxjs';
-import { chunk } from 'lodash';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import type {
-  FieldStatRawResponse,
-  FieldStatsSearchStrategyParams,
   FieldStatsSearchStrategyProgress,
   FieldStatsSearchStrategyReturnBase,
+  OverallStatsSearchStrategyParams,
 } from '../../../../common/search_strategy/types';
 import { useDataVisualizerKibana } from '../../kibana_context';
-import { FieldRequestConfig } from '../../../../common';
-import { FIELD_STATS_SEARCH_STRATEGY } from '../../../../common/search_strategy/constants';
-import { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
-
-const getInitialRawResponse = (): FieldStatRawResponse =>
-  ({
-    ccsWarning: false,
-    took: 0,
-  } as FieldStatRawResponse);
+import type { FieldRequestConfig } from '../../../../common';
+import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
+import type { FieldStatsCommonRequestParams } from '../../../../common/search_strategy/types';
+import {
+  buildBaseFilterCriteria,
+  getSafeAggregationName,
+} from '../../../../common/utils/query_utils';
+import { getFieldStats } from '../search_strategy/requests/get_field_stats';
+import type { FieldStats, FieldStatsError } from '../types/field_stats';
 
 const getInitialProgress = (): FieldStatsSearchStrategyProgress => ({
   isRunning: false,
@@ -43,24 +41,19 @@ interface FieldStatsParams {
   nonMetricConfigs: FieldRequestConfig[];
 }
 
-export function useFieldStatsSearchStrategy<TParams extends FieldStatsSearchStrategyParams>(
-  searchStrategyParams: TParams | undefined,
+export function useFieldStatsSearchStrategy(
+  searchStrategyParams: OverallStatsSearchStrategyParams | undefined,
   fieldStatsParams: FieldStatsParams | undefined,
   initialDataVisualizerListState: DataVisualizerIndexBasedAppState
-): FieldStatsSearchStrategyReturnBase<FieldStatRawResponse> {
+): FieldStatsSearchStrategyReturnBase {
   const {
-    services: { data },
+    services: {
+      data,
+      notifications: { toasts },
+    },
   } = useDataVisualizerKibana();
 
-  useEffect(
-    () => console.log('initial dataVisualizerListState', initialDataVisualizerListState),
-    [initialDataVisualizerListState]
-  );
-
-  const [rawResponse, setRawResponse] = useReducer(
-    getReducer<FieldStatRawResponse>(),
-    getInitialRawResponse()
-  );
+  const [fieldStats, setFieldStats] = useState<Map<string, FieldStats>>();
 
   const [fetchState, setFetchState] = useReducer(
     getReducer<FieldStatsSearchStrategyProgress>(),
@@ -86,64 +79,84 @@ export function useFieldStatsSearchStrategy<TParams extends FieldStatsSearchStra
     )
       return;
 
-    const { sortField, sortDirection, pageSize } = initialDataVisualizerListState;
+    const { sortField, sortDirection } = initialDataVisualizerListState;
     /**
      * Sort the list of fields by the initial sort field and sort direction
      * Then divide into chunks by the initial page size
      */
 
-    let sortedCnfigs = [
-      ...fieldStatsParams.metricConfigs,
-      ...fieldStatsParams.nonMetricConfigs,
-    ].sort((a, b) => a[sortField].localeCompare(b[sortField]));
-    if (sortDirection === 'desc') {
-      sortedCnfigs = sortedCnfigs.reverse();
+    let sortedConfigs = [...fieldStatsParams.metricConfigs, ...fieldStatsParams.nonMetricConfigs];
+
+    if (sortField === 'fieldName' || sortField === 'type') {
+      sortedConfigs = sortedConfigs.sort((a, b) => a[sortField].localeCompare(b[sortField]));
     }
-    const chunks = chunk(sortedCnfigs, pageSize);
-    console.log('chunks', chunks);
-    const request = {
-      params: { ...searchStrategyParams, ...fieldStatsParams },
+    if (sortDirection === 'desc') {
+      sortedConfigs = sortedConfigs.reverse();
+    }
+
+    const filterCriteria = buildBaseFilterCriteria(
+      searchStrategyParams.timeFieldName,
+      searchStrategyParams.earliest,
+      searchStrategyParams.latest,
+      searchStrategyParams.searchQuery
+    );
+
+    const params: FieldStatsCommonRequestParams = {
+      index: searchStrategyParams.index,
+      samplerShardSize: searchStrategyParams.samplerShardSize,
+      timeFieldName: searchStrategyParams.timeFieldName,
+      earliestMs: searchStrategyParams.earliest,
+      latestMs: searchStrategyParams.latest,
+      runtimeFieldMap: searchStrategyParams.runtimeFieldMap,
+      intervalMs: searchStrategyParams.intervalMs,
+      query: {
+        bool: {
+          filter: filterCriteria,
+        },
+      },
     };
-    // Submit the search request using the `data.search` service.
-    searchSubscription$.current = data.search
-      .search(request, {
-        strategy: FIELD_STATS_SEARCH_STRATEGY,
-        abortSignal: abortCtrl.current.signal,
-        sessionId: searchStrategyParams?.sessionId,
-      })
-      .subscribe({
-        next: (response) => {
-          // Setting results to latest even if the response is still partial
-          setRawResponse(response.rawResponse);
+    const searchOptions = {
+      abortSignal: abortCtrl.current.signal,
+      sessionId: searchStrategyParams?.sessionId,
+    };
+    const sub = combineLatest(
+      sortedConfigs
+        .map((config, idx) =>
+          getFieldStats(
+            data,
+            params,
+            {
+              fieldName: config.fieldName,
+              type: config.type,
+              cardinality: config.cardinality,
+              safeFieldName: getSafeAggregationName(config.fieldName, idx),
+            },
+            searchOptions
+          )
+        )
+        .filter((obs) => obs !== undefined) as Array<Observable<FieldStats | FieldStatsError>>
+    );
 
-          setFetchState({
-            isRunning: response.isRunning || false,
-            ...(response.loaded ? { loaded: response.loaded } : {}),
-            ...(response.total ? { total: response.total } : {}),
-          });
+    searchSubscription$.current = sub.subscribe({
+      next: (resp) => {
+        if (resp) {
+          const statsMap = resp.reduce((map, field) => {
+            map.set(field.fieldName, field);
+            return map;
+          }, new Map<string, FieldStats>());
 
-          if (isCompleteResponse(response)) {
-            // If the whole request is completed
-            searchSubscription$.current?.unsubscribe();
-            setFetchState({
-              isRunning: false,
-            });
-          } else if (isErrorResponse(response)) {
-            searchSubscription$.current?.unsubscribe();
-            setFetchState({
-              error: response as unknown as Error,
-              isRunning: false,
-            });
-          }
-        },
-        error: (error: Error) => {
-          setFetchState({
-            error,
-            isRunning: false,
-          });
-        },
-      });
-  }, [data.search, searchStrategyParams, fieldStatsParams, initialDataVisualizerListState]);
+          setFieldStats(statsMap);
+        }
+      },
+      error: (error) => {
+        toasts.addError(error, {
+          title: i18n.translate('xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage', {
+            defaultMessage: 'Error fetching field statistics',
+          }),
+        });
+      },
+    });
+  }, [data, toasts, searchStrategyParams, fieldStatsParams, initialDataVisualizerListState]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
@@ -162,7 +175,7 @@ export function useFieldStatsSearchStrategy<TParams extends FieldStatsSearchStra
 
   return {
     progress: fetchState,
-    response: rawResponse,
+    fieldStats,
     startFetch,
     cancelFetch,
   };

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
 import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { find, get } from 'lodash';
+import { catchError, switchMap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import {
   MAX_PERCENT,
   PERCENTILE_SPACING,
@@ -15,24 +16,29 @@ import {
   SAMPLER_TOP_TERMS_THRESHOLD,
 } from './constants';
 import {
-  buildBaseFilterCriteria,
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type { FieldStatsCommonRequestParams } from '../../../../../common/search_strategy/types';
-import type { Field, NumericFieldStats, Bucket } from '../../types/field_stats';
+import type { Field, NumericFieldStats, Bucket, FieldStatsError } from '../../types/field_stats';
 import { processDistributionData } from '../../utils/process_distribution_data';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '../../../../../../../../src/plugins/data/common';
+import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
+import { extractErrorProperties } from '../../utils/error_utils';
+import { isIKibanaSearchResponse } from '../../types/field_stats';
 
 export const getNumericFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
   field: Field
 ) => {
-  const { index, timeFieldName, earliestMs, latestMs, query, runtimeFieldMap, samplerShardSize } =
-    params;
+  const { index, query, runtimeFieldMap, samplerShardSize } = params;
 
   const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
   // Build the percents parameter which defines the percentiles to query
   // for the metric distribution data.
@@ -87,11 +93,7 @@ export const getNumericFieldStatsRequest = (
   }
 
   const searchBody = {
-    query: {
-      bool: {
-        filter: filterCriteria,
-      },
-    },
+    query,
     aggs: buildSamplerAggregation(aggs, samplerShardSize),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
@@ -103,61 +105,81 @@ export const getNumericFieldStatsRequest = (
   };
 };
 
-export const fetchNumericFieldStats = async (
-  esClient: ElasticsearchClient,
+export const fetchNumericFieldStats = (
+  data: DataPublicPluginStart,
   params: FieldStatsCommonRequestParams,
-  field: Field
-): Promise<NumericFieldStats> => {
+  field: Field,
+  options: ISearchOptions
+): Observable<NumericFieldStats | FieldStatsError> => {
   const { samplerShardSize } = params;
   const request: SearchRequest = getNumericFieldStatsRequest(params, field);
-  const { body } = await esClient.search(request);
-  const aggregations = body.aggregations;
-  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
 
-  const safeFieldName = field.safeFieldName;
-  const docCount = get(aggregations, [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'], 0);
-  const fieldStatsResp = get(
-    aggregations,
-    [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
-    {}
-  );
+  return data.search
+    .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
+    .pipe(
+      catchError((e) =>
+        of({
+          fieldName: field.fieldName,
+          error: extractErrorProperties(e),
+        } as FieldStatsError)
+      ),
+      switchMap((resp) => {
+        if (!isIKibanaSearchResponse(resp)) return of(resp);
 
-  const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
-  if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-    topAggsPath.push('top');
-  }
+        const aggregations = resp.rawResponse.aggregations;
+        const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
 
-  const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
+        const safeFieldName = field.safeFieldName;
+        const docCount = get(
+          aggregations,
+          [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'],
+          0
+        );
+        const fieldStatsResp = get(
+          aggregations,
+          [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
+          {}
+        );
 
-  const stats: NumericFieldStats = {
-    fieldName: field.fieldName,
-    count: docCount,
-    min: get(fieldStatsResp, 'min', 0),
-    max: get(fieldStatsResp, 'max', 0),
-    avg: get(fieldStatsResp, 'avg', 0),
-    isTopValuesSampled: field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
-    topValues,
-    topValuesSampleSize: topValues.reduce(
-      (acc, curr) => acc + curr.doc_count,
-      get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
-    ),
-    topValuesSamplerShardSize:
-      field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
-        ? SAMPLER_TOP_TERMS_SHARD_SIZE
-        : samplerShardSize,
-  };
+        const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
+        if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
+          topAggsPath.push('top');
+        }
 
-  if (stats.count > 0) {
-    const percentiles = get(
-      aggregations,
-      [...aggsPath, `${safeFieldName}_percentiles`, 'values'],
-      []
+        const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
+
+        const stats: NumericFieldStats = {
+          fieldName: field.fieldName,
+          count: docCount,
+          min: get(fieldStatsResp, 'min', 0),
+          max: get(fieldStatsResp, 'max', 0),
+          avg: get(fieldStatsResp, 'avg', 0),
+          isTopValuesSampled:
+            field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
+          topValues,
+          topValuesSampleSize: topValues.reduce(
+            (acc, curr) => acc + curr.doc_count,
+            get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
+          ),
+          topValuesSamplerShardSize:
+            field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
+              ? SAMPLER_TOP_TERMS_SHARD_SIZE
+              : samplerShardSize,
+        };
+
+        if (stats.count > 0) {
+          const percentiles = get(
+            aggregations,
+            [...aggsPath, `${safeFieldName}_percentiles`, 'values'],
+            []
+          );
+          const medianPercentile: { value: number; key: number } | undefined = find(percentiles, {
+            key: 50,
+          });
+          stats.median = medianPercentile !== undefined ? medianPercentile!.value : 0;
+          stats.distribution = processDistributionData(percentiles, PERCENTILE_SPACING, stats.min);
+        }
+        return of(stats);
+      })
     );
-    const medianPercentile: { value: number; key: number } | undefined = find(percentiles, {
-      key: 50,
-    });
-    stats.median = medianPercentile !== undefined ? medianPercentile!.value : 0;
-    stats.distribution = processDistributionData(percentiles, PERCENTILE_SPACING, stats.min);
-  }
-  return stats;
 };
