@@ -92,7 +92,7 @@ export function flattenHit(
     flatten(hit._source as Record<string, any>);
   }
 
-  indexPattern?.metaFields.forEach((metaFieldName) => {
+  indexPattern?.metaFields?.forEach((metaFieldName) => {
     if (!isValidMetaFieldName(metaFieldName) || metaFieldName === '_source') {
       return;
     }
@@ -102,8 +102,8 @@ export function flattenHit(
   return new Proxy(flat, {
     ownKeys: (target) => {
       return Reflect.ownKeys(target).sort((a, b) => {
-        const aIsMeta = indexPattern?.metaFields.includes(String(a));
-        const bIsMeta = indexPattern?.metaFields.includes(String(b));
+        const aIsMeta = indexPattern?.metaFields?.includes(String(a));
+        const bIsMeta = indexPattern?.metaFields?.includes(String(b));
         if (aIsMeta && bIsMeta) {
           return String(a).localeCompare(String(b));
         }
