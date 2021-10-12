@@ -36,6 +36,33 @@ export const metricVis = () => ({
       argType: 'font',
       default: `{font size=60 align="center"}`,
     },
+    {
+      name: 'colorMode',
+      displayName: strings.getColorModeColumnDisplayName(),
+      help: strings.getColorModeColumnHelp(),
+      argType: 'select',
+      default: 'single',
+      options: {
+        choices: [
+          { value: 'None', name: strings.getColorModeNoneOption() },
+          { value: 'Label', name: strings.getColorModeLabelOption() },
+          { value: 'Background', name: strings.getColorModeBackgroundOption() },
+        ],
+      },
+    },
+    {
+      name: 'showLabels',
+      displayName: strings.getShowLabelsColumnDisplayName(),
+      help: strings.getShowLabelsColumnHelp(),
+      argType: 'toggle',
+      default: true,
+    },
+    {
+      name: 'percentageMode',
+      displayName: strings.getPercentageModeColumnDisplayName(),
+      help: strings.getPercentageModeColumnHelp(),
+      argType: 'toggle',
+    },
   ],
   resolve({ context }: any) {
     if (getState(context) !== 'ready') {

@@ -1318,23 +1318,25 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.metricVis.args.showLabelsHelp', {
         defaultMessage: 'Shows labels under the metric values.',
       }),
-    getBgFillColumnDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.metricVis.args.bgFillDisplayName', {
-        defaultMessage: 'Background color',
+    getColorModeColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorModeDisplayName', {
+        defaultMessage: 'Metric color mode',
       }),
-    getBgFillColumnHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.metricVis.args.bgFillHelp', {
-        defaultMessage:
-          'Color as html hex code (#123456), html color (red, blue) or rgba value (rgba(255,255,255,1)).',
+    getColorModeColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorModeHelp', {
+        defaultMessage: 'Which part of metric to fill with color.',
       }),
-    getColorRangeColumnDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorRangeDisplayName', {
-        defaultMessage: 'Color range',
+    getColorModeNoneOption: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.noneOption', {
+        defaultMessage: 'None',
       }),
-    getColorRangeColumnHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorRangeHelp', {
-        defaultMessage:
-          'A range object specifying groups of values to which different colors should be applied.',
+    getColorModeLabelOption: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.labelOption', {
+        defaultMessage: 'Label',
+      }),
+    getColorModeBackgroundOption: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.backgroundOption', {
+        defaultMessage: 'Background',
       }),
   },
 };
