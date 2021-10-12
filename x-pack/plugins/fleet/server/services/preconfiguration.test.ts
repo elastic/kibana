@@ -137,11 +137,18 @@ jest.mock('./package_policy', () => ({
   ...jest.requireActual('./package_policy'),
   packagePolicyService: {
     getByIDs: jest.fn().mockReturnValue([]),
+    listIds: jest.fn().mockReturnValue({ items: [] }),
     create(soClient: any, esClient: any, newPackagePolicy: NewPackagePolicy) {
       return {
         id: 'mocked',
         version: 'mocked',
         ...newPackagePolicy,
+      };
+    },
+    get(soClient: any, id: string) {
+      return {
+        id: 'mocked',
+        version: 'mocked',
       };
     },
   },

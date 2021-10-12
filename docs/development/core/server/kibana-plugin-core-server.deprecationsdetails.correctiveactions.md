@@ -4,6 +4,8 @@
 
 ## DeprecationsDetails.correctiveActions property
 
+corrective action needed to fix this deprecation.
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,6 +16,7 @@ correctiveActions: {
             body?: {
                 [key: string]: any;
             };
+            omitContextFromBody?: boolean;
         };
         manualSteps: string[];
     };

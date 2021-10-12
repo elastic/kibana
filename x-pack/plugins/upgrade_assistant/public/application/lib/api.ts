@@ -65,6 +65,16 @@ export class ApiService {
     });
   }
 
+  public async sendPageTelemetryData(telemetryData: { [tabName: string]: boolean }) {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/stats/ui_open`,
+      method: 'put',
+      body: JSON.stringify(telemetryData),
+    });
+
+    return result;
+  }
+
   public useLoadDeprecationLogging() {
     return this.useRequest<{
       isDeprecationLogIndexingEnabled: boolean;
@@ -93,6 +103,13 @@ export class ApiService {
       method: 'get',
       query: { from },
       pollIntervalMs: DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
+    });
+  }
+
+  public deleteDeprecationLogsCache() {
+    return this.sendRequest({
+      path: `${API_BASE_PATH}/deprecation_logging/cache`,
+      method: 'delete',
     });
   }
 
@@ -138,6 +155,16 @@ export class ApiService {
       path: `${API_BASE_PATH}/ml_snapshots/${jobId}/${snapshotId}`,
       method: 'get',
     });
+  }
+
+  public async sendReindexTelemetryData(telemetryData: { [key: string]: boolean }) {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/stats/ui_reindex`,
+      method: 'put',
+      body: JSON.stringify(telemetryData),
+    });
+
+    return result;
   }
 
   public async getReindexStatus(indexName: string) {

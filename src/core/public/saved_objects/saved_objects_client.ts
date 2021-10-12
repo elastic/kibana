@@ -168,13 +168,13 @@ const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
   const responseIndices: number[] = [];
   const objectsToResolve: ObjectTypeAndId[] = [];
   const inserted = new Map<string, number>();
-  queue.forEach(({ id, type }, currentIndex) => {
+  queue.forEach(({ id, type }) => {
     const key = `${type}|${id}`;
     const indexForTypeAndId = inserted.get(key);
     if (indexForTypeAndId === undefined) {
-      inserted.set(key, currentIndex);
+      inserted.set(key, objectsToResolve.length);
+      responseIndices.push(objectsToResolve.length);
       objectsToResolve.push({ id, type });
-      responseIndices.push(currentIndex);
     } else {
       responseIndices.push(indexForTypeAndId);
     }

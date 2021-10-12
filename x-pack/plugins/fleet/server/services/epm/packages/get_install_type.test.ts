@@ -28,6 +28,7 @@ const mockInstallation: SavedObject<Installation> = {
     install_version: '1.0.0',
     install_started_at: new Date().toISOString(),
     install_source: 'registry',
+    keep_policies_up_to_date: false,
   },
 };
 const mockInstallationUpdateFail: SavedObject<Installation> = {
@@ -46,6 +47,7 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
     install_version: '1.0.1',
     install_started_at: new Date().toISOString(),
     install_source: 'registry',
+    keep_policies_up_to_date: false,
   },
 };
 

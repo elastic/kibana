@@ -7,10 +7,9 @@
 import React, { useContext, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
-import { ElasticsearchTemplate } from './elasticsearch_template';
+import { ItemTemplate } from './item_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { NodeReact } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
@@ -18,6 +17,18 @@ import { SetupModeContext } from '../../../components/setup_mode/setup_mode_cont
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useCharts } from '../../hooks/use_charts';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
+// @ts-ignore
+import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import {
+  RULE_CPU_USAGE,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_DISK_USAGE,
+  RULE_MEMORY_USAGE,
+} from '../../../../common/constants';
 
 interface SetupModeProps {
   setupMode: any;
@@ -25,26 +36,24 @@ interface SetupModeProps {
   bottomBarComponent: any;
 }
 
-export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) => {
+export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
   const { zoomInfo, onBrush } = useCharts();
   const [showSystemIndices, setShowSystemIndices] = useLocalStorage<boolean>(
     'showSystemIndices',
     false
   );
+  const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const { node }: { node: string } = useParams();
   const { services } = useKibana<{ data: any }>();
 
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
-  const cluster = find(clusters, {
-    cluster_uuid: clusterUuid,
-  });
   const [data, setData] = useState({} as any);
   const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
 
-  const title = i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+  const title = i18n.translate('xpack.monitoring.elasticsearch.node.overview.title', {
     defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
     values: {
       nodeName: data?.nodeSummary?.name,
@@ -61,30 +70,49 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes/${node}`;
+    if (services.http?.fetch && clusterUuid) {
+      const response = await services.http?.fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          showSystemIndices,
+          ccs,
+          timeRange: {
+            min: bounds.min.toISOString(),
+            max: bounds.max.toISOString(),
+          },
+          is_advanced: false,
+        }),
+      });
 
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        showSystemIndices,
-        ccs,
+      setData(response);
+      const transformer = nodesByIndices();
+      setNodesByIndicesData(transformer(response.shards, response.nodes));
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        alertTypeIds: [
+          RULE_CPU_USAGE,
+          RULE_THREAD_POOL_SEARCH_REJECTIONS,
+          RULE_THREAD_POOL_WRITE_REJECTIONS,
+          RULE_MISSING_MONITORING_DATA,
+          RULE_DISK_USAGE,
+          RULE_MEMORY_USAGE,
+        ],
+        filters: [{ nodeUuid: node }],
+        clusterUuid,
         timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
         },
-        is_advanced: false,
-      }),
-    });
-
-    setData(response);
-    const transformer = nodesByIndices();
-    setNodesByIndicesData(transformer(response.shards, response.nodes));
+      });
+      setAlerts(alertsResponse);
+    }
   }, [
-    ccs,
-    clusterUuid,
     services.data?.query.timefilter.timefilter,
     services.http,
+    clusterUuid,
     node,
     showSystemIndices,
+    ccs,
   ]);
 
   const toggleShowSystemIndices = useCallback(() => {
@@ -92,33 +120,33 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
   }, [showSystemIndices, setShowSystemIndices]);
 
   return (
-    <ElasticsearchTemplate
+    <ItemTemplate
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      cluster={cluster}
+      id={node}
+      pageType="nodes"
     >
-      <div data-test-subj="elasticsearchNodeListingPage">
-        <SetupModeRenderer
-          render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
-            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
-              {flyoutComponent}
-              <NodeReact
-                alerts={{}}
-                nodeId={node}
-                clusterUuid={clusterUuid}
-                onBrush={onBrush}
-                zoomInfo={zoomInfo}
-                toggleShowSystemIndices={toggleShowSystemIndices}
-                showSystemIndices={showSystemIndices}
-                nodesByIndices={nodesByIndicesData}
-                {...data}
-              />
-              {bottomBarComponent}
-            </SetupModeContext.Provider>
-          )}
-        />
-      </div>
-    </ElasticsearchTemplate>
+      <SetupModeRenderer
+        render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
+          <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+            {flyoutComponent}
+            <NodeReact
+              alerts={alerts}
+              labels={labels.node}
+              nodeId={node}
+              clusterUuid={clusterUuid}
+              onBrush={onBrush}
+              zoomInfo={zoomInfo}
+              toggleShowSystemIndices={toggleShowSystemIndices}
+              showSystemIndices={showSystemIndices}
+              nodesByIndices={nodesByIndicesData}
+              {...data}
+            />
+            {bottomBarComponent}
+          </SetupModeContext.Provider>
+        )}
+      />
+    </ItemTemplate>
   );
 };

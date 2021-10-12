@@ -131,6 +131,7 @@ export class MonitoringPlugin
     for (const alert of alerts) {
       plugins.alerting?.registerType(alert.getRuleType());
     }
+
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
 
     // Register collector objects for stats to show up in the APIs

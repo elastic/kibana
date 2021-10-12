@@ -66,6 +66,7 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
     fromRoot('x-pack/plugins/security_solution/scripts'),
     fromRoot('x-pack/plugins/security_solution/server/lib/detection_engine/scripts'),
     fromRoot('x-pack/plugins/metrics_entities/server/scripts'),
+    fromRoot('x-pack/plugins/uptime/e2e'),
   ];
 
   return {
