@@ -18,7 +18,6 @@ import {
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
-  META_FIELDS,
   SearchFieldValue,
   SearchSourceFields,
   tabifyDocs,
