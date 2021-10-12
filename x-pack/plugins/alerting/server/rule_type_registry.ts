@@ -48,6 +48,9 @@ export interface RegistryRuleType
     | 'producer'
     | 'minimumLicenseRequired'
     | 'isExportable'
+    | 'ruleTaskTimeout'
+    | 'minimumScheduleInterval'
+    | 'defaultScheduleInterval'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -188,6 +191,44 @@ export class RuleTypeRegistry {
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
 
+    // validate defaultScheduleInterval here
+    if (alertType.defaultScheduleInterval) {
+      const invalidDefaultTimeout = validateDurationSchema(alertType.defaultScheduleInterval);
+      if (invalidDefaultTimeout) {
+        throw new Error(
+          i18n.translate(
+            'xpack.alerting.ruleTypeRegistry.register.invalidDefaultTimeoutAlertTypeError',
+            {
+              defaultMessage: 'Rule type "{id}" has invalid default interval: {errorMessage}.',
+              values: {
+                id: alertType.id,
+                errorMessage: invalidDefaultTimeout,
+              },
+            }
+          )
+        );
+      }
+    }
+
+    // validate minimumScheduleInterval here
+    if (alertType.minimumScheduleInterval) {
+      const invalidMinimumTimeout = validateDurationSchema(alertType.minimumScheduleInterval);
+      if (invalidMinimumTimeout) {
+        throw new Error(
+          i18n.translate(
+            'xpack.alerting.ruleTypeRegistry.register.invalidMinimumTimeoutAlertTypeError',
+            {
+              defaultMessage: 'Rule type "{id}" has invalid minimum interval: {errorMessage}.',
+              values: {
+                id: alertType.id,
+                errorMessage: invalidMinimumTimeout,
+              },
+            }
+          )
+        );
+      }
+    }
+
     const normalizedAlertType = augmentActionGroupsWithReserved<
       Params,
       ExtractedParams,
@@ -287,6 +328,9 @@ export class RuleTypeRegistry {
             producer,
             minimumLicenseRequired,
             isExportable,
+            ruleTaskTimeout,
+            minimumScheduleInterval,
+            defaultScheduleInterval,
           },
         ]: [string, UntypedNormalizedAlertType]) => ({
           id,
@@ -298,6 +342,9 @@ export class RuleTypeRegistry {
           producer,
           minimumLicenseRequired,
           isExportable,
+          ruleTaskTimeout,
+          minimumScheduleInterval,
+          defaultScheduleInterval,
           enabledInLicense: !!this.licenseState.getLicenseCheckForAlertType(
             id,
             name,
