@@ -13,11 +13,19 @@ import {
   MVT_META_SOURCE_LAYER_NAME,
 } from '../../../../plugins/maps/common/constants';
 
+function findFeature(layer, callbackFn) {
+  for (let i = 0; i < layer.length; i++) {
+    const feature = layer.feature(i);
+    if (callbackFn(feature)) {
+      return feature;
+    }
+  }
+}
+
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/114471
-  describe.skip('getTile', () => {
+  describe('getTile', () => {
     it('should return ES vector tile containing documents and metadata', async () => {
       const resp = await supertest
         .get(
@@ -35,8 +43,12 @@ export default function ({ getService }) {
       const layer = jsonTile.layers[MVT_HITS_SOURCE_LAYER_NAME];
       expect(layer.length).to.be(2); // 2 docs
 
-      // 1st doc
-      const feature = layer.feature(0);
+      // Verify ES document
+
+      const feature = findFeature(layer, (feature) => {
+        return feature.properties._id === 'AU_x3_BsGFA8no6Qjjug';
+      });
+      expect(feature).not.to.be(undefined);
       expect(feature.type).to.be(1);
       expect(feature.extent).to.be(4096);
       expect(feature.id).to.be(undefined);
@@ -48,9 +60,10 @@ export default function ({ getService }) {
       });
       expect(feature.loadGeometry()).to.eql([[{ x: 44, y: 2382 }]]);
 
-      // Metadata feature
+      // Verify metadata feature
       const metaDataLayer = jsonTile.layers[MVT_META_SOURCE_LAYER_NAME];
       const metadataFeature = metaDataLayer.feature(0);
+      expect(metadataFeature).not.to.be(undefined);
       expect(metadataFeature.type).to.be(3);
       expect(metadataFeature.extent).to.be(4096);
       expect(metadataFeature.id).to.be(undefined);

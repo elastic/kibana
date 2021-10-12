@@ -79,6 +79,10 @@ const sourceSettingsSchema = schema.object({
         ),
         schedule: schema.maybe(
           schema.object({
+            full: schema.maybe(schema.string()),
+            incremental: schema.maybe(schema.string()),
+            delete: schema.maybe(schema.string()),
+            permissions: schema.maybe(schema.string()),
             blocked_windows: schema.maybe(
               schema.arrayOf(
                 schema.object({
