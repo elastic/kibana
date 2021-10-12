@@ -47,7 +47,7 @@ export const DeploymentDetails = ({ endpointUrl, cloudId, learnMoreUrl, manageme
   );
 
   const management = managementUrl ? (
-    <EuiFormRow label="API Keys" fullWidth>
+    <EuiFormRow label="API keys" fullWidth>
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem>
           <EuiButton href={managementUrl}>Create and manage API keys</EuiButton>
@@ -71,7 +71,7 @@ export const DeploymentDetails = ({ endpointUrl, cloudId, learnMoreUrl, manageme
       <div style={{ width: 450 }}>
         <Description>
           Send data to Elastic from your applications by referencing your deployment and
-          Elasticsearch information below.
+          Elasticsearch information.
         </Description>
         <EuiForm component="div">
           <EuiFormRow label="Elasticsearch endpoint" fullWidth isDisabled>
