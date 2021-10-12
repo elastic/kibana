@@ -105,6 +105,10 @@ export const emptyBlockedWindow: BlockedWindow = {
   end: '13:00:00Z',
 };
 
+type BlockedWindowMap = {
+  [prop in keyof BlockedWindow]: SyncJobType | DayOfWeek | 'all' | string;
+};
+
 export const SynchronizationLogic = kea<
   MakeLogicType<SynchronizationValues, SynchronizationActions>
 >({
@@ -214,23 +218,9 @@ export const SynchronizationLogic = kea<
         setBlockedTimeWindow: (state, { index, prop, value }) => {
           const schedule = cloneDeep(state);
           const blockedWindows = schedule.blockedWindows;
-          const blockedWindow = blockedWindows![index];
-
-          switch (prop) {
-            case 'jobType':
-              blockedWindow.jobType = value as SyncJobType;
-              break;
-            case 'day':
-              blockedWindow.day = value as DayOfWeek | 'all';
-              break;
-            case 'start':
-              blockedWindow.start = value;
-              break;
-            case 'end':
-              blockedWindow.end = value;
-              break;
-          }
-          blockedWindows![index] = blockedWindow;
+          const blockedWindow = blockedWindows![index] as BlockedWindowMap;
+          blockedWindow[prop] = value;
+          (blockedWindows![index] as BlockedWindowMap) = blockedWindow;
           schedule.blockedWindows = blockedWindows;
           return schedule;
         },
