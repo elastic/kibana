@@ -29,8 +29,6 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useSourcererDataView } from '../sourcerer';
-import { kibanaDataViewsSelector } from '../../store/sourcerer/selectors';
-import { setFetchFields } from '../../store/sourcerer/actions';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -362,7 +360,10 @@ export const useIndexFields = (
       (dataViewId != null && dataViewId !== refDataViewId.current && selectedPatterns.length > 0) ||
       (selectedPatterns.length > 0 && refSelectedPatterns.current.length === 0)
     ) {
-      console.log('fetchedFields', kibanaDataViews);
+      console.log(
+        'useEffect',
+        kibanaDataViews.find((k) => k.id === dataViewId)
+      );
 
       dispatch(sourcererActions.setFetchFields(dataViewId));
       indexFieldsSearch(dataViewId);

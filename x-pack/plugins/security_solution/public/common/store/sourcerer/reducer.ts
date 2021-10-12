@@ -65,22 +65,12 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     },
   }))
   .case(setFetchFields, (state, id) => {
-    console.log('setFetchFields', id, {
-      kibanaDataViews: state.kibanaDataViews.map((dv) =>
-        dv.id === id ? { ...dv, fetchedFields: true } : dv
-      ),
-      stateToReturn: {
-        ...state,
-        ...(state.defaultDataView.id === id
-          ? {
-              defaultDataView: { ...state.defaultDataView, fetchedFields: true },
-            }
-          : {}),
-        kibanaDataViews: state.kibanaDataViews.map((dv) =>
-          dv.id === id ? { ...dv, fetchedFields: true } : dv
-        ),
-      },
-    });
+    console.log(
+      'reducer',
+      state.kibanaDataViews
+        .map((dv) => (dv.id === id ? { ...dv, fetchedFields: true } : dv))
+        .find((k) => k.id === id)
+    );
     return {
       ...state,
       ...(state.defaultDataView.id === id
