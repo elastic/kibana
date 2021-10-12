@@ -114,15 +114,3 @@ export function flattenHitWrapper(dataView: DataView, metaFields = {}, cache = n
     return decorateFlattened(flattened);
   };
 }
-
-/**
- * This wraps `flattenHitWrapper` so one single cache can be provided for all uses of that
- * function. The returned value of this function is what is included in the index patterns
- * setup contract.
- *
- * @public
- */
-export function createFlattenHitWrapper() {
-  const cache = new WeakMap();
-  return _.partial(flattenHitWrapper, _, _, cache);
-}
