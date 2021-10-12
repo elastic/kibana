@@ -1780,6 +1780,28 @@ export const sampleAreaVis = {
     },
     aggs: {
       typesRegistry: {},
+      bySchemaName: () => [
+        {
+          id: '1',
+          enabled: true,
+          type: 'sum',
+          params: {
+            field: 'total_quantity',
+          },
+          schema: 'metric',
+          makeLabel: () => 'Total quantity',
+          toSerializedFieldFormat: () => ({
+            id: 'number',
+            params: {
+              parsedUrl: {
+                origin: 'http://localhost:5801',
+                pathname: '/app/visualize',
+                basePath: '',
+              },
+            },
+          }),
+        },
+      ],
       getResponseAggs: () => [
         {
           id: '1',

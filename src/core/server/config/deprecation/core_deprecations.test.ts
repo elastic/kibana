@@ -19,38 +19,6 @@ describe('core deprecations', () => {
     process.env = { ...initialEnv };
   });
 
-  describe('kibanaPathConf', () => {
-    it('logs a warning if KIBANA_PATH_CONF environ variable is set', () => {
-      process.env.KIBANA_PATH_CONF = 'somepath';
-      const { messages } = applyCoreDeprecations();
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Environment variable \\"KIBANA_PATH_CONF\\" is deprecated. It has been replaced with \\"KBN_PATH_CONF\\" pointing to a config folder",
-        ]
-      `);
-    });
-
-    it('does not log a warning if KIBANA_PATH_CONF environ variable is unset', () => {
-      delete process.env.KIBANA_PATH_CONF;
-      const { messages } = applyCoreDeprecations();
-      expect(messages).toHaveLength(0);
-    });
-  });
-
-  describe('xsrfDeprecation', () => {
-    it('logs a warning if server.xsrf.whitelist is set', () => {
-      const { migrated, messages } = applyCoreDeprecations({
-        server: { xsrf: { whitelist: ['/path'] } },
-      });
-      expect(migrated.server.xsrf.allowlist).toEqual(['/path']);
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Setting \\"server.xsrf.whitelist\\" has been replaced by \\"server.xsrf.allowlist\\"",
-        ]
-      `);
-    });
-  });
-
   describe('server.cors', () => {
     it('renames server.cors to server.cors.enabled', () => {
       const { migrated } = applyCoreDeprecations({
@@ -58,8 +26,9 @@ describe('core deprecations', () => {
       });
       expect(migrated.server.cors).toEqual({ enabled: true });
     });
+
     it('logs a warning message about server.cors renaming', () => {
-      const { messages } = applyCoreDeprecations({
+      const { messages, levels } = applyCoreDeprecations({
         server: { cors: true },
       });
       expect(messages).toMatchInlineSnapshot(`
@@ -67,7 +36,13 @@ describe('core deprecations', () => {
           "\\"server.cors\\" is deprecated and has been replaced by \\"server.cors.enabled\\"",
         ]
       `);
+      expect(levels).toMatchInlineSnapshot(`
+        Array [
+          "warning",
+        ]
+      `);
     });
+
     it('does not log deprecation message when server.cors.enabled set', () => {
       const { migrated, messages } = applyCoreDeprecations({
         server: { cors: { enabled: true } },
@@ -106,102 +81,6 @@ describe('core deprecations', () => {
         },
       });
       expect(messages).toHaveLength(0);
-    });
-  });
-
-  describe('cspRulesDeprecation', () => {
-    describe('with nonce source', () => {
-      it('logs a warning', () => {
-        const settings = {
-          csp: {
-            rules: [`script-src 'self' 'nonce-{nonce}'`],
-          },
-        };
-        const { messages } = applyCoreDeprecations(settings);
-        expect(messages).toMatchInlineSnapshot(`
-            Array [
-              "csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in script-src",
-            ]
-        `);
-      });
-
-      it('replaces a nonce', () => {
-        expect(
-          applyCoreDeprecations({ csp: { rules: [`script-src 'nonce-{nonce}'`] } }).migrated.csp
-            .rules
-        ).toEqual([`script-src 'self'`]);
-        expect(
-          applyCoreDeprecations({ csp: { rules: [`script-src 'unsafe-eval' 'nonce-{nonce}'`] } })
-            .migrated.csp.rules
-        ).toEqual([`script-src 'unsafe-eval' 'self'`]);
-      });
-
-      it('removes a quoted nonce', () => {
-        expect(
-          applyCoreDeprecations({ csp: { rules: [`script-src 'self' 'nonce-{nonce}'`] } }).migrated
-            .csp.rules
-        ).toEqual([`script-src 'self'`]);
-        expect(
-          applyCoreDeprecations({ csp: { rules: [`script-src 'nonce-{nonce}' 'self'`] } }).migrated
-            .csp.rules
-        ).toEqual([`script-src 'self'`]);
-      });
-
-      it('removes a non-quoted nonce', () => {
-        expect(
-          applyCoreDeprecations({ csp: { rules: [`script-src 'self' nonce-{nonce}`] } }).migrated
-            .csp.rules
-        ).toEqual([`script-src 'self'`]);
-        expect(
-          applyCoreDeprecations({ csp: { rules: [`script-src nonce-{nonce} 'self'`] } }).migrated
-            .csp.rules
-        ).toEqual([`script-src 'self'`]);
-      });
-
-      it('removes a strange nonce', () => {
-        expect(
-          applyCoreDeprecations({ csp: { rules: [`script-src 'self' blah-{nonce}-wow`] } }).migrated
-            .csp.rules
-        ).toEqual([`script-src 'self'`]);
-      });
-
-      it('removes multiple nonces', () => {
-        expect(
-          applyCoreDeprecations({
-            csp: {
-              rules: [
-                `script-src 'nonce-{nonce}' 'self' blah-{nonce}-wow`,
-                `style-src 'nonce-{nonce}' 'self'`,
-              ],
-            },
-          }).migrated.csp.rules
-        ).toEqual([`script-src 'self'`, `style-src 'self'`]);
-      });
-    });
-
-    describe('without self source', () => {
-      it('logs a warning', () => {
-        const { messages } = applyCoreDeprecations({
-          csp: { rules: [`script-src 'unsafe-eval'`] },
-        });
-        expect(messages).toMatchInlineSnapshot(`
-              Array [
-                "csp.rules must contain the 'self' source. Automatically adding to script-src.",
-              ]
-        `);
-      });
-
-      it('adds self', () => {
-        expect(
-          applyCoreDeprecations({ csp: { rules: [`script-src 'unsafe-eval'`] } }).migrated.csp.rules
-        ).toEqual([`script-src 'unsafe-eval' 'self'`]);
-      });
-    });
-
-    it('does not add self to other policies', () => {
-      expect(
-        applyCoreDeprecations({ csp: { rules: [`worker-src blob:`] } }).migrated.csp.rules
-      ).toEqual([`worker-src blob:`]);
     });
   });
 });
