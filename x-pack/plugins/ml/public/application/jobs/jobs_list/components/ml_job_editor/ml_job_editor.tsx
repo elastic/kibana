@@ -7,8 +7,12 @@
 
 import React, { FC } from 'react';
 
-import { EuiCodeEditor, EuiCodeEditorProps } from '@elastic/eui';
+import { EuiCodeBlock } from '@elastic/eui';
 import { expandLiteralStrings, XJsonMode } from '../../../../../../shared_imports';
+import {
+  CodeEditor,
+  CodeEditorProps,
+} from '../../../../../../../../../src/plugins/kibana_react/public';
 
 export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 
@@ -18,9 +22,7 @@ interface MlJobEditorProps {
   width?: string;
   mode?: typeof ML_EDITOR_MODE[keyof typeof ML_EDITOR_MODE];
   readOnly?: boolean;
-  syntaxChecking?: boolean;
-  theme?: string;
-  onChange?: EuiCodeEditorProps['onChange'];
+  onChange?: CodeEditorProps['onChange'];
 }
 export const MLJobEditor: FC<MlJobEditorProps> = ({
   value,
@@ -28,30 +30,39 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   width = '100%',
   mode = ML_EDITOR_MODE.JSON,
   readOnly = false,
-  syntaxChecking = true,
-  theme = 'textmate',
   onChange = () => {},
 }) => {
   if (mode === ML_EDITOR_MODE.XJSON) {
     value = expandLiteralStrings(value);
   }
 
-  return (
-    <EuiCodeEditor
+  return readOnly ? (
+    <EuiCodeBlock
+      style={{ width, height }}
+      language={mode}
+      fontSize="s"
+      paddingSize="s"
+      transparentBackground={true}
+    >
+      {value}
+    </EuiCodeBlock>
+  ) : (
+    <CodeEditor
+      options={{
+        automaticLayout: false,
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
+        fontSize: 12,
+        scrollBeyondLastLine: false,
+        minimap: {
+          enabled: false,
+        },
+        highlightActiveIndentGuide: false,
+      }}
       value={value}
       width={width}
       height={height}
-      mode={mode}
-      readOnly={readOnly}
-      wrapEnabled={true}
-      showPrintMargin={false}
-      theme={theme}
-      editorProps={{ $blockScrolling: true }}
-      setOptions={{
-        useWorker: syntaxChecking,
-        tabSize: 2,
-        useSoftTabs: true,
-      }}
+      languageId={mode}
       onChange={onChange}
     />
   );

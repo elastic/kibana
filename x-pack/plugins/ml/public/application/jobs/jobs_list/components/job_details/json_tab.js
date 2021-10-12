@@ -17,7 +17,12 @@ export function JsonPane({ job }) {
   return (
     <React.Fragment>
       <EuiSpacer size="s" />
-      <MLJobEditor value={json} readOnly={true} mode={ML_EDITOR_MODE.XJSON} />
+      <MLJobEditor
+        value={json}
+        readOnly={true}
+        // mode={ML_EDITOR_MODE.XJSON}
+        mode={ML_EDITOR_MODE.JSON}
+      />
     </React.Fragment>
   );
 }

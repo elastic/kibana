@@ -106,7 +106,8 @@ export class Datafeed extends Component {
             style={{ maxWidth: 'inherit' }}
           >
             <MLJobEditor
-              mode={ML_EDITOR_MODE.XJSON}
+              // mode={ML_EDITOR_MODE.XJSON}
+              mode={ML_EDITOR_MODE.JSON}
               value={query}
               onChange={this.onQueryChange}
               height="200px"
