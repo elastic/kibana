@@ -467,7 +467,7 @@ export class DynamicStyleProperty<T>
         targetName = getComputedFieldName(this.getStyleName(), this._field.getName());
       } else {
         // Non-geojson sources (e.g. 3rd party mvt or ES-source as mvt)
-        targetName = this._field.getName();
+        targetName = this._field.getMbFieldName();
       }
     }
     return targetName;
