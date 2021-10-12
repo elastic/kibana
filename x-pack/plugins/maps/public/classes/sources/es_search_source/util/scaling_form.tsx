@@ -15,7 +15,7 @@ import {
   EuiSwitchEvent,
   EuiTitle,
   EuiToolTip,
-  EuiBetaBadge,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -110,7 +110,7 @@ export class ScalingForm extends Component<Props, State> {
 
   _renderMVTRadio() {
     const labelText = i18n.translate('xpack.maps.source.esSearch.useMVTVectorTiles', {
-      defaultMessage: 'Use vector tiles',
+      defaultMessage: 'Use Elasticsearch vector tiles',
     });
     const mvtRadio = (
       <EuiRadio
@@ -123,10 +123,9 @@ export class ScalingForm extends Component<Props, State> {
 
     const enabledInfo = (
       <>
-        <EuiBetaBadge label={'beta'} />
         <EuiHorizontalRule margin="xs" />
         {i18n.translate('xpack.maps.source.esSearch.mvtDescription', {
-          defaultMessage: 'Use vector tiles for faster display of large datasets.',
+          defaultMessage: 'Use Elasticsearch vector tiles for faster display of large datasets.',
         })}
       </>
     );
@@ -139,7 +138,7 @@ export class ScalingForm extends Component<Props, State> {
   }
 
   render() {
-    let filterByBoundsSwitch;
+    let filterByBoundsSwitch = null;
     if (this.props.scalingType === SCALING_TYPES.LIMIT) {
       filterByBoundsSwitch = (
         <EuiFormRow>
@@ -151,6 +150,20 @@ export class ScalingForm extends Component<Props, State> {
             onChange={this._onFilterByMapBoundsChange}
             compressed
           />
+        </EuiFormRow>
+      );
+    }
+
+    let mvtCallout = null;
+    if (this.props.scalingType === SCALING_TYPES.MVT) {
+      mvtCallout = (
+        <EuiFormRow>
+          <EuiCallOut>
+            {i18n.translate('xpack.maps.source.esSearch.mvtCallout', {
+              defaultMessage:
+                'Using Elasticsearch vector tiles allows you to quickly view large data sets. Some layer-settings are not compatible with this selection and will be disabled.',
+            })}
+          </EuiCallOut>
         </EuiFormRow>
       );
     }
@@ -180,8 +193,8 @@ export class ScalingForm extends Component<Props, State> {
             {this._renderMVTRadio()}
           </div>
         </EuiFormRow>
-
         {filterByBoundsSwitch}
+        {mvtCallout}
       </Fragment>
     );
   }

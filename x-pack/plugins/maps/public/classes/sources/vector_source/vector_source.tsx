@@ -9,12 +9,13 @@ import type { Query } from 'src/plugins/data/common';
 import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { TooltipProperty, ITooltipProperty } from '../../tooltips/tooltip_property';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
+  TileMetaFeature,
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -44,6 +45,9 @@ export interface BoundsRequestMeta {
 }
 
 export interface IVectorSource extends ISource {
+  isMvt(): boolean;
+  isPointsOnly(): boolean;
+  showTooManyFeaturesBounds(): boolean;
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     layerDataFilters: BoundsRequestMeta,
@@ -73,7 +77,11 @@ export interface IVectorSource extends ISource {
   hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  getSourceTooltipConfigFromTileMeta(
+    tileMetaFeatures: TileMetaFeature[],
+    totalFeaturesCount: number
+  ): SourceTooltipConfig;
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
   getDefaultFields(): Promise<Record<string, Record<string, string>>>;
@@ -89,6 +97,14 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [];
   }
 
+  isMvt() {
+    return false;
+  }
+
+  isPointsOnly(): boolean {
+    return false;
+  }
+
   createField({ fieldName }: { fieldName: string }): IField {
     throw new Error('Not implemented');
   }
@@ -102,6 +118,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   isBoundsAware(): boolean {
+    return false;
+  }
+
+  showTooManyFeaturesBounds() {
     return false;
   }
 
@@ -166,8 +186,18 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig {
     return { tooltipContent: null, areResultsTrimmed: false };
+  }
+
+  getSourceTooltipConfigFromTileMeta(
+    tileMetaFeatures: TileMetaFeature[],
+    totalFeaturesCount: number
+  ): SourceTooltipConfig {
+    return {
+      tooltipContent: null,
+      areResultsTrimmed: false,
+    };
   }
 
   getSyncMeta(): object | null {

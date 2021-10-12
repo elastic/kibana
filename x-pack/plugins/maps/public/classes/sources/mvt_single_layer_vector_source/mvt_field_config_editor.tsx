@@ -178,14 +178,14 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
   _renderFieldConfig() {
     return this.state.currentFields.map((mvtFieldConfig: MVTFieldDescriptor, index: number) => {
       return (
-        <>
+        <Fragment key={index}>
           <EuiFlexGroup key={index} gutterSize="xs" alignItems="center">
             <EuiFlexItem>{this._renderFieldNameInput(mvtFieldConfig, index)}</EuiFlexItem>
             <EuiFlexItem>{this._renderFieldTypeDropDown(mvtFieldConfig, index)}</EuiFlexItem>
             <EuiFlexItem grow={false}>{this._renderFieldButtonDelete(index)}</EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size={'xs'} />
-        </>
+        </Fragment>
       );
     });
   }

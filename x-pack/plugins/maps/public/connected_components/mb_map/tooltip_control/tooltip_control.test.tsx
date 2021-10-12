@@ -36,6 +36,12 @@ const mockLayer = {
   canShowTooltip: () => {
     return true;
   },
+  getMbTooltipLayerIds: () => {
+    return ['foo', 'bar'];
+  },
+  getMbFeatureIdPropertyName: () => {
+    return 'id';
+  },
   getFeatureById: () => {
     return {
       geometry: {

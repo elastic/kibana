@@ -58,6 +58,11 @@ function createLayerMock(
         },
       } as unknown as IVectorSource;
     },
+    getLabelsDisabledReason: () => {
+      return layerType === LAYER_TYPE.TILED_VECTOR || layerType === LAYER_TYPE.VECTOR_TILE
+        ? `foobar_${layerType}`
+        : null;
+    },
   } as unknown as IVectorLayer;
 }
 
@@ -116,7 +121,7 @@ test('should render polygon-style without label properties when 3rd party mvt', 
   const component = shallow(
     <VectorStyleEditor
       {...defaultProps}
-      layer={createLayerMock(2, [VECTOR_SHAPE_TYPE.POLYGON], LAYER_TYPE.TILED_VECTOR, false)}
+      layer={createLayerMock(2, [VECTOR_SHAPE_TYPE.POLYGON], LAYER_TYPE.VECTOR_TILE, false)}
     />
   );
 
@@ -128,7 +133,7 @@ test('should render polygon-style without label properties when 3rd party mvt', 
   expect(component).toMatchSnapshot();
 });
 
-test('should render line-style with label properties when ES-source is rendered as mvt', async () => {
+test('should render line-style without label properties when ES-source is rendered as mvt', async () => {
   const component = shallow(
     <VectorStyleEditor
       {...defaultProps}

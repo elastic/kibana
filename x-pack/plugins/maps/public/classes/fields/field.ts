@@ -11,6 +11,7 @@ import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property'
 
 export interface IField {
   getName(): string;
+  getMbFieldName(): string;
   getRootName(): string;
   canValueBeFormatted(): boolean;
   getLabel(): Promise<string>;
@@ -22,6 +23,7 @@ export interface IField {
   getExtendedStatsFieldMetaRequest(): Promise<unknown | null>;
   getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null>;
   getCategoricalFieldMetaRequest(size: number): Promise<unknown>;
+  isCountable(): boolean;
 
   // Whether Maps-app can automatically determine the domain of the field-values
   // if this is not the case (e.g. for .mvt tiled data),
@@ -50,6 +52,10 @@ export class AbstractField implements IField {
     return this._fieldName;
   }
 
+  getMbFieldName(): string {
+    return this.getName();
+  }
+
   getRootName(): string {
     return this.getName();
   }
@@ -64,6 +70,10 @@ export class AbstractField implements IField {
 
   isValid(): boolean {
     return !!this._fieldName;
+  }
+
+  isCountable(): boolean {
+    return false;
   }
 
   async getDataType(): Promise<string> {

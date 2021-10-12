@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { TileLayer } from '../tile_layer/tile_layer';
 import _ from 'lodash';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
@@ -93,6 +94,12 @@ export class VectorTileLayer extends TileLayer {
       return null;
     }
     return vectorStyleAndSprites.vectorStyleSheet;
+  }
+
+  getLabelsDisabledReason() {
+    return i18n.translate('xpack.maps.vectortilelayer.labelsDisabledReasonMvt', {
+      defaultMessage: 'Labels are not supported when using 3rd party vector tiles',
+    });
   }
 
   _getSpriteMeta() {

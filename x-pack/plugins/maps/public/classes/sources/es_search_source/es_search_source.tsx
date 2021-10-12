@@ -9,8 +9,8 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
-import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
 import {
@@ -31,11 +31,14 @@ import {
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
+  DEFAULT_MAX_RESULT_WINDOW,
   ES_GEO_FIELD_TYPE,
   FIELD_ORIGIN,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
-  MVT_SOURCE_LAYER_NAME,
+  MVT_HITS_SOURCE_LAYER_NAME,
+  MVT_HITS_TOTAL_RELATION,
+  MVT_HITS_TOTAL_VALUE,
   MVT_TOKEN_PARAM_NAME,
   SCALING_TYPES,
   SOURCE_TYPES,
@@ -50,18 +53,22 @@ import { registerSource } from '../source_registry';
 import {
   DataRequestMeta,
   ESSearchSourceDescriptor,
+  TileMetaFeature,
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { TimeRange } from '../../../../../../../src/plugins/data/common';
+import {
+  SortDirection,
+  SortDirectionNumeric,
+  TimeRange,
+} from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import { GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
 import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
-import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
@@ -154,6 +161,40 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     });
   }
 
+  getSourceTooltipConfigFromTileMeta(
+    tileMetaFeatures: TileMetaFeature[],
+    totalFeaturesCount: number
+  ): SourceTooltipConfig {
+    if (!this.isMvt()) {
+      return super.getSourceTooltipConfigFromTileMeta(tileMetaFeatures, totalFeaturesCount);
+    }
+
+    const isIncomplete: boolean = tileMetaFeatures.some((tileMeta: TileMetaFeature) => {
+      if (tileMeta?.properties?.[MVT_HITS_TOTAL_RELATION] === 'gte') {
+        return tileMeta?.properties?.[MVT_HITS_TOTAL_VALUE] >= DEFAULT_MAX_RESULT_WINDOW;
+      } else {
+        return false;
+      }
+    });
+
+    return {
+      tooltipContent: isIncomplete
+        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
+            defaultMessage: `Results limited to {count} documents.`,
+            values: {
+              count: totalFeaturesCount.toLocaleString(),
+            },
+          })
+        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
+            defaultMessage: `Found {count} documents.`,
+            values: {
+              count: totalFeaturesCount.toLocaleString(),
+            },
+          }),
+      areResultsTrimmed: isIncomplete,
+    };
+  }
+
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
     if (this._isTopHits()) {
       return (
@@ -209,6 +250,10 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getFieldNames(): string[] {
     return [this._descriptor.geoField];
+  }
+
+  isMvt() {
+    return this._descriptor.scalingType === SCALING_TYPES.MVT;
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
@@ -561,7 +606,15 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return this._tooltipFields.length > 0;
   }
 
-  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: IndexPattern) {
+  showTooManyFeaturesBounds() {
+    return this.isMvt();
+  }
+
+  async _loadTooltipProperties(
+    docId: string | number,
+    esIndex: string,
+    indexPattern: IndexPattern
+  ) {
     if (this._tooltipFields.length === 0) {
       return {};
     }
@@ -582,7 +635,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const query = {
       language: 'kuery',
-      query: `_id:"${docId}" and _index:"${index}"`,
+      query: esIndex ? `_id:"${docId}" and _index:"${esIndex}"` : `_id:"${docId}"`, // todo: pending _index support on mvt
     };
 
     searchSource.setField('query', query);
@@ -664,7 +717,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig {
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     if (!meta) {
       // no tooltip content needed when there is no feature collection or meta
@@ -759,7 +812,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getLayerName(): string {
-    return MVT_SOURCE_LAYER_NAME;
+    return MVT_HITS_SOURCE_LAYER_NAME;
   }
 
   async _getEditableIndex(): Promise<string> {

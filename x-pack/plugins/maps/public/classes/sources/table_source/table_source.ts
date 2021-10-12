@@ -196,7 +196,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     throw new Error('TableSource cannot be used as a left-layer in a term join');
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig {
     throw new Error('must add tooltip content');
   }
 

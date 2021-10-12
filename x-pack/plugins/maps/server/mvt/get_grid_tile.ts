@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-import { DEFAULT_MAX_RESULT_WINDOW, ES_GEO_FIELD_TYPE } from '../../common/constants';
+import {
+  ES_GEO_FIELD_TYPE,
+  GEOCENTROID_AGG_NAME,
+  GEOTILE_GRID_AGG_NAME,
+  RENDER_AS,
+} from '../../common/constants';
 
 function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
 }
 
-export async function getEsTile({
+export async function getEsGridTile({
   logger,
   context,
   index,
@@ -23,6 +27,7 @@ export async function getEsTile({
   y,
   z,
   requestBody = {},
+  requestType = RENDER_AS.POINT,
 }: {
   x: number;
   y: number;
@@ -32,18 +37,31 @@ export async function getEsTile({
   context: DataRequestHandlerContext;
   logger: Logger;
   requestBody: any;
+  requestType: RENDER_AS.GRID | RENDER_AS.POINT;
   geoFieldType: ES_GEO_FIELD_TYPE;
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
-    let fields = _.uniq(requestBody.docvalue_fields.concat(requestBody.stored_fields));
-    fields = fields.filter((f) => f !== geometryFieldName);
+
+    const aggs: Record<string, unknown> = {};
+
+    for (const key in requestBody.aggs[GEOTILE_GRID_AGG_NAME].aggs) {
+      if (requestBody.aggs[GEOTILE_GRID_AGG_NAME].aggs.hasOwnProperty(key)) {
+        if (key !== GEOCENTROID_AGG_NAME) {
+          aggs[key] = requestBody.aggs[GEOTILE_GRID_AGG_NAME].aggs[key];
+        }
+      }
+    }
+
+    const fields = requestBody.fields;
     const body = {
-      size: DEFAULT_MAX_RESULT_WINDOW,
-      grid_precision: 0, // no aggs
-      exact_bounds: true,
+      size: 0, // no hits
+      grid_precision: 7,
+      exact_bounds: false,
       extent: 4096, // full resolution,
       query: requestBody.query,
+      grid_type: requestType === RENDER_AS.GRID ? 'grid' : 'centroid',
+      aggs,
       fields,
       runtime_mappings: requestBody.runtime_mappings,
     };

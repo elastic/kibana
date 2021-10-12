@@ -47,7 +47,14 @@ export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
-export const MVT_SOURCE_LAYER_NAME = 'source_layer';
+
+export const MVT_HITS_SOURCE_LAYER_NAME = 'hits';
+export const MVT_AGGS_SOURCE_LAYER_NAME = 'aggs';
+export const MVT_META_SOURCE_LAYER_NAME = 'meta';
+
+export const MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
+export const MVT_HITS_TOTAL_VALUE = 'hits.total.value';
+
 // Identifies vector tile "too many features" feature.
 // "too many features" feature is a box showing area that contains too many features for single ES search response
 export const KBN_METADATA_FEATURE = '__kbn_metadata_feature__';
@@ -119,7 +126,8 @@ export const DEFAULT_MAX_RESULT_WINDOW = 10000;
 export const DEFAULT_MAX_INNER_RESULT_WINDOW = 100;
 export const DEFAULT_MAX_BUCKETS_LIMIT = 65535;
 
-export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
+export const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
+export const MVT_FEATURE_ID_PROPERTY_NAME = '_id';
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
 
 export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';

@@ -51,9 +51,9 @@ export default function ({ getPageObjects, getService }) {
             'coalesce',
             [
               'case',
-              ['==', ['get', 'max_of_bytes'], null],
+              ['==', ['get', 'max_of_bytes.value'], null],
               1622,
-              ['max', ['min', ['to-number', ['get', 'max_of_bytes']], 9790], 1623],
+              ['max', ['min', ['to-number', ['get', 'max_of_bytes.value']], 9790], 1623],
             ],
             1622,
           ],
