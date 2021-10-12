@@ -4,6 +4,7 @@
  - [Transaction breakdown metrics](#transaction-breakdown-metrics)
  - [Span breakdown metrics](#span-breakdown-metrics)
  - [Service destination metrics](#service-destination-metrics)
+ - [Common filters](#common-filters)
 
 ---
 
@@ -491,7 +492,7 @@ GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 }
 ```
 
-## Common filters
+# Common filters
 
 Most Elasticsearch queries will need to have one or more filters. There are a couple of reasons for adding filters:
 
