@@ -17,10 +17,11 @@ import {
 } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
-import { SeriesUrl, UrlFilter } from '../types';
-import { useAppIndexPatternContext } from './use_app_index_pattern';
+import { ReportViewType, SeriesUrl, UrlFilter } from '../types';
+import { IndexPatternState, useAppIndexPatternContext } from './use_app_index_pattern';
 import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
 import { useTheme } from '../../../../hooks/use_theme';
+import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 
 export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
   return Object.entries(reportDefinitions ?? {})
@@ -32,6 +33,54 @@ export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitio
     })
     .filter(({ values }) => !values.includes(ALL_VALUES_SELECTED)) as UrlFilter[];
 };
+
+export function getLayerConfigs(
+  allSeries: AllSeries,
+  reportType: ReportViewType,
+  theme: EuiTheme,
+  indexPatterns: IndexPatternState
+) {
+  const layerConfigs: LayerConfig[] = [];
+
+  allSeries.forEach((series, seriesIndex) => {
+    const indexPattern = indexPatterns?.[series?.dataType];
+
+    if (
+      indexPattern &&
+      !isEmpty(series.reportDefinitions) &&
+      !series.hidden &&
+      series.selectedMetricField
+    ) {
+      const seriesConfig = getDefaultConfigs({
+        reportType,
+        indexPattern,
+        dataType: series.dataType,
+      });
+
+      const filters: UrlFilter[] = (series.filters ?? []).concat(
+        getFiltersFromDefs(series.reportDefinitions)
+      );
+
+      const color = `euiColorVis${seriesIndex}`;
+
+      layerConfigs.push({
+        filters,
+        indexPattern,
+        seriesConfig,
+        time: series.time,
+        name: series.name,
+        breakdown: series.breakdown,
+        seriesType: series.seriesType,
+        operationType: series.operationType,
+        reportDefinitions: series.reportDefinitions ?? {},
+        selectedMetricField: series.selectedMetricField,
+        color: series.color ?? (theme.eui as unknown as Record<string, string>)[color],
+      });
+    }
+  });
+
+  return layerConfigs;
+}
 
 export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null => {
   const { storage, allSeries, lastRefresh, reportType } = useSeriesStorage();
@@ -47,44 +96,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
 
     const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
 
-    const layerConfigs: LayerConfig[] = [];
-
-    allSeriesT.forEach((series, seriesIndex) => {
-      const indexPattern = indexPatterns?.[series?.dataType];
-
-      if (
-        indexPattern &&
-        !isEmpty(series.reportDefinitions) &&
-        !series.hidden &&
-        series.selectedMetricField
-      ) {
-        const seriesConfig = getDefaultConfigs({
-          reportType,
-          indexPattern,
-          dataType: series.dataType,
-        });
-
-        const filters: UrlFilter[] = (series.filters ?? []).concat(
-          getFiltersFromDefs(series.reportDefinitions)
-        );
-
-        const color = `euiColorVis${seriesIndex}`;
-
-        layerConfigs.push({
-          filters,
-          indexPattern,
-          seriesConfig,
-          time: series.time,
-          name: series.name,
-          breakdown: series.breakdown,
-          seriesType: series.seriesType,
-          operationType: series.operationType,
-          reportDefinitions: series.reportDefinitions ?? {},
-          selectedMetricField: series.selectedMetricField,
-          color: series.color ?? (theme.eui as unknown as Record<string, string>)[color],
-        });
-      }
-    });
+    const layerConfigs = getLayerConfigs(allSeriesT, reportType, theme, indexPatterns);
 
     if (layerConfigs.length < 1) {
       return null;
