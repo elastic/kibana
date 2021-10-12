@@ -20,8 +20,10 @@ const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const COPY_TO_CLIPBOARD_BUTTON_SELECTOR = 'copy-to-clipboard';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const ACTION_COLUMN_INDEX = 1;
-const ADD_TO_EXISTING_CASE_SELECTOR = 'attach-alert-to-case-button';
-const ADD_TO_NEW_CASE_SELECTOR = 'attach-alert-to-case-button';
+// CASES
+const ADD_TO_EXISTING_CASE_SELECTOR = 'add-existing-case-menu-item';
+const ADD_TO_NEW_CASE_SELECTOR = 'add-new-case-item';
+const CREATE_CASE_FLYOUT = 'create-case-flyout';
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -207,6 +209,14 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.missingOrFail(ADD_TO_NEW_CASE_SELECTOR);
   };
 
+  const addToNewCaseButtonClick = async () => {
+    return await (await getAddToNewCaseSelector()).click();
+  };
+
+  const getCreateCaseFlyoutOrFail = async () => {
+    return await testSubjects.existOrFail(CREATE_CASE_FLYOUT);
+  };
+
   return {
     getQueryBar,
     clearQueryBar,
@@ -238,5 +248,7 @@ export function ObservabilityAlertsCommonProvider({
     getAddToNewCaseSelector,
     getAddToNewCaseSelectorOrFail,
     missingAddToNewCaseSelectorOrFail,
+    getCreateCaseFlyoutOrFail,
+    addToNewCaseButtonClick,
   };
 }
