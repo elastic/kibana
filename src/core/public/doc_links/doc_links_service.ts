@@ -362,6 +362,10 @@ export class DocLinksService {
           mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
           runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
         },
+        spaces: {
+          kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
+          kibanaDisableLegacyUrlAliasesApi: `${KIBANA_DOCS}spaces-api-disable-legacy-url-aliases.html`,
+        },
         watcher: {
           jiraAction: `${ELASTICSEARCH_DOCS}actions-jira.html`,
           pagerDutyAction: `${ELASTICSEARCH_DOCS}actions-pagerduty.html`,
@@ -711,6 +715,10 @@ export interface DocLinksStart {
       mappingRoles: string;
       mappingRolesFieldRules: string;
       runAsPrivilege: string;
+    }>;
+    readonly spaces: Readonly<{
+      kibanaLegacyUrlAliases: string;
+      kibanaDisableLegacyUrlAliasesApi: string;
     }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;

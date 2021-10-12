@@ -197,9 +197,21 @@
             "text": "CoreStart"
           },
           "; readonly env: { mode: Readonly<",
-          "EnvironmentMode",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.EnvironmentMode",
+            "text": "EnvironmentMode"
+          },
           ">; packageInfo: Readonly<",
-          "PackageInfo",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.PackageInfo",
+            "text": "PackageInfo"
+          },
           ">; }; }, isLocalAngular: boolean, getHistory?: (() => ",
           "History",
           "<any>) | undefined) => void"
@@ -259,9 +271,21 @@
                 "description": [],
                 "signature": [
                   "{ mode: Readonly<",
-                  "EnvironmentMode",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "server",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-server.EnvironmentMode",
+                    "text": "EnvironmentMode"
+                  },
                   ">; packageInfo: Readonly<",
-                  "PackageInfo",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "server",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-server.PackageInfo",
+                    "text": "PackageInfo"
+                  },
                   ">; }"
                 ],
                 "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",

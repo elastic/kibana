@@ -61,6 +61,18 @@ describe('Kibana deprecation details flyout', () => {
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(manualDeprecation.title);
       expect(find('manualStepsListItem').length).toBe(3);
     });
+
+    test(`doesn't show corrective actions title and steps if there aren't any`, async () => {
+      const { find, exists, actions } = testBed;
+      const manualDeprecation = mockedKibanaDeprecations[2];
+
+      await actions.table.clickDeprecationAt(2);
+
+      expect(exists('kibanaDeprecationDetails')).toBe(true);
+      expect(exists('kibanaDeprecationDetails.manualStepsTitle')).toBe(false);
+      expect(exists('manualStepsListItem')).toBe(false);
+      expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(manualDeprecation.title);
+    });
   });
 
   describe('Deprecation with automatic resolution', () => {
