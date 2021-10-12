@@ -36,10 +36,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { licenseService } from '../../../../common/hooks/use_license';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  htmlIdGenerator: () => () => 'mockId',
-}));
-
 // TODO: remove this mock when feature flag is removed
 jest.mock('../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;

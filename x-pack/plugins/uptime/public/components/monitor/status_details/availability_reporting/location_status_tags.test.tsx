@@ -13,12 +13,6 @@ import { render } from '../../../../lib/helper/rtl_helpers';
 
 mockMoment();
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
-
 describe('LocationStatusTags component', () => {
   let monitorLocations: MonitorLocation[];
 

@@ -14,12 +14,6 @@ import { mountWithI18nProvider } from '@kbn/test/jest';
 import { Frequency } from './types';
 import { CronEditor } from './cron_editor';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
-
 describe('CronEditor', () => {
   ['MINUTE', 'HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR'].forEach((unit) => {
     test(`is rendered with a ${unit} frequency`, () => {

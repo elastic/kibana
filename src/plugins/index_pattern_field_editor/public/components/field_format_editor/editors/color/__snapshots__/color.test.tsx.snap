@@ -76,7 +76,12 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
         },
       ]
     }
-    noItemsMessage="No items found"
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
     responsive={true}
     tableLayout="fixed"
   />
@@ -170,7 +175,12 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
         },
       ]
     }
-    noItemsMessage="No items found"
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
     responsive={true}
     tableLayout="fixed"
   />
@@ -264,7 +274,12 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
         },
       ]
     }
-    noItemsMessage="No items found"
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
     responsive={true}
     tableLayout="fixed"
   />
