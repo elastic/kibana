@@ -21,7 +21,7 @@ import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constant
 import { CurationsLogic } from '../curations_logic';
 import { getCurationsBreadcrumbs } from '../utils';
 
-import { CurationsHistory } from './curations_history';
+import { CurationsHistory } from './curations_history/curations_history';
 import { CurationsOverview } from './curations_overview';
 import { CurationsSettings } from './curations_settings';
 
