@@ -79,7 +79,7 @@ const createFailedActionResponseEntry = async ({
         ...doc,
         error: {
           code: '424',
-          message: 'Failed to send action request to agent',
+          message: 'Failed to deliver action request to fleet',
         },
       },
     });
