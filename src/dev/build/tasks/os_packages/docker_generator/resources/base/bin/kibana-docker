@@ -211,12 +211,12 @@ kibana_vars=(
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
     xpack.apm.enabled
-    xpack.apm.errors
-    xpack.apm.metrics
-    xpack.apm.onboarding
-    xpack.apm.sourcemaps
-    xpack.apm.spans
-    xpack.apm.transactions
+    xpack.apm.indices.errors
+    xpack.apm.indices.metrics
+    xpack.apm.indices.onboarding
+    xpack.apm.indices.sourcemaps
+    xpack.apm.indices.spans
+    xpack.apm.indices.transactions
     xpack.apm.maxServiceEnvironments
     xpack.apm.searchAggregatedTransactions
     xpack.apm.serviceMapEnabled
