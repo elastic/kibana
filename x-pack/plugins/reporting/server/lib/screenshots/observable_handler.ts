@@ -11,7 +11,9 @@ import { catchError, mergeMap, timeout } from 'rxjs/operators';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
+import { getChromiumDisconnectedError } from '../../browsers/chromium';
 import { CaptureConfig } from '../../types';
+import { PageSetupResults, ScreenshotObservableOpts, ScreenshotResults } from './';
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
@@ -19,10 +21,14 @@ import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
-import { PageSetupResults, ScreenshotObservableOpts, ScreenshotResults } from './';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
-import { getChromiumDisconnectedError } from '../../browsers/chromium';
+
+interface PhaseInstance {
+  timeoutValue: moment.Duration | number;
+  configValue: string;
+  label: string;
+}
 
 export class ScreenshotObservableHandler {
   private conditionalHeaders: ScreenshotObservableOpts['conditionalHeaders'];
@@ -30,25 +36,27 @@ export class ScreenshotObservableHandler {
   private logger: ScreenshotObservableOpts['logger'];
   private waitErrorRegistered = false;
 
-  private phases = {
-    OPEN_URL: {
-      timeoutValue: this.captureConfig.timeouts.openUrl,
-      configValue: `xpack.reporting.capture.timeouts.openUrl`,
-      label: 'open URL',
-    },
-    WAIT_FOR_ELEMENTS: {
-      timeoutValue: this.captureConfig.timeouts.waitForElements,
-      configValue: `xpack.reporting.capture.timeouts.waitForElements`,
-      label: 'wait for elements',
-    },
-    RENDER_COMPLETE: {
-      timeoutValue: this.captureConfig.timeouts.renderComplete,
-      configValue: `xpack.reporting.capture.timeouts.renderComplete`,
-      label: 'render complete',
-    },
+  public readonly OPEN_URL: PhaseInstance = {
+    timeoutValue: this.captureConfig.timeouts.openUrl,
+    configValue: `xpack.reporting.capture.timeouts.openUrl`,
+    label: 'open URL',
+  };
+  public readonly WAIT_FOR_ELEMENTS: PhaseInstance = {
+    timeoutValue: this.captureConfig.timeouts.waitForElements,
+    configValue: `xpack.reporting.capture.timeouts.waitForElements`,
+    label: 'wait for elements',
+  };
+  public readonly RENDER_COMPLETE: PhaseInstance = {
+    timeoutValue: this.captureConfig.timeouts.renderComplete,
+    configValue: `xpack.reporting.capture.timeouts.renderComplete`,
+    label: 'render complete',
   };
 
-  constructor(private readonly captureConfig: CaptureConfig, opts: ScreenshotObservableOpts) {
+  constructor(
+    private readonly driver: HeadlessChromiumDriver,
+    private readonly captureConfig: CaptureConfig,
+    opts: ScreenshotObservableOpts
+  ) {
     this.conditionalHeaders = opts.conditionalHeaders;
     this.layout = opts.layout;
     this.logger = opts.logger;
@@ -58,8 +66,8 @@ export class ScreenshotObservableHandler {
    * This wraps a chain of observable operators in a timeout, and decorates a
    * timeout error to specify which phase of page capture has timed out.
    */
-  public waitUntil<O, P>(phase: ScreenshotObservablePhase, chain: Rx.OperatorFunction<O, P>) {
-    const { timeoutValue, label, configValue } = this.phases[phase];
+  public waitUntil<O, P>(phase: PhaseInstance, chain: Rx.OperatorFunction<O, P>) {
+    const { timeoutValue, label, configValue } = phase;
     return (o: Rx.Observable<O>) => {
       return o.pipe(
         chain,
@@ -88,11 +96,7 @@ export class ScreenshotObservableHandler {
     };
   }
 
-  public openUrl(
-    driver: HeadlessChromiumDriver,
-    index: number,
-    urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple
-  ) {
+  public openUrl(index: number, urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple) {
     return (initial: Rx.Observable<unknown>) => {
       return initial.pipe(
         mergeMap(() => {
@@ -104,7 +108,7 @@ export class ScreenshotObservableHandler {
 
           return openUrl(
             this.captureConfig,
-            driver,
+            this.driver,
             urlOrUrlLocatorTuple,
             pageLoadSelector,
             this.conditionalHeaders,
@@ -115,7 +119,8 @@ export class ScreenshotObservableHandler {
     };
   }
 
-  public waitForElements(driver: HeadlessChromiumDriver) {
+  public waitForElements() {
+    const driver = this.driver;
     return (withPageOpen: Rx.Observable<void>) => {
       return withPageOpen.pipe(
         mergeMap(() => getNumberOfItems(this.captureConfig, driver, this.layout, this.logger)),
@@ -131,7 +136,8 @@ export class ScreenshotObservableHandler {
     };
   }
 
-  public completeRender(driver: HeadlessChromiumDriver, apmTrans: apm.Transaction | null) {
+  public completeRender(apmTrans: apm.Transaction | null) {
+    const driver = this.driver;
     return (withElements: Rx.Observable<void>) => {
       return withElements.pipe(
         mergeMap(async () => {
@@ -161,16 +167,16 @@ export class ScreenshotObservableHandler {
     };
   }
 
-  public getScreenshots(driver: HeadlessChromiumDriver) {
+  public getScreenshots() {
     return (withRenderComplete: Rx.Observable<PageSetupResults>) => {
       return withRenderComplete.pipe(
         mergeMap(async (data: PageSetupResults): Promise<ScreenshotResults> => {
-          this.checkPageIsOpen(driver); // fail the report job if the browser has closed
+          this.checkPageIsOpen(); // fail the report job if the browser has closed
 
           const elements = data.elementsPositionAndAttributes
             ? data.elementsPositionAndAttributes
             : getDefaultElementPosition(this.layout.getViewport(1));
-          const screenshots = await getScreenshots(driver, elements, this.logger);
+          const screenshots = await getScreenshots(this.driver, elements, this.logger);
           const { timeRange, error: setupError } = data;
 
           return {
@@ -184,8 +190,8 @@ export class ScreenshotObservableHandler {
     };
   }
 
-  public checkPageIsOpen(driver: HeadlessChromiumDriver) {
-    if (!driver.isPageOpen()) {
+  public checkPageIsOpen() {
+    if (!this.driver.isPageOpen()) {
       throw getChromiumDisconnectedError();
     }
   }

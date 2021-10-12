@@ -29,8 +29,6 @@ export function getScreenshots$(
   const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
   const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
 
-  const screen = new ScreenshotObservableHandler(captureConfig, opts);
-
   const viewport = opts.layout.getBrowserViewport();
   const { browserTimezone, logger } = opts;
 
@@ -39,20 +37,22 @@ export function getScreenshots$(
       apmCreatePage?.end();
       exit$.subscribe({ error: () => apmTrans?.end() });
 
+      const screen = new ScreenshotObservableHandler(driver, captureConfig, opts);
+
       return Rx.from(opts.urlsOrUrlLocatorTuples).pipe(
         concatMap((urlOrUrlLocatorTuple, index) => {
           return Rx.of(1).pipe(
-            screen.waitUntil('OPEN_URL', screen.openUrl(driver, index, urlOrUrlLocatorTuple)),
-            screen.waitUntil('WAIT_FOR_ELEMENTS', screen.waitForElements(driver)),
-            screen.waitUntil('RENDER_COMPLETE', screen.completeRender(driver, apmTrans)),
+            screen.waitUntil(screen.OPEN_URL, screen.openUrl(index, urlOrUrlLocatorTuple)),
+            screen.waitUntil(screen.WAIT_FOR_ELEMENTS, screen.waitForElements()),
+            screen.waitUntil(screen.RENDER_COMPLETE, screen.completeRender(apmTrans)),
             catchError((err) => {
-              screen.checkPageIsOpen(driver); // this fails the job if the browser has closed
+              screen.checkPageIsOpen(); // this fails the job if the browser has closed
 
               logger.error(err);
               return Rx.of({ ...defaultSetupResult, error: err }); // allow failover screenshot capture
             }),
             takeUntil(exit$),
-            screen.getScreenshots(driver)
+            screen.getScreenshots()
           );
         }),
         take(opts.urlsOrUrlLocatorTuples.length),
