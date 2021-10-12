@@ -7,12 +7,11 @@
  */
 
 import { CustomPaletteState } from 'src/plugins/charts/common';
-import { MinMax } from '../utils';
 
 export const getPaletteService = () => {
   return {
     get: (paletteName: string) => ({
-      getColorForValue: (value: number, params: CustomPaletteState, minMax: MinMax) => {
+      getColorForValue: (value: number, params: CustomPaletteState) => {
         const { colors = [], stops = [] } = params ?? {};
         const lessThenValueIndex = stops.findIndex((stop) => value <= stop);
         return colors[lessThenValueIndex];

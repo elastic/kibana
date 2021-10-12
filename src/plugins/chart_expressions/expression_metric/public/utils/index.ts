@@ -5,7 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { getMinMaxForColumns, parseRgbString, shouldApplyColor, needsLightText } from './palette';
-export type { MinMax, ColumnGroups } from './palette';
-
+export { parseRgbString, shouldApplyColor, needsLightText } from './palette';
 export { formatValue } from './format';

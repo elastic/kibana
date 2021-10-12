@@ -12,7 +12,7 @@ import type { MetricOptions, MetricStyle } from '../../common/types';
 
 interface MetricVisValueProps {
   metric: MetricOptions;
-  onFilter?: (metric: MetricOptions) => void;
+  onFilter?: () => void;
   showLabel?: boolean;
   style: MetricStyle;
 }
@@ -49,7 +49,7 @@ export const MetricVisValue = ({ style, metric, onFilter, showLabel }: MetricVis
 
   if (onFilter) {
     return (
-      <button style={{ display: 'block' }} onClick={() => onFilter(metric)}>
+      <button style={{ display: 'block' }} onClick={() => onFilter()}>
         {metricComponent}
       </button>
     );

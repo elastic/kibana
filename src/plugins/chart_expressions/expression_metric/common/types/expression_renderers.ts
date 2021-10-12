@@ -46,5 +46,4 @@ export interface MetricOptions {
   color?: string;
   bgColor?: string;
   lightText: boolean;
-  rowIndex: number;
 }

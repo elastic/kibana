@@ -24,7 +24,7 @@ export interface MetricArguments {
   palette?: PaletteOutput<CustomPaletteState>;
   font: Style;
   metric: ExpressionValueVisDimension[];
-  bucket: ExpressionValueVisDimension;
+  bucket?: ExpressionValueVisDimension;
 }
 interface LensMultiTable {
   type: 'lens_multitable';

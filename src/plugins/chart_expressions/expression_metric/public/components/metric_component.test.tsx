@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-
+import { Datatable } from '../../../../expressions/common';
 import MetricVisComponent, { MetricVisComponentProps } from './metric_component';
 
 jest.mock('../../../expression_metric/public/services', () => ({
@@ -26,18 +26,17 @@ jest.mock('../../../expression_metric/public/services', () => ({
 
 type Props = MetricVisComponentProps;
 
-const baseVisData = {
+const visData: Datatable = {
+  type: 'datatable',
   columns: [{ id: 'col-0', name: 'Count', meta: { type: 'number' } }],
   rows: [{ 'col-0': 4301021 }],
-} as any;
+};
 
 describe('MetricVisComponent', function () {
-  const visParams = {
-    type: 'metric',
-    addTooltip: false,
-    addLegend: false,
+  const visParams: Props['visParams'] = {
     metric: {
-      colorSchema: 'Green to Red',
+      metricColorMode: 'None',
+      percentageMode: false,
       palette: {
         colors: ['rgb(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
         stops: [0, 10000],
@@ -46,21 +45,27 @@ describe('MetricVisComponent', function () {
         rangeMax: 1000,
         range: 'number',
       },
-      style: {},
+      style: {
+        type: 'style',
+        spec: {},
+        css: '',
+        bgColor: false,
+        labelColor: false,
+      },
       labels: {
         show: true,
       },
     },
     dimensions: {
-      metrics: [{ accessor: 0 } as any],
+      metrics: [{ accessor: 0, type: 'vis_dimension', format: { params: {}, id: 'number' } }],
       bucket: undefined,
     },
   };
 
   const getComponent = (propOverrides: Partial<Props> = {} as Partial<Props>) => {
     const props: Props = {
-      visParams: visParams as any,
-      visData: baseVisData,
+      visParams,
+      visData,
       renderComplete: jest.fn(),
       fireEvent: jest.fn(),
       ...propOverrides,
@@ -80,6 +85,7 @@ describe('MetricVisComponent', function () {
   it('should render correct structure for multi-value metrics', function () {
     const component = getComponent({
       visData: {
+        type: 'datatable',
         columns: [
           { id: 'col-0', name: '1st percentile of bytes', meta: { type: 'number' } },
           { id: 'col-1', name: '99th percentile of bytes', meta: { type: 'number' } },
@@ -90,10 +96,13 @@ describe('MetricVisComponent', function () {
         ...visParams,
         dimensions: {
           ...visParams.dimensions,
-          metrics: [{ accessor: 0 }, { accessor: 1 }],
+          metrics: [
+            { accessor: 0, type: 'vis_dimension', format: { id: 'number', params: {} } },
+            { accessor: 1, type: 'vis_dimension', format: { id: 'number', params: {} } },
+          ],
         },
       },
-    } as any);
+    });
 
     expect(component).toMatchSnapshot();
   });

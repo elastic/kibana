@@ -10,9 +10,9 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MetricVisValue } from './metric_value';
-import { MetricStyle } from '../../common/types';
+import { MetricOptions, MetricStyle } from '../../common/types';
 
-const baseMetric = { label: 'Foo', value: 'foo' } as any;
+const baseMetric: MetricOptions = { label: 'Foo', value: 'foo', lightText: false };
 const font: MetricStyle = {
   spec: { fontSize: '12px' },
 
@@ -58,6 +58,6 @@ describe('MetricVisValue', () => {
       <MetricVisValue style={font} metric={baseMetric} onFilter={onFilter} />
     );
     component.simulate('click');
-    expect(onFilter).toHaveBeenCalledWith(baseMetric);
+    expect(onFilter).toHaveBeenCalled();
   });
 });

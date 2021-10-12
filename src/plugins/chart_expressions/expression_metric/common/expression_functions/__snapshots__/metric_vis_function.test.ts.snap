@@ -6,7 +6,8 @@ Object {
     Object {
       "id": "col-0-1",
       "meta": Object {
-        "dimensionName": undefined,
+        "dimensionName": "Metric",
+        "type": "number",
       },
       "name": "Count",
     },
@@ -27,13 +28,22 @@ Object {
   "value": Object {
     "visConfig": Object {
       "dimensions": Object {
-        "metrics": undefined,
+        "metrics": Array [
+          Object {
+            "accessor": 0,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+        ],
       },
       "metric": Object {
         "labels": Object {
           "show": true,
         },
-        "metricColorMode": "\\"None\\"",
+        "metricColorMode": "None",
         "palette": Object {
           "colors": Array [
             "rgb(0, 0, 0, 0)",
@@ -51,10 +61,12 @@ Object {
         "percentageMode": false,
         "style": Object {
           "bgColor": false,
-          "bgFill": "",
-          "fontSize": 60,
+          "css": "",
           "labelColor": false,
-          "subText": "",
+          "spec": Object {
+            "fontSize": "60px",
+          },
+          "type": "style",
         },
       },
     },
@@ -62,6 +74,9 @@ Object {
       "columns": Array [
         Object {
           "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
           "name": "Count",
         },
       ],
