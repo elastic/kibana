@@ -8,7 +8,7 @@
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import React, { Dispatch, useCallback } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
@@ -32,6 +32,7 @@ import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/a
 import { HostIsolationExceptionsEmptyState } from './components/empty';
 import { HostIsolationExceptionsPageAction } from '../store/action';
 import { HostIsolationExceptionDeleteModal } from './components/delete_modal';
+import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -53,6 +54,8 @@ export const HostIsolationExceptionsList = () => {
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
   const itemToDelete = useHostIsolationExceptionsSelector(getItemToDelete);
+
+  const showFlyout = !!location.show;
 
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
@@ -92,6 +95,15 @@ export const HostIsolationExceptionsList = () => {
       [navigateCallback]
     );
 
+  const handleAddButtonClick = useCallback(
+    () =>
+      navigateCallback({
+        show: 'create',
+        id: undefined,
+      }),
+    [navigateCallback]
+  );
+
   return (
     <AdministrationListPage
       title={
@@ -100,8 +112,23 @@ export const HostIsolationExceptionsList = () => {
           defaultMessage="Host Isolation Exceptions"
         />
       }
-      actions={[]}
+      actions={
+        <EuiButton
+          fill
+          iconType="plusInCircle"
+          isDisabled={showFlyout}
+          onClick={handleAddButtonClick}
+          data-test-subj="hostIsolationExceptionsListAddButton"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.hostIsolationExceptions.list.addButton"
+            defaultMessage="Add Host Isolation Exception"
+          />
+        </EuiButton>
+      }
     >
+      {showFlyout && <HostIsolationExceptionsFormFlyout />}
+
       <SearchExceptions
         defaultValue={location.filter}
         onSearch={handleOnSearch}
@@ -124,7 +151,7 @@ export const HostIsolationExceptionsList = () => {
         pagination={pagination}
         contentClassName="host-isolation-exceptions-container"
         data-test-subj="hostIsolationExceptionsContent"
-        noItemsMessage={<HostIsolationExceptionsEmptyState />}
+        noItemsMessage={<HostIsolationExceptionsEmptyState onAdd={handleAddButtonClick} />}
       />
     </AdministrationListPage>
   );

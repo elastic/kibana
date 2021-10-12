@@ -13,8 +13,8 @@ import { isInvestigationTimeEnrichment } from './helpers';
 
 export const getTooltipTitle = (type: string | undefined) =>
   isInvestigationTimeEnrichment(type)
-    ? i18n.INVESTIGATION_TOOLTIP_TITLE
-    : i18n.INDICATOR_TOOLTIP_TITLE;
+    ? i18n.INVESTIGATION_ENRICHMENT_TITLE
+    : i18n.INDICATOR_ENRICHMENT_TITLE;
 
 export const getTooltipContent = (type: string | undefined) =>
   isInvestigationTimeEnrichment(type)
