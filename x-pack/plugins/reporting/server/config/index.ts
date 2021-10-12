@@ -43,7 +43,9 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
                 defaultMessage: `Remove the "xpack.reporting.index" setting.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingIndex.manualStepTwo', {
-                defaultMessage: `Regenerate existing reports that you still need to access in 8.0.`,
+                defaultMessage:
+                  `You can manually re-index the documents in custom reporting indices into the default` +
+                  ` ".reporting-*" indices if you need continued access to reports that were in a custom index.`,
               }),
             ],
           },
