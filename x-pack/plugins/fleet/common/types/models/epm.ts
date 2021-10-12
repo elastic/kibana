@@ -365,7 +365,6 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   id: string;
-  eprName?: string;
 };
 
 export interface IntegrationCardItem {
