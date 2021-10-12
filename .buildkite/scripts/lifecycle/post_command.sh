@@ -3,6 +3,7 @@
 set -euo pipefail
 
 node .buildkite/scripts/lifecycle/print_agent_links.js || true
+node .buildkite/scripts/lifecycle/print_build.js
 
 IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_test_execution_step" --default '')"
 
