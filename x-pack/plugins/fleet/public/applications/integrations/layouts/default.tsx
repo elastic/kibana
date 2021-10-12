@@ -86,7 +86,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
                   defaultMessage="Collect data from popular applications and services.  To learn more about Integrations, view {link}"
                   values={{
                     link: (
-                      <EuiLink target="_blank" href={docLinks.links.fleet.elasticStackGetStarted}>
+                      <EuiLink target="_blank" href={docLinks.links.elasticStackGetStarted}>
                         {i18n.translate('xpack.fleet.epm.pageSubtitleLinkText', {
                           defaultMessage: 'Getting started with Elastic Stack',
                         })}
