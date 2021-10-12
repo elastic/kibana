@@ -823,7 +823,7 @@ export const ECSMappingEditorField = ({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       {Object.entries(value).map(([ecsKey, ecsValue]) => (
         <ECSMappingEditorForm
           // eslint-disable-next-line

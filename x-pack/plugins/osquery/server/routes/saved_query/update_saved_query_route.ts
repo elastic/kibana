@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pickBy } from 'lodash';
+import { filter, pickBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { PLUGIN_ID } from '../../../common';
@@ -19,12 +19,9 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
     {
       path: '/internal/osquery/saved_query/{id}',
       validate: {
-        params: schema.object(
-          {
-            id: schema.string(),
-          },
-          { unknowns: 'allow' }
-        ),
+        params: schema.object({
+          id: schema.string(),
+        }),
         body: schema.object(
           {
             id: schema.string(),
@@ -62,13 +59,16 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         ecs_mapping,
       } = request.body;
 
-      const conflictingEntries = await savedObjectsClient.find({
+      const conflictingEntries = await savedObjectsClient.find<{ id: string }>({
         type: savedQuerySavedObjectType,
         search: id,
         searchFields: ['id'],
       });
 
-      if (conflictingEntries.saved_objects.length) {
+      if (
+        filter(conflictingEntries.saved_objects, (soObject) => soObject.id !== request.params.id)
+          .length
+      ) {
         return response.conflict({ body: `Saved query with id "${id}" already exists.` });
       }
 

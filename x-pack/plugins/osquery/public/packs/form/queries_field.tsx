@@ -21,14 +21,9 @@ import { getSupportedPlatforms } from '../queries/platforms/helpers';
 interface QueriesFieldProps {
   handleNameChange: (name: string) => void;
   field: FieldHook<Array<Record<string, unknown>>>;
-  integrationPackageVersion?: string | undefined;
 }
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
-  field,
-  handleNameChange,
-  integrationPackageVersion,
-}) => {
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, handleNameChange }) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
   const [tableSelectedItems, setTableSelectedItems] = useState<
@@ -215,7 +210,6 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       {showAddQueryFlyout && (
         <QueryFlyout
           uniqueQueryIds={uniqueQueryIds}
-          integrationPackageVersion={integrationPackageVersion}
           onSave={handleAddQuery}
           onClose={handleHideAddFlyout}
         />
@@ -225,7 +219,6 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
           uniqueQueryIds={uniqueQueryIds}
           // @ts-expect-error update types
           defaultValue={field.value[showEditQueryFlyout]}
-          integrationPackageVersion={integrationPackageVersion}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}
         />

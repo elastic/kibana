@@ -79,16 +79,19 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         request.params.id
       );
 
-      const conflictingEntries = await savedObjectsClient.find({
-        type: packSavedObjectType,
-        search: name,
-        searchFields: ['name'],
-      });
+      if (name) {
+        const conflictingEntries = await savedObjectsClient.find({
+          type: packSavedObjectType,
+          search: name,
+          searchFields: ['name'],
+        });
 
-      if (
-        filter(conflictingEntries.saved_objects, (packSO) => packSO.id !== currentPackSO.id).length
-      ) {
-        return response.conflict({ body: `Pack with name "${name}" already exists.` });
+        if (
+          filter(conflictingEntries.saved_objects, (packSO) => packSO.id !== currentPackSO.id)
+            .length
+        ) {
+          return response.conflict({ body: `Pack with name "${name}" already exists.` });
+        }
       }
 
       const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsClient, {
@@ -143,6 +146,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       }>(packSavedObjectType, request.params.id);
 
       updatedPackSO.attributes.queries = convertSOQueriesToPack(updatedPackSO.attributes.queries);
+
+      if (enabled == null && !currentPackSO.attributes.enabled) {
+        return response.ok({ body: updatedPackSO });
+      }
 
       if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
         if (enabled) {

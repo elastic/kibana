@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { OsqueryManagerPackagePolicy } from '../../../common/types';
-import { PackagePolicyPackage } from '../../../../fleet/common';
 import {
   Form,
   useForm,
@@ -48,15 +47,10 @@ const CommonUseField = getUseField({ component: Field });
 
 interface PackFormProps {
   defaultValue?: OsqueryManagerPackagePolicy;
-  packageInfo?: PackagePolicyPackage;
   editMode?: boolean;
 }
 
-const PackFormComponent: React.FC<PackFormProps> = ({
-  defaultValue,
-  packageInfo,
-  editMode = false,
-}) => {
+const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = false }) => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
@@ -73,9 +67,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const { form } = useForm<
     Omit<OsqueryManagerPackagePolicy, 'policy_id' | 'id'> & {
+      queries: {};
       policy_ids: string[];
     },
     Omit<OsqueryManagerPackagePolicy, 'policy_id' | 'id'> & {
+      queries: {};
       policy_ids: string[];
     }
   >({
@@ -103,10 +99,17 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         }),
       },
       policy_ids: {
+        defaultValue: [],
         type: FIELD_TYPES.COMBO_BOX,
         label: i18n.translate('xpack.osquery.pack.form.agentPoliciesFieldLabel', {
           defaultMessage: 'Agent policies',
         }),
+      },
+      enabled: {
+        defaultValue: true,
+      },
+      queries: {
+        defaultValue: [],
       },
     },
     onSubmit: async (formData, isValid) => {
@@ -126,12 +129,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     deserializer: (payload) => ({
       ...payload,
       policy_ids: payload.policy_ids ?? [],
-      // @ts-expect-error update types
       queries: convertPackQueriesToSO(payload.queries),
     }),
     serializer: (payload) => ({
       ...payload,
-      // @ts-expect-error update types
       queries: convertSOQueriesToPack(payload.queries),
     }),
     defaultValue,
@@ -215,8 +216,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         <CommonUseField
           path="queries"
           component={QueriesField}
-          packId={defaultValue?.id ?? null}
-          integrationPackageVersion={packageInfo?.version}
           handleNameChange={handleNameChange}
         />
 

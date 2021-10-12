@@ -30,8 +30,7 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
   return useMutation(
     (payload) =>
       http.put(`/internal/osquery/saved_query/${savedQueryId}`, {
-        // @ts-expect-error update types
-        body: JSON.stringify({ ...payload, ecs_mapping: ecsMapping }),
+        body: JSON.stringify(payload),
       }),
     {
       onError: (error: { body: { error: string; message: string } }) => {

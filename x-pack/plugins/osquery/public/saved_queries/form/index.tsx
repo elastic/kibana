@@ -47,18 +47,29 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({ viewMode }) =>
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
         <EuiFlexItem>
+          <CommonUseField
+            path="ecs_mapping"
+            component={ECSMappingEditorField}
+            query={query}
+            fieldRef={ecsFieldRef}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
           <EuiTitle size="xs">
             <h5>
               <FormattedMessage
                 id="xpack.osquery.savedQueries.form.packConfigSection.title"
-                defaultMessage="Scheduled query group configuration"
+                defaultMessage="Pack configuration"
               />
             </h5>
           </EuiTitle>
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.osquery.savedQueries.form.packConfigSection.description"
-              defaultMessage="The options listed below are optional and are only applied when the query is assigned to a scheduled query group."
+              defaultMessage="The options listed below are optional and are only applied when the query is assigned to a pack."
             />
           </EuiText>
         </EuiFlexItem>
@@ -92,18 +103,6 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({ viewMode }) =>
         </EuiFlexItem>
         <EuiFlexItem>
           <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <CommonUseField
-            path="ecs_mapping"
-            component={ECSMappingEditorField}
-            query={query}
-            fieldRef={ecsFieldRef}
-          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

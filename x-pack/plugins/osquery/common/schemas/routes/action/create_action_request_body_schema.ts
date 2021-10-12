@@ -7,12 +7,18 @@
 
 import * as t from 'io-ts';
 
-import { query, agentSelection, savedQueryId } from '../../common/schemas';
+import {
+  query,
+  agentSelection,
+  ecsMappingOrUndefined,
+  savedQueryIdOrUndefined,
+} from '../../common/schemas';
 
 export const createActionRequestBodySchema = t.type({
   agentSelection,
   query,
-  savedQueryId,
+  savedQueryId: savedQueryIdOrUndefined,
+  ecs_mapping: ecsMappingOrUndefined,
 });
 
 export type CreateActionRequestBodySchema = t.OutputOf<typeof createActionRequestBodySchema>;

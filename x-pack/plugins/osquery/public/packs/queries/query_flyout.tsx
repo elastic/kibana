@@ -36,7 +36,6 @@ const CommonUseField = getUseField({ component: Field });
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
   defaultValue?: UsePackQueryFormProps['defaultValue'] | undefined;
-  integrationPackageVersion?: string | undefined;
   onSave: (payload: PackFormData) => Promise<void>;
   onClose: () => void;
 }
