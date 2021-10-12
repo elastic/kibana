@@ -16,6 +16,7 @@ describe('UserAddedInfo', () => {
     username: 'user1',
     email: 'test@test.com',
     roleType: 'user',
+    showKibanaAccessWarning: false,
   };
 
   it('renders with email', () => {
@@ -99,6 +100,72 @@ describe('UserAddedInfo', () => {
           >
             —
           </EuiTextColor>
+        </EuiText>
+        <EuiSpacer />
+        <EuiText
+          size="s"
+        >
+          <strong>
+            Role
+          </strong>
+        </EuiText>
+        <EuiText
+          size="s"
+        >
+          user
+        </EuiText>
+        <EuiSpacer />
+      </Fragment>
+    `);
+  });
+
+  it('renders with the Kibana access warning', () => {
+    const wrapper = shallow(<UserAddedInfo {...props} showKibanaAccessWarning />);
+
+    expect(wrapper).toMatchInlineSnapshot(`
+      <Fragment>
+        <EuiCallOut
+          color="warning"
+          iconType="help"
+          title="Kibana access warning"
+        >
+          <EuiText
+            size="s"
+          >
+            This Elasticsearch user does not have an Enterprise Search role in Elasticsearch. They may not have access to Kibana.
+          </EuiText>
+          <EuiSpacer />
+          <EuiText
+            size="s"
+          >
+            Consider giving them the "enterprise-search-user" role.
+          </EuiText>
+        </EuiCallOut>
+        <EuiSpacer />
+        <EuiText
+          size="s"
+        >
+          <strong>
+            Username
+          </strong>
+        </EuiText>
+        <EuiText
+          size="s"
+        >
+          user1
+        </EuiText>
+        <EuiSpacer />
+        <EuiText
+          size="s"
+        >
+          <strong>
+            Email
+          </strong>
+        </EuiText>
+        <EuiText
+          size="s"
+        >
+          test@test.com
         </EuiText>
         <EuiSpacer />
         <EuiText
