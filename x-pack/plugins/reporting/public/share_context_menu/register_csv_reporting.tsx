@@ -81,7 +81,7 @@ export const ReportingCsvShareProvider = ({
       columns: sharingData.columns as string[] | undefined,
     };
 
-    const getJobParams = (forShareUrl?: boolean) => {
+    const getJobParams = (forShareUrl?: boolean): JobParamsCSV => {
       const absoluteTime = !forShareUrl;
       return {
         ...jobParams,
