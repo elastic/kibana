@@ -153,7 +153,7 @@
       "references": [
         {
           "type": "index-pattern",
-          "id": "cts_ip_1",
+          "id": "cts_ip_1_default",
           "name": "CTS IP 1"
         }
       ],
@@ -181,7 +181,7 @@
       "references": [
         {
           "type": "index-pattern",
-          "id": "cts_ip_1",
+          "id": "cts_ip_1_default",
           "name": "CTS IP 1"
         }
       ],
@@ -209,7 +209,7 @@
       "references": [
         {
           "type": "index-pattern",
-          "id": "cts_ip_1",
+          "id": "cts_ip_1_default",
           "name": "CTS IP 1"
         }
       ],
@@ -272,7 +272,7 @@
       "references": [
         {
           "type": "index-pattern",
-          "id": "cts_ip_1",
+          "id": "cts_ip_1_space_1",
           "name": "CTS IP 1"
         }
       ],
@@ -301,7 +301,7 @@
       "references": [
         {
           "type": "index-pattern",
-          "id": "cts_ip_1",
+          "id": "cts_ip_1_space_1",
           "name": "CTS IP 1"
         }
       ],
@@ -330,7 +330,7 @@
       "references": [
         {
           "type": "index-pattern",
-          "id": "cts_ip_1",
+          "id": "cts_ip_1_space_1",
           "name": "CTS IP 1"
         }
       ],
@@ -345,15 +345,17 @@
 {
   "type": "_doc",
   "value": {
-    "id": "index-pattern:cts_ip_1",
+    "id": "index-pattern:cts_ip_1_default",
     "index": ".kibana",
     "source": {
+      "originId": "cts_ip_1",
       "index-pattern": {
         "title": "Copy to Space index pattern 1 from default space"
       },
       "references": [],
       "type": "index-pattern",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["default"]
     },
     "type": "_doc"
   }
@@ -362,16 +364,17 @@
 {
   "type": "_doc",
   "value": {
-    "id": "space_1:index-pattern:cts_ip_1",
+    "id": "index-pattern:cts_ip_1_space_1",
     "index": ".kibana",
     "source": {
+      "originId": "cts_ip_1",
       "index-pattern": {
         "title": "Copy to Space index pattern 1 from space_1 space"
       },
       "references": [],
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespace": "space_1"
+      "namespaces": ["space_1"]
     },
     "type": "_doc"
   }

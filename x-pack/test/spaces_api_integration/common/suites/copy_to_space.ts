@@ -11,7 +11,7 @@ import { EsArchiver } from '@kbn/es-archiver';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
-import { getUrlPrefix } from '../lib/space_test_utils';
+import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 type TestResponse = Record<string, any>;
@@ -68,6 +68,9 @@ const INITIAL_COUNTS: Record<string, Record<string, number>> = {
   space_1: { dashboard: 2, visualization: 3, 'index-pattern': 1 },
   space_2: { dashboard: 1 },
 };
+const UUID_PATTERN = new RegExp(
+  /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
+);
 
 const getDestinationWithoutConflicts = () => 'space_2';
 const getDestinationWithConflicts = (originSpaceId?: string) =>
@@ -79,19 +82,11 @@ export function copyToSpaceTestSuiteFactory(
   supertest: SuperTest<any>
 ) {
   const collectSpaceContents = async () => {
-    const { body: response } = await es.search({
-      index: '.kibana',
-      body: {
-        size: 0,
-        query: { terms: { type: ['visualization', 'dashboard', 'index-pattern'] } },
-        aggs: {
-          count: {
-            terms: { field: 'namespace', missing: DEFAULT_SPACE_ID, size: 10 },
-            aggs: { countByType: { terms: { field: 'type', missing: 'UNKNOWN', size: 10 } } },
-          },
-        },
-      },
-    });
+    const { body: response } = await getAggregatedSpaceData(es, [
+      'visualization',
+      'dashboard',
+      'index-pattern',
+    ]);
 
     const aggs = response.aggregations as Record<
       string,
@@ -187,18 +182,23 @@ export function copyToSpaceTestSuiteFactory(
     async (resp: TestResponse) => {
       const destination = getDestinationWithoutConflicts();
       const result = resp.body as CopyResponse;
+
+      const indexPatternDestinationId = result[destination].successResults![0].destinationId;
+      expect(indexPatternDestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
+
       expect(result).to.eql({
         [destination]: {
           success: true,
           successCount: 5,
           successResults: [
             {
-              id: 'cts_ip_1',
+              id: `cts_ip_1_${spaceId}`,
               type: 'index-pattern',
               meta: {
                 icon: 'indexPatternApp',
                 title: `Copy to Space index pattern 1 from ${spaceId} space`,
               },
+              destinationId: indexPatternDestinationId,
             },
             {
               id: `cts_vis_1_${spaceId}`,
@@ -309,13 +309,14 @@ export function copyToSpaceTestSuiteFactory(
           successCount: 5,
           successResults: [
             {
-              id: 'cts_ip_1',
+              id: `cts_ip_1_${spaceId}`,
               type: 'index-pattern',
               meta: {
                 icon: 'indexPatternApp',
                 title: `Copy to Space index pattern 1 from ${spaceId} space`,
               },
               overwrite: true,
+              destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
             },
             {
               id: `cts_vis_1_${spaceId}`,
@@ -387,8 +388,11 @@ export function copyToSpaceTestSuiteFactory(
           },
         },
         {
-          error: { type: 'conflict' },
-          id: 'cts_ip_1',
+          error: {
+            type: 'conflict',
+            destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
+          },
+          id: `cts_ip_1_${spaceId}`,
           title: `Copy to Space index pattern 1 from ${spaceId} space`,
           type: 'index-pattern',
           meta: {
@@ -437,9 +441,6 @@ export function copyToSpaceTestSuiteFactory(
       // a 403 error actually comes back as an HTTP 200 response
       const statusCode = outcome === 'noAccess' ? 403 : 200;
       const type = 'sharedtype';
-      const v4 = new RegExp(
-        /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
-      );
       const noConflictId = `${spaceId}_only`;
       const exactMatchId = 'each_space';
       const inexactMatchId = `conflict_1_${spaceId}`;
@@ -463,7 +464,7 @@ export function copyToSpaceTestSuiteFactory(
         expect(success).to.eql(true);
         expect(successCount).to.eql(1);
         const destinationId = successResults![0].destinationId;
-        expect(destinationId).to.match(v4);
+        expect(destinationId).to.match(UUID_PATTERN);
         const meta = { title, icon: 'beaker' };
         expect(successResults).to.eql([{ type, id: sourceId, meta, destinationId }]);
         expect(errors).to.be(undefined);

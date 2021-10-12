@@ -82,8 +82,18 @@ export function resolveCopyToSpaceConflictsSuite(
       expect(result).to.eql({
         [destination]: {
           success: true,
-          successCount: 1,
+          successCount: 2,
           successResults: [
+            {
+              id: `cts_ip_1_${sourceSpaceId}`,
+              type: 'index-pattern',
+              meta: {
+                title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
+                icon: 'indexPatternApp',
+              },
+              destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
+              overwrite: true,
+            },
             {
               id: 'cts_vis_3',
               type: 'visualization',
@@ -145,6 +155,19 @@ export function resolveCopyToSpaceConflictsSuite(
           success: false,
           successCount: 0,
           errors: [
+            {
+              error: {
+                type: 'conflict',
+                destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
+              },
+              id: `cts_ip_1_${sourceSpaceId}`,
+              title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
+              meta: {
+                title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
+                icon: 'indexPatternApp',
+              },
+              type: 'index-pattern',
+            },
             {
               error: { type: 'conflict' },
               id: 'cts_vis_3',
@@ -445,6 +468,7 @@ export function resolveCopyToSpaceConflictsSuite(
 
           const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
           const visualizationObject = { type: 'visualization', id: 'cts_vis_3' };
+          const indexPatternObject = { type: 'index-pattern', id: `cts_ip_1_${spaceId}` };
 
           it(`should return ${tests.withReferencesNotOverwriting.statusCode} when not overwriting, with references`, async () => {
             const destination = getDestinationSpace(spaceId);
@@ -456,7 +480,16 @@ export function resolveCopyToSpaceConflictsSuite(
                 objects: [dashboardObject],
                 includeReferences: true,
                 createNewCopies: false,
-                retries: { [destination]: [{ ...visualizationObject, overwrite: false }] },
+                retries: {
+                  [destination]: [
+                    {
+                      ...indexPatternObject,
+                      destinationId: `cts_ip_1_${destination}`,
+                      overwrite: false,
+                    },
+                    { ...visualizationObject, overwrite: false },
+                  ],
+                },
               })
               .expect(tests.withReferencesNotOverwriting.statusCode)
               .then(tests.withReferencesNotOverwriting.response);
@@ -472,7 +505,16 @@ export function resolveCopyToSpaceConflictsSuite(
                 objects: [dashboardObject],
                 includeReferences: true,
                 createNewCopies: false,
-                retries: { [destination]: [{ ...visualizationObject, overwrite: true }] },
+                retries: {
+                  [destination]: [
+                    {
+                      ...indexPatternObject,
+                      destinationId: `cts_ip_1_${destination}`,
+                      overwrite: true,
+                    },
+                    { ...visualizationObject, overwrite: true },
+                  ],
+                },
               })
               .expect(tests.withReferencesOverwriting.statusCode)
               .then(tests.withReferencesOverwriting.response);
