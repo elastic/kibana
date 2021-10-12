@@ -6,15 +6,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { getOrElse } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as t from 'io-ts';
-import { failure } from 'io-ts/lib/PathReporter';
 import type {
   FieldValuePair,
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
-import { rangeRt } from '../../../routes/default_api_types';
 import { getCorrelationsFilters } from './get_filters';
 
 export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
@@ -36,30 +31,14 @@ export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
     transactionName,
   } = params;
 
-  // converts string based start/end to epochmillis
-  let decodedRange: { start: number; end: number };
-
-  if (typeof start === 'string' && typeof end === 'string') {
-    decodedRange = pipe(
-      rangeRt.decode({ start, end }),
-      getOrElse<t.Errors, { start: number; end: number }>((errors) => {
-        throw new Error(failure(errors).join('\n'));
-      })
-    );
-  } else if (typeof start === 'number' && typeof end === 'number') {
-    decodedRange = { start, end };
-  } else {
-    decodedRange = { start: 0, end: 0 };
-  }
-
   const correlationFilters = getCorrelationsFilters({
     environment,
     kuery,
     serviceName,
     transactionType,
     transactionName,
-    start: decodedRange.start,
-    end: decodedRange.end,
+    start,
+    end,
   });
 
   return {

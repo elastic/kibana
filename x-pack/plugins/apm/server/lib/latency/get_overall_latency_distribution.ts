@@ -24,7 +24,7 @@ interface Options extends CorrelationsOptions {
   setup: Setup;
 }
 
-interface OverallLatencyDistributionResponse {
+export interface OverallLatencyDistributionResponse {
   log: string[];
   percentileThresholdValue?: number;
   overallHistogram?: Array<{

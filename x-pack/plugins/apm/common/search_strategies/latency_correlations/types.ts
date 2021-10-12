@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  FieldValuePair,
-  HistogramItem,
-  RawResponseBase,
-  SearchStrategyClientParams,
-} from '../types';
+import { FieldValuePair, HistogramItem } from '../types';
 
 export interface LatencyCorrelation extends FieldValuePair {
   correlation: number;
@@ -32,10 +27,7 @@ export interface LatencyCorrelationsParams {
   analyzeCorrelations: boolean;
 }
 
-export type LatencyCorrelationsRequestParams = LatencyCorrelationsParams &
-  SearchStrategyClientParams;
-
-export interface LatencyCorrelationsRawResponse extends RawResponseBase {
+export interface LatencyCorrelationsRawResponse {
   log: string[];
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number;
