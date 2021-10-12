@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { IAggConfigs } from 'src/plugins/data/public';
 import { Query } from '../..';
 import { Filter } from '../../es_query';
-import { IndexPattern } from '../../index_patterns';
+import { IndexPattern } from '../..';
 import { SearchSource } from './search_source';
 
 /**

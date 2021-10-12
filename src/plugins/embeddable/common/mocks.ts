@@ -8,11 +8,12 @@
 
 import { EmbeddablePersistableStateService } from './types';
 
-export const createEmbeddablePersistableStateServiceMock = (): jest.Mocked<EmbeddablePersistableStateService> => {
-  return {
-    inject: jest.fn((state, references) => state),
-    extract: jest.fn((state) => ({ state, references: [] })),
-    getAllMigrations: jest.fn(() => ({})),
-    telemetry: jest.fn((state, collector) => ({})),
+export const createEmbeddablePersistableStateServiceMock =
+  (): jest.Mocked<EmbeddablePersistableStateService> => {
+    return {
+      inject: jest.fn((state, references) => state),
+      extract: jest.fn((state) => ({ state, references: [] })),
+      getAllMigrations: jest.fn(() => ({})),
+      telemetry: jest.fn((state, collector) => ({})),
+    };
   };
-};

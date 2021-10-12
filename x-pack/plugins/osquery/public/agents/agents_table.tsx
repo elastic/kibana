@@ -61,9 +61,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   // grouping related
   const osqueryPolicyData = useOsqueryPolicies();
-  const { loading: groupsLoading, totalCount: totalNumAgents, groups } = useAgentGroups(
-    osqueryPolicyData
-  );
+  const {
+    loading: groupsLoading,
+    totalCount: totalNumAgents,
+    groups,
+  } = useAgentGroups(osqueryPolicyData);
   const grouper = useMemo(() => new AgentGrouper(), []);
   const { isLoading: agentsLoading, data: agents } = useAllAgents(
     osqueryPolicyData,

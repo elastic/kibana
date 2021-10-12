@@ -120,8 +120,8 @@ describe('Authenticator', () => {
 
     describe('#options.urls.loggedOut', () => {
       it('points to /login if provider requires login form', () => {
-        const authenticationProviderMock = jest.requireMock(`./providers/basic`)
-          .BasicAuthenticationProvider;
+        const authenticationProviderMock =
+          jest.requireMock(`./providers/basic`).BasicAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(getMockOptions());
         const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
@@ -140,8 +140,8 @@ describe('Authenticator', () => {
       });
 
       it('points to /login if login selector is enabled', () => {
-        const authenticationProviderMock = jest.requireMock(`./providers/saml`)
-          .SAMLAuthenticationProvider;
+        const authenticationProviderMock =
+          jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(
           getMockOptions({
@@ -165,8 +165,8 @@ describe('Authenticator', () => {
       });
 
       it('points to /security/logged_out if login selector is NOT enabled', () => {
-        const authenticationProviderMock = jest.requireMock(`./providers/saml`)
-          .SAMLAuthenticationProvider;
+        const authenticationProviderMock =
+          jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(
           getMockOptions({

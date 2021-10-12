@@ -74,33 +74,32 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
     expect(resp.body).to.eql(allSpaces.find((space) => space.id === spaceId));
   };
 
-  const makeGetTest = (describeFn: DescribeFn) => (
-    description: string,
-    { user = {}, currentSpaceId, spaceId, tests }: GetTestDefinition
-  ) => {
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+  const makeGetTest =
+    (describeFn: DescribeFn) =>
+    (description: string, { user = {}, currentSpaceId, spaceId, tests }: GetTestDefinition) => {
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      getTestScenariosForSpace(currentSpaceId).forEach(({ urlPrefix, scenario }) => {
-        it(`should return ${tests.default.statusCode} ${scenario}`, async () => {
-          return supertest
-            .get(`${urlPrefix}/api/spaces/space/${spaceId}`)
-            .auth(user.username, user.password)
-            .expect(tests.default.statusCode)
-            .then(tests.default.response);
+        getTestScenariosForSpace(currentSpaceId).forEach(({ urlPrefix, scenario }) => {
+          it(`should return ${tests.default.statusCode} ${scenario}`, async () => {
+            return supertest
+              .get(`${urlPrefix}/api/spaces/space/${spaceId}`)
+              .auth(user.username, user.password)
+              .expect(tests.default.statusCode)
+              .then(tests.default.response);
+          });
         });
       });
-    });
-  };
+    };
 
   const getTest = makeGetTest(describe);
   // @ts-ignore

@@ -113,9 +113,8 @@ class FieldsService {
         this._mlClusterClient,
         this._savedObjectsClient
       );
-      const rollupConfigs:
-        | estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[]
-        | null = await rollupService.getRollupJobs();
+      const rollupConfigs: estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[] | null =
+        await rollupService.getRollupJobs();
 
       // if a rollup index has been specified, yet there are no
       // rollup configs, return with no results

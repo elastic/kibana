@@ -27,11 +27,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./keyword'));
       loadTestFile(require.resolve('./keyword_array'));
       loadTestFile(require.resolve('./long'));
-    });
-
-    describe('', function () {
-      this.tags('ciGroup13');
-
       loadTestFile(require.resolve('./text'));
       loadTestFile(require.resolve('./text_array'));
     });

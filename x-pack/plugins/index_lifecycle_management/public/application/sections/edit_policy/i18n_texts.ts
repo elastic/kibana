@@ -9,9 +9,21 @@ import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
   editPolicy: {
-    shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.indexFieldLabel', {
+    shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.enableShrinkLabel', {
       defaultMessage: 'Shrink index',
     }),
+    shrinkCountLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardCountLabel',
+      {
+        defaultMessage: 'Configure shard count',
+      }
+    ),
+    shrinkSizeLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardSizeLabel',
+      {
+        defaultMessage: 'Configure shard size',
+      }
+    ),
     rolloverOffsetsHotPhaseTiming: i18n.translate(
       'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
       {
@@ -87,6 +99,18 @@ export const i18nTexts = {
       'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotStorageFieldLabel',
       {
         defaultMessage: 'Searchable snapshot storage',
+      }
+    ),
+    maxPrimaryShardSizeLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardSizeLabel',
+      {
+        defaultMessage: 'Maximum primary shard size',
+      }
+    ),
+    maxPrimaryShardSizeUnitsLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.maximumPrimaryShardSizeAriaLabel',
+      {
+        defaultMessage: 'Maximum shard size units',
       }
     ),
     errors: {

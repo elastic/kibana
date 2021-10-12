@@ -113,10 +113,10 @@ export default function ({ getService }: FtrProviderContext) {
             'infrastructure',
             'logs',
             'maps',
-            'observabilityCases',
             'osquery',
             'uptime',
             'siem',
+            'securitySolutionCases',
             'fleet',
           ].sort()
         );

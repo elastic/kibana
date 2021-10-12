@@ -34,11 +34,11 @@ import { uiSettingsServiceMock } from '../../../../../../../src/core/public/mock
 
 const uiSettings = uiSettingsServiceMock.create().setup({} as any);
 
-const KibanaReactContext = createKibanaReactContext(({
+const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {} } },
   uiSettings,
   usageCollection: { reportUiCounter: () => {} },
-} as unknown) as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>);
 
 const mockParams = {
   rangeFrom: 'now-15m',
@@ -52,7 +52,7 @@ const location = {
 };
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  const value = ({
+  const value = {
     ...mockApmPluginContextValue,
     core: {
       ...mockApmPluginContextValue.core,
@@ -61,7 +61,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
         get: () => {},
       },
     },
-  } as unknown) as ApmPluginContextValue;
+  } as unknown as ApmPluginContextValue;
 
   return (
     <MemoryRouter initialEntries={[location]}>
@@ -102,15 +102,17 @@ describe('ServiceOverview', () => {
       'GET /api/apm/services/{serviceName}/error_groups/main_statistics': {
         error_groups: [] as any[],
       },
-      'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics': {
-        transactionGroups: [] as any[],
-        totalTransactionGroups: 0,
-        isAggregationAccurate: true,
-      },
+      'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics':
+        {
+          transactionGroups: [] as any[],
+          totalTransactionGroups: 0,
+          isAggregationAccurate: true,
+        },
       'GET /api/apm/services/{serviceName}/dependencies': {
         serviceDependencies: [],
       },
-      'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics': [],
+      'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics':
+        [],
       'GET /api/apm/services/{serviceName}/transactions/charts/latency': {
         currentPeriod: {
           overallAvgDuration: null,

@@ -7,6 +7,7 @@
 
 # Tech leads
 /dev_docs @elastic/kibana-tech-leads
+/src/dev/license_checker/config.ts @elastic/kibana-tech-leads
 /packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
 # Virtual teams
@@ -27,10 +28,10 @@
 /src/plugins/kibana_legacy/ @elastic/kibana-vis-editors
 /src/plugins/vis_default_editor/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/metric/ @elastic/kibana-vis-editors
-/src/plugins/vis_type_table/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/table/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/tagcloud/ @elastic/kibana-vis-editors
-/src/plugins/vis_type_timelion/ @elastic/kibana-vis-editors
-/src/plugins/vis_type_timeseries/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/timelion/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/timeseries/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/vega/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/vislib/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/xy/ @elastic/kibana-vis-editors
@@ -56,10 +57,12 @@
 /examples/url_generators_examples/ @elastic/kibana-app-services
 /examples/url_generators_explorer/ @elastic/kibana-app-services
 /examples/field_formats_example/ @elastic/kibana-app-services
+/examples/partial_results_example/ @elastic/kibana-app-services
 /packages/elastic-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-app-services
+/src/plugins/data-views/ @elastic/kibana-app-services
 /src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/expressions/ @elastic/kibana-app-services
 /src/plugins/field_formats/ @elastic/kibana-app-services
@@ -125,8 +128,6 @@
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
-/x-pack/plugins/apm/e2e/cypress/support/step_definitions/csm @elastic/uptime
-/x-pack/plugins/apm/e2e/cypress/integration/csm_dashboard.feature @elastic/uptime
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
 /x-pack/plugins/apm/public/components/app/RumDashboard @elastic/uptime
 /x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
@@ -200,7 +201,8 @@
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
-/packages/kbn-ui-shared-deps/ @elastic/kibana-operations
+/packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
+/packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations
@@ -241,7 +243,6 @@
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
-/packages/kbn-legacy-logging/ @elastic/kibana-core
 /packages/kbn-crypto/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
@@ -286,9 +287,7 @@
 
 # Security
 /src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
-/src/plugins/security_oss/ @elastic/kibana-security
 /src/plugins/interactive_setup/ @elastic/kibana-security
-/test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/ @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/ @elastic/kibana-security
 /x-pack/plugins/security/ @elastic/kibana-security
@@ -446,4 +445,5 @@
 /docs/setup/configuring-reporting.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
-
+# EUI design
+/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-app-services

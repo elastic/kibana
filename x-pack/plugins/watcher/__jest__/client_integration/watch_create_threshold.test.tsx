@@ -553,8 +553,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
                 port: Number(PORT),
                 scheme: SCHEME,
                 path: PATH,
-                body:
-                  '{\n  "message": "Watch [{{ctx.metadata.name}}] has exceeded the threshold"\n}', // Default
+                body: '{\n  "message": "Watch [{{ctx.metadata.name}}] has exceeded the threshold"\n}', // Default
                 username: USERNAME,
                 password: PASSWORD,
                 webhook: {

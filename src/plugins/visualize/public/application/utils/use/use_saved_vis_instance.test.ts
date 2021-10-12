@@ -55,8 +55,9 @@ jest.mock('../../../../../kibana_utils/public', () => {
   };
 });
 
-const mockGetVisualizationInstance = jest.requireMock('../get_visualization_instance')
-  .getVisualizationInstance;
+const mockGetVisualizationInstance = jest.requireMock(
+  '../get_visualization_instance'
+).getVisualizationInstance;
 
 describe('useSavedVisInstance', () => {
   const coreStartMock = coreMock.createStart();
@@ -73,7 +74,7 @@ describe('useSavedVisInstance', () => {
 
     setVisEditorsRegistry(registry);
 
-    mockServices = ({
+    mockServices = {
       ...coreStartMock,
       toastNotifications,
       stateTransferService: createEmbeddableStateTransferMock(),
@@ -97,7 +98,7 @@ describe('useSavedVisInstance', () => {
           { name: 'gauge' },
         ]),
       },
-    } as unknown) as VisualizeServices;
+    } as unknown as VisualizeServices;
 
     mockDefaultEditorControllerDestroy.mockClear();
     mockEmbeddableHandlerDestroy.mockClear();

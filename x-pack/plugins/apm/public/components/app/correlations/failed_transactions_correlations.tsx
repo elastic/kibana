@@ -84,10 +84,8 @@ export function FailedTransactionsCorrelations({
     progress.isRunning
   );
 
-  const [
-    selectedSignificantTerm,
-    setSelectedSignificantTerm,
-  ] = useState<FailedTransactionsCorrelation | null>(null);
+  const [selectedSignificantTerm, setSelectedSignificantTerm] =
+    useState<FailedTransactionsCorrelation | null>(null);
 
   const selectedTerm =
     selectedSignificantTerm ?? response.failedTransactionsCorrelations?.[0];
@@ -334,9 +332,8 @@ export function FailedTransactionsCorrelations({
     }
   }, [progress.error, notifications.toasts]);
 
-  const [sortField, setSortField] = useState<
-    keyof FailedTransactionsCorrelation
-  >('normalizedScore');
+  const [sortField, setSortField] =
+    useState<keyof FailedTransactionsCorrelation>('normalizedScore');
   const [sortDirection, setSortDirection] = useState<Direction>('desc');
 
   const onTableChange = useCallback(({ sort }) => {
@@ -373,7 +370,8 @@ export function FailedTransactionsCorrelations({
   const showSummaryBadge =
     inspectEnabled && (progress.isRunning || correlationTerms.length > 0);
 
-  const transactionDistributionChartData: TransactionDistributionChartData[] = [];
+  const transactionDistributionChartData: TransactionDistributionChartData[] =
+    [];
 
   if (Array.isArray(overallHistogram)) {
     transactionDistributionChartData.push({

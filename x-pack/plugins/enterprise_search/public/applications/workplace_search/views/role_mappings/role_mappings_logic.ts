@@ -47,11 +47,9 @@ interface RoleMappingsActions extends RoleMappingsBaseActions {
   setDefaultGroup(availableGroups: RoleGroup[]): { availableGroups: RoleGroup[] };
   setRoleMapping(roleMapping: WSRoleMapping): { roleMapping: WSRoleMapping };
   setSingleUserRoleMapping(data?: UserMapping): { singleUserRoleMapping: UserMapping };
-  setRoleMappings({
-    roleMappings,
-  }: {
+  setRoleMappings({ roleMappings }: { roleMappings: WSRoleMapping[] }): {
     roleMappings: WSRoleMapping[];
-  }): { roleMappings: WSRoleMapping[] };
+  };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
   handleGroupSelectionChange(groupIds: string[]): { groupIds: string[] };

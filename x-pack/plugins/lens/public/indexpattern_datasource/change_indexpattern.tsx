@@ -69,8 +69,8 @@ export function ChangeIndexPattern({
       >
         <div>
           <EuiPopoverTitle>
-            {i18n.translate('xpack.lens.indexPattern.changeIndexPatternTitle', {
-              defaultMessage: 'Index pattern',
+            {i18n.translate('xpack.lens.indexPattern.changeDataViewTitle', {
+              defaultMessage: 'Data view',
             })}
           </EuiPopoverTitle>
           <EuiSelectable<{
@@ -89,7 +89,7 @@ export function ChangeIndexPattern({
               checked: id === indexPatternId ? 'on' : undefined,
             }))}
             onChange={(choices) => {
-              const choice = (choices.find(({ checked }) => checked) as unknown) as {
+              const choice = choices.find(({ checked }) => checked) as unknown as {
                 value: string;
               };
               trackUiEvent('indexpattern_changed');

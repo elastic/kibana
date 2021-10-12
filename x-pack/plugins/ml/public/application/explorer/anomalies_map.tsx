@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import {
   FIELD_ORIGIN,
+  LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
@@ -32,10 +33,8 @@ import { AnomaliesTableRecord } from '../../../common/types/anomalies';
 const MAX_ENTITY_VALUES = 3;
 
 function getAnomalyRows(anomalies: AnomaliesTableRecord[], jobId: string) {
-  const anomalyRows: Record<
-    string,
-    { count: number; entityValue: string; max_severity: number }
-  > = {};
+  const anomalyRows: Record<string, { count: number; entityValue: string; max_severity: number }> =
+    {};
   for (let i = 0; i < anomalies.length; i++) {
     const anomaly = anomalies[i];
     const location = anomaly.entityValue;
@@ -127,7 +126,7 @@ export const getChoroplethAnomaliesLayer = (
       isTimeAware: true,
     },
     visible: false,
-    type: 'VECTOR',
+    type: LAYER_TYPE.VECTOR,
   };
 };
 

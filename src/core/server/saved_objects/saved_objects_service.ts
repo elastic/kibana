@@ -269,7 +269,8 @@ export interface SavedObjectsStartDeps {
 }
 
 export class SavedObjectsService
-  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
+  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart>
+{
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;

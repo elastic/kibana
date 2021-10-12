@@ -139,16 +139,14 @@ export class TaskClaiming {
   }
 
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
-    const {
-      limitedConcurrency,
-      unlimitedConcurrency,
-      skippedTypes,
-    } = groupBy(definitions.getAllDefinitions(), (definition) =>
-      definition.maxConcurrency
-        ? 'limitedConcurrency'
-        : definition.maxConcurrency === 0
-        ? 'skippedTypes'
-        : 'unlimitedConcurrency'
+    const { limitedConcurrency, unlimitedConcurrency, skippedTypes } = groupBy(
+      definitions.getAllDefinitions(),
+      (definition) =>
+        definition.maxConcurrency
+          ? 'limitedConcurrency'
+          : definition.maxConcurrency === 0
+          ? 'skippedTypes'
+          : 'unlimitedConcurrency'
     );
 
     if (skippedTypes?.length) {
@@ -255,15 +253,13 @@ export class TaskClaiming {
     taskTypes,
   }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
     const claimTasksByIdWithRawIds = this.taskStore.convertToSavedObjectIds(claimTasksById);
-    const {
-      updated: tasksUpdated,
-      version_conflicts: tasksConflicted,
-    } = await this.markAvailableTasksAsClaimed({
-      claimOwnershipUntil,
-      claimTasksById: claimTasksByIdWithRawIds,
-      size,
-      taskTypes,
-    });
+    const { updated: tasksUpdated, version_conflicts: tasksConflicted } =
+      await this.markAvailableTasksAsClaimed({
+        claimOwnershipUntil,
+        claimTasksById: claimTasksByIdWithRawIds,
+        size,
+        taskTypes,
+      });
 
     const docs =
       tasksUpdated > 0

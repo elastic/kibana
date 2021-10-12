@@ -175,7 +175,7 @@ describe('AddTimelineButton', () => {
         },
       });
 
-      ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
+      (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
         fetchAllTimeline: jest.fn(),
         timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
         loading: false,

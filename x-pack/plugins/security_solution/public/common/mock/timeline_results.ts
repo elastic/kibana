@@ -1631,8 +1631,7 @@ export const mockTimelineResults: OpenTimelineResult[] = [
     noteIds: ['noteId4'],
     notes: [
       {
-        note:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Magna ac placerat vestibulum lectus. Morbi tincidunt ornare massa eget egestas purus. Quis varius quam quisque id diam. Nulla pellentesque dignissim enim sit amet.',
+        note: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Magna ac placerat vestibulum lectus. Morbi tincidunt ornare massa eget egestas purus. Quis varius quam quisque id diam. Nulla pellentesque dignissim enim sit amet.',
         savedObjectId: 'noteId1',
         updated: 1553700738 * 1000,
         updatedBy: 'alice',
@@ -1644,106 +1643,91 @@ export const mockTimelineResults: OpenTimelineResult[] = [
         updatedBy: 'alice',
       },
       {
-        note:
-          'Cras tincidunt lobortis feugiat vivamus at augue eget arcu dictum. Morbi quis commodo odio aenean sed. Sit amet aliquam id diam. Enim nec dui nunc mattis enim ut tellus elementum.',
+        note: 'Cras tincidunt lobortis feugiat vivamus at augue eget arcu dictum. Morbi quis commodo odio aenean sed. Sit amet aliquam id diam. Enim nec dui nunc mattis enim ut tellus elementum.',
         savedObjectId: 'noteId3',
         updated: 1553700740 * 1000,
         updatedBy: 'bob',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId4',
         updated: 1553700741 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId5',
         updated: 1553700742 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId6',
         updated: 1553700743 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId7',
         updated: 1553700744 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId8',
         updated: 1553700745 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId9',
         updated: 1553700746 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId10',
         updated: 1553700747 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId11',
         updated: 1553700748 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId12',
         updated: 1553700749 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId13',
         updated: 1553700750 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId14',
         updated: 1553700751 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId15',
         updated: 1553700752 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId16',
         updated: 1553700753 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId17',
         updated: 1553700753 * 1000,
         updatedBy: 'alice',
@@ -1836,8 +1820,7 @@ export const mockTimelineResults: OpenTimelineResult[] = [
         updatedBy: 'olivia',
       },
       {
-        note:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+        note: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
         savedObjectId: 'noteId6',
         updated: 1543604192 * 1000,
         updatedBy: 'olivia',
@@ -1874,8 +1857,7 @@ export const mockTimelineResults: OpenTimelineResult[] = [
     noteIds: [],
     notes: [
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId7',
         updated: 1541677314 * 1000,
         updatedBy: 'charlotte',
@@ -2103,8 +2085,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
         and: [],
         enabled: true,
         excluded: false,
-        id:
-          'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-1',
+        id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-1',
         kqlQuery: '',
         name: '1',
         queryMatch: { field: '_id', operator: ':', value: '1' },

@@ -65,11 +65,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const {
-    addTests,
-    createTestDefinitions,
-    expectSavedObjectForbidden,
-  } = bulkUpdateTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
+    bulkUpdateTestSuiteFactory(esArchiver, supertest);
   const createTests = (spaceId: string) => {
     const { normalTypes, hiddenType, allTypes, withObjectNamespaces } = createTestCases(spaceId);
     // use singleRequest to reduce execution time and/or test combined cases
@@ -104,9 +101,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('_bulk_update', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
-      const { unauthorized, authorizedAtSpace, authorizedAllSpaces, superuser } = createTests(
-        spaceId
-      );
+      const { unauthorized, authorizedAtSpace, authorizedAllSpaces, superuser } =
+        createTests(spaceId);
       const _addTests = (user: TestUser, tests: BulkUpdateTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };

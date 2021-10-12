@@ -40,12 +40,12 @@ describe.each([
   const mockFileName = 'prepackaged_timelines.ndjson';
 
   beforeEach(async () => {
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
@@ -166,8 +166,7 @@ describe.each([
             value: '3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509',
             operator: ':',
           },
-          id:
-            'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509',
+          id: 'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509',
           enabled: true,
         },
       ],

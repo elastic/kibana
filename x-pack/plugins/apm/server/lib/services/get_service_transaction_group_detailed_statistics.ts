@@ -28,7 +28,7 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { calculateFailedTransactionRate } from '../helpers/transaction_error_rate';
 
 export async function getServiceTransactionGroupDetailedStatistics({
@@ -192,10 +192,12 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   comparisonEnd,
   environment,
   kuery,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionNames: string[];
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   numBuckets: number;
   searchAggregatedTransactions: boolean;
   transactionType: string;
@@ -204,9 +206,9 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   comparisonEnd?: number;
   environment: string;
   kuery: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
-
   const commonProps = {
     setup,
     serviceName,

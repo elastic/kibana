@@ -8,11 +8,8 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { Query } from 'src/plugins/data/common';
-import { SortDirection } from 'src/plugins/data/common/search';
-import { RENDER_AS, SCALING_TYPES } from '../constants';
 import { MapExtent } from './map_descriptor';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
-import { ESTermSourceDescriptor } from './source_descriptor_types';
 
 export type Timeslice = {
   from: number;
@@ -32,33 +29,6 @@ export type DataFilters = {
   isReadOnly: boolean;
 };
 
-export type ESSearchSourceSyncMeta = {
-  filterByMapBounds: boolean;
-  sortField: string;
-  sortOrder: SortDirection;
-  scalingType: SCALING_TYPES;
-  topHitsSplitField: string;
-  topHitsSize: number;
-};
-
-type ESGeoGridSourceSyncMeta = {
-  requestType: RENDER_AS;
-};
-
-type ESGeoLineSourceSyncMeta = {
-  splitField: string;
-  sortField: string;
-};
-
-export type ESTermSourceSyncMeta = Pick<ESTermSourceDescriptor, 'indexPatternId' | 'size' | 'term'>;
-
-export type VectorSourceSyncMeta =
-  | ESSearchSourceSyncMeta
-  | ESGeoGridSourceSyncMeta
-  | ESGeoLineSourceSyncMeta
-  | ESTermSourceSyncMeta
-  | null;
-
 export type VectorSourceRequestMeta = DataFilters & {
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
@@ -67,7 +37,7 @@ export type VectorSourceRequestMeta = DataFilters & {
   geogridPrecision?: number;
   timesliceMaskField?: string;
   sourceQuery?: Query;
-  sourceMeta: VectorSourceSyncMeta;
+  sourceMeta: object | null;
   isForceRefresh: boolean;
 };
 

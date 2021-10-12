@@ -20,12 +20,14 @@ import {
 /**
  * State transitions: fields update
  */
-export const updateFields = (newValues) => ({ fields }) => ({
-  fields: {
-    ...fields,
-    ...newValues,
-  },
-});
+export const updateFields =
+  (newValues) =>
+  ({ fields }) => ({
+    fields: {
+      ...fields,
+      ...newValues,
+    },
+  });
 
 export class FormEntryRow extends PureComponent {
   static propTypes = {

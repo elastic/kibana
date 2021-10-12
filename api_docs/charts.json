@@ -1700,12 +1700,12 @@
           {
             "parentPluginId": "charts",
             "id": "def-public.PaletteOutput.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"palette\""
+              "\"palette\" | \"system_palette\""
             ],
             "path": "src/plugins/charts/common/palette.ts",
             "deprecated": false
@@ -2864,12 +2864,12 @@
           {
             "parentPluginId": "charts",
             "id": "def-server.PaletteOutput.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"palette\""
+              "\"palette\" | \"system_palette\""
             ],
             "path": "src/plugins/charts/common/palette.ts",
             "deprecated": false
@@ -3003,7 +3003,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/charts/common/palette.ts",
@@ -3044,7 +3050,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<unknown>, ",
+          "<{ [key: string]: unknown; }>, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -3061,7 +3067,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/charts/common/palette.ts",
@@ -3304,12 +3316,12 @@
           {
             "parentPluginId": "charts",
             "id": "def-common.PaletteOutput.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"palette\""
+              "\"palette\" | \"system_palette\""
             ],
             "path": "src/plugins/charts/common/palette.ts",
             "deprecated": false

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { ZOOM_LEVELS, MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL } from '../../common/lib/constants';
 
 export interface Props {
@@ -13,10 +14,6 @@ export interface Props {
    */
   zoomScale: number;
   /**
-   * zoom level to scale workpad to fit into the viewport
-   */
-  fitZoomScale: number;
-  /**
    * sets the new zoom level
    */
   setZoomScale: (scale: number) => void;
@@ -24,19 +21,47 @@ export interface Props {
 
 // handlers for zooming in and out
 export const zoomHandlerCreators = {
-  zoomIn: ({ zoomScale, setZoomScale }: Props) => (): void => {
+  zoomIn:
+    ({ zoomScale, setZoomScale }: Props) =>
+    (): void => {
+      const scaleUp =
+        ZOOM_LEVELS.find((zoomLevel: number) => zoomScale < zoomLevel) || MAX_ZOOM_LEVEL;
+      setZoomScale(scaleUp);
+    },
+  zoomOut:
+    ({ zoomScale, setZoomScale }: Props) =>
+    (): void => {
+      const scaleDown =
+        ZOOM_LEVELS.slice()
+          .reverse()
+          .find((zoomLevel: number) => zoomScale > zoomLevel) || MIN_ZOOM_LEVEL;
+      setZoomScale(scaleDown);
+    },
+  resetZoom:
+    ({ setZoomScale }: Props) =>
+    (): void => {
+      setZoomScale(1);
+    },
+};
+
+export const useZoomHandlers = ({ zoomScale, setZoomScale }: Props) => {
+  const zoomIn = useCallback(() => {
     const scaleUp =
       ZOOM_LEVELS.find((zoomLevel: number) => zoomScale < zoomLevel) || MAX_ZOOM_LEVEL;
     setZoomScale(scaleUp);
-  },
-  zoomOut: ({ zoomScale, setZoomScale }: Props) => (): void => {
+  }, [zoomScale, setZoomScale]);
+
+  const zoomOut = useCallback(() => {
     const scaleDown =
       ZOOM_LEVELS.slice()
         .reverse()
         .find((zoomLevel: number) => zoomScale > zoomLevel) || MIN_ZOOM_LEVEL;
     setZoomScale(scaleDown);
-  },
-  resetZoom: ({ setZoomScale }: Props) => (): void => {
+  }, [zoomScale, setZoomScale]);
+
+  const resetZoom = useCallback(() => {
     setZoomScale(1);
-  },
+  }, [setZoomScale]);
+
+  return { zoomIn, zoomOut, resetZoom };
 };

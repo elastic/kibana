@@ -19,7 +19,7 @@ type SortHit = {
 };
 
 export function createIndexPatternsStub() {
-  return ({
+  return {
     get: sinon.spy((indexPatternId) =>
       Promise.resolve({
         id: indexPatternId,
@@ -27,7 +27,7 @@ export function createIndexPatternsStub() {
         popularizeField: () => {},
       })
     ),
-  } as unknown) as IndexPatternsContract;
+  } as unknown as IndexPatternsContract;
 }
 
 /**

@@ -49,9 +49,8 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
     [navigateTo]
   );
 
-  const [
-    { isSignalIndexExists, isAuthenticated, hasEncryptionKey, canUserCRUD, hasIndexWrite },
-  ] = useUserData();
+  const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey, canUserCRUD, hasIndexWrite }] =
+    useUserData();
 
   const { getLoadPrebuiltRulesAndTemplatesButton } = usePrePackagedRules({
     canUserCRUD,

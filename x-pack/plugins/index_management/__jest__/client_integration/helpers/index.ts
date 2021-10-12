@@ -9,8 +9,11 @@ import './mocks';
 
 export { nextTick, getRandomString, findTestSubject, TestBed } from '@kbn/test/jest';
 
-export { setupEnvironment, WithAppDependencies, services } from './setup_environment';
+export {
+  setupEnvironment,
+  WithAppDependencies,
+  services,
+  kibanaVersion,
+} from './setup_environment';
 
 export { TestSubjects } from './test_subjects';
-
-export { BRANCH } from './constants';

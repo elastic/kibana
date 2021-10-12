@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
@@ -39,6 +40,7 @@ import {
 export interface TableProps {
   taggingApi?: SavedObjectsTaggingApi;
   basePath: IBasePath;
+  allowedTypes: SavedObjectManagementTypeInfo[];
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
@@ -145,6 +147,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       actionRegistry,
       columnRegistry,
       taggingApi,
+      allowedTypes,
     } = this.props;
 
     const pagination = {
@@ -182,10 +185,11 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowType',
         render: (type: string, object: SavedObjectWithMetadata) => {
+          const typeLabel = getSavedObjectLabel(type, allowedTypes);
           return (
-            <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+            <EuiToolTip position="top" content={typeLabel}>
               <EuiIcon
-                aria-label={getSavedObjectLabel(type)}
+                aria-label={typeLabel}
                 type={object.meta.icon || 'apps'}
                 size="s"
                 data-test-subj="objectType"
@@ -243,7 +247,6 @@ export class Table extends PureComponent<TableProps, TableState> {
             type: 'icon',
             icon: 'inspect',
             onClick: (object) => goInspectObject(object),
-            available: (object) => !!object.meta.editUrl,
             'data-test-subj': 'savedObjectsTableAction-inspect',
           },
           {

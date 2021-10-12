@@ -29,14 +29,14 @@ const LOCKED_CARD_RAMSOMWARE_TITLE = i18n.translate(
 const LOCKED_CARD_MEMORY_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.memory',
   {
-    defaultMessage: 'Memory',
+    defaultMessage: 'Memory Threat',
   }
 );
 
 const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.behavior',
   {
-    defaultMessage: 'Behavior',
+    defaultMessage: 'Malicious Behavior',
   }
 );
 

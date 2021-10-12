@@ -645,8 +645,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Adds a new layer to the chart, fails if the chart does not support new layers
      */
-    async createLayer() {
+    async createLayer(layerType: string = 'data') {
       await testSubjects.click('lnsLayerAddButton');
+      const layerCount = (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`))
+        .length;
+
+      await retry.waitFor('check for layer type support', async () => {
+        const fasterChecks = await Promise.all([
+          (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length > layerCount,
+          testSubjects.exists(`lnsLayerAddButton-${layerType}`),
+        ]);
+        return fasterChecks.filter(Boolean).length > 0;
+      });
+      if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
+        await testSubjects.click(`lnsLayerAddButton-${layerType}`);
+      }
     },
 
     /**
@@ -1073,6 +1086,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async switchToFormula() {
       await testSubjects.click('lens-dimensionTabs-formula');
+    },
+
+    async switchToStaticValue() {
+      await testSubjects.click('lens-dimensionTabs-static_value');
     },
 
     async toggleFullscreen() {

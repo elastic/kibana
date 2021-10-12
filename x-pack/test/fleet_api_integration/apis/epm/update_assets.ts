@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -35,6 +36,8 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('updates all assets when updating a package to a different version', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
+
     before(async () => {
       await installPackage(pkgKey);
       await installPackage(pkgUpdateKey);
@@ -217,17 +220,9 @@ export default function (providerContext: FtrProviderContext) {
         index: {
           lifecycle: { name: 'reference2' },
           codec: 'best_compression',
-          mapping: {
-            total_fields: {
-              limit: '10000',
-            },
-          },
-          number_of_routing_shards: '30',
-          number_of_shards: '1',
           query: {
             default_field: ['logs_test_name', 'new_field_name'],
           },
-          refresh_interval: '5s',
         },
       });
       const resUserSettings = await es.transport.request({
@@ -429,6 +424,7 @@ export default function (providerContext: FtrProviderContext) {
         install_status: 'installed',
         install_started_at: res.attributes.install_started_at,
         install_source: 'registry',
+        keep_policies_up_to_date: false,
       });
     });
   });

@@ -31,7 +31,8 @@ export interface Params {
 }
 
 export class DashboardToDiscoverDrilldown
-  implements Drilldown<Config, ApplyGlobalFilterActionContext> {
+  implements Drilldown<Config, ApplyGlobalFilterActionContext>
+{
   constructor(protected readonly params: Params) {
     this.ReactCollectConfig = (props) => <CollectConfigContainer {...props} params={this.params} />;
   }

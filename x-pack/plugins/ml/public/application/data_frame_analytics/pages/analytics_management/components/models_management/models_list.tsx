@@ -193,9 +193,8 @@ export const ModelsList: FC = () => {
     const modelIdsToFetch = models.map((model) => model.model_id);
 
     try {
-      const {
-        trained_model_stats: modelsStatsResponse,
-      } = await trainedModelsApiService.getTrainedModelStats(modelIdsToFetch);
+      const { trained_model_stats: modelsStatsResponse } =
+        await trainedModelsApiService.getTrainedModelStats(modelIdsToFetch);
 
       for (const { model_id: id, ...stats } of modelsStatsResponse) {
         const model = models.find((m) => m.model_id === id);

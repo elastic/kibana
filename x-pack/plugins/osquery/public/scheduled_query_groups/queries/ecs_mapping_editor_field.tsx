@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { find, orderBy, sortedUniqBy, isArray, map } from 'lodash';
+import { isEmpty, find, orderBy, sortedUniqBy, isArray, map } from 'lodash';
 import React, {
   forwardRef,
   useCallback,
@@ -30,7 +30,7 @@ import {
   EuiText,
   EuiIcon,
 } from '@elastic/eui';
-import { Parser, Select } from 'node-sql-parser';
+import sqlParser from 'js-sql-parser';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -317,7 +317,7 @@ export interface ECSMappingEditorFieldRef {
 }
 
 export interface ECSMappingEditorFieldProps {
-  field: FieldHook<string>;
+  field: FieldHook<Record<string, unknown>>;
   query: string;
   fieldRef: MutableRefObject<ECSMappingEditorFieldRef>;
 }
@@ -330,65 +330,64 @@ interface ECSMappingEditorFormProps {
   onDelete?: (key: string) => void;
 }
 
-const getEcsFieldValidator = (editForm: boolean) => (
-  args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['key']>
-) => {
-  const fieldRequiredError = fieldValidators.emptyField(
-    i18n.translate(
-      'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.ecsFieldRequiredErrorMessage',
-      {
-        defaultMessage: 'ECS field is required.',
-      }
-    )
-  )(args);
+const getEcsFieldValidator =
+  (editForm: boolean) =>
+  (args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['key']>) => {
+    const fieldRequiredError = fieldValidators.emptyField(
+      i18n.translate(
+        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.ecsFieldRequiredErrorMessage',
+        {
+          defaultMessage: 'ECS field is required.',
+        }
+      )
+    )(args);
 
-  // @ts-expect-error update types
-  if (fieldRequiredError && ((!editForm && args.formData['value.field'].length) || editForm)) {
-    return fieldRequiredError;
-  }
+    // @ts-expect-error update types
+    if (fieldRequiredError && ((!editForm && args.formData['value.field'].length) || editForm)) {
+      return fieldRequiredError;
+    }
 
-  return undefined;
-};
+    return undefined;
+  };
 
-const getOsqueryResultFieldValidator = (
-  osquerySchemaOptions: OsquerySchemaOption[],
-  editForm: boolean
-) => (
-  args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['value']['field']>
-) => {
-  const fieldRequiredError = fieldValidators.emptyField(
-    i18n.translate(
-      'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage',
-      {
-        defaultMessage: 'Osquery result is required.',
-      }
-    )
-  )(args);
+const getOsqueryResultFieldValidator =
+  (osquerySchemaOptions: OsquerySchemaOption[], editForm: boolean) =>
+  (
+    args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['value']['field']>
+  ) => {
+    const fieldRequiredError = fieldValidators.emptyField(
+      i18n.translate(
+        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage',
+        {
+          defaultMessage: 'Osquery result is required.',
+        }
+      )
+    )(args);
 
-  if (fieldRequiredError && ((!editForm && args.formData.key.length) || editForm)) {
-    return fieldRequiredError;
-  }
+    if (fieldRequiredError && ((!editForm && args.formData.key.length) || editForm)) {
+      return fieldRequiredError;
+    }
 
-  if (!args.value.length) return;
+    if (!args.value.length) return;
 
-  const osqueryColumnExists = find(osquerySchemaOptions, ['label', args.value]);
+    const osqueryColumnExists = find(osquerySchemaOptions, ['label', args.value]);
 
-  return !osqueryColumnExists
-    ? {
-        code: 'ERR_FIELD_FORMAT',
-        path: args.path,
-        message: i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
-          {
-            defaultMessage: 'The current query does not return a {columnName} field',
-            values: {
-              columnName: args.value,
-            },
-          }
-        ),
-      }
-    : undefined;
-};
+    return !osqueryColumnExists
+      ? {
+          code: 'ERR_FIELD_FORMAT',
+          path: args.path,
+          message: i18n.translate(
+            'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
+            {
+              defaultMessage: 'The current query does not return a {columnName} field',
+              values: {
+                columnName: args.value,
+              },
+            }
+          ),
+        }
+      : undefined;
+  };
 
 const FORM_DEFAULT_VALUE = {
   key: '',
@@ -616,47 +615,65 @@ export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEdit
         return currentValue;
       }
 
-      const parser = new Parser();
-      let ast: Select;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let ast: Record<string, any> | undefined;
 
       try {
-        const parsedQuery = parser.astify(query);
-        ast = (isArray(parsedQuery) ? parsedQuery[0] : parsedQuery) as Select;
+        ast = sqlParser.parse(query)?.value;
       } catch (e) {
         return currentValue;
       }
 
-      const tablesOrderMap = ast?.from?.reduce((acc, table, index) => {
-        acc[table.as ?? table.table] = index;
-        return acc;
-      }, {});
+      const tablesOrderMap =
+        ast?.from?.value?.reduce(
+          (
+            acc: { [x: string]: number },
+            table: { value: { alias?: { value: string }; value: { value: string } } },
+            index: number
+          ) => {
+            acc[table.value.alias?.value ?? table.value.value.value] = index;
+            return acc;
+          },
+          {}
+        ) ?? {};
 
-      const astOsqueryTables: Record<string, OsqueryColumn[]> = ast?.from?.reduce((acc, table) => {
-        const osqueryTable = find(osquerySchema, ['name', table.table]);
+      const astOsqueryTables: Record<string, OsqueryColumn[]> =
+        ast?.from?.value?.reduce(
+          (
+            acc: { [x: string]: OsqueryColumn[] },
+            table: { value: { alias?: { value: string }; value: { value: string } } }
+          ) => {
+            const osqueryTable = find(osquerySchema, ['name', table.value.value.value]);
 
-        if (osqueryTable) {
-          acc[table.as ?? table.table] = osqueryTable.columns;
-        }
+            if (osqueryTable) {
+              acc[table.value.alias?.value ?? table.value.value.value] = osqueryTable.columns;
+            }
 
-        return acc;
-      }, {});
+            return acc;
+          },
+          {}
+        ) ?? {};
 
       // Table doesn't exist in osquery schema
-      if (
-        !isArray(ast?.columns) &&
-        ast?.columns !== '*' &&
-        !astOsqueryTables[ast?.from && ast?.from[0].table]
-      ) {
+      if (isEmpty(astOsqueryTables)) {
         return currentValue;
       }
+
       /*
         Simple query
         select * from users;
       */
-      if (ast?.columns === '*' && ast.from?.length && astOsqueryTables[ast.from[0].table]) {
-        const tableName = ast.from[0].as ?? ast.from[0].table;
+      if (
+        ast?.selectItems?.value?.length &&
+        ast?.selectItems?.value[0].value === '*' &&
+        ast.from?.value?.length &&
+        ast?.from.value[0].value?.value?.value &&
+        astOsqueryTables[ast.from.value[0].value.value.value]
+      ) {
+        const tableName =
+          ast.from.value[0].value.alias?.value ?? ast.from.value[0].value.value.value;
 
-        return astOsqueryTables[ast.from[0].table].map((osqueryColumn) => ({
+        return astOsqueryTables[ast.from.value[0].value.value.value].map((osqueryColumn) => ({
           label: osqueryColumn.name,
           value: {
             name: osqueryColumn.name,
@@ -673,39 +690,39 @@ export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEdit
        select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
       */
       const suggestions =
-        isArray(ast?.columns) &&
-        ast?.columns
-          ?.map((column) => {
-            if (column.expr.column === '*' && astOsqueryTables[column.expr.table]) {
-              return astOsqueryTables[column.expr.table].map((osqueryColumn) => ({
+        isArray(ast?.selectItems?.value) &&
+        ast?.selectItems?.value
+          // @ts-expect-error update types
+          ?.map((selectItem) => {
+            const [table, column] = selectItem.value?.split('.');
+
+            if (column === '*' && astOsqueryTables[table]) {
+              return astOsqueryTables[table].map((osqueryColumn) => ({
                 label: osqueryColumn.name,
                 value: {
                   name: osqueryColumn.name,
                   description: osqueryColumn.description,
-                  table: column.expr.table,
-                  tableOrder: tablesOrderMap[column.expr.table],
+                  table,
+                  tableOrder: tablesOrderMap[table],
                   suggestion_label: `${osqueryColumn.name}`,
                 },
               }));
             }
 
-            if (astOsqueryTables && astOsqueryTables[column.expr.table]) {
-              const osqueryColumn = find(astOsqueryTables[column.expr.table], [
-                'name',
-                column.expr.column,
-              ]);
+            if (astOsqueryTables && astOsqueryTables[table]) {
+              const osqueryColumn = find(astOsqueryTables[table], ['name', column]);
 
               if (osqueryColumn) {
-                const label = column.as ?? column.expr.column;
+                const label = selectItem.hasAs ? selectItem.alias : column;
 
                 return [
                   {
-                    label: column.as ?? column.expr.column,
+                    label,
                     value: {
                       name: osqueryColumn.name,
                       description: osqueryColumn.description,
-                      table: column.expr.table,
-                      tableOrder: tablesOrderMap[column.expr.table],
+                      table,
+                      tableOrder: tablesOrderMap[table],
                       suggestion_label: `${label}`,
                     },
                   },
@@ -719,7 +736,6 @@ export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEdit
 
       // Remove column duplicates by keeping the column from the table that appears last in the query
       return sortedUniqBy(
-        //  @ts-expect-error update types
         orderBy(suggestions, ['value.suggestion_label', 'value.tableOrder'], ['asc', 'desc']),
         'label'
       );

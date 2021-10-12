@@ -37,9 +37,9 @@ describe('delay', () => {
       isModelMemoryEstimationPayloadValid: true,
     } as JobValidator;
     wizardInitialized$ = new BehaviorSubject<boolean>(false);
-    mockJobCreator = ({
+    mockJobCreator = {
       wizardInitialized$,
-    } as unknown) as JobCreator;
+    } as unknown as JobCreator;
     modelMemoryEstimator = modelMemoryEstimatorProvider(mockJobCreator, mockJobValidator);
   });
   afterEach(() => {
@@ -106,9 +106,9 @@ describe('delay', () => {
 
     modelMemoryEstimator.updates$.subscribe(spy);
 
-    modelMemoryEstimator.update(({
+    modelMemoryEstimator.update({
       analysisConfig: { detectors: [] },
-    } as unknown) as CalculatePayload);
+    } as unknown as CalculatePayload);
     // @ts-ignore
     mockJobValidator.isModelMemoryEstimationPayloadValid = false;
     clock.tick(601);

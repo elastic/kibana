@@ -19,14 +19,14 @@ describe('callApi', () => {
   let core: CoreMock;
 
   beforeEach(() => {
-    core = ({
+    core = {
       http: {
         get: jest.fn().mockReturnValue({
           my_key: 'hello_world',
         }),
       },
       uiSettings: { get: () => false }, // disable `observability:enableInspectEsQueries` setting
-    } as unknown) as CoreMock;
+    } as unknown as CoreMock;
   });
 
   afterEach(() => {

@@ -138,59 +138,58 @@ export const isRisonObject = (value: RisonValue): value is RisonObject => {
   return value !== null && typeof value === 'object';
 };
 
-const getQueryStringResultProvider = (
-  record: CustomUrlAnomalyRecordDoc,
-  getResultTokenValue: GetResultTokenValue
-) => (resultPrefix: string, queryString: string, resultPostfix: string): string => {
-  const URL_LENGTH_LIMIT = 2000;
+const getQueryStringResultProvider =
+  (record: CustomUrlAnomalyRecordDoc, getResultTokenValue: GetResultTokenValue) =>
+  (resultPrefix: string, queryString: string, resultPostfix: string): string => {
+    const URL_LENGTH_LIMIT = 2000;
 
-  let availableCharactersLeft = URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
+    let availableCharactersLeft = URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
 
-  // URL template might contain encoded characters
-  const queryFields = queryString
-    // Split query string by AND operator.
-    .split(/\sand\s/i)
-    // Get property name from `influencerField:$influencerField$` string.
-    .map((v) => String(v.split(/:(.+)?\$/)[0]).trim());
+    // URL template might contain encoded characters
+    const queryFields = queryString
+      // Split query string by AND operator.
+      .split(/\sand\s/i)
+      // Get property name from `influencerField:$influencerField$` string.
+      .map((v) => String(v.split(/:(.+)?\$/)[0]).trim());
 
-  const queryParts: string[] = [];
-  const joinOperator = ' AND ';
+    const queryParts: string[] = [];
+    const joinOperator = ' AND ';
 
-  fieldsLoop: for (let i = 0; i < queryFields.length; i++) {
-    const field = queryFields[i];
-    // Use lodash get to allow nested JSON fields to be retrieved.
-    let tokenValues: string[] | string | null = get(record, field) || null;
-    if (tokenValues === null) {
-      continue;
-    }
-    tokenValues = Array.isArray(tokenValues) ? tokenValues : [tokenValues];
+    fieldsLoop: for (let i = 0; i < queryFields.length; i++) {
+      const field = queryFields[i];
+      // Use lodash get to allow nested JSON fields to be retrieved.
+      let tokenValues: string[] | string | null = get(record, field) || null;
+      if (tokenValues === null) {
+        continue;
+      }
+      tokenValues = Array.isArray(tokenValues) ? tokenValues : [tokenValues];
 
-    // Create a pair `influencerField:value`.
-    // In cases where there are multiple influencer field values for an anomaly
-    // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
-    let result = '';
-    for (let j = 0; j < tokenValues.length; j++) {
-      const part = `${j > 0 ? ' OR ' : ''}${field}:"${getResultTokenValue(tokenValues[j])}"`;
+      // Create a pair `influencerField:value`.
+      // In cases where there are multiple influencer field values for an anomaly
+      // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
+      let result = '';
+      for (let j = 0; j < tokenValues.length; j++) {
+        const part = `${j > 0 ? ' OR ' : ''}${field}:"${getResultTokenValue(tokenValues[j])}"`;
 
-      // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
-      if (availableCharactersLeft < part.length) {
-        if (result.length > 0) {
-          queryParts.push(j > 0 ? `(${result})` : result);
+        // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
+        if (availableCharactersLeft < part.length) {
+          if (result.length > 0) {
+            queryParts.push(j > 0 ? `(${result})` : result);
+          }
+          break fieldsLoop;
         }
-        break fieldsLoop;
+
+        result += part;
+
+        availableCharactersLeft -= result.length;
       }
 
-      result += part;
-
-      availableCharactersLeft -= result.length;
+      if (result.length > 0) {
+        queryParts.push(tokenValues.length > 1 ? `(${result})` : result);
+      }
     }
-
-    if (result.length > 0) {
-      queryParts.push(tokenValues.length > 1 ? `(${result})` : result);
-    }
-  }
-  return queryParts.join(joinOperator);
-};
+    return queryParts.join(joinOperator);
+  };
 
 /**
  * Builds a Kibana dashboard or Discover URL from the supplied config, with any

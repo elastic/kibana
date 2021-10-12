@@ -58,5 +58,6 @@ processes, users, logins, sockets information, file accesses, and more. \
     onPrem: onPremInstructions(platforms, context),
     elasticCloud: cloudInstructions(platforms),
     onPremElasticCloud: onPremCloudInstructions(platforms),
+    integrationBrowserCategories: ['web'],
   };
 }

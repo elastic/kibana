@@ -60,6 +60,7 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
 import { DeferredSpinner } from './shared';
+import { ViewSavedSearchAction } from './application/embeddable/view_saved_search_action';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -195,7 +196,8 @@ export interface DiscoverStartPlugins {
  * Discover provides embeddables for Dashboards
  */
 export class DiscoverPlugin
-  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
+  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -396,6 +398,10 @@ export class DiscoverPlugin
     // initializeServices are assigned at start and used
     // when the application/embeddable is mounted
 
+    const { uiActions } = plugins;
+
+    const viewSavedSearchAction = new ViewSavedSearchAction(core.application);
+    uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     setUiActions(plugins.uiActions);
 
     const services = buildServices(core, plugins, this.initializerContext);

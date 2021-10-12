@@ -37,6 +37,7 @@ import {
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
 import type { TopAlert } from '../';
@@ -44,6 +45,7 @@ import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana
 import { asDuration } from '../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import { parseAlert } from '../parse_alert';
+import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
@@ -54,8 +56,10 @@ type AlertsFlyoutProps = {
 } & EuiFlyoutProps;
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
 const ALERT_UUID: typeof ALERT_UUID_TYPED = ALERT_UUID_NON_TYPED;
 const ALERT_RULE_CATEGORY: typeof ALERT_RULE_CATEGORY_TYPED = ALERT_RULE_CATEGORY_NON_TYPED;
 const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
@@ -90,7 +94,11 @@ export function AlertsFlyout({
       title: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {
         defaultMessage: 'Status',
       }),
-      description: alertData.active ? 'Active' : 'Recovered',
+      description: (
+        <AlertStatusIndicator
+          alertStatus={alertData.active ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
+        />
+      ),
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.lastUpdatedLabel', {

@@ -23,6 +23,7 @@ export class VisualizeChartPageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly header = this.ctx.getPageObject('header');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -218,6 +219,7 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   public async waitForVisualizationRenderingStabilized() {
+    await this.header.waitUntilLoadingHasFinished();
     // assuming rendering is done when data-rendering-count is constant within 1000 ms
     await this.retry.waitFor('rendering count to stabilize', async () => {
       const firstCount = await this.getVisualizationRenderingCount();

@@ -25,7 +25,6 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const browser = getService('browser');
@@ -46,16 +45,14 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
-      // delete .kibana index and then wait for Kibana to re-create it
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
     });
 
     after(async function afterAll() {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.removeLogstashIndexPatternIfExist();
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should not allow saving of invalid scripts', async function () {
@@ -125,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
           'painless',
           'number',
           null,
-          '1',
+          '100',
           script
         );
         await retry.try(async function () {
@@ -370,7 +367,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('creating and using Painless date scripted fields', function describeIndexTests() {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/113745
+    describe.skip('creating and using Painless date scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painDate';
 
       it('should create scripted field', async function () {

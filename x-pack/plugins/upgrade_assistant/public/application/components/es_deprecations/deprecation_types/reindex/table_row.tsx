@@ -31,10 +31,8 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   const reindexState = useReindexContext();
   const { api } = useAppContext();
 
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const closeFlyout = useCallback(async () => {
     removeContentFromGlobalFlyout('reindexFlyout');

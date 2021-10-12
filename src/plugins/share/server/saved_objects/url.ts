@@ -28,6 +28,14 @@ export const url: SavedObjectsType = {
   },
   mappings: {
     properties: {
+      slug: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
+      },
       accessCount: {
         type: 'long',
       },
@@ -37,6 +45,9 @@ export const url: SavedObjectsType = {
       createDate: {
         type: 'date',
       },
+      // Legacy field - contains already pre-formatted final URL.
+      // This is here to support old saved objects that have this field.
+      // TODO: Remove this field and execute a migration to the new format.
       url: {
         type: 'text',
         fields: {
@@ -45,6 +56,11 @@ export const url: SavedObjectsType = {
             ignore_above: 2048,
           },
         },
+      },
+      // Information needed to load and execute a locator.
+      locatorJSON: {
+        type: 'text',
+        index: false,
       },
     },
   },

@@ -6,56 +6,71 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'src/core/server';
+import {
+  PluginConfigDescriptor,
+  PluginInitializerContext,
+} from 'src/core/server';
 import { APMOSSConfig } from 'src/plugins/apm_oss/server';
-import { APMPlugin } from './plugin';
+import { maxSuggestions } from '../../observability/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
+import { APMPlugin } from './plugin';
+
+const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  serviceMapEnabled: schema.boolean({ defaultValue: true }),
+  serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
+  serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
+  serviceMapFingerprintGlobalBucketSize: schema.number({
+    defaultValue: 1000,
+  }),
+  serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
+  serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
+  autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),
+  ui: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
+    maxTraceItems: schema.number({ defaultValue: 1000 }),
+  }),
+  searchAggregatedTransactions: schema.oneOf(
+    [
+      schema.literal(SearchAggregatedTransactionSetting.auto),
+      schema.literal(SearchAggregatedTransactionSetting.always),
+      schema.literal(SearchAggregatedTransactionSetting.never),
+    ],
+    { defaultValue: SearchAggregatedTransactionSetting.auto }
+  ),
+  telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
+  metricsInterval: schema.number({ defaultValue: 30 }),
+  profilingEnabled: schema.boolean({ defaultValue: false }),
+  agent: schema.object({
+    migrations: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
+  }),
+});
 
 // plugin config
-export const config = {
+export const config: PluginConfigDescriptor<APMXPackConfig> = {
+  deprecations: ({ deprecate, renameFromRoot }) => [
+    deprecate('enabled', '8.0.0'),
+    renameFromRoot(
+      'xpack.apm.maxServiceEnvironments',
+      `uiSettings.overrides[${maxSuggestions}]`
+    ),
+    renameFromRoot(
+      'xpack.apm.maxServiceSelections',
+      `uiSettings.overrides[${maxSuggestions}]`
+    ),
+  ],
   exposeToBrowser: {
     serviceMapEnabled: true,
     ui: true,
     profilingEnabled: true,
   },
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    serviceMapEnabled: schema.boolean({ defaultValue: true }),
-    serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
-    serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
-    serviceMapFingerprintGlobalBucketSize: schema.number({
-      defaultValue: 1000,
-    }),
-    serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
-    serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
-    autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),
-    ui: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-      transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
-      maxTraceItems: schema.number({ defaultValue: 1000 }),
-    }),
-    searchAggregatedTransactions: schema.oneOf(
-      [
-        schema.literal(SearchAggregatedTransactionSetting.auto),
-        schema.literal(SearchAggregatedTransactionSetting.always),
-        schema.literal(SearchAggregatedTransactionSetting.never),
-      ],
-      { defaultValue: SearchAggregatedTransactionSetting.auto }
-    ),
-    telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
-    metricsInterval: schema.number({ defaultValue: 30 }),
-    maxServiceEnvironments: schema.number({ defaultValue: 100 }),
-    maxServiceSelection: schema.number({ defaultValue: 50 }),
-    profilingEnabled: schema.boolean({ defaultValue: false }),
-    agent: schema.object({
-      migrations: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
-    }),
-  }),
+  schema: configSchema,
 };
 
-export type APMXPackConfig = TypeOf<typeof config.schema>;
+export type APMXPackConfig = TypeOf<typeof configSchema>;
 export type APMConfig = ReturnType<typeof mergeConfigs>;
 
 // plugin config and ui indices settings
@@ -85,8 +100,6 @@ export function mergeConfigs(
     'xpack.apm.serviceMapMaxTracesPerRequest':
       apmConfig.serviceMapMaxTracesPerRequest,
     'xpack.apm.ui.enabled': apmConfig.ui.enabled,
-    'xpack.apm.maxServiceEnvironments': apmConfig.maxServiceEnvironments,
-    'xpack.apm.maxServiceSelection': apmConfig.maxServiceSelection,
     'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
     'xpack.apm.ui.transactionGroupBucketSize':
       apmConfig.ui.transactionGroupBucketSize,

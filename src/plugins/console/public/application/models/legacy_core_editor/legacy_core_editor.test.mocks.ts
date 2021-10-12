@@ -13,7 +13,7 @@ jest.mock('./mode/worker', () => {
 // @ts-ignore
 window.Worker = function () {
   this.postMessage = () => {};
-  ((this as unknown) as { terminate: () => void }).terminate = () => {};
+  (this as unknown as { terminate: () => void }).terminate = () => {};
 };
 
 // @ts-ignore

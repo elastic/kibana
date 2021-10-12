@@ -13,7 +13,7 @@ import { fireEvent } from '@testing-library/dom';
 import { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
 import {
   ConditionEntryField,
-  GetTrustedListAppsResponse,
+  GetTrustedAppsListResponse,
   NewTrustedApp,
   OperatingSystem,
   PostTrustedAppCreateResponse,
@@ -83,7 +83,7 @@ describe('When on the Trusted Apps Page', () => {
     page: number = 1,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     per_page: number = 20
-  ): GetTrustedListAppsResponse => {
+  ): GetTrustedAppsListResponse => {
     return {
       data: [getFakeTrustedApp()],
       total: 50, // << Should be a value large enough to fulfill two pages
@@ -96,7 +96,7 @@ describe('When on the Trusted Apps Page', () => {
     const currentGetHandler = http.get.getMockImplementation();
 
     http.get.mockImplementation(async (...args) => {
-      const path = (args[0] as unknown) as string;
+      const path = args[0] as unknown as string;
       // @ts-ignore
       const httpOptions = args[1] as HttpFetchOptions;
 
@@ -237,7 +237,7 @@ describe('When on the Trusted Apps Page', () => {
 
             expect(coreStart.http.put).toHaveBeenCalledTimes(1);
 
-            const lastCallToPut = (coreStart.http.put.mock.calls[0] as unknown) as [
+            const lastCallToPut = coreStart.http.put.mock.calls[0] as unknown as [
               string,
               HttpFetchOptions
             ];
@@ -319,9 +319,11 @@ describe('When on the Trusted Apps Page', () => {
           expect(coreStart.http.get).toHaveBeenCalledWith(TRUSTED_APP_GET_URI);
 
           expect(
-            (renderResult.getByTestId(
-              'addTrustedAppFlyout-createForm-nameTextField'
-            ) as HTMLInputElement).value
+            (
+              renderResult.getByTestId(
+                'addTrustedAppFlyout-createForm-nameTextField'
+              ) as HTMLInputElement
+            ).value
           ).toEqual('one app for edit');
         });
 
@@ -428,8 +430,11 @@ describe('When on the Trusted Apps Page', () => {
     it('should have list of policies populated', async () => {
       useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
       const resetEnv = forceHTMLElementOffsetWidth();
-      const { getByTestId } = await renderAndClickAddButton();
-      expect(getByTestId('policy-abc123'));
+      const renderResult = await renderAndClickAddButton();
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('perPolicy'));
+      });
+      expect(renderResult.getByTestId('policy-abc123'));
       resetEnv();
     });
 
@@ -678,26 +683,24 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and there are no trusted apps', () => {
-    const releaseExistsResponse: jest.MockedFunction<
-      () => Promise<GetTrustedListAppsResponse>
-    > = jest.fn(async () => {
-      return {
-        data: [],
-        total: 0,
-        page: 1,
-        per_page: 1,
-      };
-    });
-    const releaseListResponse: jest.MockedFunction<
-      () => Promise<GetTrustedListAppsResponse>
-    > = jest.fn(async () => {
-      return {
-        data: [],
-        total: 0,
-        page: 1,
-        per_page: 20,
-      };
-    });
+    const releaseExistsResponse: jest.MockedFunction<() => Promise<GetTrustedAppsListResponse>> =
+      jest.fn(async () => {
+        return {
+          data: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        };
+      });
+    const releaseListResponse: jest.MockedFunction<() => Promise<GetTrustedAppsListResponse>> =
+      jest.fn(async () => {
+        return {
+          data: [],
+          total: 0,
+          page: 1,
+          per_page: 20,
+        };
+      });
 
     beforeEach(() => {
       const priorMockImplementation = coreStart.http.get.getMockImplementation();

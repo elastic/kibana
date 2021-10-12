@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timelion',
     'common',
   ]);
+  const security = getService('security');
   const monacoEditor = getService('monacoEditor');
   const kibanaServer = getService('kibanaServer');
   const elasticChart = getService('elasticChart');
@@ -26,6 +27,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Timelion visualization', () => {
     before(async () => {
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'long_window_logstash',
+        'test_logstash_reader',
+      ]);
       await kibanaServer.uiSettings.update({
         'timelion:legacyChartsLibrary': false,
       });
@@ -277,17 +283,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should show field suggestions for split argument when index pattern set', async () => {
             await monacoEditor.setCodeEditorValue('');
             await monacoEditor.typeCodeEditorValue(
-              '.es(index=logstash-*, timefield=@timestamp ,split=',
+              '.es(index=logstash-*, timefield=@timestamp, split=',
               'timelionCodeEditor'
             );
+            // wait for split fields to load
+            await common.sleep(300);
             const suggestions = await timelion.getSuggestionItemsText();
+
             expect(suggestions.length).not.to.eql(0);
             expect(suggestions[0].includes('@message.raw')).to.eql(true);
           });
 
           it('should show field suggestions for metric argument when index pattern set', async () => {
             await monacoEditor.typeCodeEditorValue(
-              '.es(index=logstash-*, timefield=@timestamp ,metric=avg:',
+              '.es(index=logstash-*, timefield=@timestamp, metric=avg:',
               'timelionCodeEditor'
             );
             const suggestions = await timelion.getSuggestionItemsText();

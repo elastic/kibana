@@ -57,13 +57,15 @@ export const useEditTimelineBatchActions = ({
 
   const selectedIds = useMemo(() => getExportedIds(selectedItems ?? []), [selectedItems]);
 
-  const handleEnableExportTimelineDownloader = useCallback(() => enableExportTimelineDownloader(), [
-    enableExportTimelineDownloader,
-  ]);
+  const handleEnableExportTimelineDownloader = useCallback(
+    () => enableExportTimelineDownloader(),
+    [enableExportTimelineDownloader]
+  );
 
-  const handleOnOpenDeleteTimelineModal = useCallback(() => onOpenDeleteTimelineModal(), [
-    onOpenDeleteTimelineModal,
-  ]);
+  const handleOnOpenDeleteTimelineModal = useCallback(
+    () => onOpenDeleteTimelineModal(),
+    [onOpenDeleteTimelineModal]
+  );
 
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => {

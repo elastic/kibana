@@ -51,9 +51,9 @@ describe('TutorialConfigAgent', () => {
         <TutorialConfigAgent
           variantId="java"
           http={
-            ({
+            {
               get: jest.fn(),
-            } as unknown) as HttpStart
+            } as unknown as HttpStart
           }
           basePath="http://localhost:5601"
           isCloudEnabled
@@ -66,13 +66,13 @@ describe('TutorialConfigAgent', () => {
         <TutorialConfigAgent
           variantId="java"
           http={
-            ({
+            {
               get: jest.fn().mockReturnValue({
                 cloudStandaloneSetup: undefined,
                 fleetAgents,
                 isFleetEnabled: true,
               }),
-            } as unknown) as HttpStart
+            } as unknown as HttpStart
           }
           basePath="http://localhost:5601"
           isCloudEnabled={false}
@@ -113,13 +113,13 @@ describe('TutorialConfigAgent', () => {
           <TutorialConfigAgent
             variantId="java"
             http={
-              ({
+              {
                 get: jest.fn().mockReturnValue({
                   cloudStandaloneSetup: undefined,
                   fleetAgents,
                   isFleetEnabled: true,
                 }),
-              } as unknown) as HttpStart
+              } as unknown as HttpStart
             }
             basePath="http://localhost:5601"
             isCloudEnabled={false}
@@ -148,13 +148,13 @@ describe('TutorialConfigAgent', () => {
           <TutorialConfigAgent
             variantId="java"
             http={
-              ({
+              {
                 get: jest.fn().mockReturnValue({
                   cloudStandaloneSetup: undefined,
                   fleetAgents: [],
                   isFleetEnabled: true,
                 }),
-              } as unknown) as HttpStart
+              } as unknown as HttpStart
             }
             basePath="http://localhost:5601"
             isCloudEnabled
@@ -186,7 +186,7 @@ describe('TutorialConfigAgent', () => {
           <TutorialConfigAgent
             variantId="java"
             http={
-              ({
+              {
                 get: jest.fn().mockReturnValue({
                   cloudStandaloneSetup: {
                     apmServerUrl: 'cloud_url',
@@ -195,7 +195,7 @@ describe('TutorialConfigAgent', () => {
                   fleetAgents,
                   isFleetEnabled: true,
                 }),
-              } as unknown) as HttpStart
+              } as unknown as HttpStart
             }
             basePath="http://localhost:5601"
             isCloudEnabled
@@ -224,7 +224,7 @@ describe('TutorialConfigAgent', () => {
           <TutorialConfigAgent
             variantId="java"
             http={
-              ({
+              {
                 get: jest.fn().mockReturnValue({
                   cloudStandaloneSetup: {
                     apmServerUrl: 'cloud_url',
@@ -233,7 +233,7 @@ describe('TutorialConfigAgent', () => {
                   fleetAgents: [...fleetAgents, policyElasticAgentOnCloudAgent],
                   isFleetEnabled: true,
                 }),
-              } as unknown) as HttpStart
+              } as unknown as HttpStart
             }
             basePath="http://localhost:5601"
             isCloudEnabled
@@ -263,11 +263,11 @@ describe('TutorialConfigAgent', () => {
           <TutorialConfigAgent
             variantId="java"
             http={
-              ({
+              {
                 get: () => {
                   throw new Error('Boom');
                 },
-              } as unknown) as HttpStart
+              } as unknown as HttpStart
             }
             basePath="http://localhost:5601"
             isCloudEnabled
@@ -296,13 +296,13 @@ describe('TutorialConfigAgent', () => {
         <TutorialConfigAgent
           variantId="java"
           http={
-            ({
+            {
               get: jest.fn().mockReturnValue({
                 cloudStandaloneSetup: undefined,
                 fleetAgents: [],
                 isFleetEnabled: false,
               }),
-            } as unknown) as HttpStart
+            } as unknown as HttpStart
           }
           basePath="http://localhost:5601"
           isCloudEnabled
@@ -319,13 +319,13 @@ describe('TutorialConfigAgent', () => {
         <TutorialConfigAgent
           variantId="java"
           http={
-            ({
+            {
               get: jest.fn().mockReturnValue({
                 cloudStandaloneSetup: undefined,
                 fleetAgents: [],
                 isFleetEnabled: false,
               }),
-            } as unknown) as HttpStart
+            } as unknown as HttpStart
           }
           basePath="http://localhost:5601"
           isCloudEnabled
@@ -354,7 +354,7 @@ describe('TutorialConfigAgent', () => {
         <TutorialConfigAgent
           variantId="java"
           http={
-            ({
+            {
               get: jest.fn().mockReturnValue({
                 cloudStandaloneSetup: {
                   apmServerUrl: 'cloud_url',
@@ -363,7 +363,7 @@ describe('TutorialConfigAgent', () => {
                 fleetAgents: [],
                 isFleetEnabled: false,
               }),
-            } as unknown) as HttpStart
+            } as unknown as HttpStart
           }
           basePath="http://localhost:5601"
           isCloudEnabled

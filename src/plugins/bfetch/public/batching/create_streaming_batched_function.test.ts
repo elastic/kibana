@@ -28,15 +28,15 @@ const isPending = (promise: Promise<unknown>): Promise<boolean> =>
   getPromiseState(promise).then((state) => state === 'pending');
 
 const setup = () => {
-  const xhr = ({} as unknown) as XMLHttpRequest;
+  const xhr = {} as unknown as XMLHttpRequest;
   const { promise, resolve, reject } = defer<void>();
   const stream = new Subject<any>();
 
-  const fetchStreaming = (jest.fn(() => ({
+  const fetchStreaming = jest.fn(() => ({
     xhr,
     promise,
     stream,
-  })) as unknown) as jest.SpyInstance & typeof fetchStreamingReal;
+  })) as unknown as jest.SpyInstance & typeof fetchStreamingReal;
 
   return {
     fetchStreaming,

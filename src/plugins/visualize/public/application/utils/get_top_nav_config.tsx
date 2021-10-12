@@ -64,7 +64,7 @@ const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashb
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.visualize) return false;
 
-  const visualize = (anonymousUserCapabilities.visualize as unknown) as VisualizeCapabilities;
+  const visualize = anonymousUserCapabilities.visualize as unknown as VisualizeCapabilities;
 
   return !!visualize.show;
 };

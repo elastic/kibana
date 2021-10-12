@@ -21,9 +21,10 @@ const mockedCallFetchLogSourceStatusAPI = callFetchLogSourceStatusAPI as jest.Mo
 >;
 
 jest.mock('../containers/logs/log_source/api/fetch_log_source_configuration');
-const mockedCallFetchLogSourceConfigurationAPI = callFetchLogSourceConfigurationAPI as jest.MockedFunction<
-  typeof callFetchLogSourceConfigurationAPI
->;
+const mockedCallFetchLogSourceConfigurationAPI =
+  callFetchLogSourceConfigurationAPI as jest.MockedFunction<
+    typeof callFetchLogSourceConfigurationAPI
+  >;
 
 const DEFAULT_PARAMS = {
   absoluteTime: { start: 1593430680000, end: 1593430800000 },

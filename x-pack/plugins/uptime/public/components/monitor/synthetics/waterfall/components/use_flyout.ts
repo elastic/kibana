@@ -30,9 +30,8 @@ export type OnFlyoutClose = () => void;
 export const useFlyout = (metadata: WaterfallMetadata) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [flyoutData, setFlyoutData] = useState<WaterfallMetadataEntry | undefined>(undefined);
-  const [currentSidebarItemRef, setCurrentSidebarItemRef] = useState<
-    RefObject<HTMLButtonElement | null>
-  >();
+  const [currentSidebarItemRef, setCurrentSidebarItemRef] =
+    useState<RefObject<HTMLButtonElement | null>>();
 
   const handleFlyout = useCallback(
     (flyoutEntry: WaterfallMetadataEntry) => {

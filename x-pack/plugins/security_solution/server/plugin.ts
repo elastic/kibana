@@ -53,11 +53,13 @@ import {
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
+  createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { ManifestTask } from './endpoint/lib/artifacts';
+import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
@@ -66,7 +68,7 @@ import {
   APP_ID,
   SERVER_APP_ID,
   SIGNALS_ID,
-  NOTIFICATIONS_ID,
+  LEGACY_NOTIFICATIONS_ID,
   QUERY_RULE_TYPE_ID,
   DEFAULT_SPACE_ID,
   INDICATOR_RULE_TYPE_ID,
@@ -99,10 +101,14 @@ import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_m
 import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
 import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
 import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
-import { getKibanaPrivilegesFeaturePrivileges } from './features';
+import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
+// eslint-disable-next-line no-restricted-imports
+import { legacyIsNotificationAlertExecutor } from './lib/detection_engine/notifications/legacy_types';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -152,6 +158,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private policyWatcher?: PolicyWatcher;
 
   private manifestTask: ManifestTask | undefined;
+  private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
 
@@ -264,9 +271,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       };
 
       this.setupPlugins.alerting.registerType(createEqlAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createMlAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createThresholdAlertType(createRuleOptions));
     }
 
     // TODO We need to get the endpoint routes inside of initRoutes
@@ -277,6 +285,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml,
       ruleDataService,
+      this.logger,
       isRuleRegistryEnabled
     );
     registerEndpointRoutes(router, endpointContext);
@@ -294,11 +303,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     ];
     const ruleTypes = [
       SIGNALS_ID,
-      NOTIFICATIONS_ID,
+      LEGACY_NOTIFICATIONS_ID,
       ...(isRuleRegistryEnabled ? racRuleTypes : []),
     ];
 
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
+    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     // Continue to register legacy rules against alerting client exposed through rule-registry
     if (this.setupPlugins.alerting != null) {
@@ -313,9 +323,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         experimentalFeatures,
         ruleDataService: plugins.ruleRegistry.ruleDataService,
       });
+      const ruleNotificationType = legacyRulesNotificationAlertType({
+        logger: this.logger,
+      });
 
       if (isAlertExecutor(signalRuleType)) {
         this.setupPlugins.alerting.registerType(signalRuleType);
+      }
+
+      if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
+        this.setupPlugins.alerting.registerType(ruleNotificationType);
       }
     }
 
@@ -348,6 +365,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.taskManager,
       this.telemetryUsageCounter
     );
+
+    this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
+      endpointAppContext: endpointContext,
+      core,
+      taskManager: plugins.taskManager!,
+    });
 
     return {};
   }
@@ -437,6 +460,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.taskManager,
       this.telemetryReceiver
     );
+
+    this.checkMetadataTransformsTask?.start({
+      taskManager: plugins.taskManager!,
+    });
 
     return {};
   }

@@ -71,10 +71,7 @@ Object {
       },
       "minFontSize": 18,
       "orientation": "single",
-      "palette": Object {
-        "name": "default",
-        "type": "palette",
-      },
+      "palette": "{palette}",
       "scale": "linear",
       "showLabel": true,
     },
@@ -142,10 +139,7 @@ Object {
       },
       "minFontSize": 18,
       "orientation": "single",
-      "palette": Object {
-        "name": "default",
-        "type": "palette",
-      },
+      "palette": "{palette}",
       "scale": "linear",
       "showLabel": true,
     },

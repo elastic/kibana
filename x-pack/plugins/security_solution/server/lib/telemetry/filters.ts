@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { TelemetryEvent } from './types';
+
 export interface AllowlistFields {
   [key: string]: boolean | AllowlistFields;
 }
@@ -124,3 +126,48 @@ export const allowlistEventFields: AllowlistFields = {
   },
   ...allowlistBaseEventFields,
 };
+
+export const exceptionListEventFields: AllowlistFields = {
+  created_at: true,
+  description: true,
+  effectScope: true,
+  entries: true,
+  id: true,
+  name: true,
+  os: true,
+  os_types: true,
+};
+
+/**
+ * Filters out information not required for downstream analysis
+ *
+ * @param allowlist
+ * @param event
+ * @returns
+ */
+export function copyAllowlistedFields(
+  allowlist: AllowlistFields,
+  event: TelemetryEvent
+): TelemetryEvent {
+  return Object.entries(allowlist).reduce<TelemetryEvent>((newEvent, [allowKey, allowValue]) => {
+    const eventValue = event[allowKey];
+    if (eventValue !== null && eventValue !== undefined) {
+      if (allowValue === true) {
+        return { ...newEvent, [allowKey]: eventValue };
+      } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
+        const subValues = eventValue.filter((v) => typeof v === 'object');
+        return {
+          ...newEvent,
+          [allowKey]: subValues.map((v) => copyAllowlistedFields(allowValue, v as TelemetryEvent)),
+        };
+      } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
+        const values = copyAllowlistedFields(allowValue, eventValue as TelemetryEvent);
+        return {
+          ...newEvent,
+          ...(Object.keys(values).length > 0 ? { [allowKey]: values } : {}),
+        };
+      }
+    }
+    return newEvent;
+  }, {});
+}

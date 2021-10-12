@@ -45,12 +45,14 @@ export class EndpointTestResources extends FtrService {
     if (endpointPackageVersion) {
       await this.transform.api.waitForTransformToExist(transformId);
 
-      transform = ((
-        await this.transform.api
-          .getTransform(transformId)
-          .catch(catchAndWrapError)
-          .then((response: { body: GetTransformsResponseSchema }) => response)
-      ).body as GetTransformsResponseSchema).transforms[0];
+      transform = (
+        (
+          await this.transform.api
+            .getTransform(transformId)
+            .catch(catchAndWrapError)
+            .then((response: { body: GetTransformsResponseSchema }) => response)
+        ).body as GetTransformsResponseSchema
+      ).transforms[0];
     } else {
       transform = (
         await this.transform.api.getTransformList(100).catch(catchAndWrapError)
@@ -89,6 +91,7 @@ export class EndpointTestResources extends FtrService {
       numHostDocs: number;
       alertsPerHost: number;
       enableFleetIntegration: boolean;
+      logsEndpoint: boolean;
       generatorSeed: string;
       waitUntilTransformed: boolean;
     }> = {}
@@ -98,6 +101,7 @@ export class EndpointTestResources extends FtrService {
       numHostDocs = 1,
       alertsPerHost = 1,
       enableFleetIntegration = true,
+      logsEndpoint = false,
       generatorSeed = 'seed',
       waitUntilTransformed = true,
     } = options;
@@ -114,7 +118,8 @@ export class EndpointTestResources extends FtrService {
       'logs-endpoint.events.process-default',
       'logs-endpoint.alerts-default',
       alertsPerHost,
-      enableFleetIntegration
+      enableFleetIntegration,
+      logsEndpoint
     );
 
     if (waitUntilTransformed) {

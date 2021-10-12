@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
 import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
-import type { PaletteRegistry } from '../../../../charts/public';
+import type { PaletteRegistry, PaletteOutput } from '../../../../charts/public';
 import {
   Datatable,
   DatatableColumn,
@@ -36,12 +36,12 @@ const calculateWeight = (value: number, x1: number, y1: number, x2: number, y2: 
 
 const getColor = (
   palettes: PaletteRegistry,
-  activePalette: string,
+  activePalette: PaletteOutput,
   text: string,
   values: string[],
   syncColors: boolean
 ) => {
-  return palettes?.get(activePalette).getCategoricalColor(
+  return palettes?.get(activePalette?.name)?.getCategoricalColor(
     [
       {
         name: text,
@@ -54,7 +54,8 @@ const getColor = (
       totalSeries: values.length || 1,
       behindText: false,
       syncColors,
-    }
+    },
+    activePalette?.params ?? { colors: [] }
   );
 };
 
@@ -113,14 +114,14 @@ export const TagCloudChart = ({
           tag === 'all' || visData.rows.length <= 1
             ? 1
             : calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
-        color: getColor(palettesRegistry, palette.name, tag, values, syncColors) || 'rgba(0,0,0,0)',
+        color: getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)',
       };
     });
   }, [
     bucket,
     bucketFormatter,
     metric.accessor,
-    palette.name,
+    palette,
     palettesRegistry,
     syncColors,
     visData.columns,

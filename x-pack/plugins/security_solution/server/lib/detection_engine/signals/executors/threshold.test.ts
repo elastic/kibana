@@ -73,6 +73,7 @@ describe('threshold_executor', () => {
         exceptionItems,
         experimentalFeatures: allowedExperimentalValues,
         services: alertServices,
+        state: { initialized: true, signalHistory: {} },
         version,
         logger,
         buildRuleMessage,

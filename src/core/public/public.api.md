@@ -459,9 +459,13 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
 // @public
 export interface DeprecationsServiceStart {
+    // Warning: (ae-incompatible-release-tags) The symbol "getAllDeprecations" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
+    // Warning: (ae-incompatible-release-tags) The symbol "getDeprecations" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
+    // Warning: (ae-incompatible-release-tags) The symbol "isDeprecationResolvable" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;
+    // Warning: (ae-incompatible-release-tags) The symbol "resolveDeprecation" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
 }
 
@@ -699,13 +703,24 @@ export interface DocLinksStart {
         readonly ecs: {
             readonly guide: string;
         };
+        readonly clients: {
+            readonly guide: string;
+            readonly goOverview: string;
+            readonly javaIndex: string;
+            readonly jsIntro: string;
+            readonly netGuide: string;
+            readonly perlGuide: string;
+            readonly phpGuide: string;
+            readonly pythonGuide: string;
+            readonly rubyOverview: string;
+            readonly rustGuide: string;
+        };
     };
 }
 
 // Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "DomainDeprecationDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public (undocumented)
+// @internal (undocumented)
 export interface DomainDeprecationDetails extends DeprecationsDetails {
     // (undocumented)
     domainId: string;
@@ -1254,6 +1269,20 @@ export interface SavedObjectsBulkCreateOptions {
 }
 
 // @public (undocumented)
+export interface SavedObjectsBulkResolveObject {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkResolveResponse<T = unknown> {
+    // (undocumented)
+    resolved_objects: Array<SavedObjectsResolveResponse<T>>;
+}
+
+// @public (undocumented)
 export interface SavedObjectsBulkUpdateObject<T = unknown> {
     // (undocumented)
     attributes: T;
@@ -1282,6 +1311,12 @@ export class SavedObjectsClient {
         id: string;
         type: string;
     }>) => Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkResolve: <T = unknown>(objects?: Array<{
+        id: string;
+        type: string;
+    }>) => Promise<{
+        resolved_objects: ResolvedSimpleSavedObject<T>[];
+    }>;
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts

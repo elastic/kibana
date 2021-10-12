@@ -1081,13 +1081,12 @@ export const getSignalsByRuleIds = async (
     [x: string]: unknown;
   }>
 > => {
-  const {
-    body: signalsOpen,
-  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsRuleId(ruleIds))
-    .expect(200);
+  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+    await supertest
+      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+      .set('kbn-xsrf', 'true')
+      .send(getQuerySignalsRuleId(ruleIds))
+      .expect(200);
   return signalsOpen;
 };
 
@@ -1107,13 +1106,12 @@ export const getSignalsByIds = async (
     [x: string]: unknown;
   }>
 > => {
-  const {
-    body: signalsOpen,
-  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId(ids, size))
-    .expect(200);
+  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+    await supertest
+      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+      .set('kbn-xsrf', 'true')
+      .send(getQuerySignalsId(ids, size))
+      .expect(200);
   return signalsOpen;
 };
 
@@ -1131,13 +1129,12 @@ export const getSignalsById = async (
     [x: string]: unknown;
   }>
 > => {
-  const {
-    body: signalsOpen,
-  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId([id]))
-    .expect(200);
+  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+    await supertest
+      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+      .set('kbn-xsrf', 'true')
+      .send(getQuerySignalsId([id]))
+      .expect(200);
   return signalsOpen;
 };
 

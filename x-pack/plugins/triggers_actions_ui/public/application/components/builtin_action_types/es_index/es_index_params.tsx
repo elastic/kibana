@@ -46,7 +46,7 @@ export const IndexParamsFields = ({
   const [isActionConnectorChanged, setIsActionConnectorChanged] = useState<boolean>(false);
 
   const getDocumentToIndex = (doc: Array<Record<string, any>> | undefined) =>
-    doc && doc.length > 0 ? ((doc[0] as unknown) as string) : undefined;
+    doc && doc.length > 0 ? (doc[0] as unknown as string) : undefined;
 
   const [documentToIndex, setDocumentToIndex] = useState<string | undefined>(
     getDocumentToIndex(documents)

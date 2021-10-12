@@ -85,23 +85,23 @@ const createRequest = ({ type, id, initialNamespaces }: CreateTestCase) => ({
 
 export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('create');
-  const expectResponseBody = (
-    testCase: CreateTestCase,
-    user?: TestUser
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    if (testCase.failure === 403) {
-      await expectSavedObjectForbidden(testCase.type)(response);
-    } else {
-      // permitted
-      const object = response.body;
-      await expectResponses.permitted(object, testCase);
-      if (!testCase.failure) {
-        expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
-        const redactedNamespaces = getRedactedNamespaces(user, testCase.expectedNamespaces);
-        expect(object.namespaces).to.eql(redactedNamespaces);
+  const expectResponseBody =
+    (testCase: CreateTestCase, user?: TestUser): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      if (testCase.failure === 403) {
+        await expectSavedObjectForbidden(testCase.type)(response);
+      } else {
+        // permitted
+        const object = response.body;
+        await expectResponses.permitted(object, testCase);
+        if (!testCase.failure) {
+          expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+          const redactedNamespaces = getRedactedNamespaces(user, testCase.expectedNamespaces);
+          expect(object.namespaces).to.eql(redactedNamespaces);
+          // TODO: improve assertions for redacted namespaces? (#112455)
+        }
       }
-    }
-  };
+    };
   const createTestDefinitions = (
     testCases: CreateTestCase | CreateTestCase[],
     forbidden: boolean,
@@ -126,43 +126,41 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     }));
   };
 
-  const makeCreateTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: CreateTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeCreateTest =
+    (describeFn: Mocha.SuiteFunction) => (description: string, definition: CreateTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const { type, id, initialNamespaces } = test.request;
-          const path = `${type}${id ? `/${id}` : ''}`;
-          const requestBody = {
-            attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-            ...(initialNamespaces && { initialNamespaces }),
-          };
-          const query = test.overwrite ? '?overwrite=true' : '';
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${path}${query}`)
-            .auth(user?.username, user?.password)
-            .send(requestBody)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            const { type, id, initialNamespaces } = test.request;
+            const path = `${type}${id ? `/${id}` : ''}`;
+            const requestBody = {
+              attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+              ...(initialNamespaces && { initialNamespaces }),
+            };
+            const query = test.overwrite ? '?overwrite=true' : '';
+            await supertest
+              .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${path}${query}`)
+              .auth(user?.username, user?.password)
+              .send(requestBody)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeCreateTest(describe);
   // @ts-ignore

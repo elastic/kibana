@@ -28,9 +28,10 @@ interface ProductCardProps {
     URL: string;
   };
   image: string;
+  url?: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, image, url }) => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { config } = useValues(KibanaLogic);
 
@@ -68,7 +69,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
       footer={
         <EuiButtonTo
           fill
-          to={product.URL}
+          to={url || product.URL}
           shouldNotCreateHref
           onClick={() =>
             sendEnterpriseSearchTelemetry({

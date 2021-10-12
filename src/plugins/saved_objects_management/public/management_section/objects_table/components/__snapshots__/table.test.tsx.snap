@@ -146,7 +146,6 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           Object {
             "actions": Array [
               Object {
-                "available": [Function],
                 "data-test-subj": "savedObjectsTableAction-inspect",
                 "description": "Inspect this saved object",
                 "icon": "inspect",
@@ -362,7 +361,6 @@ exports[`Table should render normally 1`] = `
           Object {
             "actions": Array [
               Object {
-                "available": [Function],
                 "data-test-subj": "savedObjectsTableAction-inspect",
                 "description": "Inspect this saved object",
                 "icon": "inspect",

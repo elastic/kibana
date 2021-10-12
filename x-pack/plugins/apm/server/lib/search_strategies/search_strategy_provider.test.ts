@@ -57,17 +57,6 @@ const clientSearchMock = (
       aggregations = { transaction_duration_percentiles: { values: {} } };
     }
 
-    // fetchTransactionDurationHistogramInterval
-    if (
-      aggs.transaction_duration_min !== undefined &&
-      aggs.transaction_duration_max !== undefined
-    ) {
-      aggregations = {
-        transaction_duration_min: { value: 0 },
-        transaction_duration_max: { value: 1234 },
-      };
-    }
-
     // fetchTransactionDurationCorrelation
     if (aggs.logspace_ranges !== undefined) {
       aggregations = { logspace_ranges: { buckets: [] } };
@@ -134,14 +123,14 @@ describe('APM Correlations search strategy', () => {
       mockClientFieldCaps = jest.fn(clientFieldCapsMock);
       mockClientSearch = jest.fn(clientSearchMock);
       mockGetApmIndicesMock = jest.fn(getApmIndicesMock);
-      mockDeps = ({
+      mockDeps = {
         esClient: {
           asCurrentUser: {
             fieldCaps: mockClientFieldCaps,
             search: mockClientSearch,
           },
         },
-      } as unknown) as SearchStrategyDependencies;
+      } as unknown as SearchStrategyDependencies;
       params = {
         start: '2020',
         end: '2021',

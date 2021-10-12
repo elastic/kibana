@@ -111,15 +111,8 @@ export class APIKeysGridPage extends Component<Props, State> {
   }
 
   public renderContent() {
-    const {
-      isLoadingApp,
-      isLoadingTable,
-      areApiKeysEnabled,
-      isAdmin,
-      canManage,
-      error,
-      apiKeys,
-    } = this.state;
+    const { isLoadingApp, isLoadingTable, areApiKeysEnabled, isAdmin, canManage, error, apiKeys } =
+      this.state;
 
     if (!apiKeys) {
       if (isLoadingApp) {
@@ -620,11 +613,8 @@ export class APIKeysGridPage extends Component<Props, State> {
 
   private async checkPrivileges() {
     try {
-      const {
-        isAdmin,
-        canManage,
-        areApiKeysEnabled,
-      } = await this.props.apiKeysAPIClient.checkPrivileges();
+      const { isAdmin, canManage, areApiKeysEnabled } =
+        await this.props.apiKeysAPIClient.checkPrivileges();
       this.setState({ isAdmin, canManage, areApiKeysEnabled });
 
       if (!canManage || !areApiKeysEnabled) {

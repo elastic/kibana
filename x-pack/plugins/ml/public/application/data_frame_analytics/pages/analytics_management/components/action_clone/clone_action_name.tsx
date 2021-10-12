@@ -380,14 +380,14 @@ export function extractCloningConfig({
   id,
   ...configToClone
 }: DeepReadonly<DataFrameAnalyticsConfig>): CloneDataFrameAnalyticsConfig {
-  return (cloneDeep({
+  return cloneDeep({
     ...configToClone,
     dest: {
       ...configToClone.dest,
       // Reset the destination index
       index: '',
     },
-  }) as unknown) as CloneDataFrameAnalyticsConfig;
+  }) as unknown as CloneDataFrameAnalyticsConfig;
 }
 
 export const cloneActionNameText = i18n.translate(

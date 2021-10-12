@@ -17,7 +17,7 @@ import { uiToReactComponent } from '../../../kibana_react/public';
  * @internal
  */
 export class ActionInternal<A extends ActionDefinition = ActionDefinition>
-  implements Action<Context<A>>, Presentable<Context<A>> {
+  implements Action<Context<A>>, Presentable<Context<A>>{
   public readonly id: string;
   public readonly type: string;
   public readonly order: number;

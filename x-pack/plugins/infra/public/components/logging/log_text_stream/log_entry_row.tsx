@@ -80,10 +80,10 @@ export const LogEntryRow = memo(
     const setItemIsHovered = useCallback(() => setIsHovered(true), []);
     const setItemIsNotHovered = useCallback(() => setIsHovered(false), []);
 
-    const openFlyout = useCallback(() => openFlyoutWithItem?.(logEntry.id), [
-      openFlyoutWithItem,
-      logEntry.id,
-    ]);
+    const openFlyout = useCallback(
+      () => openFlyoutWithItem?.(logEntry.id),
+      [openFlyoutWithItem, logEntry.id]
+    );
 
     const handleOpenViewLogInContext = useCallback(() => {
       openViewLogInContext?.(logEntry);

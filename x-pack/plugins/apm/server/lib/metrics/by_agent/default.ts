@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { getCPUChartData } from './shared/cpu';
 import { getMemoryChartData } from './shared/memory';
 
@@ -14,15 +14,19 @@ export async function getDefaultMetricsCharts({
   kuery,
   serviceName,
   setup,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
   const charts = await Promise.all([
-    getCPUChartData({ environment, kuery, setup, serviceName }),
-    getMemoryChartData({ environment, kuery, setup, serviceName }),
+    getCPUChartData({ environment, kuery, setup, serviceName, start, end }),
+    getMemoryChartData({ environment, kuery, setup, serviceName, start, end }),
   ]);
 
   return { charts };

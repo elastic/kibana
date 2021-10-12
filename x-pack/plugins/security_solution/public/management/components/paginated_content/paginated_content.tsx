@@ -200,7 +200,7 @@ export const PaginatedContent = memo(
           let key: Key;
 
           if (itemId) {
-            key = (item[itemId] as unknown) as Key;
+            key = item[itemId] as unknown as Key;
           } else {
             if (itemKeys.has(item)) {
               key = itemKeys.get(item)!;

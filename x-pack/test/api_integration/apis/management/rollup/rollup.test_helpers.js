@@ -14,9 +14,8 @@ const jobsStarted = [];
 export const registerHelpers = (getService) => {
   const supertest = getService('supertest');
 
-  const { createIndex, deleteIndex, deleteAllIndicesCreated } = initElasticsearchIndicesHelpers(
-    getService
-  );
+  const { createIndex, deleteIndex, deleteAllIndicesCreated } =
+    initElasticsearchIndicesHelpers(getService);
 
   const createIndexWithMappings = (indexName = undefined, mappings = INDEX_TO_ROLLUP_MAPPINGS) => {
     return createIndex(indexName, { mappings });

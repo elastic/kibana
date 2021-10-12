@@ -65,10 +65,9 @@ const state: State = {
             },
           },
           query: {
-            match: {
+            match_phrase: {
               'host.os.name': {
                 query: 'Linux',
-                type: 'phrase',
               },
             },
           },
@@ -94,8 +93,7 @@ const state: State = {
         id: TimelineId.active,
         dataProviders: [
           {
-            id:
-              'draggable-badge-default-draggable-netflow-renderer-timeline-1-_qpBe3EBD7k-aQQL7v7--_qpBe3EBD7k-aQQL7v7--network_transport-tcp',
+            id: 'draggable-badge-default-draggable-netflow-renderer-timeline-1-_qpBe3EBD7k-aQQL7v7--_qpBe3EBD7k-aQQL7v7--network_transport-tcp',
             name: 'tcp',
             enabled: true,
             excluded: false,
@@ -122,10 +120,9 @@ const state: State = {
               type: 'phrase',
             },
             query: {
-              match: {
+              match_phrase: {
                 'source.port': {
                   query: '30045',
-                  type: 'phrase',
                 },
               },
             },
@@ -161,6 +158,60 @@ let testProps = {
 };
 
 describe('StatefulTopN', () => {
+  describe('rendering globalFilter', () => {
+    let wrapper: ReactWrapper;
+    const globalFilters = [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'signal.rule.id',
+          params: {
+            query: 'd62249f0-1632-11ec-b035-19607969bc20',
+          },
+        },
+        query: {
+          match_phrase: {
+            'signal.rule.id': 'd62249f0-1632-11ec-b035-19607969bc20',
+          },
+        },
+      },
+    ];
+    beforeEach(() => {
+      wrapper = mount(
+        <TestProviders store={store}>
+          <StatefulTopN {...testProps} globalFilters={globalFilters} />
+        </TestProviders>
+      );
+    });
+
+    test(`provides filters from  non Redux state when rendering in alerts table`, () => {
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
+
+      expect(props.filters).toEqual([
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'signal.rule.id',
+            params: {
+              query: 'd62249f0-1632-11ec-b035-19607969bc20',
+            },
+          },
+          query: {
+            match_phrase: {
+              'signal.rule.id': 'd62249f0-1632-11ec-b035-19607969bc20',
+            },
+          },
+        },
+      ]);
+    });
+  });
+
   describe('rendering in a global NON-timeline context', () => {
     let wrapper: ReactWrapper;
 
@@ -203,7 +254,7 @@ describe('StatefulTopN', () => {
             key: 'host.os.name',
             params: { query: 'Linux' },
           },
-          query: { match: { 'host.os.name': { query: 'Linux', type: 'phrase' } } },
+          query: { match_phrase: { 'host.os.name': { query: 'Linux' } } },
         },
       ]);
     });

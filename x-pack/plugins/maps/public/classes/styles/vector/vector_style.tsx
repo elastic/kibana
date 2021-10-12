@@ -258,9 +258,9 @@ export class VectorStyle implements IVectorStyle {
     mapColors: string[]
   ) {
     const originalProperties = this.getRawProperties();
-    const invalidStyleNames: VECTOR_STYLES[] = (Object.keys(
-      originalProperties
-    ) as VECTOR_STYLES[]).filter((key) => {
+    const invalidStyleNames: VECTOR_STYLES[] = (
+      Object.keys(originalProperties) as VECTOR_STYLES[]
+    ).filter((key) => {
       const dynamicOptions = getDynamicOptions(originalProperties, key);
       if (!dynamicOptions || !dynamicOptions.field || !dynamicOptions.field.name) {
         return false;
@@ -547,12 +547,10 @@ export class VectorStyle implements IVectorStyle {
     }
 
     dynamicProperties.forEach((dynamicProperty) => {
-      const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(
-        metaFeatures
-      );
-      const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(
-        metaFeatures
-      );
+      const ordinalStyleMeta =
+        dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures);
+      const categoricalStyleMeta =
+        dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures);
 
       const name = dynamicProperty.getFieldName();
       if (!styleMeta.fieldMeta[name]) {
@@ -633,9 +631,8 @@ export class VectorStyle implements IVectorStyle {
 
     dynamicProperties.forEach(
       (dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>) => {
-        const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(
-          features
-        );
+        const categoricalStyleMeta =
+          dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
         const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
         const name = dynamicProperty.getFieldName();
         if (!styleMeta.fieldMeta[name]) {

@@ -13,6 +13,7 @@ import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
+import { defaultThresholdColor } from './color_assignment';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -54,7 +55,20 @@ export function toPreviewExpression(
   return toExpression(
     {
       ...state,
-      layers: state.layers.map((layer) => ({ ...layer, hide: true })),
+      layers: state.layers.map((layer) =>
+        layer.layerType === layerTypes.DATA
+          ? { ...layer, hide: true }
+          : // cap the threshold line to 1px
+            {
+              ...layer,
+              hide: true,
+              yConfig: layer.yConfig?.map(({ lineWidth, ...config }) => ({
+                ...config,
+                lineWidth: 1,
+                icon: undefined,
+              })),
+            }
+      ),
       // hide legend for preview
       legend: {
         ...state.legend,
@@ -321,7 +335,17 @@ export const buildExpression = (
                               arguments: {
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
-                                color: yConfig.color ? [yConfig.color] : [],
+                                color:
+                                  layer.layerType === layerTypes.THRESHOLD
+                                    ? [yConfig.color || defaultThresholdColor]
+                                    : yConfig.color
+                                    ? [yConfig.color]
+                                    : [],
+                                lineStyle: [yConfig.lineStyle || 'solid'],
+                                lineWidth: [yConfig.lineWidth || 1],
+                                fill: [yConfig.fill || 'none'],
+                                icon: yConfig.icon ? [yConfig.icon] : [],
+                                iconPosition: [yConfig.iconPosition || 'auto'],
                               },
                             },
                           ],

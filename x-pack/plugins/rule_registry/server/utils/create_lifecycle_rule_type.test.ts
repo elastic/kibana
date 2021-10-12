@@ -25,7 +25,7 @@ function createRule() {
   const ruleDataClientMock = createRuleDataClientMock();
 
   const factory = createLifecycleRuleTypeFactory({
-    ruleDataClient: (ruleDataClientMock as unknown) as RuleDataClient,
+    ruleDataClient: ruleDataClientMock as unknown as RuleDataClient,
     logger: loggerMock.create(),
   });
 
@@ -276,6 +276,7 @@ describe('createLifecycleRuleTypeFactory', () => {
           return castArray(val);
         });
 
+        // @ts-ignore 4.3.5 upgrade
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
             hits: [{ fields: stored } as any],

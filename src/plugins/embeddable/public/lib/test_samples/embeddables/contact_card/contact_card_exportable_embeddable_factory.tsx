@@ -21,7 +21,8 @@ import { ContactCardInitializer } from './contact_card_initializer';
 export const CONTACT_CARD_EXPORTABLE_EMBEDDABLE = 'CONTACT_CARD_EXPORTABLE_EMBEDDABLE';
 
 export class ContactCardExportableEmbeddableFactory
-  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput>
+{
   public readonly type = CONTACT_CARD_EXPORTABLE_EMBEDDABLE;
 
   constructor(

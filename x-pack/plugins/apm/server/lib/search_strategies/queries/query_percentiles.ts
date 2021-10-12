@@ -72,8 +72,9 @@ export const fetchTransactionDurationPercentiles = async (
   return {
     totalDocs: (resp.body.hits.total as estypes.SearchTotalHits).value,
     percentiles:
-      (resp.body.aggregations
-        .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate)
-        .values ?? {},
+      (
+        resp.body.aggregations
+          .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate
+      ).values ?? {},
   };
 };

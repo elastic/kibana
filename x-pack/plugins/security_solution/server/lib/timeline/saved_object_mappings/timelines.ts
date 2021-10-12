@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsType } from '../../../../../../../src/core/server';
-import { timelinesMigrations } from './migrations';
+import { timelinesMigrations } from './migrations/timelines';
 
 export const timelineSavedObjectType = 'siem-ui-timeline';
 
@@ -318,7 +318,8 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const timelineType: SavedObjectsType = {
   name: timelineSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: timelineSavedObjectMappings,
   migrations: timelinesMigrations,
 };

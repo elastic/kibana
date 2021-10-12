@@ -11,7 +11,7 @@ import {
   SavedObjectUnsanitizedDoc,
 } from 'kibana/server';
 import { SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
-import { createReference } from './utils';
+import { createMigratedDoc, createReference } from './utils';
 
 export interface SavedQueryId {
   savedQueryId?: string | null;
@@ -29,13 +29,12 @@ export const migrateSavedQueryIdToReferences = (
     SAVED_QUERY_TYPE
   );
 
-  return {
-    ...doc,
-    attributes: {
-      ...restAttributes,
-    },
-    references: [...docReferences, ...savedQueryIdReferences],
-  };
+  return createMigratedDoc({
+    doc,
+    attributes: restAttributes,
+    docReferences,
+    migratedReferences: savedQueryIdReferences,
+  });
 };
 
 export const timelinesMigrations: SavedObjectMigrationMap = {

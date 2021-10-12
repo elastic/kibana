@@ -15,17 +15,21 @@ describe('params_is_valid', () => {
   beforeEach(() => {
     // Disable momentJS deprecation warning and it looks like it is not typed either so
     // we have to disable the type as well and cannot extend it easily.
-    ((moment as unknown) as {
-      suppressDeprecationWarnings: boolean;
-    }).suppressDeprecationWarnings = true;
+    (
+      moment as unknown as {
+        suppressDeprecationWarnings: boolean;
+      }
+    ).suppressDeprecationWarnings = true;
   });
 
   afterEach(() => {
     // Re-enable momentJS deprecation warning and it looks like it is not typed either so
     // we have to disable the type as well and cannot extend it easily.
-    ((moment as unknown) as {
-      suppressDeprecationWarnings: boolean;
-    }).suppressDeprecationWarnings = false;
+    (
+      moment as unknown as {
+        suppressDeprecationWarnings: boolean;
+      }
+    ).suppressDeprecationWarnings = false;
   });
 
   test('returns no errors if no field has been selected', () => {

@@ -10,6 +10,7 @@ import React from 'react';
 import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
 import { chartPluginMock } from '../../../charts/public/mocks';
 import { dataPluginMock } from '../../../data/public/mocks';
+import type { Datatable } from '../../../expressions/public';
 import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
@@ -119,5 +120,65 @@ describe('PieComponent', function () {
       ],
     ]);
     expect(wrapperProps.fireEvent).toHaveBeenCalled();
+  });
+
+  it('renders the no results component if all the values are zero', () => {
+    const newVisData = {
+      type: 'datatable',
+      columns: [
+        {
+          id: 'col-1-1',
+          name: 'Count',
+        },
+        {
+          id: 'col-0-2',
+          name: 'filters',
+        },
+      ],
+      rows: [
+        {
+          'col-0-2': 'Carrier : "JetBeats" ',
+          'col-1-1': 0,
+        },
+        {
+          'col-0-2': 'Carrier : "ES-Air" ',
+          'col-1-1': 0,
+        },
+      ],
+    } as unknown as Datatable;
+    const newProps = { ...wrapperProps, visData: newVisData };
+    const component = mount(<PieComponent {...newProps} />);
+    expect(findTestSubject(component, 'pieVisualizationError').text()).toEqual('No results found');
+  });
+
+  it('renders the no results component if there are negative values', () => {
+    const newVisData = {
+      type: 'datatable',
+      columns: [
+        {
+          id: 'col-1-1',
+          name: 'Count',
+        },
+        {
+          id: 'col-0-2',
+          name: 'filters',
+        },
+      ],
+      rows: [
+        {
+          'col-0-2': 'Carrier : "JetBeats" ',
+          'col-1-1': -10,
+        },
+        {
+          'col-0-2': 'Carrier : "ES-Air" ',
+          'col-1-1': -10,
+        },
+      ],
+    } as unknown as Datatable;
+    const newProps = { ...wrapperProps, visData: newVisData };
+    const component = mount(<PieComponent {...newProps} />);
+    expect(findTestSubject(component, 'pieVisualizationError').text()).toEqual(
+      "Pie/donut charts can't render with negative values."
+    );
   });
 });

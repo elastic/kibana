@@ -17,7 +17,7 @@ export const createVisualizeServicesMock = () => {
   const toastNotifications = coreStartMock.notifications.toasts;
   const visualizations = visualizationsPluginMock.createStartContract();
 
-  return ({
+  return {
     ...coreStartMock,
     data: dataStartMock,
     toastNotifications,
@@ -28,5 +28,5 @@ export const createVisualizeServicesMock = () => {
     visualizations,
     savedVisualizations: visualizations.savedVisualizationsLoader,
     createVisEmbeddableFromObject: visualizations.__LEGACY.createVisEmbeddableFromObject,
-  } as unknown) as jest.Mocked<VisualizeServices>;
+  } as unknown as jest.Mocked<VisualizeServices>;
 };

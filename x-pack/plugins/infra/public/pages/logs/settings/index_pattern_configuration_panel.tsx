@@ -79,10 +79,10 @@ export const IndexPatternConfigurationPanel: React.FC<{
               defaultMessage="Log index pattern"
             />
           }
-          {...useMemo(() => (isLoading ? {} : getFormRowProps(indexPatternFormElement)), [
-            isLoading,
-            indexPatternFormElement,
-          ])}
+          {...useMemo(
+            () => (isLoading ? {} : getFormRowProps(indexPatternFormElement)),
+            [isLoading, indexPatternFormElement]
+          )}
         >
           <IndexPatternSelector
             isLoading={isLoading || indexPatternFormElement.validity.validity === 'pending'}

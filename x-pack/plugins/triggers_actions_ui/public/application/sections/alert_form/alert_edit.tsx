@@ -50,9 +50,8 @@ export const AlertEdit = ({
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
-  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(
-    false
-  );
+  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
+    useState<boolean>(false);
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
   const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);

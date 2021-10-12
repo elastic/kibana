@@ -51,8 +51,9 @@ export class LabelBorderSizeProperty extends AbstractStyleProperty<LabelBorderSi
     const widthRatio = getWidthRatio(this.getOptions().size);
 
     if (this._labelSizeProperty.isDynamic() && this._labelSizeProperty.isComplete()) {
-      const labelSizeExpression = (this
-        ._labelSizeProperty as DynamicSizeProperty).getMbSizeExpression();
+      const labelSizeExpression = (
+        this._labelSizeProperty as DynamicSizeProperty
+      ).getMbSizeExpression();
       if (labelSizeExpression) {
         mbMap.setPaintProperty(mbLayerId, 'text-halo-width', [
           'max',

@@ -37,7 +37,8 @@ export class BfetchPublicPlugin
       BfetchPublicStart,
       BfetchPublicSetupDependencies,
       BfetchPublicStartDependencies
-    > {
+    >
+{
   private contract!: BfetchPublicContract;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -74,29 +75,33 @@ export class BfetchPublicPlugin
 
   public stop() {}
 
-  private fetchStreaming = (
-    version: string,
-    basePath: string,
-    compressionDisabled$: Observable<boolean>
-  ): BfetchPublicSetup['fetchStreaming'] => (params) =>
-    fetchStreamingStatic({
-      ...params,
-      url: `${basePath}/${removeLeadingSlash(params.url)}`,
-      headers: {
-        'Content-Type': 'application/json',
-        'kbn-version': version,
-        ...(params.headers || {}),
-      },
-      compressionDisabled$,
-    });
+  private fetchStreaming =
+    (
+      version: string,
+      basePath: string,
+      compressionDisabled$: Observable<boolean>
+    ): BfetchPublicSetup['fetchStreaming'] =>
+    (params) =>
+      fetchStreamingStatic({
+        ...params,
+        url: `${basePath}/${removeLeadingSlash(params.url)}`,
+        headers: {
+          'Content-Type': 'application/json',
+          'kbn-version': version,
+          ...(params.headers || {}),
+        },
+        compressionDisabled$,
+      });
 
-  private batchedFunction = (
-    fetchStreaming: BfetchPublicContract['fetchStreaming'],
-    compressionDisabled$: Observable<boolean>
-  ): BfetchPublicContract['batchedFunction'] => (params) =>
-    createStreamingBatchedFunction({
-      ...params,
-      compressionDisabled$,
-      fetchStreaming: params.fetchStreaming || fetchStreaming,
-    });
+  private batchedFunction =
+    (
+      fetchStreaming: BfetchPublicContract['fetchStreaming'],
+      compressionDisabled$: Observable<boolean>
+    ): BfetchPublicContract['batchedFunction'] =>
+    (params) =>
+      createStreamingBatchedFunction({
+        ...params,
+        compressionDisabled$,
+        fetchStreaming: params.fetchStreaming || fetchStreaming,
+      });
 }

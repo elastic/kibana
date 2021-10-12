@@ -182,15 +182,13 @@ export const RulesTables = React.memo<RulesTableProps>(
       rulesNotUpdated
     );
 
-    const hasActionsPrivileges = useMemo(() => (isBoolean(actions.show) ? actions.show : true), [
-      actions,
-    ]);
+    const hasActionsPrivileges = useMemo(
+      () => (isBoolean(actions.show) ? actions.show : true),
+      [actions]
+    );
 
-    const [
-      isDeleteConfirmationVisible,
-      showDeleteConfirmation,
-      hideDeleteConfirmation,
-    ] = useBoolState();
+    const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
+      useBoolState();
 
     const [confirmDeletion, handleDeletionConfirm, handleDeletionCancel] = useAsyncConfirmation({
       onInit: showDeleteConfirmation,
@@ -300,10 +298,10 @@ export const RulesTables = React.memo<RulesTableProps>(
       reFetchRules,
     ]);
 
-    const monitoringColumns = useMemo(() => getMonitoringColumns(navigateToApp, formatUrl), [
-      navigateToApp,
-      formatUrl,
-    ]);
+    const monitoringColumns = useMemo(
+      () => getMonitoringColumns(navigateToApp, formatUrl),
+      [navigateToApp, formatUrl]
+    );
 
     useEffect(() => {
       setRefreshRulesData(reFetchRules);

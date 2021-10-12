@@ -51,11 +51,10 @@ export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] 
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
-  const observable$ = useMemo(() => services.uiSettings!.get$(key, defaultValue), [
-    key,
-    defaultValue,
-    services.uiSettings,
-  ]);
+  const observable$ = useMemo(
+    () => services.uiSettings!.get$(key, defaultValue),
+    [key, defaultValue, services.uiSettings]
+  );
   const value = useObservable<T>(observable$, services.uiSettings!.get(key, defaultValue));
   const set = useCallback((newValue: T) => services.uiSettings!.set(key, newValue), [key]);
 

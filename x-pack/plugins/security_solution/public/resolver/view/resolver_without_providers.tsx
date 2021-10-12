@@ -69,11 +69,8 @@ export const ResolverWithoutProviders = React.memo(
     // use this for the entire render in order to keep things in sync
     const timeAtRender = timestamp();
 
-    const {
-      processNodePositions,
-      connectingEdgeLineSegments,
-    } = useSelector((state: ResolverState) =>
-      selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
+    const { processNodePositions, connectingEdgeLineSegments } = useSelector(
+      (state: ResolverState) => selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
     );
 
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();

@@ -159,6 +159,7 @@ export async function getServiceInstancesTransactionStatistics<
   const bucketSizeInMinutes = bucketSize / 60;
 
   return (
+    // @ts-ignore 4.3.5 upgrade
     (response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
       (serviceNodeBucket) => {
         const { doc_count: count, key } = serviceNodeBucket;

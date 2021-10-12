@@ -362,3 +362,8 @@ export interface ThresholdQueryBucket extends TermAggregationBucket {
     value_as_string: string;
   };
 }
+
+export interface ThresholdAlertState extends AlertTypeState {
+  initialized: boolean;
+  signalHistory: ThresholdSignalHistory;
+}

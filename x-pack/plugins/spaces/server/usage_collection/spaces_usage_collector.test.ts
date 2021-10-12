@@ -63,9 +63,9 @@ function setup({
     license$: Rx.of(license),
   } as LicensingPluginSetup;
 
-  const featuresSetup = ({
+  const featuresSetup = {
     getKibanaFeatures: jest.fn().mockReturnValue(features),
-  } as unknown) as PluginsSetup['features'];
+  } as unknown as PluginsSetup['features'];
 
   const usageStatsClient = usageStatsClientMock.create();
   usageStatsClient.getUsageStats.mockResolvedValue(MOCK_USAGE_STATS);

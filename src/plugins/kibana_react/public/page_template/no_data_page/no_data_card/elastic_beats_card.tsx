@@ -23,6 +23,7 @@ export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
   button,
   href,
   solution, // unused for now
+  layout,
   ...cardRest
 }) => {
   const {
@@ -58,7 +59,8 @@ export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
       )}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
       footer={footer}
-      {...(cardRest as any)}
+      layout={layout as 'vertical' | undefined}
+      {...cardRest}
     />
   );
 };

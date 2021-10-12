@@ -31,23 +31,21 @@ type KeysOfSources<T extends any[]> = T extends [any]
   ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]> & KeyOfSource<T[3]>
   : Record<string, null | string | number>;
 
-type CompositeKeysOf<
-  TAggregationContainer extends estypes.AggregationsAggregationContainer
-> = TAggregationContainer extends {
-  composite: { sources: [...infer TSource] };
-}
-  ? KeysOfSources<TSource>
-  : never;
-
-type TopMetricKeysOf<
-  TAggregationContainer extends estypes.AggregationsAggregationContainer
-> = TAggregationContainer extends { top_metrics: { metrics: { field: infer TField } } }
-  ? TField
-  : TAggregationContainer extends { top_metrics: { metrics: Array<{ field: infer TField }> } }
-  ? TField
-  : string;
+type CompositeKeysOf<TAggregationContainer extends estypes.AggregationsAggregationContainer> =
+  TAggregationContainer extends {
+    composite: { sources: [...infer TSource] };
+  }
+    ? KeysOfSources<TSource>
+    : unknown;
 
 type Source = estypes.SearchSourceFilter | boolean | estypes.Fields;
+
+type TopMetricKeysOf<TAggregationContainer extends estypes.AggregationsAggregationContainer> =
+  TAggregationContainer extends { top_metrics: { metrics: { field: infer TField } } }
+    ? TField
+    : TAggregationContainer extends { top_metrics: { metrics: Array<{ field: infer TField }> } }
+    ? TField
+    : string;
 
 type ValueTypeOfField<T> = T extends Record<string, string | number>
   ? ValuesType<T>
@@ -61,7 +59,7 @@ type ValueTypeOfField<T> = T extends Record<string, string | number>
 
 type MaybeArray<T> = T | T[];
 
-type Fields = Exclude<Required<estypes.SearchRequest>['body']['fields'], undefined>;
+type Fields = Required<Required<estypes.SearchRequest>['body']>['fields'];
 type DocValueFields = MaybeArray<string | estypes.SearchDocValueField>;
 
 export type SearchHit<
@@ -275,13 +273,12 @@ export type AggregateOf<
           [key in keyof TAggregationContainer['filters']['filters']]: {
             doc_count: number;
           } & SubAggregateOf<TAggregationContainer, TDocument>;
-        } &
-          (TAggregationContainer extends { filters: { other_bucket_key: infer TOtherBucketKey } }
-            ? Record<
-                TOtherBucketKey & string,
-                { doc_count: number } & SubAggregateOf<TAggregationContainer, TDocument>
-              >
-            : unknown) &
+        } & (TAggregationContainer extends { filters: { other_bucket_key: infer TOtherBucketKey } }
+          ? Record<
+              TOtherBucketKey & string,
+              { doc_count: number } & SubAggregateOf<TAggregationContainer, TDocument>
+            >
+          : unknown) &
           (TAggregationContainer extends { filters: { other_bucket: true } }
             ? { _other: { doc_count: number } & SubAggregateOf<TAggregationContainer, TDocument> }
             : unknown)

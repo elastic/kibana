@@ -11,7 +11,7 @@ import { createSearchSourceMock } from '../../../data/public/mocks';
 import { indexPatternMock } from './index_pattern';
 import { indexPatternWithTimefieldMock } from './index_pattern_with_timefield';
 
-export const savedSearchMock = ({
+export const savedSearchMock = {
   id: 'the-saved-search-id',
   type: 'search',
   attributes: {
@@ -31,9 +31,9 @@ export const savedSearchMock = ({
   migrationVersion: { search: '7.5.0' },
   error: undefined,
   searchSource: createSearchSourceMock({ index: indexPatternMock }),
-} as unknown) as SavedSearch;
+} as unknown as SavedSearch;
 
-export const savedSearchMockWithTimeField = ({
+export const savedSearchMockWithTimeField = {
   id: 'the-saved-search-id-with-timefield',
   type: 'search',
   attributes: {
@@ -53,4 +53,4 @@ export const savedSearchMockWithTimeField = ({
   migrationVersion: { search: '7.5.0' },
   error: undefined,
   searchSource: createSearchSourceMock({ index: indexPatternWithTimefieldMock }),
-} as unknown) as SavedSearch;
+} as unknown as SavedSearch;

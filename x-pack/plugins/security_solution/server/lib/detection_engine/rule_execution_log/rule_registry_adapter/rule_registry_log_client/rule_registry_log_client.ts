@@ -56,9 +56,7 @@ interface FindExecutionLogArgs {
 }
 
 interface IRuleRegistryLogClient {
-  find: (
-    args: FindExecutionLogArgs
-  ) => Promise<{
+  find: (args: FindExecutionLogArgs) => Promise<{
     [ruleId: string]: IRuleStatusSOAttributes[] | undefined;
   }>;
   create: (event: RuleExecutionEvent) => Promise<void>;

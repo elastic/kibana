@@ -35,7 +35,7 @@ export function mockHandlerArguments(
 ] {
   const listTypes = jest.fn(() => listTypesRes);
   return [
-    ({
+    {
       alerting: {
         listTypes,
         getRulesClient() {
@@ -44,7 +44,7 @@ export function mockHandlerArguments(
         getFrameworkHealth,
         areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),
       },
-    } as unknown) as AlertingRequestHandlerContext,
+    } as unknown as AlertingRequestHandlerContext,
     req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
@@ -59,5 +59,5 @@ export const mockResponseFactory = (resToMock: Array<MethodKeysOf<KibanaResponse
       });
     }
   });
-  return (factory as unknown) as KibanaResponseFactory;
+  return factory as unknown as KibanaResponseFactory;
 };

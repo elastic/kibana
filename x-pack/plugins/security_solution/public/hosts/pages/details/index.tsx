@@ -74,9 +74,10 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const capabilities = useMlCapabilities();
   const kibana = useKibana();
-  const hostDetailsPageFilters: Filter[] = useMemo(() => getHostDetailsPageFilters(detailName), [
-    detailName,
-  ]);
+  const hostDetailsPageFilters: Filter[] = useMemo(
+    () => getHostDetailsPageFilters(detailName),
+    [detailName]
+  );
   const getFilters = () => [...hostDetailsPageFilters, ...filters];
 
   const narrowDateRange = useCallback<UpdateDateRange>(

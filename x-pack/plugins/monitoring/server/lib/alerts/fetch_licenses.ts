@@ -11,7 +11,8 @@ import { ElasticsearchSource } from '../../../common/types/es';
 export async function fetchLicenses(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string
+  index: string,
+  filterQuery?: string
 ): Promise<AlertLicense[]> {
   const params = {
     index,
@@ -58,6 +59,15 @@ export async function fetchLicenses(
       },
     },
   };
+
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
   const { body: response } = await esClient.search<ElasticsearchSource>(params);
   return (

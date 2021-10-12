@@ -15,6 +15,7 @@ import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { renameKeys } from './../lib/rename_keys';
 import { FindOptions } from '../../rules_client';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
 
 // config definition
 const querySchema = schema.object({
@@ -59,6 +60,12 @@ export const findAlertRoute = (
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       trackLegacyRouteUsage('find', usageCounter);
+      trackLegacyTerminology(
+        [req.query.search, req.query.search_fields, req.query.sort_field].filter(
+          Boolean
+        ) as string[],
+        usageCounter
+      );
       const rulesClient = context.alerting.getRulesClient();
 
       const query = req.query;
@@ -80,6 +87,14 @@ export const findAlertRoute = (
         options.searchFields = Array.isArray(query.search_fields)
           ? query.search_fields
           : [query.search_fields];
+      }
+
+      if (query.fields) {
+        usageCounter?.incrementCounter({
+          counterName: `legacyAlertingFieldsUsage`,
+          counterType: 'alertingFieldsUsage',
+          incrementBy: 1,
+        });
       }
 
       const findResult = await rulesClient.find({ options });

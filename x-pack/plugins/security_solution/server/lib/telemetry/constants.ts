@@ -11,6 +11,8 @@ export const TELEMETRY_CHANNEL_LISTS = 'security-lists';
 
 export const TELEMETRY_CHANNEL_ENDPOINT_META = 'endpoint-metadata';
 
+export const LIST_TRUSTED_APPLICATION = 'trusted_application';
+
 export const LIST_ENDPOINT_EXCEPTION = 'endpoint_exception';
 
 export const LIST_ENDPOINT_EVENT_FILTER = 'endpoint_event_filter';

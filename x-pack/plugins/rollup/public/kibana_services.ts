@@ -32,9 +32,10 @@ export function setFatalErrors(newFatalErrors: FatalErrorsSetup) {
   fatalErrors = newFatalErrors;
 }
 
-export const [getUiStatsReporter, setUiStatsReporter] = createGetterSetter<
-  (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void
->('uiMetric');
+export const [getUiStatsReporter, setUiStatsReporter] =
+  createGetterSetter<
+    (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void
+  >('uiMetric');
 
 // default value if usageCollection is not available
 setUiStatsReporter(() => {});

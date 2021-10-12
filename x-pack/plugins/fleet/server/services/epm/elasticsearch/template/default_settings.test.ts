@@ -46,19 +46,11 @@ describe('buildDefaultSettings', () => {
           "lifecycle": Object {
             "name": "logs",
           },
-          "mapping": Object {
-            "total_fields": Object {
-              "limit": "10000",
-            },
-          },
-          "number_of_routing_shards": "30",
-          "number_of_shards": "1",
           "query": Object {
             "default_field": Array [
               "field1Keyword",
             ],
           },
-          "refresh_interval": "5s",
         },
       }
     `);

@@ -1,353 +1,541 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NotFoundErrors component renders correctly for index-pattern type 1`] = `
-<NotFoundErrors
-  type="index-pattern"
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  title={
+    <FormattedMessage
+      defaultMessage="There is a problem with this saved object"
+      id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+      values={Object {}}
+    />
+  }
 >
-  <EuiCallOut
-    color="danger"
-    iconType="alert"
-    title={
-      <FormattedMessage
-        defaultMessage="There is a problem with this saved object"
-        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-        values={Object {}}
-      />
-    }
+  <div
+    className="euiCallOut euiCallOut--danger"
   >
     <div
-      className="euiCallOut euiCallOut--danger"
+      className="euiCallOutHeader"
     >
-      <div
-        className="euiCallOutHeader"
+      <EuiIcon
+        aria-hidden="true"
+        className="euiCallOutHeader__icon"
+        color="inherit"
+        size="m"
+        type="alert"
       >
-        <EuiIcon
+        <span
           aria-hidden="true"
           className="euiCallOutHeader__icon"
           color="inherit"
+          data-euiicon-type="alert"
           size="m"
-          type="alert"
-        >
-          <span
-            aria-hidden="true"
-            className="euiCallOutHeader__icon"
-            color="inherit"
-            data-euiicon-type="alert"
-            size="m"
-          />
-        </EuiIcon>
-        <span
-          className="euiCallOutHeader__title"
-        >
-          <FormattedMessage
-            defaultMessage="There is a problem with this saved object"
-            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-            values={Object {}}
-          >
-            There is a problem with this saved object
-          </FormattedMessage>
-        </span>
-      </div>
-      <EuiText
-        color="default"
-        size="s"
+        />
+      </EuiIcon>
+      <span
+        className="euiCallOutHeader__title"
       >
-        <div
-          className="euiText euiText--small"
+        <FormattedMessage
+          defaultMessage="There is a problem with this saved object"
+          id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+          values={Object {}}
         >
-          <EuiTextColor
-            color="default"
-            component="div"
-          >
-            <div
-              className="euiTextColor euiTextColor--default"
-              style={Object {}}
-            >
-              <div>
-                <FormattedMessage
-                  defaultMessage="The index pattern associated with this object no longer exists."
-                  id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
-                  values={Object {}}
-                >
-                  The index pattern associated with this object no longer exists.
-                </FormattedMessage>
-              </div>
-              <div>
-                <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                  id="savedObjectsManagement.view.howToFixErrorDescription"
-                  values={Object {}}
-                >
-                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-                </FormattedMessage>
-              </div>
-            </div>
-          </EuiTextColor>
-        </div>
-      </EuiText>
+          There is a problem with this saved object
+        </FormattedMessage>
+      </span>
     </div>
-  </EuiCallOut>
-</NotFoundErrors>
+    <EuiText
+      color="default"
+      size="s"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <EuiTextColor
+          color="default"
+          component="div"
+        >
+          <div
+            className="euiTextColor euiTextColor--default"
+            style={Object {}}
+          >
+            <div>
+              <FormattedMessage
+                defaultMessage="The index pattern associated with this object no longer exists."
+                id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
+                values={Object {}}
+              >
+                The index pattern associated with this object no longer exists.
+              </FormattedMessage>
+            </div>
+            <div>
+              <FormattedMessage
+                defaultMessage="If you know what this error means, you can use the {savedObjectsApis} to fix it — otherwise click the delete button above."
+                id="savedObjectsManagement.view.howToFixErrorDescription"
+                values={
+                  Object {
+                    "savedObjectsApis": <EuiLink
+                      aria-label="Saved objects APIs"
+                      href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                      target="_blank"
+                    >
+                      Saved objects APIs
+                    </EuiLink>,
+                  }
+                }
+              >
+                If you know what this error means, you can use the 
+                <EuiLink
+                  aria-label="Saved objects APIs"
+                  href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                  target="_blank"
+                >
+                  <a
+                    aria-label="Saved objects APIs"
+                    className="euiLink euiLink--primary"
+                    href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    Saved objects APIs
+                    <EuiIcon
+                      aria-label="External link"
+                      className="euiLink__externalIcon"
+                      size="s"
+                      type="popout"
+                    >
+                      <span
+                        aria-label="External link"
+                        className="euiLink__externalIcon"
+                        data-euiicon-type="popout"
+                        size="s"
+                      />
+                    </EuiIcon>
+                    <EuiScreenReaderOnly>
+                      <span
+                        className="euiScreenReaderOnly"
+                      >
+                        <EuiI18n
+                          default="(opens in a new tab or window)"
+                          token="euiLink.newTarget.screenReaderOnlyText"
+                        >
+                          (opens in a new tab or window)
+                        </EuiI18n>
+                      </span>
+                    </EuiScreenReaderOnly>
+                  </a>
+                </EuiLink>
+                 to fix it — otherwise click the delete button above.
+              </FormattedMessage>
+            </div>
+          </div>
+        </EuiTextColor>
+      </div>
+    </EuiText>
+  </div>
+</EuiCallOut>
 `;
 
 exports[`NotFoundErrors component renders correctly for index-pattern-field type 1`] = `
-<NotFoundErrors
-  type="index-pattern-field"
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  title={
+    <FormattedMessage
+      defaultMessage="There is a problem with this saved object"
+      id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+      values={Object {}}
+    />
+  }
 >
-  <EuiCallOut
-    color="danger"
-    iconType="alert"
-    title={
-      <FormattedMessage
-        defaultMessage="There is a problem with this saved object"
-        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-        values={Object {}}
-      />
-    }
+  <div
+    className="euiCallOut euiCallOut--danger"
   >
     <div
-      className="euiCallOut euiCallOut--danger"
+      className="euiCallOutHeader"
     >
-      <div
-        className="euiCallOutHeader"
+      <EuiIcon
+        aria-hidden="true"
+        className="euiCallOutHeader__icon"
+        color="inherit"
+        size="m"
+        type="alert"
       >
-        <EuiIcon
+        <span
           aria-hidden="true"
           className="euiCallOutHeader__icon"
           color="inherit"
+          data-euiicon-type="alert"
           size="m"
-          type="alert"
-        >
-          <span
-            aria-hidden="true"
-            className="euiCallOutHeader__icon"
-            color="inherit"
-            data-euiicon-type="alert"
-            size="m"
-          />
-        </EuiIcon>
-        <span
-          className="euiCallOutHeader__title"
-        >
-          <FormattedMessage
-            defaultMessage="There is a problem with this saved object"
-            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-            values={Object {}}
-          >
-            There is a problem with this saved object
-          </FormattedMessage>
-        </span>
-      </div>
-      <EuiText
-        color="default"
-        size="s"
+        />
+      </EuiIcon>
+      <span
+        className="euiCallOutHeader__title"
       >
-        <div
-          className="euiText euiText--small"
+        <FormattedMessage
+          defaultMessage="There is a problem with this saved object"
+          id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+          values={Object {}}
         >
-          <EuiTextColor
-            color="default"
-            component="div"
-          >
-            <div
-              className="euiTextColor euiTextColor--default"
-              style={Object {}}
-            >
-              <div>
-                <FormattedMessage
-                  defaultMessage="A field associated with this object no longer exists in the index pattern."
-                  id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
-                  values={Object {}}
-                >
-                  A field associated with this object no longer exists in the index pattern.
-                </FormattedMessage>
-              </div>
-              <div>
-                <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                  id="savedObjectsManagement.view.howToFixErrorDescription"
-                  values={Object {}}
-                >
-                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-                </FormattedMessage>
-              </div>
-            </div>
-          </EuiTextColor>
-        </div>
-      </EuiText>
+          There is a problem with this saved object
+        </FormattedMessage>
+      </span>
     </div>
-  </EuiCallOut>
-</NotFoundErrors>
+    <EuiText
+      color="default"
+      size="s"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <EuiTextColor
+          color="default"
+          component="div"
+        >
+          <div
+            className="euiTextColor euiTextColor--default"
+            style={Object {}}
+          >
+            <div>
+              <FormattedMessage
+                defaultMessage="A field associated with this object no longer exists in the index pattern."
+                id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
+                values={Object {}}
+              >
+                A field associated with this object no longer exists in the index pattern.
+              </FormattedMessage>
+            </div>
+            <div>
+              <FormattedMessage
+                defaultMessage="If you know what this error means, you can use the {savedObjectsApis} to fix it — otherwise click the delete button above."
+                id="savedObjectsManagement.view.howToFixErrorDescription"
+                values={
+                  Object {
+                    "savedObjectsApis": <EuiLink
+                      aria-label="Saved objects APIs"
+                      href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                      target="_blank"
+                    >
+                      Saved objects APIs
+                    </EuiLink>,
+                  }
+                }
+              >
+                If you know what this error means, you can use the 
+                <EuiLink
+                  aria-label="Saved objects APIs"
+                  href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                  target="_blank"
+                >
+                  <a
+                    aria-label="Saved objects APIs"
+                    className="euiLink euiLink--primary"
+                    href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    Saved objects APIs
+                    <EuiIcon
+                      aria-label="External link"
+                      className="euiLink__externalIcon"
+                      size="s"
+                      type="popout"
+                    >
+                      <span
+                        aria-label="External link"
+                        className="euiLink__externalIcon"
+                        data-euiicon-type="popout"
+                        size="s"
+                      />
+                    </EuiIcon>
+                    <EuiScreenReaderOnly>
+                      <span
+                        className="euiScreenReaderOnly"
+                      >
+                        <EuiI18n
+                          default="(opens in a new tab or window)"
+                          token="euiLink.newTarget.screenReaderOnlyText"
+                        >
+                          (opens in a new tab or window)
+                        </EuiI18n>
+                      </span>
+                    </EuiScreenReaderOnly>
+                  </a>
+                </EuiLink>
+                 to fix it — otherwise click the delete button above.
+              </FormattedMessage>
+            </div>
+          </div>
+        </EuiTextColor>
+      </div>
+    </EuiText>
+  </div>
+</EuiCallOut>
 `;
 
 exports[`NotFoundErrors component renders correctly for search type 1`] = `
-<NotFoundErrors
-  type="search"
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  title={
+    <FormattedMessage
+      defaultMessage="There is a problem with this saved object"
+      id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+      values={Object {}}
+    />
+  }
 >
-  <EuiCallOut
-    color="danger"
-    iconType="alert"
-    title={
-      <FormattedMessage
-        defaultMessage="There is a problem with this saved object"
-        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-        values={Object {}}
-      />
-    }
+  <div
+    className="euiCallOut euiCallOut--danger"
   >
     <div
-      className="euiCallOut euiCallOut--danger"
+      className="euiCallOutHeader"
     >
-      <div
-        className="euiCallOutHeader"
+      <EuiIcon
+        aria-hidden="true"
+        className="euiCallOutHeader__icon"
+        color="inherit"
+        size="m"
+        type="alert"
       >
-        <EuiIcon
+        <span
           aria-hidden="true"
           className="euiCallOutHeader__icon"
           color="inherit"
+          data-euiicon-type="alert"
           size="m"
-          type="alert"
-        >
-          <span
-            aria-hidden="true"
-            className="euiCallOutHeader__icon"
-            color="inherit"
-            data-euiicon-type="alert"
-            size="m"
-          />
-        </EuiIcon>
-        <span
-          className="euiCallOutHeader__title"
-        >
-          <FormattedMessage
-            defaultMessage="There is a problem with this saved object"
-            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-            values={Object {}}
-          >
-            There is a problem with this saved object
-          </FormattedMessage>
-        </span>
-      </div>
-      <EuiText
-        color="default"
-        size="s"
+        />
+      </EuiIcon>
+      <span
+        className="euiCallOutHeader__title"
       >
-        <div
-          className="euiText euiText--small"
+        <FormattedMessage
+          defaultMessage="There is a problem with this saved object"
+          id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+          values={Object {}}
         >
-          <EuiTextColor
-            color="default"
-            component="div"
-          >
-            <div
-              className="euiTextColor euiTextColor--default"
-              style={Object {}}
-            >
-              <div>
-                <FormattedMessage
-                  defaultMessage="The saved search associated with this object no longer exists."
-                  id="savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage"
-                  values={Object {}}
-                >
-                  The saved search associated with this object no longer exists.
-                </FormattedMessage>
-              </div>
-              <div>
-                <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                  id="savedObjectsManagement.view.howToFixErrorDescription"
-                  values={Object {}}
-                >
-                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-                </FormattedMessage>
-              </div>
-            </div>
-          </EuiTextColor>
-        </div>
-      </EuiText>
+          There is a problem with this saved object
+        </FormattedMessage>
+      </span>
     </div>
-  </EuiCallOut>
-</NotFoundErrors>
+    <EuiText
+      color="default"
+      size="s"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <EuiTextColor
+          color="default"
+          component="div"
+        >
+          <div
+            className="euiTextColor euiTextColor--default"
+            style={Object {}}
+          >
+            <div>
+              <FormattedMessage
+                defaultMessage="The saved search associated with this object no longer exists."
+                id="savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage"
+                values={Object {}}
+              >
+                The saved search associated with this object no longer exists.
+              </FormattedMessage>
+            </div>
+            <div>
+              <FormattedMessage
+                defaultMessage="If you know what this error means, you can use the {savedObjectsApis} to fix it — otherwise click the delete button above."
+                id="savedObjectsManagement.view.howToFixErrorDescription"
+                values={
+                  Object {
+                    "savedObjectsApis": <EuiLink
+                      aria-label="Saved objects APIs"
+                      href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                      target="_blank"
+                    >
+                      Saved objects APIs
+                    </EuiLink>,
+                  }
+                }
+              >
+                If you know what this error means, you can use the 
+                <EuiLink
+                  aria-label="Saved objects APIs"
+                  href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                  target="_blank"
+                >
+                  <a
+                    aria-label="Saved objects APIs"
+                    className="euiLink euiLink--primary"
+                    href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    Saved objects APIs
+                    <EuiIcon
+                      aria-label="External link"
+                      className="euiLink__externalIcon"
+                      size="s"
+                      type="popout"
+                    >
+                      <span
+                        aria-label="External link"
+                        className="euiLink__externalIcon"
+                        data-euiicon-type="popout"
+                        size="s"
+                      />
+                    </EuiIcon>
+                    <EuiScreenReaderOnly>
+                      <span
+                        className="euiScreenReaderOnly"
+                      >
+                        <EuiI18n
+                          default="(opens in a new tab or window)"
+                          token="euiLink.newTarget.screenReaderOnlyText"
+                        >
+                          (opens in a new tab or window)
+                        </EuiI18n>
+                      </span>
+                    </EuiScreenReaderOnly>
+                  </a>
+                </EuiLink>
+                 to fix it — otherwise click the delete button above.
+              </FormattedMessage>
+            </div>
+          </div>
+        </EuiTextColor>
+      </div>
+    </EuiText>
+  </div>
+</EuiCallOut>
 `;
 
 exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
-<NotFoundErrors
-  type="unknown"
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  title={
+    <FormattedMessage
+      defaultMessage="There is a problem with this saved object"
+      id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+      values={Object {}}
+    />
+  }
 >
-  <EuiCallOut
-    color="danger"
-    iconType="alert"
-    title={
-      <FormattedMessage
-        defaultMessage="There is a problem with this saved object"
-        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-        values={Object {}}
-      />
-    }
+  <div
+    className="euiCallOut euiCallOut--danger"
   >
     <div
-      className="euiCallOut euiCallOut--danger"
+      className="euiCallOutHeader"
     >
-      <div
-        className="euiCallOutHeader"
+      <EuiIcon
+        aria-hidden="true"
+        className="euiCallOutHeader__icon"
+        color="inherit"
+        size="m"
+        type="alert"
       >
-        <EuiIcon
+        <span
           aria-hidden="true"
           className="euiCallOutHeader__icon"
           color="inherit"
+          data-euiicon-type="alert"
           size="m"
-          type="alert"
-        >
-          <span
-            aria-hidden="true"
-            className="euiCallOutHeader__icon"
-            color="inherit"
-            data-euiicon-type="alert"
-            size="m"
-          />
-        </EuiIcon>
-        <span
-          className="euiCallOutHeader__title"
-        >
-          <FormattedMessage
-            defaultMessage="There is a problem with this saved object"
-            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-            values={Object {}}
-          >
-            There is a problem with this saved object
-          </FormattedMessage>
-        </span>
-      </div>
-      <EuiText
-        color="default"
-        size="s"
+        />
+      </EuiIcon>
+      <span
+        className="euiCallOutHeader__title"
       >
-        <div
-          className="euiText euiText--small"
+        <FormattedMessage
+          defaultMessage="There is a problem with this saved object"
+          id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+          values={Object {}}
         >
-          <EuiTextColor
-            color="default"
-            component="div"
-          >
-            <div
-              className="euiTextColor euiTextColor--default"
-              style={Object {}}
-            >
-              <div />
-              <div>
-                <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                  id="savedObjectsManagement.view.howToFixErrorDescription"
-                  values={Object {}}
-                >
-                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-                </FormattedMessage>
-              </div>
-            </div>
-          </EuiTextColor>
-        </div>
-      </EuiText>
+          There is a problem with this saved object
+        </FormattedMessage>
+      </span>
     </div>
-  </EuiCallOut>
-</NotFoundErrors>
+    <EuiText
+      color="default"
+      size="s"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <EuiTextColor
+          color="default"
+          component="div"
+        >
+          <div
+            className="euiTextColor euiTextColor--default"
+            style={Object {}}
+          >
+            <div />
+            <div>
+              <FormattedMessage
+                defaultMessage="If you know what this error means, you can use the {savedObjectsApis} to fix it — otherwise click the delete button above."
+                id="savedObjectsManagement.view.howToFixErrorDescription"
+                values={
+                  Object {
+                    "savedObjectsApis": <EuiLink
+                      aria-label="Saved objects APIs"
+                      href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                      target="_blank"
+                    >
+                      Saved objects APIs
+                    </EuiLink>,
+                  }
+                }
+              >
+                If you know what this error means, you can use the 
+                <EuiLink
+                  aria-label="Saved objects APIs"
+                  href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                  target="_blank"
+                >
+                  <a
+                    aria-label="Saved objects APIs"
+                    className="euiLink euiLink--primary"
+                    href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    Saved objects APIs
+                    <EuiIcon
+                      aria-label="External link"
+                      className="euiLink__externalIcon"
+                      size="s"
+                      type="popout"
+                    >
+                      <span
+                        aria-label="External link"
+                        className="euiLink__externalIcon"
+                        data-euiicon-type="popout"
+                        size="s"
+                      />
+                    </EuiIcon>
+                    <EuiScreenReaderOnly>
+                      <span
+                        className="euiScreenReaderOnly"
+                      >
+                        <EuiI18n
+                          default="(opens in a new tab or window)"
+                          token="euiLink.newTarget.screenReaderOnlyText"
+                        >
+                          (opens in a new tab or window)
+                        </EuiI18n>
+                      </span>
+                    </EuiScreenReaderOnly>
+                  </a>
+                </EuiLink>
+                 to fix it — otherwise click the delete button above.
+              </FormattedMessage>
+            </div>
+          </div>
+        </EuiTextColor>
+      </div>
+    </EuiText>
+  </div>
+</EuiCallOut>
 `;

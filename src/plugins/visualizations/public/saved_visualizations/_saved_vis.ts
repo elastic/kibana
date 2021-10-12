@@ -103,7 +103,7 @@ export function createSavedVisClass(services: SavedVisServices) {
           version: 1,
         },
         afterESResp: async (savedObject: SavedObject) => {
-          const savedVis = (savedObject as any) as ISavedVis;
+          const savedVis = savedObject as any as ISavedVis;
           savedVis.visState = await updateOldState(savedVis.visState);
           if (savedVis.searchSourceFields?.index) {
             await services.indexPatterns.get(savedVis.searchSourceFields.index as any);
@@ -111,7 +111,7 @@ export function createSavedVisClass(services: SavedVisServices) {
           if (savedVis.savedSearchId) {
             await savedSearch.get(savedVis.savedSearchId);
           }
-          return (savedVis as any) as SavedObject;
+          return savedVis as any as SavedObject;
         },
       });
       this.showInRecentlyAccessed = true;
@@ -121,5 +121,5 @@ export function createSavedVisClass(services: SavedVisServices) {
     }
   }
 
-  return (SavedVis as unknown) as new (opts: Record<string, unknown> | string) => SavedObject;
+  return SavedVis as unknown as new (opts: Record<string, unknown> | string) => SavedObject;
 }

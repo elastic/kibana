@@ -132,10 +132,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       hasIndexRead,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
@@ -180,10 +178,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       const timelineId = TimelineId.detectionsPage;
       clearEventsLoading!({ id: timelineId });
       clearEventsDeleted!({ id: timelineId });
-      clearSelected!({ id: timelineId });
       setFilterGroup(newFilterGroup);
     },
-    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
+    [clearEventsLoading, clearEventsDeleted, setFilterGroup]
   );
 
   const alertsHistogramDefaultFilters = useMemo(

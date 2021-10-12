@@ -147,8 +147,8 @@ describe('AuthenticationService', () => {
         service.start(mockStartAuthenticationParams);
 
         authHandler = mockSetupAuthenticationParams.http.registerAuth.mock.calls[0][0];
-        authenticate = jest.requireMock('./authenticator').Authenticator.mock.instances[0]
-          .authenticate;
+        authenticate =
+          jest.requireMock('./authenticator').Authenticator.mock.instances[0].authenticate;
       });
 
       it('returns error if license is not available.', async () => {
@@ -331,8 +331,8 @@ describe('AuthenticationService', () => {
         service.setup(mockSetupAuthenticationParams);
         service.start(mockStartAuthenticationParams);
 
-        getServerBaseURL = jest.requireMock('./authenticator').Authenticator.mock.calls[0][0]
-          .getServerBaseURL;
+        getServerBaseURL =
+          jest.requireMock('./authenticator').Authenticator.mock.calls[0][0].getServerBaseURL;
       });
 
       it('falls back to legacy server config if `public` config is not specified', async () => {

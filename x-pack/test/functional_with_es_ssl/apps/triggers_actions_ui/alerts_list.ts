@@ -383,7 +383,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('alertStatusFilterButton');
       await testSubjects.click('alertStatuserrorFilerOption'); // select Error status filter
       await retry.try(async () => {
-        const filterErrorOnlyResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        const filterErrorOnlyResults =
+          await pageObjects.triggersActionsUI.getAlertsListWithStatus();
         expect(filterErrorOnlyResults).to.eql([
           {
             name: failingAlert.name,

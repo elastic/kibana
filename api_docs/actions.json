@@ -580,6 +580,20 @@
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.taskInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "taskInfo",
+            "description": [],
+            "signature": [
+              "TaskInfo",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1765,8 +1779,34 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.AdditionalEmailServices",
+        "type": "Enum",
+        "tags": [],
+        "label": "AdditionalEmailServices",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ACTIONS_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ACTIONS_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"actions\""
+        ],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "actions",
         "id": "def-common.ALERT_HISTORY_PREFIX",

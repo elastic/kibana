@@ -341,15 +341,8 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const {
-      spaceId,
-      actionId,
-      actionTypeId,
-      outcome,
-      message,
-      startMessage,
-      errorMessage,
-    } = params;
+    const { spaceId, actionId, actionTypeId, outcome, message, startMessage, errorMessage } =
+      params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({

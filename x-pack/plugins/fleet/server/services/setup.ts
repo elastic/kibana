@@ -15,13 +15,17 @@ import { SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
-import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
+import {
+  cleanPreconfiguredOutputs,
+  ensurePreconfiguredOutputs,
+  ensurePreconfiguredPackagesAndPolicies,
+} from './preconfiguration';
 import { outputService } from './output';
 
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { ensureAgentActionPolicyChangeExists } from './agents';
+import { ensureFleetServerAgentPoliciesExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
@@ -34,7 +38,7 @@ export interface SetupStatus {
   nonFatalErrors: Array<PreconfigurationError | DefaultPackagesInstallationError>;
 }
 
-export async function setupIngestManager(
+export async function setupFleet(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
@@ -45,22 +49,26 @@ async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  const [defaultOutput] = await Promise.all([
-    outputService.ensureDefaultOutput(soClient),
+  const {
+    agentPolicies: policiesOrUndefined,
+    packages: packagesOrUndefined,
+    outputs: outputsOrUndefined,
+  } = appContextService.getConfig() ?? {};
+
+  const policies = policiesOrUndefined ?? [];
+  let packages = packagesOrUndefined ?? [];
+
+  await Promise.all([
+    ensurePreconfiguredOutputs(soClient, esClient, outputsOrUndefined ?? []),
     settingsService.settingsSetup(soClient),
   ]);
+
+  const defaultOutput = await outputService.ensureDefaultOutput(soClient);
 
   await awaitIfFleetServerSetupPending();
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
     await ensureFleetGlobalEsAssets(soClient, esClient);
   }
-
-  const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
-    appContextService.getConfig() ?? {};
-
-  const policies = policiesOrUndefined ?? [];
-
-  let packages = packagesOrUndefined ?? [];
 
   // Ensure that required packages are always installed even if they're left out of the config
   const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
@@ -90,8 +98,10 @@ async function createSetupSideEffects(
     defaultOutput
   );
 
+  await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
+
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
-  await ensureAgentActionPolicyChangeExists(soClient, esClient);
+  await ensureFleetServerAgentPoliciesExists(soClient, esClient);
 
   return {
     isInitialized: true,

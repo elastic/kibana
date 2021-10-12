@@ -31,18 +31,16 @@ export function setServices(newServices: DiscoverServices) {
 export const setUiActions = (pluginUiActions: UiActionsStart) => (uiActions = pluginUiActions);
 export const getUiActions = () => uiActions;
 
-export const [getHeaderActionMenuMounter, setHeaderActionMenuMounter] = createGetterSetter<
-  AppMountParameters['setHeaderActionMenu']
->('headerActionMenuMounter');
+export const [getHeaderActionMenuMounter, setHeaderActionMenuMounter] =
+  createGetterSetter<AppMountParameters['setHeaderActionMenu']>('headerActionMenuMounter');
 
 export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
   setTrackedUrl: (url: string) => void;
   restorePreviousUrl: () => void;
 }>('urlTracker');
 
-export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<DocViewsRegistry>(
-  'DocViewsRegistry'
-);
+export const [getDocViewsRegistry, setDocViewsRegistry] =
+  createGetterSetter<DocViewsRegistry>('DocViewsRegistry');
 
 /**
  * Makes sure discover and context are using one instance of history.
@@ -68,6 +66,5 @@ export const syncHistoryLocations = () => {
   return h;
 };
 
-export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHistory>(
-  'scopedHistory'
-);
+export const [getScopedHistory, setScopedHistory] =
+  createGetterSetter<ScopedHistory>('scopedHistory');

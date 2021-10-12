@@ -389,23 +389,26 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
 
     const formatter = getResultsFormatter(params.resultType, !!previewTimeInterval);
 
-    return (previewTimeInterval
-      ? (result as {
-          alerts_over_time: {
-            buckets: Array<
-              {
-                doc_count: number;
-                key: number;
-                key_as_string: string;
-              } & AggResultsResponse
-            >;
-          };
-        }).alerts_over_time.buckets
-          // Filter out empty buckets
-          .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
-          // Map response
-          .map(formatter)
-      : [formatter((result as unknown) as AggResultsResponse)]
+    return (
+      previewTimeInterval
+        ? (
+            result as {
+              alerts_over_time: {
+                buckets: Array<
+                  {
+                    doc_count: number;
+                    key: number;
+                    key_as_string: string;
+                  } & AggResultsResponse
+                >;
+              };
+            }
+          ).alerts_over_time.buckets
+            // Filter out empty buckets
+            .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
+            // Map response
+            .map(formatter)
+        : [formatter(result as unknown as AggResultsResponse)]
     ).filter(isDefined);
   };
 
@@ -583,8 +586,8 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                     should: [
                       {
                         match_phrase: {
-                          [r.topInfluencers![0].influencer_field_name]: r.topInfluencers![0]
-                            .influencer_field_value,
+                          [r.topInfluencers![0].influencer_field_name]:
+                            r.topInfluencers![0].influencer_field_value,
                         },
                       },
                     ],

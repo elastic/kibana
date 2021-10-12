@@ -35,32 +35,31 @@ export interface UnknownDocsFound {
   unknownDocs: CheckForUnknownDocsFoundDoc[];
 }
 
-export const checkForUnknownDocs = ({
-  client,
-  indexName,
-  unusedTypesQuery,
-  knownTypes,
-}: CheckForUnknownDocsParams): TaskEither.TaskEither<
-  RetryableEsClientError,
-  UnknownDocsFound
-> => () => {
-  const query = createUnknownDocQuery(unusedTypesQuery, knownTypes);
+export const checkForUnknownDocs =
+  ({
+    client,
+    indexName,
+    unusedTypesQuery,
+    knownTypes,
+  }: CheckForUnknownDocsParams): TaskEither.TaskEither<RetryableEsClientError, UnknownDocsFound> =>
+  () => {
+    const query = createUnknownDocQuery(unusedTypesQuery, knownTypes);
 
-  return client
-    .search<SavedObjectsRawDocSource>({
-      index: indexName,
-      body: {
-        query,
-      },
-    })
-    .then((response) => {
-      const { hits } = response.body.hits;
-      return Either.right({
-        unknownDocs: hits.map((hit) => ({ id: hit._id, type: hit._source?.type ?? 'unknown' })),
-      });
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+    return client
+      .search<SavedObjectsRawDocSource>({
+        index: indexName,
+        body: {
+          query,
+        },
+      })
+      .then((response) => {
+        const { hits } = response.body.hits;
+        return Either.right({
+          unknownDocs: hits.map((hit) => ({ id: hit._id, type: hit._source?.type ?? 'unknown' })),
+        });
+      })
+      .catch(catchRetryableEsClientErrors);
+  };
 
 const createUnknownDocQuery = (
   unusedTypesQuery: estypes.QueryDslQueryContainer,

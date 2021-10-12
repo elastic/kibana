@@ -220,9 +220,9 @@ describe('index migrations', () => {
         const result = migrations['7.14.0'](caseComment, contextMock);
 
         const parsedComment = parseCommentString(result.attributes.comment);
-        const lensVisualizations = (getLensVisualizations(
+        const lensVisualizations = getLensVisualizations(
           parsedComment.children
-        ) as unknown) as Array<{
+        ) as unknown as Array<{
           attributes: LensDocShape715 & { references: SavedObjectReference[] };
         }>;
 

@@ -33,27 +33,28 @@ export const commonRenameOperationsForFormula = (
   }
   const newAttributes = cloneDeep(attributes);
   const datasourceLayers = newAttributes.state.datasourceStates.indexpattern.layers || {};
-  (newAttributes as LensDocShapePost712).state.datasourceStates.indexpattern.layers = Object.fromEntries(
-    Object.entries(datasourceLayers).map(([layerId, layer]) => {
-      return [
-        layerId,
-        {
-          ...layer,
-          columns: Object.fromEntries(
-            Object.entries(layer.columns).map(([columnId, column]) => {
-              const copy = {
-                ...column,
-                operationType: shouldBeRenamed(column.operationType)
-                  ? renameMapping[column.operationType]
-                  : column.operationType,
-              };
-              return [columnId, copy];
-            })
-          ),
-        },
-      ];
-    })
-  );
+  (newAttributes as LensDocShapePost712).state.datasourceStates.indexpattern.layers =
+    Object.fromEntries(
+      Object.entries(datasourceLayers).map(([layerId, layer]) => {
+        return [
+          layerId,
+          {
+            ...layer,
+            columns: Object.fromEntries(
+              Object.entries(layer.columns).map(([columnId, column]) => {
+                const copy = {
+                  ...column,
+                  operationType: shouldBeRenamed(column.operationType)
+                    ? renameMapping[column.operationType]
+                    : column.operationType,
+                };
+                return [columnId, copy];
+              })
+            ),
+          },
+        ];
+      })
+    );
   return newAttributes as LensDocShapePost712;
 };
 
@@ -62,26 +63,27 @@ export const commonRemoveTimezoneDateHistogramParam = (
 ): LensDocShape714 => {
   const newAttributes = cloneDeep(attributes);
   const datasourceLayers = newAttributes.state.datasourceStates.indexpattern.layers || {};
-  (newAttributes as LensDocShapePost712).state.datasourceStates.indexpattern.layers = Object.fromEntries(
-    Object.entries(datasourceLayers).map(([layerId, layer]) => {
-      return [
-        layerId,
-        {
-          ...layer,
-          columns: Object.fromEntries(
-            Object.entries(layer.columns).map(([columnId, column]) => {
-              if (column.operationType === 'date_histogram' && 'params' in column) {
-                const copy = { ...column, params: { ...column.params } };
-                delete copy.params.timeZone;
-                return [columnId, copy];
-              }
-              return [columnId, column];
-            })
-          ),
-        },
-      ];
-    })
-  );
+  (newAttributes as LensDocShapePost712).state.datasourceStates.indexpattern.layers =
+    Object.fromEntries(
+      Object.entries(datasourceLayers).map(([layerId, layer]) => {
+        return [
+          layerId,
+          {
+            ...layer,
+            columns: Object.fromEntries(
+              Object.entries(layer.columns).map(([columnId, column]) => {
+                if (column.operationType === 'date_histogram' && 'params' in column) {
+                  const copy = { ...column, params: { ...column.params } };
+                  delete copy.params.timeZone;
+                  return [columnId, copy];
+                }
+                return [columnId, column];
+              })
+            ),
+          },
+        ];
+      })
+    );
   return newAttributes as LensDocShapePost712;
 };
 

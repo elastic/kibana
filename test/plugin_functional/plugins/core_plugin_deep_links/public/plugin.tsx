@@ -10,7 +10,8 @@ import { Plugin, CoreSetup } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../../src/core/public';
 
 export class CorePluginDeepLinksPlugin
-  implements Plugin<CorePluginDeepLinksPluginSetup, CorePluginDeepLinksPluginStart> {
+  implements Plugin<CorePluginDeepLinksPluginSetup, CorePluginDeepLinksPluginStart>
+{
   public setup(core: CoreSetup, deps: {}) {
     core.application.register({
       id: 'deeplinks',

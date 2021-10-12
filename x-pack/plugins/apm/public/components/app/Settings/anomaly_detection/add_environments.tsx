@@ -34,7 +34,8 @@ interface Props {
   onCancel: () => void;
 }
 
-type ApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection/environments'>;
+type ApiResponse =
+  APIReturnType<'GET /api/apm/settings/anomaly-detection/environments'>;
 const INITIAL_DATA: ApiResponse = { environments: [] };
 
 export function AddEnvironments({

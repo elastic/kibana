@@ -39,7 +39,7 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
 
         for (const key in params) {
           if (params.hasOwnProperty(key)) {
-            const value = (params[key] as unknown) as RisonValue;
+            const value = params[key] as unknown as RisonValue;
             parsedParams[key] = encode(value);
           }
         }

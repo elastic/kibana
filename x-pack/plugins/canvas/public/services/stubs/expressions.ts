@@ -22,7 +22,7 @@ export const expressionsServiceFactory: CanvasExpressionsServiceFactory = () => 
 
   functionDefinitions.forEach((fn) => expressionsService.registerFunction(fn));
   renderFunctions.forEach((fn) => {
-    expressionsService.registerRenderer((fn as unknown) as AnyExpressionRenderDefinition);
+    expressionsService.registerRenderer(fn as unknown as AnyExpressionRenderDefinition);
   });
 
   return expressionsService;

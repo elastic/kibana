@@ -13,13 +13,13 @@ export default function ({ getService }: FtrProviderContext) {
   const security = getService('security');
   const spaces = getService('spaces');
 
-  const isElasticsearchAnonymousAccessEnabled = (config.get(
-    'esTestCluster.serverArgs'
-  ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
+  const isElasticsearchAnonymousAccessEnabled = (
+    config.get('esTestCluster.serverArgs') as string[]
+  ).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
 
   async function getAnonymousCapabilities(spaceId?: string) {
     const apiResponse = await supertest
-      .get(`${spaceId ? `/s/${spaceId}` : ''}/internal/security_oss/anonymous_access/capabilities`)
+      .get(`${spaceId ? `/s/${spaceId}` : ''}/internal/security/anonymous_access/capabilities`)
       .expect(200);
 
     return Object.fromEntries(

@@ -15,6 +15,7 @@ import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
+  LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
@@ -154,7 +155,7 @@ export function useLayerList() {
     maxZoom: 24,
     alpha: 0.75,
     visible: true,
-    type: 'VECTOR',
+    type: LAYER_TYPE.VECTOR,
   };
 
   ES_TERM_SOURCE_REGION.whereQuery = getWhereQuery(serviceName!);
@@ -178,7 +179,7 @@ export function useLayerList() {
     maxZoom: 24,
     alpha: 0.75,
     visible: true,
-    type: 'VECTOR',
+    type: LAYER_TYPE.VECTOR,
   };
 
   return [

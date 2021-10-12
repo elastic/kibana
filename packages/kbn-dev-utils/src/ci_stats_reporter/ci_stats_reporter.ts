@@ -10,7 +10,8 @@ import { inspect } from 'util';
 import Os from 'os';
 import Fs from 'fs';
 import Path from 'path';
-
+import crypto from 'crypto';
+import execa from 'execa';
 import Axios from 'axios';
 
 import { ToolingLog } from '../tooling_log';
@@ -80,17 +81,51 @@ export class CiStatsReporter {
     const timings = options.timings;
     const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
+    let email;
+    let branch;
+
+    try {
+      const { stdout } = await execa('git', ['config', 'user.email']);
+      email = stdout;
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
+    try {
+      const { stdout } = await execa('git', ['branch', '--show-current']);
+      branch = stdout;
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
+    const memUsage = process.memoryUsage();
+    const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
+
     const defaultMetadata = {
-      osPlatform: Os.platform(),
-      osRelease: Os.release(),
-      osArch: Os.arch(),
+      kibanaUuid,
+      isElasticCommitter,
+      committerHash: email
+        ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
+        : undefined,
+      email: isElasticCommitter ? email : undefined,
+      branch: isElasticCommitter ? branch : undefined,
       cpuCount: Os.cpus()?.length,
       cpuModel: Os.cpus()[0]?.model,
       cpuSpeed: Os.cpus()[0]?.speed,
       freeMem: Os.freemem(),
+      memoryUsageRss: memUsage.rss,
+      memoryUsageHeapTotal: memUsage.heapTotal,
+      memoryUsageHeapUsed: memUsage.heapUsed,
+      memoryUsageExternal: memUsage.external,
+      memoryUsageArrayBuffers: memUsage.arrayBuffers,
+      nestedTiming: process.env.CI_STATS_NESTED_TIMING ? true : false,
+      osArch: Os.arch(),
+      osPlatform: Os.platform(),
+      osRelease: Os.release(),
       totalMem: Os.totalmem(),
-      kibanaUuid,
     };
+
+    this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
 
     return await this.req({
       auth: !!buildId,

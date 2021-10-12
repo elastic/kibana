@@ -22,7 +22,8 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
     preserveDrawingBuffer: true,
   },
   schema: configSchema,
-  deprecations: () => [
+  deprecations: ({ deprecate }) => [
+    deprecate('enabled', '8.0.0'),
     (
       completeConfig: Record<string, any>,
       rootPath: string,

@@ -12,7 +12,7 @@ import { MonitoringConfig } from '../../../config';
 // @ts-ignore
 import { getIndexPatterns } from '../../../lib/cluster/get_index_patterns';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../common/ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,

@@ -36,6 +36,7 @@ import {
   EuiFlexItem,
   EuiContextMenuPanel,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -168,15 +169,18 @@ function ObservabilityActions({
     application: { capabilities },
   } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
-  const parseObservabilityAlert = useMemo(() => parseAlert(observabilityRuleTypeRegistry), [
-    observabilityRuleTypeRegistry,
-  ]);
-  const alertDataConsumer = useMemo<string>(() => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0], [
-    dataFieldEs,
-  ]);
-  const alertDataProducer = useMemo<string>(() => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0], [
-    dataFieldEs,
-  ]);
+  const parseObservabilityAlert = useMemo(
+    () => parseAlert(observabilityRuleTypeRegistry),
+    [observabilityRuleTypeRegistry]
+  );
+  const alertDataConsumer = useMemo<string>(
+    () => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0],
+    [dataFieldEs]
+  );
+  const alertDataProducer = useMemo<string>(
+    () => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0],
+    [dataFieldEs]
+  );
 
   const alert = parseObservabilityAlert(dataFieldEs);
   const { prepend } = core.http.basePath;
@@ -245,39 +249,63 @@ function ObservabilityActions({
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
 
+  const viewDetailsTextLabel = i18n.translate(
+    'xpack.observability.alertsTable.viewDetailsTextLabel',
+    {
+      defaultMessage: 'View details',
+    }
+  );
+  const viewInAppTextLabel = i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
+    defaultMessage: 'View in app',
+  });
+  const moreActionsTextLabel = i18n.translate(
+    'xpack.observability.alertsTable.moreActionsTextLabel',
+    {
+      defaultMessage: 'More actions',
+    }
+  );
+
   return (
     <>
       <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
-          <EuiButtonIcon
-            size="s"
-            iconType="expand"
-            color="text"
-            onClick={() => setFlyoutAlert(alert)}
-            data-test-subj="openFlyoutButton"
-          />
+          <EuiToolTip content={viewDetailsTextLabel}>
+            <EuiButtonIcon
+              size="s"
+              iconType="expand"
+              color="text"
+              onClick={() => setFlyoutAlert(alert)}
+              data-test-subj="openFlyoutButton"
+              aria-label={viewDetailsTextLabel}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButtonIcon
-            size="s"
-            href={prepend(alert.link ?? '')}
-            iconType="eye"
-            color="text"
-            aria-label="View alert in app"
-          />
+          <EuiToolTip content={viewInAppTextLabel}>
+            <EuiButtonIcon
+              size="s"
+              href={prepend(alert.link ?? '')}
+              iconType="eye"
+              color="text"
+              aria-label={viewInAppTextLabel}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         {actionsMenuItems.length > 0 && (
           <EuiFlexItem>
             <EuiPopover
               button={
-                <EuiButtonIcon
-                  display="empty"
-                  size="s"
-                  color="text"
-                  iconType="boxesHorizontal"
-                  aria-label="More"
-                  onClick={() => toggleActionsPopover(eventId)}
-                />
+                <EuiToolTip content={moreActionsTextLabel}>
+                  <EuiButtonIcon
+                    display="empty"
+                    size="s"
+                    color="text"
+                    iconType="boxesHorizontal"
+                    aria-label={moreActionsTextLabel}
+                    onClick={() => toggleActionsPopover(eventId)}
+                    data-test-subj="alerts-table-row-action-more"
+                  />
+                </EuiToolTip>
               }
               isOpen={openActionsPopoverId === eventId}
               closePopover={closeActionsPopover}
@@ -382,7 +410,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
       },
-      renderCellValue: getRenderCellValue({ rangeFrom, rangeTo, setFlyoutAlert }),
+      renderCellValue: getRenderCellValue({ setFlyoutAlert }),
       rowRenderers: NO_ROW_RENDER,
       start: rangeFrom,
       setRefetch,

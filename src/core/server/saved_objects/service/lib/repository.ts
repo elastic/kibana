@@ -8,11 +8,6 @@
 
 import { omit, isObject } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  CORE_USAGE_STATS_TYPE,
-  CORE_USAGE_STATS_ID,
-  REPOSITORY_RESOLVE_OUTCOME_STATS,
-} from '../../../core_usage_data';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
 import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import type { Logger } from '../../../logging';
@@ -57,6 +52,8 @@ import {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
   SavedObjectsResolveResponse,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -65,16 +62,21 @@ import {
   SavedObjectsMigrationVersion,
   MutatingOperationRefreshSetting,
 } from '../../types';
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
 import {
   getBulkOperationError,
+  getCurrentTime,
   getExpectedVersionProperties,
   getSavedObjectFromSource,
+  normalizeNamespace,
   rawDocExistsInNamespace,
   rawDocExistsInNamespaces,
+  Either,
+  isLeft,
+  isRight,
 } from './internal_utils';
 import {
   ALL_NAMESPACES_STRING,
@@ -96,20 +98,6 @@ import { getIndexForType } from './get_index_for_type';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
-
-interface Left {
-  tag: 'Left';
-  error: Record<string, any>;
-}
-
-interface Right {
-  tag: 'Right';
-  value: Record<string, any>;
-}
-
-type Either = Left | Right;
-const isLeft = (either: Either): either is Left => either.tag === 'Left';
-const isRight = (either: Either): either is Right => either.tag === 'Right';
 
 export interface SavedObjectsRepositoryOptions {
   index: string;
@@ -297,7 +285,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
     let savedObjectNamespace: string | undefined;
     let savedObjectNamespaces: string[] | undefined;
 
@@ -373,54 +361,62 @@ export class SavedObjectsRepository {
   ): Promise<SavedObjectsBulkResponse<T>> {
     const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedResults: Either[] = objects.map((object) => {
-      const { type, id, initialNamespaces } = object;
-      let error: DecoratedError | undefined;
-      if (!this._allowedTypes.includes(type)) {
-        error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
-      } else {
-        try {
-          this.validateInitialNamespaces(type, initialNamespaces);
-        } catch (e) {
-          error = e;
+    const expectedResults: Array<Either<Record<string, any>, Record<string, any>>> = objects.map(
+      (object) => {
+        const { type, id, initialNamespaces } = object;
+        let error: DecoratedError | undefined;
+        if (!this._allowedTypes.includes(type)) {
+          error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+        } else {
+          try {
+            this.validateInitialNamespaces(type, initialNamespaces);
+          } catch (e) {
+            error = e;
+          }
         }
-      }
 
-      if (error) {
+        if (error) {
+          return {
+            tag: 'Left',
+            value: { id, type, error: errorContent(error) },
+          };
+        }
+
+        const method = id && overwrite ? 'index' : 'create';
+        const requiresNamespacesCheck = id && this._registry.isMultiNamespace(type);
+
+        if (id == null) {
+          object.id = SavedObjectsUtils.generateId();
+        }
+
         return {
-          tag: 'Left' as 'Left',
-          error: { id, type, error: errorContent(error) },
+          tag: 'Right',
+          value: {
+            method,
+            object,
+            ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+          },
         };
       }
-
-      const method = id && overwrite ? 'index' : 'create';
-      const requiresNamespacesCheck = id && this._registry.isMultiNamespace(type);
-
-      if (id == null) {
-        object.id = SavedObjectsUtils.generateId();
-      }
-
-      return {
-        tag: 'Right' as 'Right',
-        value: {
-          method,
-          object,
-          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
-        },
-      };
-    });
+    );
 
     const bulkGetDocs = expectedResults
       .filter(isRight)
       .filter(({ value }) => value.esRequestIndex !== undefined)
-      .map(({ value: { object: { type, id } } }) => ({
-        _id: this._serializer.generateRawId(namespace, type, id),
-        _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
-      }));
+      .map(
+        ({
+          value: {
+            object: { type, id },
+          },
+        }) => ({
+          _id: this._serializer.generateRawId(namespace, type, id),
+          _index: this.getIndexForType(type),
+          _source: ['type', 'namespaces'],
+        })
+      );
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget<SavedObjectsRawDocSource>(
           {
@@ -443,92 +439,93 @@ export class SavedObjectsRepository {
     }
     let bulkRequestIndexCounter = 0;
     const bulkCreateParams: object[] = [];
-    const expectedBulkResults: Either[] = expectedResults.map((expectedBulkGetResult) => {
-      if (isLeft(expectedBulkGetResult)) {
-        return expectedBulkGetResult;
-      }
+    const expectedBulkResults: Array<Either<Record<string, any>, Record<string, any>>> =
+      expectedResults.map((expectedBulkGetResult) => {
+        if (isLeft(expectedBulkGetResult)) {
+          return expectedBulkGetResult;
+        }
 
-      let savedObjectNamespace: string | undefined;
-      let savedObjectNamespaces: string[] | undefined;
-      let versionProperties;
-      const {
-        esRequestIndex,
-        object: { initialNamespaces, version, ...object },
-        method,
-      } = expectedBulkGetResult.value;
-      if (esRequestIndex !== undefined) {
-        const indexFound = bulkGetResponse?.statusCode !== 404;
-        const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-        const docFound = indexFound && actualResult?.found === true;
-        if (
-          docFound &&
-          !this.rawDocExistsInNamespaces(
-            // @ts-expect-error MultiGetHit._source is optional
-            actualResult!,
-            initialNamespaces ?? [SavedObjectsUtils.namespaceIdToString(namespace)]
-          )
-        ) {
-          const { id, type } = object;
-          return {
-            tag: 'Left' as 'Left',
-            error: {
-              id,
-              type,
-              error: {
-                ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-                metadata: { isNotOverwritable: true },
+        let savedObjectNamespace: string | undefined;
+        let savedObjectNamespaces: string[] | undefined;
+        let versionProperties;
+        const {
+          esRequestIndex,
+          object: { initialNamespaces, version, ...object },
+          method,
+        } = expectedBulkGetResult.value;
+        if (esRequestIndex !== undefined) {
+          const indexFound = bulkGetResponse?.statusCode !== 404;
+          const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
+          const docFound = indexFound && actualResult?.found === true;
+          if (
+            docFound &&
+            !this.rawDocExistsInNamespaces(
+              // @ts-expect-error MultiGetHit._source is optional
+              actualResult!,
+              initialNamespaces ?? [SavedObjectsUtils.namespaceIdToString(namespace)]
+            )
+          ) {
+            const { id, type } = object;
+            return {
+              tag: 'Left',
+              value: {
+                id,
+                type,
+                error: {
+                  ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+                  metadata: { isNotOverwritable: true },
+                },
               },
-            },
-          };
-        }
-        savedObjectNamespaces =
-          initialNamespaces ||
+            };
+          }
+          savedObjectNamespaces =
+            initialNamespaces ||
+            // @ts-expect-error MultiGetHit._source is optional
+            getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
           // @ts-expect-error MultiGetHit._source is optional
-          getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
-        // @ts-expect-error MultiGetHit._source is optional
-        versionProperties = getExpectedVersionProperties(version, actualResult);
-      } else {
-        if (this._registry.isSingleNamespace(object.type)) {
-          savedObjectNamespace = initialNamespaces
-            ? normalizeNamespace(initialNamespaces[0])
-            : namespace;
-        } else if (this._registry.isMultiNamespace(object.type)) {
-          savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
+          versionProperties = getExpectedVersionProperties(version, actualResult);
+        } else {
+          if (this._registry.isSingleNamespace(object.type)) {
+            savedObjectNamespace = initialNamespaces
+              ? normalizeNamespace(initialNamespaces[0])
+              : namespace;
+          } else if (this._registry.isMultiNamespace(object.type)) {
+            savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
+          }
+          versionProperties = getExpectedVersionProperties(version);
         }
-        versionProperties = getExpectedVersionProperties(version);
-      }
 
-      const expectedResult = {
-        esRequestIndex: bulkRequestIndexCounter++,
-        requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(
-          this._migrator.migrateDocument({
-            id: object.id,
-            type: object.type,
-            attributes: object.attributes,
-            migrationVersion: object.migrationVersion,
-            ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-            ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-            updated_at: time,
-            references: object.references || [],
-            originId: object.originId,
-          }) as SavedObjectSanitizedDoc
-        ),
-      };
+        const expectedResult = {
+          esRequestIndex: bulkRequestIndexCounter++,
+          requestedId: object.id,
+          rawMigratedDoc: this._serializer.savedObjectToRaw(
+            this._migrator.migrateDocument({
+              id: object.id,
+              type: object.type,
+              attributes: object.attributes,
+              migrationVersion: object.migrationVersion,
+              ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+              ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+              updated_at: time,
+              references: object.references || [],
+              originId: object.originId,
+            }) as SavedObjectSanitizedDoc
+          ),
+        };
 
-      bulkCreateParams.push(
-        {
-          [method]: {
-            _id: expectedResult.rawMigratedDoc._id,
-            _index: this.getIndexForType(object.type),
-            ...(overwrite && versionProperties),
+        bulkCreateParams.push(
+          {
+            [method]: {
+              _id: expectedResult.rawMigratedDoc._id,
+              _index: this.getIndexForType(object.type),
+              ...(overwrite && versionProperties),
+            },
           },
-        },
-        expectedResult.rawMigratedDoc._source
-      );
+          expectedResult.rawMigratedDoc._source
+        );
 
-      return { tag: 'Right' as 'Right', value: expectedResult };
-    });
+        return { tag: 'Right', value: expectedResult };
+      });
 
     const bulkResponse = bulkCreateParams.length
       ? await this.client.bulk({
@@ -541,7 +538,7 @@ export class SavedObjectsRepository {
     return {
       saved_objects: expectedBulkResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error as any;
+          return expectedResult.value as any;
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
@@ -578,29 +575,30 @@ export class SavedObjectsRepository {
     const namespace = normalizeNamespace(options.namespace);
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map((object) => {
-      const { type, id } = object;
+    const expectedBulkGetResults: Array<Either<Record<string, any>, Record<string, any>>> =
+      objects.map((object) => {
+        const { type, id } = object;
 
-      if (!this._allowedTypes.includes(type)) {
+        if (!this._allowedTypes.includes(type)) {
+          return {
+            tag: 'Left',
+            value: {
+              id,
+              type,
+              error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
+            },
+          };
+        }
+
         return {
-          tag: 'Left' as 'Left',
-          error: {
-            id,
+          tag: 'Right',
+          value: {
             type,
-            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
+            id,
+            esRequestIndex: bulkGetRequestIndexCounter++,
           },
         };
-      }
-
-      return {
-        tag: 'Right' as 'Right',
-        value: {
-          type,
-          id,
-          esRequestIndex: bulkGetRequestIndexCounter++,
-        },
-      };
-    });
+      });
 
     const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
       _id: this._serializer.generateRawId(namespace, type, id),
@@ -630,7 +628,7 @@ export class SavedObjectsRepository {
     const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
     expectedBulkGetResults.forEach((expectedResult) => {
       if (isLeft(expectedResult)) {
-        errors.push(expectedResult.error as any);
+        errors.push(expectedResult.value as any);
         return;
       }
 
@@ -937,7 +935,7 @@ export class SavedObjectsRepository {
     }
 
     return {
-      ...(body.aggregations ? { aggregations: (body.aggregations as unknown) as A } : {}),
+      ...(body.aggregations ? { aggregations: body.aggregations as unknown as A } : {}),
       page,
       per_page: perPage,
       total: body.hits.total,
@@ -979,38 +977,39 @@ export class SavedObjectsRepository {
     }
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map((object) => {
-      const { type, id, fields, namespaces } = object;
+    const expectedBulkGetResults: Array<Either<Record<string, any>, Record<string, any>>> =
+      objects.map((object) => {
+        const { type, id, fields, namespaces } = object;
 
-      let error: DecoratedError | undefined;
-      if (!this._allowedTypes.includes(type)) {
-        error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
-      } else {
-        try {
-          this.validateObjectNamespaces(type, id, namespaces);
-        } catch (e) {
-          error = e;
+        let error: DecoratedError | undefined;
+        if (!this._allowedTypes.includes(type)) {
+          error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+        } else {
+          try {
+            this.validateObjectNamespaces(type, id, namespaces);
+          } catch (e) {
+            error = e;
+          }
         }
-      }
 
-      if (error) {
+        if (error) {
+          return {
+            tag: 'Left',
+            value: { id, type, error: errorContent(error) },
+          };
+        }
+
         return {
-          tag: 'Left' as 'Left',
-          error: { id, type, error: errorContent(error) },
+          tag: 'Right',
+          value: {
+            type,
+            id,
+            fields,
+            namespaces,
+            esRequestIndex: bulkGetRequestIndexCounter++,
+          },
         };
-      }
-
-      return {
-        tag: 'Right' as 'Right',
-        value: {
-          type,
-          id,
-          fields,
-          namespaces,
-          esRequestIndex: bulkGetRequestIndexCounter++,
-        },
-      };
-    });
+      });
 
     const getNamespaceId = (namespaces?: string[]) =>
       namespaces !== undefined ? SavedObjectsUtils.namespaceStringToId(namespaces[0]) : namespace;
@@ -1044,7 +1043,7 @@ export class SavedObjectsRepository {
     return {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error as any;
+          return expectedResult.value as any;
         }
 
         const {
@@ -1057,17 +1056,60 @@ export class SavedObjectsRepository {
 
         // @ts-expect-error MultiGetHit._source is optional
         if (!doc?.found || !this.rawDocExistsInNamespaces(doc, namespaces)) {
-          return ({
+          return {
             id,
             type,
             error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-          } as any) as SavedObject<T>;
+          } as any as SavedObject<T>;
         }
 
         // @ts-expect-error MultiGetHit._source is optional
         return getSavedObjectFromSource(this._registry, type, id, doc);
       }),
     };
+  }
+
+  /**
+   * Resolves an array of objects by id, using any legacy URL aliases if they exist
+   *
+   * @param {array} objects - an array of objects containing id, type
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
+   * @returns {promise} - { resolved_objects: [{ saved_object, outcome }] }
+   * @example
+   *
+   * bulkResolve([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern' }
+   * ])
+   */
+  async bulkResolve<T = unknown>(
+    objects: SavedObjectsBulkResolveObject[],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsBulkResolveResponse<T>> {
+    const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
+      registry: this._registry,
+      allowedTypes: this._allowedTypes,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      incrementCounterInternal: this.incrementCounterInternal.bind(this),
+      objects,
+      options,
+    });
+    const resolvedObjects = bulkResults.map<SavedObjectsResolveResponse<T>>((result) => {
+      // extract payloads from saved object errors
+      if ((result as InternalBulkResolveError).error) {
+        const errorResult = result as InternalBulkResolveError;
+        const { type, id, error } = errorResult;
+        return {
+          saved_object: { type, id, error: errorContent(error) } as unknown as SavedObject<T>,
+          outcome: 'exactMatch',
+        };
+      }
+      return result as SavedObjectsResolveResponse<T>;
+    });
+    return { resolved_objects: resolvedObjects };
   }
 
   /**
@@ -1125,148 +1167,21 @@ export class SavedObjectsRepository {
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
+      registry: this._registry,
+      allowedTypes: this._allowedTypes,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      incrementCounterInternal: this.incrementCounterInternal.bind(this),
+      objects: [{ type, id }],
+      options,
+    });
+    const [result] = bulkResults;
+    if ((result as InternalBulkResolveError).error) {
+      throw (result as InternalBulkResolveError).error;
     }
-
-    const namespace = normalizeNamespace(options.namespace);
-    if (namespace === undefined) {
-      // legacy URL aliases cannot exist for the default namespace; just attempt to get the object
-      return this.resolveExactMatch(type, id, options);
-    }
-
-    const rawAliasId = this._serializer.generateRawLegacyUrlAliasId(namespace, type, id);
-    const time = this._getCurrentTime();
-
-    // retrieve the alias, and if it is not disabled, update it
-    const aliasResponse = await this.client.update<{ [LEGACY_URL_ALIAS_TYPE]: LegacyUrlAlias }>(
-      {
-        id: rawAliasId,
-        index: this.getIndexForType(LEGACY_URL_ALIAS_TYPE),
-        refresh: false,
-        _source: 'true',
-        body: {
-          script: {
-            source: `
-              if (ctx._source[params.type].disabled != true) {
-                if (ctx._source[params.type].resolveCounter == null) {
-                  ctx._source[params.type].resolveCounter = 1;
-                }
-                else {
-                  ctx._source[params.type].resolveCounter += 1;
-                }
-                ctx._source[params.type].lastResolved = params.time;
-                ctx._source.updated_at = params.time;
-              }
-            `,
-            lang: 'painless',
-            params: {
-              type: LEGACY_URL_ALIAS_TYPE,
-              time,
-            },
-          },
-        },
-      },
-      { ignore: [404] }
-    );
-    if (
-      isNotFoundFromUnsupportedServer({
-        statusCode: aliasResponse.statusCode,
-        headers: aliasResponse.headers,
-      })
-    ) {
-      // throw if we cannot verify the response is from Elasticsearch
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
-        LEGACY_URL_ALIAS_TYPE,
-        rawAliasId
-      );
-    }
-    if (
-      aliasResponse.statusCode === 404 ||
-      aliasResponse.body.get?.found === false ||
-      aliasResponse.body.get?._source[LEGACY_URL_ALIAS_TYPE]?.disabled === true
-    ) {
-      // no legacy URL alias exists, or one exists but it's disabled; just attempt to get the object
-      return this.resolveExactMatch(type, id, options);
-    }
-
-    const legacyUrlAlias: LegacyUrlAlias = aliasResponse.body.get!._source[LEGACY_URL_ALIAS_TYPE];
-    const objectIndex = this.getIndexForType(type);
-    const bulkGetResponse = await this.client.mget<SavedObjectsRawDocSource>(
-      {
-        body: {
-          docs: [
-            {
-              // attempt to find an exact match for the given ID
-              _id: this._serializer.generateRawId(namespace, type, id),
-              _index: objectIndex,
-            },
-            {
-              // also attempt to find a match for the legacy URL alias target ID
-              _id: this._serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
-              _index: objectIndex,
-            },
-          ],
-        },
-      },
-      { ignore: [404] }
-    );
-    // exit early if a 404 isn't from elasticsearch
-    if (
-      isNotFoundFromUnsupportedServer({
-        statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
-      })
-    ) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-    }
-    const exactMatchDoc = bulkGetResponse?.body.docs[0];
-    const aliasMatchDoc = bulkGetResponse?.body.docs[1];
-    const foundExactMatch =
-      // @ts-expect-error MultiGetHit._source is optional
-      exactMatchDoc.found && this.rawDocExistsInNamespace(exactMatchDoc, namespace);
-    const foundAliasMatch =
-      // @ts-expect-error MultiGetHit._source is optional
-      aliasMatchDoc.found && this.rawDocExistsInNamespace(aliasMatchDoc, namespace);
-
-    let result: SavedObjectsResolveResponse<T> | null = null;
-    let outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND;
-    if (foundExactMatch && foundAliasMatch) {
-      result = {
-        // @ts-expect-error MultiGetHit._source is optional
-        saved_object: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
-        outcome: 'conflict',
-        alias_target_id: legacyUrlAlias.targetId,
-      };
-      outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT;
-    } else if (foundExactMatch) {
-      result = {
-        // @ts-expect-error MultiGetHit._source is optional
-        saved_object: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
-        outcome: 'exactMatch',
-      };
-      outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH;
-    } else if (foundAliasMatch) {
-      result = {
-        saved_object: getSavedObjectFromSource(
-          this._registry,
-          type,
-          legacyUrlAlias.targetId,
-          // @ts-expect-error MultiGetHit._source is optional
-          aliasMatchDoc
-        ),
-        outcome: 'aliasMatch',
-        alias_target_id: legacyUrlAlias.targetId,
-      };
-      outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH;
-    }
-
-    await this.incrementResolveOutcomeStats(outcomeStatString);
-
-    if (result !== null) {
-      return result;
-    }
-    throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    return result as SavedObjectsResolveResponse<T>;
   }
 
   /**
@@ -1298,7 +1213,7 @@ export class SavedObjectsRepository {
       preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
     }
 
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
 
     let rawUpsert: SavedObjectsRawDoc | undefined;
     if (upsert) {
@@ -1436,61 +1351,62 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
     const namespace = normalizeNamespace(options.namespace);
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map((object) => {
-      const { type, id } = object;
+    const expectedBulkGetResults: Array<Either<Record<string, any>, Record<string, any>>> =
+      objects.map((object) => {
+        const { type, id } = object;
 
-      if (!this._allowedTypes.includes(type)) {
+        if (!this._allowedTypes.includes(type)) {
+          return {
+            tag: 'Left',
+            value: {
+              id,
+              type,
+              error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+            },
+          };
+        }
+
+        const { attributes, references, version, namespace: objectNamespace } = object;
+
+        if (objectNamespace === ALL_NAMESPACES_STRING) {
+          return {
+            tag: 'Left',
+            value: {
+              id,
+              type,
+              error: errorContent(
+                SavedObjectsErrorHelpers.createBadRequestError('"namespace" cannot be "*"')
+              ),
+            },
+          };
+        }
+        // `objectNamespace` is a namespace string, while `namespace` is a namespace ID.
+        // The object namespace string, if defined, will supersede the operation's namespace ID.
+
+        const documentToSave = {
+          [type]: attributes,
+          updated_at: time,
+          ...(Array.isArray(references) && { references }),
+        };
+
+        const requiresNamespacesCheck = this._registry.isMultiNamespace(object.type);
+
         return {
-          tag: 'Left' as 'Left',
-          error: {
-            id,
+          tag: 'Right',
+          value: {
             type,
-            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+            id,
+            version,
+            documentToSave,
+            objectNamespace,
+            ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
           },
         };
-      }
-
-      const { attributes, references, version, namespace: objectNamespace } = object;
-
-      if (objectNamespace === ALL_NAMESPACES_STRING) {
-        return {
-          tag: 'Left' as 'Left',
-          error: {
-            id,
-            type,
-            error: errorContent(
-              SavedObjectsErrorHelpers.createBadRequestError('"namespace" cannot be "*"')
-            ),
-          },
-        };
-      }
-      // `objectNamespace` is a namespace string, while `namespace` is a namespace ID.
-      // The object namespace string, if defined, will supersede the operation's namespace ID.
-
-      const documentToSave = {
-        [type]: attributes,
-        updated_at: time,
-        ...(Array.isArray(references) && { references }),
-      };
-
-      const requiresNamespacesCheck = this._registry.isMultiNamespace(object.type);
-
-      return {
-        tag: 'Right' as 'Right',
-        value: {
-          type,
-          id,
-          version,
-          documentToSave,
-          objectNamespace,
-          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
-        },
-      };
-    });
+      });
 
     const getNamespaceId = (objectNamespace?: string) =>
       objectNamespace !== undefined
@@ -1531,20 +1447,14 @@ export class SavedObjectsRepository {
     }
     let bulkUpdateRequestIndexCounter = 0;
     const bulkUpdateParams: object[] = [];
-    const expectedBulkUpdateResults: Either[] = expectedBulkGetResults.map(
-      (expectedBulkGetResult) => {
+    const expectedBulkUpdateResults: Array<Either<Record<string, any>, Record<string, any>>> =
+      expectedBulkGetResults.map((expectedBulkGetResult) => {
         if (isLeft(expectedBulkGetResult)) {
           return expectedBulkGetResult;
         }
 
-        const {
-          esRequestIndex,
-          id,
-          type,
-          version,
-          documentToSave,
-          objectNamespace,
-        } = expectedBulkGetResult.value;
+        const { esRequestIndex, id, type, version, documentToSave, objectNamespace } =
+          expectedBulkGetResult.value;
 
         let namespaces;
         let versionProperties;
@@ -1558,8 +1468,8 @@ export class SavedObjectsRepository {
             !this.rawDocExistsInNamespace(actualResult, getNamespaceId(objectNamespace))
           ) {
             return {
-              tag: 'Left' as 'Left',
-              error: {
+              tag: 'Left',
+              value: {
                 id,
                 type,
                 error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
@@ -1600,9 +1510,8 @@ export class SavedObjectsRepository {
           { doc: documentToSave }
         );
 
-        return { tag: 'Right' as 'Right', value: expectedResult };
-      }
-    );
+        return { tag: 'Right', value: expectedResult };
+      });
 
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const bulkUpdateResponse = bulkUpdateParams.length
@@ -1617,7 +1526,7 @@ export class SavedObjectsRepository {
     return {
       saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error as any;
+          return expectedResult.value as any;
         }
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
@@ -1801,7 +1710,7 @@ export class SavedObjectsRepository {
     return this.incrementCounterInternal<T>(type, id, counterFields, options);
   }
 
-  /** @internal incrementCounter function that is used interally and bypasses validation checks. */
+  /** @internal incrementCounter function that is used internally and bypasses validation checks. */
   private async incrementCounterInternal<T = unknown>(
     type: string,
     id: string,
@@ -1837,7 +1746,7 @@ export class SavedObjectsRepository {
     });
     const namespace = normalizeNamespace(options.namespace);
 
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
     let savedObjectNamespace;
     let savedObjectNamespaces: string[] | undefined;
 
@@ -2120,10 +2029,6 @@ export class SavedObjectsRepository {
     return unique(types.map((t) => this.getIndexForType(t)));
   }
 
-  private _getCurrentTime() {
-    return new Date().toISOString();
-  }
-
   private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
     const { namespace, type } = savedObject;
@@ -2230,33 +2135,6 @@ export class SavedObjectsRepository {
     return body;
   }
 
-  private async resolveExactMatch<T>(
-    type: string,
-    id: string,
-    options: SavedObjectsBaseOptions
-  ): Promise<SavedObjectsResolveResponse<T>> {
-    try {
-      const object = await this.get<T>(type, id, options);
-      await this.incrementResolveOutcomeStats(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-      return { saved_object: object, outcome: 'exactMatch' };
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        // 404 responses already confirmed to be valid Elasticsearch responses
-        await this.incrementResolveOutcomeStats(REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
-      }
-      throw err;
-    }
-  }
-
-  private async incrementResolveOutcomeStats(outcomeStatString: string) {
-    await this.incrementCounterInternal(
-      CORE_USAGE_STATS_TYPE,
-      CORE_USAGE_STATS_ID,
-      [outcomeStatString, REPOSITORY_RESOLVE_OUTCOME_STATS.TOTAL],
-      { refresh: false }
-    ).catch(() => {}); // if the call fails for some reason, intentionally swallow the error
-  }
-
   /** The `initialNamespaces` field (create, bulkCreate) is used to create an object in an initial set of spaces. */
   private validateInitialNamespaces(type: string, initialNamespaces: string[] | undefined) {
     if (!initialNamespaces) {
@@ -2323,20 +2201,6 @@ function getSavedObjectNamespaces(
 }
 
 /**
- * Ensure that a namespace is always in its namespace ID representation.
- * This allows `'default'` to be used interchangeably with `undefined`.
- */
-const normalizeNamespace = (namespace?: string) => {
-  if (namespace === ALL_NAMESPACES_STRING) {
-    throw SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"');
-  } else if (namespace === undefined) {
-    return namespace;
-  } else {
-    return SavedObjectsUtils.namespaceStringToId(namespace);
-  }
-};
-
-/**
  * Extracts the contents of a decorated error to return the attributes for bulk operations.
  */
 const errorContent = (error: DecoratedError) => error.output.payload;
@@ -2344,7 +2208,7 @@ const errorContent = (error: DecoratedError) => error.output.payload;
 const unique = (array: string[]) => [...new Set(array)];
 
 /**
- * Type and type guard function for converting a possibly not existant doc to an existant doc.
+ * Type and type guard function for converting a possibly not existent doc to an existent doc.
  */
 type GetResponseFound<TDocument = unknown> = estypes.GetResponse<TDocument> &
   Required<

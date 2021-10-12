@@ -13,7 +13,8 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
 
-type TransactionsGroupsPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+type TransactionsGroupsPrimaryStatistics =
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
@@ -41,7 +42,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        const transctionsGroupsPrimaryStatistics = response.body as TransactionsGroupsPrimaryStatistics;
+        const transctionsGroupsPrimaryStatistics =
+          response.body as TransactionsGroupsPrimaryStatistics;
         expect(transctionsGroupsPrimaryStatistics.transactionGroups).to.empty();
         expect(transctionsGroupsPrimaryStatistics.isAggregationAccurate).to.be(true);
       });
@@ -69,7 +71,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        const transctionsGroupsPrimaryStatistics = response.body as TransactionsGroupsPrimaryStatistics;
+        const transctionsGroupsPrimaryStatistics =
+          response.body as TransactionsGroupsPrimaryStatistics;
 
         expectSnapshot(
           transctionsGroupsPrimaryStatistics.transactionGroups.map((group: any) => group.name)
@@ -143,7 +146,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        const transctionsGroupsPrimaryStatistics = response.body as TransactionsGroupsPrimaryStatistics;
+        const transctionsGroupsPrimaryStatistics =
+          response.body as TransactionsGroupsPrimaryStatistics;
 
         const firstItem = transctionsGroupsPrimaryStatistics.transactionGroups[0];
         expectSnapshot(firstItem.latency).toMatchInline(`66846719`);

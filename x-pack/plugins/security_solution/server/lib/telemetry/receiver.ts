@@ -17,7 +17,7 @@ import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/ser
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
-import { exceptionListItemToEndpointEntry } from './helpers';
+import { exceptionListItemToTelemetryEntry, trustedApplicationToTelemetryEntry } from './helpers';
 import { TelemetryEvent, ESLicense, ESClusterInfo, GetEndpointListResponse } from './types';
 
 export class TelemetryReceiver {
@@ -42,7 +42,8 @@ export class TelemetryReceiver {
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
-    this.soClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
+    this.soClient =
+      core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
   }
 
   public async fetchFleetAgents() {
@@ -83,7 +84,7 @@ export class TelemetryReceiver {
           policy_responses: {
             terms: {
               size: this.max_records,
-              field: 'Endpoint.policy.applied.id',
+              field: 'agent.id',
             },
             aggs: {
               latest_response: {
@@ -201,7 +202,16 @@ export class TelemetryReceiver {
       throw Error('exception list client is unavailable: cannot retrieve trusted applications');
     }
 
-    return getTrustedAppsList(this.exceptionListClient, { page: 1, per_page: 10_000 });
+    const results = await getTrustedAppsList(this.exceptionListClient, {
+      page: 1,
+      per_page: 10_000,
+    });
+    return {
+      data: results?.data.map(trustedApplicationToTelemetryEntry),
+      total: results?.total ?? 0,
+      page: results?.page ?? 1,
+      per_page: results?.per_page ?? this.max_records,
+    };
   }
 
   public async fetchEndpointList(listId: string): Promise<GetEndpointListResponse> {
@@ -223,7 +233,7 @@ export class TelemetryReceiver {
     });
 
     return {
-      data: results?.data.map(exceptionListItemToEndpointEntry) ?? [],
+      data: results?.data.map(exceptionListItemToTelemetryEntry) ?? [],
       total: results?.total ?? 0,
       page: results?.page ?? 1,
       per_page: results?.per_page ?? this.max_records,

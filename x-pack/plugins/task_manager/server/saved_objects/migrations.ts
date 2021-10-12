@@ -72,7 +72,7 @@ function alertingTaskLegacyIdToSavedObjectIds(
 ): SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> {
   if (doc.attributes.taskType.startsWith('alerting:')) {
     let params: { spaceId?: string; alertId?: string } = {};
-    params = JSON.parse((doc.attributes.params as unknown) as string);
+    params = JSON.parse(doc.attributes.params as unknown as string);
 
     if (params.alertId && params.spaceId && params.spaceId !== 'default') {
       const newId = SavedObjectsUtils.getConvertedObjectId(params.spaceId, 'alert', params.alertId);
@@ -98,7 +98,7 @@ function actionsTasksLegacyIdToSavedObjectIds(
 ): SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> {
   if (doc.attributes.taskType.startsWith('actions:')) {
     let params: { spaceId?: string; actionTaskParamsId?: string } = {};
-    params = JSON.parse((doc.attributes.params as unknown) as string);
+    params = JSON.parse(doc.attributes.params as unknown as string);
 
     if (params.actionTaskParamsId && params.spaceId && params.spaceId !== 'default') {
       const newId = SavedObjectsUtils.getConvertedObjectId(

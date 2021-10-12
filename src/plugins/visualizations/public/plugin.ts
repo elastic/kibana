@@ -120,7 +120,8 @@ export class VisualizationsPlugin
       VisualizationsStart,
       VisualizationsSetupDeps,
       VisualizationsStartDeps
-    > {
+    >
+{
   private readonly types: TypesService = new TypesService();
   private getStartServicesOrDie?: StartServicesGetter<VisualizationsStartDeps, VisualizationsStart>;
 
