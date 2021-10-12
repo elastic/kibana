@@ -7,24 +7,22 @@
 
 import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
+import getPort from 'get-port';
+import http from 'http';
 
 import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-
-import {
-  getExternalServiceSimulatorPath,
-  ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getServiceNowServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
-export default function servicenowTest({ getService }: FtrProviderContext) {
+export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
 
   const mockServiceNow = {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
+      isLegacy: false,
     },
     secrets: {
       password: 'elastic',
@@ -34,14 +32,18 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       subAction: 'pushToService',
       subActionParams: {
         incident: {
-          description: 'a description',
           externalId: null,
-          impact: '1',
-          severity: '1',
-          short_description: 'a title',
-          urgency: '1',
+          short_description: 'Incident title',
+          description: 'Incident description',
+          dest_ip: ['192.168.1.1', '192.168.1.3'],
+          source_ip: ['192.168.1.2', '192.168.1.4'],
+          malware_hash: ['5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9'],
+          malware_url: ['https://example.com'],
           category: 'software',
-          subcategory: 'software',
+          subcategory: 'os',
+          correlation_id: 'alertID',
+          correlation_display: 'Alerting',
+          priority: '1',
         },
         comments: [
           {
@@ -53,25 +55,46 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
     },
   };
 
-  let servicenowSimulatorURL: string = '<could not determine kibana url>';
+  describe('ServiceNow SIR', () => {
+    let simulatedActionId = '';
+    let serviceNowSimulatorURL: string = '';
+    let serviceNowServer: http.Server;
+    let proxyServer: httpProxy | undefined;
+    let proxyHaveBeenCalled = false;
 
-  describe('ServiceNow', () => {
-    before(() => {
-      servicenowSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+    before(async () => {
+      serviceNowServer = await getServiceNowServer();
+      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      if (!serviceNowServer.listening) {
+        serviceNowServer.listen(availablePort);
+      }
+      serviceNowSimulatorURL = `http://localhost:${availablePort}`;
+      proxyServer = await getHttpProxyServer(
+        serviceNowSimulatorURL,
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
       );
     });
 
-    describe('ServiceNow - Action Creation', () => {
+    after(() => {
+      serviceNowServer.close();
+      if (proxyServer) {
+        proxyServer.close();
+      }
+    });
+
+    describe('ServiceNow SIR - Action Creation', () => {
       it('should return 200 when creating a servicenow action successfully', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            connector_type_id: '.servicenow',
+            connector_type_id: '.servicenow-sir',
             config: {
-              apiUrl: servicenowSimulatorURL,
+              apiUrl: serviceNowSimulatorURL,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -81,10 +104,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           id: createdAction.id,
           is_preconfigured: false,
           name: 'A servicenow action',
-          connector_type_id: '.servicenow',
+          connector_type_id: '.servicenow-sir',
           is_missing_secrets: false,
           config: {
-            apiUrl: servicenowSimulatorURL,
+            apiUrl: serviceNowSimulatorURL,
+            isLegacy: false,
           },
         });
 
@@ -96,12 +120,34 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           id: fetchedAction.id,
           is_preconfigured: false,
           name: 'A servicenow action',
-          connector_type_id: '.servicenow',
+          connector_type_id: '.servicenow-sir',
           is_missing_secrets: false,
           config: {
-            apiUrl: servicenowSimulatorURL,
+            apiUrl: serviceNowSimulatorURL,
+            isLegacy: false,
           },
         });
+      });
+
+      it('should set the isLegacy to false when not provided', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            connector_type_id: '.servicenow-sir',
+            config: {
+              apiUrl: serviceNowSimulatorURL,
+            },
+            secrets: mockServiceNow.secrets,
+          })
+          .expect(200);
+
+        const { body: fetchedAction } = await supertest
+          .get(`/api/actions/connector/${createdAction.id}`)
+          .expect(200);
+
+        expect(fetchedAction.config.isLegacy).to.be(false);
       });
 
       it('should respond with a 400 Bad Request when creating a servicenow action with no apiUrl', async () => {
@@ -110,7 +156,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            connector_type_id: '.servicenow',
+            connector_type_id: '.servicenow-sir',
             config: {},
           })
           .expect(400)
@@ -130,7 +176,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            connector_type_id: '.servicenow',
+            connector_type_id: '.servicenow-sir',
             config: {
               apiUrl: 'http://servicenow.mynonexistent.com',
             },
@@ -153,9 +199,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            connector_type_id: '.servicenow',
+            connector_type_id: '.servicenow-sir',
             config: {
-              apiUrl: servicenowSimulatorURL,
+              apiUrl: serviceNowSimulatorURL,
             },
           })
           .expect(400)
@@ -170,31 +216,21 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('ServiceNow - Executor', () => {
-      let simulatedActionId: string;
-      let proxyServer: httpProxy | undefined;
-      let proxyHaveBeenCalled = false;
+    describe('ServiceNow SIR - Executor', () => {
       before(async () => {
         const { body } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow simulator',
-            connector_type_id: '.servicenow',
+            connector_type_id: '.servicenow-sir',
             config: {
-              apiUrl: servicenowSimulatorURL,
+              apiUrl: serviceNowSimulatorURL,
+              isLegacy: false,
             },
             secrets: mockServiceNow.secrets,
           });
         simulatedActionId = body.id;
-
-        proxyServer = await getHttpProxyServer(
-          kibanaServer.resolveUrl('/'),
-          configService.get('kbnTestServer.serverArgs'),
-          () => {
-            proxyHaveBeenCalled = true;
-          }
-        );
       });
 
       describe('Validation', () => {
@@ -377,31 +413,81 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       });
 
       describe('Execution', () => {
-        it('should handle creating an incident without comments', async () => {
-          const { body: result } = await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...mockServiceNow.params,
-                subActionParams: {
-                  incident: mockServiceNow.params.subActionParams.incident,
-                  comments: [],
+        // New connectors
+        describe('Import set API', () => {
+          it('should handle creating an incident without comments', async () => {
+            const { body: result } = await supertest
+              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  ...mockServiceNow.params,
+                  subActionParams: {
+                    incident: mockServiceNow.params.subActionParams.incident,
+                    comments: [],
+                  },
                 },
-              },
-            })
-            .expect(200);
+              })
+              .expect(200);
 
-          expect(proxyHaveBeenCalled).to.equal(true);
-          expect(result).to.eql({
-            status: 'ok',
-            connector_id: simulatedActionId,
-            data: {
-              id: '123',
-              title: 'INC01',
-              pushedDate: '2020-03-10T12:24:20.000Z',
-              url: `${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
-            },
+            expect(proxyHaveBeenCalled).to.equal(true);
+            expect(result).to.eql({
+              status: 'ok',
+              connector_id: simulatedActionId,
+              data: {
+                id: '123',
+                title: 'INC01',
+                pushedDate: '2020-03-10T12:24:20.000Z',
+                url: `${serviceNowSimulatorURL}/nav_to.do?uri=sn_si_incident.do?sys_id=123`,
+              },
+            });
+          });
+        });
+
+        // Legacy connectors
+        describe('Table API', () => {
+          before(async () => {
+            const { body } = await supertest
+              .post('/api/actions/connector')
+              .set('kbn-xsrf', 'foo')
+              .send({
+                name: 'A servicenow simulator',
+                connector_type_id: '.servicenow-sir',
+                config: {
+                  apiUrl: serviceNowSimulatorURL,
+                  isLegacy: true,
+                },
+                secrets: mockServiceNow.secrets,
+              });
+            simulatedActionId = body.id;
+          });
+
+          it('should handle creating an incident without comments', async () => {
+            const { body: result } = await supertest
+              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  ...mockServiceNow.params,
+                  subActionParams: {
+                    incident: mockServiceNow.params.subActionParams.incident,
+                    comments: [],
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(proxyHaveBeenCalled).to.equal(true);
+            expect(result).to.eql({
+              status: 'ok',
+              connector_id: simulatedActionId,
+              data: {
+                id: '123',
+                title: 'INC01',
+                pushedDate: '2020-03-10T12:24:20.000Z',
+                url: `${serviceNowSimulatorURL}/nav_to.do?uri=sn_si_incident.do?sys_id=123`,
+              },
+            });
           });
         });
 
@@ -452,12 +538,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             });
           });
         });
-      });
-
-      after(() => {
-        if (proxyServer) {
-          proxyServer.close();
-        }
       });
     });
   });
