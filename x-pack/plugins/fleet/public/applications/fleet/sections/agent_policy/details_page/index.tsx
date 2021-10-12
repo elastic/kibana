@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Redirect, useRouteMatch, Switch, Route, useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
@@ -148,7 +148,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     [getHref, isLoading, agentPolicy, policyId]
   );
 
-  const onCancelEnrollment = useMemo(
+  const onCancelEnrollment = useCallback(
     () =>
       routeState && routeState.onDoneNavigateTo && isFleetReady
         ? () => navigateToApp(routeState.onDoneNavigateTo![0], routeState.onDoneNavigateTo![1])
@@ -163,7 +163,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         setIsEnrollmentFlyoutOpen(true);
       }}
     >
-      Add agent
+      <FormattedMessage id="xpack.fleet.policyDetails.addAgentButton" defaultMessage="Add agent" />
     </EuiLink>
   );
   const headerRightContent = useMemo(
@@ -209,6 +209,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
                   <AddAgentHelpPopover
                     button={addAgentLink}
                     isOpen={isAddAgentHelpPopoverOpen}
+                    offset={15}
                     closePopover={() => {
                       setIsAddAgentHelpPopoverOpen(false);
                     }}

@@ -10,29 +10,26 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { NoArgCallback } from '@elastic/eui';
-import { EuiButton, EuiLink, EuiText, EuiPopover, EuiPopoverFooter } from '@elastic/eui';
+import { EuiTourStep, EuiLink, EuiText } from '@elastic/eui';
 
 import { useStartServices } from '../hooks';
 
 export const AddAgentHelpPopover = ({
   button,
   isOpen,
+  offset = 0,
   closePopover,
 }: {
   button: ReactElement;
   isOpen: boolean;
+  offset?: number;
   closePopover: NoArgCallback<void>;
 }) => {
   const { docLinks } = useStartServices();
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isOpen}
-      closePopover={closePopover}
-      data-test-subj="addAgentHelpPopover"
-    >
-      <div style={{ width: '302px' }}>
-        <EuiText size="m">
+    <EuiTourStep
+      content={
+        <EuiText size="m" style={{ width: 302 }}>
           <FormattedMessage
             id="xpack.fleet.addAgentHelpPopover.popoverBody"
             defaultMessage="For integrations to work successfully, add {elasticAgent} to your host to collect data and send it to Elastic Stack. {learnMoreLink}"
@@ -49,12 +46,33 @@ export const AddAgentHelpPopover = ({
             }}
           />
         </EuiText>
-      </div>
-      <EuiPopoverFooter>
-        <EuiButton onClick={closePopover} fill fullWidth size="s">
+      }
+      isStepOpen={isOpen}
+      minWidth={300}
+      onFinish={() => {}}
+      step={1}
+      stepsTotal={1}
+      offset={offset}
+      title={
+        <FormattedMessage
+          id="xpack.fleet.addAgentHelpPopover.title"
+          defaultMessage="Don't forget to add the agent to your host"
+        />
+      }
+      anchorPosition="downCenter"
+      subtitle={null}
+      data-test-subj="addAgentHelpPopover"
+      footerAction={
+        <EuiLink
+          onClick={() => {
+            closePopover();
+          }}
+        >
           Got it
-        </EuiButton>
-      </EuiPopoverFooter>
-    </EuiPopover>
+        </EuiLink>
+      }
+    >
+      {button}
+    </EuiTourStep>
   );
 };
