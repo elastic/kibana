@@ -5,4 +5,13 @@
  * 2.0.
  */
 
-export const Overview: FunctionComponent<Props>;
+import { FunctionComponent } from 'react';
+
+export const Overview: FunctionComponent<OverviewProps>;
+
+export interface OverviewProps {
+  cluster: unknown;
+  setupMode: unknown;
+  showLicenseExpiration: boolean;
+  alerts: unknown;
+}
