@@ -8,6 +8,5 @@
 import { pointseries } from './point_series';
 import { math } from './math';
 import { tagcloud } from './tagcloud';
-import { metricVis } from './metric_vis';
 
-export const modelSpecs = [pointseries, math, tagcloud, metricVis];
+export const modelSpecs = [pointseries, math, tagcloud];
