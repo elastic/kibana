@@ -27,7 +27,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await reportingAPI.teardownEcommerce();
-      await reportingAPI.deleteAllReports();
       await reportingAPI.deleteAllSchedules();
     });
 
@@ -132,17 +131,16 @@ export default function ({ getService }: FtrProviderContext) {
       expect(scheduleResponse.status).eql(200);
       const schedule = JSON.parse(scheduleResponse.text).schedule;
       const scheduleId = schedule.id;
-      expect(schedule.user).eql(undefined);
+      log.info(`created schedule ${scheduleId}`);
 
+      expect(schedule.user).eql(undefined);
       expect(schedule.params.created_by).to.eql(false);
 
       log.info(`testing that schedule can be deleted`);
       const deleted = await supertest
-        .delete(`/api/reporting/schedules/delete/${scheduleId}`)
+        .delete(`/api/reporting/schedule/delete/${scheduleId}`)
         .set('kbn-xsrf', 'xxx');
-      expectSnapshot(deleted.text).toMatchInline(
-        `"{\\"statusCode\\":404,\\"error\\":\\"Not Found\\",\\"message\\":\\"Not Found\\"}"`
-      );
+      expectSnapshot(deleted.text).toMatchInline(`"{\\"deleted\\":true}"`);
     });
   });
 }
