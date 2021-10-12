@@ -97,13 +97,13 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       if (actions?.hasOwnProperty('rejectUnauthorized')) {
         addDeprecation({
           message:
-            `"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.verificationMode" instead, ` +
+            `"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.ssl.verificationMode" instead, ` +
             `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
             `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
           correctiveActions: {
             manualSteps: [
               `Remove "xpack.actions.rejectUnauthorized" from your kibana configs.`,
-              `Use "xpack.actions.verificationMode" ` +
+              `Use "xpack.actions.ssl.verificationMode" ` +
                 `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
                 `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
             ],
