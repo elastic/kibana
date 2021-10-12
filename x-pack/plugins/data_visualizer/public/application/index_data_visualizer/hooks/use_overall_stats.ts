@@ -10,7 +10,7 @@ import { combineLatest, of, Subscription } from 'rxjs';
 import { mergeMap, switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ToastsStart } from 'kibana/public';
-import { OverallStatsSearchStrategyParams } from '../../../../common/search_strategy/types';
+import { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   checkAggregatableFieldsExistRequest,

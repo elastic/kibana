@@ -8,6 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { each, find, get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/api/types';
 import {
   Aggs,
   BooleanFieldStats,
@@ -17,7 +18,7 @@ import {
   Field,
   NumericFieldStats,
   StringFieldStats,
-} from '../../types';
+} from '../../../common/types/field_stats';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
@@ -259,7 +260,7 @@ export const getStringFieldsStats = async (
   const aggs: Aggs = {};
   fields.forEach((field, i) => {
     const safeFieldName = getSafeAggregationName(field.fieldName, i);
-    const top = {
+    const top: AggregationsAggregationContainer = {
       terms: {
         field: field.fieldName,
         size: 10,

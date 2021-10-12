@@ -20,8 +20,13 @@ import {
   getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
-import type { FieldStatsCommonRequestParams } from '../../../../../common/search_strategy/types';
-import type { Field, NumericFieldStats, Bucket, FieldStatsError } from '../../types/field_stats';
+import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
+import type {
+  Field,
+  NumericFieldStats,
+  Bucket,
+  FieldStatsError,
+} from '../../../../../common/types/field_stats';
 import { processDistributionData } from '../../utils/process_distribution_data';
 import {
   IKibanaSearchRequest,
@@ -30,7 +35,7 @@ import {
 } from '../../../../../../../../src/plugins/data/common';
 import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 import { extractErrorProperties } from '../../utils/error_utils';
-import { isIKibanaSearchResponse } from '../../types/field_stats';
+import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 
 export const getNumericFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,

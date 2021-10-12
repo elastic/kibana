@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/api/types';
+import { AggregationsAggregationContainer, SearchRequest } from '@elastic/elasticsearch/api/types';
 import { get } from 'lodash';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import {
@@ -15,15 +15,20 @@ import {
   getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
-import type { FieldStatsCommonRequestParams } from '../../../../../common/search_strategy/types';
-import type { Aggs, Bucket, Field, StringFieldStats } from '../../types/field_stats';
+import type {
+  Aggs,
+  Bucket,
+  Field,
+  FieldStatsCommonRequestParams,
+  StringFieldStats,
+} from '../../../../../common/types/field_stats';
 import {
   DataPublicPluginStart,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
 } from '../../../../../../../../src/plugins/data/public';
-import { FieldStatsError, isIKibanaSearchResponse } from '../../types/field_stats';
+import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { extractErrorProperties } from '../../utils/error_utils';
 
 export const getStringFieldStatsRequest = (params: FieldStatsCommonRequestParams, field: Field) => {
@@ -34,7 +39,7 @@ export const getStringFieldStatsRequest = (params: FieldStatsCommonRequestParams
   const aggs: Aggs = {};
 
   const safeFieldName = field.safeFieldName;
-  const top = {
+  const top: AggregationsAggregationContainer = {
     terms: {
       field: field.fieldName,
       size: 10,

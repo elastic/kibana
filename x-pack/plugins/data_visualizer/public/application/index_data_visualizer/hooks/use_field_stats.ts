@@ -12,17 +12,17 @@ import type {
   FieldStatsSearchStrategyProgress,
   FieldStatsSearchStrategyReturnBase,
   OverallStatsSearchStrategyParams,
-} from '../../../../common/search_strategy/types';
+  FieldStatsCommonRequestParams,
+} from '../../../../common/types/field_stats';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import type { FieldRequestConfig } from '../../../../common';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
-import type { FieldStatsCommonRequestParams } from '../../../../common/search_strategy/types';
 import {
   buildBaseFilterCriteria,
   getSafeAggregationName,
 } from '../../../../common/utils/query_utils';
 import { getFieldStats } from '../search_strategy/requests/get_field_stats';
-import type { FieldStats, FieldStatsError } from '../types/field_stats';
+import type { FieldStats, FieldStatsError } from '../../../../common/types/field_stats';
 
 const getInitialProgress = (): FieldStatsSearchStrategyProgress => ({
   isRunning: false,

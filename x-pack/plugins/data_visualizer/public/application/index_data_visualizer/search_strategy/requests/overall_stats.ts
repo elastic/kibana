@@ -17,7 +17,7 @@ import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_ut
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { IKibanaSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
-import { AggCardinality, Aggs } from '../../../../../common/search_strategy/types';
+import { AggCardinality, Aggs } from '../../../../../common/types/field_stats';
 
 export const checkAggregatableFieldsExistRequest = (
   indexPatternTitle: string,

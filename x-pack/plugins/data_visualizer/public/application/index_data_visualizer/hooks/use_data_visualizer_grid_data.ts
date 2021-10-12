@@ -35,7 +35,7 @@ import { DataVisualizerGridEmbeddableInput } from '../embeddables/grid_embeddabl
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
-import { OverallStatsSearchStrategyParams } from '../../../../common/search_strategy/types';
+import { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
 
 const defaults = getDefaultPageState();
 
@@ -417,6 +417,8 @@ export const useDataVisualizerGridData = (
     }
 
     if (fieldStats) {
+      // @todo
+      // @ts-ignore
       combinedConfigs = combinedConfigs.map((c) => {
         const loadedFullStats = fieldStats.get(c.fieldName);
         return loadedFullStats

@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
 import { buildBaseFilterCriteria } from '../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../common/utils/object_utils';
-import { FieldExamples } from '../../types/chart_data';
+import { FieldExamples } from '../../../common/types/field_stats';
 
 export const getFieldExamples = async (
   client: IScopedClusterClient,
@@ -32,10 +32,12 @@ export const getFieldExamples = async (
   const size = Math.max(100, maxExamples);
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
-  // Use an exists filter to return examples of the field.
-  filterCriteria.push({
-    exists: { field },
-  });
+  if (Array.isArray(filterCriteria)) {
+    // Use an exists filter to return examples of the field.
+    filterCriteria.push({
+      exists: { field },
+    });
+  }
 
   const searchBody = {
     fields: [field],

@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from '../../common/utils/object_utils';
+import { estypes } from '@elastic/elasticsearch';
+import { AggregationsHistogramAggregation } from '@elastic/elasticsearch/api/types';
+import { isPopulatedObject } from '../utils/object_utils';
+import { IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
+import { TimeBucketsInterval } from '../services/time_buckets';
 
-// @todo: Remove
 export interface FieldData {
   fieldName: string;
   existsInDocs: boolean;
@@ -40,13 +43,18 @@ export interface Distribution {
   maxPercentile: number;
 }
 
-export interface Aggs {
-  [key: string]: any;
-}
-
 export interface Bucket {
   doc_count: number;
 }
+
+export interface FieldStatsError {
+  fieldName: string;
+  error: Error;
+}
+
+export const isIKibanaSearchResponse = (arg: unknown): arg is IKibanaSearchResponse => {
+  return isPopulatedObject(arg, ['rawResponse']);
+};
 
 export interface NumericFieldStats {
   fieldName: string;
@@ -105,10 +113,7 @@ export interface NumericColumnStats {
 export type NumericColumnStatsMap = Record<string, NumericColumnStats>;
 
 export interface AggHistogram {
-  histogram: {
-    field: string;
-    interval: number;
-  };
+  histogram: AggregationsHistogramAggregation;
 }
 
 export interface AggTerms {
@@ -174,3 +179,90 @@ export type BatchStats =
   | DateFieldStats
   | DocumentCountStats
   | FieldExamples;
+
+export type FieldStats =
+  | NumericFieldStats
+  | StringFieldStats
+  | BooleanFieldStats
+  | DateFieldStats
+  | FieldExamples
+  | FieldStatsError;
+
+export function isValidFieldStats(arg: unknown): arg is FieldStats {
+  return isPopulatedObject(arg, ['fieldName', 'type', 'count']);
+}
+
+export interface FieldStatsCommonRequestParams {
+  index: string;
+  samplerShardSize: number;
+  timeFieldName?: string;
+  earliestMs?: number | undefined;
+  latestMs?: number | undefined;
+  runtimeFieldMap?: estypes.MappingRuntimeFields;
+  intervalMs?: number;
+  query: estypes.QueryDslQueryContainer;
+  maxExamples?: number;
+}
+
+export interface OverallStatsSearchStrategyParams {
+  sessionId?: string;
+  earliest?: number;
+  latest?: number;
+  aggInterval: TimeBucketsInterval;
+  intervalMs?: number;
+  searchQuery?: any;
+  samplerShardSize: number;
+  index: string;
+  timeFieldName?: string;
+  runtimeFieldMap?: estypes.MappingRuntimeFields;
+  aggregatableFields: string[];
+  nonAggregatableFields: string[];
+}
+
+export interface FieldStatsSearchStrategyReturnBase {
+  progress: FieldStatsSearchStrategyProgress;
+  fieldStats: Map<string, FieldStats> | undefined;
+  startFetch: () => void;
+  cancelFetch: () => void;
+}
+
+export interface FieldStatsSearchStrategyProgress {
+  error?: Error;
+  isRunning: boolean;
+  loaded: number;
+  total: number;
+}
+
+export interface FieldData {
+  fieldName: string;
+  existsInDocs: boolean;
+  stats?: {
+    sampleCount?: number;
+    count?: number;
+    cardinality?: number;
+  };
+}
+
+export interface Field {
+  fieldName: string;
+  type: string;
+  cardinality: number;
+  safeFieldName: string;
+}
+
+export interface Aggs {
+  [key: string]: estypes.AggregationsAggregationContainer;
+}
+
+export interface FieldAggCardinality {
+  field: string;
+  percent?: any;
+}
+
+export interface ScriptAggCardinality {
+  script: any;
+}
+
+export interface AggCardinality {
+  cardinality: FieldAggCardinality | ScriptAggCardinality;
+}

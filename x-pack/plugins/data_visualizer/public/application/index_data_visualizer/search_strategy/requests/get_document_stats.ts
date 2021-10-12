@@ -10,8 +10,10 @@ import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { each, get } from 'lodash';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
-import type { FieldStatsCommonRequestParams } from '../../../../../common/search_strategy/types';
-import type { DocumentCountStats } from '../../types/field_stats';
+import type {
+  DocumentCountStats,
+  FieldStatsCommonRequestParams,
+} from '../../../../../common/types/field_stats';
 
 export const getDocumentCountStatsRequest = (params: FieldStatsCommonRequestParams) => {
   const { index, timeFieldName, earliestMs, latestMs, query, runtimeFieldMap, intervalMs } = params;
@@ -70,7 +72,8 @@ export const fetchDocumentCountStats = async (
 
   return {
     documentCounts: {
-      interval: intervalMs,
+      // @todo: confirm
+      interval: intervalMs ?? 0,
       buckets,
     },
   };

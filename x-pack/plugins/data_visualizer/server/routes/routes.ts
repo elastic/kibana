@@ -13,7 +13,8 @@ import {
   dataVisualizerOverallStatsSchema,
   indexPatternTitleSchema,
 } from './schemas';
-import type { Field, StartDeps, HistogramField } from '../types';
+import type { StartDeps } from '../types';
+import type { Field, HistogramField } from '../../common/types/field_stats';
 import { DataVisualizer } from '../models/data_visualizer';
 import { wrapError } from '../utils/error_wrapper';
 

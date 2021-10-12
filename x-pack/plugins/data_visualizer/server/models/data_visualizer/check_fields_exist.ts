@@ -8,7 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
-import { AggCardinality, Aggs, FieldData } from '../../types';
+import { AggCardinality, Aggs, FieldData } from '../../../common/types/field_stats';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
@@ -171,7 +171,9 @@ export const checkNonAggregatableFieldExists = async (
     },
     ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
   };
-  filterCriteria.push({ exists: { field } });
+  if (Array.isArray(filterCriteria)) {
+    filterCriteria.push({ exists: { field } });
+  }
 
   const { body } = await asCurrentUser.search({
     index,

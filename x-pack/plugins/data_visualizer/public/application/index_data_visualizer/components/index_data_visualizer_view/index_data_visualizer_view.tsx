@@ -622,15 +622,16 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       });
     });
 
-    // Add a config for 'document count', identified by no field name if indexpattern is time based.
-    if (currentIndexPattern.timeFieldName !== undefined) {
-      configs.push({
-        type: JOB_FIELD_TYPES.NUMBER,
-        existsInDocs: true,
-        loading: true,
-        aggregatable: true,
-      });
-    }
+    // @todo: REMOVE
+    // // Add a config for 'document count', identified by no field name if indexpattern is time based.
+    // if (currentIndexPattern.timeFieldName !== undefined) {
+    //   configs.push({
+    //     type: JOB_FIELD_TYPES.NUMBER,
+    //     existsInDocs: true,
+    //     loading: true,
+    //     aggregatable: true,
+    //   });
+    // }
 
     if (metricsLoaded === false) {
       setMetricsLoaded(true);

@@ -6,7 +6,7 @@
  */
 
 import { last } from 'lodash';
-import type { Distribution } from '../types/field_stats';
+import type { Distribution } from '../../../../common/types/field_stats';
 
 export const processDistributionData = (
   percentiles: Array<{ value: number }>,

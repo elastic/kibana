@@ -14,15 +14,15 @@ import {
   getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
-import type { FieldStatsCommonRequestParams } from '../../../../../common/search_strategy/types';
-import type { Field, DateFieldStats, Aggs } from '../../types/field_stats';
+import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
+import type { Field, DateFieldStats, Aggs } from '../../../../../common/types/field_stats';
 import {
   DataPublicPluginStart,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
 } from '../../../../../../../../src/plugins/data/public';
-import { FieldStatsError, isIKibanaSearchResponse } from '../../types/field_stats';
+import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { extractErrorProperties } from '../../utils/error_utils';
 
 export const getDateFieldStatsRequest = (params: FieldStatsCommonRequestParams, field: Field) => {

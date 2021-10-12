@@ -8,7 +8,12 @@
 import { IScopedClusterClient } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 import { get } from 'lodash';
-import { ChartData, ChartRequestAgg, HistogramField, NumericColumnStatsMap } from '../../types';
+import {
+  ChartData,
+  ChartRequestAgg,
+  HistogramField,
+  NumericColumnStatsMap,
+} from '../../../common/types/field_stats';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 import { stringHash } from '../../../common/utils/string_utils';
 import {

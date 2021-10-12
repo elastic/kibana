@@ -12,5 +12,6 @@ export const FIELDS_REQUEST_BATCH_SIZE = 10;
 
 export const MAX_CHART_COLUMNS = 20;
 
+export const MAX_EXAMPLES_DEFAULT = 10;
 export const MAX_PERCENT = 100;
 export const PERCENTILE_SPACING = 5;

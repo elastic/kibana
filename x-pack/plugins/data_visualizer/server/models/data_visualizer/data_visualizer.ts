@@ -16,7 +16,7 @@ import type {
   Field,
   DocumentCountStats,
   FieldExamples,
-} from '../../types';
+} from '../../../common/types/field_stats';
 import { getHistogramsForFields } from './get_histogram_for_fields';
 import {
   checkAggregatableFieldsExist,

@@ -6,7 +6,7 @@
  */
 
 import { last } from 'lodash';
-import { Distribution } from '../../types';
+import { Distribution } from '../../../common/types/field_stats';
 
 // @todo: REMOVE
 export const processDistributionData = (
