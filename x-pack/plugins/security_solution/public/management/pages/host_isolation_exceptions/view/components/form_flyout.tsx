@@ -154,7 +154,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
         },
       });
     }
-  }, [creationFailure, dispatch, exception?.item_id, history, location, toasts]);
+  }, [creationFailure, dispatch, exception?.item_id, toasts]);
 
   const handleOnCancel = useCallback(() => {
     if (creationInProgress) return;

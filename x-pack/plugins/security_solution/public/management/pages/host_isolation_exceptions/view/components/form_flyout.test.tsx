@@ -105,13 +105,13 @@ describe('When on the host isolation exceptions flyout form', () => {
         expect(mockedContext.history.location.search).toBe('');
       });
 
-      it('should show an error toast if operation fails and enable the submit button', () => {
+      it('should show an error toast if operation fails and enable the submit button', async () => {
         act(() => {
           mockedContext.store.dispatch({
             type: 'hostIsolationExceptionsFormStateChanged',
             payload: {
               type: 'FailedResourceState',
-              previousState: { type: 'UninitialisedResourceState' },
+              error: new Error('mocked error'),
             },
           });
         });
