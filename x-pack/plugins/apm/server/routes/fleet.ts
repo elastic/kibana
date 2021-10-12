@@ -129,8 +129,7 @@ const getMigrationCheckRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { plugins, context, config, request } = resources;
-    const cloudApmMigrationEnabled =
-      config['xpack.apm.agent.migrations.enabled'];
+    const cloudApmMigrationEnabled = config.agent.migrations.enabled;
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
@@ -158,8 +157,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources) => {
     const { plugins, context, config, request, logger } = resources;
-    const cloudApmMigrationEnabled =
-      config['xpack.apm.agent.migrations.enabled'];
+    const cloudApmMigrationEnabled = config.agent.migrations.enabled;
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }

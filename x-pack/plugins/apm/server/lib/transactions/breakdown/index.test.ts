@@ -13,12 +13,12 @@ import { APMConfig } from '../../..';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const mockIndices = {
-  'xpack.apm.sourcemapIndices': 'myIndex',
-  'xpack.apm.errorIndices': 'myIndex',
-  'xpack.apm.onboardingIndices': 'myIndex',
-  'xpack.apm.spanIndices': 'myIndex',
-  'xpack.apm.transactionIndices': 'myIndex',
-  'xpack.apm.metricsIndices': 'myIndex',
+  sourcemaps: 'myIndex',
+  errors: 'myIndex',
+  onboarding: 'myIndex',
+  spans: 'myIndex',
+  transactions: 'myIndex',
+  metrics: 'myIndex',
   apmAgentConfigurationIndex: 'myIndex',
   apmCustomLinkIndex: 'myIndex',
 };

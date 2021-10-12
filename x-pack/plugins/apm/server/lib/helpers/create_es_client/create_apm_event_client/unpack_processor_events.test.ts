@@ -18,12 +18,12 @@ describe('unpackProcessorEvents', () => {
     } as APMEventESSearchRequest;
 
     const indices = {
-      'xpack.apm.transactionIndices': 'my-apm-*-transaction-*',
-      'xpack.apm.metricsIndices': 'my-apm-*-metric-*',
-      'xpack.apm.errorIndices': 'my-apm-*-error-*',
-      'xpack.apm.spanIndices': 'my-apm-*-span-*',
-      'xpack.apm.onboardingIndices': 'my-apm-*-onboarding-',
-      'xpack.apm.sourcemapIndices': 'my-apm-*-sourcemap-*',
+      transactions: 'my-apm-*-transaction-*',
+      metrics: 'my-apm-*-metric-*',
+      errors: 'my-apm-*-error-*',
+      spans: 'my-apm-*-span-*',
+      onboarding: 'my-apm-*-onboarding-*',
+      sourcemaps: 'my-apm-*-sourcemap-*',
     } as ApmIndicesConfig;
 
     res = unpackProcessorEvents(request, indices);

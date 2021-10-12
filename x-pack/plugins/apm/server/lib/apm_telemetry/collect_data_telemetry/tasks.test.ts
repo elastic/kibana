@@ -14,10 +14,10 @@ import {
 
 describe('data telemetry collection tasks', () => {
   const indices = {
-    'xpack.apm.errorIndices': 'apm-8.0.0-error',
-    'xpack.apm.metricsIndices': 'apm-8.0.0-metric',
-    'xpack.apm.spanIndices': 'apm-8.0.0-span',
-    'xpack.apm.transactionIndices': 'apm-8.0.0-transaction',
+    errors: 'apm-8.0.0-error',
+    metrics: 'apm-8.0.0-metric',
+    spans: 'apm-8.0.0-span',
+    transactions: 'apm-8.0.0-transaction',
   } as ApmIndicesConfig;
 
   describe('environments', () => {

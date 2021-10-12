@@ -13,12 +13,12 @@ import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 
 jest.mock('../settings/apm_indices/get_apm_indices', () => ({
   getApmIndices: async () => ({
-    'xpack.apm.sourcemapIndices': 'apm-*',
-    'xpack.apm.errorIndices': 'apm-*',
-    'xpack.apm.onboardingIndices': 'apm-*',
-    'xpack.apm.spanIndices': 'apm-*',
-    'xpack.apm.transactionIndices': 'apm-*',
-    'xpack.apm.metricsIndices': 'apm-*',
+    sourcemaps: 'apm-*',
+    errors: 'apm-*',
+    onboarding: 'apm-*',
+    spans: 'apm-*',
+    transactions: 'apm-*',
+    metrics: 'apm-*',
     apmAgentConfigurationIndex: 'apm-*',
   }),
 }));

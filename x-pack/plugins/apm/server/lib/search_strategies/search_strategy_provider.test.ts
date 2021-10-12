@@ -90,7 +90,7 @@ const clientSearchMock = (
 };
 
 const getApmIndicesMock = async () =>
-  ({ 'xpack.apm.transactionIndices': 'apm-*' } as ApmIndicesConfig);
+  ({ transactions: 'apm-*' } as ApmIndicesConfig);
 
 describe('APM Correlations search strategy', () => {
   describe('strategy interface', () => {

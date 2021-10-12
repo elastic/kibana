@@ -65,7 +65,7 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
         const params: FailedTransactionsCorrelationsRequestParams &
           SearchStrategyServerParams = {
           ...searchServiceParams,
-          index: indices['xpack.apm.transactionIndices'],
+          index: indices.transactions,
           includeFrozen,
         };
 

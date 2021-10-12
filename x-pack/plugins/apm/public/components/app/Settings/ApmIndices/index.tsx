@@ -30,40 +30,40 @@ import {
 
 const APM_INDEX_LABELS = [
   {
-    configurationName: 'xpack.apm.sourcemapIndices',
+    configurationName: 'sourcemaps',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.sourcemapIndicesLabel',
       { defaultMessage: 'Sourcemap Indices' }
     ),
   },
   {
-    configurationName: 'xpack.apm.errorIndices',
+    configurationName: 'errors',
     label: i18n.translate('xpack.apm.settings.apmIndices.errorIndicesLabel', {
       defaultMessage: 'Error Indices',
     }),
   },
   {
-    configurationName: 'xpack.apm.onboardingIndices',
+    configurationName: 'onboarding',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.onboardingIndicesLabel',
       { defaultMessage: 'Onboarding Indices' }
     ),
   },
   {
-    configurationName: 'xpack.apm.spanIndices',
+    configurationName: 'spans',
     label: i18n.translate('xpack.apm.settings.apmIndices.spanIndicesLabel', {
       defaultMessage: 'Span Indices',
     }),
   },
   {
-    configurationName: 'xpack.apm.transactionIndices',
+    configurationName: 'transactions',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.transactionIndicesLabel',
       { defaultMessage: 'Transaction Indices' }
     ),
   },
   {
-    configurationName: 'xpack.apm.metricsIndices',
+    configurationName: 'metrics',
     label: i18n.translate('xpack.apm.settings.apmIndices.metricsIndicesLabel', {
       defaultMessage: 'Metrics Indices',
     }),
@@ -214,7 +214,10 @@ export function ApmIndices() {
                     {
                       defaultMessage:
                         'Overrides {configurationName}: {defaultValue}',
-                      values: { configurationName, defaultValue },
+                      values: {
+                        configurationName: `xpack.apm.indices.${configurationName}`,
+                        defaultValue,
+                      },
                     }
                   )}
                   fullWidth

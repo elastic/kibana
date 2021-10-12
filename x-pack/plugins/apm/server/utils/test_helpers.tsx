@@ -27,12 +27,12 @@ interface MockSetup {
   config: APMConfig;
   uiFilters: UxUIFilters;
   indices: {
-    'xpack.apm.sourcemapIndices': string;
-    'xpack.apm.errorIndices': string;
-    'xpack.apm.onboardingIndices': string;
-    'xpack.apm.spanIndices': string;
-    'xpack.apm.transactionIndices': string;
-    'xpack.apm.metricsIndices': string;
+    sourcemaps: string;
+    errors: string;
+    onboarding: string;
+    spans: string;
+    transactions: string;
+    metrics: string;
     apmAgentConfigurationIndex: string;
     apmCustomLinkIndex: string;
   };
@@ -74,8 +74,9 @@ export async function inspectSearchParams(
           switch (key) {
             default:
               return 'myIndex';
-
-            case 'xpack.apm.metricsInterval':
+            case 'indices':
+              return new Proxy({}, { get: () => 'myIndex' });
+            case 'metricsInterval':
               return 30;
           }
         },
@@ -83,12 +84,12 @@ export async function inspectSearchParams(
     ) as APMConfig,
     uiFilters: options?.uiFilters ?? {},
     indices: {
-      'xpack.apm.sourcemapIndices': 'myIndex',
-      'xpack.apm.errorIndices': 'myIndex',
-      'xpack.apm.onboardingIndices': 'myIndex',
-      'xpack.apm.spanIndices': 'myIndex',
-      'xpack.apm.transactionIndices': 'myIndex',
-      'xpack.apm.metricsIndices': 'myIndex',
+      sourcemaps: 'myIndex',
+      errors: 'myIndex',
+      onboarding: 'myIndex',
+      spans: 'myIndex',
+      transactions: 'myIndex',
+      metrics: 'myIndex',
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },

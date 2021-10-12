@@ -5,35 +5,32 @@
  * 2.0.
  */
 
-const apmIndexConfigPaths = [
-  ['xpack.apm.sourcemapIndices', 'apm_oss.sourcemapIndices'],
-  ['xpack.apm.errorIndices', 'apm_oss.errorIndices'],
-  ['xpack.apm.onboardingIndices', 'apm_oss.onboardingIndices'],
-  ['xpack.apm.spanIndices', 'apm_oss.spanIndices'],
-  ['xpack.apm.transactionIndices', 'apm_oss.transactionIndices'],
-  ['xpack.apm.metricsIndices', 'apm_oss.metricsIndices'],
+const apmIndexConfigs = [
+  ['sourcemaps', 'apm_oss.sourcemapIndices'],
+  ['errors', 'apm_oss.errorIndices'],
+  ['onboarding', 'apm_oss.onboardingIndices'],
+  ['spans', 'apm_oss.spanIndices'],
+  ['transactions', 'apm_oss.transactionIndices'],
+  ['metrics', 'apm_oss.metricsIndices'],
 ] as const;
 
-type ApmIndexConfigsPaths = typeof apmIndexConfigPaths[number][0];
+type ApmIndexConfigs = typeof apmIndexConfigs[number][0];
 type ApmIndicesSavedObjectAttributes = Partial<{
-  [Property in ApmIndexConfigsPaths]: string;
+  [Property in ApmIndexConfigs]: string;
 }>;
-type DeprecatedApmIndexConfigsPaths = typeof apmIndexConfigPaths[number][1];
+type DeprecatedApmIndexConfigPaths = typeof apmIndexConfigs[number][1];
 type DeprecatedApmIndicesSavedObjectAttributes = Partial<{
-  [Property in DeprecatedApmIndexConfigsPaths]: string;
+  [Property in DeprecatedApmIndexConfigPaths]: string;
 }>;
 
 export function updateApmOssIndexPaths(
   attributes: DeprecatedApmIndicesSavedObjectAttributes
 ) {
-  return apmIndexConfigPaths.reduce(
-    (attrs, [configPath, deprecatedConfigPath]) => {
-      const indexConfig: string | undefined = attributes[deprecatedConfigPath];
-      if (indexConfig) {
-        attrs[configPath] = indexConfig;
-      }
-      return attrs;
-    },
-    {} as ApmIndicesSavedObjectAttributes
-  );
+  return apmIndexConfigs.reduce((attrs, [configPath, deprecatedConfigPath]) => {
+    const indexConfig: string | undefined = attributes[deprecatedConfigPath];
+    if (indexConfig) {
+      attrs[configPath] = indexConfig;
+    }
+    return attrs;
+  }, {} as ApmIndicesSavedObjectAttributes);
 }

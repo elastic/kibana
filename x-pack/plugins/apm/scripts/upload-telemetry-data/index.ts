@@ -78,7 +78,12 @@ async function uploadData() {
     collectTelemetryParams: {
       logger: console as unknown as Logger,
       indices: {
-        ...config,
+        transactions: config['xpack.apm.indices.transactions'],
+        metrics: config['xpack.apm.indices.metrics'],
+        errors: config['xpack.apm.indices.errors'],
+        spans: config['xpack.apm.indices.spans'],
+        onboarding: config['xpack.apm.indices.onboarding'],
+        sourcemaps: config['xpack.apm.indices.sourcemaps'],
         apmCustomLinkIndex: '.apm-custom-links',
         apmAgentConfigurationIndex: '.apm-agent-configuration',
       },

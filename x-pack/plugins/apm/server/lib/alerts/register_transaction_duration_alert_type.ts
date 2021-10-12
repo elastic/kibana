@@ -115,12 +115,12 @@ export function registerTransactionDurationAlertType({
       // to prevent (likely) unnecessary blocking request
       // in rule execution
       const searchAggregatedTransactions =
-        config['xpack.apm.searchAggregatedTransactions'] !==
+        config.searchAggregatedTransactions !==
         SearchAggregatedTransactionSetting.never;
 
       const index = searchAggregatedTransactions
-        ? indices['xpack.apm.metricsIndices']
-        : indices['xpack.apm.transactionIndices'];
+        ? indices.metrics
+        : indices.transactions;
 
       const field = getTransactionDurationFieldForAggregatedTransactions(
         searchAggregatedTransactions

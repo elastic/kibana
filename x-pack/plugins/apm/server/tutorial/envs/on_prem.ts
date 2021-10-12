@@ -37,13 +37,7 @@ export function onPremInstructions({
   apmConfig,
   isFleetPluginEnabled,
 }: {
-  apmConfig: Pick<
-    APMConfig,
-    | 'xpack.apm.errorIndices'
-    | 'xpack.apm.transactionIndices'
-    | 'xpack.apm.metricsIndices'
-    | 'xpack.apm.onboardingIndices'
-  >;
+  apmConfig: APMConfig;
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema {
   const EDIT_CONFIG = createEditConfig();
@@ -144,7 +138,7 @@ export function onPremInstructions({
             }
           ),
           esHitsCheck: {
-            index: apmConfig['xpack.apm.onboardingIndices'],
+            index: apmConfig.indices.onboarding,
             query: {
               bool: {
                 filter: [
@@ -237,9 +231,9 @@ export function onPremInstructions({
           ),
           esHitsCheck: {
             index: [
-              apmConfig['xpack.apm.errorIndices'],
-              apmConfig['xpack.apm.transactionIndices'],
-              apmConfig['xpack.apm.metricsIndices'],
+              apmConfig.indices.errors,
+              apmConfig.indices.transactions,
+              apmConfig.indices.metrics,
             ],
             query: {
               bool: {

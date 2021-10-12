@@ -38,12 +38,12 @@ export const readKibanaConfig = () => {
   };
 
   return {
-    'xpack.apm.transactionIndices': 'apm-*',
-    'xpack.apm.metricsIndices': 'apm-*',
-    'xpack.apm.errorIndices': 'apm-*',
-    'xpack.apm.spanIndices': 'apm-*',
-    'xpack.apm.onboardingIndices': 'apm-*',
-    'xpack.apm.sourcemapIndices': 'apm-*',
+    'xpack.apm.indices.transactions': 'apm-*',
+    'xpack.apm.indices.metrics': 'apm-*',
+    'xpack.apm.indices.errors': 'apm-*',
+    'xpack.apm.indices.spans': 'apm-*',
+    'xpack.apm.indices.onboarding': 'apm-*',
+    'xpack.apm.indices.sourcemaps': 'apm-*',
     'elasticsearch.hosts': 'http://localhost:9200',
     ...loadedKibanaConfig,
     ...cliEsCredentials,

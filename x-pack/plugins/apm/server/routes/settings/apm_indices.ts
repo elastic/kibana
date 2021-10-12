@@ -45,12 +45,12 @@ const saveApmIndicesRoute = createApmServerRoute({
   },
   params: t.type({
     body: t.partial({
-      'xpack.apm.sourcemapIndices': t.string,
-      'xpack.apm.errorIndices': t.string,
-      'xpack.apm.onboardingIndices': t.string,
-      'xpack.apm.spanIndices': t.string,
-      'xpack.apm.transactionIndices': t.string,
-      'xpack.apm.metricsIndices': t.string,
+      sourcemaps: t.string,
+      errors: t.string,
+      onboarding: t.string,
+      spans: t.string,
+      transactions: t.string,
+      metrics: t.string,
     }),
   }),
   handler: async (resources) => {

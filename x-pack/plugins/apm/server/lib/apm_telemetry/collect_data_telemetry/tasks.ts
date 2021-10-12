@@ -78,7 +78,7 @@ export const tasks: TelemetryTask[] = [
         };
 
         const params = {
-          index: [indices['xpack.apm.transactionIndices']],
+          index: [indices.transactions],
           body: {
             size: 0,
             timeout,
@@ -138,7 +138,7 @@ export const tasks: TelemetryTask[] = [
       // fixed date range for reliable results
       const lastTransaction = (
         await search({
-          index: indices['xpack.apm.transactionIndices'],
+          index: indices.transactions,
           body: {
             query: {
               bool: {
@@ -253,10 +253,10 @@ export const tasks: TelemetryTask[] = [
 
       const response = await search({
         index: [
-          indices['xpack.apm.errorIndices'],
-          indices['xpack.apm.metricsIndices'],
-          indices['xpack.apm.spanIndices'],
-          indices['xpack.apm.transactionIndices'],
+          indices.errors,
+          indices.metrics,
+          indices.spans,
+          indices.transactions,
         ],
         body: {
           size: 0,
@@ -310,10 +310,10 @@ export const tasks: TelemetryTask[] = [
 
       const response = await search({
         index: [
-          indices['xpack.apm.errorIndices'],
-          indices['xpack.apm.metricsIndices'],
-          indices['xpack.apm.spanIndices'],
-          indices['xpack.apm.transactionIndices'],
+          indices.errors,
+          indices.metrics,
+          indices.spans,
+          indices.transactions,
         ],
         body: {
           size: 0,
@@ -345,7 +345,7 @@ export const tasks: TelemetryTask[] = [
     name: 'environments',
     executor: async ({ indices, search }) => {
       const response = await search({
-        index: [indices['xpack.apm.transactionIndices']],
+        index: [indices.transactions],
         body: {
           query: {
             bool: {
@@ -426,12 +426,12 @@ export const tasks: TelemetryTask[] = [
     name: 'processor_events',
     executor: async ({ indices, search }) => {
       const indicesByProcessorEvent = {
-        error: indices['xpack.apm.errorIndices'],
-        metric: indices['xpack.apm.metricsIndices'],
-        span: indices['xpack.apm.spanIndices'],
-        transaction: indices['xpack.apm.transactionIndices'],
-        onboarding: indices['xpack.apm.onboardingIndices'],
-        sourcemap: indices['xpack.apm.sourcemapIndices'],
+        error: indices.errors,
+        metric: indices.metrics,
+        span: indices.spans,
+        transaction: indices.transactions,
+        onboarding: indices.onboarding,
+        sourcemap: indices.sourcemaps,
       };
 
       type ProcessorEvent = keyof typeof indicesByProcessorEvent;
@@ -549,10 +549,10 @@ export const tasks: TelemetryTask[] = [
           return prevJob.then(async (data) => {
             const response = await search({
               index: [
-                indices['xpack.apm.errorIndices'],
-                indices['xpack.apm.spanIndices'],
-                indices['xpack.apm.metricsIndices'],
-                indices['xpack.apm.transactionIndices'],
+                indices.errors,
+                indices.spans,
+                indices.metrics,
+                indices.transactions,
               ],
               body: {
                 size: 0,
@@ -598,11 +598,7 @@ export const tasks: TelemetryTask[] = [
     name: 'versions',
     executor: async ({ search, indices }) => {
       const response = await search({
-        index: [
-          indices['xpack.apm.transactionIndices'],
-          indices['xpack.apm.spanIndices'],
-          indices['xpack.apm.errorIndices'],
-        ],
+        index: [indices.transactions, indices.spans, indices.errors],
         terminateAfter: 1,
         body: {
           query: {
@@ -647,7 +643,7 @@ export const tasks: TelemetryTask[] = [
     executor: async ({ search, indices }) => {
       const errorGroupsCount = (
         await search({
-          index: indices['xpack.apm.errorIndices'],
+          index: indices.errors,
           body: {
             size: 0,
             timeout,
@@ -683,7 +679,7 @@ export const tasks: TelemetryTask[] = [
 
       const transactionGroupsCount = (
         await search({
-          index: indices['xpack.apm.transactionIndices'],
+          index: indices.transactions,
           body: {
             size: 0,
             timeout,
@@ -719,7 +715,7 @@ export const tasks: TelemetryTask[] = [
 
       const tracesPerDayCount = (
         await search({
-          index: indices['xpack.apm.transactionIndices'],
+          index: indices.transactions,
           body: {
             query: {
               bool: {
@@ -741,11 +737,7 @@ export const tasks: TelemetryTask[] = [
 
       const servicesCount = (
         await search({
-          index: [
-            indices['xpack.apm.transactionIndices'],
-            indices['xpack.apm.errorIndices'],
-            indices['xpack.apm.metricsIndices'],
-          ],
+          index: [indices.transactions, indices.errors, indices.metrics],
           body: {
             size: 0,
             timeout,
@@ -811,11 +803,7 @@ export const tasks: TelemetryTask[] = [
         const data = await prevJob;
 
         const response = await search({
-          index: [
-            indices['xpack.apm.errorIndices'],
-            indices['xpack.apm.metricsIndices'],
-            indices['xpack.apm.transactionIndices'],
-          ],
+          index: [indices.errors, indices.metrics, indices.transactions],
           body: {
             size: 0,
             timeout,
@@ -1006,12 +994,12 @@ export const tasks: TelemetryTask[] = [
       const response = await indicesStats({
         index: [
           indices.apmAgentConfigurationIndex,
-          indices['xpack.apm.errorIndices'],
-          indices['xpack.apm.metricsIndices'],
-          indices['xpack.apm.onboardingIndices'],
-          indices['xpack.apm.sourcemapIndices'],
-          indices['xpack.apm.spanIndices'],
-          indices['xpack.apm.transactionIndices'],
+          indices.errors,
+          indices.metrics,
+          indices.onboarding,
+          indices.sourcemaps,
+          indices.spans,
+          indices.transactions,
         ],
       });
 

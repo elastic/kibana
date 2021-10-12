@@ -67,7 +67,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
         const indices = await getApmIndices();
         params = {
           ...searchServiceParams,
-          index: indices['xpack.apm.transactionIndices'],
+          index: indices.transactions,
           includeFrozen,
         };
 

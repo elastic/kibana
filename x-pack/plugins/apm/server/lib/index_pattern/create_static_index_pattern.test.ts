@@ -24,10 +24,10 @@ function getMockSavedObjectsClient(existingIndexPatternTitle: string) {
 
 const setup = {
   indices: {
-    'xpack.apm.transactionIndices': 'apm-*-transaction-*',
-    'xpack.apm.spanIndices': 'apm-*-span-*',
-    'xpack.apm.errorIndices': 'apm-*-error-*',
-    'xpack.apm.metricsIndices': 'apm-*-metrics-*',
+    transactions: 'apm-*-transaction-*',
+    spans: 'apm-*-span-*',
+    errors: 'apm-*-error-*',
+    metrics: 'apm-*-metrics-*',
   },
 } as unknown as Setup;
 
@@ -36,7 +36,7 @@ describe('createStaticIndexPattern', () => {
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
     await createStaticIndexPattern({
       setup,
-      config: { 'xpack.apm.autocreateApmIndexPattern': false } as APMConfig,
+      config: { autocreateApmIndexPattern: false } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -53,7 +53,7 @@ describe('createStaticIndexPattern', () => {
 
     await createStaticIndexPattern({
       setup,
-      config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -70,7 +70,7 @@ describe('createStaticIndexPattern', () => {
 
     await createStaticIndexPattern({
       setup,
-      config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -90,9 +90,7 @@ describe('createStaticIndexPattern', () => {
 
     await createStaticIndexPattern({
       setup,
-      config: {
-        'xpack.apm.autocreateApmIndexPattern': true,
-      } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -119,9 +117,7 @@ describe('createStaticIndexPattern', () => {
 
     await createStaticIndexPattern({
       setup,
-      config: {
-        'xpack.apm.autocreateApmIndexPattern': true,
-      } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });

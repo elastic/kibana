@@ -11,10 +11,10 @@ import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 describe('getApmIndexPatternTitle', () => {
   it('returns an index pattern title by combining existing indicies', () => {
     const title = getApmIndexPatternTitle({
-      'xpack.apm.transactionIndices': 'apm-*-transaction-*',
-      'xpack.apm.spanIndices': 'apm-*-span-*',
-      'xpack.apm.errorIndices': 'apm-*-error-*',
-      'xpack.apm.metricsIndices': 'apm-*-metrics-*',
+      transactions: 'apm-*-transaction-*',
+      spans: 'apm-*-span-*',
+      errors: 'apm-*-error-*',
+      metrics: 'apm-*-metrics-*',
     } as ApmIndicesConfig);
     expect(title).toBe(
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
@@ -23,10 +23,10 @@ describe('getApmIndexPatternTitle', () => {
 
   it('removes duplicates', () => {
     const title = getApmIndexPatternTitle({
-      'xpack.apm.transactionIndices': 'apm-*',
-      'xpack.apm.spanIndices': 'apm-*',
-      'xpack.apm.errorIndices': 'apm-*',
-      'xpack.apm.metricsIndices': 'apm-*',
+      transactions: 'apm-*',
+      spans: 'apm-*',
+      errors: 'apm-*',
+      metrics: 'apm-*',
     } as ApmIndicesConfig);
     expect(title).toBe('apm-*');
   });

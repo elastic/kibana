@@ -15,24 +15,12 @@ export const apmIndices: SavedObjectsType = {
   namespaceType: 'agnostic',
   mappings: {
     properties: {
-      'xpack.apm.sourcemapIndices': {
-        type: 'keyword',
-      },
-      'xpack.apm.errorIndices': {
-        type: 'keyword',
-      },
-      'xpack.apm.onboardingIndices': {
-        type: 'keyword',
-      },
-      'xpack.apm.spanIndices': {
-        type: 'keyword',
-      },
-      'xpack.apm.transactionIndices': {
-        type: 'keyword',
-      },
-      'xpack.apm.metricsIndices': {
-        type: 'keyword',
-      },
+      sourcemaps: { type: 'keyword' },
+      errors: { type: 'keyword' },
+      onboarding: { type: 'keyword' },
+      spans: { type: 'keyword' },
+      transactions: { type: 'keyword' },
+      metrics: { type: 'keyword' },
     },
   },
   management: {

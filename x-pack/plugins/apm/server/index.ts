@@ -46,18 +46,18 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
-  transactionIndices: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
-  spanIndices: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
-  errorIndices: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
-  metricsIndices: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
-  sourcemapIndices: schema.string({ defaultValue: 'apm-*' }),
-  onboardingIndices: schema.string({ defaultValue: 'apm-*' }),
-  indexPattern: schema.string({ defaultValue: 'apm-*' }),
-  fleetMode: schema.boolean({ defaultValue: true }),
+  indices: schema.object({
+    transactions: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
+    spans: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
+    errors: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
+    metrics: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
+    sourcemaps: schema.string({ defaultValue: 'apm-*' }),
+    onboarding: schema.string({ defaultValue: 'apm-*' }),
+  }),
 });
 
 // plugin config
-export const config: PluginConfigDescriptor<APMXPackConfig> = {
+export const config: PluginConfigDescriptor<APMConfig> = {
   deprecations: ({
     deprecate,
     renameFromRoot,
@@ -67,13 +67,13 @@ export const config: PluginConfigDescriptor<APMXPackConfig> = {
     deprecate('enabled', '8.0.0'),
     renameFromRoot(
       'apm_oss.transactionIndices',
-      'xpack.apm.transactionIndices'
+      'xpack.apm.indices.transactions'
     ),
-    renameFromRoot('apm_oss.spanIndices', 'xpack.apm.spanIndices'),
-    renameFromRoot('apm_oss.errorIndices', 'xpack.apm.errorIndices'),
-    renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.metricsIndices'),
-    renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.sourcemapIndices'),
-    renameFromRoot('apm_oss.onboardingIndices', 'xpack.apm.onboardingIndices'),
+    renameFromRoot('apm_oss.spanIndices', 'xpack.apm.indices.spans'),
+    renameFromRoot('apm_oss.errorIndices', 'xpack.apm.indices.errors'),
+    renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.indices.metrics'),
+    renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.indices.sourcemaps'),
+    renameFromRoot('apm_oss.onboardingIndices', 'xpack.apm.indices.onboarding'),
     deprecateFromRoot('apm_oss.enabled', '8.0.0'),
     unusedFromRoot('apm_oss.fleetMode'),
     unusedFromRoot('apm_oss.indexPattern'),
@@ -94,44 +94,7 @@ export const config: PluginConfigDescriptor<APMXPackConfig> = {
   schema: configSchema,
 };
 
-export type APMXPackConfig = TypeOf<typeof configSchema>;
-export type APMConfig = ReturnType<typeof mergeConfigs>;
-
-// plugin config and ui indices settings
-export function mergeConfigs(apmConfig: APMXPackConfig) {
-  const mergedConfig = {
-    'xpack.apm.transactionIndices': apmConfig.transactionIndices,
-    'xpack.apm.spanIndices': apmConfig.spanIndices,
-    'xpack.apm.errorIndices': apmConfig.errorIndices,
-    'xpack.apm.metricsIndices': apmConfig.metricsIndices,
-    'xpack.apm.sourcemapIndices': apmConfig.sourcemapIndices,
-    'xpack.apm.onboardingIndices': apmConfig.onboardingIndices,
-    'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
-    'xpack.apm.serviceMapFingerprintBucketSize':
-      apmConfig.serviceMapFingerprintBucketSize,
-    'xpack.apm.serviceMapTraceIdBucketSize':
-      apmConfig.serviceMapTraceIdBucketSize,
-    'xpack.apm.serviceMapFingerprintGlobalBucketSize':
-      apmConfig.serviceMapFingerprintGlobalBucketSize,
-    'xpack.apm.serviceMapTraceIdGlobalBucketSize':
-      apmConfig.serviceMapTraceIdGlobalBucketSize,
-    'xpack.apm.serviceMapMaxTracesPerRequest':
-      apmConfig.serviceMapMaxTracesPerRequest,
-    'xpack.apm.ui.enabled': apmConfig.ui.enabled,
-    'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
-    'xpack.apm.ui.transactionGroupBucketSize':
-      apmConfig.ui.transactionGroupBucketSize,
-    'xpack.apm.autocreateApmIndexPattern': apmConfig.autocreateApmIndexPattern,
-    'xpack.apm.telemetryCollectionEnabled':
-      apmConfig.telemetryCollectionEnabled,
-    'xpack.apm.searchAggregatedTransactions':
-      apmConfig.searchAggregatedTransactions,
-    'xpack.apm.metricsInterval': apmConfig.metricsInterval,
-    'xpack.apm.agent.migrations.enabled': apmConfig.agent.migrations.enabled,
-  };
-
-  return mergedConfig;
-}
+export type APMConfig = TypeOf<typeof configSchema>;
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);

@@ -34,12 +34,12 @@ async function getApmIndicesSavedObject(
 
 export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
   return {
-    'xpack.apm.sourcemapIndices': config['xpack.apm.sourcemapIndices'],
-    'xpack.apm.errorIndices': config['xpack.apm.errorIndices'],
-    'xpack.apm.onboardingIndices': config['xpack.apm.onboardingIndices'],
-    'xpack.apm.spanIndices': config['xpack.apm.spanIndices'],
-    'xpack.apm.transactionIndices': config['xpack.apm.transactionIndices'],
-    'xpack.apm.metricsIndices': config['xpack.apm.metricsIndices'],
+    sourcemaps: config.indices.sourcemaps,
+    errors: config.indices.errors,
+    onboarding: config.indices.onboarding,
+    spans: config.indices.spans,
+    transactions: config.indices.transactions,
+    metrics: config.indices.metrics,
     // system indices, not configurable
     apmAgentConfigurationIndex: '.apm-agent-configuration',
     apmCustomLinkIndex: '.apm-custom-link',
@@ -64,15 +64,6 @@ export async function getApmIndices({
   }
 }
 
-const APM_UI_INDICES: Array<keyof ApmIndicesConfig> = [
-  'xpack.apm.sourcemapIndices',
-  'xpack.apm.errorIndices',
-  'xpack.apm.onboardingIndices',
-  'xpack.apm.spanIndices',
-  'xpack.apm.transactionIndices',
-  'xpack.apm.metricsIndices',
-];
-
 export async function getApmIndexSettings({
   context,
   config,
@@ -91,8 +82,12 @@ export async function getApmIndexSettings({
   }
   const apmIndicesConfig = getApmIndicesConfig(config);
 
-  return APM_UI_INDICES.map((configurationName) => ({
-    configurationName,
+  const apmIndices = Object.keys(config.indices) as Array<
+    keyof typeof config.indices
+  >;
+
+  return apmIndices.map((configurationName) => ({
+    configurationName: configurationName,
     defaultValue: apmIndicesConfig[configurationName], // value defined in kibana[.dev].yml
     savedValue: apmIndicesSavedObject[configurationName], // value saved via Saved Objects service
   }));

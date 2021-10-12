@@ -36,7 +36,7 @@ function unregisterAll() {
   unregisterDataHandler({ appName: 'synthetics' });
 }
 
-const sampleAPMIndices = { 'xpack.apm.transactionIndices': 'apm-*' } as ApmIndicesConfig;
+const sampleAPMIndices = { transactions: 'apm-*' } as ApmIndicesConfig;
 
 const withCore = makeDecorator({
   name: 'withCore',

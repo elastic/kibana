@@ -17,8 +17,10 @@ export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<any>;
 
   const mockedConfig$ = of({
-    'xpack.apm.errorIndices': 'apm-*',
-    'xpack.apm.transactionIndices': 'apm-*',
+    indices: {
+      errors: 'apm-*',
+      transactions: 'apm-*',
+    },
   } as APMConfig);
 
   const loggerMock = {
