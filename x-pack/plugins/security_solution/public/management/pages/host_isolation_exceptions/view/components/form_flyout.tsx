@@ -16,7 +16,6 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   CreateExceptionListItemSchema,
@@ -34,7 +33,13 @@ import {
   isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../../state/async_resource_state';
-import { getUpdateErrorMessage } from '../../../event_filters/view/translations';
+import {
+  getCreateErrorMessage,
+  getCreationSuccessMessage,
+  getLoadErrorMessage,
+  getUpdateErrorMessage,
+  getUpdateSuccessMessage,
+} from './translations';
 import { HostIsolationExceptionsPageAction } from '../../store/action';
 import { getCurrentLocation, getExceptionToEdit, getFormStatusFailure } from '../../store/selector';
 import { createEmptyHostIsolationException } from '../../utils';
@@ -43,7 +48,6 @@ import {
   useHostIsolationExceptionsSelector,
 } from '../hooks';
 import { HostIsolationExceptionsForm } from './form';
-import { getCreateErrorMessage, getLoadErrorMessage } from './translations';
 
 export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
@@ -105,8 +109,9 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
     }
   }, [exception, location.show]);
 
+  // handle creation and edit success
   useEffect(() => {
-    if (creationSuccessful) {
+    if (creationSuccessful && exception?.name) {
       onCancel();
       dispatch({
         type: 'hostIsolationExceptionsFormStateChanged',
@@ -115,36 +120,32 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
         },
       });
       if (exception?.item_id) {
-        toasts.addSuccess(
-          i18n.translate(
-            'xpack.securitySolution.hostIsolationExceptions.form.editingSuccessToastTitle',
-            {
-              defaultMessage: '"{name}" has been updated.',
-              values: { name: exception?.name },
-            }
-          )
-        );
+        toasts.addSuccess(getUpdateSuccessMessage(exception.name));
       } else {
-        toasts.addSuccess(
-          i18n.translate(
-            'xpack.securitySolution.hostIsolationExceptions.form.creationSuccessToastTitle',
-            {
-              defaultMessage: '"{name}" has been added to the host isolation exceptions list.',
-              values: { name: exception?.name },
-            }
-          )
-        );
+        toasts.addSuccess(getCreationSuccessMessage(exception.name));
       }
     }
   }, [creationSuccessful, dispatch, exception?.item_id, exception?.name, onCancel, toasts]);
 
+  // handle load tem to edit error
+  useEffect(() => {
+    if (creationFailure && location.show === 'edit' && !exception?.item_id) {
+      toasts.addWarning(getLoadErrorMessage(creationFailure));
+      history.replace(getHostIsolationExceptionsListPath(omit(location, ['show', 'id'])));
+      dispatch({
+        type: 'hostIsolationExceptionsFormStateChanged',
+        payload: {
+          type: 'UninitialisedResourceState',
+        },
+      });
+    }
+  }, [creationFailure, dispatch, exception?.item_id, history, location, toasts]);
+
+  // handle edit or creation error
   useEffect(() => {
     if (creationFailure) {
       // failed to load the entry
-      if (location.show === 'edit' && !exception?.item_id) {
-        toasts.addWarning(getLoadErrorMessage(creationFailure));
-        history.replace(getHostIsolationExceptionsListPath(omit(location, ['show', 'id'])));
-      } else if (exception?.item_id) {
+      if (exception?.item_id) {
         toasts.addDanger(getUpdateErrorMessage(creationFailure));
       } else {
         toasts.addDanger(getCreateErrorMessage(creationFailure));

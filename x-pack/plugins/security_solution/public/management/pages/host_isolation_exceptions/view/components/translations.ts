@@ -107,3 +107,23 @@ export const getLoadErrorMessage = (getError: ServerApiError) => {
     }
   );
 };
+
+export const getUpdateSuccessMessage = (name: string) => {
+  return i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.form.editingSuccessToastTitle',
+    {
+      defaultMessage: '"{name}" has been updated.',
+      values: { name },
+    }
+  );
+};
+
+export const getCreationSuccessMessage = (name: string) => {
+  return i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.form.creationSuccessToastTitle',
+    {
+      defaultMessage: '"{name}" has been added to the host isolation exceptions list.',
+      values: { name },
+    }
+  );
+};
