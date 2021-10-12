@@ -47,7 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(scheduleResponse.status).eql(200);
 
       log.info(`checking for the first report instance`);
-      await retry.tryForTime(25000, async () => {
+      // takes from 1 to 10 seconds in local development environment
+      await retry.tryForTime(60000, async () => {
         expect(await countReportDocuments()).eql(1);
         log.info(`found the first report instance`);
       });
@@ -57,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
       await new Promise((resolve) => setTimeout(resolve, 60000));
 
       log.info(`checking for the second report instance`);
-      await retry.tryForTime(25000, async () => {
+      await retry.tryForTime(60000, async () => {
         expect(await countReportDocuments()).eql(2);
         log.info(`found the second report instance`);
       });
