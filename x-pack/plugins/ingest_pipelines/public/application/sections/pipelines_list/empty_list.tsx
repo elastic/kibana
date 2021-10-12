@@ -81,11 +81,11 @@ export const EmptyList: FunctionComponent = () => {
                 fill
                 iconSide="right"
                 iconType="arrowDown"
-                data-test-subj="createPipelineDropdown"
-                key="createPipelineDropdown"
+                data-test-subj="emptyStateCreatePipelineDropdown"
+                key="emptyStateCreatePipelineDropdown"
                 onClick={() => setShowPopover((previousBool) => !previousBool)}
               >
-                {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
+                {i18n.translate('xpack.ingestPipelines.list.table.emptyCreatePipelineDropdownLabel', {
                   defaultMessage: 'Create pipeline',
                 })}
               </EuiButton>
