@@ -53,6 +53,9 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "attempts": 0,
             "retryAt": null,
+            "scope": Array [
+              "scheduled-reports",
+            ],
             "startedAt": null,
             "state": Object {},
             "status": "idle",
@@ -129,7 +132,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(scheduleResponse.status).eql(200);
       const schedule = JSON.parse(scheduleResponse.text).schedule;
       const scheduleId = schedule.id;
-      expect(schedule.user).empty();
+      expect(schedule.user).eql(undefined);
+
       expect(schedule.params.created_by).to.eql(false);
 
       log.info(`testing that schedule can be deleted`);
