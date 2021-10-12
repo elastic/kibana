@@ -55,7 +55,7 @@ const i18nTexts = {
   reindexCanceledText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.reindex.reindexCanceledText',
     {
-      defaultMessage: 'Reindex canceled',
+      defaultMessage: 'Reindex cancelled',
     }
   ),
   reindexPausedText: i18n.translate(
@@ -158,7 +158,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" color="danger" />
+            <EuiIcon type="indexClose" color="warning" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexCanceledText}</EuiText>

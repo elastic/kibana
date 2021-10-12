@@ -13,6 +13,13 @@ export enum LoadingState {
   Error,
 }
 
+export enum CancelLoadingState {
+  Requested,
+  Loading,
+  Success,
+  Error,
+}
+
 export type DeprecationTableColumns =
   | 'type'
   | 'index'

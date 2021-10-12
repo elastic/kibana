@@ -34,7 +34,7 @@ const StepStatus: React.FunctionComponent<{ status: STATUS; idx: number }> = ({ 
   } else if (status === 'cancelled') {
     return (
       <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-cancelled">
-        <EuiIcon type="cross" size="s" />
+        <EuiIcon type="indexClose" />
       </span>
     );
   } else if (status === 'failed') {
@@ -56,11 +56,7 @@ const Step: React.FunctionComponent<StepProgressStep & { idx: number }> = ({
 }) => {
   const titleClassName = classNames('upgStepProgress__title', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    'upgStepProgress__title--currentStep':
-      status === 'inProgress' ||
-      status === 'paused' ||
-      status === 'failed' ||
-      status === 'cancelled',
+    'upgStepProgress__title--currentStep': status === 'inProgress',
   });
 
   return (

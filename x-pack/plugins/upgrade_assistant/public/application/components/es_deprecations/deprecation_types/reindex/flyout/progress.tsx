@@ -18,7 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
-import { LoadingState } from '../../../../types';
+import { CancelLoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { StepProgress, StepProgressStep } from './step_progress';
 import { getReindexProgressLabel } from '../../../../../lib/utils';
@@ -44,55 +44,71 @@ const CancelReindexingDocumentsButton: React.FunctionComponent<{
   reindexState: ReindexState;
   cancelReindex: () => void;
 }> = ({ reindexState: { lastCompletedStep, status, cancelLoadingState }, cancelReindex }) => {
-  let cancelText: React.ReactNode;
-  switch (cancelLoadingState) {
-    case LoadingState.Loading:
-      cancelText = (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancellingLabel"
-          defaultMessage="Cancelling…"
-        />
-      );
-      break;
-    case LoadingState.Success:
-      cancelText = (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
-          defaultMessage="Cancelled"
-        />
-      );
-      break;
-    case LoadingState.Error:
-      cancelText = (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
-          defaultMessage="Could not cancel"
-        />
-      );
-      break;
-    default:
-      cancelText = (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelLabel"
-          defaultMessage="Cancel"
-        />
-      );
+  if (status === ReindexStatus.cancelled) {
+    return (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
+        defaultMessage="Cancelled"
+      />
+    );
   }
+  if (
+    status === ReindexStatus.inProgress &&
+    (lastCompletedStep === ReindexStep.newIndexCreated ||
+      lastCompletedStep === ReindexStep.reindexStarted)
+  ) {
+    let cancelText: React.ReactNode;
+    switch (cancelLoadingState) {
+      case CancelLoadingState.Requested:
+      case CancelLoadingState.Loading:
+        cancelText = (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancellingLabel"
+            defaultMessage="Cancelling…"
+          />
+        );
+        break;
+      case CancelLoadingState.Success:
+        cancelText = (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
+            defaultMessage="Cancelled"
+          />
+        );
+        break;
+      case CancelLoadingState.Error:
+        cancelText = (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
+            defaultMessage="Could not cancel"
+          />
+        );
+        break;
+      default:
+        cancelText = (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelLabel"
+            defaultMessage="Cancel"
+          />
+        );
+    }
 
-  return (
-    <EuiButtonEmpty
-      data-test-subj="cancelReindexingDocumentsButton"
-      onClick={cancelReindex}
-      disabled={
-        cancelLoadingState === LoadingState.Loading ||
-        status !== ReindexStatus.inProgress ||
-        lastCompletedStep !== ReindexStep.reindexStarted
-      }
-      isLoading={cancelLoadingState === LoadingState.Loading}
-    >
-      {cancelText}
-    </EuiButtonEmpty>
-  );
+    return (
+      <EuiButtonEmpty
+        size="s"
+        data-test-subj="cancelReindexingDocumentsButton"
+        onClick={cancelReindex}
+        isDisabled={
+          cancelLoadingState === CancelLoadingState.Requested ||
+          cancelLoadingState === CancelLoadingState.Loading ||
+          lastCompletedStep !== ReindexStep.reindexStarted
+        }
+      >
+        {cancelText}
+      </EuiButtonEmpty>
+    );
+  }
+  return null;
 };
 
 const orderedSteps = Object.values(ReindexStep).sort() as number[];
@@ -153,12 +169,9 @@ export const ReindexProgress: React.FunctionComponent<{
             defaultMessage="Reindexing documents"
           />
         </EuiFlexItem>
-        {(lastCompletedStep === ReindexStep.newIndexCreated ||
-          lastCompletedStep === ReindexStep.reindexStarted) && (
-          <EuiFlexItem grow={false}>
-            <CancelReindexingDocumentsButton {...props} />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <CancelReindexingDocumentsButton {...props} />
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
   } as StepProgressStep;
