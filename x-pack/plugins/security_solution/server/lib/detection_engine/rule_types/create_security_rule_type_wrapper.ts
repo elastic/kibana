@@ -14,7 +14,7 @@ import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { toError } from '@kbn/securitysolution-list-api';
 
-import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
+import { createPersistenceRuleTypeWrapper } from '../../../../../rule_registry/server';
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
 import {
   checkPrivilegesFromEsClient,
@@ -22,10 +22,14 @@ import {
   getRuleRangeTuples,
   hasReadIndexPrivileges,
   hasTimestampFields,
-  isMachineLearningParams,
+  isEqlParams,
+  isQueryParams,
+  isSavedQueryParams,
+  isThreatParams,
+  isThresholdParams,
 } from '../signals/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
-import { CreateSecurityRuleTypeFactory } from './types';
+import { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
 import {
   NotificationRuleTypeParams,
@@ -37,13 +41,14 @@ import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './fact
 import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
+import { AlertAttributes } from '../signals/types';
 
 /* eslint-disable complexity */
-export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
+export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   ({ lists, logger, config, ruleDataClient, eventLogService }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
-    const persistenceRuleType = createPersistenceRuleTypeFactory({ ruleDataClient, logger });
+    const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
     return persistenceRuleType({
       ...type,
       async executor(options) {
@@ -69,7 +74,10 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           eventLogService,
           underlyingClient: config.ruleExecutionLog.underlyingClient,
         });
-        const ruleSO = await savedObjectsClient.get('alert', alertId);
+        const ruleSO = await savedObjectsClient.get<AlertAttributes<typeof params>>(
+          'alert',
+          alertId
+        );
 
         const {
           actions,
@@ -107,7 +115,16 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
         // move this collection of lines into a function in utils
         // so that we can use it in create rules route, bulk, etc.
         try {
-          if (!isMachineLearningParams(params)) {
+          // Typescript 4.1.3 can't figure out that `!isMachineLearningParams(params)` also excludes the only rule type
+          // of rule params that doesn't include `params.index`, but Typescript 4.3.5 does compute the stricter type correctly.
+          // When we update Typescript to >= 4.3.5, we can replace this logic with `!isMachineLearningParams(params)` again.
+          if (
+            isEqlParams(params) ||
+            isThresholdParams(params) ||
+            isQueryParams(params) ||
+            isSavedQueryParams(params) ||
+            isThreatParams(params)
+          ) {
             const index = params.index;
             const hasTimestampOverride = !!timestampOverride;
 
@@ -254,7 +271,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
               createdSignals,
               createdSignalsCount: createdSignals.length,
               errors: result.errors.concat(runResult.errors),
-              lastLookbackDate: runResult.lastLookbackDate,
+              lastLookbackDate: runResult.lastLookBackDate,
               searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
               state: runState,
               success: result.success && runResult.success,
