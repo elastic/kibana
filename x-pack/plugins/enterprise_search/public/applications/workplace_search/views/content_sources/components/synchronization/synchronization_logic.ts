@@ -204,7 +204,11 @@ export const SynchronizationLogic = kea<
           const schedule = cloneDeep(state);
           const blockedWindows = schedule.blockedWindows;
           blockedWindows!.splice(index, 1);
-          schedule.blockedWindows = blockedWindows;
+          if (blockedWindows!.length > 0) {
+            schedule.blockedWindows = blockedWindows;
+          } else {
+            delete schedule.blockedWindows;
+          }
           return schedule;
         },
         setBlockedTimeWindow: (state, { index, prop, value }) => {

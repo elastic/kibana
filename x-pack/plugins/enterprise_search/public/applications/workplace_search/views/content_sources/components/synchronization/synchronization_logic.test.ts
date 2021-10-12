@@ -135,11 +135,21 @@ describe('SynchronizationLogic', () => {
       });
     });
 
-    it('removeBlockedWindow', () => {
-      SynchronizationLogic.actions.addBlockedWindow();
-      SynchronizationLogic.actions.removeBlockedWindow(0);
+    describe('removeBlockedWindow', () => {
+      it('removes window', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.removeBlockedWindow(0);
 
-      expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([]);
+        expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([emptyBlockedWindow]);
+      });
+
+      it('returns "undefined" when last window removed', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.removeBlockedWindow(0);
+
+        expect(SynchronizationLogic.values.schedule.blockedWindows).toBeUndefined();
+      });
     });
   });
 
