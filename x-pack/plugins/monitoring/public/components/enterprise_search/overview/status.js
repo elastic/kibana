@@ -13,6 +13,13 @@ import { i18n } from '@kbn/i18n';
 export function Status({ stats }) {
   const metrics = [
     {
+      label: i18n.translate('xpack.monitoring.entSearch.overview.instances', {
+        defaultMessage: 'Instances',
+      }),
+      value: formatMetric(stats.totalInstances, 'int_commas'),
+      'data-test-subj': 'totalInstances',
+    },
+    {
       label: i18n.translate('xpack.monitoring.entSearch.overview.appSearchEngines', {
         defaultMessage: 'App Search Engines',
       }),
