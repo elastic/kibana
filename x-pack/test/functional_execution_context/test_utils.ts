@@ -40,7 +40,7 @@ export async function assertLogContains({
   retry: RetryService;
 }): Promise<void> {
   // logs are written to disk asynchronously. I sacrificed performance to reduce flakiness.
-  await retry.waitForWithTimeout(description, 60_000, async () => {
+  await retry.waitFor(description, async () => {
     const logsStr = await Fs.readFile(logFilePath, 'utf-8');
     const normalizedRecords = logsStr
       .split(endOfLine)
