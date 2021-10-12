@@ -133,37 +133,47 @@ describe('ServiceNow API', () => {
     });
 
     it('returns an error when the response fails', async () => {
-      const abortCtrl = new AbortController();
-      fetchMock.mockResolvedValueOnce(applicationInfoResponse);
+      expect.assertions(1);
 
-      try {
-        await getAppInfo({
+      const abortCtrl = new AbortController();
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: async () => applicationInfoResponse.json,
+      });
+
+      await expect(() =>
+        getAppInfo({
           signal: abortCtrl.signal,
           apiUrl: 'https://example.com',
           username: 'test',
           password: 'test',
           actionTypeId: '.servicenow',
-        });
-      } catch (e) {
-        expect(e.message).toContain('Received status:');
-      }
+        })
+      ).rejects.toThrow('Received status:');
     });
 
     it('returns an error when parsing the json fails', async () => {
-      const abortCtrl = new AbortController();
-      fetchMock.mockResolvedValueOnce(applicationInfoResponse);
+      expect.assertions(1);
 
-      try {
-        await getAppInfo({
+      const abortCtrl = new AbortController();
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => {
+          throw new Error('bad');
+        },
+      });
+
+      await expect(() =>
+        getAppInfo({
           signal: abortCtrl.signal,
           apiUrl: 'https://example.com',
           username: 'test',
           password: 'test',
           actionTypeId: '.servicenow',
-        });
-      } catch (e) {
-        expect(e.message).toContain('bad');
-      }
+        })
+      ).rejects.toThrow('bad');
     });
   });
 });
