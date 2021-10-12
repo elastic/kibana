@@ -1913,6 +1913,34 @@ describe('successful migrations', () => {
         ],
       });
     });
+
+    test('extracts references from geo-containment alerts', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: '.geo-containment',
+          params: {
+            indexId: 'foo',
+            boundaryIndexId: 'bar',
+          },
+        }),
+      };
+
+      const migratedAlert = migration7160(alert, migrationContext);
+
+      expect(migratedAlert.references).toEqual([
+        { id: 'foo', name: 'tracked_index_foo', type: 'index-pattern' },
+        { id: 'bar', name: 'boundary_index_bar', type: 'index-pattern' },
+      ]);
+
+      expect(migratedAlert.attributes.params).toEqual({
+        boundaryIndexRef: 'boundary_index_bar',
+        indexRef: 'tracked_index_foo',
+      });
+
+      expect(migratedAlert.attributes.params.indexId).toEqual(undefined);
+      expect(migratedAlert.attributes.params.boundaryIndexId).toEqual(undefined);
+    });
   });
 
   describe('8.0.0', () => {
