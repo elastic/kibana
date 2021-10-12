@@ -148,13 +148,14 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     [getHref, isLoading, agentPolicy, policyId]
   );
 
-  const onCancelEnrollment = useCallback(
-    () =>
-      routeState && routeState.onDoneNavigateTo && isFleetReady
-        ? () => navigateToApp(routeState.onDoneNavigateTo![0], routeState.onDoneNavigateTo![1])
-        : undefined,
-    [isFleetReady, navigateToApp, routeState]
-  );
+  const onCancelEnrollment = useMemo(() => {
+    if (routeState && routeState.onDoneNavigateTo && isFleetReady) {
+      const [appId, options] = routeState.onDoneNavigateTo;
+      return () => navigateToApp(appId, options);
+    }
+
+    return undefined;
+  }, [isFleetReady, navigateToApp, routeState]);
 
   const addAgentLink = (
     <EuiLink
