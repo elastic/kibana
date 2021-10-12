@@ -87,7 +87,7 @@ export async function getApmIndexSettings({
   >;
 
   return apmIndices.map((configurationName) => ({
-    configurationName: configurationName,
+    configurationName,
     defaultValue: apmIndicesConfig[configurationName], // value defined in kibana[.dev].yml
     savedValue: apmIndicesSavedObject[configurationName], // value saved via Saved Objects service
   }));

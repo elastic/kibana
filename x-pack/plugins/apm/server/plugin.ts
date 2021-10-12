@@ -18,8 +18,7 @@ import { isEmpty, mapValues } from 'lodash';
 import { SavedObjectsClient } from '../../../../src/core/server';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
-import { /*APMConfig,*/ APMConfig, APM_SERVER_FEATURE_ID } from '.';
-// import { getFullPathConfigs } from './index';
+import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
@@ -73,18 +72,11 @@ export class APMPlugin
   ) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMConfig>();
-    // const mergedConfig$ = config$.pipe(
-    //   map((apmConfig) => getFullPathConfigs(apmConfig))
-    // );
 
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
 
-    // const currentConfig = getFullPathConfigs(
-    //   this.initContext.config.get<APMConfig>()
-    // );
-    // this.currentConfig = currentConfig;
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
 
@@ -92,11 +84,9 @@ export class APMPlugin
       plugins.taskManager &&
       plugins.usageCollection &&
       currentConfig.telemetryCollectionEnabled
-      // currentConfig['xpack.apm.telemetryCollectionEnabled']
     ) {
       createApmTelemetry({
         core,
-        // config$: mergedConfig$,
         config$,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
