@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback, useContext } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerMetric,
@@ -29,7 +29,7 @@ export interface MetricExplorerViewState {
 
 export const useMetricsExplorerState = (
   source: MetricsSourceConfigurationProperties,
-  derivedIndexPattern: IIndexPattern,
+  derivedIndexPattern: DataViewBase,
   shouldLoadImmediately = true
 ) => {
   const [refreshSignal, setRefreshSignal] = useState(0);
