@@ -95,6 +95,8 @@ export async function getInUseTotalCount(
   countTotal: number;
   countByType: Record<string, number>;
   countByAlertHistoryConnectorType: number;
+  countByNamespace: Record<string, number>;
+  countEmailByService: Record<string, number>;
 }> {
   const scriptedMetric = {
     scripted_metric: {
@@ -262,7 +264,7 @@ export async function getInUseTotalCount(
   const bulkFilter = Object.entries(aggs.connectorIds).map(([key]) => ({
     id: key,
     type: 'action',
-    fields: ['id', 'actionTypeId'],
+    fields: ['id', 'actionTypeId', 'namespaces', 'config'],
   }));
   const actions = await actionsBulkGet(bulkFilter);
   const countByActionTypeId = actions.saved_objects.reduce(
@@ -275,6 +277,29 @@ export async function getInUseTotalCount(
     },
     {}
   );
+
+  const countByNamespace = actions.saved_objects.reduce(
+    (namespaceCount: Record<string, number>, action) => {
+      action.namespaces?.forEach((namespace) => {
+        const namespaceCl = replaceFirstAndLastDotSymbols(namespace);
+        const currentCount =
+          namespaceCount[namespaceCl] !== undefined ? namespaceCount[namespaceCl] : 0;
+        namespaceCount[namespaceCl] = currentCount + 1;
+      });
+      return namespaceCount;
+    },
+    {}
+  );
+
+  const countEmailByService = actions.saved_objects
+    .filter((action) => action.attributes.actionTypeId === '.email')
+    .reduce((emailServiceCount: Record<string, number>, action) => {
+      const service = (action.attributes.config?.service ?? 'other') as string;
+      const currentCount =
+        emailServiceCount[service] !== undefined ? emailServiceCount[service] : 0;
+      emailServiceCount[service] = currentCount + 1;
+      return emailServiceCount;
+    }, {});
 
   let preconfiguredAlertHistoryConnectors = 0;
   const preconfiguredActionsRefs: Array<{
@@ -294,6 +319,8 @@ export async function getInUseTotalCount(
     countTotal: aggs.total + (preconfiguredActionsAggs?.total ?? 0),
     countByType: countByActionTypeId,
     countByAlertHistoryConnectorType: preconfiguredAlertHistoryConnectors,
+    countEmailByService,
+    countByNamespace,
   };
 }
 

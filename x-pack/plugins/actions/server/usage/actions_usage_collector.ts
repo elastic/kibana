@@ -28,6 +28,20 @@ const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
   __teams: { type: 'long' },
 };
 
+const byServiceProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_active_email_connectors_by_service_type'] =
+  {
+    DYNAMIC_KEY: { type: 'long' },
+    // Known services:
+    exchange: { type: 'long' },
+    gmail: { type: 'long' },
+    outlook365: { type: 'long' },
+    __swimlane: { type: 'long' },
+  };
+
+const byNamespaceSchema: MakeSchemaFrom<ActionsUsage>['count_active_by_namespace'] = {
+  DYNAMIC_KEY: { type: 'long' },
+};
+
 export function createActionsUsageCollector(
   usageCollection: UsageCollectionSetup,
   config: ActionsConfig,
@@ -54,6 +68,8 @@ export function createActionsUsageCollector(
       },
       count_by_type: byTypeSchema,
       count_active_by_type: byTypeSchema,
+      count_active_email_connectors_by_service_type: byServiceProviderTypeSchema,
+      count_active_by_namespace: byNamespaceSchema,
     },
     fetch: async () => {
       try {
@@ -73,6 +89,8 @@ export function createActionsUsageCollector(
           count_active_alert_history_connectors: 0,
           count_active_by_type: {},
           count_by_type: {},
+          count_active_email_connectors_by_service_type: {},
+          count_active_by_namespace: {},
         };
       }
     },

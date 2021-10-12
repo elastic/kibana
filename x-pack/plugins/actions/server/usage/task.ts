@@ -48,7 +48,7 @@ function registerActionsTelemetryTask(
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
-      timeout: '5m',
+      timeout: '5s',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, preconfiguredActions),
     },
   });
@@ -109,6 +109,8 @@ export function telemetryTaskRunner(
                 count_active_total: totalInUse.countTotal,
                 count_active_by_type: totalInUse.countByType,
                 count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
+                count_active_email_connectors_by_service_type: totalInUse.countEmailByService,
+                count_active_by_namespace: totalInUse.countByNamespace,
               },
               runAt: getNextMidnight(),
             };
@@ -126,5 +128,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
+  return moment().add(1, 'm').startOf('m').toDate();
 }

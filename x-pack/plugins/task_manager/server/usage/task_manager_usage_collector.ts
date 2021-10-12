@@ -52,6 +52,7 @@ export function createTaskManagerUsageCollector(
           },
         },
         task_type_exclusion: excludeTaskTypes,
+        failed_tasks: 0,
       };
     },
     schema: {
@@ -79,6 +80,7 @@ export function createTaskManagerUsageCollector(
         },
       },
       task_type_exclusion: { type: 'array', items: { type: 'keyword' } },
+      failed_tasks: { type: 'long' },
     },
   });
 }
