@@ -9,7 +9,6 @@
 - [Queries and data model](./dev_docs/apm_queries.md)
 - [Telemetry](./dev_docs/telemetry.md)
 - [Routing and Linking](./dev_docs/routing_and_linking.md)
-- [Features flags](./dev_docs/feature_flags.md)
 
 **Tooling**
 - [VSCode setup instructions](./dev_docs/vscode_setup.md)
