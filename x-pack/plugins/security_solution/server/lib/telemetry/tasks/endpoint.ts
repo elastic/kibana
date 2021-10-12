@@ -16,7 +16,7 @@ import { TelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 import {
   batchTelemetryRecords,
-  getPreviousEpMetaTaskTimestamp,
+  getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
 } from '../helpers';
 import { PolicyData } from '../../../../common/endpoint/types';
@@ -40,7 +40,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
     interval: '24h',
     timeout: '5m',
     version: '1.0.0',
-    getLastExecutionTime: getPreviousEpMetaTaskTimestamp,
+    getLastExecutionTime: getPreviousDailyTaskTimestamp,
     runTask: async (
       taskId: string,
       logger: Logger,

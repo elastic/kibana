@@ -56,12 +56,28 @@ export class TelemetryEventsSender {
     this.telemetryUsageCounter = telemetryUsageCounter;
 
     if (taskManager) {
+<<<<<<< HEAD
       this.telemetryTasks = createTelemetryTaskConfigs().map(
         (config: SecurityTelemetryTaskConfig) => {
           const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
           task.register(taskManager);
           return task;
         }
+=======
+      this.diagnosticTask = new DiagnosticTask(this.logger, taskManager, this, telemetryReceiver);
+      this.endpointTask = new EndpointTask(this.logger, taskManager, this, telemetryReceiver);
+      this.detectionRulesTask = new DetectionRulesTask(
+        this.logger,
+        taskManager,
+        this,
+        telemetryReceiver
+      );
+      this.exceptionListsTask = new ExceptionListsTask(
+        this.logger,
+        taskManager,
+        this,
+        telemetryReceiver
+>>>>>>> f88901c6ac37440beff1629685055e0bca64221b
       );
     }
   }
