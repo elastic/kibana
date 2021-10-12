@@ -29,6 +29,13 @@ export const metricVis = () => ({
       help: strings.getBucketColumnHelp(),
       argType: 'vis_dimension',
     },
+    {
+      name: 'font',
+      displayName: strings.getFontColumnDisplayName(),
+      help: strings.getFontColumnHelp(),
+      argType: 'font',
+      default: `{font size=60 align="center"}`,
+    },
   ],
   resolve({ context }: any) {
     if (getState(context) !== 'ready') {
