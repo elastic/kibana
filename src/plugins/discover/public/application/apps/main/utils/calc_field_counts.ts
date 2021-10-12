@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { flattenHit, IndexPattern } from 'src/plugins/data/common';
+import { flattenHit, IndexPattern } from '../../../../../../data/common';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 
 /**

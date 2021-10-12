@@ -21,7 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
-import { flattenHit, IndexPattern, META_FIELDS } from '../../../../../data/common';
+import { flattenHit, IndexPattern } from '../../../../../data/common';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
