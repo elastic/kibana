@@ -39,7 +39,6 @@ const getDirectiveValueValidator = ({ allowNone, allowNonce }: DirectiveValidati
 
 const configSchema = schema.object(
   {
-    rules: schema.maybe(schema.arrayOf(schema.string())),
     script_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
@@ -89,9 +88,6 @@ const configSchema = schema.object(
   },
   {
     validate: (cspConfig) => {
-      if (cspConfig.rules && hasDirectiveSpecified(cspConfig)) {
-        return `"csp.rules" cannot be used when specifying per-directive additions such as "script_src", "worker_src" or "style_src"`;
-      }
       const hasUnsafeInlineScriptSrc =
         cspConfig.script_src.includes(`unsafe-inline`) ||
         cspConfig.script_src.includes(`'unsafe-inline'`);
@@ -106,22 +102,6 @@ const configSchema = schema.object(
   }
 );
 
-const hasDirectiveSpecified = (rawConfig: CspConfigType): boolean => {
-  return Boolean(
-    rawConfig.script_src.length ||
-      rawConfig.worker_src.length ||
-      rawConfig.style_src.length ||
-      rawConfig.connect_src.length ||
-      rawConfig.default_src.length ||
-      rawConfig.font_src.length ||
-      rawConfig.frame_src.length ||
-      rawConfig.img_src.length ||
-      rawConfig.frame_ancestors.length ||
-      rawConfig.report_uri.length ||
-      rawConfig.report_to.length
-  );
-};
-
 /**
  * @internal
  */
@@ -132,25 +112,4 @@ export const config: ServiceConfigDescriptor<CspConfigType> = {
   // ? https://github.com/elastic/kibana/pull/52251
   path: 'csp',
   schema: configSchema,
-  deprecations: () => [
-    (rawConfig, fromPath, addDeprecation) => {
-      const cspConfig = rawConfig[fromPath];
-      if (cspConfig?.rules) {
-        addDeprecation({
-          message:
-            '`csp.rules` is deprecated in favor of directive specific configuration. Please use `csp.connect_src`, ' +
-            '`csp.default_src`, `csp.font_src`, `csp.frame_ancestors`, `csp.frame_src`, `csp.img_src`, ' +
-            '`csp.report_uri`, `csp.report_to`, `csp.script_src`, `csp.style_src`, and `csp.worker_src` instead.',
-          correctiveActions: {
-            manualSteps: [
-              `Remove "csp.rules" from the Kibana config file."`,
-              `Add directive specific configurations to the config file using "csp.connect_src", "csp.default_src", "csp.font_src", ` +
-                `"csp.frame_ancestors", "csp.frame_src", "csp.img_src", "csp.report_uri", "csp.report_to", "csp.script_src", ` +
-                `"csp.style_src", and "csp.worker_src".`,
-            ],
-          },
-        });
-      }
-    },
-  ],
 };
