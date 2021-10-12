@@ -115,7 +115,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const savedSearch = embeddable.getSavedSearch();
-    const { columns, searchSource } = await this.getSearchSource(savedSearch, embeddable);
+    const { columns, getSearchSource } = await this.getSearchSource(savedSearch, embeddable);
 
     // If the TZ is set to the default "Browser", it will not be useful for
     // server-side export. We need to derive the timezone and pass it as a param
@@ -124,7 +124,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
     const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
     const immediateJobParams: JobParamsDownloadCSV = {
-      searchSource,
+      searchSource: getSearchSource(true),
       columns,
       browserTimezone,
       title: savedSearch.title,
