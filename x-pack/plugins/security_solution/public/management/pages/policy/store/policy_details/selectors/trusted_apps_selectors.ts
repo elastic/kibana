@@ -31,6 +31,7 @@ import {
   LoadedResourceState,
 } from '../../../../../state';
 import { getCurrentArtifactsLocation } from './policy_common_selectors';
+import { ServerApiError } from '../../../../../../common/types';
 
 export const doesPolicyHaveTrustedApps = (
   state: PolicyDetailsState
@@ -212,3 +213,11 @@ export const getDoesAnyTrustedAppExistsIsLoading: PolicyDetailsSelector<boolean>
     return isLoadingResourceState(doesAnyTrustedAppExists);
   }
 );
+
+export const getPolicyTrustedAppListError: PolicyDetailsSelector<
+  Immutable<ServerApiError> | undefined
+> = createSelector(getCurrentPolicyAssignedTrustedAppsState, (currentAssignedTrustedAppsState) => {
+  if (isFailedResourceState(currentAssignedTrustedAppsState)) {
+    return currentAssignedTrustedAppsState.error;
+  }
+});
