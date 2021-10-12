@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export const PageLoading: FunctionComponent<Props>;
-export const License: FunctionComponent<Props>;
+export { ElasticsearchOverview } from './overview';
+// @ts-ignore
+export { ElasticsearchOverviewReact } from './overview_react';

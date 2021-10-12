@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ElasticsearchOverview } from './overview';
+export * from './fleet_mocks';
