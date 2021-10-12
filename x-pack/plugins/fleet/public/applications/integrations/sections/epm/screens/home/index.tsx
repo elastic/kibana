@@ -34,10 +34,7 @@ export const getParams = (params: CategoryParams, search: string) => {
   const selectedCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam } as {
-    selectedCategory: IntegrationCategory;
-    searchParam: string;
-  };
+  return { selectedCategory, searchParam };
 };
 
 export const categoryExists = (category: string, categories: CategoryFacet[]) => {
@@ -78,6 +75,7 @@ export const mapToCard = (
     name: 'name' in item ? item.name || '' : '',
     version: 'version' in item ? item.version || '' : '',
     release: 'release' in item ? item.release : undefined,
+    categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
   };
 };
 
