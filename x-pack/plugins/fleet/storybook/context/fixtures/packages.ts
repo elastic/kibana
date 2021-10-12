@@ -19,6 +19,7 @@ export const response: GetPackagesResponse['response'] = [
     path: '/package/ga/not_installed',
     id: 'ga_not_installed',
     status: 'not_installed',
+    categories: ['aws', 'azure'],
   },
   {
     name: 'ga_beats',
@@ -31,6 +32,7 @@ export const response: GetPackagesResponse['response'] = [
     path: '/package/ga/not_installed/beats',
     id: 'ga_not_installed_beat',
     status: 'not_installed',
+    categories: ['azure', 'cloud', 'config_management'],
   },
   {
     name: 'ga_installed',
@@ -66,6 +68,7 @@ export const response: GetPackagesResponse['response'] = [
       updated_at: '2021-08-25T19:44:53.517Z',
       version: 'WzczMTIsNF0=',
     },
+    categories: ['cloud', 'containers'],
   },
   {
     name: 'ga_installed_update',
@@ -101,6 +104,7 @@ export const response: GetPackagesResponse['response'] = [
       updated_at: '2021-08-25T19:44:53.517Z',
       version: 'WzczMTIsNF0=',
     },
+    categories: ['cloud', 'crm', 'custom'],
   },
   {
     name: 'beta_not_installed',
@@ -125,6 +129,7 @@ export const response: GetPackagesResponse['response'] = [
     path: '/package/beta/not_installed/beats',
     id: 'beta_beats',
     status: 'not_installed',
+    categories: ['datastore', 'elastic_stack', 'google_cloud'],
   },
   {
     name: 'beta_installed',
@@ -160,6 +165,7 @@ export const response: GetPackagesResponse['response'] = [
       updated_at: '2021-08-25T19:44:53.517Z',
       version: 'WzczMTIsNF0=',
     },
+    categories: ['elastic_stack', 'languages'],
   },
   {
     name: 'beta_installed_update',
@@ -195,6 +201,7 @@ export const response: GetPackagesResponse['response'] = [
       updated_at: '2021-08-25T19:44:53.517Z',
       version: 'WzczMTIsNF0=',
     },
+    categories: ['message_queue', 'monitoring'],
   },
   {
     name: 'exp_not_installed',
@@ -207,18 +214,28 @@ export const response: GetPackagesResponse['response'] = [
     path: '/package/exp/not_installed',
     id: 'exp_not_installed',
     status: 'not_installed',
+    categories: ['monitoring', 'network', 'notification'],
   },
   {
-    name: 'exp_not_installed',
+    name: 'exp_beats',
     title: 'j. Experimental, has Beats',
     version: '0.0.9',
     release: 'experimental',
     description: 'A package that is Experimental and not installed',
     type: 'integration',
-    download: '/epr/exp/not_installed',
-    path: '/package/exp/not_installed',
-    id: 'exp_not_installed',
+    download: '/epr/exp/not_installed/beats',
+    path: '/package/exp/not_installed/beats',
+    id: 'exp_beats',
     status: 'not_installed',
+    policy_templates: [
+      {
+        name: '',
+        description: '',
+        title: '',
+        categories: ['datastore'],
+      },
+    ],
+    categories: ['version_control', 'web'],
   },
   {
     name: 'exp_installed',
@@ -254,6 +271,7 @@ export const response: GetPackagesResponse['response'] = [
       updated_at: '2021-08-25T19:44:53.517Z',
       version: 'WzczMTIsNF0=',
     },
+    categories: ['os_system', 'productivity'],
   },
   {
     name: 'exp_installed_update',
@@ -289,5 +307,6 @@ export const response: GetPackagesResponse['response'] = [
       updated_at: '2021-08-25T19:44:53.517Z',
       version: 'WzczMTIsNF0=',
     },
+    categories: ['aws', 'cloud', 'elastic_stack'],
   },
 ];

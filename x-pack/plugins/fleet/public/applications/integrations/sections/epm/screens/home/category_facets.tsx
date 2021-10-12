@@ -32,14 +32,6 @@ export interface Props {
   onCategoryChange: (category: CategoryFacet) => unknown;
 }
 
-export interface Props {
-  showCounts: boolean;
-  isLoading?: boolean;
-  categories: CategoryFacet[];
-  selectedCategory: string;
-  onCategoryChange: (category: CategoryFacet) => void;
-}
-
 export function CategoryFacets({
   isLoading,
   categories,

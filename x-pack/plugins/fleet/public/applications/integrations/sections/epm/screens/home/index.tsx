@@ -12,10 +12,8 @@ import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../..
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
 
-import type {
-  CustomIntegration,
-  IntegrationCategory,
-} from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { PackageListItem } from '../../../../types';
 
@@ -34,7 +32,10 @@ export const getParams = (params: CategoryParams, search: string) => {
   const selectedCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam };
+  return { selectedCategory, searchParam } as {
+    selectedCategory: IntegrationCategory & '';
+    searchParam: string;
+  };
 };
 
 export const categoryExists = (category: string, categories: CategoryFacet[]) => {

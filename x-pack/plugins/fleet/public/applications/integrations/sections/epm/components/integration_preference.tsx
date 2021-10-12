@@ -6,18 +6,27 @@
  */
 
 import React from 'react';
+import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPanel, EuiLink, EuiText, EuiForm, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiLink,
+  EuiText,
+  EuiForm,
+  EuiRadioGroup,
+  EuiSpacer,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
-import { SHIPPER_DISPLAY } from '../../../../../../../../../src/plugins/custom_integrations/common';
-
-export type IntegrationPreferenceType = 'beats' | 'agent';
+export type IntegrationPreferenceType = 'recommended' | 'beats' | 'agent';
 
 interface Option {
   type: IntegrationPreferenceType;
-  label: string;
+  label: React.ReactNode;
 }
 
 export interface Props {
@@ -37,30 +46,58 @@ const link = (
 const title = (
   <FormattedMessage
     id="xpack.fleet.epm.integrationPreference.title"
-    defaultMessage="When an integration is available for {link}, use:"
+    defaultMessage="When an integration is available for {link}, show:"
     values={{ link }}
   />
 );
 
+const recommendedTooltip = (
+  <FormattedMessage
+    id="xpack.fleet.epm.integrationPreference.recommendedTooltip"
+    defaultMessage="Generally available (GA) integrations are recommended over beta and experimental."
+  />
+);
+
+const Item = styled(EuiFlexItem)`
+  padding-left: ${(props) => props.theme.eui.euiSizeXS};
+`;
+
+const options: Option[] = [
+  {
+    type: 'recommended',
+    label: (
+      <EuiFlexGroup alignItems="center" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          {i18n.translate('xpack.fleet.epm.integrationPreference.recommendedLabel', {
+            defaultMessage: 'Recommended',
+          })}
+        </EuiFlexItem>
+        <Item>
+          <EuiIconTip content={recommendedTooltip} />
+        </Item>
+      </EuiFlexGroup>
+    ),
+  },
+  {
+    type: 'agent',
+    label: i18n.translate('xpack.fleet.epm.integrationPreference.elasticAgentLabel', {
+      defaultMessage: 'Elastic Agent only',
+    }),
+  },
+  {
+    type: 'beats',
+    label: i18n.translate('xpack.fleet.epm.integrationPreference.beatsLabel', {
+      defaultMessage: 'Beats only',
+    }),
+  },
+];
+
 export const IntegrationPreference = ({ initialType, onChange }: Props) => {
   const [idSelected, setIdSelected] = React.useState<IntegrationPreferenceType>(initialType);
-
-  const options: Option[] = [
-    {
-      type: 'agent',
-      label: i18n.translate('xpack.fleet.epm.integrationPreference.elasticAgentLabel', {
-        defaultMessage: 'Elastic Agent (recommended)',
-      }),
-    },
-    {
-      type: 'beats',
-      label: SHIPPER_DISPLAY.beats,
-    },
-  ];
-
   const radios = options.map((option) => ({
     id: option.type,
-    ...option,
+    value: option.type,
+    label: option.label,
   }));
 
   return (
