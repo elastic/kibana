@@ -1,182 +1,118 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`props exportedFieldsUrl 1`] = `
-<EuiFlexGroup>
-  <EuiFlexItem>
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="l"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiTitle
-          size="l"
+<EuiPageHeader
+  description={
+    <React.Fragment>
+      <Content
+        text="this is a great tutorial about..."
+      />
+      <React.Fragment>
+        <br />
+        <EuiLink
+          href="exported_fields_url"
+          rel="noopener"
+          target="_blank"
         >
-          <h1>
-            Great tutorial
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <Content
-      text="this is a great tutorial about..."
-    />
-    <div>
-      <EuiSpacer />
-      <EuiButton
-        href="exported_fields_url"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        <FormattedMessage
-          defaultMessage="View exported fields"
-          id="home.tutorial.introduction.viewButtonLabel"
-          values={Object {}}
-        />
-      </EuiButton>
-    </div>
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  />
-</EuiFlexGroup>
+          <FormattedMessage
+            defaultMessage="View exported fields"
+            id="home.tutorial.introduction.viewButtonLabel"
+            values={Object {}}
+          />
+        </EuiLink>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  pageTitle={
+    <React.Fragment>
+      Great tutorial
+    </React.Fragment>
+  }
+/>
 `;
 
 exports[`props iconType 1`] = `
-<EuiFlexGroup>
-  <EuiFlexItem>
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="l"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiIcon
-          size="xl"
-          title=""
-          type="logoElastic"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiTitle
-          size="l"
-        >
-          <h1>
-            Great tutorial
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <Content
-      text="this is a great tutorial about..."
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  />
-</EuiFlexGroup>
+<EuiPageHeader
+  description={
+    <React.Fragment>
+      <Content
+        text="this is a great tutorial about..."
+      />
+    </React.Fragment>
+  }
+  iconType="logoElastic"
+  pageTitle={
+    <React.Fragment>
+      Great tutorial
+    </React.Fragment>
+  }
+/>
 `;
 
 exports[`props isBeta 1`] = `
-<EuiFlexGroup>
-  <EuiFlexItem>
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="l"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiTitle
-          size="l"
-        >
-          <h1>
-            Great tutorial
-             
-            <EuiBetaBadge
-              label="Beta"
-            />
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <Content
-      text="this is a great tutorial about..."
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  />
-</EuiFlexGroup>
+<EuiPageHeader
+  description={
+    <React.Fragment>
+      <Content
+        text="this is a great tutorial about..."
+      />
+    </React.Fragment>
+  }
+  pageTitle={
+    <React.Fragment>
+      Great tutorial
+      <React.Fragment>
+         
+        <EuiBetaBadge
+          label="Beta"
+        />
+      </React.Fragment>
+    </React.Fragment>
+  }
+/>
 `;
 
 exports[`props previewUrl 1`] = `
-<EuiFlexGroup>
-  <EuiFlexItem>
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="l"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiTitle
-          size="l"
-        >
-          <h1>
-            Great tutorial
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <Content
-      text="this is a great tutorial about..."
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiImage
-      allowFullScreen={true}
-      alt="screenshot of primary dashboard."
-      fullScreenIconColor="dark"
-      hasShadow={true}
-      size="l"
-      url="preview_image_url"
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>
+<EuiPageHeader
+  description={
+    <React.Fragment>
+      <Content
+        text="this is a great tutorial about..."
+      />
+    </React.Fragment>
+  }
+  pageTitle={
+    <React.Fragment>
+      Great tutorial
+    </React.Fragment>
+  }
+  rightSideItems={
+    Array [
+      <EuiImage
+        allowFullScreen={true}
+        alt="screenshot of primary dashboard."
+        fullScreenIconColor="dark"
+        size="l"
+        url="preview_image_url"
+      />,
+    ]
+  }
+/>
 `;
 
 exports[`render 1`] = `
-<EuiFlexGroup>
-  <EuiFlexItem>
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="l"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiTitle
-          size="l"
-        >
-          <h1>
-            Great tutorial
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <Content
-      text="this is a great tutorial about..."
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  />
-</EuiFlexGroup>
+<EuiPageHeader
+  description={
+    <React.Fragment>
+      <Content
+        text="this is a great tutorial about..."
+      />
+    </React.Fragment>
+  }
+  pageTitle={
+    <React.Fragment>
+      Great tutorial
+    </React.Fragment>
+  }
+/>
 `;
