@@ -60,7 +60,7 @@ export async function promptToken() {
   return answers.token;
 }
 
-export function decodeEnrollmentToken(enrollmentToken): EnrollmentToken | undefined {
+export function decodeEnrollmentToken(enrollmentToken: string): EnrollmentToken | undefined {
   try {
     const json = JSON.parse(atob(enrollmentToken)) as EnrollmentToken;
     if (
@@ -76,10 +76,10 @@ export function decodeEnrollmentToken(enrollmentToken): EnrollmentToken | undefi
   } catch (error) {} // eslint-disable-line no-empty
 }
 
-function btoa(str) {
+function btoa(str: string) {
   return Buffer.from(str, 'binary').toString('base64');
 }
 
-function atob(str) {
+function atob(str: string) {
   return Buffer.from(str, 'base64').toString('binary');
 }

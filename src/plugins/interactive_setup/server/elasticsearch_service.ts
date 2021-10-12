@@ -49,7 +49,7 @@ export interface ElasticsearchServiceSetupDeps {
   /**
    * Core Elasticsearch service preboot contract;
    */
-  elasticsearch: ElasticsearchServicePreboot;
+  elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>;
 
   /**
    * Interval for the Elasticsearch connection check (whether it's configured or not).
@@ -169,7 +169,7 @@ export class ElasticsearchService {
    * the Elasticsearch node we're enrolling with. Should be in a form of a hex colon-delimited string in upper case.
    */
   private async enroll(
-    elasticsearch: ElasticsearchServicePreboot,
+    elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>,
     { apiKey, hosts, caFingerprint }: EnrollParameters
   ) {
     const scopeableRequest: ScopeableRequest = { headers: { authorization: `ApiKey ${apiKey}` } };
@@ -257,7 +257,7 @@ export class ElasticsearchService {
   }
 
   private async authenticate(
-    elasticsearch: ElasticsearchServicePreboot,
+    elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>,
     { host, username, password, caCert }: AuthenticateParameters
   ) {
     const client = elasticsearch.createClient('authenticate', {
@@ -281,7 +281,10 @@ export class ElasticsearchService {
     }
   }
 
-  private async ping(elasticsearch: ElasticsearchServicePreboot, host: string) {
+  private async ping(
+    elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>,
+    host: string
+  ) {
     const client = elasticsearch.createClient('ping', {
       hosts: [host],
       username: '',
