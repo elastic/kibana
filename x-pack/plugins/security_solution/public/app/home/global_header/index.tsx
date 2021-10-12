@@ -44,10 +44,23 @@ export const GlobalHeader = React.memo(
     const { pathname } = useLocation();
     const [{ pageName, detailName }] = useRouteSpy();
     const isAlertsOrRulesDetailsPage =
-      pageName === SecurityPageName.alerts || (SecurityPageName.rules && detailName != null);
+      pageName === SecurityPageName.alerts ||
+      (pageName === SecurityPageName.rules && detailName != null);
     const sourcererScope = isAlertsOrRulesDetailsPage
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
+    const showSourcerer = useMemo(
+      () =>
+        [
+          SecurityPageName.alerts,
+          SecurityPageName.detections,
+          SecurityPageName.events,
+          SecurityPageName.hosts,
+          SecurityPageName.network,
+          SecurityPageName.overview,
+        ].find((page) => page === pageName) || isAlertsOrRulesDetailsPage,
+      [isAlertsOrRulesDetailsPage, pageName]
+    );
 
     useEffect(() => {
       setHeaderActionMenu((element) => {
@@ -79,7 +92,7 @@ export const GlobalHeader = React.memo(
               >
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>
-              <Sourcerer scope={sourcererScope} />
+              {showSourcerer && <Sourcerer scope={sourcererScope} />}
             </EuiHeaderLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>

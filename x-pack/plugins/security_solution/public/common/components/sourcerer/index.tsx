@@ -82,7 +82,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
     const dispatch = useDispatch();
     const [{ pageName, detailName }] = useRouteSpy();
     const isAlertsOrRulesDetailsPage =
-      pageName === SecurityPageName.alerts || (SecurityPageName.rules && detailName != null);
+      pageName === SecurityPageName.alerts ||
+      (pageName === SecurityPageName.rules && detailName != null);
 
     const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(false);
     const isOnlyDetectionAlerts: boolean =
