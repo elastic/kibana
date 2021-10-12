@@ -19,10 +19,7 @@ jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
 describe('ExploratoryViewHeader', function () {
   it('should render properly', function () {
     const { getByText } = render(
-      <ExploratoryViewHeader
-        seriesId={0}
-        lensAttributes={{ title: 'Performance distribution' } as any}
-      />
+      <ExploratoryViewHeader lensAttributes={{ title: 'Performance distribution' } as any} />
     );
     getByText('Refresh');
   });
