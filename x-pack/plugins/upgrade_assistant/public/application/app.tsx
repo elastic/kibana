@@ -21,7 +21,7 @@ import { EsDeprecations, ComingSoonPrompt, KibanaDeprecations, Overview } from '
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
-const AppWithoutPolling: React.FunctionComponent = () => {
+const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
   const {
     isReadOnlyMode,
     services: { api },
@@ -123,8 +123,13 @@ export const App = ({ history }: { history: ScopedHistory }) => {
     services: { api },
   } = useAppContext();
 
-  // This is a hack to avoid the app getting stuck in an infinite render loop,
-  // as noted in api.ts.
+  // Poll the API to detect when the cluster is either in the middle of
+  // a rolling upgrade or has completed one. We need to create two separate
+  // components: one to call this hook and one to handle state changes.
+  // This is because the implementation of this hook calls the state-change
+  // callbacks on every render, which will get the UI stuck in an infinite
+  // render loop if the same component both called the hook and handled
+  // the state changes it triggers.
   const { isLoading, isInitialRequest } = api.useLoadClusterUpgradeStatus();
 
   // Prevent flicker of the underlying UI while we wait for the status to fetch.
@@ -143,7 +148,7 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 
   return (
     <Router history={history}>
-      <AppWithoutPolling />
+      <AppHandlingClusterUpgradeState />
     </Router>
   );
 };
