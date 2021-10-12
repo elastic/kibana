@@ -68,7 +68,7 @@ export interface StartPlugins {
   timelines: TimelinesUIStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export type StartServices = CoreStart &
