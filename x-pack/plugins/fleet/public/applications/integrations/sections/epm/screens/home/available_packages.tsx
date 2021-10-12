@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiHorizontalRule } from '@elastic/eui';
@@ -23,13 +23,11 @@ import { doesPackageHaveIntegrations } from '../../../../services';
 import type { PackageList, PackageListItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
-import type {
-  CustomIntegration,
-  IntegrationCategory,
-} from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import { useMergeEprPackagesWithReplacements } from '../../../../../../hooks/use_merge_epr_with_replacements';
 
+import type { IntegrationPreferenceType } from '../../components/integration_preference';
 import { IntegrationPreference } from '../../components/integration_preference';
 
 import { mergeAndReplaceCategoryCounts } from './util';
@@ -73,6 +71,7 @@ const title = i18n.translate('xpack.fleet.epmList.allTitle', {
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
 export const AvailablePackages: React.FC = memo(() => {
+  const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
   useBreadcrumbs('integrations_all');
 
   const { selectedCategory, searchParam } = getParams(
@@ -127,7 +126,7 @@ export const AvailablePackages: React.FC = memo(() => {
     useMergeEprPackagesWithReplacements(
       eprPackages || [],
       replacementCustomIntegrations || [],
-      selectedCategory as IntegrationCategory
+      selectedCategory
     );
 
   const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
@@ -138,7 +137,7 @@ export const AvailablePackages: React.FC = memo(() => {
         if (!selectedCategory) {
           return true;
         }
-        return integration.categories.indexOf(selectedCategory as IntegrationCategory) >= 0;
+        return integration.categories.indexOf(selectedCategory) >= 0;
       })
     : [];
 
@@ -184,7 +183,10 @@ export const AvailablePackages: React.FC = memo(() => {
   }
 
   // TODO: clintandrewhall - figure out the right logic for the onChange.
-  let controls = [<EuiHorizontalRule />, <IntegrationPreference onChange={() => {}} />];
+  let controls = [
+    <EuiHorizontalRule />,
+    <IntegrationPreference initialType={preference} onChange={setPreference} />,
+  ];
 
   if (categories) {
     controls = [
@@ -193,7 +195,7 @@ export const AvailablePackages: React.FC = memo(() => {
         isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
         categories={categories}
         selectedCategory={selectedCategory}
-        onCategoryChange={({ id }: CategoryFacet) => {
+        onCategoryChange={({ id }) => {
           setSelectedCategory(id);
         }}
       />,

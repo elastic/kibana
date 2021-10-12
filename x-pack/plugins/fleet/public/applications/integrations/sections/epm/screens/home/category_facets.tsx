@@ -26,7 +26,7 @@ export interface Props {
   isLoading?: boolean;
   categories: CategoryFacet[];
   selectedCategory: string;
-  onCategoryChange: (category: CategoryFacet) => unknown;
+  onCategoryChange: (category: CategoryFacet) => void;
 }
 
 export function CategoryFacets({

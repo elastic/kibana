@@ -13,15 +13,16 @@ import { EuiPanel, EuiLink, EuiText, EuiForm, EuiRadioGroup, EuiSpacer } from '@
 
 import { SHIPPER_DISPLAY } from '../../../../../../../../../src/plugins/custom_integrations/common';
 
-type Value = 'beats' | 'agent';
+export type IntegrationPreferenceType = 'beats' | 'agent';
 
 interface Option {
-  value: Value;
+  type: IntegrationPreferenceType;
   label: string;
 }
 
 export interface Props {
-  onChange: (value: Value) => void;
+  initialType: IntegrationPreferenceType;
+  onChange: (type: IntegrationPreferenceType) => void;
 }
 
 const link = (
@@ -41,24 +42,24 @@ const title = (
   />
 );
 
-export const IntegrationPreference = ({ onChange }: Props) => {
-  const [idSelected, setIdSelected] = React.useState<Value>('agent');
+export const IntegrationPreference = ({ initialType, onChange }: Props) => {
+  const [idSelected, setIdSelected] = React.useState<IntegrationPreferenceType>(initialType);
 
   const options: Option[] = [
     {
-      value: 'agent',
+      type: 'agent',
       label: i18n.translate('xpack.fleet.epm.integrationPreference.elasticAgentLabel', {
         defaultMessage: 'Elastic Agent (recommended)',
       }),
     },
     {
-      value: 'beats',
+      type: 'beats',
       label: SHIPPER_DISPLAY.beats,
     },
   ];
 
   const radios = options.map((option) => ({
-    id: option.value,
+    id: option.type,
     ...option,
   }));
 
@@ -71,8 +72,8 @@ export const IntegrationPreference = ({ onChange }: Props) => {
           options={radios}
           idSelected={idSelected}
           onChange={(id, value) => {
-            setIdSelected(id as Value);
-            onChange(value as Value);
+            setIdSelected(id as IntegrationPreferenceType);
+            onChange(value as IntegrationPreferenceType);
           }}
           name="preference"
         />
