@@ -76,8 +76,8 @@ export const AddAgentHelpPopover = ({
           }}
         >
           <FormattedMessage
-              id="xpack.fleet.addAgentHelpPopover.footActionButton"
-              defaultMessage="Got it"
+            id="xpack.fleet.addAgentHelpPopover.footActionButton"
+            defaultMessage="Got it"
           />
         </EuiLink>
       }
