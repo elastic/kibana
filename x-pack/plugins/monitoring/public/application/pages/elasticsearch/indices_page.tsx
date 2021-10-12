@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ElasticsearchTemplate } from './elasticsearch_template';
@@ -19,6 +19,7 @@ import { useLocalStorage } from '../../hooks/use_local_storage';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 interface SetupModeProps {
   setupMode: any;
@@ -28,19 +29,28 @@ interface SetupModeProps {
 
 export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const { services } = useKibana<{ data: any }>();
   const { getPaginationTableProps } = useTable('elasticsearch.indices');
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
-  });
+  }) as any;
   const [data, setData] = useState({} as any);
   const [showSystemIndices, setShowSystemIndices] = useLocalStorage<boolean>(
     'showSystemIndices',
     false
   );
   const [alerts, setAlerts] = useState<AlertsByName>({});
+
+  useEffect(() => {
+    if (cluster) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inElasticsearch: true,
+      });
+    }
+  }, [cluster, generateBreadcrumbs]);
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.indices.routeTitle', {
     defaultMessage: 'Elasticsearch - Indices',
