@@ -212,7 +212,7 @@ async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecations
 The deprecations API allows plugins to provide an API call that can be used to automatically fix specific deprecations.
 To do so create a `PUT` or `POST` route in your plugin and specify data you want to be passed in the payload for the deprecation.
 
-In the example above, `/internal/security/users/test_dashboard_user` will be called when users click on `Quick Resolve` in the UA. The service will automatically pass the body provided in the api corrective action to provide context to the route for fixing the deprecation.
+In the example above, `/internal/security/users/test_dashboard_user` will be called when users click on `Quick Resolve` in the UA. The service will automatically pass the body provided in the api corrective action to provide context to the route for fixing the deprecation. If you need to omit the deprecation details context in the request of the body, you can use the property `omitContextFromBody`.
 
 The deprecations service expects a `200` status code to recognize the corrective action as a success.
 
