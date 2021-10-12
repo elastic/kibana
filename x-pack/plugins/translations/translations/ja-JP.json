@@ -2522,7 +2522,6 @@
     "discover.loadingDocuments": "ドキュメントを読み込み中",
     "discover.loadingJSON": "JSONを読み込んでいます",
     "discover.loadingResults": "結果を読み込み中",
-    "discover.localMenu.fallbackReportTitle": "Discover検索[{date}]",
     "discover.localMenu.inspectTitle": "検査",
     "discover.localMenu.localMenu.newSearchTitle": "新規",
     "discover.localMenu.localMenu.optionsTitle": "オプション",
