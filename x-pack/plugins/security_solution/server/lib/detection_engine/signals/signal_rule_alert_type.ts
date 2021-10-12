@@ -167,7 +167,7 @@ export const signalRulesAlertType = ({
         id: alertId,
         ruleId,
         name,
-        index: outputIndex,
+        index: indexNameOverride ?? outputIndex,
       });
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
@@ -292,7 +292,7 @@ export const signalRulesAlertType = ({
 
         const wrapHits = wrapHitsFactory({
           completeRule,
-          signalsIndex: params.outputIndex,
+          signalsIndex: indexNameOverride ?? params.outputIndex,
           mergeStrategy,
           ignoreFields,
         });
@@ -442,7 +442,7 @@ export const signalRulesAlertType = ({
                 id: alertId,
                 kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
                   ?.kibana_siem_app_url,
-                outputIndex,
+                outputIndex: indexNameOverride ?? outputIndex,
                 ruleId,
                 esClient: services.scopedClusterClient.asCurrentUser,
                 notificationRuleParams,
@@ -462,7 +462,9 @@ export const signalRulesAlertType = ({
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
           logger.debug(
             buildRuleMessage(
-              `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
+              `[+] Finished indexing ${result.createdSignalsCount} signals into ${
+                indexNameOverride ?? outputIndex
+              }`
             )
           );
           if (!hasError && !wroteWarningStatus && !result.warning) {

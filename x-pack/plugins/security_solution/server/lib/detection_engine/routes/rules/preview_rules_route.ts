@@ -165,13 +165,19 @@ export const previewRulesRoute = async (
           (item) => item.newStatus === RuleExecutionStatus.failed
         );
 
+        const warnings = warningsAndErrorsStore.filter(
+          (item) =>
+            item.newStatus === RuleExecutionStatus['partial failure'] ||
+            item.newStatus === RuleExecutionStatus.warning
+        );
+
         if (errors.length) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {
           return response.ok({
             body: {
               previewId,
-              warnings: warningsAndErrorsStore,
+              warnings,
             },
           });
         }
