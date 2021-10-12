@@ -16,8 +16,6 @@ import {
 import { esHits } from '../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { DiscoverGridContext } from './discover_grid_context';
-import { META_FIELDS } from 'src/plugins/data/common';
-import { IUiSettingsClient } from 'kibana/public';
 
 const baseContextMock = {
   expanded: undefined,
@@ -28,13 +26,6 @@ const baseContextMock = {
   isDarkMode: false,
   selectedDocs: [],
   setSelectedDocs: jest.fn(),
-  uiSettings: {
-    get: jest.fn((key) => {
-      if (key === META_FIELDS) {
-        return ['_id', '_index'];
-      }
-    }),
-  } as unknown as IUiSettingsClient,
 };
 
 describe('document selection', () => {

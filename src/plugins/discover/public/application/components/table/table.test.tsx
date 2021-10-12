@@ -24,8 +24,6 @@ import { getServices } from '../../../kibana_services';
     get: (key: string) => {
       if (key === 'discover:showMultiFields') {
         return true;
-      } else if (key === 'metaFields') {
-        return ['_id', '_index'];
       }
     },
   },
@@ -450,12 +448,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     (getServices as jest.Mock).mockImplementationOnce(() => ({
       uiSettings: {
         get: (key: string) => {
-          if (key === 'discover:showMultiFields') {
-            return false;
-          }
-          if (key === 'metaFields') {
-            return ['_id', '_index'];
-          }
+          return key === 'discover:showMultiFields' && false;
         },
       },
     }));

@@ -16,7 +16,6 @@ import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { esHits } from '../../../__mocks__/es_hits';
 import { EuiButton } from '@elastic/eui';
 import { IndexPatternField } from 'src/plugins/data/common';
-import { IUiSettingsClient } from 'kibana/public';
 
 describe('Discover cell actions ', function () {
   it('should not show cell actions for unfilterable fields', async () => {
@@ -35,9 +34,6 @@ describe('Discover cell actions ', function () {
       isDarkMode: false,
       selectedDocs: [],
       setSelectedDocs: jest.fn(),
-      uiSettings: {
-        get: jest.fn(),
-      } as unknown as IUiSettingsClient,
     };
 
     const component = mountWithIntl(
@@ -66,9 +62,6 @@ describe('Discover cell actions ', function () {
       isDarkMode: false,
       selectedDocs: [],
       setSelectedDocs: jest.fn(),
-      uiSettings: {
-        get: jest.fn(),
-      } as unknown as IUiSettingsClient,
     };
 
     const component = mountWithIntl(
