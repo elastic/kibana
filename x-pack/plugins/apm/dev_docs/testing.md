@@ -68,7 +68,7 @@ diff --git a/x-pack/plugins/apm/scripts/test/README.md b/x-pack/plugins/apm/scri
 
 ## Storybook
 
-**Start**
+### Start
 ```
 yarn storybook apm
 ```
