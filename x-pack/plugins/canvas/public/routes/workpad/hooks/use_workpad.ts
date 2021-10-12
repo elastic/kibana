@@ -33,6 +33,8 @@ export const useWorkpad = (
   const storedWorkpad = useSelector(getWorkpad);
   const [error, setError] = useState<string | Error | undefined>(undefined);
 
+  const [resolveOutcome, setResolveOutcome] = useState<string | undefined>(undefined);
+
   useEffect(() => {
     (async () => {
       try {
@@ -42,34 +44,29 @@ export const useWorkpad = (
           workpad: { assets, ...workpad },
         } = await workpadService.resolve(workpadId);
 
+        setResolveOutcome(outcome);
+
         if (outcome === 'conflict') {
           workpad.aliasId = aliasId;
         }
 
-        // Only reload workpad and assets if we're on a new workpad
-        if (storedWorkpad.id !== workpadId) {
-          dispatch(setAssets(assets));
-          dispatch(setWorkpad(workpad, { loadPages }));
-          dispatch(setZoomScale(1));
-        }
-
-        if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
-          platformService.redirectLegacyUrl(`#${getRedirectPath(aliasId)}`, getWorkpadLabel());
-        }
+        dispatch(setAssets(assets));
+        dispatch(setWorkpad(workpad, { loadPages }));
+        dispatch(setZoomScale(1));
       } catch (e) {
         setError(e as Error | string);
       }
     })();
-  }, [
-    workpadId,
-    dispatch,
-    setError,
-    loadPages,
-    workpadService,
-    storedWorkpad,
-    getRedirectPath,
-    platformService,
-  ]);
+  }, [workpadId, dispatch, setError, loadPages, workpadService]);
+
+  useEffect(() => {
+    (async () => {
+      const aliasId = storedWorkpad?.aliasId;
+      if (resolveOutcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
+        platformService.redirectLegacyUrl(`#${getRedirectPath(aliasId)}`, getWorkpadLabel());
+      }
+    })();
+  }, [storedWorkpad, resolveOutcome, getRedirectPath, platformService]);
 
   return [storedWorkpad.id === workpadId ? storedWorkpad : undefined, error];
 };
