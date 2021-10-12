@@ -35,6 +35,7 @@ import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
 import { overridePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
+import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { outputService } from './output';
 
 interface PreconfigurationResult {
@@ -94,9 +95,21 @@ export async function ensurePreconfiguredOutputs(
         data.hosts = outputService.getDefaultESHosts();
       }
 
-      if (!existingOutput) {
+      const isCreate = !existingOutput;
+      const isUpdateWithNewData =
+        existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
+      // If a default output already exists, delete it in favor of the preconfigured one
+      if (isCreate || isUpdateWithNewData) {
+        const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+
+        if (defaultOutputId && defaultOutputId !== output.id) {
+          await outputService.delete(soClient, defaultOutputId);
+        }
+      }
+
+      if (isCreate) {
         await outputService.create(soClient, data, { id, overwrite: true });
-      } else if (isPreconfiguredOutputDifferentFromCurrent(existingOutput, data)) {
+      } else if (isUpdateWithNewData) {
         await outputService.update(soClient, id, data);
         // Bump revision of all policies using that output
         if (outputData.is_default) {
@@ -311,6 +324,17 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         await agentPolicyService.update(soClient, esClient, policy!.id, { is_managed: true });
       }
     }
+  }
+
+  try {
+    const fulfilledPolicyPackagePolicyIds = fulfilledPolicies.flatMap<string>(
+      ({ policy }) => policy?.package_policies as string[]
+    );
+
+    await upgradeManagedPackagePolicies(soClient, esClient, fulfilledPolicyPackagePolicyIds);
+    // Swallow errors that occur when upgrading
+  } catch (error) {
+    appContextService.getLogger().error(error);
   }
 
   return {

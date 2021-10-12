@@ -36,6 +36,7 @@
     { "path": "../licensing/tsconfig.json" },
     { "path": "../file_upload/tsconfig.json" },
     { "path": "../saved_objects_tagging/tsconfig.json" },
-    { "path": "../security/tsconfig.json" }
+    { "path": "../security/tsconfig.json" },
+    { "path": "../spaces/tsconfig.json" }
   ]
 }

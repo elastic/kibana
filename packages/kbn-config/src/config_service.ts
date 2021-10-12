@@ -19,12 +19,13 @@ import { RawConfigurationProvider } from './raw/raw_config_service';
 import {
   applyDeprecations,
   ConfigDeprecationWithContext,
+  ConfigDeprecationContext,
   ConfigDeprecationProvider,
   configDeprecationFactory,
   DeprecatedConfigDetails,
   ChangedDeprecatedPaths,
 } from './deprecation';
-import { LegacyObjectToConfigAdapter } from './legacy';
+import { ObjectToConfigAdapter } from './object_to_config_adapter';
 
 /** @internal */
 export type IConfigService = PublicMethodsOf<ConfigService>;
@@ -71,7 +72,7 @@ export class ConfigService {
       map(([rawConfig, deprecations]) => {
         const migrated = applyDeprecations(rawConfig, deprecations);
         this.deprecatedConfigPaths.next(migrated.changedPaths);
-        return new LegacyObjectToConfigAdapter(migrated.config);
+        return new ObjectToConfigAdapter(migrated.config);
       }),
       tap((config) => {
         this.lastConfig = config;
@@ -103,6 +104,7 @@ export class ConfigService {
       ...provider(configDeprecationFactory).map((deprecation) => ({
         deprecation,
         path: flatPath,
+        context: createDeprecationContext(this.env),
       })),
     ]);
   }
@@ -298,3 +300,10 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
   handledPaths.some((handledPath) => hasConfigPathIntersection(path, handledPath));
+
+const createDeprecationContext = (env: Env): ConfigDeprecationContext => {
+  return {
+    branch: env.packageInfo.branch,
+    version: env.packageInfo.version,
+  };
+};
