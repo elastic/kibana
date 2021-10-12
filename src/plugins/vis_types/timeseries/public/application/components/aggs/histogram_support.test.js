@@ -13,6 +13,7 @@ import { FieldSelect } from './field_select';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
 import { setDataStart } from '../../../services';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
+import { FormValidationContext } from '../../contexts/form_validation_context';
 
 jest.mock('../query_bar_wrapper', () => ({
   QueryBarWrapper: jest.fn(() => null),
@@ -31,19 +32,21 @@ const runTest = (aggType, name, test, additionalProps = {}) => {
 
     it(name, () => {
       const wrapper = mountWithIntl(
-        <div>
-          <Agg
-            onAdd={jest.fn()}
-            onChange={jest.fn()}
-            onDelete={jest.fn()}
-            panel={panel}
-            fields={FIELDS}
-            model={metric}
-            series={series}
-            siblings={series.metrics}
-            dragHandleProps={{}}
-          />
-        </div>
+        <FormValidationContext.Provider value={jest.fn()}>
+          <div>
+            <Agg
+              onAdd={jest.fn()}
+              onChange={jest.fn()}
+              onDelete={jest.fn()}
+              panel={panel}
+              fields={FIELDS}
+              model={metric}
+              series={series}
+              siblings={series.metrics}
+              dragHandleProps={{}}
+            />
+          </div>
+        </FormValidationContext.Provider>
       );
       test(wrapper);
     });
