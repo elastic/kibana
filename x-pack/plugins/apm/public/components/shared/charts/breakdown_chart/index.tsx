@@ -28,8 +28,8 @@ import { Annotation } from '../../../../../common/annotations';
 import { useChartTheme } from '../../../../../../observability/public';
 import {
   asAbsoluteDateTime,
-  asDuration,
   asPercent,
+  getDurationFormatter,
 } from '../../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
@@ -40,6 +40,10 @@ import { ChartContainer } from '../../charts/chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../../charts/helper/helper';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import {
+  getMaxY,
+  getResponseTimeTickFormatter,
+} from '../../../shared/charts/transaction_charts/helper';
 
 interface Props {
   fetchStatus: FETCH_STATUS;
@@ -51,7 +55,6 @@ interface Props {
 }
 
 const asPercentBound = (y: number | null) => asPercent(y, 1);
-const asDurationBound = (y: number | null) => asDuration(y);
 
 export function BreakdownChart({
   fetchStatus,
@@ -83,8 +86,11 @@ export function BreakdownChart({
 
   const isEmpty = isTimeseriesEmpty(timeseries);
 
+  const maxY = getMaxY(timeseries);
   const yTickFormat: TickFormatter =
-    yAxisType === 'duration' ? asDurationBound : asPercentBound;
+    yAxisType === 'duration'
+      ? getResponseTimeTickFormatter(getDurationFormatter(maxY))
+      : asPercentBound;
 
   return (
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
