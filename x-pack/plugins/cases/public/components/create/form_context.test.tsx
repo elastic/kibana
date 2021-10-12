@@ -239,6 +239,29 @@ describe('Create case', () => {
       );
     });
 
+    it('should set sync alerts to false when the sync setting is passed in as false and alerts are disabled', async () => {
+      useConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        connectors: connectorsMock,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <FormContext onSuccess={onFormSubmitSuccess} syncAlertsDefaultValue={false}>
+            <CreateCaseForm {...defaultCreateCaseForm} disableAlerts={true} />
+            <SubmitCaseButton />
+          </FormContext>
+        </TestProviders>
+      );
+
+      fillForm(wrapper);
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+
+      await waitFor(() =>
+        expect(postCase).toBeCalledWith({ ...sampleData, settings: { syncAlerts: false } })
+      );
+    });
+
     it('it should select the default connector set in the configuration', async () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,

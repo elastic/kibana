@@ -31,7 +31,6 @@ export const VisualizeListing = () => {
       chrome,
       dashboard,
       history,
-      savedVisualizations,
       toastNotifications,
       visualizations,
       stateTransferService,
@@ -113,16 +112,16 @@ export const VisualizeListing = () => {
       }
 
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
-      return savedVisualizations
-        .findListItems(searchTerm, { size: listingLimit, references })
-        .then(({ total, hits }: { total: number; hits: object[] }) => ({
+      return visualizations
+        .findListItems(searchTerm, listingLimit, references)
+        .then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => ({
           total,
           hits: hits.filter(
             (result: any) => isLabsEnabled || result.type?.stage !== 'experimental'
           ),
         }));
     },
-    [listingLimit, savedVisualizations, uiSettings, savedObjectsTagging]
+    [listingLimit, uiSettings, savedObjectsTagging, visualizations]
   );
 
   const deleteItems = useCallback(
