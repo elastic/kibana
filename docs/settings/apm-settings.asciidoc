@@ -97,7 +97,7 @@ Changing these settings may disable features of the APM App.
   | Matcher for all {apm-server-ref}/span-indices.html[span indices]. Defaults to `apm-*`.
 
 | `xpack.apm.indices.transactions` {ess-icon}
-  | Matcher for all {apm-server-ref}/transaction-indices.html[transaction indices]. Defaults to `apm-*`.
+  | Matcher for all {apm-server-ref}/transaction-indices.html[transaction indices]. Defaults to `traces-apm*,apm-*`.
 
 | `xpack.apm.indices.metrics` {ess-icon}
   | Matcher for all {apm-server-ref}/metricset-indices.html[metrics indices]. Defaults to `apm-*`.
