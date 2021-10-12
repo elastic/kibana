@@ -37,6 +37,11 @@ describe('Policy trusted apps flyout', () => {
         updateTrustedApp: () => ({
           data: getMockCreateResponse(),
         }),
+        assignPolicyToTrustedApps: () => [
+          {
+            data: getMockCreateResponse(),
+          },
+        ],
       };
     });
     mockedContext = createAppRootMockRenderer();
