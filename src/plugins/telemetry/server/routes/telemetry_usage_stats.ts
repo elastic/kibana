@@ -35,7 +35,7 @@ export function registerTelemetryUsageStatsRoutes(
           request: req,
           unencrypted,
         };
-
+        // @ts-expect-error Type 'EncryptedStatsGetterConfig' is not assignable to type 'UnencryptedStatsGetterConfig'
         const stats = await telemetryCollectionManager.getStats(statsConfig);
         return res.ok({ body: stats });
       } catch (err) {
