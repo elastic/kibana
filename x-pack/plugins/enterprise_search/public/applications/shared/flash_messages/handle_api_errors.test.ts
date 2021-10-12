@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { HttpResponse } from 'kibana/public';
 import '../../__mocks__/kea_logic/kibana_logic.mock';
 
 jest.mock('./set_message_helpers', () => ({
