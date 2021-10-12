@@ -1807,6 +1807,19 @@
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.YConfig.textVisibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "textVisibility",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
