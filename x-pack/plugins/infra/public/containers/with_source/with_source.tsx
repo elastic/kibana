@@ -7,7 +7,7 @@
 
 import React, { useContext } from 'react';
 
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 import {
   MetricsSourceConfigurationProperties,
   PartialMetricsSourceConfigurationProperties,
@@ -21,7 +21,7 @@ interface WithSourceProps {
     create: (
       sourceProperties: PartialMetricsSourceConfigurationProperties
     ) => Promise<any> | undefined;
-    createDerivedIndexPattern: (type: 'metrics') => IIndexPattern;
+    createDerivedIndexPattern: (type: 'metrics') => DataViewBase;
     exists?: boolean;
     hasFailed: boolean;
     isLoading: boolean;
