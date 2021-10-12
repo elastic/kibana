@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export const getClusterFromClusters: (
-  clusters: any,
-  globalState: State,
-  unsetGlobalState: boolean
-) => any;
+export * from './fleet_mocks';
