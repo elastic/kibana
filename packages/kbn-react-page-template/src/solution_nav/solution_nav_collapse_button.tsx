@@ -34,11 +34,11 @@ export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<Kiba
       className
     );
 
-    const collapseLabel = i18n.translate('kibana-react.solutionNav.collapsibleLabel', {
+    const collapseLabel = i18n.translate('kbn-react-page-template.solutionNav.collapsibleLabel', {
       defaultMessage: 'Collapse side navigation',
     });
 
-    const openLabel = i18n.translate('kibana-react.solutionNav.openLabel', {
+    const openLabel = i18n.translate('kbn-react-page-template.solutionNav.openLabel', {
       defaultMessage: 'Open side navigation',
     });
 

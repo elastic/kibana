@@ -17,16 +17,17 @@ import {
   EuiText,
   EuiTextColor,
   EuiLink,
+  EuiPageTemplateProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { KibanaPageTemplateProps } from '../page_template';
 
 import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
 import { KibanaPageTemplateSolutionNavAvatar } from '../solution_nav';
+import { KibanaContext } from '../page_template';
 
 export const NO_DATA_PAGE_MAX_WIDTH = 950;
-export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
+export const NO_DATA_PAGE_TEMPLATE_PROPS: EuiPageTemplateProps = {
   restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
   template: 'centeredBody',
   pageContentProps: {
@@ -36,7 +37,7 @@ export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
 };
 
 export const NO_DATA_RECOMMENDED = i18n.translate(
-  'kibana-react.noDataPage.noDataPage.recommended',
+  'kbn-react-page-template.noDataPage.noDataPage.recommended',
   {
     defaultMessage: 'Recommended',
   }
@@ -84,12 +85,14 @@ export interface NoDataPageProps {
   actions: NoDataPageActionsProps;
 }
 
-export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
+export const NoDataPage: FunctionComponent<NoDataPageProps & KibanaContext> = ({
   solution,
   logo,
   actions,
   docsLink,
   pageTitle,
+  addBasePath,
+  isDarkMode,
 }) => {
   // Convert obj data into an iterable array
   const entries = Object.entries(actions);
@@ -110,13 +113,23 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
       if (actionsKeys[i] === 'elasticAgent') {
         return (
           <EuiFlexItem key={`empty-page-agent-action`} className="kbnNoDataPageContents__item">
-            <ElasticAgentCard solution={solution} {...action} />
+            <ElasticAgentCard
+              solution={solution}
+              isDarkMode={isDarkMode}
+              addBasePath={addBasePath}
+              {...action}
+            />
           </EuiFlexItem>
         );
       } else if (actionsKeys[i] === 'beats') {
         return (
           <EuiFlexItem key={`empty-page-beats-action`} className="kbnNoDataPageContents__item">
-            <ElasticBeatsCard solution={solution} {...action} />
+            <ElasticBeatsCard
+              solution={solution}
+              isDarkMode={isDarkMode}
+              addBasePath={addBasePath}
+              {...action}
+            />
           </EuiFlexItem>
         );
       } else {
@@ -130,7 +143,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
         );
       }
     });
-  }, [sortedData, actionsKeys, solution]);
+  }, [sortedData, actionsKeys, solution, isDarkMode, addBasePath]);
 
   return (
     <div className="kbnNoDataPageContents">
@@ -144,7 +157,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
         <h1>
           {pageTitle || (
             <FormattedMessage
-              id="kibana-react.noDataPage.welcomeTitle"
+              id="kbn-react-page-template.noDataPage.welcomeTitle"
               defaultMessage="Welcome to Elastic {solution}!"
               values={{ solution }}
             />
@@ -153,14 +166,14 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
         <EuiTextColor color="subdued">
           <p>
             <FormattedMessage
-              id="kibana-react.noDataPage.intro"
+              id="kbn-react-page-template.noDataPage.intro"
               defaultMessage="Add your data to get started, or {link} about {solution}."
               values={{
                 solution,
                 link: (
                   <EuiLink href={docsLink}>
                     <FormattedMessage
-                      id="kibana-react.noDataPage.intro.link"
+                      id="kbn-react-page-template.noDataPage.intro.link"
                       defaultMessage="learn more"
                     />
                   </EuiLink>
@@ -181,13 +194,13 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
           <EuiText textAlign="center" color="subdued">
             <p>
               <FormattedMessage
-                id="kibana-react.noDataPage.cantDecide"
+                id="kbn-react-page-template.noDataPage.cantDecide"
                 defaultMessage="Confused on which to use? {link}"
                 values={{
                   link: (
                     <EuiLink href="https://www.elastic.co/guide/en/fleet/current/beats-agent-comparison.html">
                       <FormattedMessage
-                        id="kibana-react.noDataPage.cantDecide.link"
+                        id="kbn-react-page-template.noDataPage.cantDecide.link"
                         defaultMessage="Check our docs for more information."
                       />
                     </EuiLink>

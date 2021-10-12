@@ -9,6 +9,12 @@
 import React from 'react';
 import { NoDataPage } from './no_data_page';
 import { shallowWithIntl } from '@kbn/test/jest';
+import { KibanaContext } from '../page_template';
+
+const kibanaContext: KibanaContext = {
+  isDarkMode: false,
+  addBasePath: (path: string) => (path ? path : 'path'),
+};
 
 describe('NoDataPage', () => {
   test('render', () => {
@@ -21,6 +27,7 @@ describe('NoDataPage', () => {
           custom: {},
         }}
         docsLink="test"
+        {...kibanaContext}
       />
     );
     expect(component).toMatchSnapshot();

@@ -9,36 +9,38 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { ElasticAgentCard } from './elastic_agent_card';
+import { KibanaContext } from '../../page_template';
 
-jest.mock('../../../context', () => ({
-  ...jest.requireActual('../../../context'),
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
-      uiSettings: { get: jest.fn() },
-    },
-  }),
-}));
+const kibanaContext: KibanaContext = {
+  isDarkMode: false,
+  addBasePath: (path: string) => (path ? path : 'path'),
+};
 
 describe('ElasticAgentCard', () => {
   test('renders', () => {
-    const component = shallow(<ElasticAgentCard solution="Solution" />);
+    const component = shallow(<ElasticAgentCard solution="Solution" {...kibanaContext} />);
     expect(component).toMatchSnapshot();
   });
 
   describe('props', () => {
     test('recommended', () => {
-      const component = shallow(<ElasticAgentCard recommended solution="Solution" />);
+      const component = shallow(
+        <ElasticAgentCard recommended solution="Solution" {...kibanaContext} />
+      );
       expect(component).toMatchSnapshot();
     });
 
     test('button', () => {
-      const component = shallow(<ElasticAgentCard button="Button" solution="Solution" />);
+      const component = shallow(
+        <ElasticAgentCard button="Button" solution="Solution" {...kibanaContext} />
+      );
       expect(component).toMatchSnapshot();
     });
 
     test('href', () => {
-      const component = shallow(<ElasticAgentCard href="#" button="Button" solution="Solution" />);
+      const component = shallow(
+        <ElasticAgentCard href="#" button="Button" solution="Solution" {...kibanaContext} />
+      );
       expect(component).toMatchSnapshot();
     });
   });

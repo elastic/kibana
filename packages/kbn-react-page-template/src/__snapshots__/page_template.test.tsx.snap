@@ -180,7 +180,9 @@ exports[`KibanaPageTemplate render noDataContent 1`] = `
         "elasticAgent": Object {},
       }
     }
+    addBasePath={[Function]}
     docsLink="test"
+    isDarkMode={false}
     solution="Elastic"
   />
 </EuiPageTemplate>

@@ -11,7 +11,7 @@ exports[`ElasticBeatsCard props button 1`] = `
     </EuiButton>
   }
   href="/app/home#/tutorial_directory"
-  image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
+  image="test-file-stub"
   paddingSize="l"
   title="Add data"
 />
@@ -28,7 +28,7 @@ exports[`ElasticBeatsCard props href 1`] = `
     </EuiButton>
   }
   href="#"
-  image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
+  image="test-file-stub"
   paddingSize="l"
   title="Add data"
 />
@@ -46,7 +46,7 @@ exports[`ElasticBeatsCard props recommended 1`] = `
     </EuiButton>
   }
   href="/app/home#/tutorial_directory"
-  image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
+  image="test-file-stub"
   paddingSize="l"
   title="Add data"
 />
@@ -63,7 +63,7 @@ exports[`ElasticBeatsCard renders 1`] = `
     </EuiButton>
   }
   href="/app/home#/tutorial_directory"
-  image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
+  image="test-file-stub"
   paddingSize="l"
   title="Add data"
 />

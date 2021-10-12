@@ -11,7 +11,8 @@ exports[`ElasticAgentCard props button 1`] = `
     </EuiButton>
   }
   href="/app/integrations/browse"
-  image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+  image="test-file-stub"
+  isDarkMode={false}
   paddingSize="l"
   title="Add Elastic Agent"
 />
@@ -28,7 +29,8 @@ exports[`ElasticAgentCard props href 1`] = `
     </EuiButton>
   }
   href="#"
-  image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+  image="test-file-stub"
+  isDarkMode={false}
   paddingSize="l"
   title="Add Elastic Agent"
 />
@@ -46,7 +48,8 @@ exports[`ElasticAgentCard props recommended 1`] = `
     </EuiButton>
   }
   href="/app/integrations/browse"
-  image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+  image="test-file-stub"
+  isDarkMode={false}
   paddingSize="l"
   title="Add Elastic Agent"
 />
@@ -63,7 +66,8 @@ exports[`ElasticAgentCard renders 1`] = `
     </EuiButton>
   }
   href="/app/integrations/browse"
-  image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+  image="test-file-stub"
+  isDarkMode={false}
   paddingSize="l"
   title="Add Elastic Agent"
 />

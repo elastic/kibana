@@ -10,10 +10,12 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCard } from '@elastic/eui';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import { KibanaContext } from '../../page_template';
 
-export type ElasticAgentCardProps = NoDataPageActions & {
-  solution: string;
-};
+export type ElasticAgentCardProps = KibanaContext &
+  NoDataPageActions & {
+    solution: string;
+  };
 
 /**
  * Applies extra styling to a typical EuiAvatar
@@ -25,14 +27,15 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   href,
   button,
   layout,
+  addBasePath,
   ...cardRest
 }) => {
-  const addBasePath = (str: string) => str;
-  const basePathUrl = '/plugins/kibanaReact/assets/';
-
-  const defaultCTAtitle = i18n.translate('kibana-react.noDataPage.elasticAgentCard.title', {
-    defaultMessage: 'Add Elastic Agent',
-  });
+  const defaultCTAtitle = i18n.translate(
+    'kbn-react-page-template.noDataPage.elasticAgentCard.title',
+    {
+      defaultMessage: 'Add Elastic Agent',
+    }
+  );
 
   const footer =
     typeof button !== 'string' && typeof button !== 'undefined' ? (
@@ -48,10 +51,13 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       paddingSize="l"
       href={href ?? addBasePath('/app/integrations/browse')}
       title={title || defaultCTAtitle}
-      description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
-        defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
-      })}
-      image={addBasePath(`${basePathUrl}elastic_agent_card.svg`)}
+      description={i18n.translate(
+        'kbn-react-page-template.noDataPage.elasticAgentCard.description',
+        {
+          defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
+        }
+      )}
+      image={require('../../assets/elastic_agent_card.svg')}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
       footer={footer}
       layout={layout as 'vertical' | undefined}

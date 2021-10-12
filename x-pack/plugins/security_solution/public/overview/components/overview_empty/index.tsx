@@ -7,19 +7,16 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate, NoDataPageActionsProps } from '@kbn/react-page-template';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH } from '../../../../common/constants';
 import { pagePathGetters } from '../../../../../fleet/public';
 import { SOLUTION_NAME } from '../../../../public/common/translations';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-import {
-  KibanaPageTemplate,
-  NoDataPageActionsProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
-
 const OverviewEmptyComponent: React.FC = () => {
-  const { http, docLinks } = useKibana().services;
+  const { http, docLinks, uiSettings } = useKibana().services;
+  const isDarkMode = uiSettings.get('theme:darkMode');
   const basePath = http.basePath.get();
   const canAccessFleet = useUserPrivileges().endpointPrivileges.canAccessFleet;
   const integrationsPathComponents = pagePathGetters.integrations_all({ category: 'security' });
@@ -57,6 +54,8 @@ const OverviewEmptyComponent: React.FC = () => {
         actions: canAccessFleet ? agentAction : beatsAction,
         docsLink: docLinks.links.siem.gettingStarted,
       }}
+      addBasePath={http.basePath.prepend}
+      isDarkMode={isDarkMode}
     />
   );
 };

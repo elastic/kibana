@@ -27,26 +27,43 @@ import {
 import { NoDataPage, NoDataPageProps, NO_DATA_PAGE_TEMPLATE_PROPS } from './no_data_page';
 
 /**
+ * Required Kibana context for rendering page template
+ */
+export interface KibanaContext {
+  /**
+   * Append Kibana's basePath
+   * @param path
+   */
+  addBasePath: (path: string) => string;
+
+  /**
+   * If Kibana is in dark mode
+   */
+  isDarkMode: boolean;
+}
+
+/**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
-export type KibanaPageTemplateProps = EuiPageTemplateProps & {
-  /**
-   * Changes the template type depending on other props provided.
-   * With `pageHeader` only: Uses `centeredBody` and fills an EuiEmptyPrompt with `pageHeader` info.
-   * With `children` only: Uses `centeredBody`
-   * With `pageHeader` and `children`: Uses `centeredContent`
-   */
-  isEmptyState?: boolean;
-  /**
-   * Quick creation of EuiSideNav. Hooks up mobile instance too
-   */
-  solutionNav?: KibanaPageTemplateSolutionNavProps;
-  /**
-   * Accepts a configuration object, that when provided, ignores pageHeader and children and instead
-   * displays Agent, Beats, and custom cards to direct users to the right ingest location
-   */
-  noDataConfig?: NoDataPageProps;
-};
+export type KibanaPageTemplateProps = KibanaContext &
+  EuiPageTemplateProps & {
+    /**
+     * Changes the template type depending on other props provided.
+     * With `pageHeader` only: Uses `centeredBody` and fills an EuiEmptyPrompt with `pageHeader` info.
+     * With `children` only: Uses `centeredBody`
+     * With `pageHeader` and `children`: Uses `centeredContent`
+     */
+    isEmptyState?: boolean;
+    /**
+     * Quick creation of EuiSideNav. Hooks up mobile instance too
+     */
+    solutionNav?: KibanaPageTemplateSolutionNavProps;
+    /**
+     * Accepts a configuration object, that when provided, ignores pageHeader and children and instead
+     * displays Agent, Beats, and custom cards to direct users to the right ingest location
+     */
+    noDataConfig?: NoDataPageProps;
+  };
 
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   template,
@@ -59,6 +76,8 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   pageSideBarProps,
   solutionNav,
   noDataConfig,
+  isDarkMode,
+  addBasePath,
   ...rest
 }) => {
   /**
@@ -143,7 +162,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
         }}
         {...NO_DATA_PAGE_TEMPLATE_PROPS}
       >
-        <NoDataPage {...noDataConfig} />
+        <NoDataPage {...noDataConfig} isDarkMode={isDarkMode} addBasePath={addBasePath} />
       </EuiPageTemplate>
     );
   }

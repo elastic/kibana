@@ -30,7 +30,7 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
       // TODO: we should require both title and description to be passed in by consumers since defaults are not adequate.
       // see comment: https://github.com/elastic/kibana/pull/111261/files#r708399140
       title={title!}
-      description={i18n.translate('kibana-react.noDataPage.noDataCard.description', {
+      description={i18n.translate('kbn-react-page-template.noDataPage.noDataCard.description', {
         defaultMessage: `Proceed without collecting data`,
       })}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}

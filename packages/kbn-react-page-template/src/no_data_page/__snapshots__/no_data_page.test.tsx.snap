@@ -16,7 +16,7 @@ exports[`NoDataPage render 1`] = `
     <h1>
       <FormattedMessage
         defaultMessage="Welcome to Elastic {solution}!"
-        id="kibana-react.noDataPage.welcomeTitle"
+        id="kbn-react-page-template.noDataPage.welcomeTitle"
         values={
           Object {
             "solution": "Elastic",
@@ -30,7 +30,7 @@ exports[`NoDataPage render 1`] = `
       <p>
         <FormattedMessage
           defaultMessage="Add your data to get started, or {link} about {solution}."
-          id="kibana-react.noDataPage.intro"
+          id="kbn-react-page-template.noDataPage.intro"
           values={
             Object {
               "link": <EuiLink
@@ -38,7 +38,7 @@ exports[`NoDataPage render 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="learn more"
-                  id="kibana-react.noDataPage.intro.link"
+                  id="kbn-react-page-template.noDataPage.intro.link"
                   values={Object {}}
                 />
               </EuiLink>,
@@ -68,6 +68,8 @@ exports[`NoDataPage render 1`] = `
       key="empty-page-agent-action"
     >
       <ElasticAgentCard
+        addBasePath={[Function]}
+        isDarkMode={false}
         solution="Elastic"
       />
     </EuiFlexItem>
@@ -76,6 +78,8 @@ exports[`NoDataPage render 1`] = `
       key="empty-page-beats-action"
     >
       <ElasticBeatsCard
+        addBasePath={[Function]}
+        isDarkMode={false}
         solution="Elastic"
       />
     </EuiFlexItem>
@@ -96,7 +100,7 @@ exports[`NoDataPage render 1`] = `
     <p>
       <FormattedMessage
         defaultMessage="Confused on which to use? {link}"
-        id="kibana-react.noDataPage.cantDecide"
+        id="kbn-react-page-template.noDataPage.cantDecide"
         values={
           Object {
             "link": <EuiLink
@@ -104,7 +108,7 @@ exports[`NoDataPage render 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Check our docs for more information."
-                id="kibana-react.noDataPage.cantDecide.link"
+                id="kbn-react-page-template.noDataPage.cantDecide.link"
                 values={Object {}}
               />
             </EuiLink>,

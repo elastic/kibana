@@ -251,6 +251,8 @@ class TutorialDirectoryUi extends React.Component {
       <KibanaPageTemplate
         restrictWidth={1200}
         template="empty"
+        addBasePath={getServices().addBasePath}
+        isDarkMode={getServices().uiSettings.get('theme:darkMode')}
         pageHeader={{
           pageTitle: (
             <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
