@@ -6,11 +6,11 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
-import { combineLatest, of, Subscription } from 'rxjs';
+import { combineLatest, forkJoin, of, Subscription } from 'rxjs';
 import { mergeMap, switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ToastsStart } from 'kibana/public';
-import { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
+import { OverallStatsSearchStrategyParams } from '../../../../common/search_strategy/types';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   checkAggregatableFieldsExistRequest,
@@ -142,8 +142,11 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           )
         : of(undefined);
 
-    const sub = combineLatest([nonAggregatableOverallStats$, aggregatableOverallStats$]).pipe(
-      mergeMap(([nonAggregatableOverallStatsResp, aggregatableOverallStatsResp]) => {
+    const sub = forkJoin({
+      nonAggregatableOverallStatsResp: nonAggregatableOverallStats$,
+      aggregatableOverallStatsResp: aggregatableOverallStats$,
+    }).pipe(
+      mergeMap(({ nonAggregatableOverallStatsResp, aggregatableOverallStatsResp }) => {
         const aggregatableOverallStats = processAggregatableFieldsExistResponse(
           aggregatableOverallStatsResp?.rawResponse,
           aggregatableFields,
