@@ -51,10 +51,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           await observability.alerts.common.openActionsMenuForRow(0);
           await observability.alerts.common.addToNewCaseButtonClick();
           await observability.alerts.common.getCreateCaseFlyoutOrFail();
+          await observability.alerts.common.closeFlyout();
         });
       });
 
-      it('opens a modal when Add to existing case is clicked', async () => {});
+      it('opens a modal when Add to existing case is clicked', async () => {
+        await retry.try(async () => {
+          await observability.alerts.common.openActionsMenuForRow(0);
+          await observability.alerts.common.addToExistingCaseButtonClick();
+          await observability.alerts.common.getAddtoExistingCaseModalOrFail();
+        });
+      });
     });
 
     describe('When user has read permissions for cases', () => {

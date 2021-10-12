@@ -24,6 +24,7 @@ const ACTION_COLUMN_INDEX = 1;
 const ADD_TO_EXISTING_CASE_SELECTOR = 'add-existing-case-menu-item';
 const ADD_TO_NEW_CASE_SELECTOR = 'add-new-case-item';
 const CREATE_CASE_FLYOUT = 'create-case-flyout';
+const SELECT_CASE_MODAL = 'all-cases-modal';
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -213,8 +214,20 @@ export function ObservabilityAlertsCommonProvider({
     return await (await getAddToNewCaseSelector()).click();
   };
 
+  const addToExistingCaseButtonClick = async () => {
+    return await (await getAddToExistingCaseSelector()).click();
+  };
+
   const getCreateCaseFlyoutOrFail = async () => {
     return await testSubjects.existOrFail(CREATE_CASE_FLYOUT);
+  };
+
+  const closeFlyout = async () => {
+    return await (await testSubjects.find('euiFlyoutCloseButton')).click();
+  };
+
+  const getAddtoExistingCaseModalOrFail = async () => {
+    return await testSubjects.existOrFail(SELECT_CASE_MODAL);
   };
 
   return {
@@ -249,6 +262,9 @@ export function ObservabilityAlertsCommonProvider({
     getAddToNewCaseSelectorOrFail,
     missingAddToNewCaseSelectorOrFail,
     getCreateCaseFlyoutOrFail,
+    closeFlyout,
     addToNewCaseButtonClick,
+    addToExistingCaseButtonClick,
+    getAddtoExistingCaseModalOrFail,
   };
 }
