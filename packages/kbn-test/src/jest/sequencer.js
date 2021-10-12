@@ -13,7 +13,7 @@ class ParallelSequencer extends Sequencer {
   jobIndex = parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10);
 
   sort(tests) {
-    if (!process.env.CI) return tests;
+    if (!process.env.CI || !this.jobsCount) return tests;
 
     const testsByFile = new Map();
     const testPaths = new Set();
