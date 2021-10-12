@@ -6,11 +6,13 @@
  */
 
 import {
+  CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { CoreStart, HttpSetup, HttpStart } from 'kibana/public';
 import { matchPath } from 'react-router-dom';
+import { transformNewItemOutput } from '@kbn/securitysolution-list-hooks';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
@@ -20,7 +22,11 @@ import {
   createFailedResourceState,
   createLoadedResourceState,
 } from '../../../state/async_resource_builders';
-import { deleteHostIsolationExceptionItems, getHostIsolationExceptionItems } from '../service';
+import {
+  deleteHostIsolationExceptionItems,
+  getHostIsolationExceptionItems,
+  createHostIsolationExceptionItem,
+} from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 import { getCurrentListPageDataState, getCurrentLocation, getItemToDelete } from './selector';
 
@@ -39,11 +45,49 @@ export const createHostIsolationExceptionsPageMiddleware = (
     if (action.type === 'userChangedUrl' && isHostIsolationExceptionsPage(action.payload)) {
       loadHostIsolationExceptionsList(store, coreStart.http);
     }
+
+    if (action.type === 'hostIsolationExceptionsCreateEntry') {
+      createHostIsolationException(store, coreStart.http);
+    }
+
     if (action.type === 'hostIsolationExceptionsSubmitDelete') {
       deleteHostIsolationExceptionsItem(store, coreStart.http);
     }
   };
 };
+
+async function createHostIsolationException(
+  store: ImmutableMiddlewareAPI<HostIsolationExceptionsPageState, AppAction>,
+  http: HttpStart
+) {
+  const { dispatch } = store;
+  const entry = transformNewItemOutput(
+    store.getState().form.entry as CreateExceptionListItemSchema
+  );
+  dispatch({
+    type: 'hostIsolationExceptionsFormStateChanged',
+    payload: {
+      type: 'LoadingResourceState',
+      // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
+      previousState: entry,
+    },
+  });
+  try {
+    const response = await createHostIsolationExceptionItem({
+      http,
+      exception: entry,
+    });
+    dispatch({
+      type: 'hostIsolationExceptionsFormStateChanged',
+      payload: createLoadedResourceState(response),
+    });
+  } catch (error) {
+    dispatch({
+      type: 'hostIsolationExceptionsFormStateChanged',
+      payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
+    });
+  }
+}
 
 async function loadHostIsolationExceptionsList(
   store: ImmutableMiddlewareAPI<HostIsolationExceptionsPageState, AppAction>,
