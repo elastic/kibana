@@ -78,8 +78,8 @@ export const Header: React.FC<HeaderProps> = ({
           <EuiFlexItem>
             <EuiSpacer size="s" />
             <Tabs className={tabsClassName}>
-              {tabs.map((props) => (
-                <EuiTab {...(props as EuiTabProps)} key={props.id}>
+              {tabs.map((props, index) => (
+                <EuiTab {...(props as EuiTabProps)} key={`${props.id}-${index}`}>
                   {props.name}
                 </EuiTab>
               ))}

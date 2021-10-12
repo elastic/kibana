@@ -155,18 +155,16 @@ const RolesSchema = schema.object({
   allow: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
 });
 
-const IndexSchema = schema.string({ defaultValue: '.reporting' });
-
 // Browser side polling: job completion notifier, management table auto-refresh
 // NOTE: can not use schema.duration, a bug prevents it being passed to the browser correctly
 const PollSchema = schema.object({
   jobCompletionNotifier: schema.object({
     interval: schema.number({ defaultValue: 10000 }),
-    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // unused
+    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // deprecated as unused since 7.10
   }),
   jobsRefresh: schema.object({
     interval: schema.number({ defaultValue: 5000 }),
-    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // unused
+    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // deprecated as unused since 7.10
   }),
 });
 
@@ -178,7 +176,6 @@ export const ConfigSchema = schema.object({
   csv: CsvSchema,
   encryptionKey: EncryptionKeySchema,
   roles: RolesSchema,
-  index: IndexSchema,
   poll: PollSchema,
 });
 

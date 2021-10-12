@@ -13,8 +13,8 @@ import { TimefilterContract } from '../../timefilter';
 import { TimeRange } from '../../../../common';
 
 export function convertRangeFilterToTimeRange(filter: RangeFilter) {
-  const key = keys(filter.range)[0];
-  const values = filter.range[key];
+  const key = keys(filter.query.range)[0];
+  const values = filter.query.range[key];
 
   return {
     from: moment(values.gt || values.gte),

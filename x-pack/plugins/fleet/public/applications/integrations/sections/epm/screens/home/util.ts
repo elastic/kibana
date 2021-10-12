@@ -7,7 +7,7 @@
 
 import type {
   CustomIntegration,
-  Category,
+  IntegrationCategory,
 } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { CategoryFacet } from './category_facets';
@@ -27,7 +27,7 @@ export function mergeAndReplaceCategoryCounts(
       match.count += count;
     } else {
       merged.push({
-        id: category as Category,
+        id: category as IntegrationCategory,
         count,
       });
     }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseRoute } from './helpers';
+import { parseRoute, getHostRiskIndex } from './helpers';
 
 describe('public helpers parseRoute', () => {
   it('should properly parse hash route', () => {
@@ -52,5 +52,11 @@ describe('public helpers parseRoute', () => {
       path: `${nonHashLocation.search}`,
       search: nonHashLocation.search,
     });
+  });
+});
+
+describe('public helpers export getHostRiskIndex', () => {
+  it('should properly return index if space is specified', () => {
+    expect(getHostRiskIndex('testName')).toEqual('ml_host_risk_score_latest_testName');
   });
 });

@@ -62,6 +62,12 @@ export const EVENT_FILTERS = i18n.translate(
   }
 );
 
+export const HOST_ISOLATION_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.search.administration.hostIsolationExceptions',
+  {
+    defaultMessage: 'Host Isolation Exceptions',
+  }
+);
 export const DETECT = i18n.translate('xpack.securitySolution.navigation.detect', {
   defaultMessage: 'Detect',
 });

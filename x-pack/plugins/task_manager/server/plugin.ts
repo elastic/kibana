@@ -32,13 +32,18 @@ import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 
-export type TaskManagerSetupContract = {
+export interface TaskManagerSetupContract {
   /**
    * @deprecated
    */
   index: string;
   addMiddleware: (middleware: Middleware) => void;
-} & Pick<TaskTypeDictionary, 'registerTaskDefinitions'>;
+  /**
+   * Method for allowing consumers to register task definitions into the system.
+   * @param taskDefinitions - The Kibana task definitions dictionary
+   */
+  registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
+}
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,

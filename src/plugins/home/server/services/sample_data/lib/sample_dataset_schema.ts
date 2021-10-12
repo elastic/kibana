@@ -67,6 +67,7 @@ export const sampleDataSchema = schema.object({
   description: schema.string(),
   previewImagePath: schema.string(),
   darkPreviewImagePath: schema.maybe(schema.string()),
+  iconPath: schema.maybe(schema.string()), // relative path to icon. Used for display in the Fleet-integrations app
 
   // saved object id of main dashboard for sample data set
   overviewDashboard: schema.string(),
