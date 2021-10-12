@@ -32,7 +32,7 @@ export function useMergeEprPackagesWithReplacements(
   eprPackages.forEach((eprPackage: PackageListItem) => {
     const hits = findReplacementsForEprPackage(
       filteredReplacements,
-      eprPackage.eprName || eprPackage.name,
+      eprPackage.name,
       eprPackage.release
     );
     if (hits.length) {

@@ -64,7 +64,6 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 
     const topPackage = {
       ...restOfPackage,
-      eprName: pkg.name,
       categories: getAllCategoriesFromIntegrations(pkg),
     };
 
@@ -79,7 +78,6 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
               ...restOfPackage,
               id: `${restOfPackage}-${name}`,
               integration: name,
-              eprName: topPackage.eprName,
               title,
               description,
               icons: icons || restOfPackage.icons,
