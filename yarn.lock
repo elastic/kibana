@@ -2236,6 +2236,10 @@
     is-absolute "^1.0.0"
     is-negated-glob "^1.0.0"
 
+"@elastic/apm-generator@link:bazel-bin/packages/elastic-apm-generator":
+  version "0.0.0"
+  uid ""
+
 "@elastic/apm-rum-core@^5.12.1":
   version "5.12.1"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.12.1.tgz#ad78787876c68b9ce718d1c42b8e7b12b12eaa69"
