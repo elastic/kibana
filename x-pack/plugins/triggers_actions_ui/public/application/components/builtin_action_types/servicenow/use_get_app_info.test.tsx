@@ -75,6 +75,7 @@ describe('useGetAppInfo', () => {
   });
 
   it('it throws an error when api fails', async () => {
+    expect.assertions(1);
     getAppInfoMock.mockImplementation(() => {
       throw new Error('An error occurred');
     });
@@ -85,14 +86,10 @@ describe('useGetAppInfo', () => {
       })
     );
 
-    try {
-      await act(async () => {
+    await expect(() =>
+      act(async () => {
         await result.current.fetchAppInfo(actionConnector);
-      });
-
-      fail('Should never get here');
-    } catch (e) {
-      expect(e.message).toBe('An error occurred');
-    }
+      })
+    ).rejects.toThrow('An error occurred');
   });
 });

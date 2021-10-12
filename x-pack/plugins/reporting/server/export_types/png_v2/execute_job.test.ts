@@ -102,12 +102,10 @@ test(`passes browserTimezone to generatePng`, async () => {
           "warning": [Function],
         },
         Array [
-          "localhost:80undefined/app/management/insightsAndAlerting/reporting/r",
+          "localhost:80undefined/app/management/insightsAndAlerting/reporting/r?forceNow=test",
           Object {
             "id": "test",
-            "params": Object {
-              "forceNow": "test",
-            },
+            "params": Object {},
             "version": "test",
           },
         ],

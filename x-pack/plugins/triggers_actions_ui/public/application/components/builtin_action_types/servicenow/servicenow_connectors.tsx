@@ -74,15 +74,11 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
       }
     }, [getApplicationInfo, isOldConnector]);
 
-    const afterActionConnectorSave = useCallback(async () => {
-      // TODO: Implement
-    }, []);
-
     useEffect(() => {
       if (setCallbacks) {
-        setCallbacks({ beforeActionConnectorSave, afterActionConnectorSave });
+        setCallbacks({ beforeActionConnectorSave });
       }
-    }, [afterActionConnectorSave, beforeActionConnectorSave, setCallbacks]);
+    }, [beforeActionConnectorSave, setCallbacks]);
 
     const onMigrateClick = useCallback(() => setShowModal(true), []);
     const onModalCancel = useCallback(() => setShowModal(false), []);

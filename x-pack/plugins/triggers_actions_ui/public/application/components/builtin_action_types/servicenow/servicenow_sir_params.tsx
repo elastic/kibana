@@ -283,6 +283,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.COMMENTS_LABEL}
       />
+      <EuiSpacer size="m" />
     </>
   );
 };
