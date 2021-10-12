@@ -145,10 +145,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     return this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE;
   }
 
-  isPointsOnly(): boolean {
-    return this._descriptor.requestType === RENDER_AS.POINT;
-  }
-
   getFieldNames() {
     return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }

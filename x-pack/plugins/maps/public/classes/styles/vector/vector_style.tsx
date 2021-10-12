@@ -91,7 +91,7 @@ export interface IVectorStyle extends IStyle {
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   isTimeAware(): boolean;
-  getIcon(isPointsOnlyFromSource: boolean): ReactElement<any>;
+  getIcon(): ReactElement<any>;
   hasLegendDetails: () => Promise<boolean>;
   renderLegendDetails: () => ReactElement<any>;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
@@ -489,7 +489,13 @@ export class VectorStyle implements IVectorStyle {
   }
 
   async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
+    const supportedShapeTypes = await this._source.getSupportedShapeTypes();
     const styleMeta: StyleMetaDescriptor = {
+      geometryTypes: {
+        isPointsOnly: supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POINT),
+        isLinesOnly: supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE),
+        isPolygonsOnly: supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON),
+      },
       fieldMeta: {},
     };
 
@@ -721,9 +727,9 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
-  getIcon(isPointsOnlyFromSource: boolean) {
-    const isLinesOnly = isPointsOnlyFromSource ? false : this._getIsLinesOnly();
-    const isPointsOnly = isPointsOnlyFromSource ? true : this._getIsPointsOnly();
+  getIcon() {
+    const isLinesOnly = this._getIsLinesOnly();
+    const isPointsOnly = this._getIsPointsOnly();
     return this._getIconFromGeometryTypes(isLinesOnly, isPointsOnly);
   }
 

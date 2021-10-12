@@ -46,7 +46,6 @@ export interface BoundsRequestMeta {
 
 export interface IVectorSource extends ISource {
   isMvt(): boolean;
-  isPointsOnly(): boolean;
   showTooManyFeaturesBounds(): boolean;
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
@@ -98,10 +97,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   isMvt() {
-    return false;
-  }
-
-  isPointsOnly(): boolean {
     return false;
   }
 

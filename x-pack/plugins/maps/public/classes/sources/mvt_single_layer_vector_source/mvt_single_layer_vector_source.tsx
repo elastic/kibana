@@ -87,10 +87,6 @@ export class MVTSingleLayerVectorSource
     return true;
   }
 
-  isPointsOnly(): boolean {
-    return false;
-  }
-
   showTooManyFeaturesBounds(): boolean {
     return false;
   }

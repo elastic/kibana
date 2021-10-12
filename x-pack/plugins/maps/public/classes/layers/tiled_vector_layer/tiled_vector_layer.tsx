@@ -71,7 +71,7 @@ export class TiledVectorLayer extends VectorLayer {
     if (!this._source.isESSource()) {
       // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources
       return {
-        icon: this.getCurrentStyle().getIcon(this.getSource().isPointsOnly()),
+        icon: this.getCurrentStyle().getIcon(),
         tooltipContent: null,
         areResultsTrimmed: false,
       };
@@ -96,7 +96,7 @@ export class TiledVectorLayer extends VectorLayer {
       totalFeaturesCount
     );
     return {
-      icon: this.getCurrentStyle().getIcon(this.getSource().isPointsOnly()),
+      icon: this.getCurrentStyle().getIcon(),
       ...content,
     };
   }
