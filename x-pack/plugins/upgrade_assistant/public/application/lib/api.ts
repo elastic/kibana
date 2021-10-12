@@ -51,10 +51,18 @@ export class ApiService {
     const response = _useRequest<R, ResponseError>(this.client, config);
     // NOTE: This will cause an infinite render loop in any component that both
     // consumes the hook calling this useRequest function and also handles
-    // cluster upgrade errors. This is because we're calling handleClusterUpgradeError
-    // every time useRequest is called, which will be on every render. If handling
-    // the cluster upgrade error causes a state change in the consuming component,
-    // that will trigger a render, which will call useRequest again, and so on.
+    // cluster upgrade errors. Note that sendRequest doesn't have this problem.
+    //
+    // This is due to React's fundamental expectation that hooks be idempotent,
+    // so it can render a component as many times as necessary and thereby call
+    // the hook on each render without worrying about that triggering subsequent
+    // renders.
+    //
+    // In this case we call handleClusterUpgradeError every time useRequest is
+    // called, which is on every render. If handling the cluster upgrade error
+    // causes a state change in the consuming component, that will trigger a
+    // render, which will call useRequest again, calling handleClusterUpgradeError,
+    // causing a state change in the consuming component, and so on.
     this.handleClusterUpgradeError(response.error);
     return response;
   }
