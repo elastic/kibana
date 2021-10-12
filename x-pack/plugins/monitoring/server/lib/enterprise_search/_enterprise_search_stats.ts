@@ -7,22 +7,20 @@
 
 import type { ElasticsearchResponse } from '../../../common/types/es';
 
-export const getDiffCalculation = (max: number | null, min: number | null) => {
-  // no need to test max >= 0, but min <= 0 which is normal for a derivative after restart
-  // because we are aggregating/collapsing on ephemeral_ids
-  if (max !== null && min !== null && max >= 0 && min >= 0 && max >= min) {
-    return max - min;
-  }
-
-  return null;
-};
-
 export const entSearchAggFilterPath = [
   'aggregations.total',
-  'aggregations.heap_used_total.value',
-  'aggregations.heap_max_total.value',
-  'aggregations.heap_committed_total.value',
   'aggregations.versions.buckets',
+
+  // Latest values
+  'aggregations.app_search_engines.value',
+  'aggregations.workplace_search_org_sources.value',
+  'aggregations.workplace_search_private_sources.value',
+
+  // Cluster-wide values
+  'aggregations.uptime.value',
+  'aggregations.cluster_heap_used.value',
+  'aggregations.cluster_heap_total.value',
+  'aggregations.cluster_heap_committed.value',
 ];
 
 export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
@@ -38,6 +36,34 @@ export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
   versions: {
     terms: {
       field: 'enterprisesearch.health.version.number',
+    },
+  },
+
+  // Get latest values for some of the metrics across the recent events
+  latest_report: {
+    terms: {
+      field: '@timestamp',
+      size: 2, // There is a health and a stats event and we want to make sure we always get at least one of each
+      order: {
+        _key: 'desc',
+      },
+    },
+    aggs: {
+      app_search_engines: {
+        max: {
+          field: 'enterprisesearch.stats.product_usage.app_search.total_engines',
+        },
+      },
+      workplace_search_org_sources: {
+        max: {
+          field: 'enterprisesearch.stats.product_usage.workplace_search.total_org_sources',
+        },
+      },
+      workplace_search_private_sources: {
+        max: {
+          field: 'enterprisesearch.stats.product_usage.workplace_search.total_private_sources',
+        },
+      },
     },
   },
 
@@ -71,7 +97,24 @@ export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
     },
   },
 
-  // Aggregate per-instance metrics into global values
+  // Get latest values from aggregations into global values
+  app_search_engines: {
+    max_bucket: {
+      buckets_path: 'latest_report>app_search_engines',
+    },
+  },
+  workplace_search_org_sources: {
+    max_bucket: {
+      buckets_path: 'latest_report>workplace_search_org_sources',
+    },
+  },
+  workplace_search_private_sources: {
+    max_bucket: {
+      buckets_path: 'latest_report>workplace_search_private_sources',
+    },
+  },
+
+  // Aggregate metrics into global values
   uptime: {
     max_bucket: {
       buckets_path: 'ephemeral_ids>uptime_max',
@@ -97,6 +140,12 @@ export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
 export const entSearchAggResponseHandler = (response: ElasticsearchResponse) => {
   const aggs = response.aggregations;
 
+  // console.log('Aggs: ', aggs);
+
+  const appSearchEngines = aggs.app_search_engines.value ?? 0;
+  const workplaceSearchOrgSources = aggs.workplace_search_org_sources.value ?? 0;
+  const workplaceSearchPrivateSources = aggs.workplace_search_private_sources.value ?? 0;
+
   const totalInstances = aggs?.total.value ?? 0;
   const uptime = aggs?.uptime.value;
 
@@ -107,6 +156,9 @@ export const entSearchAggResponseHandler = (response: ElasticsearchResponse) => 
   const versions = (aggs?.versions.buckets ?? []).map(({ key }: { key: string }) => key);
 
   return {
+    appSearchEngines,
+    workplaceSearchOrgSources,
+    workplaceSearchPrivateSources,
     totalInstances,
     uptime,
     memUsed,

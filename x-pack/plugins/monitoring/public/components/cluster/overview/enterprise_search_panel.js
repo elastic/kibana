@@ -73,6 +73,7 @@ export function EnterpriseSearchPanel(props) {
                   defaultMessage="Version"
                 />
               </EuiDescriptionListTitle>
+
               <EuiDescriptionListDescription data-test-subj="entSearchVersion">
                 {props.stats.versions[0] ||
                   i18n.translate(
@@ -81,6 +82,36 @@ export function EnterpriseSearchPanel(props) {
                       defaultMessage: 'N/A',
                     }
                   )}
+              </EuiDescriptionListDescription>
+
+              <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.entSearchPanel.appSearchEngines"
+                  defaultMessage="Engines"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="appSearchEngines">
+                {props.stats.appSearchEngines}
+              </EuiDescriptionListDescription>
+
+              <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.entSearchPanel.workplaceSearchOrgSources"
+                  defaultMessage="Org Sources"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="workplaceSearchOrgSources">
+                {props.stats.workplaceSearchOrgSources}
+              </EuiDescriptionListDescription>
+
+              <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.entSearchPanel.workplaceSearchPrivateSources"
+                  defaultMessage="Private Sources"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="workplaceSearchPrivateSources">
+                {props.stats.workplaceSearchPrivateSources}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>

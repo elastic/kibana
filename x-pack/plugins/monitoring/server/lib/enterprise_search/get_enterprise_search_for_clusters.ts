@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { ElasticsearchResponse } from '../../../../../../node_modules/x-pack/plugins/monitoring/common/types/es';
 import { LegacyRequest, Cluster } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import { EnterpriseSearchMetric } from '../metrics';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { ElasticsearchResponse } from 'x-pack/plugins/monitoring/common/types/es';
-import { entSearchAggResponseHandler, entSearchUuidsAgg } from './_enterprise_search_stats';
+import {
+  entSearchAggFilterPath,
+  entSearchAggResponseHandler,
+  entSearchUuidsAgg,
+} from './_enterprise_search_stats';
 
 function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
   const stats = entSearchAggResponseHandler(response);
@@ -42,8 +46,9 @@ export function getEnterpriseSearchForClusters(
       const clusterUuid = cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid;
       const params = {
         index: entSearchIndexPattern,
-        size: 1,
+        size: 0,
         ignore_unavailable: true,
+        filter_path: entSearchAggFilterPath,
         body: {
           query: createEnterpriseSearchQuery({
             start,
@@ -55,6 +60,8 @@ export function getEnterpriseSearchForClusters(
           aggs: entSearchUuidsAgg(maxBucketSize!),
         },
       };
+
+      // console.log('Query: ', JSON.stringify(params));
 
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
       const response = await callWithRequest(req, 'search', params);
