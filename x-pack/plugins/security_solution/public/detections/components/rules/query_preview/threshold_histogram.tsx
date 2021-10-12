@@ -7,9 +7,9 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import * as i18n from './translations';
+import * as i18n from '../rule_preview/translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { getThresholdHistogramConfig } from './helpers';
+import { getThresholdHistogramConfig } from '../rule_preview/helpers';
 import { ChartSeriesConfigs, ChartSeriesData } from '../../../../common/components/charts/common';
 import { InspectResponse } from '../../../../../public/types';
 import { inputsModel } from '../../../../common/store';

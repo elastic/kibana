@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import * as i18n from './translations';
+import * as i18n from '../rule_preview/translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { TestProviders } from '../../../../common/mock';
 import { PreviewCustomQueryHistogram } from './custom_histogram';
