@@ -165,11 +165,66 @@
         "label": "Outlet",
         "description": [],
         "signature": [
-          "() => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+          "() => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null"
         ],
         "path": "packages/kbn-typed-react-router-config/src/outlet.tsx",
         "deprecated": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/typed-react-router-config",
+        "id": "def-common.OutletContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "OutletContextProvider",
+        "description": [],
+        "signature": [
+          "({\n  element,\n  children,\n}: { element: React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>; children: React.ReactNode; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-typed-react-router-config/src/outlet.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/typed-react-router-config",
+            "id": "def-common.OutletContextProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  element,\n  children,\n}",
+            "description": [],
+            "path": "packages/kbn-typed-react-router-config/src/outlet.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/typed-react-router-config",
+                "id": "def-common.OutletContextProvider.$1.element",
+                "type": "Object",
+                "tags": [],
+                "label": "element",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+                ],
+                "path": "packages/kbn-typed-react-router-config/src/outlet.tsx",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/typed-react-router-config",
+                "id": "def-common.OutletContextProvider.$1.children",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+                ],
+                "path": "packages/kbn-typed-react-router-config/src/outlet.tsx",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -236,7 +291,7 @@
             "section": "def-common.Route",
             "text": "Route"
           },
-          "[]>; children: React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>; }) => JSX.Element"
+          "[]>; children: React.ReactNode; }) => JSX.Element"
         ],
         "path": "packages/kbn-typed-react-router-config/src/use_router.tsx",
         "deprecated": false,
@@ -282,12 +337,12 @@
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
                 "id": "def-common.RouterContextProvider.$1.children",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+                  "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-typed-react-router-config/src/use_router.tsx",
                 "deprecated": false
@@ -340,7 +395,7 @@
           },
           "[]>; history: ",
           "History",
-          "<any>; children: React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>; }) => JSX.Element"
+          "<any>; children: React.ReactNode; }) => JSX.Element"
         ],
         "path": "packages/kbn-typed-react-router-config/src/router_provider.tsx",
         "deprecated": false,
@@ -400,12 +455,12 @@
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
                 "id": "def-common.RouterProvider.$1.children",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+                  "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-typed-react-router-config/src/router_provider.tsx",
                 "deprecated": false
@@ -2027,6 +2082,44 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/typed-react-router-config",
+            "id": "def-common.Router.getRoutesToMatch",
+            "type": "Function",
+            "tags": [],
+            "label": "getRoutesToMatch",
+            "description": [],
+            "signature": [
+              "(path: string) => ",
+              {
+                "pluginId": "@kbn/typed-react-router-config",
+                "scope": "common",
+                "docId": "kibKbnTypedReactRouterConfigPluginApi",
+                "section": "def-common.FlattenRoutesOf",
+                "text": "FlattenRoutesOf"
+              },
+              "<TRoutes>"
+            ],
+            "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/typed-react-router-config",
+                "id": "def-common.Router.getRoutesToMatch.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2034,6 +2127,24 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/typed-react-router-config",
+        "id": "def-common.FlattenRoutesOf",
+        "type": "Type",
+        "tags": [],
+        "label": "FlattenRoutesOf",
+        "description": [],
+        "signature": [
+          "Pick<",
+          "ValuesType",
+          "<MapRoutes<TRoutes, []>>, Exclude<keyof ",
+          "ValuesType",
+          "<MapRoutes<TRoutes, []>>, \"parents\">>[]"
+        ],
+        "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
         "id": "def-common.Match",
