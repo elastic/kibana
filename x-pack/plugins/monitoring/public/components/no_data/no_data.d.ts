@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const getClusterFromClusters: (
-  clusters: any,
-  globalState: State,
-  unsetGlobalState: boolean
-) => any;
+import { FunctionComponent } from 'react';
+
+export const NoData: FunctionComponent<Record<any, any>>;

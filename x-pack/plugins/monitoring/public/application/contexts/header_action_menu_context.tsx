@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export const euiTableStorageGetter: (string) => any;
-export const euiTableStorageSetter: (string) => any;
-export const EuiMonitoringTable: FunctionComponent<Props>;
+import React from 'react';
+import { AppMountParameters } from 'kibana/public';
+
+interface ContextProps {
+  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+}
+
+export const HeaderActionMenuContext = React.createContext<ContextProps>({});

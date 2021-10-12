@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export const StatusIcon: FunctionComponent<Props>;
+export interface SectionDescriptor {
+  key: string;
+  label: string;
+  required?: boolean;
+  properties: Array<{ field: string; value: string[] | number[] }>;
+}
