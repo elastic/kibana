@@ -64,3 +64,13 @@ node scripts/functional_test_runner --config x-pack/test/functional/config.js --
 APM tests are located in `x-pack/test/functional/apps/apm`.
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 diff --git a/x-pack/plugins/apm/scripts/test/README.md b/x-pack/plugins/apm/scripts/test/README.md
+
+
+## Storybook
+
+**Start**
+```
+yarn storybook apm
+```
+
+All files with a .stories.tsx extension will be loaded. You can access the development environment at http://localhost:9001.
