@@ -11,11 +11,11 @@ import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 interface EcsError {
-  code: string;
-  id: string;
+  code?: string;
+  id?: string;
   message: string;
-  stack_trace: string;
-  type: string;
+  stack_trace?: string;
+  type?: string;
 }
 
 interface EndpointActionFields {

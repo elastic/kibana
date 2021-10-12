@@ -14,6 +14,7 @@ import { CasesByAlertId } from '../../../../../cases/common/api/cases/case';
 import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
 import {
   ENDPOINT_ACTIONS_DS,
+  ENDPOINT_ACTION_RESPONSES_DS,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
 } from '../../../../common/endpoint/constants';
@@ -22,6 +23,7 @@ import {
   EndpointAction,
   HostMetadata,
   LogsEndpointAction,
+  LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
 import {
   SecuritySolutionPluginRouter,
@@ -59,6 +61,32 @@ export function registerHostIsolationRoutes(
     isolationRequestHandler(endpointContext, false)
   );
 }
+
+const createFailedActionResponseEntry = async ({
+  context,
+  doc,
+  logger,
+}: {
+  context: SecuritySolutionRequestHandlerContext;
+  doc: LogsEndpointActionResponse;
+  logger: Logger;
+}): Promise<void> => {
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  try {
+    await esClient.index<LogsEndpointActionResponse>({
+      index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
+      body: {
+        ...doc,
+        error: {
+          code: '424',
+          message: 'Failed to send action request to agent',
+        },
+      },
+    });
+  } catch (e) {
+    logger.error(e);
+  }
+};
 
 const doLogsEndpointActionDsExists = async ({
   context,
@@ -166,12 +194,17 @@ export const isolationRequestHandler = function (
     };
 
     // if .logs-endpoint.actions data stream exists
-    // create action request record in .logs-endpoint.actions DS as the current user
+    // try to create action request record in .logs-endpoint.actions DS as the current user
+    // (from >= v7.16, use this check to ensure the current user has privileges to write to the new index)
+    // and allow only users with superuser privileges to write to fleet indices
+    const logger = endpointContext.logFactory.get('host-isolation');
     const doesLogsEndpointActionsDsExist = await doLogsEndpointActionDsExists({
       context,
-      logger: endpointContext.logFactory.get('host-isolation'),
+      logger,
       dataStreamName: ENDPOINT_ACTIONS_DS,
     });
+    // if the new endpoint indices/data streams exists
+    // write the action request to the new index as the current user
     if (doesLogsEndpointActionsDsExist) {
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -197,15 +230,14 @@ export const isolationRequestHandler = function (
       }
     }
 
-    // create action request record as system user in .fleet-actions
     try {
-      // we use this check to ensure the user has permission to write to the new index
-      // and thus allow this action record to be added to the fleet index specifically by kibana
       let esClient = context.core.elasticsearch.client.asCurrentUser;
       if (doesLogsEndpointActionsDsExist) {
+        // create action request record as system user with user in .fleet-actions
         esClient = context.core.elasticsearch.client.asInternalUser;
       }
-
+      // write as the current user if the new indices do not exist
+      // <v7.16 requires the current user to be super user
       fleetActionIndexResult = await esClient.index<EndpointAction>({
         index: AGENT_ACTIONS_INDEX,
         body: {
@@ -216,6 +248,7 @@ export const isolationRequestHandler = function (
           user_id: doc.user.id,
         },
       });
+
       if (fleetActionIndexResult.statusCode !== 201) {
         return res.customError({
           statusCode: 500,
@@ -225,6 +258,24 @@ export const isolationRequestHandler = function (
         });
       }
     } catch (e) {
+      // create entry in .logs-endpoint.action.responses-default data stream
+      // when writing to .fleet-actions fails
+      if (doesLogsEndpointActionsDsExist) {
+        await createFailedActionResponseEntry({
+          context,
+          doc: {
+            '@timestamp': moment().toISOString(),
+            agent: doc.agent,
+            EndpointActions: {
+              action_id: doc.EndpointActions.action_id,
+              completed_at: moment().toISOString(),
+              started_at: moment().toISOString(),
+              data: doc.EndpointActions.data,
+            },
+          },
+          logger,
+        });
+      }
       return res.customError({
         statusCode: 500,
         body: { message: e },
