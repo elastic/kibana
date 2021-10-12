@@ -30,6 +30,11 @@ export const metricVis = () => ({
       argType: 'vis_dimension',
     },
     {
+      name: 'palette',
+      argType: 'stops_palette',
+      default: `{palette}`,
+    },
+    {
       name: 'font',
       displayName: strings.getFontColumnDisplayName(),
       help: strings.getFontColumnHelp(),

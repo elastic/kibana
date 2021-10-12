@@ -328,6 +328,16 @@ export const ArgumentStrings = {
         defaultMessage: 'Select column',
       }),
   },
+  StopsPalette: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.stopsPaletteTitle', {
+        defaultMessage: 'Palette picker with bounds',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.visDimensionLabel', {
+        defaultMessage: 'Provides colors for the values, based on the bounds.',
+      }),
+  },
 };
 
 export const DataSourceStrings = {

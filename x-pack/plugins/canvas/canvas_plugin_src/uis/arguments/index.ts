@@ -32,6 +32,7 @@ import { textarea } from './textarea';
 // @ts-expect-error untyped local
 import { toggle } from './toggle';
 import { visdimension } from './vis_dimension';
+import { stopsPalette } from './stops_palette';
 
 import { SetupInitializer } from '../../plugin';
 
@@ -50,6 +51,7 @@ export const args = [
   textarea,
   toggle,
   visdimension,
+  stopsPalette,
 ];
 
 export const initializers = [dateFormatInitializer, numberFormatInitializer];
