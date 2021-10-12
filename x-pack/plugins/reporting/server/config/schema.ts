@@ -156,11 +156,11 @@ const RolesSchema = schema.object({
 const PollSchema = schema.object({
   jobCompletionNotifier: schema.object({
     interval: schema.number({ defaultValue: 10000 }),
-    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // unused
+    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // deprecated as unused since 7.10
   }),
   jobsRefresh: schema.object({
     interval: schema.number({ defaultValue: 5000 }),
-    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // unused
+    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // deprecated as unused since 7.10
   }),
 });
 
