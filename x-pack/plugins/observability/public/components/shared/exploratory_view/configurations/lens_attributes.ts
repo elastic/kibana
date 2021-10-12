@@ -41,7 +41,7 @@ import {
 } from './constants';
 import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
 import { PersistableFilter } from '../../../../../../lens/common';
-import { parseAbsoluteDate } from '../components/date_range_picker';
+import { parseRelativeDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
 
 function getLayerReferenceName(layerId: string) {
@@ -542,11 +542,11 @@ export class LensAttributes {
       time: { from },
     } = layerConfig;
 
-    const inDays = Math.abs(parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'days'));
+    const inDays = Math.abs(parseRelativeDate(mainFrom).diff(parseRelativeDate(from), 'days'));
     if (inDays > 1) {
       return inDays + 'd';
     }
-    const inHours = Math.abs(parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'hours'));
+    const inHours = Math.abs(parseRelativeDate(mainFrom).diff(parseRelativeDate(from), 'hours'));
     if (inHours === 0) {
       return null;
     }
