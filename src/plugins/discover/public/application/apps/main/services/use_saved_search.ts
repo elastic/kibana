@@ -23,6 +23,8 @@ import { fetchAll } from '../utils/fetch_all';
 import { useBehaviorSubject } from '../utils/use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
+import { SavedSearch } from '../../../../saved_searches';
+import { getInitialFetchStatus } from '../utils/get_initial_fetch_status';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -82,22 +84,28 @@ export interface DataChartsMessage extends DataMsg {
  * to the data fetching
  */
 export const useSavedSearch = ({
-  initialFetchStatus,
   searchSessionManager,
+  savedSearch,
   searchSource,
   services,
   stateContainer,
   useNewFieldsApi,
 }: {
-  initialFetchStatus: FetchStatus;
   searchSessionManager: DiscoverSearchSessionManager;
+  savedSearch: SavedSearch;
   searchSource: SearchSource;
   services: DiscoverServices;
   stateContainer: GetStateReturn;
   useNewFieldsApi: boolean;
 }) => {
-  const { data, filterManager } = services;
+  const { data } = services;
   const timefilter = data.query.timefilter.timefilter;
+
+  const initialFetchStatus: FetchStatus = useMemo(() => {
+    // A saved search is created on every page load, so we check the ID to see if we're loading a
+    // previously saved search or if it is just transient
+    return getInitialFetchStatus(savedSearch, searchSessionManager, services);
+  }, [savedSearch, searchSessionManager, services]);
 
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
@@ -105,13 +113,19 @@ export const useSavedSearch = ({
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const main$: DataMain$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
+  const main$: DataMain$ = useBehaviorSubject({ fetchStatus: initialFetchStatus } as DataMainMsg);
 
-  const documents$: DataDocuments$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
+  const documents$: DataDocuments$ = useBehaviorSubject({
+    fetchStatus: initialFetchStatus,
+  } as DataDocumentsMsg);
 
-  const totalHits$: DataTotalHits$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
+  const totalHits$: DataTotalHits$ = useBehaviorSubject({
+    fetchStatus: initialFetchStatus,
+  } as DataTotalHitsMsg);
 
-  const charts$: DataCharts$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
+  const charts$: DataCharts$ = useBehaviorSubject({
+    fetchStatus: initialFetchStatus,
+  } as DataChartsMessage);
 
   const dataSubjects = useMemo(() => {
     return {
@@ -195,18 +209,14 @@ export const useSavedSearch = ({
     return () => subscription.unsubscribe();
   }, [
     data,
-    data.query.queryString,
     dataSubjects,
-    filterManager,
     initialFetchStatus,
     inspectorAdapters,
     main$,
     refetch$,
     searchSessionManager,
-    searchSessionManager.newSearchSessionIdFromURL$,
     searchSource,
     services,
-    services.toastNotifications,
     stateContainer.appStateContainer,
     timefilter,
     useNewFieldsApi,

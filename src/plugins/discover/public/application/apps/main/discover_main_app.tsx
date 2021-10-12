@@ -71,7 +71,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     services,
     history,
     savedSearch,
-    indexPatternList,
   });
 
   /**

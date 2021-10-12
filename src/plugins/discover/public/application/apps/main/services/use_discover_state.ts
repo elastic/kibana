@@ -13,10 +13,10 @@ import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../../build_services';
 import { SavedSearch } from '../../../../saved_searches';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
-import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { useSearchSession } from './use_search_session';
-import { FetchStatus } from '../../../types';
 import { DiscoverContext } from './discover_context';
+import { IndexPattern } from '../../../../../../data_views/common';
 
 export function useDiscoverState({
   services,
@@ -28,14 +28,12 @@ export function useDiscoverState({
   history: History;
 }) {
   const { uiSettings: config, data } = services;
-  const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
-  const { timefilter } = data.query.timefilter;
-  const [indexPattern, setIndexPattern] = useState(savedSearch.searchSource.getField('index'));
-
   const {
     dataViews: { get },
   } = useContext(DiscoverContext);
 
+  const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
+  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>();
   const searchSource = useMemo(() => savedSearch.searchSource.createChild(), [savedSearch]);
 
   const stateContainer = useMemo(() => getState({ history, services }), [services, history]);
@@ -43,8 +41,11 @@ export function useDiscoverState({
 
   const { appStateContainer } = stateContainer;
 
+  /**
+   * Load index pattern
+   */
   useEffect(() => {
-    const load = async () => {
+    const loadIndexPattern = async () => {
       if (!savedSearch?.searchSource.getField('index')) {
         const { index, timefield } = appStateContainer.getState();
         const loadedIndexPattern = await get(
@@ -57,7 +58,7 @@ export function useDiscoverState({
         setIndexPattern(savedSearch?.searchSource.getField('index'));
       }
     };
-    load();
+    loadIndexPattern();
   }, [appStateContainer, get, savedSearch.searchSource, services.uiSettings]);
 
   /**
@@ -65,22 +66,11 @@ export function useDiscoverState({
    */
   const searchSessionManager = useSearchSession({ services, history, stateContainer, savedSearch });
 
-  const initialFetchStatus: FetchStatus = useMemo(() => {
-    // A saved search is created on every page load, so we check the ID to see if we're loading a
-    // previously saved search or if it is just transient
-    const shouldSearchOnPageLoad =
-      config.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearch.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false ||
-      searchSessionManager.hasSearchSessionIdInURL();
-    return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
-  }, [config, savedSearch.id, searchSessionManager, timefilter]);
-
   /**
    * Data fetching logic
    */
   const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
-    initialFetchStatus,
+    savedSearch,
     searchSessionManager,
     searchSource,
     services,
@@ -92,7 +82,7 @@ export function useDiscoverState({
    * Start syncing of state to URL of state if searchSource is complete (existing index pattern)
    */
   useEffect(() => {
-    if (savedSearch.searchSource.getField('index')) {
+    if (indexPattern && savedSearch.searchSource.getField('index') === indexPattern) {
       const prevState = stateContainer.appStateContainer.getState();
       const stopSync = stateContainer.initializeAndSync(savedSearch);
       const nextState = stateContainer.appStateContainer.getState();
@@ -194,7 +184,7 @@ export function useDiscoverState({
     if (indexPattern) {
       refetch$.next();
     }
-  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
+  }, [refetch$, indexPattern, savedSearch.id]);
 
   return {
     data$,
