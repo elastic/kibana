@@ -214,6 +214,14 @@ export const getDoesAnyTrustedAppExistsIsLoading: PolicyDetailsSelector<boolean>
   }
 );
 
+export const getPolicyTrustedAppListError: PolicyDetailsSelector<
+  Immutable<ServerApiError> | undefined
+> = createSelector(getCurrentPolicyAssignedTrustedAppsState, (currentAssignedTrustedAppsState) => {
+  if (isFailedResourceState(currentAssignedTrustedAppsState)) {
+    return currentAssignedTrustedAppsState.error;
+  }
+});
+
 export const getCurrentTrustedAppsRemoveListState: PolicyDetailsSelector<
   PolicyArtifactsState['removeList']
 > = (state) => state.artifacts.removeList;
