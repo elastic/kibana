@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export const getClusterFromClusters: (
-  clusters: any,
-  globalState: State,
-  unsetGlobalState: boolean
-) => any;
+import { FunctionComponent } from 'react';
+
+export const NodeStatusIcon: FunctionComponent<NodeStatusIconProps>;
+export interface NodeStatusIconProps {
+  isOnline: boolean;
+  status: string;
+}
