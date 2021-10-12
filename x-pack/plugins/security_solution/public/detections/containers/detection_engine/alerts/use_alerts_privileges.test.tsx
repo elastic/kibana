@@ -86,7 +86,12 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
     result: undefined,
     error: undefined,
   },
-  endpointPrivileges: { loading: true, canAccessEndpointManagement: false, canAccessFleet: false },
+  endpointPrivileges: {
+    loading: true,
+    canAccessEndpointManagement: false,
+    canAccessFleet: false,
+    isPlatinumPlus: true,
+  },
   kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
 };
 

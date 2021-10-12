@@ -12,6 +12,7 @@ export const useEndpointPrivileges = jest.fn(() => {
     loading: false,
     canAccessFleet: true,
     canAccessEndpointManagement: true,
+    isPlatinumPlus: true,
   };
   return endpointPrivilegesMock;
 });

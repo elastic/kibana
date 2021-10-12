@@ -24,7 +24,12 @@ export interface UserPrivilegesState {
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   listPrivileges: { loading: false, error: undefined, result: undefined },
   detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
-  endpointPrivileges: { loading: true, canAccessEndpointManagement: false, canAccessFleet: false },
+  endpointPrivileges: {
+    loading: true,
+    canAccessEndpointManagement: false,
+    canAccessFleet: false,
+    isPlatinumPlus: false,
+  },
   kibanaSecuritySolutionsPrivileges: { crud: false, read: false },
 });
 
