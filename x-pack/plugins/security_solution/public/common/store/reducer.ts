@@ -44,25 +44,29 @@ export const createInitialState = (
     signalIndexName,
     enableExperimental,
   }: {
-    defaultDataView: SourcererDataView;
-    kibanaDataViews: SourcererDataView[];
+    defaultDataView: Pick<SourcererDataView, 'id' | 'title' | 'patternList'>;
+    kibanaDataViews: Array<Pick<SourcererDataView, 'id' | 'title' | 'patternList'>>;
     signalIndexName: string | null;
     enableExperimental: ExperimentalFeatures;
   }
 ): State => {
+  const fullDefaultDataView = {
+    ...initDataView,
+    ...defaultDataView,
+  };
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
-      defaultDataView,
+      fullDefaultDataView,
       SourcererScopeName.default,
       signalIndexName
     ),
     [SourcererScopeName.detections]: getScopePatternListSelection(
-      defaultDataView,
+      fullDefaultDataView,
       SourcererScopeName.detections,
       signalIndexName
     ),
     [SourcererScopeName.timeline]: getScopePatternListSelection(
-      defaultDataView,
+      fullDefaultDataView,
       SourcererScopeName.timeline,
       signalIndexName
     ),
@@ -80,25 +84,19 @@ export const createInitialState = (
           ...sourcererModel.initialSourcererState.sourcererScopes.default,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: initialPatterns[SourcererScopeName.default],
-          // indicesExist: initialPatterns[SourcererScopeName.default].length > 0,
         },
         [SourcererScopeName.detections]: {
           ...sourcererModel.initialSourcererState.sourcererScopes.detections,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: initialPatterns[SourcererScopeName.detections],
-          // indicesExist: initialPatterns[SourcererScopeName.detections].length > 0,
         },
         [SourcererScopeName.timeline]: {
           ...sourcererModel.initialSourcererState.sourcererScopes.timeline,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: initialPatterns[SourcererScopeName.timeline],
-          // indicesExist: initialPatterns[SourcererScopeName.timeline].length > 0,
         },
       },
-      defaultDataView: {
-        ...initDataView,
-        ...defaultDataView,
-      },
+      defaultDataView: fullDefaultDataView,
       kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
     },

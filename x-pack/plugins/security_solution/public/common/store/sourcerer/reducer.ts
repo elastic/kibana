@@ -12,8 +12,7 @@ import {
   setSourcererScopeLoading,
   setSelectedDataView,
   setSignalIndexName,
-  setSource,
-  setFetchFields,
+  setDataView,
 } from './actions';
 import { initialSourcererState, SourcererModel, SourcererScopeName } from './model';
 import { validateSelectedPatterns } from './helpers';
@@ -27,8 +26,14 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
   }))
   .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => ({
     ...state,
-    defaultDataView,
-    kibanaDataViews,
+    defaultDataView: {
+      ...state.defaultDataView,
+      ...defaultDataView,
+    },
+    kibanaDataViews: kibanaDataViews.map((dataView) => ({
+      ...(kibanaDataViews.find(({ id }) => id === dataView.id) ?? {}),
+      ...dataView,
+    })),
   }))
   .case(setSourcererScopeLoading, (state, { id, loading }) => ({
     ...state,
@@ -64,26 +69,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       ...validateSelectedPatterns(state, payload),
     },
   }))
-  .case(setFetchFields, (state, id) => {
-    console.log(
-      'reducer',
-      state.kibanaDataViews
-        .map((dv) => (dv.id === id ? { ...dv, fetchedFields: true } : dv))
-        .find((k) => k.id === id)
-    );
-    return {
-      ...state,
-      ...(state.defaultDataView.id === id
-        ? {
-            defaultDataView: { ...state.defaultDataView, fetchedFields: true },
-          }
-        : {}),
-      kibanaDataViews: state.kibanaDataViews.map((dv) =>
-        dv.id === id ? { ...dv, fetchedFields: true } : dv
-      ),
-    };
-  })
-  .case(setSource, (state, { scope, dataView }) => ({
+  .case(setDataView, (state, dataView) => ({
     ...state,
     ...(dataView.id === state.defaultDataView.id
       ? {
@@ -93,12 +79,5 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     kibanaDataViews: state.kibanaDataViews.map((dv) =>
       dv.id === dataView.id ? { ...dv, ...dataView } : dv
     ),
-    sourcererScopes: {
-      ...state.sourcererScopes,
-      [scope.id]: {
-        ...state.sourcererScopes[scope.id],
-        ...scope,
-      },
-    },
   }))
   .build();

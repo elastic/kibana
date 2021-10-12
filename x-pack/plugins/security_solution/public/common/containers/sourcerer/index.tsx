@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useIndexFields } from '../source';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ALERTS_PATH, RULES_PATH, UEBA_PATH } from '../../../../common/constants';
@@ -20,6 +19,7 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
+import { useDataView } from '../source/use_data_view';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -63,9 +63,23 @@ export const useInitSourcerer = (
   const activeTimeline = useDeepEqualSelector((state) =>
     getTimelineSelector(state, TimelineId.active)
   );
+  const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
+  const { selectedDataViewId: scopeDataViewId } = useDeepEqualSelector((state) =>
+    scopeIdSelector(state, scopeId)
+  );
+  const { selectedDataViewId: timelineDataViewId } = useDeepEqualSelector((state) =>
+    scopeIdSelector(state, SourcererScopeName.timeline)
+  );
+  const activeDataViewIds = useMemo(
+    () => [...new Set([scopeDataViewId, timelineDataViewId])],
+    [scopeDataViewId, timelineDataViewId]
+  );
+  const { indexFieldsSearch } = useDataView();
 
-  const { indexFieldsSearch } = useIndexFields(scopeId);
-  useIndexFields(SourcererScopeName.timeline);
+  useEffect(
+    () => activeDataViewIds.forEach((id) => indexFieldsSearch(id)),
+    [activeDataViewIds, indexFieldsSearch]
+  );
 
   // Related to timeline
   useEffect(() => {
@@ -129,7 +143,7 @@ export const useInitSourcerer = (
           if (response.defaultDataView.patternList.includes(newSignalsIndex)) {
             // first time signals is defined and validated in the sourcerer
             // redo indexFieldsSearch
-            indexFieldsSearch(response.defaultDataView.id, newSignalsIndex);
+            indexFieldsSearch(response.defaultDataView.id);
           }
           dispatch(sourcererActions.setSourcererDataViews(response));
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));

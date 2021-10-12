@@ -8,7 +8,8 @@
 import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { State } from '../types';
-import { SourcererDataView, ManageScope, SourcererScopeById, SourcererScopeName } from './model';
+import { SourcererDataView, SourcererScope, SourcererScopeById, SourcererScopeName } from './model';
+import { FieldSpec } from '../../../../../../../src/plugins/data_views/common';
 
 export const sourcererKibanaDataViewsSelector = ({ sourcerer }: State): SourcererDataView[] =>
   sourcerer.kibanaDataViews;
@@ -25,7 +26,7 @@ export const sourcererDataViewSelector = ({ sourcerer }: State, id: string): Sou
 export const sourcererScopeIdSelector = (
   { sourcerer }: State,
   scopeId: SourcererScopeName
-): ManageScope => sourcerer.sourcererScopes[scopeId];
+): SourcererScope => sourcerer.sourcererScopes[scopeId];
 
 export const scopeIdSelector = () => createSelector(sourcererScopeIdSelector, (scope) => scope);
 
@@ -50,12 +51,11 @@ export interface SelectedDataView {
   browserFields: SourcererDataView['browserFields'];
   dataViewId: SourcererDataView['id'];
   docValueFields: SourcererDataView['docValueFields'];
-  indexPattern: SourcererDataView['indexPattern'];
-  indicesExist: ManageScope['indicesExist'];
-  runtimeMappings: SourcererDataView['runtimeMappings'];
+  indexPattern: { title: string; fields: FieldSpec[] }; // should this be DataView?
+  indicesExist: boolean;
   loading: boolean;
-  // these are manipulated
   patternList: string[];
+  runtimeMappings: SourcererDataView['runtimeMappings'];
   selectedPatterns: string[];
 }
 
@@ -65,6 +65,7 @@ export const getSelectedDataViewSelector = () => {
   const getScopeSelector = scopeIdSelector();
   const getDefaultDataViewSelector = defaultDataViewSelector();
   const getKibanaDataViewsSelector = kibanaDataViewsSelector();
+  const getSignalIndexNameSelector = signalIndexNameSelector();
 
   return (
     state: State,
@@ -73,39 +74,44 @@ export const getSelectedDataViewSelector = () => {
     const {
       selectedDataViewId,
       selectedPatterns: scopeSelectedPatterns,
-      indicesExist,
       loading,
     } = getScopeSelector(state, scopeId);
     const defaultDataView = getDefaultDataViewSelector(state);
     const kibanaDataViews = getKibanaDataViewsSelector(state);
+    const signalIndexName = getSignalIndexNameSelector(state);
     const dataViewId = selectedDataViewId === null ? defaultDataView.id : selectedDataViewId;
-    const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
+    const theDataView: SourcererDataView =
+      kibanaDataViews.find((dataView) => dataView.id === dataViewId) ?? defaultDataView;
 
     const patternList = theDataView != null ? theDataView.title.split(',') : [];
 
-    const getSelectedPatterns = memoizeOne((patterns: string[]): string[] => {
-      return (
-        patterns.some((index) => index === 'logs-*')
-          ? [...patterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
-          : patterns
-      ).sort();
-    });
+    const getSelectedPatterns = memoizeOne((patterns: string[]): string[] =>
+      (patterns.some((index) => index === 'logs-*')
+        ? [...patterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
+        : patterns
+      ).sort()
+    );
     const getDataView = memoizeOne(
-      (indexPattern, title) => ({
-        ...indexPattern,
+      (title: string, indexFields: FieldSpec[]) => ({
+        fields: indexFields,
         title,
       }),
       (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
     );
-    const { browserFields, docValueFields, runtimeMappings, indexPattern } =
+    const { browserFields, docValueFields, runtimeMappings, indexFields } =
       theDataView != null ? theDataView : defaultDataView;
     const selectedPatterns = getSelectedPatterns(scopeSelectedPatterns);
     return {
       browserFields,
       dataViewId,
       docValueFields,
-      indexPattern: getDataView(indexPattern, 'gay-*'),
-      indicesExist,
+      indexPattern: getDataView(selectedPatterns.join(','), indexFields),
+      indicesExist:
+        scopeId === SourcererScopeName.detections
+          ? theDataView.patternList.includes(`${signalIndexName}`)
+          : scopeId === SourcererScopeName.default
+          ? theDataView.patternList.filter((i) => i !== signalIndexName).length > 0
+          : theDataView.patternList.length > 0,
       loading,
       runtimeMappings,
       // all patterns in DATA_VIEW

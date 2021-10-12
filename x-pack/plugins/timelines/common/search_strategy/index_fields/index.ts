@@ -10,9 +10,9 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
 import type {
   IEsSearchRequest,
   IEsSearchResponse,
-  IIndexPattern,
 } from '../../../../../../src/plugins/data/common';
 import type { DocValueFields, Maybe } from '../common';
+import { FieldSpec } from '../../../../../../src/plugins/data/common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
 
@@ -82,13 +82,11 @@ export interface BrowserField {
   searchable: boolean;
   type: string;
   subType?: IFieldSubType;
+  readFromDocValues: boolean;
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
 export const EMPTY_BROWSER_FIELDS = {};
 export const EMPTY_DOCVALUE_FIELD: DocValueFields[] = [];
-export const EMPTY_INDEX_PATTERN: IIndexPattern = {
-  fields: [],
-  title: '',
-};
+export const EMPTY_INDEX_FIELDS: FieldSpec[] = [];

@@ -8,29 +8,25 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import { SourcererDataView, ManageScope, SourcererScopeName } from './model';
+import { SourcererDataView, SourcererScopeName } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
-export const setSource = actionCreator<{
-  dataView: {
-    browserFields: SourcererDataView['browserFields'];
-    docValueFields: SourcererDataView['docValueFields'];
-    id: SourcererDataView['id'];
-    indexPattern: SourcererDataView['indexPattern'];
-    runtimeMappings: SourcererDataView['runtimeMappings'];
-  };
-  scope: {
-    id: ManageScope['id'];
-    loading: ManageScope['loading'];
-    indicesExist: ManageScope['indicesExist'];
-  };
-}>('SET_SOURCE');
+export const setDataView = actionCreator<{
+  browserFields: SourcererDataView['browserFields'];
+  docValueFields: SourcererDataView['docValueFields'];
+  id: SourcererDataView['id'];
+  indexFields: SourcererDataView['indexFields'];
+  runtimeMappings: SourcererDataView['runtimeMappings'];
+}>('SET_DATA_VIEW');
+
+export const setDataViewLoading = actionCreator<{
+  id: string;
+  loading: boolean;
+}>('SET_DATA_VIEW_LOADING');
 
 export const setSignalIndexName =
   actionCreator<{ signalIndexName: string }>('SET_SIGNAL_INDEX_NAME');
-
-export const setFetchFields = actionCreator<string>('SET_FETCH_FIELDS');
 
 export const setSourcererDataViews = actionCreator<{
   defaultDataView: SourcererDataView;

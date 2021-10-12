@@ -9,7 +9,11 @@ import { parseExperimentalConfigValue } from '../../../common/experimental_featu
 import { SecuritySubPlugins } from '../../app/types';
 import { createInitialState } from './reducer';
 import { mockSourcererState } from '../mock';
+import { useSourcererDataView } from '../containers/sourcerer';
+import { useDeepEqualSelector } from '../hooks/use_selector';
+import { renderHook } from '@testing-library/react-hooks';
 
+jest.mock('../hooks/use_selector');
 jest.mock('../lib/kibana', () => ({
   KibanaServices: {
     get: jest.fn(() => ({ uiSettings: { get: () => ({ from: 'now-24h', to: 'now' }) } })),
@@ -28,15 +32,21 @@ describe('createInitialState', () => {
       kibanaDataViews: [mockSourcererState.defaultDataView],
       signalIndexName: 'siem-signals-default',
     };
+    const initState = createInitialState(mockPluginState, defaultState);
+    beforeEach(() => {
+      (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(initState));
+    });
+    afterEach(() => {
+      (useDeepEqualSelector as jest.Mock).mockClear();
+    });
 
-    test('indicesExist should be TRUE if configIndexPatterns is NOT empty', () => {
-      const initState = createInitialState(mockPluginState, defaultState);
-
-      expect(initState.sourcerer?.sourcererScopes.default.indicesExist).toEqual(true);
+    test('indicesExist should be TRUE if configIndexPatterns is NOT empty', async () => {
+      const { result } = renderHook(() => useSourcererDataView());
+      expect(result.current.indicesExist).toEqual(true);
     });
 
     test('indicesExist should be FALSE if configIndexPatterns is empty', () => {
-      const initState = createInitialState(mockPluginState, {
+      const state = createInitialState(mockPluginState, {
         ...defaultState,
         defaultDataView: {
           ...defaultState.defaultDataView,
@@ -45,8 +55,9 @@ describe('createInitialState', () => {
           patternList: [],
         },
       });
-
-      expect(initState.sourcerer?.sourcererScopes.default.indicesExist).toEqual(false);
+      (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(state));
+      const { result } = renderHook(() => useSourcererDataView());
+      expect(result.current.indicesExist).toEqual(false);
     });
   });
 });

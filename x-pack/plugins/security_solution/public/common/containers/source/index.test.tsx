@@ -6,7 +6,8 @@
  */
 
 import { IndexField } from '../../../../common/search_strategy/index_fields';
-import { getBrowserFields, useIndexFields } from '.';
+import { getBrowserFields } from '.';
+import { useDataView } from './use_data_view';
 import { mockBrowserFields, mocksSource } from './mock';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { createStore, State } from '../../store';
@@ -51,7 +52,7 @@ describe('source/index.tsx', () => {
       expect(fields).toEqual(mockBrowserFields);
     });
   });
-  describe('useIndexFields hook', () => {
+  describe('useDataView hook', () => {
     const sourcererState = mockGlobalState.sourcerer;
     const state: State = {
       ...mockGlobalState,
@@ -99,176 +100,26 @@ describe('source/index.tsx', () => {
         unsubscribe: jest.fn(),
       });
     });
-    it('sets source for default scope', async () => {
+    it('sets field data for data view', async () => {
       await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(
-          () => useIndexFields(SourcererScopeName.default),
-          {
-            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-          }
-        );
-        await waitForNextUpdate();
-        rerender();
-        expect(mockDispatch.mock.calls[0][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-          payload: { id: SourcererScopeName.default, loading: true },
-        });
-        const {
-          type: sourceType,
-          payload: { payload },
-        } = mockDispatch.mock.calls[1][0];
-        expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_SOURCE');
-        expect(payload.id).toEqual(SourcererScopeName.default);
-        expect(payload.indicesExist).toEqual(true);
-        expect(payload.indexPattern.title).toEqual(
-          'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*'
-        );
-      });
-    });
-
-    // TODO: Steph/sourcerer figure out this test
-    // I'm stuck on this test, if someone wants to give it a try?
-    // i get an error relating to the rxjs subscription. i think i need to mock differently
-    // but im having quite a difficult time doing so. if no one else can get this, maybe we should just cover this
-    // case in a cypress test
-    it.skip('sets source for detections scope when signalIndexName is updated', async () => {
-      await act(async () => {
-        const { result, rerender, waitForNextUpdate } = renderHook<
+        const { rerender, waitForNextUpdate, result } = renderHook<
           string,
-          { indexFieldsSearch: (selectedDataViewId: string, newSignalsIndex?: string) => void }
-        >(() => useIndexFields(SourcererScopeName.detections), {
+          { indexFieldsSearch: (id: string) => void }
+        >(() => useDataView(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
         });
         await waitForNextUpdate();
         rerender();
-        act(() => {
-          result.current.indexFieldsSearch(
-            sourcererState.defaultDataView.id,
-            `${sourcererState.signalIndexName}-*`
-          );
-        });
-        // rxjs subscription error thrown here
-        //   TypeError: Cannot read property 'unsubscribe' of undefined
-        //
-        //   337 |           });
-        //   338 |       };
-        // > 339 |       searchSubscription$.current.unsubscribe();
-        //       |                                   ^
-        //   340 |       abortCtrl.current.abort();
-        //   341 |       asyncSearch();
-        //   342 |     },
-        expect(true).toEqual(true);
-      });
-    });
-    it('sets source for detections scope', async () => {
-      await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(
-          () => useIndexFields(SourcererScopeName.detections),
-          {
-            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-          }
-        );
-        await waitForNextUpdate();
-        rerender();
+        act(() => result.current.indexFieldsSearch('neato'));
         expect(mockDispatch.mock.calls[0][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-          payload: { id: SourcererScopeName.detections, loading: true },
+          type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
+          payload: { id: 'neato', loading: true },
         });
-        const {
-          type: sourceType,
-          payload: { payload },
-        } = mockDispatch.mock.calls[1][0];
-        expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_SOURCE');
-        expect(payload.id).toEqual(SourcererScopeName.detections);
-        expect(payload.indicesExist).toEqual(true);
-        expect(payload.indexPattern.title).toEqual(sourcererState.signalIndexName);
-      });
-    });
-    it('when selectedPatterns=[], defaults to the patternList of the selected dataView', async () => {
-      await act(async () => {
-        store = createStore(
-          {
-            ...state,
-            sourcerer: {
-              ...state.sourcerer,
-              sourcererScopes: {
-                ...state.sourcerer.sourcererScopes,
-                [SourcererScopeName.default]: {
-                  ...state.sourcerer.sourcererScopes[SourcererScopeName.default],
-                  selectedDataViewId: 'something-random',
-                  selectedPatterns: [],
-                },
-              },
-            },
-          },
-          SUB_PLUGINS_REDUCER,
-          kibanaObservable,
-          storage
-        );
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(
-          () => useIndexFields(SourcererScopeName.default),
-          {
-            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-          }
-        );
-        await waitForNextUpdate();
-        rerender();
-        expect(mockDispatch.mock.calls[0][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-          payload: { id: SourcererScopeName.default, loading: true },
-        });
-        const {
-          type: sourceType,
-          payload: { payload },
-        } = mockDispatch.mock.calls[1][0];
-        expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_SOURCE');
-        expect(payload.id).toEqual(SourcererScopeName.default);
-        expect(payload.indicesExist).toEqual(true);
-        expect(payload.indexPattern.title).toEqual('random,something');
-      });
-    });
-    it('when selectedPatterns=[] and selectedDataViewId=security-solution, runs getScopePatternListSelection', async () => {
-      await act(async () => {
-        store = createStore(
-          {
-            ...state,
-            sourcerer: {
-              ...state.sourcerer,
-              sourcererScopes: {
-                ...state.sourcerer.sourcererScopes,
-                [SourcererScopeName.default]: {
-                  ...state.sourcerer.sourcererScopes[SourcererScopeName.default],
-                  selectedPatterns: [],
-                },
-              },
-            },
-          },
-          SUB_PLUGINS_REDUCER,
-          kibanaObservable,
-          storage
-        );
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(
-          () => useIndexFields(SourcererScopeName.default),
-          {
-            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-          }
-        );
-        await waitForNextUpdate();
-        rerender();
-        expect(mockDispatch.mock.calls[0][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-          payload: { id: SourcererScopeName.default, loading: true },
-        });
-        const {
-          type: sourceType,
-          payload: { payload },
-        } = mockDispatch.mock.calls[1][0];
-        expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_SOURCE');
-        expect(payload.id).toEqual(SourcererScopeName.default);
-        expect(payload.indicesExist).toEqual(true);
-        expect(payload.indexPattern.title).toEqual(
-          'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*'
-        );
+        const { type: sourceType, payload } = mockDispatch.mock.calls[1][0];
+        expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_DATA_VIEW');
+        expect(payload.id).toEqual('neato');
+        expect(Object.keys(payload.browserFields)).toHaveLength(10);
+        expect(payload.docValueFields).toEqual([{ field: '@timestamp' }]);
       });
     });
   });

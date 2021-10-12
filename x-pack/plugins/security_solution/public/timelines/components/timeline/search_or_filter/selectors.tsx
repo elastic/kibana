@@ -9,7 +9,7 @@ import { State } from '../../../../common/store';
 import { sourcererSelectors } from '../../../../common/store/selectors';
 import {
   SourcererDataView,
-  ManageScope,
+  SourcererScope,
   SourcererScopeName,
 } from '../../../../common/store/sourcerer/model';
 
@@ -17,7 +17,7 @@ export interface SourcererScopeSelector {
   defaultDataView: SourcererDataView;
   kibanaDataViews: SourcererDataView[];
   signalIndexName: string | null;
-  sourcererScope: ManageScope;
+  sourcererScope: SourcererScope;
 }
 
 export const getSourcererScopeSelector = () => {

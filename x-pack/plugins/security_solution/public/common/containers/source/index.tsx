@@ -7,8 +7,7 @@
 
 import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { Subscription } from 'rxjs';
 
@@ -16,19 +15,14 @@ import { useKibana } from '../../lib/kibana';
 import {
   BrowserField,
   BrowserFields,
-  DELETED_SECURITY_SOLUTION_DATA_VIEW,
   DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '../../../../../timelines/common';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 import * as i18n from './translations';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { useSourcererDataView } from '../sourcerer';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -208,176 +202,4 @@ export const useFetchIndex = (
   }, [indexNames, indexFieldsSearch, previousIndexesName]);
 
   return [isLoading, state];
-};
-
-/**
- * Sourcerer specific index fields hook/request
- * sets redux state, returns nothing
- */
-export const useIndexFields = (
-  sourcererScopeName: SourcererScopeName
-): { indexFieldsSearch: (selectedDataViewId: string, newSignalsIndex?: string) => void } => {
-  const { data } = useKibana().services;
-  const abortCtrl = useRef(new AbortController());
-  const searchSubscription$ = useRef(new Subscription());
-  const dispatch = useDispatch();
-  const getKibanaDataViewsSelector = useMemo(
-    () => sourcererSelectors.kibanaDataViewsSelector(),
-    []
-  );
-  const kibanaDataViews = useDeepEqualSelector(getKibanaDataViewsSelector);
-  const { dataViewId, patternList, selectedPatterns } = useSourcererDataView(sourcererScopeName);
-  const { addError, addWarning } = useAppToasts();
-
-  const setLoading = useCallback(
-    (loading: boolean) => {
-      dispatch(sourcererActions.setSourcererScopeLoading({ id: sourcererScopeName, loading }));
-    },
-    [dispatch, sourcererScopeName]
-  );
-
-  const getSignalIndexNameSelector = useMemo(
-    () => sourcererSelectors.signalIndexNameSelector(),
-    []
-  );
-  const signalIndexNameSelector = useDeepEqualSelector(getSignalIndexNameSelector);
-
-  const indexFieldsSearch = useCallback(
-    (selectedDataViewId: string, newSignalsIndex?: string) => {
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-        searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
-            {
-              dataViewId: selectedDataViewId,
-              onlyCheckIfIndicesExist: false,
-            },
-            {
-              abortSignal: abortCtrl.current.signal,
-              strategy: 'indexFields',
-            }
-          )
-          .subscribe({
-            next: (response) => {
-              console.log('response!');
-              // TODO: Steph/sourcerer needs better tests
-              if (isCompleteResponse(response)) {
-                const signalIndexName = signalIndexNameSelector
-                  ? signalIndexNameSelector
-                  : newSignalsIndex ?? '';
-                const newSelectedPatterns = selectedPatterns.filter((pattern) =>
-                  patternList.includes(pattern)
-                );
-                const patternString = newSelectedPatterns.sort().join();
-
-                if (newSignalsIndex != null) {
-                  // if new signal index name is set, there wasn't one before so we need to update detections specifically
-                  // technically, we need to update all scopes as there xare can be new fields in signals index
-                  // once fields are moved to sourcerer.kibanaDataViews we only need to do this for detections scope
-                  dispatch(
-                    sourcererActions.setSource({
-                      scope: {
-                        id: SourcererScopeName.detections,
-                        loading: false,
-                        indicesExist: response.indicesExist.includes(signalIndexName),
-                      },
-
-                      dataView: {
-                        browserFields: getBrowserFields(patternString, response.indexFields),
-                        docValueFields: getDocValueFields(patternString, response.indexFields),
-                        id: selectedDataViewId,
-                        indexPattern: getIndexFields(patternString, response.indexFields),
-                        runtimeMappings: response.runtimeMappings,
-                      },
-                    })
-                  );
-                } else {
-                  dispatch(
-                    sourcererActions.setSource({
-                      scope: {
-                        id: sourcererScopeName,
-                        loading: false,
-                        indicesExist:
-                          // TODO: Steph/sourcerer needs test
-                          sourcererScopeName === SourcererScopeName.detections
-                            ? response.indicesExist.includes(signalIndexName)
-                            : sourcererScopeName === SourcererScopeName.default
-                            ? response.indicesExist.filter((i) => i !== signalIndexName).length > 0
-                            : response.indicesExist.length > 0,
-                      },
-                      dataView: {
-                        browserFields: getBrowserFields(patternString, response.indexFields),
-                        docValueFields: getDocValueFields(patternString, response.indexFields),
-                        id: selectedDataViewId,
-                        indexPattern: getIndexFields(patternString, response.indexFields),
-                        runtimeMappings: response.runtimeMappings,
-                      },
-                    })
-                  );
-                }
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_BEAT_FIELDS);
-                searchSubscription$.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
-                // reload app if security solution data view is deleted
-                return location.reload();
-              }
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_BEAT_FIELDS,
-              });
-              searchSubscription$.current.unsubscribe();
-            },
-          });
-      };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-      asyncSearch();
-    },
-    [
-      addError,
-      addWarning,
-      data.search,
-      dispatch,
-      patternList,
-      selectedPatterns,
-      setLoading,
-      signalIndexNameSelector,
-      sourcererScopeName,
-    ]
-  );
-  const refDataViewId = useRef('');
-  const refSelectedPatterns = useRef([] as string[]);
-
-  useEffect(() => {
-    if (
-      (dataViewId != null && dataViewId !== refDataViewId.current && selectedPatterns.length > 0) ||
-      (selectedPatterns.length > 0 && refSelectedPatterns.current.length === 0)
-    ) {
-      console.log(
-        'useEffect',
-        kibanaDataViews.find((k) => k.id === dataViewId)
-      );
-
-      dispatch(sourcererActions.setFetchFields(dataViewId));
-      indexFieldsSearch(dataViewId);
-    }
-    refSelectedPatterns.current = selectedPatterns;
-    refDataViewId.current = dataViewId;
-  }, [dataViewId, dispatch, indexFieldsSearch, selectedPatterns, kibanaDataViews]);
-
-  useEffect(() => {
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, []);
-
-  return { indexFieldsSearch };
 };

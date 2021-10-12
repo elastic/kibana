@@ -16,8 +16,8 @@ describe('Sourcerer selectors', () => {
       const mapStateToProps = getSelectedDataViewSelector();
       expect(mapStateToProps(mockGlobalState, SourcererScopeName.default).selectedPatterns).toEqual(
         [
-          ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
           '-*elastic-cloud-logs-*',
+          ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
         ]
       );
     });

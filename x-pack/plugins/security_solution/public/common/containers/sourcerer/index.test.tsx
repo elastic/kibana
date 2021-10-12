@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 import { getScopeFromPath, useInitSourcerer } from '.';
@@ -30,7 +31,7 @@ import {
   mockSourcererState,
 } from '../../mock';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { isSignalIndex } from '../../store/sourcerer/helpers';
+import { postSourcererDataView } from './api';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -42,6 +43,7 @@ const mockRouteSpy: RouteSpyState = {
 const mockDispatch = jest.fn();
 const mockUseUserInfo = useUserInfo as jest.Mock;
 jest.mock('../../../detections/components/user_info');
+jest.mock('./api');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
@@ -53,6 +55,7 @@ jest.mock('react-redux', () => {
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
 }));
+
 jest.mock('../../lib/kibana', () => ({
   useToasts: jest.fn().mockReturnValue({
     addError: jest.fn(),
@@ -120,16 +123,12 @@ describe('Sourcerer Hooks', () => {
       });
       await waitForNextUpdate();
       rerender();
-      expect(mockDispatch).toBeCalledTimes(3);
+      expect(mockDispatch).toBeCalledTimes(2);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-        payload: { id: 'default', loading: true },
+        type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
+        payload: { id: 'security-solution', loading: true },
       });
       expect(mockDispatch.mock.calls[1][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-        payload: { id: 'timeline', loading: true },
-      });
-      expect(mockDispatch.mock.calls[2][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'timeline',
@@ -150,6 +149,22 @@ describe('Sourcerer Hooks', () => {
     });
   });
   it('sets signal index name', async () => {
+    const mockNewDataViews = {
+      defaultDataView: {
+        id: DEFAULT_DATA_VIEW_ID,
+        title: mockSourcererState.defaultDataView.title,
+        patternList: mockSourcererState.defaultDataView.patternList,
+      },
+      kibanaDataViews: [
+        {
+          id: DEFAULT_DATA_VIEW_ID,
+          title: mockSourcererState.defaultDataView.title,
+          patternList: mockSourcererState.defaultDataView.patternList,
+        },
+      ],
+    };
+    (postSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
+
     store = createStore(
       {
         ...state,
@@ -179,26 +194,30 @@ describe('Sourcerer Hooks', () => {
       });
       await waitForNextUpdate();
       rerender();
-      expect(mockDispatch.mock.calls[3][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-        payload: { loading: true },
-      });
-      expect(mockDispatch.mock.calls[2][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
-        payload: {
-          id: 'timeline',
-          selectedDataViewId: mockSourcererState.defaultDataView.id,
-          selectedPatterns: [
-            mockSourcererState.signalIndexName,
-            ...mockSourcererState.defaultDataView.patternList.filter(
-              (p) => !isSignalIndex(p, mockSourcererState.signalIndexName)
-            ),
-          ].sort(),
-        },
-      });
-      expect(mockDispatch.mock.calls[4][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
-        payload: { signalIndexName: mockSourcererState.signalIndexName },
+      await waitFor(() => {
+        expect(mockDispatch.mock.calls[2][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+          payload: { loading: true },
+        });
+        expect(mockDispatch.mock.calls[3][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
+          payload: { signalIndexName: mockSourcererState.signalIndexName },
+        });
+        expect(mockDispatch.mock.calls[4][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
+          payload: {
+            id: mockSourcererState.defaultDataView.id,
+            loading: true,
+          },
+        });
+        expect(mockDispatch.mock.calls[5][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_DATA_VIEWS',
+          payload: mockNewDataViews,
+        });
+        expect(mockDispatch.mock.calls[6][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+          payload: { loading: false },
+        });
       });
     });
   });
@@ -217,7 +236,7 @@ describe('Sourcerer Hooks', () => {
       );
       await waitForNextUpdate();
       rerender();
-      expect(mockDispatch.mock.calls[3][0]).toEqual({
+      expect(mockDispatch.mock.calls[2][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'detections',

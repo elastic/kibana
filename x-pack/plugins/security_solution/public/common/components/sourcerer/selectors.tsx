@@ -7,10 +7,10 @@
 
 import { State } from '../../store';
 import { sourcererSelectors } from '../../store/sourcerer';
-import { ManageScope, SourcererModel, SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScope, SourcererModel, SourcererScopeName } from '../../store/sourcerer/model';
 
 export interface SourcererScopeSelector extends Omit<SourcererModel, 'sourcererScopes'> {
-  sourcererScope: ManageScope;
+  sourcererScope: SourcererScope;
 }
 
 export const getSourcererScopeSelector = () => {

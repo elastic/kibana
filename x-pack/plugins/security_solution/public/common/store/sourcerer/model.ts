@@ -6,13 +6,13 @@
  */
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import {
   BrowserFields,
   DocValueFields,
   EMPTY_BROWSER_FIELDS,
   EMPTY_DOCVALUE_FIELD,
-  EMPTY_INDEX_PATTERN,
+  EMPTY_INDEX_FIELDS,
 } from '../../../../../timelines/common';
 
 export type ErrorModel = Error[];
@@ -23,38 +23,37 @@ export enum SourcererScopeName {
   timeline = 'timeline',
 }
 
-export interface ManageScope {
+export interface SourcererScope {
   id: SourcererScopeName;
-  indicesExist: boolean | undefined | null;
   loading: boolean;
   selectedDataViewId: string;
   selectedPatterns: string[];
 }
 
-export interface ManageScopeInit extends Partial<ManageScope> {
+export interface SourcererScopeInit extends Partial<SourcererScope> {
   id: SourcererScopeName;
 }
 
-export type SourcererScopeById = Record<SourcererScopeName, ManageScope>;
+export type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
 
 export interface SourcererDataView {
-  fetchedFields: boolean;
-  /** Uniquely identifies a Kibana Index Pattern */
-  id: string;
-  /**  list of active patterns that return data  */
-  patternList: string[];
   /**
    * title of Kibana Index Pattern
    * title also serves as "all pattern list", including inactive
    */
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
+  /** Uniquely identifies a Kibana Data View */
+  id: string;
+  indexFields: FieldSpec[];
+  /** set when data view fields are fetched */
+  loading: boolean;
+  /**  list of active patterns that return data  */
+  patternList: string[];
+  /**  list of all patterns as comma separated string  */
   title: string;
   // Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
   runtimeMappings: MappingRuntimeFields;
-  // the index pattern value passed to the search to make the query
-  // includes fields and a title with active index names
-  indexPattern: Omit<IIndexPattern, 'fieldFormatMap'>;
 }
 
 // ManageSourcerer
@@ -65,27 +64,24 @@ export interface SourcererModel {
   sourcererScopes: SourcererScopeById;
 }
 
-export const initSourcererScope: Omit<ManageScope, 'id'> = {
+export const initSourcererScope: Omit<SourcererScope, 'id'> = {
   loading: false,
-  indicesExist: false,
   selectedDataViewId: '',
   selectedPatterns: [],
 };
 export const initDataView = {
-  fetchedFields: false,
   browserFields: EMPTY_BROWSER_FIELDS,
   docValueFields: EMPTY_DOCVALUE_FIELD,
   id: '',
-  indexPattern: EMPTY_INDEX_PATTERN,
+  indexFields: EMPTY_INDEX_FIELDS,
+  loading: false,
   patternList: [],
   runtimeMappings: {},
   title: '',
 };
 
 export const initialSourcererState: SourcererModel = {
-  defaultDataView: {
-    ...initDataView,
-  },
+  defaultDataView: initDataView,
   kibanaDataViews: [],
   signalIndexName: null,
   sourcererScopes: {
