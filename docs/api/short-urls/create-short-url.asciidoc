@@ -81,6 +81,6 @@ The API returns the following:
 --------------------------------------------------
 
 <1> A random ID is automatically generated.
-<2> A random human-readable slug is automatically generated if the `humanReadableSlug` parameter is set to `true`.
+<2> A random human-readable slug is automatically generated if the `humanReadableSlug` parameter is set to `true`. If set to `false` a random short string is generated.
 <3> The version of {kib} when short URL was created is stored.
 <4> Locator params provided as `params` property are stored.
