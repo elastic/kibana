@@ -32,19 +32,22 @@ import { CurationActionBar } from './curation_action_bar';
 import { CurationResultPanel } from './curation_result_panel';
 
 import { CurationSuggestionLogic } from './curation_suggestion_logic';
-import { DATA } from './temp_data';
 
 export const CurationSuggestion: React.FC = () => {
   const { query } = useDecodedParams();
   const { engine, isMetaEngine } = useValues(EngineLogic);
   const curationSuggestionLogic = CurationSuggestionLogic({ query });
   const { loadSuggestion } = useActions(curationSuggestionLogic);
-  const { suggestion, suggestedPromotedDocuments, curation, dataLoading } =
-    useValues(curationSuggestionLogic);
+  const { suggestion, dataLoading } = useValues(curationSuggestionLogic);
   const [showOrganicResults, setShowOrganicResults] = useState(false);
-  const currentOrganicResults = [...DATA].splice(5, 4);
-  const proposedOrganicResults = [...DATA].splice(2, 4);
-  const existingCurationResults = curation ? curation.promoted.map(convertToResultFormat) : [];
+  const currentOrganicResults = suggestion?.curation?.organic || [];
+  const proposedOrganicResults = suggestion?.organic || [];
+  const existingCurationResults = suggestion?.curation
+    ? suggestion.curation.promoted.map(convertToResultFormat)
+    : [];
+  const suggestedPromotedDocuments = suggestion?.promoted
+    ? suggestion?.promoted.map(convertToResultFormat)
+    : [];
 
   const suggestionQuery = suggestion?.query || '';
 

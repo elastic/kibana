@@ -89,20 +89,79 @@ export function registerSearchRelevanceSuggestionsRoutes({
           engineName: schema.string(),
           query: schema.string(),
         }),
-        body: schema.object({
-          page: schema.object({
-            current: schema.number(),
-            size: schema.number(),
-          }),
-          filters: schema.object({
-            status: schema.arrayOf(schema.string()),
-            type: schema.string(),
-          }),
+        query: schema.object({
+          type: schema.string(),
         }),
       },
     },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/:query',
-    })
+    // enterpriseSearchRequestHandler.createRequest({
+    //   path: '/as/engines/:engineName/search_relevance_suggestions/:query',
+    // })
+    (_context, request, response) => {
+      return response.custom({
+        statusCode: 200,
+        body: {
+          query: 'foo',
+          status: 'pending',
+          updated_at: '2021-07-08T14:35:50Z',
+          operation: 'create',
+          suggestion: {
+            promoted: [
+              {
+                id: '1',
+              },
+              {
+                id: '2',
+              },
+              {
+                id: '3',
+              },
+            ],
+            organic: [
+              {
+                id: {
+                  raw: '1',
+                },
+                _meta: {
+                  id: '1',
+                  engine: 'some-engine',
+                },
+              },
+              {
+                id: {
+                  raw: '2',
+                },
+                _meta: {
+                  id: '2',
+                  engine: 'some-engine',
+                },
+              },
+            ],
+          },
+          curation: {
+            id: 'cur-6155e69c7a2f2e4f756303fd',
+            queries: ['foo'],
+            promoted: [
+              {
+                id: '5',
+              },
+            ],
+            hidden: [],
+            last_updated: 'September 30, 2021 at 04:32PM',
+            organic: [
+              {
+                id: {
+                  raw: '1',
+                },
+                _meta: {
+                  id: '1',
+                  engine: 'some-engine',
+                },
+              },
+            ],
+          },
+        },
+      });
+    }
   );
 }

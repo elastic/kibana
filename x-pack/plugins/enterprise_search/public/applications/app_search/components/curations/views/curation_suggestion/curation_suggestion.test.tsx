@@ -26,44 +26,29 @@ describe('CurationSuggestion', () => {
     suggestion: {
       query: 'foo',
       updated_at: '2021-07-08T14:35:50Z',
-      promoted: ['1', '2', '3'],
-    },
-    suggestedPromotedDocuments: [
-      {
-        id: {
-          raw: '1',
-        },
-        _meta: {
-          id: '1',
-          engine: 'some-engine',
-        },
-      },
-      {
-        id: {
-          raw: '2',
-        },
-        _meta: {
-          id: '2',
-          engine: 'some-engine',
-        },
-      },
-      {
-        id: {
-          raw: '3',
-        },
-        _meta: {
-          id: '3',
-          engine: 'some-engine',
-        },
-      },
-    ],
-    curation: {
-      promoted: [
+      promoted: [{ id: '4', foo: 'foo' }],
+      organic: [
         {
-          id: '4',
-          foo: 'foo',
+          id: { raw: '3', snippet: null },
+          foo: { raw: 'bar', snippet: null },
+          _meta: { id: '3' },
         },
       ],
+      curation: {
+        promoted: [{ id: '1', foo: 'foo' }],
+        organic: [
+          {
+            id: { raw: '5', snippet: null },
+            foo: { raw: 'bar', snippet: null },
+            _meta: { id: '5' },
+          },
+          {
+            id: { raw: '6', snippet: null },
+            foo: { raw: 'bar', snippet: null },
+            _meta: { id: '6' },
+          },
+        ],
+      },
     },
     isMetaEngine: true,
     engine: {
@@ -99,7 +84,26 @@ describe('CurationSuggestion', () => {
   it('shows existing promoted documents', () => {
     const wrapper = shallow(<CurationSuggestion />);
     const suggestedResultsPanel = wrapper.find(CurationResultPanel).at(0);
-    // gets populated from 'curation' in state, and converted to results format (i.e, has raw properties, etc.)
+    expect(suggestedResultsPanel.prop('results')).toEqual([
+      {
+        id: {
+          raw: '1',
+          snippet: null,
+        },
+        foo: {
+          raw: 'foo',
+          snippet: null,
+        },
+        _meta: {
+          id: '1',
+        },
+      },
+    ]);
+  });
+
+  it('shows suggested promoted documents', () => {
+    const wrapper = shallow(<CurationSuggestion />);
+    const suggestedResultsPanel = wrapper.find(CurationResultPanel).at(1);
     expect(suggestedResultsPanel.prop('results')).toEqual([
       {
         id: {
@@ -115,12 +119,6 @@ describe('CurationSuggestion', () => {
         },
       },
     ]);
-  });
-
-  it('shows suggested promoted documents', () => {
-    const wrapper = shallow(<CurationSuggestion />);
-    const suggestedResultsPanel = wrapper.find(CurationResultPanel).at(1);
-    expect(suggestedResultsPanel.prop('results')).toEqual(values.suggestedPromotedDocuments);
   });
 
   it('displays the query in the title', () => {
@@ -142,9 +140,15 @@ describe('CurationSuggestion', () => {
   it('displays proposed organic results', () => {
     const wrapper = shallow(<CurationSuggestion />);
     wrapper.find('[data-test-subj="showOrganicResults"]').simulate('click');
-    expect(wrapper.find('[data-test-subj="proposedOrganicResults"]').find(Result).length).toBe(4);
-    expect(wrapper.find(Result).at(0).prop('isMetaEngine')).toEqual(true);
-    expect(wrapper.find(Result).at(0).prop('schemaForTypeHighlights')).toEqual(
+    const resultsWrapper = wrapper.find('[data-test-subj="proposedOrganicResults"]').find(Result);
+    expect(resultsWrapper.length).toBe(1);
+    expect(resultsWrapper.find(Result).at(0).prop('result')).toEqual({
+      id: { raw: '3', snippet: null },
+      foo: { raw: 'bar', snippet: null },
+      _meta: { id: '3' },
+    });
+    expect(resultsWrapper.find(Result).at(0).prop('isMetaEngine')).toEqual(true);
+    expect(resultsWrapper.find(Result).at(0).prop('schemaForTypeHighlights')).toEqual(
       values.engine.schema
     );
   });
@@ -152,9 +156,15 @@ describe('CurationSuggestion', () => {
   it('displays current organic results', () => {
     const wrapper = shallow(<CurationSuggestion />);
     wrapper.find('[data-test-subj="showOrganicResults"]').simulate('click');
-    expect(wrapper.find('[data-test-subj="currentOrganicResults"]').find(Result).length).toBe(4);
-    expect(wrapper.find(Result).at(0).prop('isMetaEngine')).toEqual(true);
-    expect(wrapper.find(Result).at(0).prop('schemaForTypeHighlights')).toEqual(
+    const resultWrapper = wrapper.find('[data-test-subj="currentOrganicResults"]').find(Result);
+    expect(resultWrapper.length).toBe(2);
+    expect(resultWrapper.find(Result).at(0).prop('result')).toEqual({
+      id: { raw: '5', snippet: null },
+      foo: { raw: 'bar', snippet: null },
+      _meta: { id: '5' },
+    });
+    expect(resultWrapper.find(Result).at(0).prop('isMetaEngine')).toEqual(true);
+    expect(resultWrapper.find(Result).at(0).prop('schemaForTypeHighlights')).toEqual(
       values.engine.schema
     );
   });

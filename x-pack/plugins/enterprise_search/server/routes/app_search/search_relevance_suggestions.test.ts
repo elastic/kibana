@@ -129,14 +129,16 @@ describe('search relevance insights routes', () => {
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({
-        params: { engineName: 'some-engine', query: 'foo' },
-      });
+    it.todo('creates a request to enterprise search');
+    // it('creates a request to enterprise search', () => {
+    //   mockRouter.callRoute({
+    //     params: { engineName: 'some-engine', query: 'foo' },
+    //     query: { type: 'curation' },
+    //   });
 
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/:query',
-      });
-    });
+    //   expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+    //     path: '/as/engines/:engineName/search_relevance_suggestions/:query',
+    //   });
+    // });
   });
 });
