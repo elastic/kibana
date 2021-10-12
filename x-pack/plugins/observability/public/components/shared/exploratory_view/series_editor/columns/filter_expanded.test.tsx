@@ -26,7 +26,7 @@ describe('FilterExpanded', function () {
         series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        filters={[]}
+        baseFilters={[]}
       />,
       { initSeries }
     );
@@ -45,7 +45,7 @@ describe('FilterExpanded', function () {
         series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        filters={[]}
+        baseFilters={[]}
       />,
       { initSeries }
     );
@@ -69,7 +69,7 @@ describe('FilterExpanded', function () {
         series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        filters={[]}
+        baseFilters={[]}
       />,
       { initSeries }
     );
@@ -99,7 +99,7 @@ describe('FilterExpanded', function () {
         series={mockUxSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        filters={[]}
+        baseFilters={[]}
       />,
       { initSeries }
     );

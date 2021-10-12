@@ -26,13 +26,6 @@ Toggling this causes the server to regenerate assets on the next startup,
 which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
 
-| `csp.rules:`
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
-A https://w3c.github.io/webappsec-csp/[Content Security Policy] template
-that disables certain unnecessary and potentially insecure capabilities in
-the browser. It is strongly recommended that you keep the default CSP rules
-that ship with {kib}.
-
 | `csp.script_src:`
 | Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src[Content Security Policy `script-src` directive].
 
@@ -428,14 +421,14 @@ in a manner that is inconsistent with `/proc/self/cgroup`.
 
 |[[savedObjects-maxImportExportSize]] `savedObjects.maxImportExportSize:`
  | The maximum count of saved objects that can be imported or exported.
-This setting exists to prevent the {kib} server from runnning out of memory when handling
+This setting exists to prevent the {kib} server from running out of memory when handling
 large numbers of saved objects. It is recommended to only raise this setting if you are
 confident your server can hold this many objects in memory.
 *Default: `10000`*
 
 |[[savedObjects-maxImportPayloadBytes]] `savedObjects.maxImportPayloadBytes:`
  | The maximum byte size of a saved objects import that the {kib} server will accept.
-This setting exists to prevent the {kib} server from runnning out of memory when handling
+This setting exists to prevent the {kib} server from running out of memory when handling
 a large import payload. Note that this setting overrides the more general
 <<server-maxPayload, `server.maxPayload`>> for saved object imports only.
 *Default: `26214400`*
@@ -502,8 +495,7 @@ To disable, set to `null`. *Default:* `null`
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
 {kib} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors:
-'self'` directive to the `Content-Security-Policy` response header (if you are using the default CSP rules), and adds the `X-Frame-Options:
-SAMEORIGIN` response header. *Default:* `false`
+'self'` directive to the `Content-Security-Policy` response header and adds the `X-Frame-Options: SAMEORIGIN` response header. *Default:* `false`
 
 | `server.customResponseHeaders:` {ess-icon}
  | Header names and values to
