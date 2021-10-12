@@ -41,25 +41,25 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('renders case options in the overflow menu', async () => {
         await observability.alerts.common.openActionsMenuForRow(0);
         await retry.try(async () => {
-          await observability.alerts.common.getAddToExistingCaseSelectorOrFail();
-          await observability.alerts.common.getAddToNewCaseSelectorOrFail();
+          await observability.alerts.addToCase.getAddToExistingCaseSelectorOrFail();
+          await observability.alerts.addToCase.getAddToNewCaseSelectorOrFail();
         });
       });
 
       it('opens a flyout when Add to new case is clicked', async () => {
         await retry.try(async () => {
           await observability.alerts.common.openActionsMenuForRow(0);
-          await observability.alerts.common.addToNewCaseButtonClick();
-          await observability.alerts.common.getCreateCaseFlyoutOrFail();
-          await observability.alerts.common.closeFlyout();
+          await observability.alerts.addToCase.addToNewCaseButtonClick();
+          await observability.alerts.addToCase.getCreateCaseFlyoutOrFail();
+          await observability.alerts.addToCase.closeFlyout();
         });
       });
 
       it('opens a modal when Add to existing case is clicked', async () => {
         await retry.try(async () => {
           await observability.alerts.common.openActionsMenuForRow(0);
-          await observability.alerts.common.addToExistingCaseButtonClick();
-          await observability.alerts.common.getAddtoExistingCaseModalOrFail();
+          await observability.alerts.addToCase.addToExistingCaseButtonClick();
+          await observability.alerts.addToCase.getAddtoExistingCaseModalOrFail();
         });
       });
     });
@@ -82,8 +82,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('does not render case options in the overflow menu', async () => {
         await observability.alerts.common.openActionsMenuForRow(0);
         await retry.try(async () => {
-          await observability.alerts.common.missingAddToExistingCaseSelectorOrFail();
-          await observability.alerts.common.missingAddToNewCaseSelectorOrFail();
+          await observability.alerts.addToCase.missingAddToExistingCaseSelectorOrFail();
+          await observability.alerts.addToCase.missingAddToNewCaseSelectorOrFail();
         });
       });
     });
