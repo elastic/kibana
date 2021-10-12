@@ -40,7 +40,7 @@ export interface ReportingPanelProps {
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
   layoutId?: string;
   objectId?: string;
-  getJobParams: () => Omit<BaseParams, 'browserTimezone' | 'version'>;
+  getJobParams: (forShareUrl?: boolean) => Omit<BaseParams, 'browserTimezone' | 'version'>;
   options?: ReactElement<any> | null;
   isDirty?: boolean;
   onClose?: () => void;
@@ -75,7 +75,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private getAbsoluteReportGenerationUrl = (props: Props) => {
     const relativePath = this.props.apiClient.getReportingJobPath(
       props.reportType,
-      this.props.apiClient.getDecoratedJobParams(this.props.getJobParams())
+      this.props.apiClient.getDecoratedJobParams(this.props.getJobParams(true))
     );
     return url.resolve(window.location.href, relativePath); // FIXME: '(from: string, to: string): string' is deprecated
   };
@@ -170,7 +170,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
           <EuiSpacer size="s" />
 
           <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
-            {(copy) => (
+            {copy => (
               <EuiButton fullWidth onClick={copy} size="s">
                 <FormattedMessage
                   id="xpack.reporting.panelContent.copyUrlButtonLabel"
