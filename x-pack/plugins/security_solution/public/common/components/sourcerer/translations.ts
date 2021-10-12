@@ -11,6 +11,13 @@ export const CALL_OUT_TITLE = i18n.translate('xpack.securitySolution.indexPatter
   defaultMessage: 'Data view cannot be modified on this page',
 });
 
+export const CALL_OUT_TIMELINE_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.callOutTimelineTitle',
+  {
+    defaultMessage: 'Data view cannot be modified',
+  }
+);
+
 export const CALL_OUT_MESSAGE = i18n.translate(
   'xpack.securitySolution.indexPatterns.callOutMessage',
   {
@@ -18,8 +25,8 @@ export const CALL_OUT_MESSAGE = i18n.translate(
   }
 );
 
-export const SOURCERER = i18n.translate('xpack.securitySolution.indexPatterns.dataSourcesLabel', {
-  defaultMessage: 'Data sources',
+export const DATA_VIEW = i18n.translate('xpack.securitySolution.indexPatterns.dataViewLabel', {
+  defaultMessage: 'Data view',
 });
 
 export const MODIFIED_BADGE_TITLE = i18n.translate(
@@ -30,16 +37,16 @@ export const MODIFIED_BADGE_TITLE = i18n.translate(
 );
 
 export const ALERTS_BADGE_TITLE = i18n.translate(
-  'xpack.securitySolution.indexPatterns.modifiedBadgeTitle',
+  'xpack.securitySolution.indexPatterns.alertsBadgeTitle',
   {
     defaultMessage: 'Alerts',
   }
 );
 
-export const SIEM_DATA_VIEW_LABEL = i18n.translate(
-  'xpack.securitySolution.indexPatterns.kipLabel',
+export const SECURITY_DEFAULT_DATA_VIEW_LABEL = i18n.translate(
+  'xpack.securitySolution.indexPatterns.securityDefaultDataViewLabel',
   {
-    defaultMessage: 'Default Security Kibana Index Pattern',
+    defaultMessage: 'Security Default Data View',
   }
 );
 
@@ -50,9 +57,12 @@ export const SIEM_SECURITY_DATA_VIEW_LABEL = i18n.translate(
   }
 );
 
-export const SELECT_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.help', {
-  defaultMessage: 'Data sources selection',
-});
+export const SELECT_DATA_VIEW = i18n.translate(
+  'xpack.securitySolution.indexPatterns.selectDataView',
+  {
+    defaultMessage: 'Data view selection',
+  }
+);
 
 export const SAVE_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.save', {
   defaultMessage: 'Save',

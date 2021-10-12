@@ -229,16 +229,16 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
     const trigger = useMemo(
       () => (
         <StyledButton
-          aria-label={i18n.SOURCERER}
+          aria-label={i18n.DATA_VIEW}
           data-test-subj="sourcerer-trigger"
           flush="left"
           iconSide="right"
           iconType="arrowDown"
           isLoading={loading}
           onClick={setPopoverIsOpenCb}
-          title={i18n.SOURCERER}
+          title={i18n.DATA_VIEW}
         >
-          {i18n.SOURCERER}
+          {i18n.DATA_VIEW}
           {isModified && <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>}
           {isOnlyDetectionAlerts && <StyledBadge>{i18n.ALERTS_BADGE_TITLE}</StyledBadge>}
         </StyledButton>
@@ -264,7 +264,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
               inputDisplay:
                 id === defaultDataView.id ? (
                   <span data-test-subj="security-option-super">
-                    <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_DATA_VIEW_LABEL}
+                    <EuiIcon type="logoSecurity" size="s" /> {i18n.SECURITY_DEFAULT_DATA_VIEW_LABEL}
                     {isModified && id === dataViewId && (
                       <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>
                     )}
@@ -327,16 +327,19 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
           isOpen={isPopoverOpen}
           closePopover={handleClosePopOver}
           display="block"
-          panelPaddingSize="s"
           repositionOnScroll
           ownFocus
         >
           <PopoverContent>
             <EuiPopoverTitle>
-              <>{i18n.SELECT_INDEX_PATTERNS}</>
+              <>{i18n.SELECT_DATA_VIEW}</>
             </EuiPopoverTitle>
-            {isAlertsOrRulesDetailsPage && (
-              <EuiCallOut size="s" iconType="iInCircle" title={i18n.CALL_OUT_TITLE} />
+            {isOnlyDetectionAlerts && (
+              <EuiCallOut
+                size="s"
+                iconType="iInCircle"
+                title={isTimelineSourcerer ? i18n.CALL_OUT_TIMELINE_TITLE : i18n.CALL_OUT_TITLE}
+              />
             )}
             <EuiSpacer size="s" />
             <EuiForm component="form">
@@ -363,6 +366,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
                 />
               </StyledFormRow>
 
+              <EuiSpacer size="m" />
+
               <StyledButton
                 color="text"
                 onClick={onExpandAdvancedOptionsClicked}
@@ -370,6 +375,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
               >
                 {i18n.INDEX_PATTERNS_ADVANCED_OPTIONS_TITLE}
               </StyledButton>
+              {expandAdvancedOptions && <EuiSpacer size="m" />}
               <FormRow
                 label={i18n.INDEX_PATTERNS_LABEL}
                 $expandAdvancedOptions={expandAdvancedOptions}
