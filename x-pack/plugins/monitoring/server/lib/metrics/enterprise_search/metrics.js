@@ -13,16 +13,6 @@ const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.entSearch.pe
   defaultMessage: '/s',
 });
 
-const bytesPerSecondUnitLabel = i18n.translate(
-  'xpack.monitoring.metrics.entSearch.bytesPerSecondUnitLabel',
-  { defaultMessage: 'bytes/s' }
-);
-
-const requestPerSecondUnitLabel = i18n.translate(
-  'xpack.monitoring.metrics.entSearch.requestPerSecondUnitLabel',
-  { defaultMessage: 'req/s' }
-);
-
 export const metrics = {
   app_search_total_engines: new EnterpriseSearchMetric({
     field: 'enterprisesearch.stats.product_usage.app_search.total_engines',
@@ -224,7 +214,7 @@ export const metrics = {
       }
     ),
     format: LARGE_BYTES,
-    units: bytesPerSecondUnitLabel,
+    units: perSecondUnitLabel,
   }),
 
   enterprise_search_http_bytes_sent_total: new EnterpriseSearchMetric({
@@ -257,7 +247,7 @@ export const metrics = {
       }
     ),
     format: LARGE_BYTES,
-    units: bytesPerSecondUnitLabel,
+    units: perSecondUnitLabel,
   }),
 
   enterprise_search_http_2xx_rate: new EnterpriseSearchMetric({
@@ -271,7 +261,7 @@ export const metrics = {
       defaultMessage: 'Outgoing HTTP 2xx responses across all instances in the deployment.',
     }),
     format: LARGE_FLOAT,
-    units: requestPerSecondUnitLabel,
+    units: perSecondUnitLabel,
   }),
 
   enterprise_search_http_3xx_rate: new EnterpriseSearchMetric({
@@ -285,7 +275,7 @@ export const metrics = {
       defaultMessage: 'Outgoing HTTP 3xx responses across all instances in the deployment.',
     }),
     format: LARGE_FLOAT,
-    units: requestPerSecondUnitLabel,
+    units: perSecondUnitLabel,
   }),
 
   enterprise_search_http_4xx_rate: new EnterpriseSearchMetric({
@@ -299,7 +289,7 @@ export const metrics = {
       defaultMessage: 'Outgoing HTTP 4xx responses across all instances in the deployment.',
     }),
     format: LARGE_FLOAT,
-    units: requestPerSecondUnitLabel,
+    units: perSecondUnitLabel,
   }),
 
   enterprise_search_http_5xx_rate: new EnterpriseSearchMetric({
@@ -313,6 +303,6 @@ export const metrics = {
       defaultMessage: 'Outgoing HTTP 5xx responses across all instances in the deployment.',
     }),
     format: LARGE_FLOAT,
-    units: requestPerSecondUnitLabel,
+    units: perSecondUnitLabel,
   }),
 };
