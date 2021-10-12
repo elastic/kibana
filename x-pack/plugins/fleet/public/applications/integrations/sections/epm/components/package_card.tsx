@@ -7,7 +7,17 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiCard } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+  EuiBadge,
+  EuiToolTip,
+  EuiSpacer,
+  EuiLink,
+} from '@elastic/eui';
 
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
@@ -16,10 +26,13 @@ import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from './release_badge'
 
 export type PackageCardProps = IntegrationCardItem;
 
-// adding the `href` causes EuiCard to use a `a` instead of a `button`
-// `a` tags use `euiLinkColor` which results in blueish Badge text
-const Card = styled(EuiCard)`
-  color: inherit;
+const Link = styled(EuiLink)`
+  &.euiLink {
+    color: inherit;
+  }
+  &.euiLink:hover {
+    text-decoration: none;
+  }
 `;
 
 export function PackageCard({
@@ -32,27 +45,49 @@ export function PackageCard({
   url,
   release,
 }: PackageCardProps) {
-  const betaBadgeLabel = release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined;
-  const betaBadgeLabelTooltipContent =
-    release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined;
+  let releaseBadge: React.ReactNode | null = null;
+
+  if (release && release !== 'ga') {
+    releaseBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiToolTip display="inlineBlock" content={RELEASE_BADGE_DESCRIPTION[release]}>
+            <EuiBadge color="hollow">{RELEASE_BADGE_LABEL[release]}</EuiBadge>
+          </EuiToolTip>
+        </span>
+      </EuiFlexItem>
+    );
+  }
 
   return (
-    <Card
-      title={title || ''}
-      description={description}
-      icon={
-        <CardIcon
-          icons={icons}
-          packageName={name}
-          integrationName={integration}
-          version={version}
-          size="xl"
-        />
-      }
-      href={url}
-      betaBadgeLabel={betaBadgeLabel}
-      betaBadgeTooltipContent={betaBadgeLabelTooltipContent}
-      target={url.startsWith('http') || url.startsWith('https') ? '_blank' : undefined}
-    />
+    <Link href={url}>
+      <EuiPanel paddingSize="m">
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <CardIcon
+              icons={icons}
+              packageName={name}
+              integrationName={integration}
+              version={version}
+              size="xl"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h3>{title}</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">{description}</EuiText>
+              </EuiFlexItem>
+              {releaseBadge}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </Link>
   );
 }
