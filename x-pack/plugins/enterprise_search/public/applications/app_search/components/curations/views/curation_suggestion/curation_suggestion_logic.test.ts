@@ -357,6 +357,42 @@ describe('CurationSuggestionLogic', () => {
         );
       });
 
+      describe('when a suggestion is a "delete" suggestion', () => {
+        const deleteSuggestion = {
+          ...suggestion,
+          operation: 'delete',
+          promoted: [],
+          curation_id: 'cur-6155e69c7a2f2e4f756303fd',
+        };
+
+        it('will show a confirm message before applying, and redirect a user back to the curations page, rather than the curation details page', async () => {
+          jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
+          http.put.mockReturnValueOnce(
+            Promise.resolve({
+              results: [{ ...suggestion, status: 'accepted', curation_id: undefined }],
+            })
+          );
+          mountLogic({
+            suggestion: deleteSuggestion,
+          });
+          CurationSuggestionLogic.actions.acceptSuggestion();
+          await nextTick();
+
+          expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
+        });
+
+        it('will do nothing if the user does not confirm', async () => {
+          jest.spyOn(global, 'confirm').mockReturnValueOnce(false);
+          mountLogic({
+            suggestion: deleteSuggestion,
+          });
+          CurationSuggestionLogic.actions.acceptSuggestion();
+          await nextTick();
+          expect(http.put).not.toHaveBeenCalled();
+          expect(navigateToUrl).not.toHaveBeenCalled();
+        });
+      });
+
       itHandlesErrors(http.put, () => {
         CurationSuggestionLogic.actions.acceptSuggestion();
       });
@@ -402,6 +438,42 @@ describe('CurationSuggestionLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith(
           '/engines/some-engine/curations/cur-6155e69c7a2f2e4f756303fd'
         );
+      });
+
+      describe('when a suggestion is a "delete" suggestion', () => {
+        const deleteSuggestion = {
+          ...suggestion,
+          operation: 'delete',
+          promoted: [],
+          curation_id: 'cur-6155e69c7a2f2e4f756303fd',
+        };
+
+        it('will show a confirm message before applying, and redirect a user back to the curations page, rather than the curation details page', async () => {
+          jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
+          http.put.mockReturnValueOnce(
+            Promise.resolve({
+              results: [{ ...suggestion, status: 'accepted', curation_id: undefined }],
+            })
+          );
+          mountLogic({
+            suggestion: deleteSuggestion,
+          });
+          CurationSuggestionLogic.actions.acceptAndAutomateSuggestion();
+          await nextTick();
+
+          expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
+        });
+
+        it('will do nothing if the user does not confirm', async () => {
+          jest.spyOn(global, 'confirm').mockReturnValueOnce(false);
+          mountLogic({
+            suggestion: deleteSuggestion,
+          });
+          CurationSuggestionLogic.actions.acceptAndAutomateSuggestion();
+          await nextTick();
+          expect(http.put).not.toHaveBeenCalled();
+          expect(navigateToUrl).not.toHaveBeenCalled();
+        });
       });
 
       itHandlesErrors(http.put, () => {
