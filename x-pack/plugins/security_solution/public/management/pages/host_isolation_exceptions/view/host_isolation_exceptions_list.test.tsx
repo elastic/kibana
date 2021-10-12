@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act } from '@testing-library/react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
-import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { getHostIsolationExceptionItems } from '../service';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
 
 jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
 jest.mock('../service');
+
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
 
 describe('When on the host isolation exceptions page', () => {
@@ -103,6 +105,18 @@ describe('When on the host isolation exceptions page', () => {
           renderResult.getByTestId('hostIsolationExceptionsContent-error').textContent
         ).toEqual(' Server is too far away');
       });
+    });
+    it('should show the create flyout when the add button is pressed', () => {
+      render();
+      act(() => {
+        userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
+      });
+      expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
+    });
+    it('should show the create flyout when the show location is create', () => {
+      history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
+      render();
+      expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
     });
   });
 });
