@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback } from 'react';
-import { DeepPartial } from '@reduxjs/toolkit';
+import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
@@ -189,7 +189,7 @@ export async function mountApp(
   const emptyState = getPreloadedState(storeDeps) as LensAppState;
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
     lens: emptyState,
-  } as DeepPartial<LensState>);
+  } as PreloadedState<LensState>);
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {

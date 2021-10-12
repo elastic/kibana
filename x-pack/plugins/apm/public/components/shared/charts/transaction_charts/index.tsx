@@ -17,9 +17,11 @@ import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 export function TransactionCharts({
   kuery,
   environment,
+  transactionName,
 }: {
   kuery: string;
   environment: string;
+  transactionName?: string;
 }) {
   return (
     <>
@@ -36,6 +38,7 @@ export function TransactionCharts({
               <ServiceOverviewThroughputChart
                 environment={environment}
                 kuery={kuery}
+                transactionName={transactionName}
               />
             </EuiFlexItem>
           </EuiFlexGrid>

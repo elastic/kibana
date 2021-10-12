@@ -2570,7 +2570,6 @@
     "discover.loadingDocuments": "正在加载文档",
     "discover.loadingJSON": "正在加载 JSON",
     "discover.loadingResults": "正在加载结果",
-    "discover.localMenu.fallbackReportTitle": "Discover 搜索 [{date}]",
     "discover.localMenu.inspectTitle": "检查",
     "discover.localMenu.localMenu.newSearchTitle": "新建",
     "discover.localMenu.localMenu.optionsTitle": "选项",

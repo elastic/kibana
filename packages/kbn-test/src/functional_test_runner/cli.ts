@@ -60,7 +60,7 @@ export function runFtrCli() {
 
         teardownRun = true;
         if (err) {
-          log.indent(-log.indent());
+          log.indent(-log.getIndent());
           log.error(err);
           process.exitCode = 1;
         }

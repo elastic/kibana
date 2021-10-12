@@ -62,6 +62,7 @@ export function TransactionDetails() {
         <TransactionCharts
           kuery={query.kuery}
           environment={query.environment}
+          transactionName={transactionName}
         />
       </ChartPointerEventContextProvider>
 

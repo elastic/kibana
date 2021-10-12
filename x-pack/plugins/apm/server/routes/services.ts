@@ -451,10 +451,8 @@ const serviceThroughputRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      comparisonRangeRt,
+      t.partial({ transactionName: t.string }),
+      t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -466,6 +464,7 @@ const serviceThroughputRoute = createApmServerRoute({
       environment,
       kuery,
       transactionType,
+      transactionName,
       comparisonStart,
       comparisonEnd,
     } = params.query;
@@ -493,6 +492,7 @@ const serviceThroughputRoute = createApmServerRoute({
       serviceName,
       setup,
       transactionType,
+      transactionName,
       throughputUnit,
       intervalString,
     };
