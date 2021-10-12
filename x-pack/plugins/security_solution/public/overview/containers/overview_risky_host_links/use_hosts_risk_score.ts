@@ -99,11 +99,15 @@ export const useHostsRiskScore = ({
 
   useEffect(() => {
     if (riskyHostsFeatureEnabled && (hostName || timerange)) {
-      start({
-        data,
-        timerange: timerange ? { to: timerange.to, from: timerange.from, interval: '' } : undefined,
-        hostName,
-        defaultIndex: [HOST_RISK_SCORES_INDEX],
+      spaces?.getActiveSpace().then(space => {
+        start({
+          data,
+          timerange: timerange
+            ? { to: timerange.to, from: timerange.from, interval: '' }
+            : undefined,
+          hostName,
+          defaultIndex: [getHostRiskIndex(space.id)],
+        });
       });
     }
   }, [start, data, timerange, hostName, riskyHostsFeatureEnabled]);
@@ -116,7 +120,7 @@ export const useHostsRiskScore = ({
 
   return {
     result: isHostsRiskScoreHit(hits?.[0]?._source)
-      ? (hits?.map((hit) => hit._source) as HostsRiskScore[])
+      ? (hits?.map(hit => hit._source) as HostsRiskScore[])
       : [],
     isModuleEnabled,
     loading,
