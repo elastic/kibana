@@ -59,6 +59,14 @@ export async function inspectSearchParams(
   let response;
   let error;
 
+  const mockApmIndices = {
+    sourcemaps: 'myIndex',
+    errors: 'myIndex',
+    onboarding: 'myIndex',
+    spans: 'myIndex',
+    transactions: 'myIndex',
+    metrics: 'myIndex',
+  };
   const mockSetup = {
     apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
@@ -75,7 +83,13 @@ export async function inspectSearchParams(
             default:
               return 'myIndex';
             case 'indices':
-              return new Proxy({}, { get: () => 'myIndex' });
+              return mockApmIndices;
+            case 'ui':
+              return {
+                enabled: true,
+                transactionGroupBucketSize: 1000,
+                maxTraceItems: 1000,
+              };
             case 'metricsInterval':
               return 30;
           }
@@ -84,12 +98,7 @@ export async function inspectSearchParams(
     ) as APMConfig,
     uiFilters: options?.uiFilters ?? {},
     indices: {
-      sourcemaps: 'myIndex',
-      errors: 'myIndex',
-      onboarding: 'myIndex',
-      spans: 'myIndex',
-      transactions: 'myIndex',
-      metrics: 'myIndex',
+      ...mockApmIndices,
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },
