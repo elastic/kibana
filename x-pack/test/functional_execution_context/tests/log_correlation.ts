@@ -17,16 +17,16 @@ export default function ({ getService }: FtrProviderContext) {
       const response1 = await supertest.get('/emit_log_with_trace_id');
       expect(response1.body.traceId).to.be.a('string');
 
-      await assertLogContains({
-        description: 'traceId included in the Kibana logs',
-        predicate: (record) => record.trace?.id === response1.body.traceId,
-        retry,
-      });
-
       const response2 = await supertest.get('/emit_log_with_trace_id');
       expect(response1.body.traceId).to.be.a('string');
 
       expect(response2.body.traceId).not.to.be(response1.body.traceId);
+
+      await assertLogContains({
+        description: `traceId ${response1.body.traceId} included in the Kibana logs`,
+        predicate: (record) => record.trace?.id === response1.body.traceId,
+        retry,
+      });
     });
   });
 }
