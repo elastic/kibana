@@ -247,6 +247,7 @@ export const ReportingExampleApp = ({
                         <EuiFlexItem
                           key={index}
                           data-shared-item
+                          data-shared-render-error
                           data-render-error="This is an example error"
                         >
                           <EuiCard

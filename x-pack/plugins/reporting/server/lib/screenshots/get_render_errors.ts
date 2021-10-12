@@ -15,39 +15,39 @@ export const getRenderErrors = async (
   browser: HeadlessChromiumDriver,
   layout: LayoutInstance,
   logger: LevelLogger
-): Promise<string[]> => {
+): Promise<undefined | string[]> => {
   const endTrace = startTrace('get_render_errors', 'read');
   logger.debug('reading render errors');
-  const errors: string[] = await browser.evaluate(
+  const errorsFound: undefined | string[] = await browser.evaluate(
     {
-      fn: (selector) => {
-        const visualizations: Element[] = Array.from(document.querySelectorAll(selector));
-        const errorMessages: string[] = [];
+      fn: (errorSelector, errorAttribute) => {
+        const visualizations: Element[] = Array.from(document.querySelectorAll(errorSelector));
+        const errors: string[] = [];
 
         visualizations.forEach((visualization) => {
-          const errorMessage = visualization.getAttribute('data-render-error');
+          const errorMessage = visualization.getAttribute(errorAttribute);
           if (errorMessage) {
-            errorMessages.push(errorMessage);
+            errors.push(errorMessage);
           }
         });
 
-        return errorMessages;
+        return errors.length ? errors : undefined;
       },
-      args: [layout.selectors.renderComplete],
+      args: [layout.selectors.renderError, layout.selectors.renderErrorAttribute],
     },
     { context: CONTEXT_GETRENDERERRORS },
     logger
   );
   endTrace();
 
-  if (errors.length) {
+  if (errorsFound?.length) {
     logger.warning(
       i18n.translate('xpack.reporting.screencapture.renderErrorsFound', {
         defaultMessage: 'Found {count} error messages. See report object for more information.',
-        values: { count: errors.length },
+        values: { count: errorsFound.length },
       })
     );
   }
 
-  return errors;
+  return errorsFound;
 };

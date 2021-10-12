@@ -29,7 +29,7 @@ const DEFAULT_SCREENSHOT_CLIP_WIDTH = 1800;
 interface ScreenSetupData {
   elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   timeRange: string | null;
-  renderErrors: string[];
+  renderErrors?: string[];
   error?: Error;
 }
 
@@ -100,16 +100,11 @@ export function getScreenshots$(
               await waitForRenderComplete(captureConfig, driver, layout, logger);
             }),
             mergeMap(async () => {
-              // Read any data-render-error's so that users can be notified when something went wrong
-              return {
-                renderErrors: await getRenderErrors(driver, layout, logger),
-              };
-            }),
-            mergeMap(async ({ renderErrors }) => {
               return await Promise.all([
                 getTimeRange(driver, layout, logger),
                 getElementPositionAndAttributes(driver, layout, logger),
-              ]).then(([timeRange, elementsPositionAndAttributes]) => ({
+                getRenderErrors(driver, layout, logger),
+              ]).then(([timeRange, elementsPositionAndAttributes, renderErrors]) => ({
                 elementsPositionAndAttributes,
                 timeRange,
                 renderErrors,
@@ -123,7 +118,6 @@ export function getScreenshots$(
                 elementsPositionAndAttributes: null,
                 timeRange: null,
                 error: err,
-                renderErrors: [],
               });
             })
           );

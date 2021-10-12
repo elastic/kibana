@@ -58,10 +58,10 @@ describe('getRenderErrors', () => {
 
   it('should extract the error messages', async () => {
     document.body.innerHTML = `
-      <renderedSelector data-render-error="a test error" />
-      <renderedSelector data-render-error="a test error" />
-      <renderedSelector data-render-error="a test error" />
-      <renderedSelector data-render-error="a test error" />
+      <div dataRenderErrorSelector="a test error" />
+      <div dataRenderErrorSelector="a test error" />
+      <div dataRenderErrorSelector="a test error" />
+      <div dataRenderErrorSelector="a test error" />
     `;
 
     await expect(getRenderErrors(browser, layout, logger)).resolves.toEqual([
@@ -77,6 +77,6 @@ describe('getRenderErrors', () => {
       <renderedSelector />
     `;
 
-    await expect(getRenderErrors(browser, layout, logger)).resolves.toEqual([]);
+    await expect(getRenderErrors(browser, layout, logger)).resolves.toEqual(undefined);
   });
 });
