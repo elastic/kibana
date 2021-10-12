@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { Unit } from '@elastic/datemath';
+// import { Unit } from '@elastic/datemath';
 import styled from 'styled-components';
 import {
   EuiFlexGroup,
@@ -22,6 +22,7 @@ import { FieldValueQueryBar } from '../query_bar';
 import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';
 import { PreviewHistogram } from './preview_histogram';
+import { usePreviewHistogram } from './use_preview_histogram';
 
 interface RulePreviewProps {
   index: string[];
@@ -39,7 +40,7 @@ const PreviewButton = styled(EuiButton)`
   margin-left: 0;
 `;
 
-const CalloutGroup: React.FC<{ items: string[]; isError: boolean }> = ({ items, isError }) =>
+const CalloutGroup: React.FC<{ items: string[]; isError?: boolean }> = ({ items, isError }) =>
   items.length > 0 ? (
     <>
       {items.map((item, i) => (
@@ -68,11 +69,15 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   isDisabled,
   threatQuery,
 }) => {
-  const [timeFrame, setTimeFrame] = useState<'h' | 'm' | 'd'>('h');
+  const [timeFrame, setTimeFrame] = useState<'h' | 'M' | 'd'>('h');
   const { createPreview, errors, isPreviewRequestInProgress, previewId, warnings } =
     usePreviewRoute();
-  const { isHistogramLoading, inspect, refetch, totalCount, data, buckets, start } =
-    usePreviewHistogram(previewId);
+
+  const { isHistogramLoading, inspect, refetch, totalCount, data } = usePreviewHistogram({
+    previewId,
+    startDate: 'now',
+    endDate: 'now-1M',
+  });
 
   return (
     <>
@@ -90,7 +95,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
               id="previewTimeFrame"
               options={[]}
               value={timeFrame}
-              onChange={setTimeFrame}
+              onChange={(e) => setTimeFrame('m')}
               aria-label={i18n.QUERY_PREVIEW_SELECT_ARIA}
               disabled={isDisabled}
               data-test-subj="preview-time-frame"
@@ -111,8 +116,10 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       <EuiSpacer size="s" />
       {previewId && (
         <PreviewHistogram
-          to={toTime}
-          from={fromTime}
+          title={'TODO title'}
+          disclaimer={'TODO test'}
+          to={'now'}
+          from={'now-1M'}
           data={data}
           totalCount={totalCount}
           inspect={inspect}

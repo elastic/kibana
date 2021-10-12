@@ -19,7 +19,7 @@ export const usePreviewRoute = () => {
       setErrors([]);
       setWarnings([]);
       setTimeout(() => {
-        setPreviewId('PLACEHOLDER_PREVIEW_ID');
+        setPreviewId('b936e74c-997c-4892-a821-cae609f96660');
       }, 500);
     }
   }, [isPreviewRequestInProgress]);
