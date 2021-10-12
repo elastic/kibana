@@ -6,11 +6,11 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
-import { AGG_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
-import { AggDescriptor } from '../../../../common/descriptor_types';
 import { EuiConfirmModal, EuiSelect, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { AggDescriptor } from '../../../../common/descriptor_types';
+import { AGG_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
 
 const BASE_OPTIONS = [
   {
@@ -55,7 +55,7 @@ export class ResolutionEditor extends Component<Props, State> {
     super(props);
 
     this.state = {
-      showModal: false
+      showModal: false,
     };
 
     if (props.includeSuperFine) {
@@ -85,52 +85,59 @@ export class ResolutionEditor extends Component<Props, State> {
     this.setState({
       showModal: false,
     });
-  }
+  };
 
   _acceptModal = () => {
     this._closeModal();
     const supportedMetrics = this.props.metrics.filter((metric) => {
       return !isUnsupportedVectorTileMetric(metric);
     });
-    this.props.onChange(GRID_RESOLUTION.SUPER_FINE, supportedMetrics.length ? supportedMetrics : [{ type: AGG_TYPE.COUNT }]);
-  }
+    this.props.onChange(
+      GRID_RESOLUTION.SUPER_FINE,
+      supportedMetrics.length ? supportedMetrics : [{ type: AGG_TYPE.COUNT }]
+    );
+  };
 
   _renderModal() {
-    return this.state.showModal
-      ? 
-        (
-          <EuiConfirmModal
-            title={i18n.translate('xpack.maps.source.esGrid.vectorTileModal.title', {
-              defaultMessage: '"Top terms" metrics not supported',
-            })}
-            onCancel={this._closeModal}
-            onConfirm={this._acceptModal}
-            cancelButtonText={i18n.translate('xpack.maps.source.esGrid.vectorTileModal.cancelBtnLabel', {
-              defaultMessage: 'Cancel',
-            })}
-            confirmButtonText={i18n.translate('xpack.maps.source.esGrid.vectorTileModal.confirmBtnLabel', {
-              defaultMessage: 'Accept',
-            })}
-            buttonColor="danger"
-            defaultFocusedButton="cancel"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.maps.source.esGrid.vectorTileModal.message"
-                defaultMessage={`Super fine grid resolution uses Elasticsearch vector tile API. Elasticsearch vector tile API does not support "Top terms" metric. Switching to super fine grid resolution will remove all "Top terms" metrics from your layer configuration.`}
-              />
-            </p>
-          </EuiConfirmModal>
-        )
-      : null;
+    return this.state.showModal ? (
+      <EuiConfirmModal
+        title={i18n.translate('xpack.maps.source.esGrid.vectorTileModal.title', {
+          defaultMessage: '"Top terms" metrics not supported',
+        })}
+        onCancel={this._closeModal}
+        onConfirm={this._acceptModal}
+        cancelButtonText={i18n.translate(
+          'xpack.maps.source.esGrid.vectorTileModal.cancelBtnLabel',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.maps.source.esGrid.vectorTileModal.confirmBtnLabel',
+          {
+            defaultMessage: 'Accept',
+          }
+        )}
+        buttonColor="danger"
+        defaultFocusedButton="cancel"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.maps.source.esGrid.vectorTileModal.message"
+            defaultMessage={`Super fine grid resolution uses Elasticsearch vector tile API. Elasticsearch vector tile API does not support "Top terms" metric. Switching to super fine grid resolution will remove all "Top terms" metrics from your layer configuration.`}
+          />
+        </p>
+      </EuiConfirmModal>
+    ) : null;
   }
 
   render() {
-    const helpText = this.props.resolution === GRID_RESOLUTION.SUPER_FINE
-      ? i18n.translate('xpack.maps.source.esGrid.superFineHelpText', {
-          defaultMessage: 'Super fine grid resolution uses Elasticsearch vector tile API.',
-        })
-      : undefined;
+    const helpText =
+      this.props.resolution === GRID_RESOLUTION.SUPER_FINE
+        ? i18n.translate('xpack.maps.source.esGrid.superFineHelpText', {
+            defaultMessage: 'Super fine grid resolution uses Elasticsearch vector tile API.',
+          })
+        : undefined;
     return (
       <>
         {this._renderModal()}

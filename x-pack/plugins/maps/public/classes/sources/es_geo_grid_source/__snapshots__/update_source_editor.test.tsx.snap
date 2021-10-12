@@ -21,7 +21,6 @@ exports[`source editor geo_grid_source default vector layer config should allow 
       allowMultipleMetrics={true}
       fields={Array []}
       metrics={Array []}
-      metricsDisabledDueToMvt={[Function]}
       onChange={[Function]}
     />
   </EuiPanel>
@@ -81,7 +80,6 @@ exports[`source editor geo_grid_source should put limitations based on heatmap-r
       allowMultipleMetrics={false}
       fields={Array []}
       metrics={Array []}
-      metricsDisabledDueToMvt={[Function]}
       metricsFilter={[Function]}
       onChange={[Function]}
     />

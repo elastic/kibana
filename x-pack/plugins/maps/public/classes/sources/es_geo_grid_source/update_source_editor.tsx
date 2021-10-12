@@ -115,23 +115,22 @@ export class UpdateSourceEditor extends Component<Props, State> {
     this.props.onChange({ propName: 'requestType', value: requestType });
   };
 
+  _getMetricsFilter() {
+    if (this.props.currentLayerType === LAYER_TYPE.HEATMAP) {
+      return (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
+        // these are countable metrics, where blending heatmap color blobs make sense
+        return metric.value ? isMetricCountable(metric.value) : false;
+      };
+    }
+
+    if (this.props.resolution === GRID_RESOLUTION.SUPER_FINE) {
+      return (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
+        return metric.value !== AGG_TYPE.TERMS;
+      };
+    }
+  }
+
   _renderMetricsPanel() {
-    const metricsFilter =
-      this.props.currentLayerType === LAYER_TYPE.HEATMAP
-        ? (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
-            // these are countable metrics, where blending heatmap color blobs make sense
-            return metric.value ? isMetricCountable(metric.value) : false;
-          }
-        : undefined;
-
-    const isMetricDisabledDueToMvt = (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
-      return (
-        this.props.resolution === GRID_RESOLUTION.SUPER_FINE &&
-        (metric.value === AGG_TYPE.TERMS || metric.value === AGG_TYPE.PERCENTILE)
-      );
-    };
-
-    const allowMultipleMetrics = this.props.currentLayerType !== LAYER_TYPE.HEATMAP;
     return (
       <EuiPanel>
         <EuiTitle size="xs">
@@ -142,9 +141,8 @@ export class UpdateSourceEditor extends Component<Props, State> {
         <EuiSpacer size="m" />
         <MetricsEditor
           key={this.state.metricsEditorKey}
-          allowMultipleMetrics={allowMultipleMetrics}
-          metricsFilter={metricsFilter}
-          metricsDisabledDueToMvt={isMetricDisabledDueToMvt}
+          allowMultipleMetrics={this.props.currentLayerType !== LAYER_TYPE.HEATMAP}
+          metricsFilter={this._getMetricsFilter()}
           fields={this.state.fields}
           metrics={this.props.metrics}
           onChange={this._onMetricsChange}
