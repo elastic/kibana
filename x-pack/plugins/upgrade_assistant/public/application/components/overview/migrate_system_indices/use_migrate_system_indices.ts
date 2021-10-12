@@ -17,6 +17,12 @@ import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../../common
 const FLYOUT_ID = 'migrateSystemIndicesFlyout';
 const { useGlobalFlyout } = GlobalFlyout;
 
+export type StatusType = 'idle' | 'error' | 'started';
+interface MigrationStatus {
+  statusType: StatusType;
+  error?: ResponseError;
+}
+
 export const useMigrateSystemIndices = () => {
   const {
     services: { api },
@@ -25,10 +31,9 @@ export const useMigrateSystemIndices = () => {
 
   const [showFlyout, setShowFlyout] = useState(false);
 
-  const [startMigrationStatus, setStartMigrationStatus] = useState<{
-    statusType: string;
-    error?: ResponseError;
-  }>({ statusType: 'idle' });
+  const [startMigrationStatus, setStartMigrationStatus] = useState<MigrationStatus>({
+    statusType: 'idle',
+  });
 
   const { data, error, isLoading, resendRequest, isInitialRequest } =
     api.useLoadSystemIndicesMigrationStatus();
