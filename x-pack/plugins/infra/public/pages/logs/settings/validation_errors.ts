@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IndexPattern, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
 export interface GenericValidationError {
   type: 'generic';
@@ -67,7 +68,7 @@ export const validateStringNotEmpty = (fieldName: string, value: string): FormVa
 export const validateColumnListNotEmpty = (columns: unknown[]): FormValidationError[] =>
   columns.length <= 0 ? [{ type: 'empty_column_list' }] : [];
 
-export const validateIndexPattern = (indexPattern: IndexPattern): FormValidationError[] => {
+export const validateIndexPattern = (indexPattern: DataView): FormValidationError[] => {
   return [
     ...validateIndexPatternIsTimeBased(indexPattern),
     ...validateIndexPatternHasStringMessageField(indexPattern),
@@ -75,9 +76,7 @@ export const validateIndexPattern = (indexPattern: IndexPattern): FormValidation
   ];
 };
 
-export const validateIndexPatternIsTimeBased = (
-  indexPattern: IndexPattern
-): FormValidationError[] =>
+export const validateIndexPatternIsTimeBased = (indexPattern: DataView): FormValidationError[] =>
   indexPattern.isTimeBased()
     ? []
     : [
@@ -88,7 +87,7 @@ export const validateIndexPatternIsTimeBased = (
       ];
 
 export const validateIndexPatternHasStringMessageField = (
-  indexPattern: IndexPattern
+  indexPattern: DataView
 ): FormValidationError[] => {
   const messageField = indexPattern.getFieldByName('message');
 
@@ -111,7 +110,7 @@ export const validateIndexPatternHasStringMessageField = (
   }
 };
 
-export const validateIndexPatternIsntRollup = (indexPattern: IndexPattern): FormValidationError[] =>
+export const validateIndexPatternIsntRollup = (indexPattern: DataView): FormValidationError[] =>
   indexPattern.type != null
     ? [
         {

@@ -7,6 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
+import { DataViewBase } from '@kbn/es-query';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import {
   SnapshotMetricInput,
@@ -18,13 +19,12 @@ import { findToolbar } from '../../../../../../common/inventory_models/toolbars'
 import { ToolbarWrapper } from './toolbar_wrapper';
 
 import { InfraGroupByOptions } from '../../../../../lib/lib';
-import { IIndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_options';
 import { useInventoryMeta } from '../../hooks/use_inventory_meta';
 
 export interface ToolbarProps extends Omit<WaffleOptionsState, 'boundsOverride' | 'autoBounds'> {
-  createDerivedIndexPattern: (type: 'metrics') => IIndexPattern;
+  createDerivedIndexPattern: (type: 'metrics') => DataViewBase;
   changeMetric: (payload: SnapshotMetricInput) => void;
   changeGroupBy: (payload: SnapshotGroupBy) => void;
   changeCustomOptions: (payload: InfraGroupByOptions[]) => void;
