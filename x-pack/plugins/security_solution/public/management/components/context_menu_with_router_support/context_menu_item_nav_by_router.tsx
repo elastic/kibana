@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { EuiContextMenuItem, EuiContextMenuItemProps } from '@elastic/eui';
 import { NavigateToAppOptions } from 'kibana/public';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps {
   /** The Kibana (plugin) app id */
@@ -34,6 +35,7 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
       ...navigateOptions,
       onClick,
     });
+    const getTestId = useTestIdGenerator(otherMenuItemProps['data-test-subj']);
 
     return (
       <EuiContextMenuItem
@@ -43,6 +45,7 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
         {textTruncate ? (
           <div
             className="eui-textTruncate"
+            data-test-subj={getTestId('truncateWrapper')}
             {
               /* Add the html `title` prop if children is a string */
               ...('string' === typeof children ? { title: children } : {})
