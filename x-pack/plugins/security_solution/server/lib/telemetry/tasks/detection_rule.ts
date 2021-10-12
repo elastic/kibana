@@ -31,6 +31,11 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
       const { body: prebuiltRules } = await receiver.fetchDetectionRules();
 
+      if (!prebuiltRules) {
+        logger.debug('no prebuilt rules found');
+        return 0;
+      }
+
       const cacheArray = prebuiltRules.hits.hits.reduce((cache, searchHit) => {
         const rule = searchHit._source as RuleSearchResult;
         const ruleId = rule.alert.params.ruleId;
