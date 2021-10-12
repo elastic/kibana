@@ -9,7 +9,12 @@ import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { LABEL_FIELDS_BREAKDOWN, USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
+import {
+  LABEL_FIELDS_BREAKDOWN,
+  USE_BREAK_DOWN_COLUMN,
+  RECORDS_FIELD,
+  PERCENTILE,
+} from '../../configurations/constants';
 import { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {
@@ -43,6 +48,7 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
   }
 
   const hasUseBreakdownColumn = seriesConfig.xAxisColumn.sourceField === USE_BREAK_DOWN_COLUMN;
+  const isRecordsMetric = series.selectedMetricField === RECORDS_FIELD;
 
   const items = seriesConfig.breakdownFields.map((breakdown) => ({
     id: breakdown,
@@ -56,11 +62,13 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
     });
   }
 
-  const options = items.map(({ id, label }) => ({
-    inputDisplay: label,
-    value: id,
-    dropdownDisplay: label,
-  }));
+  const options = items
+    .map(({ id, label }) => ({
+      inputDisplay: label,
+      value: id,
+      dropdownDisplay: label,
+    }))
+    .filter(({ value }) => !(value === PERCENTILE && isRecordsMetric));
 
   let valueOfSelected =
     selectedBreakdown || (hasUseBreakdownColumn ? options[0].value : NO_BREAKDOWN);

@@ -16,7 +16,7 @@ import {
 } from './constants/elasticsearch_fieldnames';
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
 import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
-import { RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from './constants';
+import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
 
 describe('Lens Attribute', () => {
   mockAppIndexPattern();
@@ -73,6 +73,63 @@ describe('Lens Attribute', () => {
     ]);
 
     expect(lnsAttrKpi.getJSON()).toEqual(sampleAttributeKpi);
+  });
+
+  it('should return expected json for percentile breakdowns', function () {
+    const seriesConfigKpi = getDefaultConfigs({
+      reportType: ReportTypes.KPI,
+      dataType: 'ux',
+      indexPattern: mockIndexPattern,
+    });
+
+    const lnsAttrKpi = new LensAttributes([
+      {
+        filters: [],
+        seriesConfig: seriesConfigKpi,
+        time: {
+          from: 'now-1h',
+          to: 'now',
+        },
+        indexPattern: mockIndexPattern,
+        name: 'ux-series-1',
+        breakdown: 'percentile',
+        reportDefinitions: {},
+        selectedMetricField: 'transaction.duration.us',
+        color: '#54b399',
+      },
+    ]);
+
+    expect(lnsAttrKpi.getJSON().state.datasourceStates.indexpattern.layers.layer0.columns).toEqual({
+      'x-axis-column-layer0': {
+        dataType: 'date',
+        isBucketed: true,
+        label: '@timestamp',
+        operationType: 'date_histogram',
+        params: {
+          interval: 'auto',
+        },
+        scale: 'interval',
+        sourceField: '@timestamp',
+      },
+      ...PERCENTILE_RANKS.reduce((acc: Record<string, any>, rank, index) => {
+        acc[`y-axis-column-${index === 0 ? 'layer' + index : index}`] = {
+          dataType: 'number',
+          filter: {
+            language: 'kuery',
+            query: 'transaction.type: page-load and processor.event: transaction',
+          },
+          isBucketed: false,
+          label: `${rank} percentile of page load time`,
+          operationType: 'percentile',
+          params: {
+            percentile: Number(rank.slice(0, 2)),
+          },
+          scale: 'ratio',
+          sourceField: 'transaction.duration.us',
+        };
+        return acc;
+      }, {}),
+    });
   });
 
   it('should return main y axis', function () {
@@ -395,7 +452,7 @@ describe('Lens Attribute', () => {
           yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0' }],
         },
       ],
-      legend: { isVisible: true, position: 'right' },
+      legend: { isVisible: true, showSingleSeries: true, position: 'right' },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       valueLabels: 'hide',
