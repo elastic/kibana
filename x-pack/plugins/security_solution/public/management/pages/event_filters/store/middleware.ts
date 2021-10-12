@@ -231,9 +231,8 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
     dispatch({
       type: 'eventFiltersListPageDataChanged',
       payload: {
-        // @ts-ignore will be fixed with when AsyncResourceState is refactored (#830)
+        // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored
         type: 'LoadingResourceState',
-        // @ts-ignore will be fixed with when AsyncResourceState is refactored (#830)
         previousState: getCurrentListPageDataState(state),
       },
     });

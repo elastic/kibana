@@ -31,6 +31,6 @@ export interface HostIsolationExceptionsPageState {
   };
   form: {
     entry?: CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
-    status: AsyncResourceState<ExceptionListItemSchema>;
+    status: AsyncResourceState<CreateExceptionListItemSchema | UpdateExceptionListItemSchema>;
   };
 }
