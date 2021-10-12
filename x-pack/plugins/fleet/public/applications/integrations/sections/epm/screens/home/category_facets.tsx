@@ -21,19 +21,21 @@ interface ALL_CATEGORY {
 
 export type CategoryFacet = IntegrationCategoryCount | ALL_CATEGORY;
 
+export interface Props {
+  showCounts: boolean;
+  isLoading?: boolean;
+  categories: CategoryFacet[];
+  selectedCategory: string;
+  onCategoryChange: (category: CategoryFacet) => unknown;
+}
+
 export function CategoryFacets({
   showCounts,
   isLoading,
   categories,
   selectedCategory,
   onCategoryChange,
-}: {
-  showCounts: boolean;
-  isLoading?: boolean;
-  categories: CategoryFacet[];
-  selectedCategory: string;
-  onCategoryChange: (category: CategoryFacet) => unknown;
-}) {
+}: Props) {
   const controls = (
     <EuiFacetGroup>
       {isLoading ? (
