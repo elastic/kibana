@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CreateFieldComponentType } from '../../../../../common';
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline/columns';
 
@@ -17,6 +18,8 @@ export interface FieldBrowserProps {
   columnHeaders: ColumnHeaderOptions[];
   /** A map of categoryId -> metadata about the fields in that category */
   browserFields: BrowserFields;
+
+  createFieldComponent?: CreateFieldComponentType;
   /** When true, this Fields Browser is being used as an "events viewer" */
   isEventViewer?: boolean;
   /** The width of the field browser */

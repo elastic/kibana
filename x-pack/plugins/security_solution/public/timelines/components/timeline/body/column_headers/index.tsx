@@ -32,10 +32,12 @@ import {
 } from '../../styles';
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
+import { CreateFieldComponentType } from '../../../../../../../timelines/public';
 
 interface Props {
   actionsColumnWidth: number;
   browserFields: BrowserFields;
+  createFieldComponent: CreateFieldComponentType;
   columnHeaders: ColumnHeaderOptions[];
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
@@ -86,6 +88,7 @@ export const ColumnHeadersComponent = ({
   actionsColumnWidth,
   browserFields,
   columnHeaders,
+  createFieldComponent,
   isEventViewer = false,
   isSelectAllChecked,
   onSelectAll,
@@ -194,6 +197,7 @@ export const ColumnHeadersComponent = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
+                createFieldComponent={createFieldComponent}
               />
             )}
           </EventsThGroupActions>
@@ -206,6 +210,7 @@ export const ColumnHeadersComponent = ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
+    createFieldComponent,
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,
@@ -241,6 +246,7 @@ export const ColumnHeadersComponent = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
+                createFieldComponent={createFieldComponent}
               />
             )}
           </EventsThGroupActions>
@@ -253,6 +259,7 @@ export const ColumnHeadersComponent = ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
+    createFieldComponent,
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,

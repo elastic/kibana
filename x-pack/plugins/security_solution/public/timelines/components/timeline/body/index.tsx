@@ -16,6 +16,7 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
+  CreateFieldComponentType,
 } from '../../../../../../timelines/public';
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
@@ -29,7 +30,7 @@ import {
 } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
-import { inputsModel, State } from '../../../../common/store';
+import { inputsModel, sourcererSelectors, State } from '../../../../common/store';
 import { TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -43,6 +44,9 @@ import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { CreateFieldButton } from '../../create_runtime_field';
+import { SelectedDataView } from '../../../../common/store/sourcerer/selectors';
 
 interface OwnProps {
   activePage: number;
@@ -224,6 +228,24 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [columnHeaders.length, containerRef, data.length]
     );
 
+    const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
+    const { dataViewId } = useDeepEqualSelector<SelectedDataView>((state) =>
+      getSelectedDataView(state, SourcererScopeName.timeline)
+    );
+
+    const createFieldComponent = useMemo(() => {
+      // It has to receive onClick props from TGrid in order to close browserFields modal.
+      const CreateFieldButtonComponent: CreateFieldComponentType = ({ onClick }) => (
+        <CreateFieldButton
+          selectedDataViewId={dataViewId}
+          onClick={onClick} // close browserField and make sure create field modal is on top of timeline modal
+          scopeId={SourcererScopeName.timeline}
+        />
+      );
+
+      return CreateFieldButtonComponent;
+    }, [dataViewId]);
+
     return (
       <>
         <TimelineBody data-test-subj="timeline-body" ref={containerRef}>
@@ -240,6 +262,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               actionsColumnWidth={actionsColumnWidth}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
+              createFieldComponent={createFieldComponent}
               isEventViewer={isEventViewer}
               isSelectAllChecked={isSelectAllChecked}
               onSelectAll={onSelectAll}
