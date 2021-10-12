@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, unset, set } from 'lodash';
+import { get, isEmpty, unset, set } from 'lodash';
 import { satisfies } from 'semver';
 import {
   EuiFlexGroup,
@@ -65,7 +65,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
 
   const { form: configForm } = useForm({
     defaultValue: {
-      config: JSON.stringify(newPolicy?.inputs[0].config?.osquery.value ?? {}, null, 2),
+      config: JSON.stringify(get(newPolicy, 'inputs[0].config?.osquery.value', {}), null, 2),
     },
     schema: {
       config: {

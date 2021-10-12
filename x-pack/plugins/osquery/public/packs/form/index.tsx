@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiDescribedFormGroup,
   EuiSpacer,
   EuiBottomBar,
   EuiHorizontalRule,
@@ -180,37 +179,24 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
   return (
     <>
       <Form form={form}>
-        <EuiDescribedFormGroup
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.osquery.pack.form.settingsSectionTitleText"
-                defaultMessage="Pack settings"
-              />
-            </h3>
-          }
-          fullWidth
-          description={
-            <FormattedMessage
-              id="xpack.osquery.pack.form.settingsSectionDescriptionText"
-              defaultMessage="UPDATE ME!!! Packs include one or more queries that are run
-                at a set interval and are associated with an agent policy.
-                When you define a pack, it is added as a new
-                Osquery Manager policy."
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <CommonUseField path="name" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <CommonUseField path="description" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <CommonUseField
+              path="policy_ids"
+              component={PolicyIdComboBoxField}
+              agentPoliciesById={agentPoliciesById}
             />
-          }
-        >
-          <CommonUseField path="name" />
-
-          <CommonUseField path="description" />
-
-          <CommonUseField
-            path="policy_ids"
-            component={PolicyIdComboBoxField}
-            agentPoliciesById={agentPoliciesById}
-          />
-        </EuiDescribedFormGroup>
-
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiHorizontalRule />
 
         <CommonUseField
@@ -221,8 +207,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
 
         <CommonUseField path="enabled" component={GhostFormField} />
       </Form>
-      <EuiSpacer size="xxl" />
-      <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />

@@ -105,27 +105,12 @@ const PackDetailsPageComponent = () => {
           <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
             <EuiDescriptionListTitle className="eui-textNoWrap">
               <FormattedMessage
-                id="xpack.osquery.packDetailsPage.kpis.policyLabelText"
-                defaultMessage="Policy"
+                id="xpack.osquery.packDetailsPage.kpis.policiesLabelText"
+                defaultMessage="Policies"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription className="eui-textNoWrap">
-              {
-                // @ts-expect-error update types
-                data?.policy_ids?.length ? (
-                  <>
-                    {
-                      // @ts-expect-error update types
-                      data?.policy_ids.map((policyId: string) => (
-                        <>
-                          {' '}
-                          <AgentsPolicyLink key={policyId} policyId={policyId} />
-                        </>
-                      ))
-                    }
-                  </>
-                ) : null
-              }
+              {data?.policy_ids?.length}
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
