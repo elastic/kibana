@@ -36,12 +36,6 @@ export interface TabifyDocsOptions {
    * merged into the flattened document.
    */
   source?: boolean;
-  /**
-   * Specify a list of meta field names that should be merged from the top
-   * level of the hit (i.e. not nested under _source or fields) into the flattened version.
-   * If not specified no meta fields (like _id, _index, etc.) will be merged.
-   */
-  meta?: string[];
 }
 
 /**
@@ -58,7 +52,6 @@ export function flattenHit(
   params?: TabifyDocsOptions
 ) {
   const flat = {} as Record<string, any>;
-  const metaFields = params?.meta ?? [];
 
   function flatten(obj: Record<string, any>, keyPrefix: string = '') {
     for (const [k, val] of Object.entries(obj)) {
@@ -99,7 +92,7 @@ export function flattenHit(
     flatten(hit._source as Record<string, any>);
   }
 
-  metaFields.forEach((metaFieldName) => {
+  indexPattern?.metaFields.forEach((metaFieldName) => {
     if (!isValidMetaFieldName(metaFieldName) || metaFieldName === '_source') {
       return;
     }
@@ -109,8 +102,8 @@ export function flattenHit(
   return new Proxy(flat, {
     ownKeys: (target) => {
       return Reflect.ownKeys(target).sort((a, b) => {
-        const aIsMeta = metaFields.includes(String(a));
-        const bIsMeta = metaFields.includes(String(b));
+        const aIsMeta = indexPattern?.metaFields.includes(String(a));
+        const bIsMeta = indexPattern?.metaFields.includes(String(b));
         if (aIsMeta && bIsMeta) {
           return String(a).localeCompare(String(b));
         }

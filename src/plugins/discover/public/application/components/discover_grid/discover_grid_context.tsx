@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { IUiSettingsClient } from 'src/core/public';
 import type { IndexPattern } from 'src/plugins/data/common';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 
@@ -20,7 +19,6 @@ export interface GridContext {
   isDarkMode: boolean;
   selectedDocs: string[];
   setSelectedDocs: (selected: string[]) => void;
-  uiSettings: IUiSettingsClient;
 }
 
 const defaultContext = {} as unknown as GridContext;

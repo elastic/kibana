@@ -30,6 +30,7 @@ describe('tabifyDocs', () => {
         },
       },
     },
+    metaFields: ['_id', '_index', '_score', '_type'],
     fieldFormats: fieldFormats as any,
   });
 
@@ -64,9 +65,11 @@ describe('tabifyDocs', () => {
     expect(table).toMatchSnapshot();
   });
 
-  it('combines meta fields if meta option is set', () => {
-    const table = tabifyDocs(response, index, { meta: ['_id', '_index', '_score', '_type'] });
-    expect(table).toMatchSnapshot();
+  it('combines meta fields from index pattern', () => {
+    const table = tabifyDocs(response, index);
+    expect(table.columns.map((col) => col.id)).toEqual(
+      expect.arrayContaining(['_id', '_index', '_score', '_type'])
+    );
   });
 
   it('works without provided index pattern', () => {

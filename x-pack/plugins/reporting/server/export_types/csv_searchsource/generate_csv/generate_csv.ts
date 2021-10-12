@@ -357,10 +357,7 @@ export class CsvGenerator {
 
         let table: Datatable | undefined;
         try {
-          table = tabifyDocs(results, index, {
-            shallow: true,
-            meta: await this.clients.uiSettings.get(META_FIELDS),
-          });
+          table = tabifyDocs(results, index, { shallow: true });
         } catch (err) {
           this.logger.error(err);
         }

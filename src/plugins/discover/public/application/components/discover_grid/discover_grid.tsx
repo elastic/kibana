@@ -271,11 +271,7 @@ export const DiscoverGrid = ({
       getRenderCellValueFn(
         indexPattern,
         displayedRows,
-        displayedRows
-          ? displayedRows.map((hit) =>
-              flattenHit(hit, indexPattern, { meta: services.uiSettings.get(META_FIELDS) })
-            )
-          : [],
+        displayedRows ? displayedRows.map((hit) => flattenHit(hit, indexPattern)) : [],
         useNewFieldsApi,
         fieldsToShow,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)
@@ -377,7 +373,6 @@ export const DiscoverGrid = ({
             setIsFilterActive(false);
           }
         },
-        uiSettings: services.uiSettings,
       }}
     >
       <span

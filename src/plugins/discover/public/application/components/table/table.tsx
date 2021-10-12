@@ -97,10 +97,7 @@ export const DocViewerTable = ({
     return null;
   }
 
-  const flattened = flattenHit(hit, indexPattern, {
-    meta: uiSettings.get(META_FIELDS),
-    source: true,
-  });
+  const flattened = flattenHit(hit, indexPattern, { source: true });
   const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
 
   const items: FieldRecord[] = Object.keys(flattened)

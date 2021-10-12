@@ -9,7 +9,7 @@
 import React, { useContext } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { flattenHit, IndexPatternField, META_FIELDS } from '../../../../../data/common';
+import { flattenHit, IndexPatternField } from '../../../../../data/common';
 import { DiscoverGridContext } from './discover_grid_context';
 
 export const FilterInBtn = ({
@@ -27,9 +27,7 @@ export const FilterInBtn = ({
     <Component
       onClick={() => {
         const row = context.rows[rowIndex];
-        const flattened = flattenHit(row, context.indexPattern, {
-          meta: context.uiSettings.get(META_FIELDS),
-        });
+        const flattened = flattenHit(row, context.indexPattern);
 
         if (flattened) {
           context.onFilter(columnId, flattened[columnId], '+');
@@ -62,7 +60,7 @@ export const FilterOutBtn = ({
     <Component
       onClick={() => {
         const row = context.rows[rowIndex];
-        const flattened = context.indexPattern.flattenHit(row);
+        const flattened = flattenHit(row, context.indexPattern);
 
         if (flattened) {
           context.onFilter(columnId, flattened[columnId], '-');

@@ -23,13 +23,6 @@ const baseContextMock = {
   isDarkMode: false,
   selectedDocs: [],
   setSelectedDocs: jest.fn(),
-  uiSettings: {
-    get: jest.fn((key) => {
-      if (key === META_FIELDS) {
-        return ['_id', '_index'];
-      }
-    }),
-  } as unknown as IUiSettingsClient,
 };
 
 describe('Discover grid view button ', function () {
