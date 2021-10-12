@@ -7,15 +7,19 @@
  */
 
 import './visualize_editor.scss';
-import React, { RefObject } from 'react';
+import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from 'kibana/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
+import { useKibana } from '../../../../kibana_react/public';
+import { urlFor } from '../../../../visualizations/public';
 import {
   SavedVisInstance,
   VisualizeAppState,
+  VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
@@ -53,6 +57,55 @@ export const VisualizeEditorCommon = ({
   embeddableId,
   visEditorRef,
 }: VisualizeEditorCommonProps) => {
+  const { services } = useKibana<VisualizeServices>();
+
+  useEffect(() => {
+    async function aliasMatchRedirect() {
+      const sharingSavedObjectProps = visInstance?.savedVis.sharingSavedObjectProps;
+      if (services.spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
+        // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+        const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+        const newPath = `${urlFor(newObjectId!)}${services.history.location.search}`;
+        await services.spaces.ui.redirectLegacyUrl(
+          newPath,
+          i18n.translate('visualize.legacyUrlConflict.objectNoun', {
+            defaultMessage: '{visName} visualization',
+            values: {
+              visName: visInstance?.vis?.type.title,
+            },
+          })
+        );
+        return;
+      }
+    }
+
+    aliasMatchRedirect();
+  }, [visInstance?.savedVis.sharingSavedObjectProps, visInstance?.vis?.type.title, services]);
+
+  const getLegacyUrlConflictCallout = useCallback(() => {
+    // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
+    const currentObjectId = visInstance?.savedVis.id;
+    const sharingSavedObjectProps = visInstance?.savedVis.sharingSavedObjectProps;
+    if (services.spaces && sharingSavedObjectProps?.outcome === 'conflict' && currentObjectId) {
+      // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
+      // callout with a warning for the user, and provide a way for them to navigate to the other object.
+      const otherObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'conflict'
+      const otherObjectPath = `${urlFor(otherObjectId)}${services.history.location.search}`;
+      return services.spaces.ui.components.getLegacyUrlConflict({
+        objectNoun: i18n.translate('visualize.legacyUrlConflict.objectNoun', {
+          defaultMessage: '{visName} visualization',
+          values: {
+            visName: visInstance?.vis?.type.title,
+          },
+        }),
+        currentObjectId,
+        otherObjectId,
+        otherObjectPath,
+      });
+    }
+    return null;
+  }, [visInstance?.savedVis, services, visInstance?.vis?.type.title]);
+
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
       {visInstance && appState && currentAppState && (
@@ -74,6 +127,7 @@ export const VisualizeEditorCommon = ({
       )}
       {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
+      {getLegacyUrlConflictCallout()}
       {visInstance && (
         <EuiScreenReaderOnly>
           <h1>
