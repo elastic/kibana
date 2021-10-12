@@ -21,6 +21,8 @@ import {
   CLOSE_TIMELINE_BTN,
   COMBO_BOX,
   CREATE_NEW_TIMELINE,
+  DELETE_TIMELINE_BTN,
+  DELETION_CONFIRMATION,
   FIELD_BROWSER,
   ID_FIELD,
   ID_HEADER_FIELD,
@@ -66,6 +68,7 @@ import {
   TIMELINE_COLLAPSED_ITEMS_BTN,
   TIMELINE_TAB_CONTENT_EQL,
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
+  PINNED_TAB_BUTTON,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
@@ -130,6 +133,15 @@ export const goToQueryTab = () => {
     .pipe(($el) => {
       $el.find(QUERY_TAB_BUTTON).trigger('click');
       return $el.find(QUERY_TAB_BUTTON);
+    })
+    .should('have.class', 'euiTab-isSelected');
+};
+
+export const goToPinnedTab = () => {
+  cy.root()
+    .pipe(($el) => {
+      $el.find(PINNED_TAB_BUTTON).trigger('click');
+      return $el.find(PINNED_TAB_BUTTON);
     })
     .should('have.class', 'euiTab-isSelected');
 };
@@ -244,6 +256,12 @@ export const executeTimelineKQL = (query: string) => {
 
 export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
+};
+
+export const deleteTimeline = () => {
+  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).click();
+  cy.get(DELETE_TIMELINE_BTN).click();
+  cy.get(DELETION_CONFIRMATION).click();
 };
 
 export const markAsFavorite = () => {
