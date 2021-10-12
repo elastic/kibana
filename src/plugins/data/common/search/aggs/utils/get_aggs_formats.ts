@@ -9,12 +9,12 @@
 /* eslint-disable max-classes-per-file */
 import { i18n } from '@kbn/i18n';
 
-import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
 import {
   FieldFormat,
   FieldFormatInstanceType,
   FieldFormatsContentType,
   IFieldFormat,
+  SerializedFieldFormat,
 } from '../../../../../field_formats/common';
 import { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
