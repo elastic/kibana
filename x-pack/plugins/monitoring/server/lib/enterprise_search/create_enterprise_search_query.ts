@@ -25,17 +25,16 @@ export function createEnterpriseSearchQuery(options: {
   const opts = {
     filters: [] as any[],
     metric: EnterpriseSearchMetric.getMetricFields(),
-    types: ['health'],
+    types: ['health', 'stats'],
     ...(options ?? {}),
   };
 
   opts.filters.push({
     bool: {
-      must: {
-        term: {
-          'event.dataset': 'enterprisesearch.health',
-        },
-      },
+      should: [
+        { term: { 'event.dataset': 'enterprisesearch.health' } },
+        { term: { 'event.dataset': 'enterprisesearch.stats' } },
+      ],
     },
   });
 
