@@ -141,6 +141,11 @@ export const CurationSuggestionLogic = kea<
       const { engineName } = EngineLogic.values;
       const { suggestion } = values;
 
+      if (suggestion!.operation === 'delete') {
+        const confirmed = await confirmDialog('Are you sure you want to delete this curation?');
+        if (!confirmed) return;
+      }
+
       try {
         const updatedSuggestion = await updateSuggestion(
           http,
@@ -155,11 +160,16 @@ export const CurationSuggestionLogic = kea<
             { defaultMessage: 'Suggestion was succefully applied.' }
           )
         );
-        KibanaLogic.values.navigateToUrl(
-          generateEnginePath(ENGINE_CURATION_PATH, {
-            curationId: updatedSuggestion.curation_id,
-          })
-        );
+        if (suggestion!.operation === 'delete') {
+          // Because if a curation is deleted, there will be no curation detail page to navigate to afterwards.
+          KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
+        } else {
+          KibanaLogic.values.navigateToUrl(
+            generateEnginePath(ENGINE_CURATION_PATH, {
+              curationId: updatedSuggestion.curation_id,
+            })
+          );
+        }
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -168,6 +178,11 @@ export const CurationSuggestionLogic = kea<
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
       const { suggestion } = values;
+
+      if (suggestion!.operation === 'delete') {
+        const confirmed = await confirmDialog('Are you sure you want to delete this curation?');
+        if (!confirmed) return;
+      }
 
       try {
         const updatedSuggestion = await updateSuggestion(
@@ -187,11 +202,16 @@ export const CurationSuggestionLogic = kea<
             }
           )
         );
-        KibanaLogic.values.navigateToUrl(
-          generateEnginePath(ENGINE_CURATION_PATH, {
-            curationId: updatedSuggestion.curation_id,
-          })
-        );
+        if (suggestion!.operation === 'delete') {
+          // Because if a curation is deleted, there will be no curation detail page to navigate to afterwards.
+          KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
+        } else {
+          KibanaLogic.values.navigateToUrl(
+            generateEnginePath(ENGINE_CURATION_PATH, {
+              curationId: updatedSuggestion.curation_id,
+            })
+          );
+        }
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -323,5 +343,12 @@ const getDocumentDetails = async (http: HttpSetup, engineName: string, documentI
 const getCuration = async (http: HttpSetup, engineName: string, curationId: string) => {
   return http.get(`/internal/app_search/engines/${engineName}/curations/${curationId}`, {
     query: { skip_record_analytics: 'true' },
+  });
+};
+
+const confirmDialog = (msg: string) => {
+  return new Promise(function (resolve) {
+    const confirmed = window.confirm(msg);
+    return resolve(confirmed);
   });
 };
