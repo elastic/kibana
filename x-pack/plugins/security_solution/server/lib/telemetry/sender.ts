@@ -18,10 +18,11 @@ import {
 } from '../../../../task_manager/server';
 import { TelemetryReceiver } from './receiver';
 import { allowlistEventFields, copyAllowlistedFields } from './filters';
-import { DiagnosticTask, EndpointTask, ExceptionListsTask, DetectionRulesTask } from './tasks';
+import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
+import { SecurityTelemetryTask, SecurityTelemetryTaskConfig } from './task';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
@@ -39,10 +40,7 @@ export class TelemetryEventsSender {
   private isOptedIn?: boolean = true; // Assume true until the first check
 
   private telemetryUsageCounter?: UsageCounter;
-  private diagnosticTask?: DiagnosticTask;
-  private endpointTask?: EndpointTask;
-  private exceptionListsTask?: ExceptionListsTask;
-  private detectionRulesTask?: DetectionRulesTask;
+  private telemetryTasks?: SecurityTelemetryTask[];
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -58,19 +56,12 @@ export class TelemetryEventsSender {
     this.telemetryUsageCounter = telemetryUsageCounter;
 
     if (taskManager) {
-      this.diagnosticTask = new DiagnosticTask(this.logger, taskManager, this, telemetryReceiver);
-      this.endpointTask = new EndpointTask(this.logger, taskManager, this, telemetryReceiver);
-      this.detectionRulesTask = new DetectionRulesTask(
-        this.logger,
-        taskManager,
-        this,
-        telemetryReceiver
-      );
-      this.exceptionListsTask = new ExceptionListsTask(
-        this.logger,
-        taskManager,
-        this,
-        telemetryReceiver
+      this.telemetryTasks = createTelemetryTaskConfigs().map(
+        (config: SecurityTelemetryTaskConfig) => {
+          const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
+          task.register(taskManager);
+          return task;
+        }
       );
     }
   }
@@ -83,12 +74,9 @@ export class TelemetryEventsSender {
     this.telemetryStart = telemetryStart;
     this.receiver = receiver;
 
-    if (taskManager && this.diagnosticTask && this.endpointTask && this.exceptionListsTask) {
-      this.logger.debug(`starting security telemetry tasks`);
-      this.diagnosticTask.start(taskManager);
-      this.endpointTask.start(taskManager);
-      this.detectionRulesTask?.start(taskManager);
-      this.exceptionListsTask?.start(taskManager);
+    if (taskManager && this.telemetryTasks) {
+      this.logger.debug(`Starting security telemetry tasks`);
+      this.telemetryTasks.forEach((task) => task.start(taskManager));
     }
 
     this.logger.debug(`Starting local task`);

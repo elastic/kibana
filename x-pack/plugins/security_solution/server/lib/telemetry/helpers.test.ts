@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { createMockPackagePolicy } from './mocks';
+import { createMockPackagePolicy } from './__mocks__';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
