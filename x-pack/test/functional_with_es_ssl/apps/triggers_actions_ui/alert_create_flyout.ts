@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -28,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   async function deleteAlerts(alertIds: string[]) {
-    alertIds.forEach(async (alertId: string) => {
+    await asyncForEach(alertIds, async (alertId: string) => {
       await supertest
         .delete(`/api/alerting/rule/${alertId}`)
         .set('kbn-xsrf', 'foo')
@@ -102,7 +103,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  describe('create alert', function () {
+  // FLAKY https://github.com/elastic/kibana/issues/112749
+  describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -234,6 +236,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterSave).to.eql([

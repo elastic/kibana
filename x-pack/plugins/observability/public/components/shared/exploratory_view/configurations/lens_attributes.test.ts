@@ -16,7 +16,7 @@ import {
 } from './constants/elasticsearch_fieldnames';
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
 import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
-import { REPORT_METRIC_FIELD } from './constants';
+import { RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from './constants';
 
 describe('Lens Attribute', () => {
   mockAppIndexPattern();
@@ -38,6 +38,9 @@ describe('Lens Attribute', () => {
     indexPattern: mockIndexPattern,
     reportDefinitions: {},
     time: { from: 'now-15m', to: 'now' },
+    color: 'green',
+    name: 'test-series',
+    selectedMetricField: TRANSACTION_DURATION,
   };
 
   beforeEach(() => {
@@ -50,7 +53,7 @@ describe('Lens Attribute', () => {
 
   it('should return expected json for kpi report type', function () {
     const seriesConfigKpi = getDefaultConfigs({
-      reportType: 'kpi-over-time',
+      reportType: ReportTypes.KPI,
       dataType: 'ux',
       indexPattern: mockIndexPattern,
     });
@@ -63,6 +66,9 @@ describe('Lens Attribute', () => {
         indexPattern: mockIndexPattern,
         reportDefinitions: { 'service.name': ['elastic-co'] },
         time: { from: 'now-15m', to: 'now' },
+        color: 'green',
+        name: 'test-series',
+        selectedMetricField: RECORDS_FIELD,
       },
     ]);
 
@@ -135,6 +141,9 @@ describe('Lens Attribute', () => {
       indexPattern: mockIndexPattern,
       reportDefinitions: { 'performance.metric': [LCP_FIELD] },
       time: { from: 'now-15m', to: 'now' },
+      color: 'green',
+      name: 'test-series',
+      selectedMetricField: TRANSACTION_DURATION,
     };
 
     lnsAttr = new LensAttributes([layerConfig1]);
@@ -356,8 +365,7 @@ describe('Lens Attribute', () => {
                   min: 0,
                 },
                 name: 'divide',
-                text:
-                  "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
                 type: 'function',
               },
             },
@@ -384,7 +392,7 @@ describe('Lens Attribute', () => {
           palette: undefined,
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ forAccessor: 'y-axis-column-layer0' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0' }],
         },
       ],
       legend: { isVisible: true, position: 'right' },
@@ -404,6 +412,9 @@ describe('Lens Attribute', () => {
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
         breakdown: USER_AGENT_NAME,
         time: { from: 'now-15m', to: 'now' },
+        color: 'green',
+        name: 'test-series',
+        selectedMetricField: TRANSACTION_DURATION,
       };
 
       lnsAttr = new LensAttributes([layerConfig1]);
@@ -424,7 +435,7 @@ describe('Lens Attribute', () => {
           seriesType: 'line',
           splitAccessor: 'breakdown-column-layer0',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ forAccessor: 'y-axis-column-layer0' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0' }],
         },
       ]);
 
@@ -564,8 +575,7 @@ describe('Lens Attribute', () => {
                   min: 0,
                 },
                 name: 'divide',
-                text:
-                  "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
                 type: 'function',
               },
             },
@@ -591,6 +601,9 @@ describe('Lens Attribute', () => {
         indexPattern: mockIndexPattern,
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
         time: { from: 'now-15m', to: 'now' },
+        color: 'green',
+        name: 'test-series',
+        selectedMetricField: TRANSACTION_DURATION,
       };
 
       const filters = lnsAttr.getLayerFilters(layerConfig1, 2);

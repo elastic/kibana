@@ -34,7 +34,7 @@ export function useTransactionTraceSamplesFetcher({
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -42,12 +42,16 @@ export function useTransactionTraceSamplesFetcher({
     urlParams: { transactionId, traceId, sampleRangeFrom, sampleRangeTo },
   } = useUrlParams();
 
-  const { data = INITIAL_DATA, status, error } = useFetcher(
+  const {
+    data = INITIAL_DATA,
+    status,
+    error,
+  } = useFetcher(
     async (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
         const response = await callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/traces/samples',
+            'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
           params: {
             path: {
               serviceName,

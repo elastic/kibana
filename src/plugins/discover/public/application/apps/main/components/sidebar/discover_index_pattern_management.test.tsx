@@ -14,7 +14,7 @@ import { DiscoverServices } from '../../../../../build_services';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
 
-const mockServices = ({
+const mockServices = {
   history: () => ({
     location: {
       search: '',
@@ -48,7 +48,7 @@ const mockServices = ({
       },
     },
   },
-} as unknown) as DiscoverServices;
+} as unknown as DiscoverServices;
 
 describe('Discover IndexPattern Management', () => {
   const indexPattern = stubLogstashIndexPattern;

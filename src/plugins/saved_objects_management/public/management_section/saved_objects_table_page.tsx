@@ -16,6 +16,7 @@ import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import type { SpacesApi, SpacesContextProps } from '../../../../../x-pack/plugins/spaces/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
@@ -40,7 +41,7 @@ const SavedObjectsTablePage = ({
   dataStart: DataPublicPluginStart;
   taggingApi?: SavedObjectsTaggingApi;
   spacesApi?: SpacesApi;
-  allowedTypes: string[];
+  allowedTypes: SavedObjectManagementTypeInfo[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;

@@ -24,7 +24,7 @@ import { Role } from '../../types';
 import { GroupAssignmentSelector } from './group_assignment_selector';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
-const roleTypes = (['admin', 'user'] as unknown) as Role[];
+const roleTypes = ['admin', 'user'] as unknown as Role[];
 
 export const User: React.FC = () => {
   const {
@@ -66,6 +66,7 @@ export const User: React.FC = () => {
       username={singleUserRoleMapping.elasticsearchUser.username}
       email={singleUserRoleMapping.elasticsearchUser.email as string}
       roleType={singleUserRoleMapping.roleMapping.roleType}
+      showKibanaAccessWarning={!singleUserRoleMapping.hasEnterpriseSearchRole}
     />
   );
 

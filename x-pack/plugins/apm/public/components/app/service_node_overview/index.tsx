@@ -36,7 +36,7 @@ const ServiceNodeName = euiStyled.div`
 function ServiceNodeOverview() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/nodes');
+  } = useApmParams('/services/{serviceName}/nodes');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -48,7 +48,7 @@ function ServiceNodeOverview() {
         return undefined;
       }
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/serviceNodes',
+        endpoint: 'GET /internal/apm/services/{serviceName}/serviceNodes',
         params: {
           path: {
             serviceName,

@@ -19,11 +19,11 @@ import styled from 'styled-components';
 const HOVER_INTENT_DELAY = 100; // ms
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const WithHoverActionsPopover = (styled(EuiPopover as any)`
+const WithHoverActionsPopover = styled(EuiPopover as any)`
   .euiPopover__anchor {
     width: 100%;
   }
-` as unknown) as typeof EuiPopover;
+` as unknown as typeof EuiPopover;
 
 interface Props {
   /**

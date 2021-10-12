@@ -9,6 +9,7 @@
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test/jest';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { Relationships, RelationshipsProps } from './relationships';
 
 jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
@@ -18,6 +19,15 @@ jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
 jest.mock('../../../lib/fetch_export_objects', () => ({
   fetchExportObjects: jest.fn(),
 }));
+
+const allowedTypes: SavedObjectManagementTypeInfo[] = [
+  {
+    name: 'index-pattern',
+    displayName: 'index-pattern',
+    namespaceType: 'single',
+    hidden: false,
+  },
+];
 
 describe('Relationships', () => {
   it('should render index patterns normally', async () => {
@@ -73,6 +83,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -143,6 +154,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -213,6 +225,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -283,6 +296,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -323,6 +337,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -368,6 +383,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 

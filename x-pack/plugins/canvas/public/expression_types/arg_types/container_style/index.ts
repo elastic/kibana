@@ -34,14 +34,18 @@ interface OuterProps {
 const wrap = (Component: ComponentType<any>) =>
   // TODO: this should be in a helper
   withHandlers<OuterProps, Handlers>({
-    getArgValue: ({ argValue }) => (name, alt) => {
-      const args = get(argValue, 'chain.0.arguments', {});
-      return get(args, `${name}.0`, alt);
-    },
-    setArgValue: ({ argValue, onValueChange }) => (name, val) => {
-      const newValue = set(argValue, `chain.0.arguments.${name}.0`, val);
-      onValueChange(newValue);
-    },
+    getArgValue:
+      ({ argValue }) =>
+      (name, alt) => {
+        const args = get(argValue, 'chain.0.arguments', {});
+        return get(args, `${name}.0`, alt);
+      },
+    setArgValue:
+      ({ argValue, onValueChange }) =>
+      (name, val) => {
+        const newValue = set(argValue, `chain.0.arguments.${name}.0`, val);
+        onValueChange(newValue);
+      },
   })(Component);
 
 export const containerStyle = () => ({

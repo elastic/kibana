@@ -10,7 +10,7 @@ import type { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
 
 describe('replaceIndexPatternReference', () => {
-  const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
+  const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 
   test('should replace index_pattern to index-pattern', () => {
     const migratedDoc = replaceIndexPatternReference(

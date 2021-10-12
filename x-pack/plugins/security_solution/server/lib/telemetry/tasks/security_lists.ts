@@ -19,9 +19,10 @@ import {
 import {
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
+  LIST_TRUSTED_APPLICATION,
   TELEMETRY_CHANNEL_LISTS,
 } from '../constants';
-import { batchTelemetryRecords, templateEndpointExceptions, templateTrustedApps } from '../helpers';
+import { batchTelemetryRecords, templateExceptionList } from '../helpers';
 import { TelemetryEventsSender } from '../sender';
 import { TelemetryReceiver } from '../receiver';
 
@@ -110,7 +111,7 @@ export class TelemetryExceptionListsTask {
     // Lists Telemetry: Trusted Applications
 
     const trustedApps = await this.receiver.fetchTrustedApplications();
-    const trustedAppsJson = templateTrustedApps(trustedApps.data);
+    const trustedAppsJson = templateExceptionList(trustedApps.data, LIST_TRUSTED_APPLICATION);
     this.logger.debug(`Trusted Apps: ${trustedAppsJson}`);
 
     batchTelemetryRecords(trustedAppsJson, MAX_TELEMETRY_BATCH).forEach((batch) =>
@@ -120,7 +121,7 @@ export class TelemetryExceptionListsTask {
     // Lists Telemetry: Endpoint Exceptions
 
     const epExceptions = await this.receiver.fetchEndpointList(ENDPOINT_LIST_ID);
-    const epExceptionsJson = templateEndpointExceptions(epExceptions.data, LIST_ENDPOINT_EXCEPTION);
+    const epExceptionsJson = templateExceptionList(epExceptions.data, LIST_ENDPOINT_EXCEPTION);
     this.logger.debug(`EP Exceptions: ${epExceptionsJson}`);
 
     batchTelemetryRecords(epExceptionsJson, MAX_TELEMETRY_BATCH).forEach((batch) =>
@@ -130,7 +131,7 @@ export class TelemetryExceptionListsTask {
     // Lists Telemetry: Endpoint Event Filters
 
     const epFilters = await this.receiver.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
-    const epFiltersJson = templateEndpointExceptions(epFilters.data, LIST_ENDPOINT_EVENT_FILTER);
+    const epFiltersJson = templateExceptionList(epFilters.data, LIST_ENDPOINT_EVENT_FILTER);
     this.logger.debug(`EP Event Filters: ${epFiltersJson}`);
 
     batchTelemetryRecords(epFiltersJson, MAX_TELEMETRY_BATCH).forEach((batch) =>

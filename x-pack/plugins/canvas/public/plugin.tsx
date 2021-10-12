@@ -19,6 +19,7 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { SpacesPluginStart } from '../../spaces/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { getSessionStorage } from './lib/storage';
 import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
@@ -62,6 +63,7 @@ export interface CanvasStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -76,7 +78,8 @@ export type CanvasStart = void;
 
 /** @internal */
 export class CanvasPlugin
-  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
+  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps>
+{
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private initContext: PluginInitializerContext;
 
@@ -131,8 +134,7 @@ export class CanvasPlugin
           setupPlugins,
           startPlugins,
           registries,
-          this.appUpdater,
-          pluginServices
+          this.appUpdater
         );
 
         const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });

@@ -61,11 +61,8 @@ export function URLSearch({
 }: Props) {
   const { uxUiFilters, urlParams } = useUrlParams();
 
-  const {
-    transactionUrl,
-    transactionUrlExcluded,
-    ...restFilters
-  } = uxUiFilters;
+  const { transactionUrl, transactionUrlExcluded, ...restFilters } =
+    uxUiFilters;
 
   const { searchTerm, percentile } = urlParams;
 

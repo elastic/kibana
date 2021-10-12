@@ -60,7 +60,8 @@ export class SavedObjectsManagementPlugin
       SavedObjectsManagementPluginStart,
       SetupDependencies,
       StartDependencies
-    > {
+    >
+{
   private actionService = new SavedObjectsManagementActionService();
   private columnService = new SavedObjectsManagementColumnService();
   private serviceRegistry = new SavedObjectsManagementServiceRegistry();

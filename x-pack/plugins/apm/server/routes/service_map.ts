@@ -20,7 +20,7 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 import { environmentRt, rangeRt } from './default_api_types';
 
 const serviceMapRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/service-map',
+  endpoint: 'GET /internal/apm/service-map',
   params: t.type({
     query: t.intersection([
       t.partial({
@@ -47,14 +47,14 @@ const serviceMapRoute = createApmServerRoute({
 
     const setup = await setupRequest(resources);
     const {
-      query: { serviceName, environment },
+      query: { serviceName, environment, start, end },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      start: setup.start,
-      end: setup.end,
+      start,
+      end,
       kuery: '',
     });
     return getServiceMap({
@@ -63,12 +63,14 @@ const serviceMapRoute = createApmServerRoute({
       environment,
       searchAggregatedTransactions,
       logger,
+      start,
+      end,
     });
   },
 });
 
 const serviceMapServiceNodeRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/service-map/service/{serviceName}',
+  endpoint: 'GET /internal/apm/service-map/service/{serviceName}',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -89,14 +91,14 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { environment },
+      query: { environment, start, end },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      start: setup.start,
-      end: setup.end,
+      start,
+      end,
       kuery: '',
     });
 
@@ -105,12 +107,14 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
       setup,
       serviceName,
       searchAggregatedTransactions,
+      start,
+      end,
     });
   },
 });
 
 const serviceMapBackendNodeRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/service-map/backend/{backendName}',
+  endpoint: 'GET /internal/apm/service-map/backend/{backendName}',
   params: t.type({
     path: t.type({
       backendName: t.string,
@@ -131,13 +135,15 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
 
     const {
       path: { backendName },
-      query: { environment },
+      query: { environment, start, end },
     } = params;
 
     return getServiceMapBackendNodeInfo({
       environment,
       setup,
       backendName,
+      start,
+      end,
     });
   },
 });

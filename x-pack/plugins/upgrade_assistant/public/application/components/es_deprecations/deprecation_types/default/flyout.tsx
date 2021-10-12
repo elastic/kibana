@@ -18,9 +18,11 @@ import {
   EuiText,
   EuiTextColor,
   EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { DeprecationBadge } from '../../../shared';
 
 export interface DefaultDeprecationFlyoutProps {
   deprecation: EnrichedDeprecationInfo;
@@ -61,8 +63,10 @@ export const DefaultDeprecationFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
+        <DeprecationBadge isCritical={deprecation.isCritical} isResolved={false} />
+        <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>{message}</h2>
+          <h2 id="defaultDeprecationDetailsFlyoutTitle">{message}</h2>
         </EuiTitle>
         {index && (
           <EuiText data-test-subj="flyoutDescription">
@@ -74,7 +78,7 @@ export const DefaultDeprecationFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText>
-          <p>{details}</p>
+          <p className="eui-textBreakWord">{details}</p>
           <p>
             <EuiLink target="_blank" href={url}>
               {i18nTexts.learnMoreLinkLabel}

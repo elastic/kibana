@@ -132,7 +132,10 @@ readonly links: {
         };
         readonly addData: string;
         readonly kibana: string;
-        readonly upgradeAssistant: string;
+        readonly upgradeAssistant: {
+            readonly overview: string;
+            readonly batchReindex: string;
+        };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
@@ -190,6 +193,9 @@ readonly links: {
         }>;
         readonly observability: Readonly<{
             guide: string;
+            infrastructureThreshold: string;
+            logsThreshold: string;
+            metricsThreshold: string;
             monitorStatus: string;
             monitorUptime: string;
             tlsCertificate: string;
@@ -210,6 +216,10 @@ readonly links: {
             mappingRolesFieldRules: string;
             runAsPrivilege: string;
         }>;
+        readonly spaces: Readonly<{
+            kibanaLegacyUrlAliases: string;
+            kibanaDisableLegacyUrlAliasesApi: string;
+        }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
         readonly plugins: Record<string, string>;
@@ -227,9 +237,22 @@ readonly links: {
             datastreamsNamingScheme: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
+            learnMoreBlog: string;
         }>;
         readonly ecs: {
             readonly guide: string;
+        };
+        readonly clients: {
+            readonly guide: string;
+            readonly goOverview: string;
+            readonly javaIndex: string;
+            readonly jsIntro: string;
+            readonly netGuide: string;
+            readonly perlGuide: string;
+            readonly phpGuide: string;
+            readonly pythonGuide: string;
+            readonly rubyOverview: string;
+            readonly rustGuide: string;
         };
     };
 ```

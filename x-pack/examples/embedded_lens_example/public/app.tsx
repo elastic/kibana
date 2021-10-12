@@ -260,10 +260,10 @@ export const App = (props: {
                 {isSaveModalVisible && (
                   <LensSaveModalComponent
                     initialInput={
-                      (getLensAttributes(
+                      getLensAttributes(
                         props.defaultIndexPattern,
                         color
-                      ) as unknown) as LensEmbeddableInput
+                      ) as unknown as LensEmbeddableInput
                     }
                     onSave={() => {}}
                     onClose={() => setIsSaveModalVisible(false)}

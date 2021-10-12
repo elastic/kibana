@@ -199,7 +199,6 @@ kibana_vars=(
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
-    timelion.enabled
     url_drilldown.enabled
     vega.enableExternalUrls
     vis_type_vega.enableExternalUrls
@@ -222,6 +221,7 @@ kibana_vars=(
     xpack.alerting.healthCheck.interval
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
+    xpack.alerting.defaultRuleTaskTimeout
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -388,6 +388,7 @@ kibana_vars=(
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
     xpack.security.sessionTimeout
+    xpack.security.showInsecureClusterWarning
     xpack.securitySolution.alertMergeStrategy
     xpack.securitySolution.alertIgnoreFields
     xpack.securitySolution.endpointResultListDefaultFirstPageIndex

@@ -16,23 +16,19 @@ import { VectorLayer, TmsLayer } from '../../maps_ems/public';
 
 export const [getCoreService, setCoreService] = createGetterSetter<CoreStart>('Core');
 
-export const [getFormatService, setFormatService] = createGetterSetter<
-  DataPublicPluginStart['fieldFormats']
->('data.fieldFormats');
+export const [getFormatService, setFormatService] =
+  createGetterSetter<DataPublicPluginStart['fieldFormats']>('data.fieldFormats');
 
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
+export const [getNotifications, setNotifications] =
+  createGetterSetter<NotificationsStart>('Notifications');
 
-export const [getQueryService, setQueryService] = createGetterSetter<
-  DataPublicPluginStart['query']
->('Query');
+export const [getQueryService, setQueryService] =
+  createGetterSetter<DataPublicPluginStart['query']>('Query');
 
 export const [getShareService, setShareService] = createGetterSetter<SharePluginStart>('Share');
 
-export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
-  'KibanaLegacy'
-);
+export const [getKibanaLegacy, setKibanaLegacy] =
+  createGetterSetter<KibanaLegacyStart>('KibanaLegacy');
 
 export const [getTmsLayers, setTmsLayers] = createGetterSetter<TmsLayer[]>('TmsLayers');
 

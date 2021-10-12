@@ -9,7 +9,10 @@ import { cloneDeep } from 'lodash';
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 
+import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 import { securityConfigDeprecationProvider } from './config_deprecations';
+
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);
@@ -19,8 +22,11 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
     deprecations.map((deprecation) => ({
       deprecation,
       path: 'xpack.security',
+      context: deprecationContext,
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
@@ -42,8 +48,8 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(defaultConfig);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Session idle timeout (\\"xpack.security.session.idleTimeout\\") will be set to 1 hour by default in the next major version (8.0).",
-        "Session lifespan (\\"xpack.security.session.lifespan\\") will be set to 30 days by default in the next major version (8.0).",
+        "The session idle timeout will default to 1 hour in 8.0.",
+        "The session lifespan will default to 30 days in 8.0.",
       ]
     `);
   });
@@ -54,7 +60,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(defaultConfig);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Session idle timeout (\\"xpack.security.session.idleTimeout\\") will be set to 1 hour by default in the next major version (8.0).",
+        "The session idle timeout will default to 1 hour in 8.0.",
       ]
     `);
   });
@@ -65,7 +71,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(defaultConfig);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Session lifespan (\\"xpack.security.session.lifespan\\") will be set to 30 days by default in the next major version (8.0).",
+        "The session lifespan will default to 30 days in 8.0.",
       ]
     `);
   });
@@ -84,7 +90,7 @@ describe('Config Deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting \\"xpack.security.sessionTimeout\\" has been replaced by \\"xpack.security.session.idleTimeout\\"",
-        "Session lifespan (\\"xpack.security.session.lifespan\\") will be set to 30 days by default in the next major version (8.0).",
+        "The session lifespan will default to 30 days in 8.0.",
       ]
     `);
   });
@@ -201,6 +207,27 @@ describe('Config Deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+      ]
+    `);
+  });
+
+  it('renames security.showInsecureClusterWarning to xpack.security.showInsecureClusterWarning', () => {
+    const config = {
+      xpack: {
+        security: {
+          session: { idleTimeout: 123, lifespan: 345 },
+        },
+      },
+      security: {
+        showInsecureClusterWarning: false,
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.security.showInsecureClusterWarning).not.toBeDefined();
+    expect(migrated.xpack.security.showInsecureClusterWarning).toEqual(false);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting \\"security.showInsecureClusterWarning\\" has been replaced by \\"xpack.security.showInsecureClusterWarning\\"",
       ]
     `);
   });
@@ -391,16 +418,33 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Disabling the security plugin \\"xpack.security.enabled\\" will only be supported by disable security in Elasticsearch.",
+        "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
       ]
     `);
   });
 
-  it('does not warn when the security plugin is enabled', () => {
+  it('warns when the security plugin is enabled', () => {
     const config = {
       xpack: {
         security: {
           enabled: true,
+          session: { idleTimeout: 123, lifespan: 345 },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated).toEqual(config);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
+      ]
+    `);
+  });
+
+  it("does not warn when xpack.security.enabled isn't set", () => {
+    const config = {
+      xpack: {
+        security: {
           session: { idleTimeout: 123, lifespan: 345 },
         },
       },

@@ -38,18 +38,18 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
       http: core.http,
       security,
       getUiSettingsClient: () =>
-        (Promise.resolve({
+        Promise.resolve({
           get: () => Promise.resolve(uiSettingsMock),
-        }) as unknown) as Promise<IUiSettingsClient>,
+        }) as unknown as Promise<IUiSettingsClient>,
     });
   });
 
   test('should not redirects for not app/* requests', async () => {
-    const request = ({
+    const request = {
       url: {
         pathname: 'api/test',
       },
-    } as unknown) as KibanaRequest;
+    } as unknown as KibanaRequest;
 
     interceptor(request, {} as LifecycleResponseFactory, toolkit);
 
@@ -57,11 +57,11 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
   });
 
   test('should not redirects not authenticated users', async () => {
-    const request = ({
+    const request = {
       url: {
         pathname: '/app/home',
       },
-    } as unknown) as KibanaRequest;
+    } as unknown as KibanaRequest;
 
     interceptor(request, {} as LifecycleResponseFactory, toolkit);
 
@@ -73,22 +73,22 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
       describe(`requests to url:"${url}"`, () => {
         test('redirects to the dashboard_mode app instead', async () => {
           const { pathname, search, hash } = parseUrl(url);
-          const request = ({
+          const request = {
             url: { pathname, search, hash },
             credentials: {
               roles: [DASHBOARD_ONLY_MODE_ROLE],
             },
-          } as unknown) as KibanaRequest;
+          } as unknown as KibanaRequest;
 
-          const response = ({
+          const response = {
             redirected: jest.fn(),
-          } as unknown) as LifecycleResponseFactory;
+          } as unknown as LifecycleResponseFactory;
 
           security.authc.getCurrentUser = jest.fn(
             (r: KibanaRequest) =>
-              (({
+              ({
                 roles: [DASHBOARD_ONLY_MODE_ROLE],
-              } as unknown) as AuthenticatedUser)
+              } as unknown as AuthenticatedUser)
           );
 
           uiSettingsMock = [DASHBOARD_ONLY_MODE_ROLE];

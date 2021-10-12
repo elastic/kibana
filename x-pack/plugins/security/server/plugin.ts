@@ -18,7 +18,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import type { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import type {
@@ -28,7 +27,7 @@ import type {
 import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import type { AuthenticatedUser, SecurityLicense } from '../common';
+import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
@@ -44,6 +43,7 @@ import { AuthorizationService } from './authorization';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
 import {
+  getPrivilegeDeprecationsService,
   registerKibanaDashboardOnlyRoleDeprecation,
   registerKibanaUserRoleDeprecation,
 } from './deprecations';
@@ -88,6 +88,10 @@ export interface SecurityPluginSetup {
    * Exposes services for audit logging.
    */
   audit: AuditServiceSetup;
+  /**
+   * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
+   */
+  privilegeDeprecationsService: PrivilegeDeprecationsService;
 }
 
 /**
@@ -109,7 +113,6 @@ export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
-  securityOss?: SecurityOssPluginSetup;
   spaces?: SpacesPluginSetup;
 }
 
@@ -124,11 +127,11 @@ export interface PluginStartDependencies {
  * Represents Security Plugin instance that will be managed by the Kibana plugin system.
  */
 export class SecurityPlugin
-  implements Plugin<SecurityPluginSetup, SecurityPluginStart, PluginSetupDependencies> {
+  implements Plugin<SecurityPluginSetup, SecurityPluginStart, PluginSetupDependencies>
+{
   private readonly logger: Logger;
   private authorizationSetup?: AuthorizationServiceSetupInternal;
   private auditSetup?: AuditServiceSetup;
-  private anonymousAccessStart?: AnonymousAccessServiceStart;
   private configSubscription?: Subscription;
 
   private config?: ConfigType;
@@ -188,6 +191,13 @@ export class SecurityPlugin
     this.initializerContext.logger.get('anonymous-access'),
     this.getConfig
   );
+  private anonymousAccessStart?: AnonymousAccessServiceStart;
+  private readonly getAnonymousAccess = () => {
+    if (!this.anonymousAccessStart) {
+      throw new Error(`anonymousAccessStart is not registered!`);
+    }
+    return this.anonymousAccessStart;
+  };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -195,23 +205,17 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    {
-      features,
-      licensing,
-      taskManager,
-      usageCollection,
-      securityOss,
-      spaces,
-    }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
   ) {
+    const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
+      map((rawConfig) =>
+        createConfig(rawConfig, this.initializerContext.logger.get('config'), {
+          isTLSEnabled: core.http.getServerInfo().protocol === 'https',
+        })
+      )
+    );
     this.configSubscription = combineLatest([
-      this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
-        map((rawConfig) =>
-          createConfig(rawConfig, this.initializerContext.logger.get('config'), {
-            isTLSEnabled: core.http.getServerInfo().protocol === 'https',
-          })
-        )
-      ),
+      config$,
       this.initializerContext.config.legacy.globalConfig$,
     ]).subscribe(([config, { kibana }]) => {
       this.config = config;
@@ -230,20 +234,6 @@ export class SecurityPlugin
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
     });
-
-    if (securityOss) {
-      license.features$.subscribe(({ allowRbac }) => {
-        const showInsecureClusterWarning = !allowRbac;
-        securityOss.showInsecureClusterWarning$.next(showInsecureClusterWarning);
-      });
-
-      securityOss.setAnonymousAccessServiceProvider(() => {
-        if (!this.anonymousAccessStart) {
-          throw new Error('AnonymousAccess service is not started!');
-        }
-        return this.anonymousAccessStart;
-      });
-    }
 
     securityFeatures.forEach((securityFeature) =>
       features.registerElasticsearchFeature(securityFeature)
@@ -311,6 +301,7 @@ export class SecurityPlugin
       httpResources: core.http.resources,
       logger: this.initializerContext.logger.get('routes'),
       config,
+      config$,
       authz: this.authorizationSetup,
       license,
       getSession: this.getSession,
@@ -318,6 +309,7 @@ export class SecurityPlugin
         startServicesPromise.then((services) => services.features.getKibanaFeatures()),
       getFeatureUsageService: this.getFeatureUsageService,
       getAuthenticationService: this.getAuthentication,
+      getAnonymousAccessService: this.getAnonymousAccess,
     });
 
     return Object.freeze<SecurityPluginSetup>({
@@ -325,20 +317,22 @@ export class SecurityPlugin
         asScoped: this.auditSetup.asScoped,
         getLogger: this.auditSetup.getLogger,
       },
-
       authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
-
       authz: {
         actions: this.authorizationSetup.actions,
         checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
-        checkPrivilegesDynamicallyWithRequest: this.authorizationSetup
-          .checkPrivilegesDynamicallyWithRequest,
-        checkSavedObjectsPrivilegesWithRequest: this.authorizationSetup
-          .checkSavedObjectsPrivilegesWithRequest,
+        checkPrivilegesDynamicallyWithRequest:
+          this.authorizationSetup.checkPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivilegesWithRequest:
+          this.authorizationSetup.checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup.mode,
       },
-
       license,
+      privilegeDeprecationsService: getPrivilegeDeprecationsService(
+        this.authorizationSetup,
+        license,
+        this.logger.get('deprecations')
+      ),
     });
   }
 
@@ -391,10 +385,10 @@ export class SecurityPlugin
       authz: {
         actions: this.authorizationSetup!.actions,
         checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
-        checkPrivilegesDynamicallyWithRequest: this.authorizationSetup!
-          .checkPrivilegesDynamicallyWithRequest,
-        checkSavedObjectsPrivilegesWithRequest: this.authorizationSetup!
-          .checkSavedObjectsPrivilegesWithRequest,
+        checkPrivilegesDynamicallyWithRequest:
+          this.authorizationSetup!.checkPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivilegesWithRequest:
+          this.authorizationSetup!.checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup!.mode,
       },
     });

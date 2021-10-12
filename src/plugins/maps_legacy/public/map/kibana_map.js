@@ -581,7 +581,7 @@ export class KibanaMap extends EventEmitter {
     );
 
     let bounds = null;
-    boundsArray.forEach(async (b) => {
+    boundsArray.forEach((b) => {
       if (bounds) {
         bounds.extend(b);
       } else {

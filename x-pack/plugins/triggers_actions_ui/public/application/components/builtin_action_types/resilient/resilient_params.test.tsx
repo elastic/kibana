@@ -187,9 +187,11 @@ describe('ResilientParamsFields renders', () => {
     test('incidentTypeComboBox creation triggers editAction', () => {
       const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
       const incidentTypes = wrapper.find('[data-test-subj="incidentTypeComboBox"]');
-      ((incidentTypes.at(0).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: 'Cool' }]);
+      (
+        incidentTypes.at(0).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: 'Cool' }]);
       expect(editAction.mock.calls[0][1].incident.incidentTypes).toEqual(['Cool']);
     });
     test('incidentTypes undefined triggers editAction', () => {
@@ -208,9 +210,11 @@ describe('ResilientParamsFields renders', () => {
       };
       const wrapper = mount(<ResilientParamsFields {...newProps} />);
       const incidentTypes = wrapper.find('[data-test-subj="incidentTypeComboBox"]');
-      ((incidentTypes.at(0).props() as unknown) as {
-        onBlur: () => void;
-      }).onBlur();
+      (
+        incidentTypes.at(0).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
       expect(editAction.mock.calls[0][1].incident.incidentTypes).toEqual([]);
     });
     test('A comment triggers editAction', () => {

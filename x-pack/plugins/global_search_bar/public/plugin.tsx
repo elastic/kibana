@@ -23,7 +23,7 @@ export interface GlobalSearchBarPluginStartDeps {
 }
 
 export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
-  public async setup() {
+  public setup() {
     return {};
   }
 

@@ -109,23 +109,27 @@ describe('query_ranges', () => {
         },
       ];
 
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
-        body: estypes.SearchResponse;
-      } => {
-        return {
-          body: ({
-            aggregations: {
-              logspace_ranges: {
-                buckets: logspaceRangesBuckets,
+      const esClientSearchMock = jest.fn(
+        (
+          req: estypes.SearchRequest
+        ): {
+          body: estypes.SearchResponse;
+        } => {
+          return {
+            body: {
+              aggregations: {
+                logspace_ranges: {
+                  buckets: logspaceRangesBuckets,
+                },
               },
-            },
-          } as unknown) as estypes.SearchResponse,
-        };
-      });
+            } as unknown as estypes.SearchResponse,
+          };
+        }
+      );
 
-      const esClientMock = ({
+      const esClientMock = {
         search: esClientSearchMock,
-      } as unknown) as ElasticsearchClient;
+      } as unknown as ElasticsearchClient;
 
       const resp = await fetchTransactionDurationRanges(
         esClientMock,

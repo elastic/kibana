@@ -202,6 +202,19 @@
         },
         {
           "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.snapshotsUrl",
+          "type": "string",
+          "tags": [],
+          "label": "snapshotsUrl",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
           "id": "def-public.CloudSetup.isCloudEnabled",
           "type": "boolean",
           "tags": [],

@@ -25,7 +25,7 @@ export interface CreateCaseModalProps {
 
 const StyledFlyout = styled(EuiFlyout)`
   ${({ theme }) => `
-    z-index: ${theme.eui.euiZModal};
+    z-index: ${theme.eui.euiZLevel5};
   `}
 `;
 
@@ -37,10 +37,10 @@ const maskOverlayClassName = 'create-case-flyout-mask-overlay';
  * A global style is needed to target a parent element.
  */
 
-const GlobalStyle = createGlobalStyle<{ theme: { eui: { euiZModal: number } } }>`
+const GlobalStyle = createGlobalStyle<{ theme: { eui: { euiZLevel5: number } } }>`
   .${maskOverlayClassName} {
     ${({ theme }) => `
-    z-index: ${theme.eui.euiZModal};
+    z-index: ${theme.eui.euiZLevel5};
   `}
   }
 `;

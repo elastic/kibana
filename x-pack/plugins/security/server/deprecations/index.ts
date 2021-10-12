@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { getPrivilegeDeprecationsService } from './privilege_deprecations';
 export {
   registerKibanaDashboardOnlyRoleDeprecation,
   KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,

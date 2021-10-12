@@ -8,14 +8,14 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { DomainDeprecationDetails } from 'kibana/public';
 import { SectionLoading, GlobalFlyout } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
-import { NoDeprecationsPrompt, DeprecationCount } from '../shared';
+import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
 import { KibanaDeprecationsTable } from './kibana_deprecations_table';
 import {
   DeprecationDetailsFlyout,
@@ -67,15 +67,6 @@ const i18nTexts = {
         pluginIds: pluginIds.join(', '),
       },
     }),
-  requestErrorTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.requestErrorTitle', {
-    defaultMessage: 'Could not retrieve Kibana deprecation issues',
-  }),
-  requestErrorDescription: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecationErrors.requestErrorDescription',
-    {
-      defaultMessage: 'Check the Kibana server logs for errors.',
-    }
-  ),
 };
 
 export interface DeprecationResolutionState {
@@ -129,10 +120,8 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
     },
   } = useAppContext();
 
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const getAllDeprecations = useCallback(async () => {
     setIsLoading(true);
@@ -144,9 +133,14 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
       const deprecationErrors: string[] = [];
 
       allDeprecations.forEach((deprecation) => {
-        // Keep track of any deprecations that failed to fetch to show warning in UI
+        // Keep track of any plugin deprecations that failed to fetch to show warning in UI
         if (deprecation.level === 'fetch_error') {
-          deprecationErrors.push(deprecation.domainId);
+          // It's possible that a plugin registered more than one deprecation that could fail
+          // We only want to keep track of the unique plugin failures
+          const pluginErrorExists = deprecationErrors.includes(deprecation.domainId);
+          if (pluginErrorExists === false) {
+            deprecationErrors.push(deprecation.domainId);
+          }
           return;
         }
 
@@ -248,15 +242,8 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
     getAllDeprecations();
   }, [deprecations, getAllDeprecations]);
 
-  if (kibanaDeprecations && kibanaDeprecations.length === 0) {
-    return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <NoDeprecationsPrompt
-          deprecationType={i18nTexts.deprecationLabel}
-          navigateToOverviewPage={() => history.push('/overview')}
-        />
-      </EuiPageContent>
-    );
+  if (error) {
+    return <DeprecationsPageLoadingError deprecationSource="Kibana" />;
   }
 
   if (isLoading) {
@@ -267,63 +254,53 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
     );
   }
 
-  if (kibanaDeprecations?.length) {
+  if (kibanaDeprecations?.length === 0) {
     return (
-      <div data-test-subj="kibanaDeprecations">
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={i18nTexts.pageTitle}
-          description={i18nTexts.pageDescription}
-        >
-          <DeprecationCount
-            totalCriticalDeprecations={deprecationsCountByLevel.criticalDeprecations}
-            totalWarningDeprecations={deprecationsCountByLevel.warningDeprecations}
-          />
-        </EuiPageHeader>
-
-        <EuiSpacer size="l" />
-
-        {kibanaDeprecationErrors.length > 0 && (
-          <>
-            <EuiCallOut
-              title={i18nTexts.kibanaDeprecationErrorTitle}
-              color="warning"
-              iconType="alert"
-              data-test-subj="kibanaDeprecationErrors"
-            >
-              <p>{i18nTexts.getKibanaDeprecationErrorDescription(kibanaDeprecationErrors)}</p>
-            </EuiCallOut>
-
-            <EuiSpacer />
-          </>
-        )}
-
-        <KibanaDeprecationsTable
-          deprecations={kibanaDeprecations}
-          reload={getAllDeprecations}
-          toggleFlyout={toggleFlyout}
-          deprecationResolutionState={deprecationResolutionState}
-        />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <EuiPageContent
-        verticalPosition="center"
-        horizontalPosition="center"
-        color="danger"
-        data-test-subj="kibanaRequestError"
-      >
-        <EuiEmptyPrompt
-          iconType="alert"
-          title={<h2>{i18nTexts.requestErrorTitle}</h2>}
-          body={<p>{i18nTexts.requestErrorDescription}</p>}
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <NoDeprecationsPrompt
+          deprecationType={i18nTexts.deprecationLabel}
+          navigateToOverviewPage={() => history.push('/overview')}
         />
       </EuiPageContent>
     );
   }
 
-  return null;
+  return (
+    <div data-test-subj="kibanaDeprecations">
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={i18nTexts.pageTitle}
+        description={i18nTexts.pageDescription}
+      >
+        <DeprecationCount
+          totalCriticalDeprecations={deprecationsCountByLevel.criticalDeprecations}
+          totalWarningDeprecations={deprecationsCountByLevel.warningDeprecations}
+        />
+      </EuiPageHeader>
+
+      <EuiSpacer size="l" />
+
+      {kibanaDeprecationErrors.length > 0 && (
+        <>
+          <EuiCallOut
+            title={i18nTexts.kibanaDeprecationErrorTitle}
+            color="warning"
+            iconType="alert"
+            data-test-subj="kibanaDeprecationErrors"
+          >
+            <p>{i18nTexts.getKibanaDeprecationErrorDescription(kibanaDeprecationErrors)}</p>
+          </EuiCallOut>
+
+          <EuiSpacer />
+        </>
+      )}
+
+      <KibanaDeprecationsTable
+        deprecations={kibanaDeprecations}
+        reload={getAllDeprecations}
+        toggleFlyout={toggleFlyout}
+        deprecationResolutionState={deprecationResolutionState}
+      />
+    </div>
+  );
 });

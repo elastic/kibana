@@ -64,15 +64,8 @@ async function importIndexPattern(
   openConfirm: OverlayStart['openConfirm']
 ) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
-  const {
-    title,
-    timeFieldName,
-    fields,
-    fieldFormatMap,
-    sourceFilters,
-    type,
-    typeMeta,
-  } = doc._source;
+  const { title, timeFieldName, fields, fieldFormatMap, sourceFilters, type, typeMeta } =
+    doc._source;
   const indexPatternSpec: IndexPatternSpec = {
     id: doc._id,
     title,

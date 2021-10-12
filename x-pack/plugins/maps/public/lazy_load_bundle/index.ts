@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 import { AppMountParameters } from 'kibana/public';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable/types';
-import { SourceRegistryEntry } from '../classes/sources/source_registry';
-import { LayerWizard } from '../classes/layers/layer_wizard_registry';
 import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
 import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
 
@@ -31,8 +28,6 @@ interface LazyLoadedMapModules {
     indexPatternId: string,
     indexPatternTitle: string
   ) => LayerDescriptor[];
-  registerLayerWizard: (layerWizard: LayerWizard) => void;
-  registerSource(entry: SourceRegistryEntry): void;
   createTileMapLayerDescriptor: ({
     label,
     mapType,
@@ -91,8 +86,6 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
         getMapsCapabilities,
         renderApp,
         createSecurityLayerDescriptors,
-        registerLayerWizard,
-        registerSource,
         createTileMapLayerDescriptor,
         createRegionMapLayerDescriptor,
         createBasemapLayerDescriptor,
@@ -105,8 +98,6 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
         getMapsCapabilities,
         renderApp,
         createSecurityLayerDescriptors,
-        registerLayerWizard,
-        registerSource,
         createTileMapLayerDescriptor,
         createRegionMapLayerDescriptor,
         createBasemapLayerDescriptor,

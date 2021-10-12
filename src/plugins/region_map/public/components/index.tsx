@@ -13,6 +13,7 @@ import { RegionMapVisParams } from '../region_map_types';
 
 const RegionMapOptions = lazy(() => import('./region_map_options'));
 
-export const createRegionMapOptions = (getServiceSettings: () => Promise<IServiceSettings>) => (
-  props: VisEditorOptionsProps<RegionMapVisParams>
-) => <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />;
+export const createRegionMapOptions =
+  (getServiceSettings: () => Promise<IServiceSettings>) =>
+  (props: VisEditorOptionsProps<RegionMapVisParams>) =>
+    <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />;

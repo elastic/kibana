@@ -131,7 +131,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('fails on unauthenticated users', async () => {
     // @ts-ignore
-    core.pluginSetupDeps = ({
+    core.pluginSetupDeps = {
       // @ts-ignore
       ...core.pluginSetupDeps,
       security: {
@@ -142,7 +142,7 @@ describe('GET /api/reporting/jobs/download', () => {
           getCurrentUser: () => undefined,
         },
       },
-    } as unknown) as ReportingInternalSetup;
+    } as unknown as ReportingInternalSetup;
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -305,7 +305,7 @@ describe('GET /api/reporting/jobs/download', () => {
       const deprecatedConfig = createMockConfigSchema({ roles: { enabled: true } });
       core = await createMockReportingCore(deprecatedConfig, mockSetupDeps);
       // @ts-ignore
-      core.pluginSetupDeps = ({
+      core.pluginSetupDeps = {
         // @ts-ignore
         ...core.pluginSetupDeps,
         security: {
@@ -320,7 +320,7 @@ describe('GET /api/reporting/jobs/download', () => {
             }),
           },
         },
-      } as unknown) as ReportingInternalSetup;
+      } as unknown as ReportingInternalSetup;
       registerJobInfoRoutes(core);
 
       await server.start();

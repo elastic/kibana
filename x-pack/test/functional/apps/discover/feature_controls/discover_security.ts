@@ -229,12 +229,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it(`doesn't show CSV reports`, async () => {
-        await PageObjects.share.clickShareTopNavButton();
-        await testSubjects.missingOrFail('sharePanel-CSVReports');
-        await PageObjects.share.clickShareTopNavButton();
-      });
-
       it('allows loading a saved query via the saved query management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
@@ -322,7 +316,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close the menu
         await PageObjects.share.clickShareTopNavButton();

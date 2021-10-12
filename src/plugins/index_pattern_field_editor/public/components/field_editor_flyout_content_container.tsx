@@ -103,10 +103,10 @@ export const FieldEditorFlyoutContentContainer = ({
     return existing;
   }, [fields, field]);
 
-  const validateRuntimeField = useMemo(() => getRuntimeFieldValidator(indexPattern.title, search), [
-    search,
-    indexPattern,
-  ]);
+  const validateRuntimeField = useMemo(
+    () => getRuntimeFieldValidator(indexPattern.title, search),
+    [search, indexPattern]
+  );
 
   const services = useMemo(
     () => ({

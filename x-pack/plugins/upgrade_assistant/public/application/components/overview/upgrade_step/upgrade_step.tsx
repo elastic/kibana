@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import type { DocLinksStart } from 'src/core/public';
 import { useAppContext } from '../../../app_context';
 
 const i18nTexts = {
@@ -48,19 +47,23 @@ const i18nTexts = {
   }),
 };
 
-const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
+const UpgradeStep = () => {
   const {
     plugins: { cloud },
+    services: {
+      core: { docLinks },
+    },
   } = useAppContext();
   const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
   let callToAction;
 
   if (isCloudEnabled) {
+    const upgradeOnCloudUrl = cloud!.deploymentUrl + '?show_upgrade=true';
     callToAction = (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
-            href={cloud!.deploymentUrl}
+            href={upgradeOnCloudUrl}
             target="_blank"
             data-test-subj="upgradeSetupCloudLink"
             iconSide="right"
@@ -114,15 +117,11 @@ const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
   );
 };
 
-interface Props {
-  docLinks: DocLinksStart;
-  nextMajor: number;
-}
-
-export const getUpgradeStep = ({ docLinks, nextMajor }: Props): EuiStepProps => {
+export const getUpgradeStep = ({ nextMajor }: { nextMajor: number }): EuiStepProps => {
   return {
     title: i18nTexts.upgradeStepTitle(nextMajor),
     status: 'incomplete',
-    children: <UpgradeStep docLinks={docLinks} />,
+    'data-test-subj': 'upgradeStep',
+    children: <UpgradeStep />,
   };
 };

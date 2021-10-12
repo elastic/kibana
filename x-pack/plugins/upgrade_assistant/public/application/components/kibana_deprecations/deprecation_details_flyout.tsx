@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
+import { DeprecationBadge } from '../shared';
 
 import './_deprecation_details_flyout.scss';
 
@@ -130,12 +131,18 @@ export const DeprecationDetailsFlyout = ({
   deprecationResolutionState,
 }: DeprecationDetailsFlyoutProps) => {
   const { documentationUrl, message, correctiveActions, title } = deprecation;
+  const isCurrent = deprecationResolutionState?.id === deprecation.id;
+  const isResolved = isCurrent && deprecationResolutionState?.resolveDeprecationStatus === 'ok';
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
+        <DeprecationBadge isCritical={deprecation.level === 'critical'} isResolved={isResolved} />
+        <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2 id="kibanaDeprecationDetailsFlyoutTitle">{title}</h2>
+          <h2 id="kibanaDeprecationDetailsFlyoutTitle" className="eui-textBreakWord">
+            {title}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -154,7 +161,7 @@ export const DeprecationDetailsFlyout = ({
         )}
 
         <EuiText>
-          <p>{message}</p>
+          <p className="eui-textBreakWord">{message}</p>
 
           {documentationUrl && (
             <p>
@@ -168,7 +175,7 @@ export const DeprecationDetailsFlyout = ({
         <EuiSpacer />
 
         {/* Hide resolution steps if already resolved */}
-        {deprecationResolutionState?.resolveDeprecationStatus !== 'ok' && (
+        {!isResolved && (
           <div data-test-subj="resolveSection">
             {correctiveActions.api && (
               <>
@@ -189,16 +196,26 @@ export const DeprecationDetailsFlyout = ({
               <h3>{i18nTexts.manualFixTitle}</h3>
             </EuiTitle>
 
-            <EuiSpacer />
+            <EuiSpacer size="s" />
 
             <EuiText>
-              <ol data-test-subj="manualStepsList">
-                {correctiveActions.manualSteps.map((step, stepIndex) => (
-                  <li key={`step-${stepIndex}`} className="upgResolveStep eui-textBreakWord">
-                    {step}
-                  </li>
-                ))}
-              </ol>
+              {correctiveActions.manualSteps.length === 1 ? (
+                <p data-test-subj="manualStep" className="eui-textBreakWord">
+                  {correctiveActions.manualSteps[0]}
+                </p>
+              ) : (
+                <ol data-test-subj="manualStepsList">
+                  {correctiveActions.manualSteps.map((step, stepIndex) => (
+                    <li
+                      data-test-subj="manualStepsListItem"
+                      key={`step-${stepIndex}`}
+                      className="upgResolveStep eui-textBreakWord"
+                    >
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              )}
             </EuiText>
           </div>
         )}
@@ -212,8 +229,8 @@ export const DeprecationDetailsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          {/* Only show the "Quick resolve" button if deprecation supports it */}
-          {correctiveActions.api && (
+          {/* Only show the "Quick resolve" button if deprecation supports it and deprecation is not yet resolved */}
+          {correctiveActions.api && !isResolved && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
@@ -222,7 +239,6 @@ export const DeprecationDetailsFlyout = ({
                 isLoading={Boolean(
                   deprecationResolutionState?.resolveDeprecationStatus === 'in_progress'
                 )}
-                disabled={Boolean(deprecationResolutionState?.resolveDeprecationStatus === 'ok')}
               >
                 {getQuickResolveButtonLabel(deprecationResolutionState)}
               </EuiButton>

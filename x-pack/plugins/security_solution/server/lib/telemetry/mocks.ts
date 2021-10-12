@@ -8,7 +8,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { TelemetryEventsSender } from './sender';
 import { TelemetryReceiver } from './receiver';
-import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
+import { DiagnosticTask, EndpointTask, ExceptionListsTask, DetectionRulesTask } from './tasks';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 
 /**
@@ -17,7 +17,7 @@ import { PackagePolicy } from '../../../../fleet/common/types/models/package_pol
 export const createMockTelemetryEventsSender = (
   enableTelemtry: boolean
 ): jest.Mocked<TelemetryEventsSender> => {
-  return ({
+  return {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
@@ -27,11 +27,11 @@ export const createMockTelemetryEventsSender = (
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemtry ?? jest.fn()),
     sendIfDue: jest.fn(),
     sendEvents: jest.fn(),
-  } as unknown) as jest.Mocked<TelemetryEventsSender>;
+  } as unknown as jest.Mocked<TelemetryEventsSender>;
 };
 
 export const createMockTelemetryReceiver = (): jest.Mocked<TelemetryReceiver> => {
-  return ({
+  return {
     start: jest.fn(),
     fetchClusterInfo: jest.fn(),
     fetchLicenseInfo: jest.fn(),
@@ -40,14 +40,16 @@ export const createMockTelemetryReceiver = (): jest.Mocked<TelemetryReceiver> =>
     fetchEndpointMetrics: jest.fn(),
     fetchEndpointPolicyResponses: jest.fn(),
     fetchTrustedApplications: jest.fn(),
-  } as unknown) as jest.Mocked<TelemetryReceiver>;
+    fetchDetectionRules: jest.fn(),
+    fetchDetectionExceptionList: jest.fn(),
+  } as unknown as jest.Mocked<TelemetryReceiver>;
 };
 
 /**
  * Creates a mocked package policy
  */
 export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> => {
-  return ({
+  return {
     id: jest.fn(),
     inputs: jest.fn(),
     version: jest.fn(),
@@ -56,7 +58,7 @@ export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> => {
     updated_by: jest.fn(),
     created_at: jest.fn(),
     created_by: jest.fn(),
-  } as unknown) as jest.Mocked<PackagePolicy>;
+  } as unknown as jest.Mocked<PackagePolicy>;
 };
 
 /**
@@ -77,5 +79,12 @@ export class MockTelemetryEndpointTask extends EndpointTask {
  * Creates a mocked Telemetry exception lists Task
  */
 export class MockExceptionListsTask extends ExceptionListsTask {
+  public runTask = jest.fn();
+}
+
+/**
+ * Creates a mocked Telemetry detection rules lists Task
+ */
+export class MockDetectionRuleListsTask extends DetectionRulesTask {
   public runTask = jest.fn();
 }

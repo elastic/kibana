@@ -42,15 +42,8 @@ export const ComponentTemplatesProvider = ({
   value: Props;
   children: React.ReactNode;
 }) => {
-  const {
-    httpClient,
-    apiBasePath,
-    trackMetric,
-    docLinks,
-    toasts,
-    setBreadcrumbs,
-    getUrlForApp,
-  } = value;
+  const { httpClient, apiBasePath, trackMetric, docLinks, toasts, setBreadcrumbs, getUrlForApp } =
+    value;
 
   const useRequest = getUseRequest(httpClient);
   const sendRequest = getSendRequest(httpClient);

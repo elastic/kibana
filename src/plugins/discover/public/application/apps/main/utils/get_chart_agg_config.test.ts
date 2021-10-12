@@ -14,7 +14,7 @@ describe('getChartAggConfigs', () => {
   test('is working', () => {
     const indexPattern = indexPatternWithTimefieldMock;
     const setField = jest.fn();
-    const searchSource = ({
+    const searchSource = {
       setField,
       getField: (name: string) => {
         if (name === 'index') {
@@ -22,7 +22,7 @@ describe('getChartAggConfigs', () => {
         }
       },
       removeField: jest.fn(),
-    } as unknown) as SearchSource;
+    } as unknown as SearchSource;
 
     const dataMock = dataPluginMock.createStartContract();
 

@@ -34,12 +34,8 @@ import { DisplaySettingsLogic } from './display_settings_logic';
 import { ExampleResultDetailCard } from './example_result_detail_card';
 
 export const ResultDetail: React.FC = () => {
-  const {
-    toggleFieldEditorModal,
-    setDetailFields,
-    openEditDetailField,
-    removeDetailField,
-  } = useActions(DisplaySettingsLogic);
+  const { toggleFieldEditorModal, setDetailFields, openEditDetailField, removeDetailField } =
+    useActions(DisplaySettingsLogic);
 
   const {
     searchResultConfig: { detailFields },

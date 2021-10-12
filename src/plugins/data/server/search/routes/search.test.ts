@@ -28,7 +28,7 @@ describe('Search service', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
   }
 
   beforeEach(() => {

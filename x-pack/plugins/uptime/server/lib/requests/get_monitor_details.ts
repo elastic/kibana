@@ -82,65 +82,63 @@ const getMonitorAlerts = async ({
   return monitorAlerts;
 };
 
-export const getMonitorDetails: UMElasticsearchQueryFn<
-  GetMonitorDetailsParams,
-  MonitorDetails
-> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd, rulesClient }) => {
-  const queryFilters: any = [
-    {
-      range: {
-        '@timestamp': {
-          gte: dateStart,
-          lte: dateEnd,
-        },
-      },
-    },
-    {
-      term: {
-        'monitor.id': monitorId,
-      },
-    },
-  ];
-
-  const params = {
-    size: 1,
-    _source: ['error', '@timestamp'],
-    query: {
-      bool: {
-        must: [
-          {
-            exists: {
-              field: 'error',
-            },
-          },
-        ],
-        filter: queryFilters,
-      },
-    },
-    sort: [
+export const getMonitorDetails: UMElasticsearchQueryFn<GetMonitorDetailsParams, MonitorDetails> =
+  async ({ uptimeEsClient, monitorId, dateStart, dateEnd, rulesClient }) => {
+    const queryFilters: any = [
       {
-        '@timestamp': {
-          order: 'desc' as const,
+        range: {
+          '@timestamp': {
+            gte: dateStart,
+            lte: dateEnd,
+          },
         },
       },
-    ],
+      {
+        term: {
+          'monitor.id': monitorId,
+        },
+      },
+    ];
+
+    const params = {
+      size: 1,
+      _source: ['error', '@timestamp'],
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'error',
+              },
+            },
+          ],
+          filter: queryFilters,
+        },
+      },
+      sort: [
+        {
+          '@timestamp': {
+            order: 'desc' as const,
+          },
+        },
+      ],
+    };
+
+    const { body: result } = await uptimeEsClient.search({ body: params });
+
+    const data = result.hits.hits[0]?._source as Ping & { '@timestamp': string };
+
+    const errorTimestamp: string | undefined = data?.['@timestamp'];
+    const monAlerts = await getMonitorAlerts({
+      uptimeEsClient,
+      rulesClient,
+      monitorId,
+    });
+
+    return {
+      monitorId,
+      error: data?.error,
+      timestamp: errorTimestamp,
+      alerts: monAlerts,
+    };
   };
-
-  const { body: result } = await uptimeEsClient.search({ body: params });
-
-  const data = result.hits.hits[0]?._source as Ping & { '@timestamp': string };
-
-  const errorTimestamp: string | undefined = data?.['@timestamp'];
-  const monAlerts = await getMonitorAlerts({
-    uptimeEsClient,
-    rulesClient,
-    monitorId,
-  });
-
-  return {
-    monitorId,
-    error: data?.error,
-    timestamp: errorTimestamp,
-    alerts: monAlerts,
-  };
-};

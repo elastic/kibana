@@ -57,7 +57,7 @@ describe('ESSQL search strategy', () => {
     beforeEach(() => {
       mockQuery = jest.fn().mockResolvedValueOnce(getMockEssqlResponse());
       mockClearCursor = jest.fn();
-      mockDeps = ({
+      mockDeps = {
         esClient: {
           asCurrentUser: {
             sql: {
@@ -66,7 +66,7 @@ describe('ESSQL search strategy', () => {
             },
           },
         },
-      } as unknown) as any;
+      } as unknown as any;
     });
 
     describe('query functionality', () => {

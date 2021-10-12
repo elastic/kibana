@@ -74,6 +74,7 @@ export const getAppContextMock = () => ({
   },
   plugins: {
     share: shareMock,
+    infra: undefined,
     cloud: {
       ...cloudMock.createSetup(),
       isCloudEnabled: false,

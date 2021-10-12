@@ -8,15 +8,15 @@
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EventOutcome } from '../../../../../../../typings/es_schemas/raw/fields/event_outcome';
 import { useTheme } from '../../../../../../hooks/use_theme';
-
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
 const ResetLineHeight = euiStyled.span`
   line-height: initial;
 `;
 
-export function FailureBadge({ outcome }: { outcome?: 'success' | 'failure' }) {
+export function FailureBadge({ outcome }: { outcome?: EventOutcome }) {
   const theme = useTheme();
 
   if (outcome !== 'failure') {

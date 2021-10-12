@@ -39,7 +39,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"goal\" | \"histogram\" | \"heatmap\" | \"metric\" | \"area\" | \"line\" | \"horizontal_bar\" | \"pie\" | \"point_series\" | \"gauge\""
+              "\"goal\" | \"heatmap\" | \"metric\" | \"pie\" | \"gauge\""
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
             "deprecated": false
@@ -107,9 +107,9 @@
             "signature": [
               {
                 "pluginId": "charts",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibChartsPluginApi",
-                "section": "def-public.Labels",
+                "section": "def-common.Labels",
                 "text": "Labels"
               }
             ],
@@ -338,7 +338,7 @@
         "label": "VislibChartType",
         "description": [],
         "signature": [
-          "\"goal\" | \"histogram\" | \"heatmap\" | \"metric\" | \"area\" | \"line\" | \"horizontal_bar\" | \"pie\" | \"point_series\" | \"gauge\""
+          "\"goal\" | \"heatmap\" | \"metric\" | \"pie\" | \"gauge\""
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,
@@ -384,7 +384,7 @@
         "label": "VislibChartType",
         "description": [],
         "signature": [
-          "{ readonly Histogram: \"histogram\"; readonly HorizontalBar: \"horizontal_bar\"; readonly Line: \"line\"; readonly Pie: \"pie\"; readonly Area: \"area\"; readonly PointSeries: \"point_series\"; readonly Heatmap: \"heatmap\"; readonly Gauge: \"gauge\"; readonly Goal: \"goal\"; readonly Metric: \"metric\"; }"
+          "{ readonly Pie: \"pie\"; readonly Heatmap: \"heatmap\"; readonly Gauge: \"gauge\"; readonly Goal: \"goal\"; readonly Metric: \"metric\"; }"
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,

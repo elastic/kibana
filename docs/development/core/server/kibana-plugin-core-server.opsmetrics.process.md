@@ -4,7 +4,12 @@
 
 ## OpsMetrics.process property
 
-Process related metrics
+> Warning: This API is now obsolete.
+> 
+> use the processes field instead.
+> 
+
+Process related metrics.
 
 <b>Signature:</b>
 

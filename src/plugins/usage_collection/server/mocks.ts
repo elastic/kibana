@@ -25,10 +25,8 @@ export const createUsageCollectionSetupMock = () => {
     logger: loggingSystemMock.createLogger(),
     maximumWaitTimeForAllCollectorsInS: 1,
   });
-  const {
-    createUsageCounter,
-    getUsageCounterByType,
-  } = usageCountersServiceMock.createSetupContract();
+  const { createUsageCounter, getUsageCounterByType } =
+    usageCountersServiceMock.createSetupContract();
 
   const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = {
     createUsageCounter,

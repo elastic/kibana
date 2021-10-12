@@ -58,7 +58,7 @@ export const settings = {
   ),
   children: [
     page({
-      path: '/agent-configuration',
+      path: '/settings/agent-configuration',
       tab: 'agent-configurations',
       title: i18n.translate(
         'xpack.apm.views.settings.agentConfiguration.title',
@@ -68,7 +68,7 @@ export const settings = {
     }),
     {
       ...page({
-        path: '/agent-configuration/create',
+        path: '/settings/agent-configuration/create',
         title: i18n.translate(
           'xpack.apm.views.settings.createAgentConfiguration.title',
           { defaultMessage: 'Create Agent Configuration' }
@@ -84,7 +84,7 @@ export const settings = {
     },
     {
       ...page({
-        path: '/agent-configuration/edit',
+        path: '/settings/agent-configuration/edit',
         title: i18n.translate(
           'xpack.apm.views.settings.editAgentConfiguration.title',
           { defaultMessage: 'Edit Agent Configuration' }
@@ -101,7 +101,7 @@ export const settings = {
       }),
     },
     page({
-      path: '/apm-indices',
+      path: '/settings/apm-indices',
       title: i18n.translate('xpack.apm.views.settings.indices.title', {
         defaultMessage: 'Indices',
       }),
@@ -109,7 +109,7 @@ export const settings = {
       element: <ApmIndices />,
     }),
     page({
-      path: '/customize-ui',
+      path: '/settings/customize-ui',
       title: i18n.translate('xpack.apm.views.settings.customizeUI.title', {
         defaultMessage: 'Customize app',
       }),
@@ -117,7 +117,7 @@ export const settings = {
       element: <CustomizeUI />,
     }),
     page({
-      path: '/schema',
+      path: '/settings/schema',
       title: i18n.translate('xpack.apm.views.settings.schema.title', {
         defaultMessage: 'Schema',
       }),
@@ -125,7 +125,7 @@ export const settings = {
       tab: 'schema',
     }),
     page({
-      path: '/anomaly-detection',
+      path: '/settings/anomaly-detection',
       title: i18n.translate('xpack.apm.views.settings.anomalyDetection.title', {
         defaultMessage: 'Anomaly detection',
       }),
@@ -133,7 +133,7 @@ export const settings = {
       tab: 'anomaly-detection',
     }),
     {
-      path: '/',
+      path: '/settings',
       element: <Redirect to="/settings/agent-configuration" />,
     },
   ],

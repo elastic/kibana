@@ -104,6 +104,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.closeFlyout();
         });
       });
+
+      it('should allow paginating docs in the flyout by clicking in the doc table', async function () {
+        await retry.try(async function () {
+          await dataGrid.clickRowToggle({ rowIndex: rowToInspect - 1 });
+          await testSubjects.exists(`dscDocNavigationPage0`);
+          await dataGrid.clickRowToggle({ rowIndex: rowToInspect });
+          await testSubjects.exists(`dscDocNavigationPage1`);
+          await dataGrid.closeFlyout();
+        });
+      });
       // skipping for this backport because it's flaky, will resolve in master
       it.skip('should show allow adding columns from the detail panel', async function () {
         await retry.try(async function () {

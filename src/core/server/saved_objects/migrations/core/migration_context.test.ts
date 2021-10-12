@@ -74,4 +74,18 @@ describe('disableUnknownTypeMappingFields', () => {
       },
     });
   });
+
+  it('does not fail if the source mapping does not have `properties` defined', () => {
+    const missingPropertiesMappings = {
+      ...sourceMappings,
+      properties: undefined,
+    };
+    const result = disableUnknownTypeMappingFields(
+      activeMappings,
+      // @ts-expect-error `properties` should not be undefined
+      missingPropertiesMappings
+    );
+
+    expect(Object.keys(result.properties)).toEqual(['known_type']);
+  });
 });

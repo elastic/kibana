@@ -7,7 +7,7 @@
 
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
-import { metadataTransformPattern } from './endpoint/constants';
+import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -64,23 +64,40 @@ export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex';
 export const DEFAULT_THREAT_INDEX_VALUE = ['filebeat-*'];
+export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  authentications = 'authentications',
   case = 'case',
+  caseConfigure = 'case-configure',
+  caseCreate = 'case-create',
   detections = 'detections',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
+  hostIsolationExceptions = 'host_isolation_exceptions',
+  events = 'events',
   exceptions = 'exceptions',
+  explore = 'explore',
   hosts = 'hosts',
+  hostsAnomalies = 'hosts-anomalies',
+  hostsExternalAlerts = 'hosts-external_alerts',
+  investigate = 'investigate',
   network = 'network',
+  networkAnomalies = 'network-anomalies',
+  networkDns = 'network-dns',
+  networkExternalAlerts = 'network-external_alerts',
+  networkHttp = 'network-http',
+  networkTls = 'network-tls',
+  timelines = 'timelines',
+  timelinesTemplates = 'timelines-templates',
   overview = 'overview',
   policies = 'policies',
   rules = 'rules',
-  timelines = 'timelines',
   trustedApps = 'trusted_apps',
   ueba = 'ueba',
+  uncommonProcesses = 'uncommon_processes',
 }
 
 export const TIMELINES_PATH = '/timelines';
@@ -97,6 +114,7 @@ export const MANAGEMENT_PATH = '/administration';
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints`;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps`;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters`;
+export const HOST_ISOLATION_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/host_isolation_exceptions`;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}`;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}`;
@@ -113,6 +131,7 @@ export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}`;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}`;
 export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}`;
 export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}`;
+export const APP_HOST_ISOLATION_EXCEPTIONS_PATH = `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
@@ -187,24 +206,23 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
 /**
  * Id for the signals alerting type
  */
-export const SIGNALS_ID = `siem.signals`;
+export const SIGNALS_ID = `siem.signals` as const;
 
 /**
- * Id's for reference rule types
+ * IDs for RAC rule types
  */
-export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
-export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
-
-export const QUERY_ALERT_TYPE_ID = `siem.queryRule`;
-export const EQL_ALERT_TYPE_ID = `siem.eqlRule`;
-export const INDICATOR_ALERT_TYPE_ID = `siem.indicatorRule`;
-export const ML_ALERT_TYPE_ID = `siem.mlRule`;
-export const THRESHOLD_ALERT_TYPE_ID = `siem.thresholdRule`;
+const RULE_TYPE_PREFIX = `siem` as const;
+export const EQL_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.eqlRule` as const;
+export const INDICATOR_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.indicatorRule` as const;
+export const ML_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.mlRule` as const;
+export const QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.queryRule` as const;
+export const THRESHOLD_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.thresholdRule` as const;
 
 /**
  * Id for the notifications alerting type
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const NOTIFICATIONS_ID = `siem.notifications`;
+export const LEGACY_NOTIFICATIONS_ID = `siem.notifications`;
 
 /**
  * Special internal structure for tags for signals. This is used
@@ -228,6 +246,7 @@ export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 export const DETECTION_ENGINE_RULES_BULK_ACTION = `${DETECTION_ENGINE_RULES_URL}/_bulk_action`;
 
+export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve';
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINES_URL = '/api/timelines';
 export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite';
@@ -312,4 +331,23 @@ export const showAllOthersBucket: string[] = [
  */
 export const ELASTIC_NAME = 'estc';
 
-export const TRANSFORM_STATS_URL = `/api/transform/transforms/${metadataTransformPattern}-*/_stats`;
+export const METADATA_TRANSFORM_STATS_URL = `/api/transform/transforms/${METADATA_TRANSFORMS_PATTERN}/_stats`;
+
+export const HOST_RISK_SCORES_INDEX = 'ml_host_risk_score_latest';
+
+export const TRANSFORM_STATES = {
+  ABORTING: 'aborting',
+  FAILED: 'failed',
+  INDEXING: 'indexing',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+  STOPPING: 'stopping',
+  WAITING: 'waiting',
+};
+
+export const WARNING_TRANSFORM_STATES = new Set([
+  TRANSFORM_STATES.ABORTING,
+  TRANSFORM_STATES.FAILED,
+  TRANSFORM_STATES.STOPPED,
+  TRANSFORM_STATES.STOPPING,
+]);

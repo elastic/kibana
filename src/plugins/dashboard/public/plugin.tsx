@@ -146,7 +146,8 @@ export interface DashboardStart {
 
 export class DashboardPlugin
   implements
-    Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies> {
+    Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
+{
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -164,7 +165,8 @@ export class DashboardPlugin
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     { share, embeddable, home, urlForwarding, data, usageCollection }: DashboardSetupDependencies
   ): DashboardSetup {
-    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<DashboardFeatureFlagConfig>();
+    this.dashboardFeatureFlagConfig =
+      this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const startServices = core.getStartServices();
 
     if (share) {
@@ -418,9 +420,8 @@ export class DashboardPlugin
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
       getDashboardContainerByValueRenderer: () => {
-        const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
-          DASHBOARD_CONTAINER_TYPE
-        );
+        const dashboardContainerFactory =
+          plugins.embeddable.getEmbeddableFactory(DASHBOARD_CONTAINER_TYPE);
 
         if (!dashboardContainerFactory) {
           throw new Error(`${DASHBOARD_CONTAINER_TYPE} Embeddable Factory not found`);

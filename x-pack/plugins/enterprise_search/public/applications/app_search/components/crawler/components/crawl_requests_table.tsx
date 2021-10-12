@@ -9,16 +9,21 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiBasicTable, EuiEmptyPrompt, EuiTableFieldDataColumnType } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiEmptyPrompt,
+  EuiIconTip,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { CrawlerLogic } from '../crawler_logic';
-import { CrawlRequest, readableCrawlerStatuses } from '../types';
+import { CrawlEvent, readableCrawlerStatuses } from '../types';
 
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
-const columns: Array<EuiTableFieldDataColumnType<CrawlRequest>> = [
+const columns: Array<EuiTableFieldDataColumnType<CrawlEvent>> = [
   {
     field: 'id',
     name: i18n.translate(
@@ -36,7 +41,7 @@ const columns: Array<EuiTableFieldDataColumnType<CrawlRequest>> = [
         defaultMessage: 'Created',
       }
     ),
-    render: (createdAt: CrawlRequest['createdAt']) => (
+    render: (createdAt: CrawlEvent['createdAt']) => (
       <CustomFormattedTimestamp timestamp={createdAt} />
     ),
   },
@@ -48,17 +53,32 @@ const columns: Array<EuiTableFieldDataColumnType<CrawlRequest>> = [
         defaultMessage: 'Status',
       }
     ),
-    render: (status: CrawlRequest['status']) => readableCrawlerStatuses[status],
+    align: 'right',
+    render: (status: CrawlEvent['status'], event: CrawlEvent) => (
+      <>
+        {event.stage === 'process' && (
+          <EuiIconTip
+            aria-label="Process crawl"
+            size="m"
+            type="iInCircle"
+            color="primary"
+            position="top"
+            content="Re-applied crawl rules"
+          />
+        )}
+        {readableCrawlerStatuses[status]}
+      </>
+    ),
   },
 ];
 
 export const CrawlRequestsTable: React.FC = () => {
-  const { crawlRequests } = useValues(CrawlerLogic);
+  const { events } = useValues(CrawlerLogic);
 
   return (
     <EuiBasicTable
       columns={columns}
-      items={crawlRequests}
+      items={events}
       noItemsMessage={
         <EuiEmptyPrompt
           iconType="tableDensityExpanded"

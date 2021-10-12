@@ -7,8 +7,11 @@
 
 import { config } from './index';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 
 const CONFIG_PATH = 'xpack.task_manager';
+
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyTaskManagerDeprecations = (settings: Record<string, unknown> = {}) => {
   const deprecations = config.deprecations!(configDeprecationFactory);
@@ -21,8 +24,11 @@ const applyTaskManagerDeprecations = (settings: Record<string, unknown> = {}) =>
     deprecations.map((deprecation) => ({
       deprecation,
       path: CONFIG_PATH,
+      context: deprecationContext,
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,

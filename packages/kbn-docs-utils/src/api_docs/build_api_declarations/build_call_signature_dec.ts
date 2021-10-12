@@ -6,59 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import { Node, Signature } from 'ts-morph';
-import { AnchorLink, ApiDeclaration } from '../types';
+import { ApiDeclaration } from '../types';
 import { buildApiDeclaration } from './build_api_declaration';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { getJSDocParamComment, getJSDocReturnTagComment } from './js_doc_utils';
+import { BuildApiDecOpts } from './types';
+import { buildApiId, getOptsForChildWithName } from './utils';
 
-export function buildCallSignatureDec({
-  signature,
-  node,
-  plugins,
-  captureReferences,
-  currentPluginId,
-  anchorLink,
-  log,
-  name,
-}: {
-  signature: Signature;
-  name: string;
-  plugins: KibanaPlatformPlugin[];
-  anchorLink: AnchorLink;
-  log: ToolingLog;
-  captureReferences: boolean;
-  currentPluginId: string;
-  node: Node;
-}) {
+export function buildCallSignatureDec(node: Node, signature: Signature, opts: BuildApiDecOpts) {
   return {
-    ...buildBasicApiDeclaration({
-      node,
-      plugins,
-      anchorLink,
-      apiName: name,
-      currentPluginId,
-      captureReferences,
-      log,
-    }),
+    ...buildBasicApiDeclaration(node, opts),
     returnComment: getJSDocReturnTagComment(node),
-    children: signature.getParameters().reduce((kids, p) => {
+    children: signature.getParameters().reduce((kids, p, index) => {
       if (p.getDeclarations().length === 1) {
         kids.push({
-          ...buildApiDeclaration({
-            node: p.getDeclarations()[0],
-            log,
-            captureReferences,
-            plugins,
-            scope: anchorLink.scope,
-            name: p.getName(),
-            currentPluginId,
+          ...buildApiDeclaration(p.getDeclarations()[0], {
+            ...getOptsForChildWithName(p.getName(), opts),
+            id: buildApiId(`$${index + 1}`, opts.id),
           }),
           description: getJSDocParamComment(node, p.getName()),
         });
       } else {
-        log.warning(`Losing information on parameter ${p.getName()}`);
+        opts.log.warning(`Losing information on parameter ${p.getName()}`);
       }
       return kids;
     }, [] as ApiDeclaration[]),

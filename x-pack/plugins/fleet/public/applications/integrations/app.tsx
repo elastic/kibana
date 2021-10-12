@@ -32,7 +32,7 @@ import {
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
 import { AgentPolicyContextProvider, useUrlModal } from './hooks';
-import { INTEGRATIONS_ROUTING_PATHS } from './constants';
+import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
 import { Error, Loading, SettingFlyout } from './components';
 
@@ -201,13 +201,15 @@ export const IntegrationsAppContext: React.FC<{
                 <EuiThemeProvider darkMode={isDarkMode}>
                   <UIExtensionsContext.Provider value={extensions}>
                     <FleetStatusProvider>
-                      <Router history={history}>
-                        <AgentPolicyContextProvider>
-                          <PackageInstallProvider notifications={startServices.notifications}>
-                            {children}
-                          </PackageInstallProvider>
-                        </AgentPolicyContextProvider>
-                      </Router>
+                      <startServices.customIntegrations.ContextProvider>
+                        <Router history={history}>
+                          <AgentPolicyContextProvider>
+                            <PackageInstallProvider notifications={startServices.notifications}>
+                              {children}
+                            </PackageInstallProvider>
+                          </AgentPolicyContextProvider>
+                        </Router>
+                      </startServices.customIntegrations.ContextProvider>
                     </FleetStatusProvider>
                   </UIExtensionsContext.Provider>
                 </EuiThemeProvider>
@@ -242,7 +244,7 @@ export const AppRoutes = memo(() => {
             // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
             const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
             if (!shouldRedirectHash) {
-              return <Redirect to={INTEGRATIONS_ROUTING_PATHS.integrations_all} />;
+              return <Redirect to={pagePathGetters.integrations_all({})[1]} />;
             }
             const pathname = location.hash.replace(/^#/, '');
 

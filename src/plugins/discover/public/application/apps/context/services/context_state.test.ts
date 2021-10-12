@@ -28,7 +28,7 @@ describe('Test Discover Context State', () => {
       history,
       uiSettings: {
         get: <T>(key: string) =>
-          ((key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown) as T,
+          (key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown as T,
       } as IUiSettingsClient,
     });
     state.startSync();

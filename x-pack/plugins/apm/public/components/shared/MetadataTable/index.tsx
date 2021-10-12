@@ -19,18 +19,21 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { HeightRetainer } from '../HeightRetainer';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { filterSectionsByTerm, SectionsWithRows } from './helper';
+import { filterSectionsByTerm } from './helper';
 import { Section } from './Section';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { SectionDescriptor } from './types';
 
 interface Props {
-  sections: SectionsWithRows;
+  sections: SectionDescriptor[];
+  isLoading: boolean;
 }
 
-export function MetadataTable({ sections }: Props) {
+export function MetadataTable({ sections, isLoading }: Props) {
   const history = useHistory();
   const location = useLocation();
   const { urlParams } = useUrlParams();
@@ -77,6 +80,13 @@ export function MetadataTable({ sections }: Props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {isLoading && (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <HeightRetainer>
         {filteredSections.map((section) => (
           <div key={section.key}>
@@ -84,7 +94,7 @@ export function MetadataTable({ sections }: Props) {
               <h6>{section.label}</h6>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <Section keyValuePairs={section.rows} />
+            <Section properties={section.properties} />
             <EuiSpacer size="xl" />
           </div>
         ))}

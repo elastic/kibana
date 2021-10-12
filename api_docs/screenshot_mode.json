@@ -198,7 +198,7 @@
           "children": [
             {
               "parentPluginId": "screenshotMode",
-              "id": "def-server.request",
+              "id": "def-server.ScreenshotModePluginSetup.isScreenshotMode.$1",
               "type": "Object",
               "tags": [],
               "label": "request",
@@ -273,7 +273,7 @@
           "children": [
             {
               "parentPluginId": "screenshotMode",
-              "id": "def-server.request",
+              "id": "def-server.ScreenshotModePluginStart.isScreenshotMode.$1",
               "type": "Object",
               "tags": [],
               "label": "request",

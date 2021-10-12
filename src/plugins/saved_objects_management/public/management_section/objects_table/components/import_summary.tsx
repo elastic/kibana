@@ -29,6 +29,7 @@ import type {
   SavedObjectsImportWarning,
   IBasePath,
 } from 'kibana/public';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
 
 const DEFAULT_ICON = 'apps';
@@ -38,6 +39,7 @@ export interface ImportSummaryProps {
   successfulImports: SavedObjectsImportSuccess[];
   importWarnings: SavedObjectsImportWarning[];
   basePath: IBasePath;
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 interface ImportItem {
@@ -244,6 +246,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
   successfulImports,
   importWarnings,
   basePath,
+  allowedTypes,
 }) => {
   const importItems: ImportItem[] = useMemo(
     () =>
@@ -279,6 +282,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
       <EuiHorizontalRule />
       {importItems.map((item, index) => {
         const { type, title, icon } = item;
+        const typeLabel = getSavedObjectLabel(type, allowedTypes);
         return (
           <EuiFlexGroup
             responsive={false}
@@ -288,8 +292,8 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
             className="savedObjectsManagementImportSummary__row"
           >
             <EuiFlexItem grow={false}>
-              <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
-                <EuiIcon aria-label={getSavedObjectLabel(type)} type={icon} size="s" />
+              <EuiToolTip position="top" content={typeLabel}>
+                <EuiIcon aria-label={typeLabel} type={icon} size="s" />
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem className="savedObjectsManagementImportSummary__title">

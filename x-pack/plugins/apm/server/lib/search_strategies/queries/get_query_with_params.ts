@@ -15,26 +15,17 @@ import type {
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
 import { rangeRt } from '../../../routes/default_api_types';
-import { getCorrelationsFilters } from '../../correlations/get_filters';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { getCorrelationsFilters } from './get_filters';
 
-export const getTermsQuery = (
-  fieldName: FieldValuePair['fieldName'] | undefined,
-  fieldValue: FieldValuePair['fieldValue'] | undefined
-) => {
-  return fieldName && fieldValue ? [{ term: { [fieldName]: fieldValue } }] : [];
+export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
+  return { term: { [fieldName]: fieldValue } };
 };
 
 interface QueryParams {
   params: SearchStrategyParams;
-  fieldName?: FieldValuePair['fieldName'];
-  fieldValue?: FieldValuePair['fieldValue'];
+  termFilters?: FieldValuePair[];
 }
-export const getQueryWithParams = ({
-  params,
-  fieldName,
-  fieldValue,
-}: QueryParams) => {
+export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
   const {
     environment,
     kuery,
@@ -46,27 +37,28 @@ export const getQueryWithParams = ({
   } = params;
 
   // converts string based start/end to epochmillis
-  const setup = pipe(
+  const decodedRange = pipe(
     rangeRt.decode({ start, end }),
     getOrElse<t.Errors, { start: number; end: number }>((errors) => {
       throw new Error(failure(errors).join('\n'));
     })
-  ) as Setup & SetupTimeRange;
+  );
 
-  const filters = getCorrelationsFilters({
-    setup,
+  const correlationFilters = getCorrelationsFilters({
     environment,
     kuery,
     serviceName,
     transactionType,
     transactionName,
+    start: decodedRange.start,
+    end: decodedRange.end,
   });
 
   return {
     bool: {
       filter: [
-        ...filters,
-        ...getTermsQuery(fieldName, fieldValue),
+        ...correlationFilters,
+        ...(Array.isArray(termFilters) ? termFilters.map(getTermsQuery) : []),
       ] as estypes.QueryDslQueryContainer[],
     },
   };

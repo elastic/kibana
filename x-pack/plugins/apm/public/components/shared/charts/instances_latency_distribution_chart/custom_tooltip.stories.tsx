@@ -11,13 +11,15 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { CustomTooltip } from './custom_tooltip';
 
-type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
-type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
+type ServiceInstanceMainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type MainStatsServiceInstanceItem =
+  ServiceInstanceMainStatistics['currentPeriod'][0];
 
 function getLatencyFormatter(props: TooltipInfo) {
   const maxLatency = Math.max(
     ...props.values.map((value) => {
-      const datum = (value.datum as unknown) as MainStatsServiceInstanceItem;
+      const datum = value.datum as unknown as MainStatsServiceInstanceItem;
       return datum.latency ?? 0;
     })
   );
@@ -37,8 +39,7 @@ export function Example(props: TooltipInfo) {
 Example.args = {
   header: {
     seriesIdentifier: {
-      key:
-        'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
+      key: 'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
       specId: 'Instances',
       yAccessor: '(index:0)',
       splitAccessors: {},
@@ -65,8 +66,7 @@ Example.args = {
   values: [
     {
       seriesIdentifier: {
-        key:
-          'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
+        key: 'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
         specId: 'Instances',
       },
       valueAccessor: 'y1',
@@ -98,8 +98,7 @@ export function MultipleInstances(props: TooltipInfo) {
 MultipleInstances.args = {
   header: {
     seriesIdentifier: {
-      key:
-        'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
+      key: 'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
       specId: 'Instances',
       yAccessor: '(index:0)',
       splitAccessors: {},
@@ -126,8 +125,7 @@ MultipleInstances.args = {
   values: [
     {
       seriesIdentifier: {
-        key:
-          'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
+        key: 'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
         specId: 'Instances',
       },
       valueAccessor: 'y1',
@@ -150,8 +148,7 @@ MultipleInstances.args = {
     },
     {
       seriesIdentifier: {
-        key:
-          'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
+        key: 'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
         specId: 'Instances',
       },
       valueAccessor: 'y1',

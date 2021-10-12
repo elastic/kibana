@@ -35,6 +35,18 @@ export class UpgradeAssistantPageObject extends FtrService {
     });
   }
 
+  async clickDeprecationLoggingToggle() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('deprecationLoggingToggle');
+    });
+  }
+
+  async clickResetLastCheckpointButton() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('resetLastStoredDate');
+    });
+  }
+
   async clickKibanaDeprecationsPanel() {
     return await this.retry.try(async () => {
       await this.testSubjects.click('kibanaStatsPanel');
@@ -55,6 +67,19 @@ export class UpgradeAssistantPageObject extends FtrService {
       await issueLink.click();
     } else {
       this.log.debug('Unable to find selected deprecation row');
+    }
+  }
+
+  async clickEsDeprecation(deprecationType: 'indexSettings' | 'default' | 'reindex' | 'ml') {
+    const table = await this.testSubjects.find('esDeprecationsTable');
+    const deprecationIssueLink = await (
+      await table.findByTestSubject(`${deprecationType}TableCell-message`)
+    ).findByCssSelector('button');
+
+    if (deprecationIssueLink) {
+      await deprecationIssueLink.click();
+    } else {
+      this.log.debug('Unable to find selected deprecation');
     }
   }
 }

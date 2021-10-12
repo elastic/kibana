@@ -24,7 +24,7 @@ const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
 let mockConsoleLog: jest.SpyInstance;
 
 import { createWriteStream } from 'fs';
-const mockCreateWriteStream = (createWriteStream as unknown) as jest.Mock<typeof createWriteStream>;
+const mockCreateWriteStream = createWriteStream as unknown as jest.Mock<typeof createWriteStream>;
 
 import { LoggingSystem, config } from '.';
 

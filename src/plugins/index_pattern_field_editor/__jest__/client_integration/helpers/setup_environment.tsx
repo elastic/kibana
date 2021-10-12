@@ -59,64 +59,66 @@ export const fieldFormatsOptions = [{ id: 'upper', title: 'UpperCaseString' } as
 
 export const indexPatternNameForTest = 'testIndexPattern';
 
-export const WithFieldEditorDependencies = <T extends object = { [key: string]: unknown }>(
-  Comp: FunctionComponent<T>,
-  overridingDependencies?: Partial<Context>
-) => (props: T) => {
-  // Setup mocks
-  (fieldFormats.getByFieldType as jest.MockedFunction<
-    typeof fieldFormats['getByFieldType']
-  >).mockReturnValue(fieldFormatsOptions);
+export const WithFieldEditorDependencies =
+  <T extends object = { [key: string]: unknown }>(
+    Comp: FunctionComponent<T>,
+    overridingDependencies?: Partial<Context>
+  ) =>
+  (props: T) => {
+    // Setup mocks
+    (
+      fieldFormats.getByFieldType as jest.MockedFunction<typeof fieldFormats['getByFieldType']>
+    ).mockReturnValue(fieldFormatsOptions);
 
-  (fieldFormats.getDefaultType as jest.MockedFunction<
-    typeof fieldFormats['getDefaultType']
-  >).mockReturnValue({ id: 'testDefaultFormat', title: 'TestDefaultFormat' } as any);
+    (
+      fieldFormats.getDefaultType as jest.MockedFunction<typeof fieldFormats['getDefaultType']>
+    ).mockReturnValue({ id: 'testDefaultFormat', title: 'TestDefaultFormat' } as any);
 
-  (fieldFormats.getInstance as jest.MockedFunction<
-    typeof fieldFormats['getInstance']
-  >).mockImplementation((id: string) => {
-    if (id === 'upper') {
-      return {
-        convertObject: {
-          html(value: string = '') {
-            return `<span>${value.toUpperCase()}</span>`;
+    (
+      fieldFormats.getInstance as jest.MockedFunction<typeof fieldFormats['getInstance']>
+    ).mockImplementation((id: string) => {
+      if (id === 'upper') {
+        return {
+          convertObject: {
+            html(value: string = '') {
+              return `<span>${value.toUpperCase()}</span>`;
+            },
           },
-        },
-      } as any;
-    }
-  });
+        } as any;
+      }
+    });
 
-  const dependencies: Context = {
-    indexPattern: {
-      title: indexPatternNameForTest,
-      fields: { getAll: spyIndexPatternGetAllFields },
-    } as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    fieldTypeToProcess: 'runtime',
-    existingConcreteFields: [],
-    namesNotAllowed: [],
-    links: {
-      runtimePainless: 'https://elastic.co',
-    },
-    services: {
-      notifications: notificationServiceMock.createStartContract(),
-      search,
-      api: apiService,
-    },
-    fieldFormatEditors: {
-      getAll: () => [],
-      getById: () => undefined,
-    },
-    fieldFormats,
+    const dependencies: Context = {
+      indexPattern: {
+        title: indexPatternNameForTest,
+        fields: { getAll: spyIndexPatternGetAllFields },
+      } as any,
+      uiSettings: uiSettingsServiceMock.createStartContract(),
+      fieldTypeToProcess: 'runtime',
+      existingConcreteFields: [],
+      namesNotAllowed: [],
+      links: {
+        runtimePainless: 'https://elastic.co',
+      },
+      services: {
+        notifications: notificationServiceMock.createStartContract(),
+        search,
+        api: apiService,
+      },
+      fieldFormatEditors: {
+        getAll: () => [],
+        getById: () => undefined,
+      },
+      fieldFormats,
+    };
+
+    const mergedDependencies = merge({}, dependencies, overridingDependencies);
+
+    return (
+      <FieldEditorProvider {...mergedDependencies}>
+        <FieldPreviewProvider>
+          <Comp {...props} />
+        </FieldPreviewProvider>
+      </FieldEditorProvider>
+    );
   };
-
-  const mergedDependencies = merge({}, dependencies, overridingDependencies);
-
-  return (
-    <FieldEditorProvider {...mergedDependencies}>
-      <FieldPreviewProvider>
-        <Comp {...props} />
-      </FieldPreviewProvider>
-    </FieldEditorProvider>
-  );
-};

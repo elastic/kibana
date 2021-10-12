@@ -113,34 +113,34 @@ const renderData = ({ label, value }: TooltipData, index: number) => {
   ) : null;
 };
 
-export const getDetailedTooltip = (aspects: Aspects) => (
-  headerFormatter?: TooltipValueFormatter
-): CustomTooltip => {
-  return function DetailedTooltip({ header, values }) {
-    // Note: first value is not necessarily the closest value
-    // To be fixed with https://github.com/elastic/elastic-charts/issues/835
-    // TODO: Allow multiple values to be displayed in tooltip
-    const highlightedValue = values.find(({ isHighlighted }) => isHighlighted);
+export const getDetailedTooltip =
+  (aspects: Aspects) =>
+  (headerFormatter?: TooltipValueFormatter): CustomTooltip => {
+    return function DetailedTooltip({ header, values }) {
+      // Note: first value is not necessarily the closest value
+      // To be fixed with https://github.com/elastic/elastic-charts/issues/835
+      // TODO: Allow multiple values to be displayed in tooltip
+      const highlightedValue = values.find(({ isHighlighted }) => isHighlighted);
 
-    if (!highlightedValue) {
-      return null;
-    }
+      if (!highlightedValue) {
+        return null;
+      }
 
-    const tooltipData = getTooltipData(aspects, header, highlightedValue);
+      const tooltipData = getTooltipData(aspects, header, highlightedValue);
 
-    if (tooltipData.length === 0) {
-      return null;
-    }
+      if (tooltipData.length === 0) {
+        return null;
+      }
 
-    return (
-      <div className="detailedTooltip">
-        {headerFormatter && header && (
-          <div className="detailedTooltip__header">{headerFormatter(header)}</div>
-        )}
-        <table>
-          <tbody>{tooltipData.map(renderData)}</tbody>
-        </table>
-      </div>
-    );
+      return (
+        <div className="detailedTooltip">
+          {headerFormatter && header && (
+            <div className="detailedTooltip__header">{headerFormatter(header)}</div>
+          )}
+          <table>
+            <tbody>{tooltipData.map(renderData)}</tbody>
+          </table>
+        </div>
+      );
+    };
   };
-};

@@ -6,10 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { IRouter } from 'kibana/server';
 import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../../lib';
 import { BASE_ACTION_API_PATH } from '../../../common';
 import { ActionsRequestHandlerContext } from '../../types';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -17,7 +19,8 @@ const paramSchema = schema.object({
 
 export const deleteActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) => {
   router.delete(
     {
@@ -33,6 +36,7 @@ export const deleteActionRoute = (
       }
       const actionsClient = context.actions.getActionsClient();
       const { id } = req.params;
+      trackLegacyRouteUsage('delete', usageCounter);
       try {
         await actionsClient.delete({ id });
         return res.noContent();

@@ -25,7 +25,7 @@ function createRule() {
   const ruleDataClientMock = createRuleDataClientMock();
 
   const factory = createLifecycleRuleTypeFactory({
-    ruleDataClient: (ruleDataClientMock as unknown) as RuleDataClient,
+    ruleDataClient: ruleDataClientMock as unknown as RuleDataClient,
     logger: loggerMock.create(),
   });
 

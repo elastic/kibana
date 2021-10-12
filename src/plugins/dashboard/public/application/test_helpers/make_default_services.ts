@@ -48,13 +48,13 @@ export function makeDefaultServices(): DashboardAppServices {
     .fn()
     .mockImplementation((id?: string) => Promise.resolve(getSavedDashboardMock({ id })));
 
-  const dashboardSessionStorage = ({
+  const dashboardSessionStorage = {
     getDashboardIdsWithUnsavedChanges: jest
       .fn()
       .mockResolvedValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
     getState: jest.fn().mockReturnValue(undefined),
     setState: jest.fn(),
-  } as unknown) as DashboardSessionStorage;
+  } as unknown as DashboardSessionStorage;
   dashboardSessionStorage.clearState = jest.fn();
 
   const defaultCapabilities: DashboardAppCapabilities = {

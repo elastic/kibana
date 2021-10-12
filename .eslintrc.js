@@ -496,6 +496,7 @@ module.exports = {
     {
       files: [
         '**/*.stories.tsx',
+        '**/*.test.js',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/plugins/apm/**/*.js',
@@ -510,6 +511,7 @@ module.exports = {
       ],
       rules: {
         'import/no-default-export': 'off',
+        'import/no-named-as-default-member': 'off',
         'import/no-named-as-default': 'off',
       },
     },
@@ -934,6 +936,15 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
         '@typescript-eslint/unified-signatures': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
+            // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
+            // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
+            patterns: ['*legacy*'],
+          },
+        ],
       },
     },
     {
@@ -1196,6 +1207,15 @@ module.exports = {
         'no-template-curly-in-string': 'error',
         'sort-keys': 'error',
         'prefer-destructuring': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
+            // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
+            // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it has valid uses.
+            patterns: ['*legacy*'],
+          },
+        ],
       },
     },
     /**
@@ -1308,6 +1328,15 @@ module.exports = {
         'no-template-curly-in-string': 'error',
         'sort-keys': 'error',
         'prefer-destructuring': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
+            // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
+            // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it has valid uses.
+            patterns: ['*legacy*'],
+          },
+        ],
       },
     },
     /**
@@ -1496,7 +1525,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps/src/flot_charts/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps-src/src/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1506,7 +1535,7 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: ['src/plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/plugins/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-default-export': 'error',
       },
@@ -1524,8 +1553,8 @@ module.exports = {
       plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        'arrow-body-style': ['error', 'as-needed'],
-        'prefer-arrow-callback': 'error',
+        // 'arrow-body-style': ['error', 'as-needed'],
+        // 'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -1570,7 +1599,6 @@ module.exports = {
      */
     {
       files: [
-        'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',

@@ -67,7 +67,8 @@ const wrapError = (error: any): CustomHttpResponseOptions<ResponseError> => {
 };
 
 export class MonitoringPlugin
-  implements Plugin<MonitoringPluginSetup, void, PluginsSetup, PluginsStart> {
+  implements Plugin<MonitoringPluginSetup, void, PluginsSetup, PluginsStart>
+{
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
@@ -130,6 +131,7 @@ export class MonitoringPlugin
     for (const alert of alerts) {
       plugins.alerting?.registerType(alert.getRuleType());
     }
+
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
 
     // Register collector objects for stats to show up in the APIs
@@ -209,7 +211,7 @@ export class MonitoringPlugin
     }
   }
 
-  async start(coreStart: CoreStart, { licensing }: PluginsStart) {
+  start(coreStart: CoreStart, { licensing }: PluginsStart) {
     const config = this.config!;
     this.cluster = instantiateClient(
       config.ui.elasticsearch,

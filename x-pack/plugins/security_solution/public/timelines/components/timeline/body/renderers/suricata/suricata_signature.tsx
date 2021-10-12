@@ -31,9 +31,9 @@ const SignatureFlexItem = styled(EuiFlexItem)`
 
 SignatureFlexItem.displayName = 'SignatureFlexItem';
 
-const Badge = (styled(EuiBadge)`
+const Badge = styled(EuiBadge)`
   vertical-align: top;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 Badge.displayName = 'Badge';
 

@@ -61,7 +61,7 @@ describe('createFiltersFromValueClick', () => {
 
     const dataStart = dataPluginMock.createStartContract();
     setSearchService(dataStart.search);
-    setIndexPatterns(({
+    setIndexPatterns({
       ...dataStart.indexPatterns,
       get: async () => ({
         id: 'logstash-*',
@@ -71,7 +71,7 @@ describe('createFiltersFromValueClick', () => {
         },
         getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
       }),
-    } as unknown) as IndexPatternsContract);
+    } as unknown as IndexPatternsContract);
   });
 
   test('ignores event when value for rows is not provided', async () => {

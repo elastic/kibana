@@ -159,7 +159,8 @@ export interface FleetStartContract {
 }
 
 export class FleetPlugin
-  implements AsyncPlugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
+  implements AsyncPlugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps>
+{
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
   private configInitialValue: FleetConfigType;

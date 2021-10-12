@@ -125,11 +125,22 @@ const createActions = (testBed: TestBed) => {
     },
   };
 
+  const reindexDeprecationFlyout = {
+    clickReindexButton: async () => {
+      await act(async () => {
+        find('startReindexingButton').simulate('click');
+      });
+
+      component.update();
+    },
+  };
+
   return {
     table,
     searchBar,
     pagination,
     mlDeprecationFlyout,
+    reindexDeprecationFlyout,
     indexSettingsDeprecationFlyout,
   };
 };

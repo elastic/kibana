@@ -134,17 +134,8 @@ export function pieFunctionFactory(
         },
       },
       fn: (input, args) => {
-        const {
-          tilt,
-          radius,
-          labelRadius,
-          labels,
-          hole,
-          legend,
-          palette,
-          font,
-          seriesStyle,
-        } = args;
+        const { tilt, radius, labelRadius, labels, hole, legend, palette, font, seriesStyle } =
+          args;
         const seriesStyles = keyBy(seriesStyle || [], 'label') || {};
 
         const data: PieData[] = map(groupBy(input.rows, 'color'), (series, label = '') => {

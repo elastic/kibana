@@ -90,6 +90,7 @@ export function createRegionMapLayerDescriptor({
     metrics: [metricsDescriptor],
     applyGlobalQuery: true,
     applyGlobalTime: true,
+    applyForceRefresh: true,
   };
   if (termsSize !== undefined) {
     termSourceDescriptor.size = termsSize;

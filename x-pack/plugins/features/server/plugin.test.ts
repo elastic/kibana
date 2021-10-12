@@ -46,36 +46,7 @@ describe('Features Plugin', () => {
 
   it('returns OSS + registered kibana features', async () => {
     const plugin = new FeaturesPlugin(initContext);
-    const { registerKibanaFeature } = await plugin.setup(coreSetup, {});
-    registerKibanaFeature({
-      id: 'baz',
-      name: 'baz',
-      app: [],
-      category: { id: 'foo', label: 'foo' },
-      privileges: null,
-    });
-
-    const { getKibanaFeatures } = plugin.start(coreStart);
-
-    expect(getKibanaFeatures().map((f) => f.id)).toMatchInlineSnapshot(`
-      Array [
-        "baz",
-        "discover",
-        "visualize",
-        "dashboard",
-        "dev_tools",
-        "advancedSettings",
-        "indexPatterns",
-        "savedObjectsManagement",
-      ]
-    `);
-  });
-
-  it('returns OSS + registered kibana features with timelion when available', async () => {
-    const plugin = new FeaturesPlugin(initContext);
-    const { registerKibanaFeature: registerFeature } = await plugin.setup(coreSetup, {
-      visTypeTimelion: { uiEnabled: true },
-    });
+    const { registerKibanaFeature: registerFeature } = await plugin.setup(coreSetup);
     registerFeature({
       id: 'baz',
       name: 'baz',
@@ -96,7 +67,6 @@ describe('Features Plugin', () => {
         "advancedSettings",
         "indexPatterns",
         "savedObjectsManagement",
-        "timelion",
       ]
     `);
   });
@@ -105,7 +75,7 @@ describe('Features Plugin', () => {
     typeRegistry.isHidden.mockReturnValueOnce(true);
     typeRegistry.isHidden.mockReturnValueOnce(false);
     const plugin = new FeaturesPlugin(initContext);
-    await plugin.setup(coreSetup, {});
+    await plugin.setup(coreSetup);
     const { getKibanaFeatures } = plugin.start(coreStart);
 
     const soTypes =
@@ -120,7 +90,7 @@ describe('Features Plugin', () => {
 
   it('returns registered elasticsearch features', async () => {
     const plugin = new FeaturesPlugin(initContext);
-    const { registerElasticsearchFeature } = await plugin.setup(coreSetup, {});
+    const { registerElasticsearchFeature } = await plugin.setup(coreSetup);
     registerElasticsearchFeature({
       id: 'baz',
       privileges: [
@@ -142,7 +112,7 @@ describe('Features Plugin', () => {
 
   it('registers a capabilities provider', async () => {
     const plugin = new FeaturesPlugin(initContext);
-    await plugin.setup(coreSetup, {});
+    await plugin.setup(coreSetup);
 
     expect(coreSetup.capabilities.registerProvider).toHaveBeenCalledTimes(1);
     expect(coreSetup.capabilities.registerProvider).toHaveBeenCalledWith(expect.any(Function));

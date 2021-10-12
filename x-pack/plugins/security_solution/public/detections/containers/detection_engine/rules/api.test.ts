@@ -48,8 +48,7 @@ describe('Detections Rules API', () => {
       const payload = getCreateRulesSchemaMock();
       await createRule({ rule: payload, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
-        body:
-          '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1"}',
+        body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1"}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
@@ -66,8 +65,7 @@ describe('Detections Rules API', () => {
       const payload = getUpdateRulesSchemaMock();
       await updateRule({ rule: payload, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
-        body:
-          '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","id":"04128c15-0d1b-4716-a4c5-46997ac7f3bd"}',
+        body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","id":"04128c15-0d1b-4716-a4c5-46997ac7f3bd"}',
         method: 'PUT',
         signal: abortCtrl.signal,
       });
@@ -425,8 +423,7 @@ describe('Detections Rules API', () => {
     test('check parameter url, body when duplicating rules', async () => {
       await duplicateRules({ rules: rulesMock.data });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_create', {
-        body:
-          '[{"actions":[],"author":[],"description":"Elastic Endpoint detected Credential Dumping. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":73,"risk_score_mapping":[],"name":"Credential Dumping - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:cred_theft_event and endgame.metadata.type:detection","filters":[],"references":[],"severity":"high","severity_mapping":[],"tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"throttle":null,"version":1},{"actions":[],"author":[],"description":"Elastic Endpoint detected an Adversary Behavior. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":47,"risk_score_mapping":[],"name":"Adversary Behavior - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:rules_engine_event","filters":[],"references":[],"severity":"medium","severity_mapping":[],"tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"throttle":null,"version":1}]',
+        body: '[{"actions":[],"author":[],"description":"Elastic Endpoint detected Credential Dumping. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":73,"risk_score_mapping":[],"name":"Credential Dumping - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:cred_theft_event and endgame.metadata.type:detection","filters":[],"references":[],"severity":"high","severity_mapping":[],"tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"throttle":null,"version":1},{"actions":[],"author":[],"description":"Elastic Endpoint detected an Adversary Behavior. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":47,"risk_score_mapping":[],"name":"Adversary Behavior - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:rules_engine_event","filters":[],"references":[],"severity":"medium","severity_mapping":[],"tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"throttle":null,"version":1}]',
         method: 'POST',
       });
     });

@@ -375,7 +375,7 @@ describe('PrivilegeSpaceForm', () => {
 
     const onChange = jest.fn();
 
-    const canCustomize = (Symbol('can customize') as unknown) as boolean;
+    const canCustomize = Symbol('can customize') as unknown as boolean;
 
     const wrapper = mountWithIntl(
       <PrivilegeSpaceForm

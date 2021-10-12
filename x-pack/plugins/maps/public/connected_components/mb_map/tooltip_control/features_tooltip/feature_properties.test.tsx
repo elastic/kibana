@@ -51,17 +51,17 @@ const defaultProps = {
   showFilterButtons: false,
   addFilters: async () => {},
   getActionContext: () => {
-    return ({} as unknown) as ActionExecutionContext;
+    return {} as unknown as ActionExecutionContext;
   },
   getFilterActions: async () => {
-    return [({ id: ACTION_GLOBAL_APPLY_FILTER } as unknown) as Action];
+    return [{ id: ACTION_GLOBAL_APPLY_FILTER } as unknown as Action];
   },
   showFilterActions: () => {},
 };
 
 const mockTooltipProperties = [
-  (new MockTooltipProperty('prop1', 'foobar1', true) as unknown) as ITooltipProperty,
-  (new MockTooltipProperty('prop2', 'foobar2', false) as unknown) as ITooltipProperty,
+  new MockTooltipProperty('prop1', 'foobar1', true) as unknown as ITooltipProperty,
+  new MockTooltipProperty('prop2', 'foobar2', false) as unknown as ITooltipProperty,
 ];
 
 describe('FeatureProperties', () => {
@@ -111,7 +111,7 @@ describe('FeatureProperties', () => {
           return mockTooltipProperties;
         }}
         getFilterActions={async () => {
-          return [({ id: 'drilldown1' } as unknown) as Action];
+          return [{ id: 'drilldown1' } as unknown as Action];
         }}
       />
     );

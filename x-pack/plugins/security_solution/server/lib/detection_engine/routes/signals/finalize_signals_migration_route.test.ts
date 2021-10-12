@@ -20,11 +20,11 @@ describe('finalizing signals migrations', () => {
   beforeEach(() => {
     server = serverMock.create();
 
-    const securityMock = ({
+    const securityMock = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
       },
-    } as unknown) as SetupPlugins['security'];
+    } as unknown as SetupPlugins['security'];
     finalizeSignalsMigrationRoute(server.router, securityMock);
   });
 

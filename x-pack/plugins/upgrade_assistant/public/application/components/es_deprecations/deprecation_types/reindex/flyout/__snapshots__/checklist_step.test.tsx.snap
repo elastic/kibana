@@ -80,6 +80,7 @@ exports[`ChecklistFlyout renders 1`] = `
       >
         <EuiButton
           color="primary"
+          data-test-subj="startReindexingButton"
           disabled={false}
           fill={true}
           isLoading={false}

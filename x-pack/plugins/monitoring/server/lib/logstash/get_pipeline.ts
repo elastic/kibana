@@ -7,14 +7,11 @@
 
 import boom from '@hapi/boom';
 import { get } from 'lodash';
-// @ts-ignore
 import { checkParam } from '../error_missing_required';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
-// @ts-ignore
 import { getPipelineStatsAggregation } from './get_pipeline_stats_aggregation';
-// @ts-ignore
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
-import { LegacyRequest } from '../../types';
+import { LegacyRequest, PipelineVersion } from '../../types';
 import {
   ElasticsearchSource,
   ElasticsearchSourceLogstashPipelineVertex,
@@ -119,15 +116,9 @@ export async function getPipeline(
   lsIndexPattern: string,
   clusterUuid: string,
   pipelineId: string,
-  version: { firstSeen: string; lastSeen: string; hash: string }
+  version: PipelineVersion
 ) {
   checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
-
-  const options: any = {
-    clusterUuid,
-    pipelineId,
-    version,
-  };
 
   // Determine metrics' timeseries interval based on version's timespan
   const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
@@ -138,8 +129,21 @@ export async function getPipeline(
   );
 
   const [stateDocument, statsAggregation] = await Promise.all([
-    getPipelineStateDocument(req, lsIndexPattern, options),
-    getPipelineStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
+    getPipelineStateDocument({
+      req,
+      logstashIndexPattern: lsIndexPattern,
+      clusterUuid,
+      pipelineId,
+      version,
+    }),
+    getPipelineStatsAggregation({
+      req,
+      logstashIndexPattern: lsIndexPattern,
+      timeseriesInterval,
+      clusterUuid,
+      pipelineId,
+      version,
+    }),
   ]);
 
   if (stateDocument === null || !statsAggregation) {

@@ -6,13 +6,17 @@
  * Side Public License, v 1.
  */
 import { set } from '@elastic/safer-lodash-set';
-import type { ConfigDeprecationProvider } from '@kbn/config';
+import type { ConfigDeprecationProvider, ConfigDeprecationContext } from '@kbn/config';
 import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
+import { configDeprecationsMock } from './mocks';
+
+const defaultContext = configDeprecationsMock.createContext();
 
 function collectDeprecations(
   provider: ConfigDeprecationProvider,
   settings: Record<string, any>,
-  path: string
+  path: string,
+  context: ConfigDeprecationContext = defaultContext
 ) {
   const deprecations = provider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
@@ -21,8 +25,11 @@ function collectDeprecations(
     deprecations.map((deprecation) => ({
       deprecation,
       path,
+      context,
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,

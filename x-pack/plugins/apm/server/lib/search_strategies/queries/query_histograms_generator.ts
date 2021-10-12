@@ -50,8 +50,7 @@ export async function* fetchTransactionDurationHistograms(
         ranges,
         fractions,
         totalDocCount,
-        item.fieldName,
-        item.fieldValue
+        [item]
       );
 
       if (state.getIsCancelled()) {
@@ -69,8 +68,7 @@ export async function* fetchTransactionDurationHistograms(
           esClient,
           params,
           histogramRangeSteps,
-          item.fieldName,
-          item.fieldValue
+          [item]
         );
         yield {
           ...item,

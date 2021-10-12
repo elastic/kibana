@@ -9,7 +9,8 @@
 import { i18n } from '@kbn/i18n';
 
 import { VisTypeDefinition } from '../../visualizations/public';
-import { ORIGIN, VectorLayer } from '../../maps_ems/public';
+import { VectorLayer } from '../../maps_ems/public';
+import { ORIGIN } from '../../maps_ems/common';
 
 import { getDeprecationMessage } from './get_deprecation_message';
 import { RegionMapVisualizationDependencies } from './plugin';

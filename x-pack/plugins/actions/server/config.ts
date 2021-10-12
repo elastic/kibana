@@ -112,6 +112,7 @@ export const configSchema = schema.object({
     idleInterval: schema.duration({ defaultValue: '1h' }),
     pageSize: schema.number({ defaultValue: 100 }),
   }),
+  microsoftGraphApiUrl: schema.maybe(schema.string()),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

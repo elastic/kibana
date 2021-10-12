@@ -10,29 +10,27 @@ import { TestBed } from '@kbn/test/jest';
 import { createFormToggleAction } from './form_toggle_action';
 import { createFormSetValueAction } from './form_set_value_action';
 
-const createSetPrimaryShardSizeAction = (testBed: TestBed) => async (
-  value: string,
-  units?: string
-) => {
-  const { find, component } = testBed;
+const createSetPrimaryShardSizeAction =
+  (testBed: TestBed) => async (value: string, units?: string) => {
+    const { find, component } = testBed;
 
-  await act(async () => {
-    find('hot-selectedMaxPrimaryShardSize').simulate('change', { target: { value } });
-  });
-  component.update();
-
-  if (units) {
-    act(() => {
-      find('hot-selectedMaxPrimaryShardSize.show-filters-button').simulate('click');
+    await act(async () => {
+      find('hot-selectedMaxPrimaryShardSize').simulate('change', { target: { value } });
     });
     component.update();
 
-    act(() => {
-      find(`hot-selectedMaxPrimaryShardSize.filter-option-${units}`).simulate('click');
-    });
-    component.update();
-  }
-};
+    if (units) {
+      act(() => {
+        find('hot-selectedMaxPrimaryShardSize.show-filters-button').simulate('click');
+      });
+      component.update();
+
+      act(() => {
+        find(`hot-selectedMaxPrimaryShardSize.filter-option-${units}`).simulate('click');
+      });
+      component.update();
+    }
+  };
 
 const createSetMaxAgeAction = (testBed: TestBed) => async (value: string, units?: string) => {
   const { find, component } = testBed;

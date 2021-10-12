@@ -120,210 +120,208 @@ const timelineActionsType = [
 const isItAtimelineAction = (timelineId: string | undefined) =>
   timelineId && timelineId.toLowerCase().startsWith('timeline');
 
-export const createTimelineEpic = <State>(): Epic<
-  Action,
-  Action,
-  State,
-  TimelineEpicDependencies<State>
-> => (
-  action$,
-  state$,
-  {
-    selectAllTimelineQuery,
-    selectNotesByIdSelector,
-    timelineByIdSelector,
-    timelineTimeRangeSelector,
-    kibana$,
-  }
-) => {
-  const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
+export const createTimelineEpic =
+  <State>(): Epic<Action, Action, State, TimelineEpicDependencies<State>> =>
+  (
+    action$,
+    state$,
+    {
+      selectAllTimelineQuery,
+      selectNotesByIdSelector,
+      timelineByIdSelector,
+      timelineTimeRangeSelector,
+      kibana$,
+    }
+  ) => {
+    const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
 
-  const allTimelineQuery$ = state$.pipe(
-    map((state) => {
-      const getQuery = selectAllTimelineQuery();
-      return getQuery(state, ALL_TIMELINE_QUERY_ID);
-    }),
-    filter(isNotNull)
-  );
-
-  const notes$ = state$.pipe(map(selectNotesByIdSelector), filter(isNotNull));
-
-  const timelineTimeRange$ = state$.pipe(map(timelineTimeRangeSelector), filter(isNotNull));
-
-  return merge(
-    action$.pipe(
-      withLatestFrom(timeline$),
-      filter(([action, timeline]) => {
-        const timelineId: string = get('payload.id', action);
-        const timelineObj: TimelineModel = timeline[timelineId];
-        if (action.type === addError.type) {
-          return true;
-        }
-        if (
-          isItAtimelineAction(timelineId) &&
-          timelineObj != null &&
-          timelineObj.status != null &&
-          TimelineStatus.immutable === timelineObj.status
-        ) {
-          return false;
-        } else if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
-          myEpicTimelineId.setTimelineVersion(null);
-          myEpicTimelineId.setTimelineId(null);
-          myEpicTimelineId.setTemplateTimelineId(null);
-          myEpicTimelineId.setTemplateTimelineVersion(null);
-        } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
-          const addNewTimeline: TimelineModel = get('payload.timeline', action);
-          myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
-          myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
-          myEpicTimelineId.setTemplateTimelineId(addNewTimeline.templateTimelineId);
-          myEpicTimelineId.setTemplateTimelineVersion(addNewTimeline.templateTimelineVersion);
-          return getOr(false, 'payload.savedTimeline', action);
-        } else if (
-          timelineActionsType.includes(action.type) &&
-          !timelineObj.isLoading &&
-          isItAtimelineAction(timelineId)
-        ) {
-          return true;
-        }
+    const allTimelineQuery$ = state$.pipe(
+      map((state) => {
+        const getQuery = selectAllTimelineQuery();
+        return getQuery(state, ALL_TIMELINE_QUERY_ID);
       }),
-      debounceTime(500),
-      mergeMap(([action]) => {
-        dispatcherTimelinePersistQueue.next({ action });
-        return empty();
-      })
-    ),
-    dispatcherTimelinePersistQueue.pipe(
-      delay(500),
-      withLatestFrom(timeline$, notes$, timelineTimeRange$),
-      concatMap(([objAction, timeline, notes, timelineTimeRange]) => {
-        const action: ActionTimeline = get('action', objAction);
-        const timelineId = myEpicTimelineId.getTimelineId();
-        const version = myEpicTimelineId.getTimelineVersion();
-        const templateTimelineId = myEpicTimelineId.getTemplateTimelineId();
-        const templateTimelineVersion = myEpicTimelineId.getTemplateTimelineVersion();
+      filter(isNotNull)
+    );
 
-        if (timelineNoteActionsType.includes(action.type)) {
-          return epicPersistNote(
-            action,
-            timeline,
-            notes,
-            action$,
-            timeline$,
-            notes$,
-            allTimelineQuery$
-          );
-        } else if (timelinePinnedEventActionsType.includes(action.type)) {
-          return epicPersistPinnedEvent(action, timeline, action$, timeline$, allTimelineQuery$);
-        } else if (timelineFavoriteActionsType.includes(action.type)) {
-          return epicPersistTimelineFavorite(
-            action,
-            timeline,
-            action$,
-            timeline$,
-            allTimelineQuery$
-          );
-        } else if (timelineActionsType.includes(action.type)) {
-          return from(
-            persistTimeline({
-              timelineId,
-              version,
-              timeline: {
-                ...convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
-                templateTimelineId,
-                templateTimelineVersion,
-              },
-            })
-          ).pipe(
-            withLatestFrom(timeline$, allTimelineQuery$, kibana$),
-            mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {
-              const error = result as TimelineErrorResponse;
-              if (error.status_code != null && error.status_code === 405) {
-                kibana.notifications!.toasts.addDanger({
-                  title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-                  text: error.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
-                });
-                return [
-                  endTimelineSaving({
-                    id: action.payload.id,
-                  }),
-                ];
-              }
+    const notes$ = state$.pipe(map(selectNotesByIdSelector), filter(isNotNull));
 
-              const savedTimeline = recentTimeline[action.payload.id];
-              const response: ResponseTimeline = get('data.persistTimeline', result);
-              if (response == null) {
-                return [
-                  endTimelineSaving({
-                    id: action.payload.id,
-                  }),
-                ];
-              }
-              const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+    const timelineTimeRange$ = state$.pipe(map(timelineTimeRangeSelector), filter(isNotNull));
 
-              if (allTimelineQuery.refetch != null) {
-                (allTimelineQuery.refetch as inputsModel.Refetch)();
-              }
+    return merge(
+      action$.pipe(
+        withLatestFrom(timeline$),
+        filter(([action, timeline]) => {
+          const timelineId: string = get('payload.id', action);
+          const timelineObj: TimelineModel = timeline[timelineId];
+          if (action.type === addError.type) {
+            return true;
+          }
+          if (
+            isItAtimelineAction(timelineId) &&
+            timelineObj != null &&
+            timelineObj.status != null &&
+            TimelineStatus.immutable === timelineObj.status
+          ) {
+            return false;
+          } else if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
+            myEpicTimelineId.setTimelineVersion(null);
+            myEpicTimelineId.setTimelineId(null);
+            myEpicTimelineId.setTemplateTimelineId(null);
+            myEpicTimelineId.setTemplateTimelineVersion(null);
+          } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
+            const addNewTimeline: TimelineModel = get('payload.timeline', action);
+            myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
+            myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
+            myEpicTimelineId.setTemplateTimelineId(addNewTimeline.templateTimelineId);
+            myEpicTimelineId.setTemplateTimelineVersion(addNewTimeline.templateTimelineVersion);
+            return getOr(false, 'payload.savedTimeline', action);
+          } else if (
+            timelineActionsType.includes(action.type) &&
+            !timelineObj.isLoading &&
+            isItAtimelineAction(timelineId)
+          ) {
+            return true;
+          }
+        }),
+        debounceTime(500),
+        mergeMap(([action]) => {
+          dispatcherTimelinePersistQueue.next({ action });
+          return empty();
+        })
+      ),
+      dispatcherTimelinePersistQueue.pipe(
+        delay(500),
+        withLatestFrom(timeline$, notes$, timelineTimeRange$),
+        concatMap(([objAction, timeline, notes, timelineTimeRange]) => {
+          const action: ActionTimeline = get('action', objAction);
+          const timelineId = myEpicTimelineId.getTimelineId();
+          const version = myEpicTimelineId.getTimelineVersion();
+          const templateTimelineId = myEpicTimelineId.getTemplateTimelineId();
+          const templateTimelineVersion = myEpicTimelineId.getTemplateTimelineVersion();
 
-              return [
-                response.code === 409
-                  ? updateAutoSaveMsg({
-                      timelineId: action.payload.id,
-                      newTimelineModel: omitTypenameInTimeline(savedTimeline, response.timeline),
-                    })
-                  : updateTimeline({
+          if (timelineNoteActionsType.includes(action.type)) {
+            return epicPersistNote(
+              action,
+              timeline,
+              notes,
+              action$,
+              timeline$,
+              notes$,
+              allTimelineQuery$
+            );
+          } else if (timelinePinnedEventActionsType.includes(action.type)) {
+            return epicPersistPinnedEvent(action, timeline, action$, timeline$, allTimelineQuery$);
+          } else if (timelineFavoriteActionsType.includes(action.type)) {
+            return epicPersistTimelineFavorite(
+              action,
+              timeline,
+              action$,
+              timeline$,
+              allTimelineQuery$
+            );
+          } else if (timelineActionsType.includes(action.type)) {
+            return from(
+              persistTimeline({
+                timelineId,
+                version,
+                timeline: {
+                  ...convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
+                  templateTimelineId,
+                  templateTimelineVersion,
+                },
+              })
+            ).pipe(
+              withLatestFrom(timeline$, allTimelineQuery$, kibana$),
+              mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {
+                const error = result as TimelineErrorResponse;
+                if (error.status_code != null && error.status_code === 405) {
+                  kibana.notifications!.toasts.addDanger({
+                    title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+                    text: error.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+                  });
+                  return [
+                    endTimelineSaving({
                       id: action.payload.id,
-                      timeline: {
-                        ...savedTimeline,
-                        updated: response.timeline.updated ?? undefined,
-                        savedObjectId: response.timeline.savedObjectId,
-                        version: response.timeline.version,
-                        status: response.timeline.status ?? TimelineStatus.active,
-                        timelineType: response.timeline.timelineType ?? TimelineType.default,
-                        templateTimelineId: response.timeline.templateTimelineId ?? null,
-                        templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
-                        isSaving: false,
-                      },
                     }),
-                ...callOutMsg,
-                endTimelineSaving({
-                  id: action.payload.id,
-                }),
-              ];
-            }),
-            startWith(startTimelineSaving({ id: action.payload.id })),
-            takeUntil(
-              action$.pipe(
-                withLatestFrom(timeline$),
-                filter(([checkAction, updatedTimeline]) => {
-                  if (
-                    checkAction.type === endTimelineSaving.type &&
-                    updatedTimeline[get('payload.id', checkAction)].savedObjectId != null
-                  ) {
-                    myEpicTimelineId.setTimelineId(
-                      updatedTimeline[get('payload.id', checkAction)].savedObjectId
-                    );
-                    myEpicTimelineId.setTimelineVersion(
-                      updatedTimeline[get('payload.id', checkAction)].version
-                    );
-                    myEpicTimelineId.setTemplateTimelineId(
-                      updatedTimeline[get('payload.id', checkAction)].templateTimelineId
-                    );
-                    myEpicTimelineId.setTemplateTimelineVersion(
-                      updatedTimeline[get('payload.id', checkAction)].templateTimelineVersion
-                    );
-                    return true;
-                  }
-                  return false;
-                })
+                  ];
+                }
+
+                const savedTimeline = recentTimeline[action.payload.id];
+                const response: ResponseTimeline = get('data.persistTimeline', result);
+                if (response == null) {
+                  return [
+                    endTimelineSaving({
+                      id: action.payload.id,
+                    }),
+                  ];
+                }
+                const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+
+                if (allTimelineQuery.refetch != null) {
+                  (allTimelineQuery.refetch as inputsModel.Refetch)();
+                }
+
+                return [
+                  response.code === 409
+                    ? updateAutoSaveMsg({
+                        timelineId: action.payload.id,
+                        newTimelineModel: omitTypenameInTimeline(savedTimeline, response.timeline),
+                      })
+                    : updateTimeline({
+                        id: action.payload.id,
+                        timeline: {
+                          ...savedTimeline,
+                          updated: response.timeline.updated ?? undefined,
+                          savedObjectId: response.timeline.savedObjectId,
+                          version: response.timeline.version,
+                          status: response.timeline.status ?? TimelineStatus.active,
+                          timelineType: response.timeline.timelineType ?? TimelineType.default,
+                          templateTimelineId: response.timeline.templateTimelineId ?? null,
+                          templateTimelineVersion:
+                            response.timeline.templateTimelineVersion ?? null,
+                          isSaving: false,
+                        },
+                      }),
+                  ...callOutMsg,
+                  endTimelineSaving({
+                    id: action.payload.id,
+                  }),
+                ];
+              }),
+              startWith(startTimelineSaving({ id: action.payload.id })),
+              takeUntil(
+                action$.pipe(
+                  withLatestFrom(timeline$),
+                  filter(([checkAction, updatedTimeline]) => {
+                    if (
+                      checkAction.type === endTimelineSaving.type &&
+                      updatedTimeline[get('payload.id', checkAction)].savedObjectId != null
+                    ) {
+                      myEpicTimelineId.setTimelineId(
+                        updatedTimeline[get('payload.id', checkAction)].savedObjectId
+                      );
+                      myEpicTimelineId.setTimelineVersion(
+                        updatedTimeline[get('payload.id', checkAction)].version
+                      );
+                      myEpicTimelineId.setTemplateTimelineId(
+                        updatedTimeline[get('payload.id', checkAction)].templateTimelineId
+                      );
+                      myEpicTimelineId.setTemplateTimelineVersion(
+                        updatedTimeline[get('payload.id', checkAction)].templateTimelineVersion
+                      );
+                      return true;
+                    }
+                    return false;
+                  })
+                )
               )
-            )
-          );
-        }
-        return empty();
-      })
-    )
-  );
-};
+            );
+          }
+          return empty();
+        })
+      )
+    );
+  };
 
 const timelineInput: TimelineInput = {
   columns: null,

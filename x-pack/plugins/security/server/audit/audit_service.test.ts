@@ -29,7 +29,7 @@ import {
 jest.useFakeTimers();
 
 const createConfig = (settings: Partial<ConfigType['audit']>) => {
-  return ConfigSchema.validate(settings);
+  return ConfigSchema.validate({ audit: settings }).audit;
 };
 
 const logger = loggingSystemMock.createLogger();

@@ -64,28 +64,24 @@ export const useNetworkKpiUniquePrivateIps = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    networkKpiUniquePrivateIpsRequest,
-    setNetworkKpiUniquePrivateIpsRequest,
-  ] = useState<NetworkKpiUniquePrivateIpsRequestOptions | null>(null);
+  const [networkKpiUniquePrivateIpsRequest, setNetworkKpiUniquePrivateIpsRequest] =
+    useState<NetworkKpiUniquePrivateIpsRequestOptions | null>(null);
   const { getTransformChangesIfTheyExist } = useTransforms();
 
-  const [
-    networkKpiUniquePrivateIpsResponse,
-    setNetworkKpiUniquePrivateIpsResponse,
-  ] = useState<NetworkKpiUniquePrivateIpsArgs>({
-    uniqueDestinationPrivateIps: 0,
-    uniqueDestinationPrivateIpsHistogram: null,
-    uniqueSourcePrivateIps: 0,
-    uniqueSourcePrivateIpsHistogram: null,
-    id: ID,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    isInspected: false,
-    refetch: refetch.current,
-  });
+  const [networkKpiUniquePrivateIpsResponse, setNetworkKpiUniquePrivateIpsResponse] =
+    useState<NetworkKpiUniquePrivateIpsArgs>({
+      uniqueDestinationPrivateIps: 0,
+      uniqueDestinationPrivateIpsHistogram: null,
+      uniqueSourcePrivateIps: 0,
+      uniqueSourcePrivateIpsHistogram: null,
+      id: ID,
+      inspect: {
+        dsl: [],
+        response: [],
+      },
+      isInspected: false,
+      refetch: refetch.current,
+    });
   const { addError, addWarning } = useAppToasts();
 
   const networkKpiUniquePrivateIpsSearch = useCallback(

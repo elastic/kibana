@@ -48,9 +48,25 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, { devTools, home, usageCollection }: ",
+              "<object, unknown>, { devTools, home, share, usageCollection }: ",
               "AppSetupUIPluginDependencies",
-              ") => void"
+              ") => { locator: ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              {
+                "pluginId": "console",
+                "scope": "public",
+                "docId": "kibConsolePluginApi",
+                "section": "def-public.ConsoleUILocatorParams",
+                "text": "ConsoleUILocatorParams"
+              },
+              ">; }"
             ],
             "path": "src/plugins/console/public/plugin.ts",
             "deprecated": false,
@@ -81,7 +97,7 @@
                 "id": "def-public.ConsoleUIPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ devTools, home, usageCollection }",
+                "label": "{ devTools, home, share, usageCollection }",
                 "description": [],
                 "signature": [
                   "AppSetupUIPluginDependencies"
@@ -113,7 +129,51 @@
       }
     ],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "console",
+        "id": "def-public.ConsoleUILocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConsoleUILocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "console",
+            "scope": "public",
+            "docId": "kibConsolePluginApi",
+            "section": "def-public.ConsoleUILocatorParams",
+            "text": "ConsoleUILocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/plugins/console/public/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "console",
+            "id": "def-public.ConsoleUILocatorParams.loadFrom",
+            "type": "string",
+            "tags": [],
+            "label": "loadFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/console/public/plugin.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []

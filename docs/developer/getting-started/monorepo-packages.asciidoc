@@ -103,6 +103,7 @@ yarn kbn watch
 - @kbn/test-subj-selector
 - @kbn/tinymath
 - @kbn/ui-framework
-- @kbn/ui-shared-deps
+- @kbn/ui-shared-deps-npm
+- @kbn/ui-shared-deps-src
 - @kbn/utility-types
 - @kbn/utils

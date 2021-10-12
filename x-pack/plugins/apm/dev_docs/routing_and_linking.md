@@ -18,13 +18,13 @@ Routes (and their parameters) are defined in [public/components/routing/apm_conf
 
 #### Parameter handling
 
-Path (like `serviceName` in '/services/:serviceName/transactions') and query parameters are defined in the route definitions.
+Path (like `serviceName` in '/services/{serviceName}/transactions') and query parameters are defined in the route definitions.
 
 For each parameter, an io-ts runtime type needs to be present:
 
 ```tsx
 {
-  route: '/services/:serviceName',
+  route: '/services/{serviceName}',
   element: <Outlet/>,
   params: t.intersection([
     t.type({

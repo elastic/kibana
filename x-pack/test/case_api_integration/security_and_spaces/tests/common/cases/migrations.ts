@@ -11,7 +11,7 @@ import {
   CASES_URL,
   SECURITY_SOLUTION_OWNER,
 } from '../../../../../../plugins/cases/common/constants';
-import { getCase, getCaseSavedObjectsFromES } from '../../../../common/lib/utils';
+import { getCase, getCaseSavedObjectsFromES, resolveCase } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -204,6 +204,77 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           expect(
             casesFromES.body.hits.hits[0]._source?.cases.external_service
           ).to.not.have.property('id');
+        });
+      });
+    });
+
+    describe('7.16.0', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+      });
+
+      describe('resolve', () => {
+        it('should return exactMatch outcome', async () => {
+          const { outcome } = await resolveCase({
+            supertest,
+            caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          });
+
+          expect(outcome).to.be('exactMatch');
+        });
+
+        it('should preserve the same case info', async () => {
+          const { case: theCase } = await resolveCase({
+            supertest,
+            caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          });
+
+          expect(theCase.title).to.be('A case');
+          expect(theCase.description).to.be('asdf');
+          expect(theCase.owner).to.be(SECURITY_SOLUTION_OWNER);
+        });
+
+        it('should preserve the same connector', async () => {
+          const { case: theCase } = await resolveCase({
+            supertest,
+            caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          });
+
+          expect(theCase.connector).to.eql({
+            fields: {
+              issueType: '10002',
+              parent: null,
+              priority: null,
+            },
+            id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
+            name: 'Test Jira',
+            type: '.jira',
+          });
+        });
+
+        it('should preserve the same external service', async () => {
+          const { case: theCase } = await resolveCase({
+            supertest,
+            caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          });
+
+          expect(theCase.external_service).to.eql({
+            connector_id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
+            connector_name: 'Test Jira',
+            external_id: '10106',
+            external_title: 'TPN-99',
+            external_url: 'https://cases-testing.atlassian.net/browse/TPN-99',
+            pushed_at: '2021-06-17T18:57:45.524Z',
+            pushed_by: {
+              email: null,
+              full_name: 'j@j.com',
+              username: '711621466',
+            },
+          });
         });
       });
     });

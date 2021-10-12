@@ -11,13 +11,15 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
-function convertLookupEntriesToMap(lookupEntries: any[]) {
+function convertLookupEntriesToMap(
+  lookupEntries: Array<{ key: string; value: unknown }>
+): Record<string, unknown> {
   return lookupEntries.reduce(
-    (lookupMap: Record<string, any>, lookupEntry: Record<string, any>) => {
+    (lookupMap: Record<string, unknown>, lookupEntry: { key: string; value: unknown }) => {
       lookupMap[lookupEntry.key] = lookupEntry.value;
       return lookupMap;
     },
-    {}
+    {} as Record<string, unknown>
   );
 }
 
@@ -41,7 +43,7 @@ export class StaticLookupFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: string) => {
     const lookupEntries = this.param('lookupEntries');
     const unknownKeyValue = this.param('unknownKeyValue');
 

@@ -254,11 +254,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const { deprecations } = await supertest
             .get('/api/deprecations/')
             .set('kbn-xsrf', 'true')
-            .then(
-              ({ body }): Promise<DeprecationsGetResponse> => {
-                return body;
-              }
-            );
+            .then(({ body }): Promise<DeprecationsGetResponse> => {
+              return body;
+            });
 
           const deprecation = deprecations.find(
             ({ message }) => message === 'SavedObject test-deprecations-plugin is still being used.'

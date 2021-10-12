@@ -7,43 +7,49 @@
  */
 
 import { Subject } from 'rxjs';
-
-import {
-  mockMonitorPercentile,
-  monitorEventLoopDelay,
-  mockMonitorReset,
-  mockMonitorDisable,
-} from './event_loop_delays.mocks';
-import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
+import { savedObjectsRepositoryMock, metricsServiceMock } from '../../../../../core/server/mocks';
 import { startTrackingEventLoopDelaysUsage } from './track_delays';
 
 describe('startTrackingEventLoopDelaysUsage', () => {
+  const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
   const mockInternalRepository = savedObjectsRepositoryMock.create();
   const stopMonitoringEventLoop$ = new Subject<void>();
+  const instanceUuid = 'mock_uuid';
 
   beforeAll(() => jest.useFakeTimers('modern'));
   beforeEach(() => jest.clearAllMocks());
   afterEach(() => stopMonitoringEventLoop$.next());
 
-  it('initializes EventLoopDelaysCollector and starts timer', () => {
+  it('collects eventLoopDelaysMonitor metrics after start delay', () => {
     const collectionStartDelay = 1000;
-    startTrackingEventLoopDelaysUsage(mockInternalRepository, stopMonitoringEventLoop$, {
-      collectionStartDelay,
-    });
+    startTrackingEventLoopDelaysUsage(
+      mockInternalRepository,
+      instanceUuid,
+      stopMonitoringEventLoop$,
+      eventLoopDelaysMonitor,
+      {
+        collectionStartDelay,
+      }
+    );
 
-    expect(monitorEventLoopDelay).toBeCalledTimes(1);
-    expect(mockMonitorPercentile).toBeCalledTimes(0);
+    expect(eventLoopDelaysMonitor.collect).toBeCalledTimes(0);
     jest.advanceTimersByTime(collectionStartDelay);
-    expect(mockMonitorPercentile).toBeCalled();
+    expect(eventLoopDelaysMonitor.collect).toBeCalledTimes(1);
   });
 
   it('stores event loop delays every collectionInterval duration', () => {
     const collectionStartDelay = 100;
     const collectionInterval = 1000;
-    startTrackingEventLoopDelaysUsage(mockInternalRepository, stopMonitoringEventLoop$, {
-      collectionStartDelay,
-      collectionInterval,
-    });
+    startTrackingEventLoopDelaysUsage(
+      mockInternalRepository,
+      instanceUuid,
+      stopMonitoringEventLoop$,
+      eventLoopDelaysMonitor,
+      {
+        collectionStartDelay,
+        collectionInterval,
+      }
+    );
 
     expect(mockInternalRepository.create).toBeCalledTimes(0);
     jest.advanceTimersByTime(collectionStartDelay);
@@ -54,28 +60,39 @@ describe('startTrackingEventLoopDelaysUsage', () => {
     expect(mockInternalRepository.create).toBeCalledTimes(3);
   });
 
-  it('resets histogram every histogramReset duration', () => {
+  it('resets eventLoopDelaysMonitor every histogramReset duration', () => {
     const collectionStartDelay = 0;
     const collectionInterval = 1000;
     const histogramReset = 5000;
-    startTrackingEventLoopDelaysUsage(mockInternalRepository, stopMonitoringEventLoop$, {
-      collectionStartDelay,
-      collectionInterval,
-      histogramReset,
-    });
 
-    expect(mockMonitorReset).toBeCalledTimes(0);
+    startTrackingEventLoopDelaysUsage(
+      mockInternalRepository,
+      instanceUuid,
+      stopMonitoringEventLoop$,
+      eventLoopDelaysMonitor,
+      {
+        collectionStartDelay,
+        collectionInterval,
+        histogramReset,
+      }
+    );
+
+    expect(eventLoopDelaysMonitor.reset).toBeCalledTimes(0);
     jest.advanceTimersByTime(collectionInterval * 5);
-    expect(mockMonitorReset).toBeCalledTimes(1);
+    expect(eventLoopDelaysMonitor.reset).toBeCalledTimes(1);
     jest.advanceTimersByTime(collectionInterval * 5);
-    expect(mockMonitorReset).toBeCalledTimes(2);
+    expect(eventLoopDelaysMonitor.reset).toBeCalledTimes(2);
   });
 
   it('stops monitoring event loop delays once stopMonitoringEventLoop$.next is called', () => {
-    startTrackingEventLoopDelaysUsage(mockInternalRepository, stopMonitoringEventLoop$);
-
-    expect(mockMonitorDisable).toBeCalledTimes(0);
+    startTrackingEventLoopDelaysUsage(
+      mockInternalRepository,
+      instanceUuid,
+      stopMonitoringEventLoop$,
+      eventLoopDelaysMonitor
+    );
+    expect(eventLoopDelaysMonitor.stop).toBeCalledTimes(0);
     stopMonitoringEventLoop$.next();
-    expect(mockMonitorDisable).toBeCalledTimes(1);
+    expect(eventLoopDelaysMonitor.stop).toBeCalledTimes(1);
   });
 });

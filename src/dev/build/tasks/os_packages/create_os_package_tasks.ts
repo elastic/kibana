@@ -9,15 +9,6 @@
 import { Task } from '../../lib';
 import { runFpm } from './run_fpm';
 import { runDockerGenerator } from './docker_generator';
-import { createOSPackageKibanaYML } from './create_os_package_kibana_yml';
-
-export const CreatePackageConfig: Task = {
-  description: 'Creating OS package kibana.yml',
-
-  async run(config, log, build) {
-    await createOSPackageKibanaYML(config, build);
-  },
-};
 
 export const CreateDebPackage: Task = {
   description: 'Creating deb package',
@@ -91,6 +82,25 @@ export const CreateDockerUBI: Task = {
   },
 };
 
+export const CreateDockerCloud: Task = {
+  description: 'Creating Docker Cloud image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      context: false,
+      cloud: true,
+      image: true,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      context: false,
+      cloud: true,
+      image: true,
+    });
+  },
+};
+
 export const CreateDockerContexts: Task = {
   description: 'Creating Docker build contexts',
 
@@ -108,6 +118,11 @@ export const CreateDockerContexts: Task = {
     });
     await runDockerGenerator(config, log, build, {
       ironbank: true,
+      context: true,
+      image: false,
+    });
+    await runDockerGenerator(config, log, build, {
+      cloud: true,
       context: true,
       image: false,
     });

@@ -62,8 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/111628
-  describe.skip('lens add-to-dashboards tests', () => {
+  describe('lens add-to-dashboards tests', () => {
     it('should allow new lens to be added by value to a new dashboard', async () => {
       await createNewLens();
       await PageObjects.lens.save('New Lens from Modal', false, false, false, 'new');
@@ -234,6 +233,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
+    });
+
+    // issue #111104
+    it('should add a Lens heatmap to the dashboard', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'ip',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.waitForVisualization();
+
+      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+
+      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
+      await PageObjects.lens.openPalettePanel('lnsHeatmap');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.lens.save('New Lens Heatmap', false, false, true, 'new');
+
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      const panelCount = await PageObjects.dashboard.getPanelCount();
+      expect(panelCount).to.eql(1);
     });
 
     describe('Capabilities', function capabilitiesTests() {

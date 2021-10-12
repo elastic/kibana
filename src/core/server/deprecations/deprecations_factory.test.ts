@@ -55,10 +55,10 @@ describe('DeprecationsFactory', () => {
   });
 
   describe('getAllDeprecations', () => {
-    const mockDependencies = ({
+    const mockDependencies = {
       esClient: jest.fn(),
       savedObjectsClient: jest.fn(),
-    } as unknown) as GetDeprecationsContext;
+    } as unknown as GetDeprecationsContext;
 
     it('returns a flattened array of deprecations', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });
@@ -184,10 +184,10 @@ describe('DeprecationsFactory', () => {
   });
 
   describe('getDeprecations', () => {
-    const mockDependencies = ({
+    const mockDependencies = {
       esClient: jest.fn(),
       savedObjectsClient: jest.fn(),
-    } as unknown) as GetDeprecationsContext;
+    } as unknown as GetDeprecationsContext;
 
     it('returns a flattened array of DeprecationInfo', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });

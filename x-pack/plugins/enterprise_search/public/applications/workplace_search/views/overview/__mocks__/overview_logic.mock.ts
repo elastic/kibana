@@ -17,7 +17,7 @@ export const mockOverviewValues = {
   hasUsers: false,
   isOldAccount: false,
   pendingInvitationsCount: 0,
-  personalSourcesCount: 0,
+  privateSourcesCount: 0,
   sourcesCount: 0,
   dataLoading: true,
 };

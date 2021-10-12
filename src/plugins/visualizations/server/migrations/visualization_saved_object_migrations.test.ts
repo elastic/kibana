@@ -9,7 +9,7 @@
 import { visualizationSavedObjectTypeMigrations } from './visualization_saved_object_migrations';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
 
-const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
+const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 
 const testMigrateMatchAllQuery = (migrate: Function) => {
   it('should migrate obsolete match_all query', () => {
@@ -922,11 +922,11 @@ describe('migration visualization', () => {
 
   describe('7.3.0', () => {
     const logMsgArr: string[] = [];
-    const logger = ({
+    const logger = {
       log: {
         warn: (msg: string) => logMsgArr.push(msg),
       },
-    } as unknown) as SavedObjectMigrationContext;
+    } as unknown as SavedObjectMigrationContext;
 
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.3.0'](
@@ -1636,10 +1636,8 @@ describe('migration visualization', () => {
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON).toEqual('{}');
       const { kibanaSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
-      const {
-        kibanaSavedObjectMeta: oldKibanaSavedObjectMeta,
-        ...oldAttributes
-      } = migratedtimeSeriesDoc.attributes;
+      const { kibanaSavedObjectMeta: oldKibanaSavedObjectMeta, ...oldAttributes } =
+        migratedtimeSeriesDoc.attributes;
       expect(attributes).toEqual(oldAttributes);
     });
   });

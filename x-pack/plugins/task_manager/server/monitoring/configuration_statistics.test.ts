@@ -39,6 +39,9 @@ describe('Configuration Statistics Aggregator', () => {
         enabled: true,
         request_capacity: 10,
       },
+      unsafe: {
+        exclude_task_types: [],
+      },
     };
 
     const managedConfig = {

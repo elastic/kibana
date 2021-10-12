@@ -6,7 +6,13 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
+import {
+  FieldLabels,
+  OPERATION_COLUMN,
+  RECORDS_FIELD,
+  REPORT_METRIC_FIELD,
+  ReportTypes,
+} from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -43,7 +49,7 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
   return {
     defaultSeriesType: 'bar_stacked',
     seriesTypes: [],
-    reportType: 'kpi-over-time',
+    reportType: ReportTypes.KPI,
     xAxisColumn: {
       sourceField: '@timestamp',
     },

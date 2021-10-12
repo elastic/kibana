@@ -148,9 +148,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IFieldType",
                 "text": "IFieldType"
               }
@@ -190,9 +190,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IIndexPattern",
                 "text": "IIndexPattern"
               },
@@ -385,7 +385,7 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-public.args",
+            "id": "def-public.QuerySuggestionGetFn.$1",
             "type": "Object",
             "tags": [],
             "label": "args",

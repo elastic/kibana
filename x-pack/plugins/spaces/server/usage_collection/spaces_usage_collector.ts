@@ -138,7 +138,6 @@ export interface UsageData extends UsageStats {
     graph?: number;
     uptime?: number;
     savedObjectsManagement?: number;
-    timelion?: number;
     dev_tools?: number;
     advancedSettings?: number;
     infrastructure?: number;
@@ -264,12 +263,6 @@ export function getSpacesUsageCollector(
           },
         },
         savedObjectsManagement: {
-          type: 'long',
-          _meta: {
-            description: 'The number of spaces which have this feature disabled.',
-          },
-        },
-        timelion: {
           type: 'long',
           _meta: {
             description: 'The number of spaces which have this feature disabled.',

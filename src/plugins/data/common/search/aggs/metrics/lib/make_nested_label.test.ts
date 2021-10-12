@@ -11,7 +11,7 @@ import { IMetricAggConfig } from '../metric_agg_type';
 
 describe('metric agg make_nested_label', () => {
   const generateAggConfig = (metricLabel: string): IMetricAggConfig => {
-    return ({
+    return {
       params: {
         customMetric: {
           makeLabel: () => {
@@ -22,7 +22,7 @@ describe('metric agg make_nested_label', () => {
       getParam(this: IMetricAggConfig, key: string) {
         return this.params[key];
       },
-    } as unknown) as IMetricAggConfig;
+    } as unknown as IMetricAggConfig;
   };
 
   it('should return a metric label with prefix', () => {

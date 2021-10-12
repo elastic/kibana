@@ -53,10 +53,12 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   dispatchArgumentAtIndex: (props) => (arg) => dispatch(setArgumentAtIndex({ ...props, arg })),
-  dispatchAstAtIndex: ({ index, element, pageId }) => (ast) => {
-    dispatch(flushContext(element.id));
-    dispatch(setAstAtIndex(index, ast, element, pageId));
-  },
+  dispatchAstAtIndex:
+    ({ index, element, pageId }) =>
+    (ast) => {
+      dispatch(flushContext(element.id));
+      dispatch(setAstAtIndex(index, ast, element, pageId));
+    },
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {

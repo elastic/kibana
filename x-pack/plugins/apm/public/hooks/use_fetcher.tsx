@@ -9,12 +9,12 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { useInspectorContext } from '../context/inspector/use_inspector_context';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import {
   AutoAbortedAPMClient,
   callApmApi,
 } from '../services/rest/createCallApmApi';
+import { useInspectorContext } from '../../../observability/public';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',

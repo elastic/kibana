@@ -42,7 +42,7 @@ The API tests are located in `x-pack/test/apm_api_integration/`.
 node scripts/test/e2e [--trial] [--help]
 ```
 
-The E2E tests are located [here](../../ftr_e2e)
+The E2E tests are located [here](../ftr_e2e)
 
 ---
 

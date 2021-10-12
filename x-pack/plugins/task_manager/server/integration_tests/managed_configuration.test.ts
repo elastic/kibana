@@ -55,6 +55,9 @@ describe('managed configuration', () => {
         enabled: true,
         request_capacity: 10,
       },
+      unsafe: {
+        exclude_task_types: [],
+      },
     });
     logger = context.logger.get('taskManager');
 

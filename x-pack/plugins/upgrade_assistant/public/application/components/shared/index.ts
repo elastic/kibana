@@ -7,3 +7,5 @@
 
 export { NoDeprecationsPrompt } from './no_deprecations';
 export { DeprecationCount } from './deprecation_count';
+export { DeprecationBadge } from './deprecation_badge';
+export { DeprecationsPageLoadingError } from './deprecations_page_loading_error';

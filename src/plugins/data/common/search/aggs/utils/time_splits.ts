@@ -213,9 +213,9 @@ export function mergeTimeShifts(
           }
           const baseSubAggregate = target[key] as estypes.AggregationsAggregate;
           // only supported bucket formats in agg configs are array of buckets and record of buckets for filters
-          const baseBuckets = ('buckets' in baseSubAggregate
-            ? baseSubAggregate.buckets
-            : undefined) as GenericBucket[] | Record<string, GenericBucket> | undefined;
+          const baseBuckets = (
+            'buckets' in baseSubAggregate ? baseSubAggregate.buckets : undefined
+          ) as GenericBucket[] | Record<string, GenericBucket> | undefined;
           // merge
           if (isArray(buckets) && isArray(baseBuckets)) {
             const baseBucketMap: Record<string, GenericBucket> = {};
@@ -259,8 +259,9 @@ export function mergeTimeShifts(
     if (shouldSplit) {
       // multiple time shifts caused a filters agg in the tree we have to merge
       if (hasMultipleTimeShifts && cursor.time_offset_split) {
-        const timeShiftedBuckets = (cursor.time_offset_split as estypes.AggregationsFiltersAggregate)
-          .buckets as Record<string, estypes.AggregationsFiltersBucketItem>;
+        const timeShiftedBuckets = (
+          cursor.time_offset_split as estypes.AggregationsFiltersAggregate
+        ).buckets as Record<string, estypes.AggregationsFiltersBucketItem>;
         const subTree = {};
         Object.entries(timeShifts).forEach(([key, shift]) => {
           mergeAggLevel(

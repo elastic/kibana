@@ -39,6 +39,9 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { FindBulkExecutionLogResponse } from '../../rule_execution_log/types';
+import { ruleTypeMappings } from '../../signals/utils';
+// eslint-disable-next-line no-restricted-imports
+import type { LegacyRuleNotificationAlertType } from '../../notifications/legacy_types';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -179,18 +182,18 @@ export const getEmptyFindResult = (): FindHit => ({
   data: [],
 });
 
-export const getFindResultWithSingleHit = (): FindHit => ({
+export const getFindResultWithSingleHit = (isRuleRegistryEnabled: boolean): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [getAlertMock(getQueryRuleParams())],
+  data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
 });
 
-export const nonRuleFindResult = (): FindHit => ({
+export const nonRuleFindResult = (isRuleRegistryEnabled: boolean): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [nonRuleAlert()],
+  data: [nonRuleAlert(isRuleRegistryEnabled)],
 });
 
 export const getFindResultWithMultiHits = ({
@@ -348,19 +351,22 @@ export const createActionResult = (): ActionResult => ({
   isPreconfigured: false,
 });
 
-export const nonRuleAlert = () => ({
+export const nonRuleAlert = (isRuleRegistryEnabled: boolean) => ({
   // Defaulting to QueryRuleParams because ts doesn't like empty objects
-  ...getAlertMock(getQueryRuleParams()),
+  ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
   name: 'Non-Rule Alert',
   alertTypeId: 'something',
 });
 
-export const getAlertMock = <T extends RuleParams>(params: T): Alert<T> => ({
+export const getAlertMock = <T extends RuleParams>(
+  isRuleRegistryEnabled: boolean,
+  params: T
+): Alert<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
-  alertTypeId: 'siem.signals',
+  alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[params.type] : 'siem.signals',
   consumer: 'siem',
   params,
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
@@ -444,12 +450,13 @@ export const getMockPrivilegesResult = () => ({
   application: {},
 });
 
-export const getEmptySavedObjectsResponse = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
-  page: 1,
-  per_page: 1,
-  total: 0,
-  saved_objects: [],
-});
+export const getEmptySavedObjectsResponse =
+  (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+    page: 1,
+    per_page: 1,
+    total: 0,
+    saved_objects: [],
+  });
 
 export const getRuleExecutionStatuses = (): Array<
   SavedObjectsFindResult<IRuleStatusSOAttributes>
@@ -587,4 +594,59 @@ export const getSignalsMigrationStatusRequest = () =>
     method: 'get',
     path: DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
     query: getSignalsMigrationStatusSchemaMock(),
+  });
+
+/**
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export const legacyGetNotificationResult = (): LegacyRuleNotificationAlertType => ({
+  id: '200dbf2f-b269-4bf9-aa85-11ba32ba73ba',
+  name: 'Notification for Rule Test',
+  tags: ['__internal_rule_alert_id:85b64e8a-2e40-4096-86af-5ac172c10825'],
+  alertTypeId: 'siem.notifications',
+  consumer: 'siem',
+  params: {
+    ruleAlertId: '85b64e8a-2e40-4096-86af-5ac172c10825',
+  },
+  schedule: {
+    interval: '5m',
+  },
+  enabled: true,
+  actions: [
+    {
+      actionTypeId: '.slack',
+      params: {
+        message:
+          'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+      },
+      group: 'default',
+      id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+    },
+  ],
+  throttle: null,
+  notifyWhen: null,
+  apiKey: null,
+  apiKeyOwner: 'elastic',
+  createdBy: 'elastic',
+  updatedBy: 'elastic',
+  createdAt: new Date('2020-03-21T11:15:13.530Z'),
+  muteAll: false,
+  mutedInstanceIds: [],
+  scheduledTaskId: '62b3a130-6b70-11ea-9ce9-6b9818c4cbd7',
+  updatedAt: new Date('2020-03-21T12:37:08.730Z'),
+  executionStatus: {
+    status: 'unknown',
+    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+  },
+});
+
+/**
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export const legacyGetFindNotificationsResultWithSingleHit =
+  (): FindHit<LegacyRuleNotificationAlertType> => ({
+    page: 1,
+    perPage: 1,
+    total: 1,
+    data: [legacyGetNotificationResult()],
   });

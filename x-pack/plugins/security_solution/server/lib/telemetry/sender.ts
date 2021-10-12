@@ -17,8 +17,8 @@ import {
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
 import { TelemetryReceiver } from './receiver';
-import { AllowlistFields, allowlistEventFields } from './filters';
-import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
+import { allowlistEventFields, copyAllowlistedFields } from './filters';
+import { DiagnosticTask, EndpointTask, ExceptionListsTask, DetectionRulesTask } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
@@ -42,6 +42,7 @@ export class TelemetryEventsSender {
   private diagnosticTask?: DiagnosticTask;
   private endpointTask?: EndpointTask;
   private exceptionListsTask?: ExceptionListsTask;
+  private detectionRulesTask?: DetectionRulesTask;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -59,6 +60,12 @@ export class TelemetryEventsSender {
     if (taskManager) {
       this.diagnosticTask = new DiagnosticTask(this.logger, taskManager, this, telemetryReceiver);
       this.endpointTask = new EndpointTask(this.logger, taskManager, this, telemetryReceiver);
+      this.detectionRulesTask = new DetectionRulesTask(
+        this.logger,
+        taskManager,
+        this,
+        telemetryReceiver
+      );
       this.exceptionListsTask = new ExceptionListsTask(
         this.logger,
         taskManager,
@@ -80,6 +87,7 @@ export class TelemetryEventsSender {
       this.logger.debug(`starting security telemetry tasks`);
       this.diagnosticTask.start(taskManager);
       this.endpointTask.start(taskManager);
+      this.detectionRulesTask?.start(taskManager);
       this.exceptionListsTask?.start(taskManager);
     }
 
@@ -194,8 +202,8 @@ export class TelemetryEventsSender {
 
   /**
    * This function sends events to the elastic telemetry channel. Caution is required
-   * because it does no allowlist filtering. The caller is responsible for making sure
-   * that there is no sensitive material or PII in the records that are sent upstream.
+   * because it does no allowlist filtering at send time. The function call site is
+   * responsible for ensuring sure no sensitive material is in telemetry events.
    *
    * @param channel the elastic telemetry channel
    * @param toSend telemetry events
@@ -293,31 +301,4 @@ export class TelemetryEventsSender {
       });
     }
   }
-}
-
-export function copyAllowlistedFields(
-  allowlist: AllowlistFields,
-  event: TelemetryEvent
-): TelemetryEvent {
-  return Object.entries(allowlist).reduce<TelemetryEvent>((newEvent, [allowKey, allowValue]) => {
-    const eventValue = event[allowKey];
-    if (eventValue !== null && eventValue !== undefined) {
-      if (allowValue === true) {
-        return { ...newEvent, [allowKey]: eventValue };
-      } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
-        const subValues = eventValue.filter((v) => typeof v === 'object');
-        return {
-          ...newEvent,
-          [allowKey]: subValues.map((v) => copyAllowlistedFields(allowValue, v as TelemetryEvent)),
-        };
-      } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
-        const values = copyAllowlistedFields(allowValue, eventValue as TelemetryEvent);
-        return {
-          ...newEvent,
-          ...(Object.keys(values).length > 0 ? { [allowKey]: values } : {}),
-        };
-      }
-    }
-    return newEvent;
-  }, {});
 }

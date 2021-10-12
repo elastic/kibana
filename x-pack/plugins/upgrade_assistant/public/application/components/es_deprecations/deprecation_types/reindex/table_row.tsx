@@ -33,10 +33,8 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
     services: { api },
   } = useAppContext();
 
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const closeFlyout = useCallback(async () => {
     removeContentFromGlobalFlyout('reindexFlyout');
@@ -56,6 +54,7 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
         },
         flyoutProps: {
           onClose: closeFlyout,
+          className: 'eui-textBreakWord',
           'data-test-subj': 'reindexDetails',
           'aria-labelledby': 'reindexDetailsFlyoutTitle',
         },

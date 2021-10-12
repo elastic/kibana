@@ -67,7 +67,7 @@ export function BreakdownChart({
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const theme = useTheme();
 

@@ -20,6 +20,8 @@ import {
   CommentRequestUserType,
   CommentRequestAlertType,
   CommentRequestActionsType,
+  CaseUserActionResponse,
+  isPush,
 } from '../../../common';
 import { ActionsClient } from '../../../../actions/server';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
@@ -55,21 +57,35 @@ export const getLatestPushInfo = (
   userActions: CaseUserActionsResponse
 ): { index: number; pushedInfo: CaseFullExternalService } | null => {
   for (const [index, action] of [...userActions].reverse().entries()) {
-    if (action.action === 'push-to-service' && action.new_value)
+    if (
+      isPush(action.action, action.action_field) &&
+      isValidNewValue(action) &&
+      connectorId === action.new_val_connector_id
+    ) {
       try {
         const pushedInfo = JSON.parse(action.new_value);
-        if (pushedInfo.connector_id === connectorId) {
-          // We returned the index of the element in the userActions array.
-          // As we traverse the userActions in reverse we need to calculate the index of a normal traversal
-          return { index: userActions.length - index - 1, pushedInfo };
-        }
+        // We returned the index of the element in the userActions array.
+        // As we traverse the userActions in reverse we need to calculate the index of a normal traversal
+        return {
+          index: userActions.length - index - 1,
+          pushedInfo: { ...pushedInfo, connector_id: connectorId },
+        };
       } catch (e) {
-        // Silence JSON parse errors
+        // ignore parse failures and check the next user action
       }
+    }
   }
 
   return null;
 };
+
+type NonNullNewValueAction = Omit<CaseUserActionResponse, 'new_value' | 'new_val_connector_id'> & {
+  new_value: string;
+  new_val_connector_id: string;
+};
+
+const isValidNewValue = (userAction: CaseUserActionResponse): userAction is NonNullNewValueAction =>
+  userAction.new_val_connector_id != null && userAction.new_value != null;
 
 const getCommentContent = (comment: CommentResponse): string => {
   if (comment.type === CommentType.user) {
@@ -173,13 +189,13 @@ export const createIncident = async ({
 
   if (externalId) {
     try {
-      currentIncident = ((await actionsClient.execute({
+      currentIncident = (await actionsClient.execute({
         actionId: connector.id,
         params: {
           subAction: 'getIncident',
           subActionParams: { externalId },
         },
-      })) as unknown) as ExternalServiceParams | undefined;
+      })) as unknown as ExternalServiceParams | undefined;
     } catch (ex) {
       throw new Error(
         `Retrieving Incident by id ${externalId} from ${connector.actionTypeId} failed with exception: ${ex}`

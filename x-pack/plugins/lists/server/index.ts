@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 
 import { ConfigSchema } from './config';
 import { ListPlugin } from './plugin';
@@ -19,6 +19,9 @@ export {
 export { ExceptionListClient } from './services/exception_lists/exception_list_client';
 export type { ListPluginSetup, ListsApiRequestHandlerContext } from './types';
 
-export const config = { schema: ConfigSchema };
+export const config: PluginConfigDescriptor = {
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
+  schema: ConfigSchema,
+};
 export const plugin = (initializerContext: PluginInitializerContext): ListPlugin =>
   new ListPlugin(initializerContext);

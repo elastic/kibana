@@ -78,104 +78,106 @@ export function importTestSuiteFactory(
   supertest: SuperTest<any>
 ) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
-  const expectResponseBody = (
-    testCases: ImportTestCase | ImportTestCase[],
-    statusCode: 200 | 403,
-    singleRequest: boolean,
-    overwrite: boolean,
-    createNewCopies: boolean,
-    spaceId = SPACES.DEFAULT.spaceId
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
-    if (statusCode === 403) {
-      const types = testCaseArray.map((x) => x.type);
-      await expectSavedObjectForbidden(types)(response);
-    } else {
-      // permitted
-      const { success, successCount, successResults, errors } = response.body;
-      const expectedSuccesses = testCaseArray.filter((x) => !x.failure);
-      const expectedFailures = testCaseArray.filter((x) => x.failure);
-      expect(success).to.eql(expectedFailures.length === 0);
-      expect(successCount).to.eql(expectedSuccesses.length);
-      if (expectedFailures.length) {
-        expect(errors).to.have.length(expectedFailures.length);
+  const expectResponseBody =
+    (
+      testCases: ImportTestCase | ImportTestCase[],
+      statusCode: 200 | 403,
+      singleRequest: boolean,
+      overwrite: boolean,
+      createNewCopies: boolean,
+      spaceId = SPACES.DEFAULT.spaceId
+    ): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
+      if (statusCode === 403) {
+        const types = testCaseArray.map((x) => x.type);
+        await expectSavedObjectForbidden(types)(response);
       } else {
-        expect(response.body).not.to.have.property('errors');
-      }
-      for (let i = 0; i < expectedSuccesses.length; i++) {
-        const { type, id, successParam, expectedNewId } = expectedSuccesses[i];
-        // we don't know the order of the returned successResults; search for each one
-        const object = (successResults as Array<Record<string, unknown>>).find(
-          (x) => x.type === type && x.id === id
-        );
-        expect(object).not.to.be(undefined);
-        const destinationId = object!.destinationId as string;
-        if (successParam === 'destinationId') {
-          // Kibana created the object with a different ID than what was specified in the import
-          // This can happen due to an unresolvable conflict (so the new ID will be random), or due to an inexact match (so the new ID will
-          // be equal to the ID or originID of the existing object that it inexactly matched)
-          if (expectedNewId) {
-            expect(destinationId).to.be(expectedNewId);
-          } else {
+        // permitted
+        const { success, successCount, successResults, errors } = response.body;
+        const expectedSuccesses = testCaseArray.filter((x) => !x.failure);
+        const expectedFailures = testCaseArray.filter((x) => x.failure);
+        expect(success).to.eql(expectedFailures.length === 0);
+        expect(successCount).to.eql(expectedSuccesses.length);
+        if (expectedFailures.length) {
+          expect(errors).to.have.length(expectedFailures.length);
+        } else {
+          expect(response.body).not.to.have.property('errors');
+        }
+        for (let i = 0; i < expectedSuccesses.length; i++) {
+          const { type, id, successParam, expectedNewId } = expectedSuccesses[i];
+          // we don't know the order of the returned successResults; search for each one
+          const object = (successResults as Array<Record<string, unknown>>).find(
+            (x) => x.type === type && x.id === id
+          );
+          expect(object).not.to.be(undefined);
+          const destinationId = object!.destinationId as string;
+          if (successParam === 'destinationId') {
+            // Kibana created the object with a different ID than what was specified in the import
+            // This can happen due to an unresolvable conflict (so the new ID will be random), or due to an inexact match (so the new ID will
+            // be equal to the ID or originID of the existing object that it inexactly matched)
+            if (expectedNewId) {
+              expect(destinationId).to.be(expectedNewId);
+            } else {
+              // the new ID was randomly generated
+              expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
+            }
+          } else if (successParam === 'createNewCopies' || successParam === 'createNewCopy') {
             // the new ID was randomly generated
             expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
+          } else {
+            expect(destinationId).to.be(undefined);
           }
-        } else if (successParam === 'createNewCopies' || successParam === 'createNewCopy') {
-          // the new ID was randomly generated
-          expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
-        } else {
-          expect(destinationId).to.be(undefined);
-        }
 
-        // This assertion is only needed for the case where `createNewCopies` mode is disabled and ambiguous source conflicts are detected.
-        // When `createNewCopies` mode is permanently enabled, this field will be removed, and this assertion will be redundant and can be
-        // removed too.
-        const createNewCopy = object!.createNewCopy as boolean | undefined;
-        if (successParam === 'createNewCopy') {
-          expect(createNewCopy).to.be(true);
-        } else {
-          expect(createNewCopy).to.be(undefined);
-        }
+          // This assertion is only needed for the case where `createNewCopies` mode is disabled and ambiguous source conflicts are detected.
+          // When `createNewCopies` mode is permanently enabled, this field will be removed, and this assertion will be redundant and can be
+          // removed too.
+          const createNewCopy = object!.createNewCopy as boolean | undefined;
+          if (successParam === 'createNewCopy') {
+            expect(createNewCopy).to.be(true);
+          } else {
+            expect(createNewCopy).to.be(undefined);
+          }
 
-        if (!singleRequest || overwrite || createNewCopies) {
-          // even if the object result was a "success" result, it may not have been created if other resolvable errors were returned
-          const { _source } = await expectResponses.successCreated(
-            es,
-            spaceId,
-            type,
-            destinationId ?? id
+          if (!singleRequest || overwrite || createNewCopies) {
+            // even if the object result was a "success" result, it may not have been created if other resolvable errors were returned
+            const { _source } = await expectResponses.successCreated(
+              es,
+              spaceId,
+              type,
+              destinationId ?? id
+            );
+            expect(_source?.[type][NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+          }
+        }
+        for (let i = 0; i < expectedFailures.length; i++) {
+          const { type, id, failure, fail409Param, expectedNewId } = expectedFailures[i];
+          // we don't know the order of the returned errors; search for each one
+          const object = (errors as Array<Record<string, unknown>>).find(
+            (x) => x.type === type && x.id === id
           );
-          expect(_source?.[type][NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
-        }
-      }
-      for (let i = 0; i < expectedFailures.length; i++) {
-        const { type, id, failure, fail409Param, expectedNewId } = expectedFailures[i];
-        // we don't know the order of the returned errors; search for each one
-        const object = (errors as Array<Record<string, unknown>>).find(
-          (x) => x.type === type && x.id === id
-        );
-        expect(object).not.to.be(undefined);
-        if (failure === 400) {
-          expect(object!.error).to.eql({ type: 'unsupported_type' });
-        } else {
-          // 409
-          let error: Record<string, unknown> = {
-            type: 'conflict',
-            ...(expectedNewId && { destinationId: expectedNewId }),
-          };
-          if (fail409Param === 'ambiguous_conflict_2c') {
-            // "ambiguous destination" conflict
-            error = {
-              type: 'ambiguous_conflict',
-              // response destinations should be sorted by updatedAt in descending order, then ID in ascending order
-              destinations: [getConflictDest(`${CID}2a`), getConflictDest(`${CID}2b`)],
+          expect(object).not.to.be(undefined);
+          if (failure === 400) {
+            expect(object!.error).to.eql({ type: 'unsupported_type' });
+          } else {
+            // 409
+            let error: Record<string, unknown> = {
+              type: 'conflict',
+              ...(expectedNewId && { destinationId: expectedNewId }),
             };
+            if (fail409Param === 'ambiguous_conflict_2c') {
+              // "ambiguous destination" conflict
+              error = {
+                type: 'ambiguous_conflict',
+                // response destinations should be sorted by updatedAt in descending order, then ID in ascending order
+                destinations: [getConflictDest(`${CID}2a`), getConflictDest(`${CID}2b`)],
+              };
+            }
+            expect(object!.error).to.eql(error);
           }
-          expect(object!.error).to.eql(error);
         }
       }
-    }
-  };
+    };
   const createTestDefinitions = (
     testCases: ImportTestCase | ImportTestCase[],
     forbidden: boolean,
@@ -225,46 +227,44 @@ export function importTestSuiteFactory(
     ];
   };
 
-  const makeImportTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: ImportTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeImportTest =
+    (describeFn: Mocha.SuiteFunction) => (description: string, definition: ImportTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      const attrs = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };
+        const attrs = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const requestBody = test.request
-            .map((obj) => JSON.stringify({ ...obj, ...attrs }))
-            .join('\n');
-          const query = test.overwrite
-            ? '?overwrite=true'
-            : test.createNewCopies
-            ? '?createNewCopies=true'
-            : '';
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import${query}`)
-            .auth(user?.username, user?.password)
-            .attach('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson')
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            const requestBody = test.request
+              .map((obj) => JSON.stringify({ ...obj, ...attrs }))
+              .join('\n');
+            const query = test.overwrite
+              ? '?overwrite=true'
+              : test.createNewCopies
+              ? '?createNewCopies=true'
+              : '';
+            await supertest
+              .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import${query}`)
+              .auth(user?.username, user?.password)
+              .attach('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson')
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeImportTest(describe);
   // @ts-ignore

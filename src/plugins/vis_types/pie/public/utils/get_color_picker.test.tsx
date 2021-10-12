@@ -30,14 +30,14 @@ jest.mock('@elastic/charts', () => {
 
 describe('getColorPicker', function () {
   const mockState = new Map();
-  const uiState = ({
+  const uiState = {
     get: jest
       .fn()
       .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
     set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
     emit: jest.fn(),
     setSilent: jest.fn(),
-  } as unknown) as PersistedState;
+  } as unknown as PersistedState;
 
   let wrapperProps: LegendColorPickerProps;
   const Component: ComponentType<LegendColorPickerProps> = getColorPicker(

@@ -44,6 +44,7 @@ export interface ActionExecutorContext {
 
 export interface TaskInfo {
   scheduled: Date;
+  attempts: number;
 }
 
 export interface ExecuteOptions<Source = unknown> {
@@ -210,6 +211,7 @@ export class ActionExecutor {
             config: validatedConfig,
             secrets: validatedSecrets,
             isEphemeral,
+            taskInfo,
           });
         } catch (err) {
           rawResult = {

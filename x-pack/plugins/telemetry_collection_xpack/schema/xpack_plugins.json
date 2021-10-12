@@ -163,6 +163,9 @@
             "__es-query": {
               "type": "long"
             },
+            "transform_health": {
+              "type": "long"
+            },
             "apm__error_rate": {
               "type": "long"
             },
@@ -226,10 +229,10 @@
             "__geo-containment": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_alert": {
+            "xpack__ml__anomaly_detection_alert": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_jobs_health": {
+            "xpack__ml__anomaly_detection_jobs_health": {
               "type": "long"
             }
           }
@@ -245,6 +248,9 @@
             "__es-query": {
               "type": "long"
             },
+            "transform_health": {
+              "type": "long"
+            },
             "apm__error_rate": {
               "type": "long"
             },
@@ -308,10 +314,10 @@
             "__geo-containment": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_alert": {
+            "xpack__ml__anomaly_detection_alert": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_jobs_health": {
+            "xpack__ml__anomaly_detection_jobs_health": {
               "type": "long"
             }
           }
@@ -4086,6 +4092,31 @@
             "deprecated": {
               "type": "long"
             },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
             "app": {
               "properties": {
                 "search": {
@@ -4127,6 +4158,31 @@
             },
             "deprecated": {
               "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
             },
             "app": {
               "properties": {
@@ -4170,6 +4226,31 @@
             "deprecated": {
               "type": "long"
             },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
             "app": {
               "properties": {
                 "search": {
@@ -4211,6 +4292,31 @@
             },
             "deprecated": {
               "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
             },
             "app": {
               "properties": {
@@ -4254,6 +4360,31 @@
             "deprecated": {
               "type": "long"
             },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
             "app": {
               "properties": {
                 "search": {
@@ -4296,6 +4427,31 @@
             "deprecated": {
               "type": "long"
             },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
             "app": {
               "properties": {
                 "search": {
@@ -4337,6 +4493,31 @@
             },
             "deprecated": {
               "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
             },
             "app": {
               "properties": {
@@ -4975,6 +5156,31 @@
             }
           }
         },
+        "output_size": {
+          "properties": {
+            "1.0": {
+              "type": "long"
+            },
+            "5.0": {
+              "type": "long"
+            },
+            "25.0": {
+              "type": "long"
+            },
+            "50.0": {
+              "type": "long"
+            },
+            "75.0": {
+              "type": "long"
+            },
+            "95.0": {
+              "type": "long"
+            },
+            "99.0": {
+              "type": "long"
+            }
+          }
+        },
         "available": {
           "type": "boolean"
         },
@@ -4996,6 +5202,31 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
@@ -5039,6 +5270,31 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "app": {
                   "properties": {
                     "search": {
@@ -5080,6 +5336,31 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
@@ -5123,6 +5404,31 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "app": {
                   "properties": {
                     "search": {
@@ -5164,6 +5470,31 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
@@ -5207,6 +5538,31 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "app": {
                   "properties": {
                     "search": {
@@ -5248,6 +5604,31 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
@@ -5883,6 +6264,31 @@
                       }
                     }
                   }
+                }
+              }
+            },
+            "output_size": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
                 }
               }
             }
@@ -6690,12 +7096,6 @@
                 "description": "The number of spaces which have this feature disabled."
               }
             },
-            "timelion": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of spaces which have this feature disabled."
-              }
-            },
             "dev_tools": {
               "type": "long",
               "_meta": {
@@ -6905,6 +7305,12 @@
                 }
               }
             }
+          }
+        },
+        "task_type_exclusion": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
           }
         }
       }

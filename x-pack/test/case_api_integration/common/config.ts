@@ -93,6 +93,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         .isDirectory()
     );
 
+    const casesConfig = ['--xpack.cases.enabled=true'];
+
     return {
       testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
       servers,
@@ -115,6 +117,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+          ...casesConfig,
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',

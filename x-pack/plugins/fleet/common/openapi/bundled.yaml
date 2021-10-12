@@ -119,6 +119,8 @@ paths:
                         type: string
                         enum:
                           - installed
+                          - installing
+                          - install_failed
                           - not_installed
                       savedObject:
                         type: string
@@ -1513,6 +1515,13 @@ components:
           type: string
         description:
           type: string
+        monitoring_enabled:
+          type: array
+          items:
+            type: string
+            enum:
+              - metrics
+              - logs
     new_package_policy:
       title: New package policy
       type: object

@@ -157,6 +157,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getMarkdownText(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const el = await this.find.byCssSelector('.tvbVis');
     const text = await el.getVisibleText();
     return text;
@@ -270,20 +271,22 @@ export class VisualBuilderPageObject extends FtrService {
   /**
    * change the data formatter for template in an `options` label tab
    *
-   * @param formatter - typeof formatter which you can use for presenting data. By default kibana show `Number` formatter
+   * @param formatter - typeof formatter which you can use for presenting data. By default kibana show `Default` formatter
    */
   public async changeDataFormatter(
-    formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
+    formatter: 'default' | 'bytes' | 'number' | 'percent' | 'duration' | 'custom'
   ) {
-    const formatterEl = await this.testSubjects.find('tsvbDataFormatPicker');
-    await this.comboBox.setElement(formatterEl, formatter, { clickWithMouse: true });
+    await this.testSubjects.click('tsvbDataFormatPicker');
+    await this.testSubjects.click(`tsvbDataFormatPicker-${formatter}`);
+    await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
   public async setDrilldownUrl(value: string) {
     const drilldownEl = await this.testSubjects.find('drilldownUrl');
 
     await drilldownEl.clearValue();
-    await drilldownEl.type(value);
+    await drilldownEl.type(value, { charByChar: true });
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   /**
@@ -304,16 +307,16 @@ export class VisualBuilderPageObject extends FtrService {
   }) {
     if (from) {
       await this.retry.try(async () => {
-        const fromCombobox = await this.find.byCssSelector('[id$="from-row"] .euiComboBox');
-        await this.comboBox.setElement(fromCombobox, from, { clickWithMouse: true });
+        await this.comboBox.set('dataFormatPickerDurationFrom', from);
       });
     }
     if (to) {
-      const toCombobox = await this.find.byCssSelector('[id$="to-row"] .euiComboBox');
-      await this.comboBox.setElement(toCombobox, to, { clickWithMouse: true });
+      await this.retry.try(async () => {
+        await this.comboBox.set('dataFormatPickerDurationTo', to);
+      });
     }
     if (decimalPlaces) {
-      const decimalPlacesInput = await this.find.byCssSelector('[id$="decimal"]');
+      const decimalPlacesInput = await this.testSubjects.find('dataFormatPickerDurationDecimal');
       await decimalPlacesInput.type(decimalPlaces);
     }
   }
@@ -442,6 +445,7 @@ export class VisualBuilderPageObject extends FtrService {
    * @memberof VisualBuilderPage
    */
   public async getViewTable(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const tableView = await this.testSubjects.find('tableView', 20000);
     return await tableView.getVisibleText();
   }
@@ -871,5 +875,15 @@ export class VisualBuilderPageObject extends FtrService {
   public async getAreaChartData(chartData?: DebugState, nth: number = 0) {
     const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
     return areas?.[nth]?.lines.y1.points.map(({ x, y }) => [x, y]);
+  }
+
+  public async getVisualizeError() {
+    const visError = await this.testSubjects.find(`visualization-error`);
+    const errorSpans = await visError.findAllByClassName('euiText--extraSmall');
+    return await errorSpans[0].getVisibleText();
+  }
+
+  public async checkInvalidAggComponentIsPresent() {
+    await this.testSubjects.existOrFail(`invalid_agg`);
   }
 }

@@ -19,11 +19,12 @@ import { ProductSelector } from './components/product_selector';
 import { SetupGuide } from './components/setup_guide';
 import { ROOT_PATH, SETUP_GUIDE_PATH } from './routes';
 
-export const EnterpriseSearch: React.FC<InitialAppData> = ({ access = {} }) => {
+export const EnterpriseSearch: React.FC<InitialAppData> = ({ access = {}, workplaceSearch }) => {
   const { errorConnecting } = useValues(HttpLogic);
   const { config } = useValues(KibanaLogic);
 
   const showErrorConnecting = !!(config.host && errorConnecting);
+  const isWorkplaceSearchAdmin = !!workplaceSearch?.account?.isAdmin;
 
   return (
     <Switch>
@@ -31,7 +32,11 @@ export const EnterpriseSearch: React.FC<InitialAppData> = ({ access = {} }) => {
         <SetupGuide />
       </Route>
       <Route exact path={ROOT_PATH}>
-        {showErrorConnecting ? <ErrorConnecting /> : <ProductSelector access={access} />}
+        {showErrorConnecting ? (
+          <ErrorConnecting />
+        ) : (
+          <ProductSelector isWorkplaceSearchAdmin={isWorkplaceSearchAdmin} access={access} />
+        )}
       </Route>
     </Switch>
   );

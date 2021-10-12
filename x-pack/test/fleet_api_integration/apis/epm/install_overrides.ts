@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -23,6 +24,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('installs packages that include settings and mappings overrides', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
@@ -124,9 +126,7 @@ export default function (providerContext: FtrProviderContext) {
                   limit: '10000',
                 },
               },
-              number_of_routing_shards: 30,
               number_of_shards: '3',
-              refresh_interval: '5s',
             },
           },
           mappings: {

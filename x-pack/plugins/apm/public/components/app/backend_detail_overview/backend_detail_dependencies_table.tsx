@@ -24,7 +24,7 @@ export function BackendDetailDependenciesTable() {
 
   const {
     query: { rangeFrom, rangeTo, kuery, environment },
-  } = useApmParams('/backends/:backendName/overview');
+  } = useApmParams('/backends/{backendName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -44,7 +44,7 @@ export function BackendDetailDependenciesTable() {
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/backends/{backendName}/upstream_services',
+        endpoint: 'GET /internal/apm/backends/{backendName}/upstream_services',
         params: {
           path: {
             backendName,

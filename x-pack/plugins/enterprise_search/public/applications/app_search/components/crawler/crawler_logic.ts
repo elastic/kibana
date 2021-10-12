@@ -12,34 +12,33 @@ import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import {
-  CrawlerData,
-  CrawlerDomain,
-  CrawlRequest,
-  CrawlRequestFromServer,
-  CrawlerStatus,
-} from './types';
-import { crawlerDataServerToClient, crawlRequestServerToClient } from './utils';
+import { CrawlerData, CrawlerDomain, CrawlEvent, CrawlRequest, CrawlerStatus } from './types';
+import { crawlerDataServerToClient } from './utils';
 
 const POLLING_DURATION = 1000;
 const POLLING_DURATION_ON_FAILURE = 5000;
+const ACTIVE_STATUSES = [
+  CrawlerStatus.Pending,
+  CrawlerStatus.Starting,
+  CrawlerStatus.Running,
+  CrawlerStatus.Canceling,
+];
 
 export interface CrawlerValues {
-  crawlRequests: CrawlRequest[];
+  events: CrawlEvent[];
   dataLoading: boolean;
   domains: CrawlerDomain[];
-  mostRecentCrawlRequestStatus: CrawlerStatus;
+  mostRecentCrawlRequest: CrawlRequest | null;
+  mostRecentCrawlRequestStatus: CrawlerStatus | null;
   timeoutId: NodeJS.Timeout | null;
 }
 
 interface CrawlerActions {
   clearTimeoutId(): void;
-  createNewTimeoutForCrawlRequests(duration: number): { duration: number };
+  createNewTimeoutForCrawlerData(duration: number): { duration: number };
   fetchCrawlerData(): void;
-  getLatestCrawlRequests(refreshData?: boolean): { refreshData?: boolean };
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   onReceiveCrawlerData(data: CrawlerData): { data: CrawlerData };
-  onReceiveCrawlRequests(crawlRequests: CrawlRequest[]): { crawlRequests: CrawlRequest[] };
   startCrawl(): void;
   stopCrawl(): void;
 }
@@ -48,12 +47,10 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
   path: ['enterprise_search', 'app_search', 'crawler_logic'],
   actions: {
     clearTimeoutId: true,
-    createNewTimeoutForCrawlRequests: (duration) => ({ duration }),
+    createNewTimeoutForCrawlerData: (duration) => ({ duration }),
     fetchCrawlerData: true,
-    getLatestCrawlRequests: (refreshData) => ({ refreshData }),
     onCreateNewTimeout: (timeoutId) => ({ timeoutId }),
     onReceiveCrawlerData: (data) => ({ data }),
-    onReceiveCrawlRequests: (crawlRequests) => ({ crawlRequests }),
     startCrawl: () => null,
     stopCrawl: () => null,
   },
@@ -70,10 +67,16 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         onReceiveCrawlerData: (_, { data: { domains } }) => domains,
       },
     ],
-    crawlRequests: [
+    events: [
       [],
       {
-        onReceiveCrawlRequests: (_, { crawlRequests }) => crawlRequests,
+        onReceiveCrawlerData: (_, { data: { events } }) => events,
+      },
+    ],
+    mostRecentCrawlRequest: [
+      null,
+      {
+        onReceiveCrawlerData: (_, { data: { mostRecentCrawlRequest } }) => mostRecentCrawlRequest,
       },
     ],
     timeoutId: [
@@ -86,15 +89,12 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
   },
   selectors: ({ selectors }) => ({
     mostRecentCrawlRequestStatus: [
-      () => [selectors.crawlRequests],
-      (crawlRequests: CrawlerValues['crawlRequests']) => {
-        const eligibleCrawlRequests = crawlRequests.filter(
-          (req) => req.status !== CrawlerStatus.Skipped
-        );
-        if (eligibleCrawlRequests.length === 0) {
-          return CrawlerStatus.Success;
+      () => [selectors.mostRecentCrawlRequest],
+      (crawlRequest: CrawlerValues['mostRecentCrawlRequest']) => {
+        if (crawlRequest) {
+          return crawlRequest.status;
         }
-        return eligibleCrawlRequests[0].status;
+        return CrawlerStatus.Success;
       },
     ],
   }),
@@ -107,10 +107,21 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         const response = await http.get(`/internal/app_search/engines/${engineName}/crawler`);
 
         const crawlerData = crawlerDataServerToClient(response);
-
         actions.onReceiveCrawlerData(crawlerData);
+
+        const continuePoll =
+          (crawlerData.mostRecentCrawlRequest &&
+            ACTIVE_STATUSES.includes(crawlerData.mostRecentCrawlRequest.status)) ||
+          crawlerData.events.find((event) => ACTIVE_STATUSES.includes(event.status));
+
+        if (continuePoll) {
+          actions.createNewTimeoutForCrawlerData(POLLING_DURATION);
+        } else {
+          actions.clearTimeoutId();
+        }
       } catch (e) {
         flashAPIErrors(e);
+        actions.createNewTimeoutForCrawlerData(POLLING_DURATION_ON_FAILURE);
       }
     },
     startCrawl: async () => {
@@ -119,7 +130,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
 
       try {
         await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests`);
-        actions.getLatestCrawlRequests();
+        actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -130,54 +141,21 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
 
       try {
         await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests/cancel`);
-        actions.getLatestCrawlRequests();
+        actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);
       }
     },
-    createNewTimeoutForCrawlRequests: ({ duration }) => {
+    createNewTimeoutForCrawlerData: ({ duration }) => {
       if (values.timeoutId) {
         clearTimeout(values.timeoutId);
       }
 
       const timeoutIdId = setTimeout(() => {
-        actions.getLatestCrawlRequests();
+        actions.fetchCrawlerData();
       }, duration);
 
       actions.onCreateNewTimeout(timeoutIdId);
-    },
-    getLatestCrawlRequests: async ({ refreshData = true }) => {
-      const { http } = HttpLogic.values;
-      const { engineName } = EngineLogic.values;
-
-      try {
-        const crawlRequestsFromServer: CrawlRequestFromServer[] = await http.get(
-          `/internal/app_search/engines/${engineName}/crawler/crawl_requests`
-        );
-        const crawlRequests = crawlRequestsFromServer.map(crawlRequestServerToClient);
-        actions.onReceiveCrawlRequests(crawlRequests);
-        if (
-          [
-            CrawlerStatus.Pending,
-            CrawlerStatus.Starting,
-            CrawlerStatus.Running,
-            CrawlerStatus.Canceling,
-          ].includes(crawlRequests[0]?.status)
-        ) {
-          actions.createNewTimeoutForCrawlRequests(POLLING_DURATION);
-        } else if (
-          [CrawlerStatus.Success, CrawlerStatus.Failed, CrawlerStatus.Canceled].includes(
-            crawlRequests[0]?.status
-          )
-        ) {
-          actions.clearTimeoutId();
-          if (refreshData) {
-            actions.fetchCrawlerData();
-          }
-        }
-      } catch (e) {
-        actions.createNewTimeoutForCrawlRequests(POLLING_DURATION_ON_FAILURE);
-      }
     },
   }),
   events: ({ values }) => ({

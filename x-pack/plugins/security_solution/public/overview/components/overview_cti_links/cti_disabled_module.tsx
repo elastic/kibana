@@ -5,51 +5,30 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiButton } from '@elastic/eui';
-import { ThreatIntelPanelView } from './threat_intel_panel_view';
+import React from 'react';
 import { EMPTY_LIST_ITEMS } from '../../containers/overview_cti_links/helpers';
 import { useKibana } from '../../../common/lib/kibana';
-import { CtiInnerPanel } from './cti_inner_panel';
 import * as i18n from './translations';
+import { DisabledLinkPanel } from '../link_panel/disabled_link_panel';
+import { ThreatIntelPanelView } from './threat_intel_panel_view';
 
 export const CtiDisabledModuleComponent = () => {
   const threatIntelDocLink = `${
     useKibana().services.docLinks.links.filebeat.base
   }/filebeat-module-threatintel.html`;
 
-  const danger = useMemo(
-    () => (
-      <CtiInnerPanel
-        color={'warning'}
-        title={i18n.DANGER_TITLE}
-        body={i18n.DANGER_BODY}
-        button={
-          <EuiButton
-            href={threatIntelDocLink}
-            color={'warning'}
-            target="_blank"
-            data-test-subj="cti-enable-module-button"
-          >
-            {i18n.DANGER_BUTTON}
-          </EuiButton>
-        }
-        dataTestSubj="cti-inner-panel-danger"
-      />
-    ),
-    [threatIntelDocLink]
-  );
-
   return (
-    <ThreatIntelPanelView
-      totalEventCount={0}
-      splitPanel={danger}
+    <DisabledLinkPanel
+      bodyCopy={i18n.DANGER_BODY}
+      buttonCopy={i18n.DANGER_BUTTON}
+      dataTestSubjPrefix="cti"
+      docLink={threatIntelDocLink}
       listItems={EMPTY_LIST_ITEMS}
-      isInspectEnabled={false}
+      titleCopy={i18n.DANGER_TITLE}
+      LinkPanelViewComponent={ThreatIntelPanelView}
     />
   );
 };
 
-CtiDisabledModuleComponent.displayName = 'CtiDisabledModule';
-
 export const CtiDisabledModule = React.memo(CtiDisabledModuleComponent);
+CtiDisabledModule.displayName = 'CtiDisabledModule';

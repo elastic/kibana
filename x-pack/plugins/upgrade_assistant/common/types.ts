@@ -11,16 +11,16 @@ import {
 } from '@elastic/elasticsearch/api/types';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
+export type DeprecationSource = 'Kibana' | 'Elasticsearch';
+
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.
   created = 0,
-  indexGroupServicesStopped = 10,
   readonly = 20,
   newIndexCreated = 30,
   reindexStarted = 40,
   reindexCompleted = 50,
   aliasCreated = 60,
-  indexGroupServicesStarted = 70,
 }
 
 export enum ReindexStatus {
@@ -29,6 +29,9 @@ export enum ReindexStatus {
   failed,
   paused,
   cancelled,
+  // Used by the UI to differentiate if there was a failure retrieving
+  // the status from the server API
+  fetchFailed,
 }
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
@@ -110,11 +113,6 @@ export interface ReindexWarning {
   meta?: {
     [key: string]: string | string[];
   };
-}
-
-export enum IndexGroup {
-  ml = '___ML_REINDEX_LOCK___',
-  watcher = '___WATCHER_REINDEX_LOCK___',
 }
 
 // Telemetry types
@@ -254,4 +252,24 @@ export interface MlOperation extends SavedObjectAttributes {
 export interface DeprecationLoggingStatus {
   isDeprecationLogIndexingEnabled: boolean;
   isDeprecationLoggingEnabled: boolean;
+}
+
+export type UPGRADE_STATUS = 'UPGRADE_NEEDED' | 'NO_UPGRADE_NEEDED' | 'IN_PROGRESS' | 'ERROR';
+export interface SystemIndicesMigrationFeature {
+  id?: string;
+  feature_name: string;
+  minimum_index_version: string;
+  upgrade_status: UPGRADE_STATUS;
+  indices: Array<{
+    index: string;
+    version: string;
+  }>;
+}
+export interface SystemIndicesMigrationStatus {
+  features: SystemIndicesMigrationFeature[];
+  upgrade_status: UPGRADE_STATUS;
+}
+export interface SystemIndicesMigrationStarted {
+  features: SystemIndicesMigrationFeature[];
+  accepted: boolean;
 }

@@ -25,10 +25,8 @@ export const HostsQueryTabBody = ({
   startDate,
   type,
 }: HostsComponentsQueryProps) => {
-  const [
-    loading,
-    { hosts, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
-  ] = useAllHost({ docValueFields, endDate, filterQuery, indexNames, skip, startDate, type });
+  const [loading, { hosts, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch }] =
+    useAllHost({ docValueFields, endDate, filterQuery, indexNames, skip, startDate, type });
 
   return (
     <HostsTableManage

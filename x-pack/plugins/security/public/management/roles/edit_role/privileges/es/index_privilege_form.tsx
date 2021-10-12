@@ -189,12 +189,8 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   };
 
   private getFieldLevelControls = () => {
-    const {
-      allowFieldLevelSecurity,
-      allowDocumentLevelSecurity,
-      indexPrivilege,
-      isRoleReadOnly,
-    } = this.props;
+    const { allowFieldLevelSecurity, allowDocumentLevelSecurity, indexPrivilege, isRoleReadOnly } =
+      this.props;
 
     if (!allowFieldLevelSecurity) {
       return null;

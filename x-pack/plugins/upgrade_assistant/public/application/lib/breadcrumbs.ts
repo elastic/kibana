@@ -16,12 +16,12 @@ const i18nTexts = {
       defaultMessage: 'Upgrade Assistant',
     }),
     esDeprecations: i18n.translate('xpack.upgradeAssistant.breadcrumb.esDeprecationsLabel', {
-      defaultMessage: 'Elasticsearch deprecation warnings',
+      defaultMessage: 'Elasticsearch deprecation issues',
     }),
     kibanaDeprecations: i18n.translate(
       'xpack.upgradeAssistant.breadcrumb.kibanaDeprecationsLabel',
       {
-        defaultMessage: 'Kibana deprecation warnings',
+        defaultMessage: 'Kibana deprecation issues',
       }
     ),
   },

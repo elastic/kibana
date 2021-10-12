@@ -7,7 +7,9 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ResultActions } from './result_actions';
 import { ResultHeaderItem } from './result_header_item';
@@ -21,6 +23,7 @@ interface Props {
   resultMeta: ResultMeta;
   actions: ResultAction[];
   documentLink?: string;
+  resultPosition?: number;
 }
 
 export const ResultHeader: React.FC<Props> = ({
@@ -29,6 +32,7 @@ export const ResultHeader: React.FC<Props> = ({
   isMetaEngine,
   actions,
   documentLink,
+  resultPosition,
 }) => {
   return (
     <header className="appSearchResultHeader">
@@ -39,6 +43,19 @@ export const ResultHeader: React.FC<Props> = ({
         responsive={false}
         wrap
       >
+        {typeof resultPosition !== 'undefined' && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              <FormattedMessage
+                id="xpack.enterpriseSearch.appSearch.result.resultPositionLabel"
+                defaultMessage="#{resultPosition}"
+                values={{
+                  resultPosition,
+                }}
+              />
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow>
           <ResultHeaderItem
             href={documentLink}

@@ -94,7 +94,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         // we'll check title and message in this test, but not subsequent ones
         expect(title).to.be('alert always fire group all documents met threshold');
 
-        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern =
+          /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
     });
@@ -133,7 +134,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(name).to.be('always fire');
         if (group === 'group-0') inGroup0++;
 
-        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: count is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern =
+          /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: count is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
 
@@ -170,7 +172,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
 
-        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: sum\(testedValue\) is between 0 and 1000000 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern =
+          /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: sum\(testedValue\) is between 0 and 1000000 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
     });
@@ -205,7 +208,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
 
-        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: .*\n- Conditions Met: avg\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern =
+          /alert 'always fire' is active for group \'all documents\':\n\n- Value: .*\n- Conditions Met: avg\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
     });
@@ -246,7 +250,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(name).to.be('always fire');
         if (group === 'group-2') inGroup2++;
 
-        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: max\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern =
+          /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: max\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
 
@@ -291,7 +296,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(name).to.be('always fire');
         if (group === 'group-0') inGroup0++;
 
-        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: min\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern =
+          /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: min\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
 

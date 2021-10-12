@@ -33,7 +33,8 @@ export class GlobalSearchTestPlugin
       GlobalSearchTestPluginStart,
       GlobalSearchTestPluginSetupDeps,
       GlobalSearchTestPluginStartDeps
-    > {
+    >
+{
   public setup(
     { application, getStartServices }: CoreSetup,
     { globalSearch }: GlobalSearchTestPluginSetupDeps

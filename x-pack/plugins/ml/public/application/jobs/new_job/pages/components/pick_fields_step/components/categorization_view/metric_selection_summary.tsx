@@ -17,9 +17,12 @@ import { CategoryStoppedPartitions } from './category_stopped_partitions';
 const DTR_IDX = 0;
 
 export const CategorizationDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    chartLoader,
+    resultsLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
 
   const [loadingData, setLoadingData] = useState(false);

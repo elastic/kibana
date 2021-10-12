@@ -13,7 +13,6 @@ const getSpacePrefix = (spaceId: string) => {
 };
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
@@ -22,20 +21,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'spaceSelector',
     'settings',
   ]);
+  const kibanaServer = getService('kibanaServer');
+  const spacesService = getService('spaces');
 
   const spaceId = 'space_1';
 
   describe('spaces integration', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/functional/es_archives/saved_objects_management/spaces_integration'
+      await spacesService.create({ id: spaceId, name: spaceId });
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/spaces_integration',
+        { space: spaceId }
       );
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/saved_objects_management/spaces_integration'
-      );
+      await spacesService.delete(spaceId);
     });
 
     beforeEach(async () => {

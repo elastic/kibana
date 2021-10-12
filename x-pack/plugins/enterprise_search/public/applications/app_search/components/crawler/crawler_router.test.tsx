@@ -19,7 +19,6 @@ import { CrawlerSingleDomain } from './crawler_single_domain';
 describe('CrawlerRouter', () => {
   const mockActions = {
     fetchCrawlerData: jest.fn(),
-    getLatestCrawlRequests: jest.fn(),
   };
 
   let wrapper: ShallowWrapper;
@@ -32,7 +31,6 @@ describe('CrawlerRouter', () => {
 
   it('calls fetchCrawlerData and starts polling on page load', () => {
     expect(mockActions.fetchCrawlerData).toHaveBeenCalledTimes(1);
-    expect(mockActions.getLatestCrawlRequests).toHaveBeenCalledWith(false);
   });
 
   it('renders a crawler views', () => {

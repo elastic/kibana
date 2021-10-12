@@ -696,7 +696,7 @@ describe('CaseConfigureService', () => {
 
       it('defaults to the none connector when attributes is undefined', async () => {
         unsecuredSavedObjectsClient.get.mockReturnValue(
-          Promise.resolve(({
+          Promise.resolve({
             references: [
               {
                 id: '1',
@@ -704,7 +704,7 @@ describe('CaseConfigureService', () => {
                 type: ACTION_SAVED_OBJECT_TYPE,
               },
             ],
-          } as unknown) as SavedObject<ESCasesConfigureAttributes>)
+          } as unknown as SavedObject<ESCasesConfigureAttributes>)
         );
         const res = await service.get({ unsecuredSavedObjectsClient, configurationId: '1' });
 

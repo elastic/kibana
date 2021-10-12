@@ -36,16 +36,16 @@ describe('Reporting Plugin', () => {
     initContext = coreMock.createPluginInitializerContext(configSchema);
     coreSetup = coreMock.createSetup(configSchema);
     coreStart = coreMock.createStart();
-    pluginSetup = ({
+    pluginSetup = {
       licensing: {},
       features: featuresPluginMock.createSetup(),
       usageCollection: {
         makeUsageCollector: jest.fn(),
         registerCollector: jest.fn(),
       },
-      taskManager: ({
+      taskManager: {
         registerTaskDefinitions: jest.fn(),
-      } as unknown) as TaskManagerSetupContract,
+      } as unknown as TaskManagerSetupContract,
       security: {
         authc: {
           getCurrentUser: () => ({
@@ -55,12 +55,12 @@ describe('Reporting Plugin', () => {
           }),
         },
       },
-    } as unknown) as any;
-    pluginStart = ({
+    } as unknown as any;
+    pluginStart = {
       data: {
         fieldFormats: {},
       },
-    } as unknown) as any;
+    } as unknown as any;
   });
 
   it('has a sync setup process', () => {

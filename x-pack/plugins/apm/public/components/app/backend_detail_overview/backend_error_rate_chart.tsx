@@ -31,7 +31,7 @@ export function BackendFailedTransactionRateChart({
 
   const {
     query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/backends/:backendName/overview');
+  } = useApmParams('/backends/{backendName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -44,7 +44,7 @@ export function BackendFailedTransactionRateChart({
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/backends/{backendName}/charts/error_rate',
+        endpoint: 'GET /internal/apm/backends/{backendName}/charts/error_rate',
         params: {
           path: {
             backendName,

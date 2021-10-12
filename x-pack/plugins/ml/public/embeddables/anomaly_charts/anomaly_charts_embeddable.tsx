@@ -21,7 +21,7 @@ import {
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsServices,
 } from '..';
-import type { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import type { IndexPattern } from '../../../../../../src/plugins/data/common';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 export const getDefaultExplorerChartsPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.anomalyChartsEmbeddable.title', {

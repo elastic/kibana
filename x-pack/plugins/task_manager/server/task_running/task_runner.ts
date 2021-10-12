@@ -361,9 +361,8 @@ export class TaskManagerRunner implements TaskRunner {
         })) as ConcreteTaskInstanceWithStartedAt
       );
 
-      const timeUntilClaimExpiresAfterUpdate = howManyMsUntilOwnershipClaimExpires(
-        ownershipClaimedUntil
-      );
+      const timeUntilClaimExpiresAfterUpdate =
+        howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
       if (timeUntilClaimExpiresAfterUpdate < 0) {
         this.logger.debug(
           `[Task Runner] Task ${id} ran after ownership expired (${Math.abs(

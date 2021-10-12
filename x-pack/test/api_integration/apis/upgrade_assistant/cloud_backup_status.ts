@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -54,13 +55,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Cloud backup status', () => {
     describe('get', () => {
       describe('with backups present', () => {
-        // Needs SnapshotInfo type https://github.com/elastic/elasticsearch-specification/issues/685
-        let mostRecentSnapshot: any;
+        let mostRecentSnapshot: estypes.SnapshotSnapshotInfo;
 
         before(async () => {
           await createCloudRepository();
           await createCloudSnapshot('test_snapshot_1');
-          mostRecentSnapshot = (await createCloudSnapshot('test_snapshot_2')).body.snapshot;
+          mostRecentSnapshot = (await createCloudSnapshot('test_snapshot_2')).body.snapshot!;
         });
 
         after(async () => {

@@ -29,6 +29,7 @@ describe('StatusService', () => {
   });
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   const available: ServiceStatus<any> = {
     level: ServiceStatusLevels.available,
     summary: 'Available',
@@ -36,6 +37,10 @@ describe('StatusService', () => {
   const degraded: ServiceStatus<any> = {
     level: ServiceStatusLevels.degraded,
     summary: 'This is degraded!',
+  };
+  const critical: ServiceStatus<any> = {
+    level: ServiceStatusLevels.critical,
+    summary: 'This is critical!',
   };
 
   type SetupDeps = Parameters<StatusService['setup']>[0];
@@ -181,7 +186,7 @@ describe('StatusService', () => {
         );
         expect(await setup.overall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
+          summary: '2 services are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -201,15 +206,15 @@ describe('StatusService', () => {
         const subResult3 = await setup.overall$.pipe(first()).toPromise();
         expect(subResult1).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
+          summary: '2 services are degraded: elasticsearch, savedObjects',
         });
         expect(subResult2).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
+          summary: '2 services are degraded: elasticsearch, savedObjects',
         });
         expect(subResult3).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
+          summary: '2 services are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -258,7 +263,7 @@ describe('StatusService', () => {
                   "savedObjects",
                 ],
               },
-              "summary": "[savedObjects]: This is degraded!",
+              "summary": "1 service is degraded: savedObjects",
             },
             Object {
               "level": available,
@@ -308,7 +313,178 @@ describe('StatusService', () => {
                   "savedObjects",
                 ],
               },
-              "summary": "[savedObjects]: This is degraded!",
+              "summary": "1 service is degraded: savedObjects",
+            },
+            Object {
+              "level": available,
+              "summary": "All services are available",
+            },
+          ]
+        `);
+      });
+    });
+
+    describe('coreOverall$', () => {
+      it('exposes an overall summary of core services', async () => {
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: of(degraded),
+            },
+            savedObjects: {
+              status$: of(degraded),
+            },
+          })
+        );
+        expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
+          level: ServiceStatusLevels.degraded,
+          summary: '2 services are degraded: elasticsearch, savedObjects',
+        });
+      });
+
+      it('computes the summary depending on the services status', async () => {
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: of(degraded),
+            },
+            savedObjects: {
+              status$: of(critical),
+            },
+          })
+        );
+        expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
+          level: ServiceStatusLevels.critical,
+          summary: '1 service is critical: savedObjects',
+        });
+      });
+
+      it('replays last event', async () => {
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: of(degraded),
+            },
+            savedObjects: {
+              status$: of(degraded),
+            },
+          })
+        );
+
+        const subResult1 = await setup.coreOverall$.pipe(first()).toPromise();
+        const subResult2 = await setup.coreOverall$.pipe(first()).toPromise();
+        const subResult3 = await setup.coreOverall$.pipe(first()).toPromise();
+
+        expect(subResult1).toMatchObject({
+          level: ServiceStatusLevels.degraded,
+          summary: '2 services are degraded: elasticsearch, savedObjects',
+        });
+        expect(subResult2).toMatchObject({
+          level: ServiceStatusLevels.degraded,
+          summary: '2 services are degraded: elasticsearch, savedObjects',
+        });
+        expect(subResult3).toMatchObject({
+          level: ServiceStatusLevels.degraded,
+          summary: '2 services are degraded: elasticsearch, savedObjects',
+        });
+      });
+
+      it('does not emit duplicate events', async () => {
+        const elasticsearch$ = new BehaviorSubject(available);
+        const savedObjects$ = new BehaviorSubject(degraded);
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: elasticsearch$,
+            },
+            savedObjects: {
+              status$: savedObjects$,
+            },
+          })
+        );
+
+        const statusUpdates: ServiceStatus[] = [];
+        const subscription = setup.coreOverall$.subscribe((status) => statusUpdates.push(status));
+
+        // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
+        elasticsearch$.next(available);
+        await delay(500);
+        elasticsearch$.next(available);
+        await delay(500);
+        elasticsearch$.next({
+          level: ServiceStatusLevels.available,
+          summary: `Wow another summary`,
+        });
+        await delay(500);
+        savedObjects$.next(degraded);
+        await delay(500);
+        savedObjects$.next(available);
+        await delay(500);
+        savedObjects$.next(available);
+        await delay(500);
+        subscription.unsubscribe();
+
+        expect(statusUpdates).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "detail": "See the status page for more information",
+              "level": degraded,
+              "meta": Object {
+                "affectedServices": Array [
+                  "savedObjects",
+                ],
+              },
+              "summary": "1 service is degraded: savedObjects",
+            },
+            Object {
+              "level": available,
+              "summary": "All services are available",
+            },
+          ]
+        `);
+      });
+
+      it('debounces events in quick succession', async () => {
+        const savedObjects$ = new BehaviorSubject(available);
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: new BehaviorSubject(available),
+            },
+            savedObjects: {
+              status$: savedObjects$,
+            },
+          })
+        );
+
+        const statusUpdates: ServiceStatus[] = [];
+        const subscription = setup.coreOverall$.subscribe((status) => statusUpdates.push(status));
+
+        // All of these should debounced into a single `available` status
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        // Waiting for the debounce timeout should cut a new update
+        await delay(500);
+        savedObjects$.next(available);
+        await delay(500);
+        subscription.unsubscribe();
+
+        expect(statusUpdates).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "detail": "See the status page for more information",
+              "level": degraded,
+              "meta": Object {
+                "affectedServices": Array [
+                  "savedObjects",
+                ],
+              },
+              "summary": "1 service is degraded: savedObjects",
             },
             Object {
               "level": available,

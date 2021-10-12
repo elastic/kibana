@@ -38,9 +38,10 @@ const PAGE_SIZE = 3;
 
 const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   const dispatch = useDispatch();
-  const updateIsLoading = useCallback((payload) => dispatch(dispatchUpdateIsLoading(payload)), [
-    dispatch,
-  ]);
+  const updateIsLoading = useCallback(
+    (payload) => dispatch(dispatchUpdateIsLoading(payload)),
+    [dispatch]
+  );
   const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
 
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);

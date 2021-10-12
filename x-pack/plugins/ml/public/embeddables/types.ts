@@ -27,7 +27,7 @@ import {
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
 } from './constants';
 import { MlResultsService } from '../application/services/results_service';
-import { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../src/plugins/data/common';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];

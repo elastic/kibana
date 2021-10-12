@@ -66,7 +66,7 @@ export {
 };
 
 export type ActionTypeIndex = Record<string, ActionType>;
-export type AlertTypeIndex = Map<string, AlertType>;
+export type RuleTypeIndex = Map<string, AlertType>;
 export type ActionTypeRegistryContract<
   ActionConnector = unknown,
   ActionParams = unknown
@@ -197,6 +197,9 @@ export interface AlertType<
     | 'minimumLicenseRequired'
     | 'recoveryActionGroup'
     | 'defaultActionGroupId'
+    | 'ruleTaskTimeout'
+    | 'defaultScheduleInterval'
+    | 'minimumScheduleInterval'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
@@ -209,7 +212,7 @@ export type AlertUpdates = Omit<Alert, 'id' | 'executionStatus'>;
 
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
-  tagsText: string;
+  index: number;
   actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
@@ -285,6 +288,7 @@ export interface AlertEditProps<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
+  ruleType?: AlertType<string, string>;
 }
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
@@ -299,4 +303,5 @@ export interface AlertAddProps<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
+  ruleTypeIndex?: RuleTypeIndex;
 }

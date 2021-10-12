@@ -38,19 +38,24 @@ export const exporters = {
  * Index patterns:
  */
 
-import { isNestedField, isFilterable } from '../common';
+import {
+  isNestedField,
+  isFilterable,
+  isMultiField,
+  getFieldSubtypeNested,
+  getFieldSubtypeMulti,
+} from '../common';
 
 import {
   ILLEGAL_CHARACTERS_KEY,
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
   validateDataView,
   flattenHitWrapper,
-} from './index_patterns';
+} from './data_views';
 
-export type { IndexPatternsService } from './index_patterns';
+export type { IndexPatternsService } from './data_views';
 
 // Index patterns namespace:
 export const indexPatterns = {
@@ -58,9 +63,11 @@ export const indexPatterns = {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
   isFilterable,
   isNestedField,
+  isMultiField,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
   validate: validateDataView,
   flattenHitWrapper,
 };
@@ -71,7 +78,7 @@ export {
   IndexPattern,
   IndexPatternField,
   TypeMeta,
-} from './index_patterns';
+} from './data_views';
 
 export {
   IIndexPattern,
@@ -85,13 +92,11 @@ export {
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
   GetFieldsOptions,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
   AggregationRestrictions,
   IndexPatternType,
   IndexPatternListItem,
+  DuplicateDataViewError,
 } from '../common';
-
-export { DuplicateDataViewError } from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:

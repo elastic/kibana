@@ -12,6 +12,9 @@ import { PluginInitializerContext } from 'src/core/server';
 import { RuleRegistryPlugin } from './plugin';
 
 export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
+export { RuleDataPluginService } from './rule_data_plugin_service';
+export { RuleDataClient } from './rule_data_client';
+export { IRuleDataClient } from './rule_data_client/types';
 export type {
   RacRequestHandlerContext,
   RacApiRequestHandlerContext,

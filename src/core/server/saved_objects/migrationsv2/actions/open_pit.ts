@@ -29,15 +29,17 @@ export const pitKeepAlive = '10m';
  * Creates a lightweight view of data when the request has been initiated.
  * See https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
  * */
-export const openPit = ({
-  client,
-  index,
-}: OpenPitParams): TaskEither.TaskEither<RetryableEsClientError, OpenPitResponse> => () => {
-  return client
-    .openPointInTime({
-      index,
-      keep_alive: pitKeepAlive,
-    })
-    .then((response) => Either.right({ pitId: response.body.id }))
-    .catch(catchRetryableEsClientErrors);
-};
+export const openPit =
+  ({
+    client,
+    index,
+  }: OpenPitParams): TaskEither.TaskEither<RetryableEsClientError, OpenPitResponse> =>
+  () => {
+    return client
+      .openPointInTime({
+        index,
+        keep_alive: pitKeepAlive,
+      })
+      .then((response) => Either.right({ pitId: response.body.id }))
+      .catch(catchRetryableEsClientErrors);
+  };

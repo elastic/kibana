@@ -66,7 +66,7 @@ describe('DeprecationsService', () => {
     const deprecationsRegistry = mockDeprecationsRegistry.create();
     const getDeprecationsContext = mockDeprecationsRegistry.createGetDeprecationsContext();
 
-    it('registers config deprecations', () => {
+    it('registers config deprecations', async () => {
       const deprecationsService = new DeprecationsService(coreContext);
       coreContext.configService.getHandledDeprecatedConfigs.mockReturnValue([
         [
@@ -93,9 +93,10 @@ describe('DeprecationsService', () => {
       expect(deprecationsFactory.getRegistry).toBeCalledTimes(1);
       expect(deprecationsFactory.getRegistry).toBeCalledWith('testDomain');
       expect(deprecationsRegistry.registerDeprecations).toBeCalledTimes(1);
-      const configDeprecations = deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
-        getDeprecationsContext
-      );
+      const configDeprecations =
+        await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
+          getDeprecationsContext
+        );
       expect(configDeprecations).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -114,6 +115,33 @@ describe('DeprecationsService', () => {
           },
         ]
       `);
+    });
+
+    it('accepts `level` field overrides', async () => {
+      const deprecationsService = new DeprecationsService(coreContext);
+      coreContext.configService.getHandledDeprecatedConfigs.mockReturnValue([
+        [
+          'testDomain',
+          [
+            {
+              message: 'testMessage',
+              level: 'warning',
+              correctiveActions: {
+                manualSteps: ['step a'],
+              },
+            },
+          ],
+        ],
+      ]);
+
+      deprecationsFactory.getRegistry.mockReturnValue(deprecationsRegistry);
+      deprecationsService['registerConfigDeprecationsInfo'](deprecationsFactory);
+
+      const configDeprecations =
+        await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
+          getDeprecationsContext
+        );
+      expect(configDeprecations[0].level).toBe('warning');
     });
   });
 });

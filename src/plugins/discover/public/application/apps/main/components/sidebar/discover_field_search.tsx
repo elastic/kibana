@@ -230,8 +230,8 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     return (
       <EuiPopoverFooter paddingSize="s">
         <EuiSwitch
-          label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
-            defaultMessage: 'Hide missing fields',
+          label={i18n.translate('discover.fieldChooser.filter.hideEmptyFieldsLabel', {
+            defaultMessage: 'Hide empty fields',
           })}
           checked={values.missing}
           onChange={handleMissingChange}

@@ -17,7 +17,7 @@ jest.mock('../../containers/sourcerer', () => ({
 }));
 
 describe('useHoverActionItems', () => {
-  const defaultProps: UseHoverActionItemsProps = ({
+  const defaultProps: UseHoverActionItemsProps = {
     dataProvider: [{} as DataProvider],
     defaultFocusedButtonRef: null,
     field: 'signal.rule.name',
@@ -31,7 +31,7 @@ describe('useHoverActionItems', () => {
     toggleColumn: jest.fn(),
     toggleTopN: jest.fn(),
     values: ['rule name'],
-  } as unknown) as UseHoverActionItemsProps;
+  } as unknown as UseHoverActionItemsProps;
 
   beforeEach(() => {
     (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => {

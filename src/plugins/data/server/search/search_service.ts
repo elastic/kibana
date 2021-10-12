@@ -35,8 +35,8 @@ import type {
 import { AggsService } from './aggs';
 
 import { FieldFormatsStart } from '../../../field_formats/server';
-import { IndexPatternsServiceStart } from '../index_patterns';
 import { registerMsearchRoute, registerSearchRoute } from './routes';
+import { IndexPatternsServiceStart } from '../data_views';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
@@ -89,6 +89,7 @@ import { getKibanaContext } from './expressions/kibana_context';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
+import { CachedUiSettingsClient } from './services';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -458,7 +459,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         searchSessionsClient,
         savedObjectsClient,
         esClient: elasticsearch.client.asScoped(request),
-        uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
+        uiSettingsClient: new CachedUiSettingsClient(
+          uiSettings.asScopedToClient(savedObjectsClient)
+        ),
         request,
       };
       return {

@@ -56,7 +56,7 @@ export function createPluginInitializerContext(
     env: coreContext.env,
     config: {
       get<T>() {
-        return (pluginConfig as unknown) as T;
+        return pluginConfig as unknown as T;
       },
     },
   };

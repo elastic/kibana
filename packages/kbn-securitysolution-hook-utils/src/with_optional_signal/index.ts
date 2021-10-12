@@ -18,9 +18,9 @@ export type OptionalSignalArgs<Args> = Omit<Args, 'signal'> & Partial<SignalArgs
  *
  * @returns An async function where the AbortSignal argument is optional
  */
-export const withOptionalSignal = <Args extends SignalArgs, Result>(fn: (args: Args) => Result) => (
-  args: OptionalSignalArgs<Args>
-): Result => {
-  const signal = args.signal != null ? args.signal : new AbortController().signal;
-  return fn({ ...args, signal } as Args);
-};
+export const withOptionalSignal =
+  <Args extends SignalArgs, Result>(fn: (args: Args) => Result) =>
+  (args: OptionalSignalArgs<Args>): Result => {
+    const signal = args.signal != null ? args.signal : new AbortController().signal;
+    return fn({ ...args, signal } as Args);
+  };

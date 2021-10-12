@@ -32,7 +32,7 @@ import {
 import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
-import { DRAW_MODE } from '../../../common';
+import { DRAW_MODE } from '../../../common/constants';
 import { TileMetaFeature } from '../../../common/descriptor_types';
 import type { MapExtentState } from '../../reducers/map/types';
 

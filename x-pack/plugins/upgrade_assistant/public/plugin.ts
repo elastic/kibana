@@ -15,14 +15,11 @@ import { SetupDependencies, StartDependencies, AppDependencies } from './types';
 import { Config } from '../common/config';
 
 export class UpgradeAssistantUIPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   constructor(private ctx: PluginInitializerContext) {}
   setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud, share }: SetupDependencies) {
-    const { enabled, readonly } = this.ctx.config.get<Config>();
-
-    if (!enabled) {
-      return;
-    }
+    const { readonly } = this.ctx.config.get<Config>();
 
     const appRegistrar = management.sections.section.stack;
     const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
@@ -42,7 +39,7 @@ export class UpgradeAssistantUIPlugin
       title: pluginName,
       order: 1,
       async mount(params) {
-        const [coreStart, { data }] = await coreSetup.getStartServices();
+        const [coreStart, { data, ...plugins }] = await coreSetup.getStartServices();
 
         const {
           chrome: { docTitle },
@@ -56,6 +53,10 @@ export class UpgradeAssistantUIPlugin
           plugins: {
             cloud,
             share,
+            // Infra plugin doesnt export anything as a public interface. So the only
+            // way we have at this stage for checking if the plugin is available or not
+            // is by checking if the startServices has the `infra` key.
+            infra: plugins.hasOwnProperty('infra') ? {} : undefined,
           },
           services: {
             core: coreStart,

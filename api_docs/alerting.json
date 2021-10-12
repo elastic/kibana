@@ -25,7 +25,13 @@
             "text": "Alert"
           },
           "<never>, \"enabled\" | \"id\" | \"name\" | \"tags\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
-          "JsonObject"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.JsonObject",
+            "text": "JsonObject"
+          }
         ],
         "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
         "deprecated": false,
@@ -35,7 +41,7 @@
         "children": [
           {
             "parentPluginId": "alerting",
-            "id": "def-public.alert",
+            "id": "def-public.AlertNavigationHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "alert",
@@ -510,9 +516,21 @@
               ", filterOpts: ",
               "AlertingAuthorizationFilterOpts",
               ") => Promise<{ filter?: ",
-              "KueryNode",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.KueryNode",
+                "text": "KueryNode"
+              },
               " | ",
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; logSuccessfulAuthorization: () => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
@@ -590,9 +608,21 @@
                 "text": "WriteOperations"
               },
               ") => Promise<{ filter?: ",
-              "KueryNode",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.KueryNode",
+                "text": "KueryNode"
+              },
               " | ",
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; logSuccessfulAuthorization: () => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
@@ -1425,7 +1455,7 @@
             "children": [
               {
                 "parentPluginId": "alerting",
-                "id": "def-server.options",
+                "id": "def-server.AlertType.executor.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1535,6 +1565,19 @@
             "tags": [],
             "label": "isExportable",
             "description": [],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.AlertType.ruleTaskTimeout",
+            "type": "string",
+            "tags": [],
+            "label": "ruleTaskTimeout",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           }
@@ -3388,7 +3431,13 @@
             "label": "state",
             "description": [],
             "signature": [
-              "JsonObject"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              }
             ],
             "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
             "deprecated": false

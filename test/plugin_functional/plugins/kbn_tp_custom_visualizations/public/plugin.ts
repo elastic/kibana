@@ -21,7 +21,8 @@ export interface SetupDependencies {
 }
 
 export class CustomVisualizationsPublicPlugin
-  implements Plugin<CustomVisualizationsSetup, CustomVisualizationsStart> {
+  implements Plugin<CustomVisualizationsSetup, CustomVisualizationsStart>
+{
   public setup(core: CoreSetup, { expressions, visualizations }: SetupDependencies) {
     /**
      * Register an expression function with type "render" for your visualization

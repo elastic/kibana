@@ -29,6 +29,7 @@ start with:
 
 * <<services>>
 * <<traces>>
+* <<dependencies>>
 * <<service-maps>>
 
 Notice something awry? Select a service or trace and dive deeper with:
@@ -45,6 +46,8 @@ See the {apm-overview-ref-v}/overview.html[APM Overview].
 include::services.asciidoc[]
 
 include::traces.asciidoc[]
+
+include::dependencies.asciidoc[]
 
 include::service-maps.asciidoc[]
 

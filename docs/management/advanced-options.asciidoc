@@ -478,13 +478,6 @@ The default period of time in the Security time filter.
 [[kibana-timelion-settings]]
 ==== Timelion
 
-[horizontal]
-[[timelion-defaultcolumns]]`timelion:default_columns`::
-The default number of columns to use on a Timelion sheet.
-
-[[timelion-defaultrows]]`timelion:default_rows`::
-The default number of rows to use on a Timelion sheet.
-
 [[timelion-esdefaultindex]]`timelion:es.default_index`::
 The default index when using the `.es()` query.
 
@@ -509,9 +502,6 @@ The smallest interval to calculate when using "auto".
 experimental:[]
 Used with quandl queries, this is your API key from
 https://www.quandl.com/[www.quandl.com].
-
-[[timelion-showtutorial]]`timelion:showTutorial`::
-Shows the Timelion tutorial to users when they first open the Timelion app.
 
 [[timelion-targetbuckets]]`timelion:target_buckets`::
 Used for calculating automatic intervals in visualizations, this is the number

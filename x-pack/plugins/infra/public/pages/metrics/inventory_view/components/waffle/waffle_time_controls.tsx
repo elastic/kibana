@@ -17,13 +17,8 @@ interface Props {
 }
 
 export const WaffleTimeControls = withTheme(({ theme }: Props) => {
-  const {
-    currentTime,
-    isAutoReloading,
-    startAutoReload,
-    stopAutoReload,
-    jumpToTime,
-  } = useWaffleTimeContext();
+  const { currentTime, isAutoReloading, startAutoReload, stopAutoReload, jumpToTime } =
+    useWaffleTimeContext();
 
   const currentMoment = moment(currentTime);
 

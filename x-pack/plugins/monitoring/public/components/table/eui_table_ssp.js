@@ -20,10 +20,8 @@ export function EuiMonitoringSSPTable({
   onTableChange,
   setupMode,
   productName,
-  fetchMoreData,
   ...props
 }) {
-  const [isLoading, setIsLoading] = React.useState(false);
   const [queryText, setQueryText] = React.useState('');
   const [page, setPage] = React.useState({
     index: pagination.pageIndex,
@@ -72,19 +70,28 @@ export function EuiMonitoringSSPTable({
   const onChange = async ({ page, sort }) => {
     setPage(page);
     setSort({ sort });
-    setIsLoading(true);
-    await fetchMoreData({ page, sort: { sort }, queryText });
-    setIsLoading(false);
-    onTableChange({ page, sort });
+    // angular version
+    if (props.fetchMoreData) {
+      await props.fetchMoreData({ page, sort: { sort }, queryText });
+      onTableChange({ page, sort });
+    }
+    // react version
+    else {
+      onTableChange({ page, sort, queryText });
+    }
   };
 
   const onQueryChange = async ({ queryText }) => {
     const newPage = { ...page, index: 0 };
     setPage(newPage);
     setQueryText(queryText);
-    setIsLoading(true);
-    await fetchMoreData({ page: newPage, sort, queryText });
-    setIsLoading(false);
+    // angular version
+    if (props.fetchMoreData) {
+      await props.fetchMoreData({ page: newPage, sort, queryText });
+    } else {
+      // react version
+      onTableChange({ page, sort: sort.sort, queryText });
+    }
   };
 
   return (
@@ -97,7 +104,6 @@ export function EuiMonitoringSSPTable({
         items={items}
         pagination={pagination}
         onChange={onChange}
-        loading={isLoading}
         columns={columns}
       />
       {footerContent}

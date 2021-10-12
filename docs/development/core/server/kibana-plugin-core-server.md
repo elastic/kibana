@@ -19,6 +19,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [BasePath](./kibana-plugin-core-server.basepath.md) | Access or manipulate the Kibana base path |
 |  [CspConfig](./kibana-plugin-core-server.cspconfig.md) | CSP configuration for use in Kibana. |
 |  [ElasticsearchConfig](./kibana-plugin-core-server.elasticsearchconfig.md) | Wrapper of config schema. |
+|  [EventLoopDelaysMonitor](./kibana-plugin-core-server.eventloopdelaysmonitor.md) |  |
 |  [KibanaRequest](./kibana-plugin-core-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
 |  [RouteValidationError](./kibana-plugin-core-server.routevalidationerror.md) | Error to return when the validation is not successful. |
 |  [SavedObjectsClient](./kibana-plugin-core-server.savedobjectsclient.md) |  |
@@ -97,6 +98,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IExternalUrlPolicy](./kibana-plugin-core-server.iexternalurlpolicy.md) | A policy describing whether access to an external destination is allowed. |
 |  [IKibanaResponse](./kibana-plugin-core-server.ikibanaresponse.md) | A response data object, expected to returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution |
 |  [IKibanaSocket](./kibana-plugin-core-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
+|  [IntervalHistogram](./kibana-plugin-core-server.intervalhistogram.md) | an IntervalHistogram object that samples and reports the event loop delay over time. The delays will be reported in nanoseconds. |
 |  [IRenderOptions](./kibana-plugin-core-server.irenderoptions.md) |  |
 |  [IRouter](./kibana-plugin-core-server.irouter.md) | Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-core-server.routeconfig.md) and [RequestHandler](./kibana-plugin-core-server.requesthandler.md) for more information about arguments to route registrations. |
 |  [ISavedObjectsPointInTimeFinder](./kibana-plugin-core-server.isavedobjectspointintimefinder.md) |  |
@@ -144,6 +146,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBaseOptions](./kibana-plugin-core-server.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-core-server.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkGetObject](./kibana-plugin-core-server.savedobjectsbulkgetobject.md) |  |
+|  [SavedObjectsBulkResolveObject](./kibana-plugin-core-server.savedobjectsbulkresolveobject.md) |  |
+|  [SavedObjectsBulkResolveResponse](./kibana-plugin-core-server.savedobjectsbulkresolveresponse.md) |  |
 |  [SavedObjectsBulkResponse](./kibana-plugin-core-server.savedobjectsbulkresponse.md) |  |
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-core-server.savedobjectsbulkupdateobject.md) |  |
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-server.savedobjectsbulkupdateoptions.md) |  |

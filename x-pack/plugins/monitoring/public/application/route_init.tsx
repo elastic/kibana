@@ -7,12 +7,15 @@
 import React, { useContext } from 'react';
 import { Route, Redirect, useLocation } from 'react-router-dom';
 import { useClusters } from './hooks/use_clusters';
-import { GlobalStateContext } from './global_state_context';
+import { GlobalStateContext } from './contexts/global_state_context';
 import { getClusterFromClusters } from '../lib/get_cluster_from_clusters';
 
+export interface ComponentProps {
+  clusters: [];
+}
 interface RouteInitProps {
   path: string;
-  component: React.ComponentType;
+  component: React.ComponentType<ComponentProps>;
   codePaths: string[];
   fetchAllClusters: boolean;
   unsetGlobalState?: boolean;
@@ -58,7 +61,12 @@ export const RouteInit: React.FC<RouteInitProps> = ({
     }
   }
 
-  return loaded ? <Route path={path} component={component} /> : null;
+  const Component = component;
+  return loaded ? (
+    <Route path={path}>
+      <Component clusters={clusters} />
+    </Route>
+  ) : null;
 };
 
 const isExpired = (license: any): boolean => {

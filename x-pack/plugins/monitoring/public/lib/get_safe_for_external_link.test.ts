@@ -31,8 +31,7 @@ describe('getSafeForExternalLink', () => {
 
   it('should work with existing query string', async () => {
     const location = {
-      hash:
-        '#/overview?_g=(cluster_uuid:ae2womLaSMmZBioEQ9wFjw,refreshInterval:(pause:!t,value:10000),time:(from:now-1h,to:now))',
+      hash: '#/overview?_g=(cluster_uuid:ae2womLaSMmZBioEQ9wFjw,refreshInterval:(pause:!t,value:10000),time:(from:now-1h,to:now))',
     };
     expect(getSafeForExternalLink('#/overview', {}, location)).toBe(
       '#/overview?_g=(cluster_uuid:ae2womLaSMmZBioEQ9wFjw,refreshInterval:(pause:!t,value:10000),time:(from:now-1h,to:now))'

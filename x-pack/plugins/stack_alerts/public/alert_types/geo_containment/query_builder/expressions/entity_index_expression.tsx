@@ -20,8 +20,8 @@ import { ES_GEO_FIELD_TYPES } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IFieldType } from '../../../../../../../../src/plugins/data/common';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
   dateField: string;

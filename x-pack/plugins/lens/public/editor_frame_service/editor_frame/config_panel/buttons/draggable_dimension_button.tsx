@@ -116,10 +116,10 @@ export function DraggableDimensionButton({
     [group.accessors]
   );
 
-  const registerNewButtonRefMemoized = useCallback((el) => registerNewButtonRef(columnId, el), [
-    registerNewButtonRef,
-    columnId,
-  ]);
+  const registerNewButtonRefMemoized = useCallback(
+    (el) => registerNewButtonRef(columnId, el),
+    [registerNewButtonRef, columnId]
+  );
 
   const handleOnDrop = useCallback(
     (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),

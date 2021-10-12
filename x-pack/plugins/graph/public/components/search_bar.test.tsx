@@ -77,7 +77,7 @@ describe('search_bar', () => {
   const defaultProps = {
     isLoading: false,
     indexPatternProvider: {
-      get: jest.fn(() => Promise.resolve(({ fields: [] } as unknown) as IndexPattern)),
+      get: jest.fn(() => Promise.resolve({ fields: [] } as unknown as IndexPattern)),
     },
     confirmWipeWorkspace: (callback: () => void) => {
       callback();
@@ -169,9 +169,9 @@ describe('search_bar', () => {
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    (instance
-      .find(QueryStringInput)
-      .prop('prepend') as ReactElement).props.children.props.onClick();
+    (
+      instance.find(QueryStringInput).prop('prepend') as ReactElement
+    ).props.children.props.onClick();
 
     expect(openSourceModal).toHaveBeenCalled();
   });

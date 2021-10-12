@@ -211,10 +211,10 @@ export function FieldSelect({
         placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
           defaultMessage: 'Field',
         })}
-        options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
+        options={memoizedFieldOptions as unknown as EuiComboBoxOptionOption[]}
         isInvalid={Boolean(incompleteOperation || fieldIsInvalid)}
         selectedOptions={
-          ((selectedOperationType && selectedField
+          (selectedOperationType && selectedField
             ? [
                 {
                   label: fieldIsInvalid
@@ -223,7 +223,7 @@ export function FieldSelect({
                   value: { type: 'field', field: selectedField },
                 },
               ]
-            : []) as unknown) as EuiComboBoxOptionOption[]
+            : []) as unknown as EuiComboBoxOptionOption[]
         }
         singleSelection={{ asPlainText: true }}
         onChange={(choices) => {
@@ -232,7 +232,7 @@ export function FieldSelect({
             return;
           }
 
-          const choice = (choices[0].value as unknown) as FieldChoice;
+          const choice = choices[0].value as unknown as FieldChoice;
 
           if (choice.field !== selectedField) {
             trackUiEvent('indexpattern_dimension_field_changed');
@@ -244,7 +244,7 @@ export function FieldSelect({
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={null}>
                 <LensFieldIcon
-                  type={((option.value as unknown) as { dataType: DataType }).dataType}
+                  type={(option.value as unknown as { dataType: DataType }).dataType}
                   fill="none"
                 />
               </EuiFlexItem>

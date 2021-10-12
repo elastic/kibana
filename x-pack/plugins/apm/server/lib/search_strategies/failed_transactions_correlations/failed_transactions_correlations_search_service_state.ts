@@ -7,11 +7,16 @@
 
 import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 
+import type { HistogramItem } from '../../../../common/search_strategies/types';
+
 interface Progress {
   started: number;
   loadedFieldCandidates: number;
+  loadedErrorCorrelations: number;
+  loadedOverallHistogram: number;
   loadedFailedTransactionsCorrelations: number;
 }
+
 export const failedTransactionsCorrelationsSearchServiceStateProvider = () => {
   let ccsWarning = false;
   function setCcsWarning(d: boolean) {
@@ -33,9 +38,26 @@ export const failedTransactionsCorrelationsSearchServiceStateProvider = () => {
     isRunning = d;
   }
 
+  let errorHistogram: HistogramItem[] | undefined;
+  function setErrorHistogram(d: HistogramItem[]) {
+    errorHistogram = d;
+  }
+
+  let overallHistogram: HistogramItem[] | undefined;
+  function setOverallHistogram(d: HistogramItem[]) {
+    overallHistogram = d;
+  }
+
+  let percentileThresholdValue: number;
+  function setPercentileThresholdValue(d: number) {
+    percentileThresholdValue = d;
+  }
+
   let progress: Progress = {
     started: Date.now(),
     loadedFieldCandidates: 0,
+    loadedErrorCorrelations: 0,
+    loadedOverallHistogram: 0,
     loadedFailedTransactionsCorrelations: 0,
   };
   function getOverallProgress() {
@@ -71,6 +93,9 @@ export const failedTransactionsCorrelationsSearchServiceStateProvider = () => {
       error,
       isCancelled,
       isRunning,
+      overallHistogram,
+      errorHistogram,
+      percentileThresholdValue,
       progress,
       failedTransactionsCorrelations,
     };
@@ -86,6 +111,9 @@ export const failedTransactionsCorrelationsSearchServiceStateProvider = () => {
     setError,
     setIsCancelled,
     setIsRunning,
+    setOverallHistogram,
+    setErrorHistogram,
+    setPercentileThresholdValue,
     setProgress,
   };
 };

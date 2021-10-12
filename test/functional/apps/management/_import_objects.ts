@@ -211,7 +211,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('.json file', () => {
+    // https://github.com/elastic/kibana/issues/114053
+    describe.skip('.json file', () => {
       beforeEach(async function () {
         await esArchiver.load('test/functional/fixtures/es_archiver/saved_objects_imports');
         await kibanaServer.uiSettings.replace({});

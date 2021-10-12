@@ -105,18 +105,19 @@ export const ActionForm = ({
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [emptyActionsIds, setEmptyActionsIds] = useState<string[]>([]);
 
-  const closeAddConnectorModal = useCallback(() => setAddModalVisibility(false), [
-    setAddModalVisibility,
-  ]);
+  const closeAddConnectorModal = useCallback(
+    () => setAddModalVisibility(false),
+    [setAddModalVisibility]
+  );
 
   // load action types
   useEffect(() => {
     (async () => {
       try {
         setIsLoadingActionTypes(true);
-        const registeredActionTypes = (
-          actionTypes ?? (await loadActionTypes({ http }))
-        ).sort((a, b) => a.name.localeCompare(b.name));
+        const registeredActionTypes = (actionTypes ?? (await loadActionTypes({ http }))).sort(
+          (a, b) => a.name.localeCompare(b.name)
+        );
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of registeredActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;

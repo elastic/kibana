@@ -22,9 +22,13 @@ jest.mock('../../../../public/application/lib/logs_checkpoint', () => {
 });
 
 import { DeprecationLoggingStatus } from '../../../../common/types';
-import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../common/constants';
-import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
+import { setupEnvironment, advanceTime } from '../../helpers';
+import {
+  DEPRECATION_LOGS_INDEX,
+  DEPRECATION_LOGS_SOURCE_ID,
+  DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
+} from '../../../../common/constants';
 
 const getLoggingResponse = (toggle: boolean): DeprecationLoggingStatus => ({
   isDeprecationLogIndexingEnabled: toggle,
@@ -49,11 +53,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
   describe('Step status', () => {
     test(`It's complete when there are no deprecation logs since last checkpoint`, async () => {
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
-
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
-        count: 0,
-      });
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
 
       await act(async () => {
         testBed = await setupOverviewPage();
@@ -67,11 +67,7 @@ describe('Overview - Fix deprecation logs step', () => {
     });
 
     test(`It's incomplete when there are deprecation logs since last checkpoint`, async () => {
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
-
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
-        count: 5,
-      });
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 5 });
 
       await act(async () => {
         testBed = await setupOverviewPage();
@@ -80,6 +76,26 @@ describe('Overview - Fix deprecation logs step', () => {
       const { exists, component } = testBed;
 
       component.update();
+
+      expect(exists(`fixLogsStep-incomplete`)).toBe(true);
+    });
+
+    test(`It's incomplete when log collection is disabled `, async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { actions, exists, component } = testBed;
+
+      component.update();
+
+      expect(exists(`fixLogsStep-complete`)).toBe(true);
+
+      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(false));
+
+      await actions.clickDeprecationToggle();
 
       expect(exists(`fixLogsStep-incomplete`)).toBe(true);
     });
@@ -169,6 +185,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
       expect(exists('externalLinksTitle')).toBe(false);
       expect(exists('deprecationsCountTitle')).toBe(false);
+      expect(exists('apiCompatibilityNoteTitle')).toBe(false);
     });
   });
 
@@ -185,6 +202,9 @@ describe('Overview - Fix deprecation logs step', () => {
               prepend: (url: string) => url,
             },
           },
+          plugins: {
+            infra: {},
+          },
         });
       });
 
@@ -196,6 +216,14 @@ describe('Overview - Fix deprecation logs step', () => {
       expect(find('viewObserveLogs').props().href).toBe(
         `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}&logPosition=(end:now,start:'${MOCKED_TIME}')`
       );
+    });
+
+    test(`Doesn't show observability app link if infra app is not available`, async () => {
+      const { component, exists } = testBed;
+
+      component.update();
+
+      expect(exists('viewObserveLogs')).toBe(false);
     });
 
     test('Has a link to see logs in discover app', async () => {
@@ -220,6 +248,7 @@ describe('Overview - Fix deprecation logs step', () => {
   describe('Step 3 - Resolve log issues', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
+      httpRequestsMockHelpers.setDeleteLogsCacheResponse('ok');
     });
 
     test('With deprecation warnings', async () => {
@@ -307,6 +336,138 @@ describe('Overview - Fix deprecation logs step', () => {
       await actions.clickResetButton();
 
       expect(exists('noWarningsCallout')).toBe(true);
+    });
+
+    test('Shows a toast if deleting cache fails', async () => {
+      const error = {
+        statusCode: 500,
+        error: 'Internal server error',
+        message: 'Internal server error',
+      };
+
+      httpRequestsMockHelpers.setDeleteLogsCacheResponse(undefined, error);
+      // Initially we want to have the callout to have a warning state
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 10 });
+
+      const addDanger = jest.fn();
+      await act(async () => {
+        testBed = await setupOverviewPage({
+          services: {
+            core: {
+              notifications: {
+                toasts: {
+                  addDanger,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      const { exists, actions, component } = testBed;
+
+      component.update();
+
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
+
+      await actions.clickResetButton();
+
+      // The toast should always be shown if the delete logs cache fails.
+      expect(addDanger).toHaveBeenCalled();
+      // Even though we changed the response of the getLogsCountResponse, when the
+      // deleteLogsCache fails the getLogsCount api should not be called and the
+      // status of the callout should remain the same it initially was.
+      expect(exists('hasWarningsCallout')).toBe(true);
+    });
+
+    describe('Poll for logs count', () => {
+      beforeEach(async () => {
+        jest.useFakeTimers();
+
+        // First request should make the step be complete
+        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+          count: 0,
+        });
+
+        testBed = await setupOverviewPage();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      test('renders step as incomplete when a success state is followed by an error state', async () => {
+        const { exists } = testBed;
+
+        expect(exists('fixLogsStep-complete')).toBe(true);
+
+        // second request will error
+        const error = {
+          statusCode: 500,
+          error: 'Internal server error',
+          message: 'Internal server error',
+        };
+        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(undefined, error);
+
+        // Resolve the polling timeout.
+        await advanceTime(DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS);
+        testBed.component.update();
+
+        expect(exists('fixLogsStep-incomplete')).toBe(true);
+      });
+    });
+  });
+
+  describe('Step 4 - API compatibility header', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
+    });
+
+    test('It shows copy with compatibility api header advice', async () => {
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { exists, component } = testBed;
+
+      component.update();
+
+      expect(exists('apiCompatibilityNoteTitle')).toBe(true);
+    });
+  });
+
+  describe('Privileges check', () => {
+    test(`permissions warning callout is hidden if user has the right privileges`, async () => {
+      const { exists } = testBed;
+
+      // Index privileges warning callout should not be shown
+      expect(exists('noIndexPermissionsCallout')).toBe(false);
+      // Analyze logs and Resolve logs sections should be shown
+      expect(exists('externalLinksTitle')).toBe(true);
+      expect(exists('deprecationsCountTitle')).toBe(true);
+    });
+
+    test(`doesn't show analyze and resolve logs if it doesn't have the right privileges`, async () => {
+      await act(async () => {
+        testBed = await setupOverviewPage({
+          privileges: {
+            hasAllPrivileges: false,
+            missingPrivileges: {
+              index: [DEPRECATION_LOGS_INDEX],
+            },
+          },
+        });
+      });
+
+      const { exists, component } = testBed;
+
+      component.update();
+
+      // No index privileges warning callout should be shown
+      expect(exists('noIndexPermissionsCallout')).toBe(true);
+      // Analyze logs and Resolve logs sections should be hidden
+      expect(exists('externalLinksTitle')).toBe(false);
+      expect(exists('deprecationsCountTitle')).toBe(false);
     });
   });
 });

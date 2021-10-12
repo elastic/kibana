@@ -14,11 +14,20 @@ export {
   UseRequestResponse,
   SectionLoading,
   GlobalFlyout,
+  WithPrivileges,
+  Privileges,
+  MissingPrivileges,
+  AuthorizationProvider,
+  AuthorizationContext,
+  Authorization,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
 export { Storage } from '../../../../src/plugins/kibana_utils/public';
 
-export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+export {
+  KibanaContextProvider,
+  reactRouterNavigate,
+} from '../../../../src/plugins/kibana_react/public';
 
 export { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
