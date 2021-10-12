@@ -9,49 +9,11 @@
 export const PLUGIN_ID = 'customIntegrations';
 export const PLUGIN_NAME = 'customIntegrations';
 
-export interface IntegrationCategoryCount {
-  count: number;
-  id: IntegrationCategory;
-}
-
-export const category = [
-  'aws',
-  'azure',
-  'cloud',
-  'config_management',
-  'containers',
-  'crm',
-  'custom',
-  'datastore',
-  'elastic_stack',
-  'google_cloud',
-  'kubernetes',
-  'languages',
-  'message_queue',
-  'monitoring',
-  'network',
-  'notification',
-  'os_system',
-  'productivity',
-  'security',
-  'sample_data',
-  'support',
-  'ticketing',
-  'version_control',
-  'web',
-
-  // Kibana added
-  'language_client',
-  'upload_file',
-
-  // Internal
-  'updates_available',
-] as const;
-
-export type IntegrationCategory = typeof category[number];
-
+/**
+ * A map of category names and their corresponding titles.
+ */
 // TODO: consider i18n
-export const INTEGRATION_CATEGORY_DISPLAY: { [K in IntegrationCategory]: string } = {
+export const INTEGRATION_CATEGORY_DISPLAY = {
   aws: 'AWS',
   azure: 'Azure',
   cloud: 'Cloud',
@@ -85,26 +47,10 @@ export const INTEGRATION_CATEGORY_DISPLAY: { [K in IntegrationCategory]: string 
   updates_available: 'Updates available',
 };
 
-export const shipper = [
-  'beats',
-  'language_clients',
-  'other',
-  'sample_data',
-  'tests',
-  'tutorial',
-] as const;
-
-export type Shipper = typeof shipper[number];
-
-// TODO: consider i18n
-export const SHIPPER_DISPLAY: { [K in Shipper]: string } = {
-  beats: 'Beats',
-  language_clients: 'Language clients',
-  other: 'Other',
-  sample_data: 'Sample data',
-  tests: 'Tests',
-  tutorial: 'Tutorials',
-};
+/**
+ * A category applicable to an Integration.
+ */
+export type IntegrationCategory = keyof typeof INTEGRATION_CATEGORY_DISPLAY;
 
 /**
  * The list of all available categories.
