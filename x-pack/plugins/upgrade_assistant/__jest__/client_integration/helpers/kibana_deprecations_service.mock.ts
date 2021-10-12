@@ -34,6 +34,17 @@ const kibanaDeprecations: DomainDeprecationDetails[] = [
     message: 'Test deprecation message 2',
     deprecationType: 'feature',
   },
+  {
+    correctiveActions: {
+      // Has no manual steps.
+      manualSteps: [],
+    },
+    domainId: 'test_domain_3',
+    level: 'warning',
+    title: 'Test deprecation title 3',
+    message: 'Test deprecation message 3',
+    deprecationType: 'feature',
+  },
 ];
 
 const setLoadDeprecations = ({
