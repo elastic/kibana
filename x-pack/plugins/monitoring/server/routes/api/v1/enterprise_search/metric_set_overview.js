@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export const metricSet = ['app_search_total_engines'];
+export const metricSet = [
+  'app_search_total_engines',
+  'workplace_search_total_org_sources',
+  'workplace_search_total_private_sources',
+];

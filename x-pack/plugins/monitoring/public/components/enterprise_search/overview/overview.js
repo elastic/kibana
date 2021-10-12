@@ -23,7 +23,11 @@ import { Status } from './status';
 export class EnterpriseSearchOverview extends PureComponent {
   render() {
     const { metrics, stats, ...props } = this.props;
-    const metricsToShow = [metrics.app_search_total_engines];
+    const productUsageMetrics = [
+      metrics.app_search_total_engines,
+      metrics.workplace_search_total_org_sources,
+      metrics.workplace_search_total_private_sources,
+    ];
 
     return (
       <EuiPage>
@@ -44,9 +48,18 @@ export class EnterpriseSearchOverview extends PureComponent {
           <EuiSpacer size="m" />
 
           <EuiPageContent>
+            <EuiScreenReaderOnly>
+              <h1>
+                <FormattedMessage
+                  id="xpack.monitoring.entSearch.overview.productUsage"
+                  defaultMessage="Product Usage Summary"
+                />
+              </h1>
+            </EuiScreenReaderOnly>
             <EuiFlexGrid columns={2} gutterSize="s">
-              {metricsToShow.map((metric, index) => (
+              {productUsageMetrics.map((metric, index) => (
                 <EuiFlexItem key={index}>
+                  {/* FIXME: Figure out if we can limit the values on the graph to positive only */}
                   <MonitoringTimeseriesContainer series={metric} {...props} />
                   <EuiSpacer />
                 </EuiFlexItem>

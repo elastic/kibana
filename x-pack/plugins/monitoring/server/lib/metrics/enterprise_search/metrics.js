@@ -23,7 +23,41 @@ export const metrics = {
       }
     ),
     format: SMALL_FLOAT,
-    units: 'engines',
+    units: '',
+    metricAgg: 'avg',
+  }),
+
+  workplace_search_total_org_sources: new EnterpriseSearchMetric({
+    field: 'enterprisesearch.stats.product_usage.workplace_search.total_org_sources',
+    label: i18n.translate('xpack.monitoring.metrics.entSearch.workplace_search_org_sources', {
+      defaultMessage: 'Workpace Search Org Sources',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.entSearch.workplace_search_org_sources.description',
+      {
+        defaultMessage:
+          'Current number of Workplace Search org-wide content sources within the Enterprise Search deployment.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    units: '',
+    metricAgg: 'avg',
+  }),
+
+  workplace_search_total_private_sources: new EnterpriseSearchMetric({
+    field: 'enterprisesearch.stats.product_usage.workplace_search.total_private_sources',
+    label: i18n.translate('xpack.monitoring.metrics.entSearch.workplace_search_private_sources', {
+      defaultMessage: 'Workpace Search Private Sources',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.entSearch.workplace_search_private_sources.description',
+      {
+        defaultMessage:
+          'Current number of Workplace Search private content sources within the Enterprise Search deployment.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    units: '',
     metricAgg: 'avg',
   }),
 
