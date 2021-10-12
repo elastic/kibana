@@ -12,7 +12,7 @@ export const getCloud = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
     isCloudEnabled,
     baseUrl: 'https://base.url',
     cloudId: 'cloud-id',
-    cname: 'cname',
+    cname: 'found.io',
     deploymentUrl: 'https://deployment.url',
     organizationUrl: 'https://organization.url',
     profileUrl: 'https://profile.url',

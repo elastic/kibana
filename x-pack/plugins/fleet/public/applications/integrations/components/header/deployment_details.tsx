@@ -14,15 +14,31 @@ import { DeploymentDetails as Component } from './deployment_details.component';
 export const DeploymentDetails = () => {
   const { share, cloud, docLinks } = useStartServices();
 
-  if (!cloud || !cloud?.isCloudEnabled || !cloud?.cloudId) {
+  // If the cloud plugin isn't enabled, we can't display the flyout.
+  if (!cloud) {
     return null;
   }
 
-  const { cloudId } = cloud;
+  const { isCloudEnabled, cloudId, cname } = cloud;
 
-  // TODO: This is a temporary workaround for the fact that I don't know
-  // the best place to get this URL.
-  const endpointUrl = '#get-this-from-fleet-team?';
+  // If cloud isn't enabled, we don't have a cloudId or a cname, we can't display the flyout.
+  if (!isCloudEnabled || !cloudId || !cname) {
+    return null;
+  }
+
+  // If the cname doesn't start with a known prefix, we can't display the flyout.
+  // TODO: dover - this is a short term solution, see https://github.com/elastic/kibana/pull/114287#issuecomment-940111026
+  if (
+    !(
+      cname.endsWith('elastic-cloud.com') ||
+      cname.endsWith('found.io') ||
+      cname.endsWith('found.no')
+    )
+  ) {
+    return null;
+  }
+
+  const endpointUrl = `https://${cloudId}.${cname}`;
 
   const managementUrl = share.url.locators
     .get('MANAGEMENT_APP_LOCATOR')
