@@ -527,8 +527,8 @@ export const SOURCE_OVERVIEW_TITLE = i18n.translate(
   }
 );
 
-export const SOURCE_SYNCRONIZATION_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationDescription',
+export const SOURCE_SYNCHRONIZATION_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationDescription',
   {
     defaultMessage:
       'Synchronization provides control over data being indexed from the content source. Enable synchronization of data from the content source to Workplace Search.',
@@ -558,24 +558,24 @@ export const SOURCE_OBJECTS_AND_ASSETS_LABEL = i18n.translate(
   }
 );
 
-export const SOURCE_SYNCRONIZATION_TOGGLE_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationToggleLabel',
+export const SOURCE_SYNCHRONIZATION_TOGGLE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationToggleLabel',
   {
     defaultMessage: 'Synchronize this source',
   }
 );
 
-export const SOURCE_SYNCRONIZATION_TOGGLE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationToggleDescription',
+export const SOURCE_SYNCHRONIZATION_TOGGLE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationToggleDescription',
   {
     defaultMessage: 'Source content will automatically be kept in sync.',
   }
 );
 
-export const SOURCE_SYNCRONIZATION_FREQUENCY_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationFrequencyTitle',
+export const SOURCE_SYNCHRONIZATION_FREQUENCY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationFrequencyTitle',
   {
-    defaultMessage: 'Syncronization frequency',
+    defaultMessage: 'Synchronization frequency',
   }
 );
 
