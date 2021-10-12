@@ -46,9 +46,12 @@ export const useWorkpad = (
           workpad.aliasId = aliasId;
         }
 
-        dispatch(setAssets(assets));
-        dispatch(setWorkpad(workpad, { loadPages }));
-        dispatch(setZoomScale(1));
+        // Only reload workpad and assets if we're on a new workpad
+        if (storedWorkpad.id !== workpadId) {
+          dispatch(setAssets(assets));
+          dispatch(setWorkpad(workpad, { loadPages }));
+          dispatch(setZoomScale(1));
+        }
 
         if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
           platformService.redirectLegacyUrl(`#${getRedirectPath(aliasId)}`, getWorkpadLabel());
@@ -57,7 +60,16 @@ export const useWorkpad = (
         setError(e as Error | string);
       }
     })();
-  }, [workpadId, dispatch, setError, loadPages, workpadService, getRedirectPath, platformService]);
+  }, [
+    workpadId,
+    dispatch,
+    setError,
+    loadPages,
+    workpadService,
+    storedWorkpad,
+    getRedirectPath,
+    platformService,
+  ]);
 
   return [storedWorkpad.id === workpadId ? storedWorkpad : undefined, error];
 };
