@@ -71,6 +71,8 @@ describe('IndexActionConnectorFields renders', () => {
       editActionSecrets: () => {},
       errors: { index: [] },
       readOnly: false,
+      setCallbacks: () => {},
+      isEdit: false,
     };
     const wrapper = mountWithIntl(<IndexActionConnectorFields {...props} />);
 
