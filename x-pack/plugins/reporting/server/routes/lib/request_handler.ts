@@ -72,6 +72,7 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} is not an async job type!`);
     }
 
+    // 1. ensure the incoming params have a version field
     const jobParams = {
       ...jobParamsRaw,
       version: checkParamsVersion(jobParamsRaw, logger), // ensure job params are versioned
@@ -84,14 +85,14 @@ export class RequestHandler {
     const { reporting, logger, context, req, user } = this;
     const { exportType, createJob, jobParams } = this.setupRequest(exportTypeId, jobParamsRaw);
 
-    // 1. encrypt request headers for the running report job to authenticate itself with Kibana
-    // 2. call the export type's createJobFn to create the job payload
+    // 2. encrypt request headers for the running report job to authenticate itself with Kibana
+    // 3. call the export type's createJobFn to create the job payload
     const [headers, job] = await Promise.all([
       this.encryptHeaders(),
       createJob(jobParams, context),
     ]);
 
-    // 3. Add the report to ReportingStore to show as pending
+    // 4. Add the report to ReportingStore to show as pending
     const store = await reporting.getStore();
     const report = await store.addReport(
       new Report({
@@ -112,7 +113,7 @@ export class RequestHandler {
     );
     logger.debug(`Successfully stored pending job: ${report._index}/${report._id}`);
 
-    // 4. Schedule the report with Task Manager
+    // 5. Schedule the report with Task Manager
     const task = await reporting.scheduleTask(report.toReportTaskJSON());
     logger.info(
       `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`

@@ -19,7 +19,7 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
   const { router } = setupDeps;
 
   /*
-   * List the user's schedules
+   * List of schedules
    */
   router.get(
     {
@@ -28,7 +28,7 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
         query: schema.object({}),
       },
     },
-    authorizedUserPreRouting(reporting, async (user, context, _req, res) => {
+    authorizedUserPreRouting(reporting, async (_user, context, _req, res) => {
       if (!context.reporting) {
         return handleUnavailable(res);
       }
@@ -37,16 +37,17 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
       // `report:execute` that were created by the current user.
       const { taskManager } = await reporting.getPluginStartDeps();
       const { docs } = await taskManager.fetch({
+        // FIXME: implement paging
         size: 100,
         query: {
           constant_score: {
             filter: {
               bool: {
                 must: [
+                  // TODO: filter on the username when security is enabled
                   { term: { 'task.scope': SCHEDULED_REPORTS_SCOPE } },
                   { term: { 'task.taskType': 'report:execute' } },
-                  ...[user ? { term: { 'task.user': user.username } } : undefined],
-                ].filter(Boolean) as unknown as QueryDslQueryContainer[],
+                ] as unknown as QueryDslQueryContainer[],
               },
             },
           },
@@ -71,7 +72,7 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
   );
 
   /*
-   * Delete a user's schedule
+   * Delete a schedule
    */
   router.delete(
     {
@@ -82,7 +83,7 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
         }),
       },
     },
-    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (_user, context, req, res) => {
       if (!context.reporting) {
         return handleUnavailable(res);
       }
@@ -97,9 +98,9 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
             filter: {
               bool: {
                 must: [
+                  // TODO: filter on the username when security is enabled
                   { term: { 'task.scope': SCHEDULED_REPORTS_SCOPE } },
                   { term: { 'task.taskType': 'report:execute' } },
-                  { term: { 'task.user': user ? user.username : user } },
                   { term: { _id: `task:${scheduleId}` } },
                 ],
               },
