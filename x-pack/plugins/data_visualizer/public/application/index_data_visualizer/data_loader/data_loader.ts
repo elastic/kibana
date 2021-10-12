@@ -19,6 +19,7 @@ type SavedSearchQuery = Record<string, any> | null | undefined;
 
 const MAX_EXAMPLES_DEFAULT: number = 10;
 
+// @TODO: remove
 export class DataLoader {
   private _indexPattern: IndexPattern;
   private _runtimeMappings: estypes.MappingRuntimeFields;

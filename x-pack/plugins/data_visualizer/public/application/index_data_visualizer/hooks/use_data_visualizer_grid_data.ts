@@ -14,7 +14,6 @@ import { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
 import { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
-import { DataLoader } from '../data_loader/data_loader';
 import { useTimefilter } from './use_time_filter';
 import { dataVisualizerRefresh$ } from '../services/timefilter_refresh_service';
 import { TimeBuckets } from '../../../../common/services/time_buckets';
@@ -40,13 +39,16 @@ import { OverallStatsSearchStrategyParams } from '../../../../common/search_stra
 
 const defaults = getDefaultPageState();
 
+function isDisplayField(fieldName: string): boolean {
+  return !OMIT_FIELDS.includes(fieldName);
+}
+
 export const useDataVisualizerGridData = (
   input: DataVisualizerGridEmbeddableInput,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>
 ) => {
   const { services } = useDataVisualizerKibana();
-  const { notifications, uiSettings, data } = services;
-  const { toasts } = notifications;
+  const { uiSettings, data } = services;
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
   const [lastRefresh, setLastRefresh] = useState(0);
@@ -67,10 +69,6 @@ export const useDataVisualizerGridData = (
       currentFilters: input?.filters,
     }),
     [input]
-  );
-  const dataLoader = useMemo(
-    () => new DataLoader(currentIndexPattern, toasts),
-    [currentIndexPattern, toasts]
   );
 
   /** Prepare required params to pass to search strategy **/
@@ -218,6 +216,7 @@ export const useDataVisualizerGridData = (
     });
     return { metricConfigs: existMetricFields, nonMetricConfigs: existNonMetricFields };
   }, [metricConfigs, nonMetricConfigs]);
+
   const overallStats = useOverallStats(fieldStatsRequest);
   const strategyResponse = useFieldStatsSearchStrategy(fieldStatsRequest, configsWithoutStats);
 
@@ -246,7 +245,7 @@ export const useDataVisualizerGridData = (
       return (
         f.type === KBN_FIELD_TYPES.NUMBER &&
         f.displayName !== undefined &&
-        dataLoader.isDisplayField(f.displayName) === true
+        isDisplayField(f.displayName) === true
       );
     });
     const metricExistsFields = allMetricFields.filter((f) => {
@@ -304,21 +303,14 @@ export const useDataVisualizerGridData = (
       visibleMetricsCount: metricFieldsToShow.length,
     });
     setMetricConfigs(configs);
-  }, [
-    currentIndexPattern,
-    dataLoader,
-    indexPatternFields,
-    metricsLoaded,
-    overallStats,
-    showEmptyFields,
-  ]);
+  }, [currentIndexPattern, indexPatternFields, metricsLoaded, overallStats, showEmptyFields]);
 
   const createNonMetricCards = useCallback(() => {
     const allNonMetricFields = indexPatternFields.filter((f) => {
       return (
         f.type !== KBN_FIELD_TYPES.NUMBER &&
         f.displayName !== undefined &&
-        dataLoader.isDisplayField(f.displayName) === true
+        isDisplayField(f.displayName) === true
       );
     });
     // Obtain the list of all non-metric fields which appear in documents
@@ -397,14 +389,7 @@ export const useDataVisualizerGridData = (
     });
 
     setNonMetricConfigs(configs);
-  }, [
-    currentIndexPattern,
-    dataLoader,
-    indexPatternFields,
-    nonMetricsLoaded,
-    overallStats,
-    showEmptyFields,
-  ]);
+  }, [currentIndexPattern, indexPatternFields, nonMetricsLoaded, overallStats, showEmptyFields]);
 
   useEffect(() => {
     createMetricCards();
