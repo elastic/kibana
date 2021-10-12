@@ -97,6 +97,7 @@ const cellActionLink = [
               onClick={closePopover}
             />
           ) : (
+            // data grid expects each cell action always return an element, it crashes if returns null
             <></>
           );
         }
@@ -110,6 +111,7 @@ export const cellActions: TGridCellAction[] = [
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
+        // data grid expects each cell action always return an element, it crashes if returns null
         return <></>;
       }
 
@@ -138,6 +140,7 @@ export const cellActions: TGridCellAction[] = [
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
+        // data grid expects each cell action always return an element, it crashes if returns null
         return <></>;
       }
 
@@ -166,6 +169,7 @@ export const cellActions: TGridCellAction[] = [
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
+        // data grid expects each cell action always return an element, it crashes if returns null
         return <></>;
       }
 
@@ -210,6 +214,7 @@ export const cellActions: TGridCellAction[] = [
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
+        // data grid expects each cell action always return an element, it crashes if returns null
         return <></>;
       }
 

@@ -46,6 +46,7 @@ const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
 const FormattedFieldValueComponent: React.FC<{
   asPlainText?: boolean;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
@@ -97,6 +98,7 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldType === GEO_FIELD_TYPE) {
     return <>{value}</>;
   } else if (fieldType === DATE_FIELD_TYPE) {
+    const classNames = truncate ? 'eui-textTruncate eui-alignMiddle' : undefined;
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
@@ -105,18 +107,10 @@ const FormattedFieldValueComponent: React.FC<{
         tooltipContent={null}
         value={`${value}`}
       >
-        <FormattedDate
-          className={truncate ? 'eui-textTruncate eui-alignMiddle' : undefined}
-          fieldName={fieldName}
-          value={value}
-        />
+        <FormattedDate className={classNames} fieldName={fieldName} value={value} />
       </DefaultDraggable>
     ) : (
-      <FormattedDate
-        className={truncate ? 'eui-textTruncate eui-alignMiddle' : undefined}
-        fieldName={fieldName}
-        value={value}
-      />
+      <FormattedDate className={classNames} fieldName={fieldName} value={value} />
     );
   } else if (PORT_NAMES.some((portName) => fieldName === portName)) {
     return (

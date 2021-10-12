@@ -15,7 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isString, isEmpty } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { SyntheticEvent, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -211,6 +211,35 @@ export const renderEventModule = ({
   );
 };
 
+const GenericLinkComponent: React.FC<{
+  children?: React.ReactNode;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  dataTestSubj?: string;
+  href: string;
+  onClick?: (e: SyntheticEvent) => void;
+  title?: string;
+  iconType?: string;
+}> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'link' }) => {
+  return Component ? (
+    <Component
+      data-test-subj={dataTestSubj}
+      href={href}
+      iconType={iconType}
+      onClick={onClick}
+      title={title}
+    >
+      {title ?? children}
+    </Component>
+  ) : (
+    <EuiLink data-test-subj={dataTestSubj} target="_blank" href={href}>
+      {title ?? children}
+    </EuiLink>
+  );
+};
+
+const GenericLink = React.memo(GenericLinkComponent);
+
 export const renderUrl = ({
   contextId,
   Component,
@@ -223,6 +252,7 @@ export const renderUrl = ({
   value,
 }: {
   contextId: string;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
@@ -237,15 +267,7 @@ export const renderUrl = ({
 
   const formattedValue = truncate ? <TruncatableText>{value}</TruncatableText> : value;
   const content = isUrlValid ? (
-    Component ? (
-      <Component href={urlName} data-test-subj="data-grid-url" title={title} iconType="link">
-        {title ?? formattedValue}
-      </Component>
-    ) : (
-      <EuiLink target="_blank" href={urlName}>
-        {formattedValue}
-      </EuiLink>
-    )
+    <GenericLink href={urlName} dataTestSubj="ata-grid-url" title={title} iconType="link" />
   ) : (
     <>{formattedValue}</>
   );

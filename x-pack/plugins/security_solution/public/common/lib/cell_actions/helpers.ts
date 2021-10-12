@@ -61,5 +61,5 @@ export const COLUMNS_WITH_LINKS = [
 export const getLink = (cId?: string, fieldType?: string, linkField?: string) =>
   cId &&
   COLUMNS_WITH_LINKS.find(
-    (c) => c.columnId === cId || (fieldType && c.fieldType === fieldType) || linkField != null
+    (c) => c.columnId === cId || (c.fieldType && fieldType === c.fieldType && linkField != null)
   );
