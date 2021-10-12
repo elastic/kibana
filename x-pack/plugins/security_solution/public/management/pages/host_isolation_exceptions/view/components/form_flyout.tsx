@@ -83,8 +83,11 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
     [navigateCallback]
   );
 
+  // load data to edit or create
   useEffect(() => {
-    if (location.show === 'edit') {
+    if (location.show === 'create' && exception === undefined) {
+      setException(createEmptyHostIsolationException());
+    } else if (location.show === 'edit') {
       // prevent flyout to show edit without an id
       if (!location.id) {
         onCancel();
@@ -101,13 +104,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
       }
     }
     // initialize an empty exception to create
-  }, [dispatch, exceptionToEdit, location.id, location.show, onCancel]);
-
-  useEffect(() => {
-    if (location.show === 'create' && exception === undefined) {
-      setException(createEmptyHostIsolationException());
-    }
-  }, [exception, location.show]);
+  }, [dispatch, exception, exceptionToEdit, location.id, location.show, onCancel]);
 
   // handle creation and edit success
   useEffect(() => {
@@ -127,7 +124,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
     }
   }, [creationSuccessful, dispatch, exception?.item_id, exception?.name, onCancel, toasts]);
 
-  // handle load tem to edit error
+  // handle load item to edit error
   useEffect(() => {
     if (creationFailure && location.show === 'edit' && !exception?.item_id) {
       toasts.addWarning(getLoadErrorMessage(creationFailure));
