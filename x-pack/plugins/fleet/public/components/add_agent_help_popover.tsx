@@ -25,7 +25,12 @@ export const AddAgentHelpPopover = ({
 }) => {
   const { docLinks } = useStartServices();
   return (
-    <EuiPopover button={button} isOpen={isOpen} closePopover={closePopover}>
+    <EuiPopover
+      button={button}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      data-test-subj="addAgentHelpPopover"
+    >
       <div style={{ width: '302px' }}>
         <EuiText size="m">
           <FormattedMessage
