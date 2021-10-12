@@ -107,7 +107,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   );
 
   const setStateWrapper = (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
+    options: { forceRender?: boolean } = {}
   ) => {
     const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
     setState(
@@ -117,6 +118,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       },
       {
         isDimensionComplete: Boolean(hypotheticalLayer.columns[columnId]),
+        ...options,
       }
     );
   };
@@ -508,6 +510,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
               }
               incompleteOperation={incompleteOperation}
               onChoose={(choice) => {
+                if (temporaryQuickFunction) {
+                  setTemporaryState('none');
+                }
                 setStateWrapper(
                   insertOrReplaceColumn({
                     layer: state.layers[layerId],
@@ -518,7 +523,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     visualizationGroups: dimensionGroups,
                     targetGroup: props.groupId,
                     incompleteParams,
-                  })
+                  }),
+                  temporaryQuickFunction ? { forceRender: true } : undefined
                 );
               }}
             />
@@ -737,9 +743,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
       />
       {TabContent}
 
-      {!isFullscreen && !currentFieldIsInvalid && temporaryState === 'none' && (
+      {!isFullscreen && !currentFieldIsInvalid && (
         <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
-          {!incompleteInfo && selectedColumn && (
+          {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
             <LabelInput
               value={selectedColumn.label}
               onChange={(value) => {
@@ -762,7 +768,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           )}
 
-          {!isFullscreen && !incompleteInfo && !hideGrouping && (
+          {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
             <BucketNestingEditor
               layer={state.layers[props.layerId]}
               columnId={props.columnId}
