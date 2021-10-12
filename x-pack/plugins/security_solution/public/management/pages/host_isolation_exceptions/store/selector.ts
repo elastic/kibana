@@ -110,6 +110,14 @@ export const getDeleteError: HostIsolationExceptionsSelector<ServerApiError | un
     }
   });
 
+export const getFormStatusFailure: HostIsolationExceptionsSelector<ServerApiError | undefined> = (
+  state
+) => {
+  if (isFailedResourceState(state.form.status)) {
+    return state.form.status.error;
+  }
+};
+
 export const getExceptionToEdit: HostIsolationExceptionsSelector<
   UpdateExceptionListItemSchema | undefined
 > = (state) => (state.form.entry ? (state.form.entry as UpdateExceptionListItemSchema) : undefined);

@@ -22,28 +22,28 @@ import {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { omit } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { Dispatch } from 'redux';
 import { Loader } from '../../../../../common/components/loader';
 import { useToasts } from '../../../../../common/lib/kibana';
+import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
 import {
-  isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../../state/async_resource_state';
+import { getUpdateErrorMessage } from '../../../event_filters/view/translations';
 import { HostIsolationExceptionsPageAction } from '../../store/action';
-import { getCurrentLocation, getExceptionToEdit } from '../../store/selector';
+import { getCurrentLocation, getExceptionToEdit, getFormStatusFailure } from '../../store/selector';
 import { createEmptyHostIsolationException } from '../../utils';
 import {
   useHostIsolationExceptionsNavigateCallback,
   useHostIsolationExceptionsSelector,
 } from '../hooks';
 import { HostIsolationExceptionsForm } from './form';
-import {
-  HOST_ISOLATION_EXCEPTION_CREATION_ERROR,
-  HOST_ISOLATION_EXCEPTION_EDIT_ERROR,
-} from './translations';
+import { getCreateErrorMessage, getLoadErrorMessage } from './translations';
 
 export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
@@ -57,13 +57,13 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const creationSuccessful = useHostIsolationExceptionsSelector((state) =>
     isLoadedResourceState(state.form.status)
   );
-  const creationFailure = useHostIsolationExceptionsSelector((state) =>
-    isFailedResourceState(state.form.status)
-  );
+  const creationFailure = useHostIsolationExceptionsSelector(getFormStatusFailure);
 
   const exceptionToEdit = useHostIsolationExceptionsSelector(getExceptionToEdit);
 
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
+
+  const history = useHistory();
 
   const [formHasError, setFormHasError] = useState(true);
   const [exception, setException] = useState<
@@ -136,14 +136,18 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
         );
       }
     }
-  }, [creationSuccessful, onCancel, dispatch, toasts, exception?.name, exception?.item_id]);
+  }, [creationSuccessful, dispatch, exception?.item_id, exception?.name, onCancel, toasts]);
 
   useEffect(() => {
     if (creationFailure) {
-      if (exception?.item_id) {
-        toasts.addDanger(HOST_ISOLATION_EXCEPTION_EDIT_ERROR);
+      // failed to load the entry
+      if (location.show === 'edit' && !exception?.item_id) {
+        toasts.addWarning(getLoadErrorMessage(creationFailure));
+        history.replace(getHostIsolationExceptionsListPath(omit(location, ['show', 'id'])));
+      } else if (exception?.item_id) {
+        toasts.addDanger(getUpdateErrorMessage(creationFailure));
       } else {
-        toasts.addDanger(HOST_ISOLATION_EXCEPTION_CREATION_ERROR);
+        toasts.addDanger(getCreateErrorMessage(creationFailure));
       }
       dispatch({
         type: 'hostIsolationExceptionsFormStateChanged',
@@ -152,7 +156,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
         },
       });
     }
-  }, [dispatch, toasts, creationFailure, exception?.item_id]);
+  }, [creationFailure, dispatch, exception?.item_id, history, location, toasts]);
 
   const handleOnCancel = useCallback(() => {
     if (creationInProgress) return;

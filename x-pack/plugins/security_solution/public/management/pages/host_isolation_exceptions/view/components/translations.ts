@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ServerApiError } from '../../../../../common/types';
 
 export const NAME_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.hostIsolationExceptions.form.name.placeholder',
@@ -76,16 +77,33 @@ export const EDIT_HOST_ISOLATION_EXCEPTION_LABEL = i18n.translate(
     defaultMessage: 'Edit Exception',
   }
 );
-export const HOST_ISOLATION_EXCEPTION_CREATION_ERROR = i18n.translate(
-  'xpack.securitySolution.hostIsolationExceptions.form.creationFailureToastTitle',
-  {
-    defaultMessage: 'There was an error creating the exception',
-  }
-);
 
-export const HOST_ISOLATION_EXCEPTION_EDIT_ERROR = i18n.translate(
-  'xpack.securitySolution.hostIsolationExceptions.form.editFailureToastTitle',
-  {
-    defaultMessage: 'There was an error editing the exception',
-  }
-);
+export const getCreateErrorMessage = (creationError: ServerApiError) => {
+  return i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.form.failedToastTitle.create',
+    {
+      defaultMessage: 'There was an error creating the exception: "{error}"',
+      values: { error: creationError.message },
+    }
+  );
+};
+
+export const getUpdateErrorMessage = (updateError: ServerApiError) => {
+  return i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.form.failedToastTitle.update',
+    {
+      defaultMessage: 'There was an error updating the exception: "{error}"',
+      values: { error: updateError.message },
+    }
+  );
+};
+
+export const getLoadErrorMessage = (getError: ServerApiError) => {
+  return i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.form.failedToastTitle.get',
+    {
+      defaultMessage: 'Unable to edit exception: "{error}"',
+      values: { error: getError.message },
+    }
+  );
+};
