@@ -14,18 +14,38 @@ import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../exp
 // TODO: complete this list
 type ValidMetaFieldNames = keyof Pick<
   estypes.SearchHit,
-  '_id' | '_index' | '_source' | '_type' | '_score'
+  | '_id'
+  | '_ignored'
+  | '_index'
+  | '_node'
+  | '_primary_term'
+  | '_routing'
+  | '_score'
+  | '_seq_no'
+  | '_shard'
+  | '_source'
+  | '_type'
+  | '_version'
 >;
 const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
   '_id',
+  '_ignored',
   '_index',
+  '_node',
+  '_primary_term',
+  '_routing',
+  '_score',
+  '_seq_no',
+  '_shard',
   '_source',
   '_type',
-  '_score',
+  '_version',
 ];
 
 function isValidMetaFieldName(field: string): field is ValidMetaFieldNames {
-  // TODO: Leave comment why to cast here
+  // Since the array above is more narrowly typed than string[], we cannot use
+  // string to find a value in here. We manually cast it to wider string[] type
+  // so we're able to use `includes` on it.
   return (VALID_META_FIELD_NAMES as string[]).includes(field);
 }
 
