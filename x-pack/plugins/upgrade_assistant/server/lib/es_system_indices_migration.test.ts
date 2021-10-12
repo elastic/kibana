@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { convertFeaturesToIndicesArray } from './es_system_indices_upgrade';
-import { SystemIndicesUpgradeStatus } from '../../common/types';
+import { convertFeaturesToIndicesArray } from './es_system_indices_migration';
+import { SystemIndicesMigrationStatus } from '../../common/types';
 
-const esUpgradeSystemIndicesStatusMock: SystemIndicesUpgradeStatus = {
+const esUpgradeSystemIndicesStatusMock: SystemIndicesMigrationStatus = {
   features: [
     {
       feature_name: 'machine_learning',
