@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import { CaptureConfig } from '../../../../server/types';
-import { DEFAULT_VIEWPORT } from '../../../../common/constants';
+import type { ConfigType } from '../../../config';
 
-type BrowserConfig = CaptureConfig['browser']['chromium'];
+interface Viewport {
+  height: number;
+  width: number;
+}
+
+type Proxy = ConfigType['browser']['chromium']['proxy'];
 
 interface LaunchArgs {
   userDataDir: string;
-  disableSandbox: BrowserConfig['disableSandbox'];
-  proxy: BrowserConfig['proxy'];
+  viewport?: Viewport;
+  disableSandbox?: boolean;
+  proxy: Proxy;
 }
 
-export const args = ({ userDataDir, disableSandbox, proxy: proxyConfig }: LaunchArgs) => {
+export const args = ({ userDataDir, disableSandbox, viewport, proxy: proxyConfig }: LaunchArgs) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
@@ -41,13 +46,16 @@ export const args = ({ userDataDir, disableSandbox, proxy: proxyConfig }: Launch
     '--disable-gpu',
     '--headless',
     '--hide-scrollbars',
-    // NOTE: setting the window size does NOT set the viewport size: viewport and window size are different.
-    // The viewport may later need to be resized depending on the position of the clip area.
-    // These numbers come from the job parameters, so this is a close guess.
-    `--window-size=${Math.floor(DEFAULT_VIEWPORT.width)},${Math.floor(DEFAULT_VIEWPORT.height)}`,
     // allow screenshot clip region to go outside of the viewport
     `--mainFrameClipsContent=false`,
   ];
+
+  if (viewport) {
+    // NOTE: setting the window size does NOT set the viewport size: viewport and window size are different.
+    // The viewport may later need to be resized depending on the position of the clip area.
+    // These numbers come from the job parameters, so this is a close guess.
+    flags.push(`--window-size=${Math.floor(viewport.width)},${Math.floor(viewport.height)}`);
+  }
 
   if (proxyConfig.enabled) {
     flags.push(`--proxy-server=${proxyConfig.server}`);

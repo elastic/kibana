@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { HeadlessChromiumDriver } from './chromium_driver';
+export { install } from './install';
+export type { ConditionalHeaders } from './chromium';
+export {
+  getChromiumDisconnectedError,
+  DEFAULT_VIEWPORT,
+  HeadlessChromiumDriver,
+  HeadlessChromiumDriverFactory,
+} from './chromium';

@@ -7,7 +7,6 @@
 
 jest.mock('../routes');
 jest.mock('../usage');
-jest.mock('../browsers');
 
 import _ from 'lodash';
 import * as Rx from 'rxjs';
@@ -19,22 +18,11 @@ import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
-import {
-  chromium,
-  HeadlessChromiumDriverFactory,
-  initializeBrowserDriverFactory,
-} from '../browsers';
 import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
 import { setFieldFormats } from '../services';
 import { createMockLevelLogger } from './create_mock_levellogger';
-
-(
-  initializeBrowserDriverFactory as jest.Mock<Promise<HeadlessChromiumDriverFactory>>
-).mockImplementation(() => Promise.resolve({} as HeadlessChromiumDriverFactory));
-
-(chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
 export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
   return {

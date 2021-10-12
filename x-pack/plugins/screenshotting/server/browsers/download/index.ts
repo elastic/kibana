@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ensureBrowserDownloaded } from './ensure_downloaded';
+export { ensureDownloaded } from './ensure_downloaded';

@@ -10,20 +10,56 @@ import { map, truncate } from 'lodash';
 import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
-import type { LocatorParams } from '../../../../common/types';
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../../../common/constants';
-import { getDisallowedOutgoingUrlError } from '../';
-import { ReportingCore } from '../../..';
-import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/screenshot_mode/server';
-import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
-import { LevelLogger } from '../../../lib';
-import { Layout, ViewZoomWidthHeight } from '../../../lib/layouts/layout';
-import { ElementPosition } from '../../../lib/screenshots';
-import { allowRequest, NetworkPolicy } from '../../network_policy';
+import { Logger } from 'src/core/server';
+import type { Layout } from 'src/plugins/screenshot_mode/common';
+import {
+  KBN_SCREENSHOT_MODE_HEADER,
+  ScreenshotModePluginSetup,
+} from '../../../../../../src/plugins/screenshot_mode/server';
+import { allowRequest, NetworkPolicy } from '../network_policy';
 
 export interface ChromiumDriverOptions {
   inspect: boolean;
   networkPolicy: NetworkPolicy;
+}
+
+export interface ConditionalHeadersConditions {
+  protocol: string;
+  hostname: string;
+  port: number;
+  basePath: string;
+}
+
+export interface ConditionalHeaders {
+  headers: Record<string, string>;
+  conditions: ConditionalHeadersConditions;
+}
+
+export interface ElementPosition {
+  boundingClientRect: {
+    // modern browsers support x/y, but older ones don't
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  };
+  scroll: {
+    x: number;
+    y: number;
+  };
+}
+
+export interface Viewport {
+  zoom: number;
+  width: number;
+  height: number;
+}
+
+interface OpenOptions {
+  conditionalHeaders: ConditionalHeaders;
+  waitForSelector: string;
+  timeout: number;
+  layout?: Layout;
 }
 
 interface WaitForSelectorOpts {
@@ -56,28 +92,29 @@ interface InterceptedRequest {
 
 const WAIT_FOR_DELAY_MS: number = 100;
 
-export class HeadlessChromiumDriver {
-  private readonly page: puppeteer.Page;
-  private readonly inspect: boolean;
-  private readonly networkPolicy: NetworkPolicy;
+function getDisallowedOutgoingUrlError(interceptedUrl: string) {
+  return new Error(
+    i18n.translate('xpack.screenshotting.chromiumDriver.disallowedOutgoingUrl', {
+      defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}". Failing the request and closing the browser.`,
+      values: { interceptedUrl },
+    })
+  );
+}
 
+export class HeadlessChromiumDriver {
   private listenersAttached = false;
   private interceptedCount = 0;
-  private core: ReportingCore;
 
   constructor(
-    core: ReportingCore,
-    page: puppeteer.Page,
-    { inspect, networkPolicy }: ChromiumDriverOptions
-  ) {
-    this.core = core;
-    this.page = page;
-    this.inspect = inspect;
-    this.networkPolicy = networkPolicy;
-  }
+    private screenshotMode: ScreenshotModePluginSetup,
+    private readonly page: puppeteer.Page,
+    private options: ChromiumDriverOptions
+  ) {}
 
   private allowRequest(url: string) {
-    return !this.networkPolicy.enabled || allowRequest(url, this.networkPolicy.rules);
+    return (
+      !this.options.networkPolicy.enabled || allowRequest(url, this.options.networkPolicy.rules)
+    );
   }
 
   private truncateUrl(url: string) {
@@ -90,22 +127,10 @@ export class HeadlessChromiumDriver {
   /*
    * Call Page.goto and wait to see the Kibana DOM content
    */
-  public async open(
+  async open(
     url: string,
-    {
-      conditionalHeaders,
-      waitForSelector: pageLoadSelector,
-      timeout,
-      locator,
-      layout,
-    }: {
-      conditionalHeaders: ConditionalHeaders;
-      waitForSelector: string;
-      timeout: number;
-      locator?: LocatorParams;
-      layout?: Layout;
-    },
-    logger: LevelLogger
+    { conditionalHeaders, layout, waitForSelector: pageLoadSelector, timeout }: OpenOptions,
+    logger: Logger
   ): Promise<void> {
     logger.info(`opening url ${url}`);
 
@@ -116,34 +141,17 @@ export class HeadlessChromiumDriver {
      * Integrate with the screenshot mode plugin contract by calling this function before any other
      * scripts have run on the browser page.
      */
-    await this.page.evaluateOnNewDocument(this.core.getEnableScreenshotMode());
+    await this.page.evaluateOnNewDocument(() => this.screenshotMode.setScreenshotModeEnabled());
 
     if (layout) {
-      await this.page.evaluateOnNewDocument(this.core.getSetScreenshotLayout(), layout.id);
-    }
-
-    if (locator) {
-      await this.page.evaluateOnNewDocument(
-        (key: string, value: unknown) => {
-          Object.defineProperty(window, key, {
-            configurable: false,
-            writable: true,
-            enumerable: true,
-            value,
-          });
-        },
-        REPORTING_REDIRECT_LOCATOR_STORE_KEY,
-        locator
-      );
+      await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotLayout, layout);
     }
 
     await this.page.setRequestInterception(true);
-
     this.registerListeners(conditionalHeaders, logger);
-
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
-    if (this.inspect) {
+    if (this.options.inspect) {
       await this.launchDebugger();
     }
 
@@ -159,14 +167,14 @@ export class HeadlessChromiumDriver {
   /*
    * Let modules poll if Chrome is still running so they can short circuit if needed
    */
-  public isPageOpen() {
+  isPageOpen() {
     return !this.page.isClosed();
   }
 
   /*
    * Call Page.screenshot and return a base64-encoded string of the image
    */
-  public async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
+  async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
       clip: {
@@ -188,32 +196,28 @@ export class HeadlessChromiumDriver {
     return undefined;
   }
 
-  public async evaluate(
-    { fn, args = [] }: EvaluateOpts,
-    meta: EvaluateMetaOpts,
-    logger: LevelLogger
-  ) {
+  evaluate({ fn, args = [] }: EvaluateOpts, meta: EvaluateMetaOpts, logger: Logger): Promise<any> {
     logger.debug(`evaluate ${meta.context}`);
-    const result = await this.page.evaluate(fn, ...args);
-    return result;
+
+    return this.page.evaluate(fn, ...args);
   }
 
-  public async waitForSelector(
+  async waitForSelector(
     selector: string,
     opts: WaitForSelectorOpts,
     context: EvaluateMetaOpts,
-    logger: LevelLogger
+    logger: Logger
   ): Promise<ElementHandle<Element>> {
     const { timeout } = opts;
     logger.debug(`waitForSelector ${selector}`);
-    const resp = await this.page.waitForSelector(selector, { timeout }); // override default 30000ms
+    const response = await this.page.waitForSelector(selector, { timeout }); // override default 30000ms
 
-    if (!resp) {
+    if (!response) {
       throw new Error(`Failure in waitForSelector: void response! Context: ${context.context}`);
     }
 
     logger.debug(`waitForSelector ${selector} resolved`);
-    return resp;
+    return response;
   }
 
   public async waitFor({
@@ -228,9 +232,9 @@ export class HeadlessChromiumDriver {
     await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
   }
 
-  public async setViewport(
-    { width: _width, height: _height, zoom }: ViewZoomWidthHeight,
-    logger: LevelLogger
+  async setViewport(
+    { width: _width, height: _height, zoom }: Viewport,
+    logger: Logger
   ): Promise<void> {
     const width = Math.floor(_width);
     const height = Math.floor(_height);
@@ -245,7 +249,7 @@ export class HeadlessChromiumDriver {
     });
   }
 
-  private registerListeners(conditionalHeaders: ConditionalHeaders, logger: LevelLogger) {
+  private registerListeners(conditionalHeaders: ConditionalHeaders, logger: Logger) {
     if (this.listenersAttached) {
       return;
     }
@@ -300,10 +304,13 @@ export class HeadlessChromiumDriver {
           });
         } catch (err) {
           logger.error(
-            i18n.translate('xpack.reporting.chromiumDriver.failedToCompleteRequestUsingHeaders', {
-              defaultMessage: 'Failed to complete a request using headers: {error}',
-              values: { error: err },
-            })
+            i18n.translate(
+              'xpack.screenshotting.chromiumDriver.failedToCompleteRequestUsingHeaders',
+              {
+                defaultMessage: 'Failed to complete a request using headers: {error}',
+                values: { error: err },
+              }
+            )
           );
         }
       } else {
@@ -313,7 +320,7 @@ export class HeadlessChromiumDriver {
           await client.send('Fetch.continueRequest', { requestId });
         } catch (err) {
           logger.error(
-            i18n.translate('xpack.reporting.chromiumDriver.failedToCompleteRequest', {
+            i18n.translate('xpack.screenshotting.chromiumDriver.failedToCompleteRequest', {
               defaultMessage: 'Failed to complete a request: {error}',
               values: { error: err },
             })

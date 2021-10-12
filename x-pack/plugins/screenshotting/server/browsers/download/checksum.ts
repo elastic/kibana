@@ -7,16 +7,15 @@
 
 import { createHash } from 'crypto';
 import { createReadStream } from 'fs';
-import { Readable } from 'stream';
-
-function readableEnd(stream: Readable) {
-  return new Promise((resolve, reject) => {
-    stream.on('error', reject).on('end', resolve);
-  });
-}
+import { finished } from 'stream';
+import { promisify } from 'util';
 
 export async function md5(path: string) {
   const hash = createHash('md5');
-  await readableEnd(createReadStream(path).on('data', (chunk) => hash.update(chunk)));
+  const stream = createReadStream(path);
+
+  stream.on('data', (chunk) => hash.update(chunk));
+  await promisify(finished)(stream, { writable: false });
+
   return hash.digest('hex');
 }

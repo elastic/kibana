@@ -16,8 +16,8 @@ import { createInterface } from 'readline';
 import { getDataPath } from '@kbn/utils';
 import { fromEvent, merge, of, timer } from 'rxjs';
 import { catchError, map, reduce, takeUntil, tap } from 'rxjs/operators';
-import { ReportingCore } from '../../../';
-import { LevelLogger } from '../../../lib';
+import type { Logger } from 'src/core/server';
+import type { ConfigType } from '../../../config';
 import { ChromiumArchivePaths } from '../paths';
 import { args } from './args';
 
@@ -54,14 +54,8 @@ const defaultArgs = [
   '--headless',
 ];
 
-export const browserStartLogs = (
-  core: ReportingCore,
-  logger: LevelLogger,
-  overrideFlags: string[] = []
-) => {
-  const config = core.getConfig();
-  const proxy = config.get('capture', 'browser', 'chromium', 'proxy');
-  const disableSandbox = config.get('capture', 'browser', 'chromium', 'disableSandbox');
+export function diagnose(config: ConfigType, logger: Logger, overrideFlags: string[] = []) {
+  const { disableSandbox, proxy } = config.browser.chromium;
   const userDataDir = mkdtempSync(join(getDataPath(), 'chromium-'));
 
   const platform = process.platform;
@@ -92,7 +86,7 @@ export const browserStartLogs = (
   const exit$ = fromEvent(browserProcess, 'exit').pipe(
     map((code) => {
       logger.error(`Browser exited abnormally, received code: ${code}`);
-      return i18n.translate('xpack.reporting.diagnostic.browserCrashed', {
+      return i18n.translate('xpack.screenshotting.diagnostic.browserCrashed', {
         defaultMessage: `Browser exited abnormally during startup`,
       });
     })
@@ -102,13 +96,13 @@ export const browserStartLogs = (
     map((err) => {
       logger.error(`Browser process threw an error on startup`);
       logger.error(err as string | Error);
-      return i18n.translate('xpack.reporting.diagnostic.browserErrored', {
+      return i18n.translate('xpack.screenshotting.diagnostic.browserErrored', {
         defaultMessage: `Browser process threw an error on startup`,
       });
     })
   );
 
-  const browserProcessLogger = logger.clone(['chromium-stderr']);
+  const browserProcessLogger = logger.get('chromium-stderr');
   const log$ = fromEvent(rl, 'line').pipe(
     tap((message: unknown) => {
       if (typeof message === 'string') {
@@ -141,4 +135,4 @@ export const browserStartLogs = (
       return of(error);
     })
   );
-};
+}

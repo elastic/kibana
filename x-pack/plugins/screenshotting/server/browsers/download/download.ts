@@ -9,17 +9,15 @@ import Axios from 'axios';
 import { createHash } from 'crypto';
 import { closeSync, mkdirSync, openSync, writeSync } from 'fs';
 import { dirname } from 'path';
-import { GenericLevelLogger } from '../../lib/level_logger';
+import { finished, Readable } from 'stream';
+import { promisify } from 'util';
+import type { Logger } from 'src/core/server';
 
 /**
  * Download a url and calculate it's checksum
  */
-export async function download(
-  url: string,
-  path: string,
-  logger: GenericLevelLogger
-): Promise<string> {
-  logger.info(`Downloading ${url} to ${path}`);
+export async function download(url: string, path: string, logger?: Logger): Promise<string> {
+  logger?.info(`Downloading ${url} to ${path}`);
 
   const hash = createHash('md5');
 
@@ -27,30 +25,23 @@ export async function download(
   const handle = openSync(path, 'w');
 
   try {
-    const resp = await Axios.request({
+    const response = await Axios.request<Readable>({
       url,
       method: 'GET',
       responseType: 'stream',
     });
 
-    resp.data.on('data', (chunk: Buffer) => {
+    response.data.on('data', (chunk: Buffer) => {
       writeSync(handle, chunk);
       hash.update(chunk);
     });
 
-    await new Promise<void>((resolve, reject) => {
-      resp.data
-        .on('error', (err: Error) => {
-          logger.error(err);
-          reject(err);
-        })
-        .on('end', () => {
-          logger.info(`Downloaded ${url}`);
-          resolve();
-        });
-    });
-  } catch (err) {
-    throw new Error(`Unable to download ${url}: ${err}`);
+    await promisify(finished)(response.data, { writable: false });
+    logger?.info(`Downloaded ${url}`);
+  } catch (error) {
+    logger?.error(error);
+
+    throw new Error(`Unable to download ${url}: ${error}`);
   } finally {
     closeSync(handle);
   }

@@ -7,7 +7,7 @@
 
 import { allowRequest } from './network_policy';
 
-describe('Network Policy', () => {
+describe('allowRequest', () => {
   it('allows requests when there are no rules', () => {
     expect(allowRequest('https://kibana.com/cool/route/bro', [])).toEqual(true);
   });

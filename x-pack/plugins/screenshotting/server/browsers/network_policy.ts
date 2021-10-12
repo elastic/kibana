@@ -26,7 +26,7 @@ const isHostMatch = (actualHost: string, ruleHost: string) => {
   return every(ruleParts, (part, idx) => part === hostParts[idx]);
 };
 
-export const allowRequest = (url: string, rules: NetworkPolicyRule[]) => {
+export function allowRequest(url: string, rules: NetworkPolicyRule[]): boolean {
   const parsed = parse(url);
 
   if (!rules.length) {
@@ -52,4 +52,4 @@ export const allowRequest = (url: string, rules: NetworkPolicyRule[]) => {
   }, undefined);
 
   return typeof allowed !== 'undefined' ? allowed : false;
-};
+}
