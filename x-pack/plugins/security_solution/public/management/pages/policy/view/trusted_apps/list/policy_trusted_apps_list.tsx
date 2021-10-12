@@ -167,6 +167,7 @@ export const PolicyTrustedAppsList = memo(() => {
                 )
               : undefined,
             toolTipPosition: 'top',
+            'data-test-subj': getTestId('removeAction'),
           },
         ],
         policies: assignedPoliciesMenuItems,
@@ -211,7 +212,7 @@ export const PolicyTrustedAppsList = memo(() => {
         <EuiLoadingSpinner
           className="essentialAnimation"
           size="xl"
-          data-test-subj={DATA_TEST_SUBJ}
+          data-test-subj={getTestId('loading')}
         />
       </EuiPageTemplate>
     );
