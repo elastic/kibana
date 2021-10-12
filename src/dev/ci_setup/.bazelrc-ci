@@ -5,6 +5,12 @@
 # Import and load bazelrc common settings for ci env
 try-import %workspace%/src/dev/ci_setup/.bazelrc-ci.common
 
+## Cache action outputs on disk so they persist across output_base and bazel shutdown (eg. changing branches)
+common --disk_cache=~/.bazel-cache/disk-cache
+
+## Bazel repo cache settings
+common --repository_cache=~/.bazel-cache/repository-cache
+
 # BuildBuddy settings
 ## Remote settings including cache
 build --bes_results_url=https://app.buildbuddy.io/invocation/
