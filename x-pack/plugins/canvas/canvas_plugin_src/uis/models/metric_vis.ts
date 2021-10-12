@@ -13,7 +13,7 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 const { MetricVis: strings } = ViewStrings;
 
 export const metricVis = () => ({
-  name: 'tagcloud',
+  name: 'metricVis',
   displayName: strings.getDisplayName(),
   args: [
     {
