@@ -22,7 +22,6 @@ import {
 } from '../../../common/constants';
 import {
   UseRequestConfig,
-  UseRequestResponse,
   SendRequestConfig,
   SendRequestResponse,
   sendRequest as _sendRequest,
@@ -35,7 +34,7 @@ export class ApiService {
   private client: HttpSetup | undefined;
   private clusterUpgradeStateListeners: ClusterUpgradeStateListener[] = [];
 
-  private handleClusterUpgradeError<ResponseType>(error: ResponseError | null) {
+  private handleClusterUpgradeError(error: ResponseError | null) {
     const isClusterUpgradeError = Boolean(error && error.statusCode === 426);
     if (isClusterUpgradeError) {
       const clusterUpgradeState = error!.attributes!.allNodesUpgraded
@@ -56,7 +55,7 @@ export class ApiService {
     // every time useRequest is called, which will be on every render. If handling
     // the cluster upgrade error causes a state change in the consuming component,
     // that will trigger a render, which will call useRequest again, and so on.
-    this.handleClusterUpgradeError<UseRequestResponse<R, ResponseError>>(response.error);
+    this.handleClusterUpgradeError(response.error);
     return response;
   }
 
@@ -67,7 +66,7 @@ export class ApiService {
       throw new Error('API service has not been initialized.');
     }
     const response = await _sendRequest<R, ResponseError>(this.client, config);
-    this.handleClusterUpgradeError<SendRequestResponse>(response.error);
+    this.handleClusterUpgradeError(response.error);
     return response;
   }
 

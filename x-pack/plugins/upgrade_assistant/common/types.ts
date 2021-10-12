@@ -18,7 +18,9 @@ export type ClusterUpgradeState = 'isPreparingForUpgrade' | 'isUpgrading' | 'isU
 export interface ResponseError {
   statusCode: number;
   message: string | Error;
-  attributes?: Record<string, any>;
+  attributes?: {
+    allNodesUpgraded: boolean;
+  };
 }
 
 export enum ReindexStep {

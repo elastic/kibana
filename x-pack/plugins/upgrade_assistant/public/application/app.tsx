@@ -139,7 +139,6 @@ export const App = ({ history }: { history: ScopedHistory }) => {
         <EuiEmptyPrompt body={<EuiLoadingSpinner size="l" />} />
       </EuiPageContent>
     );
-    return;
   }
 
   return (
