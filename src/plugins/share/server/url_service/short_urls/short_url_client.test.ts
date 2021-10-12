@@ -250,12 +250,12 @@ describe('ServerShortUrlClient', () => {
         {
           id: '123',
           type: 'dashboard',
-          name: 'locator_params:dashboardId',
+          name: 'locator:params:dashboardId',
         },
         {
           id: '456',
           type: 'index_pattern',
-          name: 'locator_params:indexPatternId',
+          name: 'locator:params:indexPatternId',
         },
       ]);
     });

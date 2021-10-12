@@ -80,10 +80,10 @@ export class LocatorClient implements ILocatorClient {
   public inject(state: LocatorData, references: SavedObjectReference[]): LocatorData {
     const locator = this.getOrThrow(state.id);
     const filteredReferences = references
-      .filter((ref) => ref.name.startsWith('locator_params:'))
+      .filter((ref) => ref.name.startsWith('params:'))
       .map((ref) => ({
         ...ref,
-        name: ref.name.substr('locator_params:'.length),
+        name: ref.name.substr('params:'.length),
       }));
     return {
       ...state,
@@ -101,7 +101,7 @@ export class LocatorClient implements ILocatorClient {
       },
       references: extracted.references.map((ref) => ({
         ...ref,
-        name: 'locator_params:' + ref.name,
+        name: 'params:' + ref.name,
       })),
     };
   }

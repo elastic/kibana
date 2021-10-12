@@ -7,6 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from 'kibana/server';
 import { generateSlug } from 'random-word-slugs';
 import { ShortUrlRecord } from '.';
 import type {
@@ -68,7 +69,7 @@ export class ServerShortUrlClient implements IShortUrlClient {
       slug = humanReadableSlug ? generateSlug() : randomStr(4);
     }
 
-    const { storage, currentVersion, locators } = this.dependencies;
+    const { storage, currentVersion } = this.dependencies;
 
     if (slug) {
       const isSlugTaken = await storage.exists(slug);
@@ -77,7 +78,7 @@ export class ServerShortUrlClient implements IShortUrlClient {
       }
     }
 
-    const extracted = locators.extract({
+    const extracted = this.extractReferences({
       id: locator.id,
       version: currentVersion,
       state: params,
@@ -100,12 +101,32 @@ export class ServerShortUrlClient implements IShortUrlClient {
     };
   }
 
+  private extractReferences(locatorData: LocatorData): {
+    state: LocatorData;
+    references: SavedObjectReference[];
+  } {
+    const { locators } = this.dependencies;
+    const { state, references } = locators.extract(locatorData);
+    return {
+      state,
+      references: references.map((ref) => ({
+        ...ref,
+        name: 'locator:' + ref.name,
+      })),
+    };
+  }
+
   private injectReferences({ data, references }: ShortUrlRecord): ShortUrlData {
     const { locators } = this.dependencies;
-    if (!locators) return data;
+    const locatorReferences = references
+      .filter((ref) => ref.name.startsWith('locator:'))
+      .map((ref) => ({
+        ...ref,
+        name: ref.name.substr('locator:'.length),
+      }));
     return {
       ...data,
-      locator: locators.inject(data.locator, references),
+      locator: locators.inject(data.locator, locatorReferences),
     };
   }
 
