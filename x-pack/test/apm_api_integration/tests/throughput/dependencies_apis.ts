@@ -32,7 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       backendThroughputChartAPIResponse,
     ] = await Promise.all([
       apmApiClient.readUser({
-        endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
+        endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,
         params: {
           path: { serviceName },
           query: {
@@ -43,7 +43,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       }),
       apmApiClient.readUser({
-        endpoint: `GET /api/apm/backends/top_backends`,
+        endpoint: `GET /internal/apm/backends/top_backends`,
         params: {
           query: {
             ...commonQuery,
@@ -53,7 +53,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       }),
       apmApiClient.readUser({
-        endpoint: `GET /api/apm/backends/{backendName}/charts/throughput`,
+        endpoint: `GET /internal/apm/backends/{backendName}/charts/throughput`,
         params: {
           path: { backendName: 'elasticsearch' },
           query: {

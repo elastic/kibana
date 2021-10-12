@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const commonQuery = { start: new Date(start).toISOString(), end: new Date(end).toISOString() };
     const [serviceInventoryAPIResponse, observabilityOverviewAPIResponse] = await Promise.all([
       apmApiClient.readUser({
-        endpoint: 'GET /api/apm/services',
+        endpoint: 'GET /internal/apm/services',
         params: {
           query: {
             ...commonQuery,
@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       }),
       apmApiClient.readUser({
-        endpoint: `GET /api/apm/observability_overview`,
+        endpoint: `GET /internal/apm/observability_overview`,
         params: {
           query: {
             ...commonQuery,
@@ -65,7 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
           const response = await apmApiClient.readUser({
-            endpoint: `GET /api/apm/observability_overview`,
+            endpoint: `GET /internal/apm/observability_overview`,
             params: {
               query: {
                 start: new Date(start).toISOString(),

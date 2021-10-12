@@ -34,7 +34,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       serviceInstancesAPIResponse,
     ] = await Promise.all([
       apmApiClient.readUser({
-        endpoint: 'GET /api/apm/services',
+        endpoint: 'GET /internal/apm/services',
         params: {
           query: {
             ...commonQuery,
@@ -43,7 +43,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       }),
       apmApiClient.readUser({
-        endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+        endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
         params: {
           path: { serviceName },
           query: {
@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       }),
       apmApiClient.readUser({
-        endpoint: `GET /api/apm/services/{serviceName}/transactions/groups/main_statistics`,
+        endpoint: `GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics`,
         params: {
           path: { serviceName },
           query: {
@@ -66,7 +66,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       }),
       apmApiClient.readUser({
-        endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
+        endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
         params: {
           path: { serviceName },
           query: {
@@ -79,7 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       }),
       // TODO: not using it for now since the instance name is empty for metric documents
       // apmApiClient.readUser({
-      //   endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics`,
+      //   endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics`,
       //   params: {
       //     path: { serviceName },
       //     query: {

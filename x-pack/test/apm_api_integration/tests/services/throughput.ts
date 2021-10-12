@@ -35,7 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     comparisonEnd?: string;
   }) {
     const response = await apmApiClient.readUser({
-      endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+      endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
       params: {
         path: {
           serviceName: 'synth-go',
@@ -68,12 +68,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const GO_PROD_RATE = 10;
         const GO_DEV_RATE = 5;
+        const JAVA_PROD_RATE = 20;
+
         const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
           'instance-a'
         );
         const serviceGoDevInstance = service(serviceName, 'development', 'go').instance(
           'instance-b'
         );
+
+        const serviceJavaInstance = service('synth-java', 'development', 'java').instance(
+          'instance-c'
+        );
+
         await traceData.index([
           ...timerange(start, end)
             .interval('1s')
@@ -91,6 +98,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .flatMap((timestamp) =>
               serviceGoDevInstance
                 .transaction('GET /api/product/:id')
+                .duration(1000)
+                .timestamp(timestamp)
+                .serialize()
+            ),
+          ...timerange(start, end)
+            .interval('1s')
+            .rate(JAVA_PROD_RATE)
+            .flatMap((timestamp) =>
+              serviceJavaInstance
+                .transaction('POST /api/product/buy')
                 .duration(1000)
                 .timestamp(timestamp)
                 .serialize()
