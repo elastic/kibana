@@ -15,6 +15,7 @@ const alertTypeMetric = {
       String alertType = doc['alert.alertTypeId'].value;
       String namespace = doc['namespaces'].value;
       state.ruleTypes.put(alertType, state.ruleTypes.containsKey(alertType) ? state.ruleTypes.get(alertType) + 1 : 1);
+      state.namespaces.put(namespace, state.namespaces.containsKey(namespace) ? state.namespaces.get(namespace) + 1 : 1);
     `,
     // Combine script is executed per cluster, but we already have a key-value pair per cluster.
     // Despite docs that say this is optional, this script can't be blank.
