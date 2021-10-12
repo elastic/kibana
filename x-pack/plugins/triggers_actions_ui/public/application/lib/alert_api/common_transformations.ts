@@ -22,9 +22,11 @@ const transformAction: RewriteRequestCase<AlertAction> = ({
 
 const transformExecutionStatus: RewriteRequestCase<AlertExecutionStatus> = ({
   last_execution_date: lastExecutionDate,
+  last_duration: lastDuration,
   ...rest
 }) => ({
   lastExecutionDate,
+  lastDuration,
   ...rest,
 });
 
