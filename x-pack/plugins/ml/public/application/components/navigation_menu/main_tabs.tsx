@@ -51,6 +51,13 @@ function getTabs(disableLinks: boolean): Tab[] {
       disabled: disableLinks,
     },
     {
+      id: 'trained_models',
+      name: i18n.translate('xpack.ml.navMenu.trainedModelsTabLinkText', {
+        defaultMessage: 'Trained Models',
+      }),
+      disabled: disableLinks,
+    },
+    {
       id: 'datavisualizer',
       name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
         defaultMessage: 'Data Visualizer',
@@ -91,6 +98,12 @@ const TAB_DATA: Record<TabId, TabData> = {
     testSubject: 'mlMainTab dataFrameAnalytics',
     name: i18n.translate('xpack.ml.dataFrameAnalyticsTabLabel', {
       defaultMessage: 'Data Frame Analytics',
+    }),
+  },
+  trained_models: {
+    testSubject: 'mlMainTab trainedModels',
+    name: i18n.translate('xpack.ml.trainedModelsTabLabel', {
+      defaultMessage: 'Trained Models',
     }),
   },
   datavisualizer: {

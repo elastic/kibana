@@ -13,18 +13,18 @@ import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../data_frame_analytics/pages/analytics_management';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { Page } from '../../../trained_models';
 
 export const modelsListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/data_frame_analytics/models',
+  path: '/trained_models',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.modelsListLabel', {
         defaultMessage: 'Model Management',

@@ -6,30 +6,30 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiCodeBlock,
   EuiDescriptionList,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTitle,
-  EuiNotificationBadge,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiCodeBlock,
   EuiText,
-  EuiHorizontalRule,
-  EuiFlexGroup,
   EuiTextColor,
-  EuiButtonEmpty,
-  EuiBadge,
+  EuiTitle,
 } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ModelItemFull } from './models_list';
-import { useMlKibana } from '../../../../../contexts/kibana';
-import { timeFormatter } from '../../../../../../../common/util/date_utils';
-import { isDefined } from '../../../../../../../common/types/guards';
-import { isPopulatedObject } from '../../../../../../../common';
+import { useMlKibana } from '../../contexts/kibana';
+import { timeFormatter } from '../../../../common/util/date_utils';
+import { isDefined } from '../../../../common/types/guards';
+import { isPopulatedObject } from '../../../../common';
 
 interface ExpandedRowProps {
   item: ModelItemFull;

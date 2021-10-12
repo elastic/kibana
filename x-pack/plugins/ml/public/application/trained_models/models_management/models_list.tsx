@@ -6,8 +6,6 @@
  */
 
 import React, { FC, useState, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiInMemoryTable,
   EuiFlexGroup,
@@ -21,40 +19,41 @@ import {
   EuiSearchBarProps,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import { StatsBar, ModelsBarStats } from '../../../../../components/stats_bar';
-import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
-import { ModelsTableToConfigMapping } from './index';
-import { DeleteModelsModal } from './delete_models_modal';
-import {
-  useMlKibana,
-  useMlLocator,
-  useNavigateToPath,
-  useNotifications,
-} from '../../../../../contexts/kibana';
-import { ExpandedRow } from './expanded_row';
-
-import {
-  TrainedModelConfigResponse,
-  ModelPipelines,
-  TrainedModelStat,
-} from '../../../../../../../common/types/trained_models';
 import {
   getAnalysisType,
   REFRESH_ANALYTICS_LIST_STATE,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
-} from '../../../../common';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
-import { timeFormatter } from '../../../../../../../common/util/date_utils';
-import { isPopulatedObject } from '../../../../../../../common';
-import { ListingPageUrlState } from '../../../../../../../common/types/common';
-import { usePageUrlState } from '../../../../../util/url_state';
-import { BUILT_IN_MODEL_TAG } from '../../../../../../../common/constants/data_frame_analytics';
-import { useTableSettings } from '../analytics_list/use_table_settings';
+} from '../../data_frame_analytics/common';
+import { ModelsTableToConfigMapping } from './index';
+import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
+import {
+  useMlKibana,
+  useMlLocator,
+  useNavigateToPath,
+  useNotifications,
+} from '../../contexts/kibana';
+import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
+import {
+  ModelPipelines,
+  TrainedModelConfigResponse,
+  TrainedModelStat,
+} from '../../../../common/types/trained_models';
+import { BUILT_IN_MODEL_TAG } from '../../../../common/constants/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
+import { DeleteModelsModal } from './delete_models_modal';
+import { ML_PAGES } from '../../../../common/constants/locator';
+import { ListingPageUrlState } from '../../../../common/types/common';
+import { usePageUrlState } from '../../util/url_state';
+import { ExpandedRow } from './expanded_row';
+import { isPopulatedObject } from '../../../../common';
+import { timeFormatter } from '../../../../common/util/date_utils';
+import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -87,7 +86,7 @@ export const ModelsList: FC = () => {
   const urlLocator = useMlLocator()!;
 
   const [pageState, updatePageState] = usePageUrlState(
-    ML_PAGES.DATA_FRAME_ANALYTICS_MODELS_MANAGE,
+    ML_PAGES.TRAINED_MODELS_MANAGE,
     getDefaultModelsListState()
   );
 
