@@ -37,8 +37,13 @@ export const RemoveTrustedAppFromPolicyModal = memo<RemoveTrustedAppFromPolicyMo
     const removeError = usePolicyDetailsSelector(getTrustedAppsRemovalError);
     const wasSuccessful = usePolicyDetailsSelector(getTrustedAppsWasRemoveSuccessful);
 
-    const removedToastMessage = useMemo(() => {
+    const removedToastMessage: string = useMemo(() => {
       const count = trustedApps.length;
+
+      if (count === 0) {
+        return '';
+      }
+
       if (count > 1) {
         return i18n.translate(
           'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.successMultiplesToastText',
