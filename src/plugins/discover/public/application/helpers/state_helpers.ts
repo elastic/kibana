@@ -26,7 +26,7 @@ export function handleSourceColumnState<TState extends { columns?: string[] }>(
   const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING);
 
   if (useNewFieldsApi) {
-    // if fields API is used, filter out the source column
+    // if fields API is used, filter out the default column
     let cleanedColumns = state.columns.filter((column) => column !== '_source' && column !== '');
     if (cleanedColumns.length === 0 && !isEqual(defaultColumns, ['_source'])) {
       cleanedColumns = defaultColumns;
