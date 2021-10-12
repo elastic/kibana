@@ -63,7 +63,7 @@ export function PackageCard({
   return (
     <Link href={url}>
       <EuiPanel paddingSize="m">
-        <EuiFlexGroup gutterSize="m">
+        <EuiFlexGroup gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
             <CardIcon
               icons={icons}
@@ -74,7 +74,7 @@ export function PackageCard({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
               <EuiFlexItem>
                 <EuiTitle size="xs">
                   <h3>{title}</h3>
