@@ -22,6 +22,8 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
     const security = await appContextService.getSecurity();
     const user = security.authc.getCurrentUser(request);
 
+    // when ES security is disabled, but Kibana security plugin is not explicitly disabled,
+    // `authc.getCurrentUser()` does not error, instead it comes back as `null`
     if (!user) {
       return response.ok({
         body: missingSecurityBody,
@@ -38,6 +40,8 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
 
     return response.ok({ body: { success: true } });
   } catch (e) {
+    // when Kibana security plugin is explicitly disabled,
+    // `appContextService.getSecurity()` returns an error, so we catch it here
     return response.ok({
       body: missingSecurityBody,
     });
