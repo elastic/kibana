@@ -67,19 +67,16 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'date',
     },
     created_by: {
-      type: 'text',
+      type: 'keyword',
     },
     updated_at: {
       type: 'date',
     },
     updated_by: {
-      type: 'text',
+      type: 'keyword',
     },
     enabled: {
       type: 'boolean',
-    },
-    integration_version: {
-      type: 'keyword',
     },
     queries: {
       properties: {
