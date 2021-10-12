@@ -14,6 +14,20 @@ export type HostIsolationExceptionsPageDataChanged =
     payload: HostIsolationExceptionsPageState['entries'];
   };
 
+export type HostIsolationExceptionsFormStateChanged =
+  Action<'hostIsolationExceptionsFormStateChanged'> & {
+    payload: HostIsolationExceptionsPageState['form']['status'];
+  };
+
+export type HostIsolationExceptionsFormEntryChanged =
+  Action<'hostIsolationExceptionsFormEntryChanged'> & {
+    payload: HostIsolationExceptionsPageState['form']['entry'];
+  };
+
+export type HostIsolationExceptionsCreateEntry = Action<'hostIsolationExceptionsCreateEntry'> & {
+  payload: HostIsolationExceptionsPageState['form']['entry'];
+};
+
 export type HostIsolationExceptionsDeleteItem = Action<'hostIsolationExceptionsMarkToDelete'> & {
   payload?: ExceptionListItemSchema;
 };
@@ -24,9 +38,10 @@ export type HostIsolationExceptionsDeleteStatusChanged =
   Action<'hostIsolationExceptionsDeleteStatusChanged'> & {
     payload: HostIsolationExceptionsPageState['deletion']['status'];
   };
-
 export type HostIsolationExceptionsPageAction =
   | HostIsolationExceptionsPageDataChanged
+  | HostIsolationExceptionsCreateEntry
+  | HostIsolationExceptionsFormStateChanged
   | HostIsolationExceptionsDeleteItem
   | HostIsolationExceptionsSubmitDelete
   | HostIsolationExceptionsDeleteStatusChanged;

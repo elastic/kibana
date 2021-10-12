@@ -26,7 +26,6 @@ kibana_vars=(
     console.enabled
     console.proxyConfig
     console.proxyFilter
-    csp.rules
     csp.strict
     csp.warnLegacyBrowsers
     csp.script_src
