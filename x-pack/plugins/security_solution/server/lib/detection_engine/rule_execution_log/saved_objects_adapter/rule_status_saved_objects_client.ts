@@ -12,10 +12,11 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
+  SavedObjectsFindOptionsReference,
 } from '../../../../../../../../src/core/server';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+// eslint-disable-next-line no-restricted-imports
+import { ruleStatusSavedObjectType } from '../../rules/legacy_rule_status/legacy_rule_status_saved_object_mappings';
 import { IRuleStatusSOAttributes } from '../../rules/types';
-import { buildChunkedOrFilter } from '../../signals/utils';
 
 export interface RuleStatusSavedObjectsClient {
   find: (
@@ -35,7 +36,7 @@ export interface FindBulkResponse {
 }
 
 /**
- * @pdeprecated Use RuleExecutionLogClient instead
+ * @deprecated Use RuleExecutionLogClient instead
  */
 export const ruleStatusSavedObjectsClientFactory = (
   savedObjectsClient: SavedObjectsClientContract
@@ -51,12 +52,16 @@ export const ruleStatusSavedObjectsClientFactory = (
     if (ids.length === 0) {
       return {};
     }
-    const filter = buildChunkedOrFilter(`${ruleStatusSavedObjectType}.attributes.alertId`, ids);
+    const filter = `${ruleStatusSavedObjectType}.references.type: "alert"`;
+    const references = ids.map<SavedObjectsFindOptionsReference>((alertId) => ({
+      id: alertId,
+      type: 'alert',
+    }));
     const order: 'desc' = 'desc';
     const aggs = {
       alertIds: {
         terms: {
-          field: `${ruleStatusSavedObjectType}.attributes.alertId`,
+          field: `${ruleStatusSavedObjectType}.references.id`,
           size: ids.length,
         },
         aggs: {
@@ -77,6 +82,7 @@ export const ruleStatusSavedObjectsClientFactory = (
     };
     const results = await savedObjectsClient.find({
       filter,
+      hasReference: references,
       aggs,
       type: ruleStatusSavedObjectType,
       perPage: 0,

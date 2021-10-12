@@ -10,7 +10,7 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '../../../../../../../src/core/server';
-import { ruleAssetSavedObjectType } from '../rules/saved_object_mappings';
+import { ruleAssetSavedObjectType } from '../rules/rule_asset/rule_asset_saved_object_mappings';
 import { IRuleAssetSavedObject } from '../rules/types';
 
 const DEFAULT_PAGE_SIZE = 100;
