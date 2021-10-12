@@ -9,6 +9,7 @@
 
     "src/cli/**/*",
     "src/cli_init/**/*",
+    "src/cli_plugin/**/*",
     "src/dev/**/*",
     "src/fixtures/**/*",
 
