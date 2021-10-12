@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
-import { combineLatest, forkJoin, of, Subscription } from 'rxjs';
+import { combineLatest, of, Subscription } from 'rxjs';
 import { mergeMap, switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ToastsStart } from 'kibana/public';

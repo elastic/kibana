@@ -50,6 +50,7 @@ export const useDataVisualizerGridData = (
   const { services } = useDataVisualizerKibana();
   const { uiSettings, data } = services;
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
+  const dataVisualizerListStateRef = useRef(dataVisualizerListState);
 
   const [lastRefresh, setLastRefresh] = useState(0);
   const [searchSessionId, setSearchSessionId] = useState<string | undefined>();
@@ -218,7 +219,11 @@ export const useDataVisualizerGridData = (
   }, [metricConfigs, nonMetricConfigs]);
 
   const overallStats = useOverallStats(fieldStatsRequest);
-  const strategyResponse = useFieldStatsSearchStrategy(fieldStatsRequest, configsWithoutStats);
+  const strategyResponse = useFieldStatsSearchStrategy(
+    fieldStatsRequest,
+    configsWithoutStats,
+    dataVisualizerListStateRef.current
+  );
 
   useEffect(() => {
     const timeUpdateSubscription = merge(

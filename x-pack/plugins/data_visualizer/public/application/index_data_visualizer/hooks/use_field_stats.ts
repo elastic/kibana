@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { Subscription } from 'rxjs';
+import { chunk } from 'lodash';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import type {
   FieldStatRawResponse,
@@ -17,6 +18,7 @@ import type {
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { FieldRequestConfig } from '../../../../common';
 import { FIELD_STATS_SEARCH_STRATEGY } from '../../../../common/search_strategy/constants';
+import { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 
 const getInitialRawResponse = (): FieldStatRawResponse =>
   ({
@@ -43,11 +45,17 @@ interface FieldStatsParams {
 
 export function useFieldStatsSearchStrategy<TParams extends FieldStatsSearchStrategyParams>(
   searchStrategyParams: TParams | undefined,
-  fieldStatsParams: FieldStatsParams | undefined
+  fieldStatsParams: FieldStatsParams | undefined,
+  initialDataVisualizerListState: DataVisualizerIndexBasedAppState
 ): FieldStatsSearchStrategyReturnBase<FieldStatRawResponse> {
   const {
     services: { data },
   } = useDataVisualizerKibana();
+
+  useEffect(
+    () => console.log('initial dataVisualizerListState', initialDataVisualizerListState),
+    [initialDataVisualizerListState]
+  );
 
   const [rawResponse, setRawResponse] = useReducer(
     getReducer<FieldStatRawResponse>(),
@@ -78,6 +86,21 @@ export function useFieldStatsSearchStrategy<TParams extends FieldStatsSearchStra
     )
       return;
 
+    const { sortField, sortDirection, pageSize } = initialDataVisualizerListState;
+    /**
+     * Sort the list of fields by the initial sort field and sort direction
+     * Then divide into chunks by the initial page size
+     */
+
+    let sortedCnfigs = [
+      ...fieldStatsParams.metricConfigs,
+      ...fieldStatsParams.nonMetricConfigs,
+    ].sort((a, b) => a[sortField].localeCompare(b[sortField]));
+    if (sortDirection === 'desc') {
+      sortedCnfigs = sortedCnfigs.reverse();
+    }
+    const chunks = chunk(sortedCnfigs, pageSize);
+    console.log('chunks', chunks);
     const request = {
       params: { ...searchStrategyParams, ...fieldStatsParams },
     };
@@ -120,7 +143,7 @@ export function useFieldStatsSearchStrategy<TParams extends FieldStatsSearchStra
           });
         },
       });
-  }, [data.search, searchStrategyParams, fieldStatsParams]);
+  }, [data.search, searchStrategyParams, fieldStatsParams, initialDataVisualizerListState]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();

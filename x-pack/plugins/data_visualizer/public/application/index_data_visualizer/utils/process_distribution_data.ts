@@ -6,9 +6,8 @@
  */
 
 import { last } from 'lodash';
-import { Distribution } from '../../types';
+import type { Distribution } from '../types/field_stats';
 
-// @todo: REMOVE
 export const processDistributionData = (
   percentiles: Array<{ value: number }>,
   percentileSpacing: number,
