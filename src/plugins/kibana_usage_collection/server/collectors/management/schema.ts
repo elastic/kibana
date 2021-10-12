@@ -220,7 +220,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:truncate:maxHeight': {
+  'truncate:maxHeight': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
