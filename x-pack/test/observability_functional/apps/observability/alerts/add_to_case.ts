@@ -46,6 +46,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           await observability.alerts.common.getAddToNewCaseSelectorOrFail();
         });
       });
+
+      it('opens a flyout when Add to new case is clicked', async () => {});
+
+      it('opens a modal when Add to existing case is clicked', async () => {});
     });
 
     describe('When user has read permissions for cases', () => {
