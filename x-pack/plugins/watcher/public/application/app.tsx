@@ -44,7 +44,7 @@ export interface AppDeps {
   toasts: ToastsSetup;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
-  theme: ChartsPluginSetup['theme'];
+  charts: ChartsPluginSetup;
   createTimeBuckets: () => any;
   licenseStatus$: Observable<LicenseStatus>;
   setBreadcrumbs: Parameters<RegisterManagementAppArgs['mount']>[0]['setBreadcrumbs'];

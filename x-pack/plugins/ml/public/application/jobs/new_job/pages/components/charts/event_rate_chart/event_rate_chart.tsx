@@ -10,7 +10,6 @@ import {
   HistogramBarSeries,
   Chart,
   ScaleType,
-  Settings,
   TooltipType,
   BrushEndListener,
   PartialTheme,
@@ -22,6 +21,7 @@ import { useChartColors } from '../common/settings';
 import { LoadingWrapper } from '../loading_wrapper';
 import { Anomalies } from '../common/anomalies';
 import { OverlayRange } from './overlay_range';
+import { useMlKibana } from '../../../../../../contexts/kibana';
 
 interface Props {
   eventRateChartData: LineChartPoint[];
@@ -51,6 +51,7 @@ export const EventRateChart: FC<Props> = ({
   overlayRanges,
   onBrushEnd,
 }) => {
+  const { charts: { SharedChartSettings } } = useMlKibana().services;
   const { EVENT_RATE_COLOR_WITH_ANOMALIES, EVENT_RATE_COLOR } = useChartColors();
   const barColor = fadeChart ? EVENT_RATE_COLOR_WITH_ANOMALIES : EVENT_RATE_COLOR;
 
@@ -67,11 +68,7 @@ export const EventRateChart: FC<Props> = ({
         <Chart>
           {showAxis === true && <Axes />}
 
-          {onBrushEnd === undefined ? (
-            <Settings tooltip={TooltipType.None} theme={theme} />
-          ) : (
-            <Settings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} theme={theme} />
-          )}
+          <SharedChartSettings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} theme={theme} />
 
           {overlayRanges &&
             overlayRanges.map((range, i) => (

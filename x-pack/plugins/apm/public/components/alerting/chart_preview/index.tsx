@@ -16,13 +16,14 @@ import {
   RectAnnotation,
   RectAnnotationDatum,
   ScaleType,
-  Settings,
   TickFormatter,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Coordinate } from '../../../../typings/timeseries';
 import { useTheme } from '../../../hooks/use_theme';
+import { ApmPluginStartDeps } from '../../../plugin';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
@@ -35,6 +36,7 @@ export function ChartPreview({
   yTickFormat,
   threshold,
 }: ChartPreviewProps) {
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ApmPluginStartDeps>();
   const theme = useTheme();
   const thresholdOpacity = 0.3;
   const timestamps = data.map((d) => d.x);
@@ -71,7 +73,7 @@ export function ChartPreview({
     <>
       <EuiSpacer size="m" />
       <Chart size={{ height: 150 }} data-test-subj="ChartPreview">
-        <Settings tooltip="none" />
+        <SharedChartSettings tooltip="none" />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}
           domainType={AnnotationDomainType.YDomain}

@@ -36,7 +36,7 @@ const TagCloudChart = lazy(() => import('../components/tagcloud_component'));
 
 export const tagcloudRenderer: (
   deps: ExpressioTagcloudRendererDependencies
-) => ExpressionRenderDefinition<TagcloudRendererConfig> = ({ palettes }) => ({
+) => ExpressionRenderDefinition<TagcloudRendererConfig> = ({ palettes, SharedChartSettings }) => ({
   name: EXPRESSION_NAME,
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
@@ -63,6 +63,7 @@ export const tagcloudRenderer: (
               <TagCloudChart
                 {...config}
                 palettesRegistry={palettesRegistry}
+                SharedChartSettings={SharedChartSettings}
                 renderComplete={handlers.done}
                 fireEvent={handlers.event}
                 syncColors={config.syncColors}

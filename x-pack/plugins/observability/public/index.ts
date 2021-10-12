@@ -65,7 +65,7 @@ export { useEsSearch, createEsParams } from './hooks/use_es_search';
 
 export * from './typings';
 
-export { useChartTheme } from './hooks/use_chart_theme';
+export { chartThemeOverrides } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';

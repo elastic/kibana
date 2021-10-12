@@ -11,15 +11,16 @@ import {
   CurveType,
   LineSeries,
   ScaleType,
-  Settings,
+  PartialTheme,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { merge } from 'lodash';
 import React from 'react';
-import { useChartTheme } from '../../../../../../observability/public';
+import { chartThemeOverrides } from '../../../../../../observability/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
+import { ApmPluginStartDeps } from '../../../../plugin';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 
 export type Color =
@@ -56,11 +57,11 @@ export function SparkPlot({
   comparisonSeries?: Coordinate[];
 }) {
   const theme = useTheme();
-  const defaultChartTheme = useChartTheme();
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ApmPluginStartDeps>();
   const comparisonChartTheme = getComparisonChartTheme(theme);
   const hasComparisonSeries = !!comparisonSeries?.length;
 
-  const sparkplotChartTheme = merge({}, defaultChartTheme, {
+  const sparkplotChartTheme: PartialTheme = {
     chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
     lineSeriesStyle: {
       point: { opacity: 0 },
@@ -69,7 +70,7 @@ export function SparkPlot({
       point: { opacity: 0 },
     },
     ...(hasComparisonSeries ? comparisonChartTheme : {}),
-  });
+  };
 
   const colorValue = theme.eui[color];
 
@@ -94,8 +95,11 @@ export function SparkPlot({
       <EuiFlexItem grow={false}>
         {hasValidTimeseries(series) ? (
           <Chart size={chartSize}>
-            <Settings
-              theme={sparkplotChartTheme}
+            <SharedChartSettings
+              theme={[
+                sparkplotChartTheme,
+                chartThemeOverrides,
+              ]}
               showLegend={false}
               tooltip="none"
             />

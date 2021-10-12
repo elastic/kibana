@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PartialTheme } from '@elastic/charts';
 import moment from 'moment';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { getDateDifference } from '../../../../common/utils/formatters';
@@ -15,7 +16,7 @@ export enum TimeRangeComparisonType {
   PeriodBefore = 'period',
 }
 
-export function getComparisonChartTheme(theme: EuiTheme) {
+export function getComparisonChartTheme(theme: EuiTheme): PartialTheme {
   return {
     areaSeriesStyle: {
       area: {

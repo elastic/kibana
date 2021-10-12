@@ -13,7 +13,6 @@ import {
   GeometryValue,
   Position,
   ScaleType,
-  Settings,
   TooltipInfo,
   TooltipProps,
   TooltipType,
@@ -22,7 +21,8 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '../../../../../../observability/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { chartThemeOverrides } from '../../../../../../observability/public';
 import { SERVICE_NODE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import {
   asTransactionRate,
@@ -30,6 +30,7 @@ import {
 } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
+import { ApmPluginStartDeps } from '../../../../plugin';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import * as urlHelpers from '../../Links/url_helpers';
 import { ChartContainer } from '../chart_container';
@@ -56,7 +57,7 @@ export function InstancesLatencyDistributionChart({
   const hasData = items.length > 0;
 
   const theme = useTheme();
-  const chartTheme = useChartTheme();
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ApmPluginStartDeps>();
 
   const maxLatency = Math.max(...items.map((item) => item.latency ?? 0));
   const latencyFormatter = getDurationFormatter(maxLatency);
@@ -116,12 +117,12 @@ export function InstancesLatencyDistributionChart({
       </EuiTitle>
       <ChartContainer hasData={hasData} height={height} status={status}>
         <Chart id="instances-latency-distribution">
-          <Settings
+          <SharedChartSettings
             legendPosition={Position.Bottom}
             onElementClick={handleElementClick}
             tooltip={tooltip}
             showLegend
-            theme={chartTheme}
+            theme={chartThemeOverrides}
             xDomain={xDomain}
           />
           <BubbleSeries

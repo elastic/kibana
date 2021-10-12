@@ -54,6 +54,7 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   timeZone: string;
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
+  SharedChartSettings: ChartsPluginSetup['SharedChartSettings'];
   onClickValue: (data: LensFilterEvent['data']) => void;
   onSelectRange: (data: LensBrushEvent['data']) => void;
   paletteService: PaletteRegistry;

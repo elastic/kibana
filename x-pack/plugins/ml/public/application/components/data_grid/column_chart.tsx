@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import classNames from 'classnames';
 
-import { BarSeries, Chart, Settings } from '@elastic/charts';
+import { BarSeries, Chart, PartialTheme } from '@elastic/charts';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import './column_chart.scss';
@@ -16,6 +16,7 @@ import './column_chart.scss';
 import { isUnsupportedChartData, ChartData } from '../../../../common/types/field_histograms';
 
 import { useColumnChart } from './use_column_chart';
+import { useMlKibana } from '../../contexts/kibana';
 
 interface Props {
   chartData: ChartData;
@@ -25,7 +26,7 @@ interface Props {
   maxChartColumns?: number;
 }
 
-const columnChartTheme = {
+const columnChartTheme: PartialTheme = {
   background: { color: 'transparent' },
   chartMargins: {
     left: 0,
@@ -41,6 +42,7 @@ const columnChartTheme = {
   },
   scales: { barsPadding: 0.1 },
 };
+
 export const ColumnChart: FC<Props> = ({
   chartData,
   columnType,
@@ -49,13 +51,14 @@ export const ColumnChart: FC<Props> = ({
   maxChartColumns,
 }) => {
   const { data, legendText, xScaleType } = useColumnChart(chartData, columnType, maxChartColumns);
+  const { charts: { SharedChartSettings } } = useMlKibana().services;
 
   return (
     <div data-test-subj={dataTestSubj}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
         <div className="mlDataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
           <Chart>
-            <Settings theme={columnChartTheme} />
+            <SharedChartSettings theme={columnChartTheme} />
             <BarSeries
               id="histogram"
               name="count"

@@ -13,11 +13,13 @@ import { ApmPluginSetupDeps } from '../../plugin';
 import { MapsStartApi } from '../../../../maps/public';
 import { ObservabilityPublicStart } from '../../../../observability/public';
 import { Start as InspectorPluginStart } from '../../../../../../src/plugins/inspector/public';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 export interface ApmPluginContextValue {
   appMountParameters: AppMountParameters;
   config: ConfigSchema;
   core: CoreStart;
+  data: DataPublicPluginStart;
   inspector: InspectorPluginStart;
   plugins: ApmPluginSetupDeps & { maps?: MapsStartApi };
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;

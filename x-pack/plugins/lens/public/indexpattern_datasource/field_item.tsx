@@ -32,7 +32,6 @@ import {
   niceTimeFormatter,
   Position,
   ScaleType,
-  Settings,
   TooltipType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
@@ -68,7 +67,7 @@ export interface FieldItemProps {
   exists: boolean;
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
-  chartsThemeService: ChartsPluginSetup['theme'];
+  SharedChartSettings: ChartsPluginSetup['SharedChartSettings'];
   filters: Filter[];
   hideDetails?: boolean;
   itemIndex: number;
@@ -394,7 +393,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     dateRange,
     core,
     sampledValues,
-    chartsThemeService,
+    SharedChartSettings,
     fieldFormats,
     dropOntoWorkspace,
     editField,
@@ -404,8 +403,6 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     uiActions,
   } = props;
 
-  const chartTheme = chartsThemeService.useChartsTheme();
-  const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   let histogramDefault = !!props.histogram;
 
   const totalValuesCount =
@@ -610,10 +607,8 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     if (field.type === 'date') {
       return wrapInPopover(
         <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: 300 - 32 }}>
-          <Settings
+          <SharedChartSettings
             tooltip={{ type: TooltipType.None }}
-            theme={chartTheme}
-            baseTheme={chartBaseTheme}
             xDomain={
               fromDate && toDate
                 ? {
@@ -650,11 +645,9 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     } else if (showingHistogram || !topValues || !topValues.buckets.length) {
       return wrapInPopover(
         <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: '100%' }}>
-          <Settings
+          <SharedChartSettings
             rotation={90}
             tooltip={{ type: TooltipType.None }}
-            theme={chartTheme}
-            baseTheme={chartBaseTheme}
           />
 
           <Axis

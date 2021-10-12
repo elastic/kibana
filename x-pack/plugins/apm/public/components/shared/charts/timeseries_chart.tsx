@@ -18,16 +18,17 @@ import {
   Position,
   RectAnnotation,
   ScaleType,
-  Settings,
+  PartialTheme,
   YDomainRange,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Suspense, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   LazyAlertsFlyout,
-  useChartTheme,
+  chartThemeOverrides,
 } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import {
@@ -41,6 +42,7 @@ import { APMServiceAlert } from '../../../context/apm_service/apm_service_contex
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
+import { ApmPluginStartDeps } from '../../../plugin';
 import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
@@ -66,7 +68,7 @@ interface Props {
   anomalyTimeseries?: ReturnType<
     typeof getLatencyChartSelector
   >['anomalyTimeseries'];
-  customTheme?: Record<string, unknown>;
+  customTheme?: PartialTheme;
   alerts?: APMServiceAlert[];
 }
 export function TimeseriesChart({
@@ -88,8 +90,8 @@ export function TimeseriesChart({
   const { getFormatter } = observabilityRuleTypeRegistry;
   const { annotations } = useAnnotationsContext();
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ApmPluginStartDeps>();
   const theme = useTheme();
-  const chartTheme = useChartTheme();
   const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
     undefined
   );
@@ -113,16 +115,18 @@ export function TimeseriesChart({
       id={id}
     >
       <Chart ref={chartRef} id={id}>
-        <Settings
+        <SharedChartSettings
           tooltip={{ stickTo: 'top' }}
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-          theme={{
-            ...chartTheme,
-            areaSeriesStyle: {
-              line: { visible: false },
+          theme={[
+            customTheme,
+            {
+              areaSeriesStyle: {
+                line: { visible: false },
+              },
             },
-            ...customTheme,
-          }}
+            chartThemeOverrides,
+          ]}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
             tooltip: { visible: true },

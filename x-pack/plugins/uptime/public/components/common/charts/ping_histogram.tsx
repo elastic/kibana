@@ -34,6 +34,8 @@ import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
 import { createExploratoryViewUrl } from '../../../../../observability/public';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { monitorStatusSelector } from '../../../state/selectors';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ClientPluginsStart } from '../../../apps/plugin';
 
 export interface PingHistogramComponentProps {
   /**
@@ -68,10 +70,8 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   loading = false,
   height,
 }) => {
-  const {
-    colors: { danger, gray },
-    chartTheme,
-  } = useContext(UptimeThemeContext);
+  const { colors: { danger, gray } } = useContext(UptimeThemeContext);
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ClientPluginsStart>();
 
   const monitorId = useMonitorId();
 
@@ -138,7 +138,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
         })}
       >
         <Chart>
-          <Settings
+          <SharedChartSettings
             xDomain={{
               minInterval,
               min: absoluteStartDate,
@@ -147,7 +147,6 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             showLegend={false}
             onBrushEnd={onBrushEnd}
             onElementClick={onBarClicked}
-            {...chartTheme}
           />
           <Axis
             id={i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {

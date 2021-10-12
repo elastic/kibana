@@ -27,6 +27,7 @@ import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import { StartServices } from './contexts/kibana';
 export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
   MlStartDependencies;
 
@@ -72,10 +73,11 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     redirectToMlAccessDeniedPage,
   };
 
-  const services = {
+  const services: Omit<StartServices, 'mlServices'> = {
     kibanaVersion: deps.kibanaVersion,
     share: deps.share,
     data: deps.data,
+    charts: deps.charts,
     security: deps.security,
     licenseManagement: deps.licenseManagement,
     storage: localStorage,
@@ -101,7 +103,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
             services={{
               ...services,
               mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
-            }}
+            } as StartServices}
           >
             <MlRouter pageDeps={pageDeps} />
           </KibanaContextProvider>

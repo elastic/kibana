@@ -28,11 +28,12 @@ import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords } from '../../../state/actions';
-import { UptimeThemeContext } from '../../../contexts';
 import { MONITOR_CHART_HEIGHT } from '../../monitor';
 import { monitorStatusSelector } from '../../../state/selectors';
 import { microToMilli, microToSec } from '../../../lib/formatting';
 import { MS_LABEL, SECONDS_LABEL } from '../translations';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ClientPluginsStart } from '../../../apps/plugin';
 
 interface DurationChartProps {
   /**
@@ -66,7 +67,7 @@ export const DurationChartComponent = ({
 
   const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
 
-  const { chartTheme } = useContext(UptimeThemeContext);
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ClientPluginsStart>();
 
   const onBrushEnd: BrushEndListener = ({ x }) => {
     if (!x) {
@@ -103,14 +104,13 @@ export const DurationChartComponent = ({
     >
       {hasLines && typeof monitor?.monitor?.type === 'string' ? (
         <Chart>
-          <Settings
+          <SharedChartSettings
             xDomain={{ min, max }}
             showLegend
             showLegendExtra
             legendPosition={Position.Right}
             onBrushEnd={onBrushEnd}
             onLegendItemClick={legendToggleVisibility}
-            {...chartTheme}
           />
           <Axis
             id="bottom"

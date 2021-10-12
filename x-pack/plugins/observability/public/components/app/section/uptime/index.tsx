@@ -23,11 +23,12 @@ import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
-import { useChartTheme } from '../../../../hooks/use_chart_theme';
+import { chartThemeOverrides } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { Series } from '../../../../typings';
+import { useKibana } from '../../../../utils/kibana_react';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
@@ -38,7 +39,7 @@ interface Props {
 
 export function UptimeSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
-  const chartTheme = useChartTheme();
+  const { charts: { SharedChartSettings } } = useKibana().services;
   const history = useHistory();
   const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
@@ -122,9 +123,9 @@ export function UptimeSection({ bucketSize }: Props) {
 
       {/* Chart section */}
       <ChartContainer isInitialLoad={isLoading && !data}>
-        <Settings
+        <SharedChartSettings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-          theme={chartTheme}
+          theme={chartThemeOverrides}
           showLegend={false}
           legendPosition={Position.Right}
           xDomain={{ min, max }}

@@ -18,7 +18,6 @@ import {
 import { throttle } from 'lodash';
 import {
   Chart,
-  Settings,
   Heatmap,
   HeatmapElementEvent,
   ElementClickListener,
@@ -43,7 +42,7 @@ import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
-import { useUiSettings } from '../contexts/kibana';
+import { useMlKibana, useUiSettings } from '../contexts/kibana';
 import {
   Y_AXIS_LABEL_WIDTH,
   Y_AXIS_LABEL_PADDING,
@@ -194,6 +193,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const isDarkTheme = !!useUiSettings().get('theme:darkMode');
+  const { charts: { SharedChartSettings } } = useMlKibana().services;
   const { euiTheme } = useCurrentEuiTheme();
 
   // Holds the container height for previously fetched data
@@ -420,7 +420,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                 <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
                   {showSwimlane && !isLoading && (
                     <Chart className={'mlSwimLaneContainer'}>
-                      <Settings
+                      <SharedChartSettings
                         onElementClick={onElementClick}
                         showLegend={showLegend}
                         legendPosition={Position.Top}

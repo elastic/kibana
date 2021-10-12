@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { Chart, Settings, TooltipType } from '@elastic/charts';
+import { Chart, TooltipType } from '@elastic/charts';
 import { ModelItem, Anomaly } from '../../../../common/results_loader';
 import { Anomalies } from '../common/anomalies';
 import { ModelBounds } from './model_bounds';
@@ -16,6 +16,7 @@ import { Axes } from '../common/axes';
 import { getXRange } from '../common/utils';
 import { LineChartPoint } from '../../../../common/chart_loader';
 import { LoadingWrapper } from '../loading_wrapper';
+import { useMlKibana } from '../../../../../../contexts/kibana';
 
 export enum CHART_TYPE {
   LINE,
@@ -41,13 +42,14 @@ export const AnomalyChart: FC<Props> = ({
   width,
   loading = false,
 }) => {
+  const { charts: { SharedChartSettings } } = useMlKibana().services;
   const data = chartType === CHART_TYPE.SCATTER ? flattenData(chartData) : chartData;
   const xDomain = getXRange(data);
   return (
     <div style={{ width, height }} data-test-subj={`mlAnomalyChart ${CHART_TYPE[chartType]}`}>
       <LoadingWrapper height={height} hasData={data.length > 0} loading={loading}>
         <Chart>
-          <Settings xDomain={xDomain} tooltip={TooltipType.None} />
+          <SharedChartSettings xDomain={xDomain} tooltip={TooltipType.None} />
           <Axes chartData={data} />
           <Anomalies anomalyData={anomalyData} />
           <ModelBounds modelData={modelData} />

@@ -84,7 +84,7 @@ export enum SeriesType {
 }
 
 // Apply margins and paddings: https://ela.st/charts-spacing
-const theme: PartialTheme = {
+export const chartThemeOverrides: PartialTheme = {
   chartMargins: {
     left: 0,
     right: 0,
@@ -101,14 +101,6 @@ const theme: PartialTheme = {
   scales: {
     barsPadding: 0.05,
   },
-};
-export const useTheme = () => {
-  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
-  const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const themeValue = useMemo(() => mergeWithDefaultTheme(theme, defaultTheme), []);
-
-  return themeValue;
 };
 
 export const chartDefaultSettings = {

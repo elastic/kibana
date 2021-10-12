@@ -14,17 +14,17 @@ import {
   DomainRange,
   Position,
   ScaleType,
-  Settings,
   TickFormatter,
   TooltipInfo,
 } from '@elastic/charts';
 import { BAR_HEIGHT } from './constants';
-import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
 import { useWaterfallContext, WaterfallData } from '..';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
 import { WaterfallChartMarkers } from './waterfall_markers';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { ClientPluginsStart } from '../../../../../apps/plugin';
 
 const getChartHeight = (data: WaterfallData): number => {
   // We get the last item x(number of bars) and adds 1 to cater for 0 index
@@ -70,7 +70,9 @@ export const WaterfallBarChart = ({
   barStyleAccessor,
   index,
 }: Props) => {
-  const theme = useChartTheme();
+  const {
+    services: { charts: { SharedChartSettings } },
+  } = useKibana<ClientPluginsStart>();
   const { onElementClick, onProjectionClick } = useWaterfallContext();
   const handleElementClick = useMemo(() => onElementClick, [onElementClick]);
   const handleProjectionClick = useMemo(() => onProjectionClick, [onProjectionClick]);
@@ -83,7 +85,7 @@ export const WaterfallBarChart = ({
       data-test-subj="wfDataOnlyBarChart"
     >
       <Chart className="data-chart">
-        <Settings
+        <SharedChartSettings
           showLegend={false}
           rotation={90}
           tooltip={{
@@ -92,7 +94,6 @@ export const WaterfallBarChart = ({
             boundary: document.getElementById('app-fixed-viewport') ?? undefined,
             customTooltip: Tooltip,
           }}
-          theme={theme}
           onProjectionClick={handleProjectionClick}
           onElementClick={handleElementClick}
         />

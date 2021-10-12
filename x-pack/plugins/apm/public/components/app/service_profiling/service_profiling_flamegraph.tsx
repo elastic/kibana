@@ -10,7 +10,6 @@ import {
   Partition,
   PartitionLayout,
   PrimitiveValue,
-  Settings,
   TooltipInfo,
 } from '@elastic/charts';
 import {
@@ -30,7 +29,8 @@ import { rgba } from 'polished';
 import React, { useMemo, useState } from 'react';
 import seedrandom from 'seedrandom';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useChartTheme } from '../../../../../observability/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { chartThemeOverrides } from '../../../../../observability/public';
 import {
   getValueTypeConfig,
   ProfileNode,
@@ -44,6 +44,7 @@ import {
 } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
+import { ApmPluginStartDeps } from '../../../plugin';
 import { unit } from '../../../utils/style';
 
 const colors = euiPaletteForTemperature(100).slice(50, 85);
@@ -136,6 +137,7 @@ export function ServiceProfilingFlamegraph({
   end?: string;
 }) {
   const theme = useTheme();
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ApmPluginStartDeps>();
 
   const [collapseSimilarFrames, setCollapseSimilarFrames] = useState(true);
   const [highlightFilter, setHighlightFilter] = useState('');
@@ -284,8 +286,6 @@ export function ServiceProfilingFlamegraph({
     });
   }, [points, highlightFilter, data]);
 
-  const chartTheme = useChartTheme();
-
   const chartSize = {
     height: layers.length * 20,
     width: '100%',
@@ -303,8 +303,8 @@ export function ServiceProfilingFlamegraph({
     <EuiFlexGroup direction="row">
       <EuiFlexItem grow>
         <Chart size={chartSize}>
-          <Settings
-            theme={chartTheme}
+          <SharedChartSettings
+            theme={chartThemeOverrides}
             tooltip={{
               customTooltip: (info) => (
                 <CustomTooltip

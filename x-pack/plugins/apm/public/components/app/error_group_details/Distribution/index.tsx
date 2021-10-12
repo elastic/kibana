@@ -12,7 +12,6 @@ import {
   niceTimeFormatter,
   Position,
   ScaleType,
-  Settings,
   SettingsSpec,
   TooltipValue,
 } from '@elastic/charts';
@@ -31,6 +30,8 @@ import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_ann
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
 
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ApmPluginStartDeps } from '../../../../plugin';
 const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
   ALERT_RULE_TYPE_ID_NON_TYPED;
 
@@ -62,6 +63,7 @@ interface Props {
 }
 
 export function ErrorDistribution({ distribution, title }: Props) {
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ApmPluginStartDeps>();
   const theme = useTheme();
   const buckets = getFormattedBuckets(
     distribution.buckets,
@@ -98,7 +100,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
       </EuiTitle>
       <div style={{ height: 180 }}>
         <Chart>
-          <Settings
+          <SharedChartSettings
             xDomain={{ min: xMin, max: xMax }}
             tooltip={tooltipProps}
             showLegend

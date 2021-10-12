@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import classNames from 'classnames';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType } from '@elastic/charts';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import './column_chart.scss';
@@ -16,6 +16,7 @@ import './column_chart.scss';
 import { isUnsupportedChartData, ChartData } from './field_histograms';
 
 import { useColumnChart } from './use_column_chart';
+import { getPluginsStart } from '../../../../../../kibana_services';
 
 interface Props {
   chartData: ChartData;
@@ -36,12 +37,13 @@ export const ColumnChart: FC<Props> = ({
   maxChartColumns,
 }) => {
   const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns);
+  const { SharedChartSettings } = getPluginsStart().charts;
 
   return (
     <div data-test-subj={dataTestSubj}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
         <Chart size={size}>
-          <Settings
+          <SharedChartSettings
             xDomain={{ min: 0, max: 9 }}
             theme={{ chartMargins: zeroSize, chartPaddings: zeroSize }}
           />

@@ -21,6 +21,7 @@ import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
 import { setReadonlyBadge } from '../updateBadge';
 import { ApmAppRoot } from '../components/routing/app_root';
+import { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 
 /**
  * This module is rendered asynchronously in the Kibana platform.
@@ -42,7 +43,7 @@ export const renderApp = ({
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) => {
   const { element } = appMountParameters;
-  const apmPluginContextValue = {
+  const apmPluginContextValue: ApmPluginContextValue = {
     appMountParameters,
     config,
     core: coreStart,

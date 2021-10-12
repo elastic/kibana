@@ -10,25 +10,19 @@ import {
   BarSeries,
   BrushEndListener,
   Chart,
-  DARK_THEME,
-  LIGHT_THEME,
   niceTimeFormatByDay,
   ScaleType,
   SeriesNameFn,
-  Settings,
   timeFormatter,
   Position,
 } from '@elastic/charts';
-import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-} from '@elastic/eui/dist/eui_charts_theme';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { ApmPluginStartDeps } from '../../../../plugin';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { ChartWrapper } from '../ChartWrapper';
 import { I18LABELS } from '../translations';
@@ -42,6 +36,7 @@ interface Props {
 }
 
 export function PageViewsChart({ data, loading }: Props) {
+  const { services: { charts: { SharedChartSettings, theme } } } = useKibana<ApmPluginStartDeps>();
   const history = useHistory();
   const { urlParams } = useUrlParams();
 
@@ -76,8 +71,6 @@ export function PageViewsChart({ data, loading }: Props) {
 
   const breakdownAccessors = data?.topItems?.length ? data?.topItems : ['y'];
 
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
   const customSeriesNaming: SeriesNameFn = ({ yAccessor }) => {
     if (yAccessor === 'y') {
       return I18LABELS.overall;
@@ -86,17 +79,11 @@ export function PageViewsChart({ data, loading }: Props) {
     return yAccessor;
   };
 
-  const euiChartTheme = darkMode
-    ? EUI_CHARTS_THEME_DARK
-    : EUI_CHARTS_THEME_LIGHT;
-
   return (
     <ChartWrapper loading={loading} height="250px">
       {(!loading || data) && (
         <Chart>
-          <Settings
-            baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
-            theme={euiChartTheme.theme}
+          <SharedChartSettings
             showLegend
             onBrushEnd={onBrushEnd}
             xDomain={{
@@ -127,7 +114,7 @@ export function PageViewsChart({ data, loading }: Props) {
             name={customSeriesNaming}
             color={
               !hasBreakdowns
-                ? euiChartTheme.theme.colors?.vizColors?.[1]
+                ? theme.useChartsTheme().colors?.vizColors?.[1]
                 : undefined
             }
           />

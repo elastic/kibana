@@ -22,6 +22,7 @@ interface SetupDeps {
 /** @internal  */
 export interface ExpressioTagcloudRendererDependencies {
   palettes: ChartsPluginSetup['palettes'];
+  SharedChartSettings: ChartsPluginSetup['SharedChartSettings'];
 }
 
 interface StartDeps {
@@ -39,6 +40,7 @@ export class ExpressionTagcloudPlugin
   public setup(core: CoreSetup, { expressions, charts }: SetupDeps): ExpressionTagcloudPluginSetup {
     const rendererDependencies: ExpressioTagcloudRendererDependencies = {
       palettes: charts.palettes,
+      SharedChartSettings: charts.SharedChartSettings,
     };
     expressions.registerFunction(tagcloudFunction);
     expressions.registerRenderer(tagcloudRenderer(rendererDependencies));

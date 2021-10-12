@@ -115,6 +115,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   timeZone,
   formatFactory,
   chartsThemeService,
+  SharedChartSettings,
   onClickValue,
   onSelectRange,
   paletteService,
@@ -327,13 +328,12 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
 
   return (
     <Chart>
-      <Settings
+      <SharedChartSettings
         onElementClick={onElementClick}
         showLegend={args.legend.isVisible}
         legendPosition={args.legend.position}
         debugState={window._echDebugStateFlag ?? false}
         theme={{
-          ...chartTheme,
           legend: {
             labelOptions: { maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0 },
           },

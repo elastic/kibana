@@ -15,7 +15,6 @@ import {
   Axis,
   Chart,
   Position,
-  Settings,
   AnnotationDomainType,
   LineAnnotation,
   TooltipType,
@@ -76,7 +75,7 @@ export const TimeSeries = ({
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { theme: themeService, activeCursor: activeCursorService } = getCharts();
+  const { theme: themeService, SharedChartSettings, activeCursor: activeCursorService } = getCharts();
 
   const chartRef = useRef();
   const chartTheme = themeService.useChartsTheme();
@@ -107,7 +106,6 @@ export const TimeSeries = ({
 
   // apply legend style change if bgColor is configured
   const classes = classNames(getChartClasses(backgroundColor));
-
   const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   const onBrushEndListener = ({ x }) => {
@@ -140,7 +138,7 @@ export const TimeSeries = ({
   );
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
-      <Settings
+      <SharedChartSettings
         debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}

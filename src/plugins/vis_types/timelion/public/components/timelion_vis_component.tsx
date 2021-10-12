@@ -102,9 +102,7 @@ const TimelionVisComponent = ({
   const chart = seriesList.list;
   const chartsService = getCharts();
 
-  const chartTheme = chartsService.theme.useChartsTheme();
-  const chartBaseTheme = chartsService.theme.useChartsBaseTheme();
-
+  const SharedChartSettings = chartsService.SharedChartSettings;
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
     isDateHistogram: true,
   });
@@ -188,7 +186,7 @@ const TimelionVisComponent = ({
         </EuiTitle>
       )}
       <Chart ref={chartRef} renderer="canvas" size={{ width: '100%' }}>
-        <Settings
+        <SharedChartSettings
           debugState={window._echDebugStateFlag ?? false}
           onBrushEnd={brushEndListener}
           showLegend={legend.showLegend}
@@ -196,8 +194,6 @@ const TimelionVisComponent = ({
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
           onPointerUpdate={handleCursorUpdate}
-          theme={chartTheme}
-          baseTheme={chartBaseTheme}
           tooltip={{
             snap: true,
             headerFormatter: ({ value }) => tickFormat(value),

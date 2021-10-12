@@ -14,13 +14,13 @@ import {
   DomainRange,
   Position,
   ScaleType,
-  Settings,
   TickFormatter,
   TooltipType,
 } from '@elastic/charts';
-import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartFixedAxisContainer } from './styles';
 import { WaterfallChartMarkers } from './waterfall_markers';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { ClientPluginsStart } from '../../../../../apps/plugin';
 
 interface Props {
   tickFormat: TickFormatter;
@@ -29,16 +29,17 @@ interface Props {
 }
 
 export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }: Props) => {
-  const theme = useChartTheme();
+  const {
+    services: { charts: { SharedChartSettings } },
+  } = useKibana<ClientPluginsStart>();
 
   return (
     <WaterfallChartFixedAxisContainer>
       <Chart className="axis-only-chart" data-test-subj="axisOnlyChart">
-        <Settings
+        <SharedChartSettings
           showLegend={false}
           rotation={90}
           tooltip={{ type: TooltipType.None }}
-          theme={theme}
         />
 
         <Axis

@@ -46,9 +46,11 @@ import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
 import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import { registerManagementSection } from './application/management';
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
   share: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
   uiActions: UiActionsStart;
@@ -102,6 +104,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           coreStart,
           {
             data: pluginsStart.data,
+            charts: pluginsStart.charts,
             share: pluginsStart.share,
             kibanaLegacy: pluginsStart.kibanaLegacy,
             security: pluginsSetup.security,

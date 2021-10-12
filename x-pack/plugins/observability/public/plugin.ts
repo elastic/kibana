@@ -45,6 +45,7 @@ import { createNavigationRegistry, NavigationEntry } from './services/navigation
 import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -57,6 +58,7 @@ export interface ObservabilityPublicPluginsSetup {
 export interface ObservabilityPublicPluginsStart {
   cases: CasesUiStart;
   embeddable: EmbeddableStart;
+  charts: ChartsPluginStart;
   home?: HomePublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;

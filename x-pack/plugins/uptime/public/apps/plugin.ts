@@ -42,6 +42,7 @@ import {
   LazySyntheticsPolicyEditExtension,
 } from '../components/fleet_package';
 import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
+import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -53,6 +54,7 @@ export interface ClientPluginsSetup {
 export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   fleet?: FleetStart;
   observability: ObservabilityPublicStart;

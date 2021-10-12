@@ -13,6 +13,7 @@ import { palette, systemPalette } from '../common';
 import { ThemeService, LegacyColorsService } from './services';
 import { PaletteService } from './services/palettes/service';
 import { ActiveCursor } from './services/active_cursor';
+import { getEuiChartSettings } from './services/settings/eui_chart_settings';
 
 export type Theme = Omit<ThemeService, 'init'>;
 export type Color = Omit<LegacyColorsService, 'init'>;
@@ -26,6 +27,10 @@ export interface ChartsPluginSetup {
   legacyColors: Color;
   theme: Theme;
   palettes: ReturnType<PaletteService['setup']>;
+  /**
+   * Wrapper around elastic charts `Settings` component to share settings.
+   */
+  SharedChartSettings: ReturnType<typeof getEuiChartSettings>;
 }
 
 /** @public */
@@ -41,6 +46,7 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
   private readonly activeCursor = new ActiveCursor();
 
   private palettes: undefined | ReturnType<PaletteService['setup']>;
+  private SharedChartSettings: undefined | ReturnType<typeof getEuiChartSettings>;
 
   public setup(core: CoreSetup, dependencies: SetupDependencies): ChartsPluginSetup {
     dependencies.expressions.registerFunction(palette);
@@ -48,6 +54,7 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
     this.themeService.init(core.uiSettings);
     this.legacyColorsService.init(core.uiSettings);
     this.palettes = this.paletteService.setup(this.legacyColorsService);
+    this.SharedChartSettings = getEuiChartSettings(this.themeService);
 
     this.activeCursor.setup();
 
@@ -55,6 +62,7 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
       legacyColors: this.legacyColorsService,
       theme: this.themeService,
       palettes: this.palettes,
+      SharedChartSettings: this.SharedChartSettings!,
     };
   }
 
@@ -64,6 +72,7 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
       theme: this.themeService,
       palettes: this.palettes!,
       activeCursor: this.activeCursor,
+      SharedChartSettings: this.SharedChartSettings!,
     };
   }
 }

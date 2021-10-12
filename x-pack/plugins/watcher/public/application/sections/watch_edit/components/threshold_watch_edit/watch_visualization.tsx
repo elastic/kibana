@@ -12,9 +12,9 @@ import {
   Chart,
   LineAnnotation,
   LineSeries,
+  PartialTheme,
   Position,
   ScaleType,
-  Settings,
 } from '@elastic/charts';
 import dateMath from '@elastic/datemath';
 import moment from 'moment-timezone';
@@ -32,17 +32,15 @@ import { comparators } from '../../../../models/watch/comparators';
 import { SectionError, Error } from '../../../../components';
 import { useAppContext } from '../../../../app_context';
 
-const customTheme = () => {
-  return {
-    lineSeriesStyle: {
-      line: {
-        strokeWidth: 3,
-      },
-      point: {
-        visible: false,
-      },
+const customTheme: PartialTheme = {
+  lineSeriesStyle: {
+    line: {
+      strokeWidth: 3,
     },
-  };
+    point: {
+      visible: false,
+    },
+  },
 };
 
 const getTimezone = (config: IUiSettingsClient) => {
@@ -87,9 +85,8 @@ const getTimeBuckets = (watch: any, timeBuckets: any) => {
 };
 
 export const WatchVisualization = () => {
-  const { createTimeBuckets, theme, uiSettings } = useAppContext();
+  const { createTimeBuckets, charts: { SharedChartSettings }, uiSettings } = useAppContext();
   const { watch } = useContext(WatchContext);
-  const chartsTheme = theme.useChartsTheme();
   const {
     index,
     timeField,
@@ -214,8 +211,8 @@ export const WatchVisualization = () => {
         <EuiSpacer size="l" />
         {watchVisualizationDataKeys.length ? (
           <Chart size={['100%', 300]} renderer="canvas">
-            <Settings
-              theme={[customTheme(), chartsTheme]}
+            <SharedChartSettings
+              theme={customTheme}
               xDomain={domain}
               showLegend={!!watch.termField}
               showLegendExtra

@@ -55,6 +55,7 @@ export function PieComponent(
   props: PieExpressionProps & {
     formatFactory: FormatFactory;
     chartsThemeService: ChartsPluginSetup['theme'];
+    SharedChartSettings: ChartsPluginSetup['SharedChartSettings'];
     interactive?: boolean;
     paletteService: PaletteRegistry;
     onClickValue: (data: LensFilterEvent['data']) => void;
@@ -65,7 +66,7 @@ export function PieComponent(
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartsThemeService, paletteService, syncColors, onClickValue } = props;
+  const { chartsThemeService, SharedChartSettings, paletteService, syncColors, onClickValue } = props;
   const {
     shape,
     groups,
@@ -82,7 +83,6 @@ export function PieComponent(
     palette,
   } = props.args;
   const chartTheme = chartsThemeService.useChartsTheme();
-  const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const isDarkMode = chartsThemeService.useDarkMode();
 
   if (!hideLabels) {
@@ -276,7 +276,7 @@ export function PieComponent(
       isReady={isReady}
     >
       <Chart>
-        <Settings
+        <SharedChartSettings
           tooltip={{ boundary: document.getElementById('app-fixed-viewport') ?? undefined }}
           debugState={window._echDebugStateFlag ?? false}
           // Legend is hidden in many scenarios
@@ -293,16 +293,13 @@ export function PieComponent(
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}
           legendAction={getLegendAction(firstTable, onClickValue)}
           theme={{
-            ...chartTheme,
             background: {
-              ...chartTheme.background,
               color: undefined, // removes background for embeddables
             },
             legend: {
               labelOptions: { maxLines: truncateLegend ? legendMaxLines ?? 1 : 0 },
             },
           }}
-          baseTheme={chartBaseTheme}
         />
         <Partition
           id={shape}

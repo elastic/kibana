@@ -7,7 +7,6 @@
 
 import {
   Axis,
-  Settings,
   Position,
   Chart,
   PointerUpdateListener,
@@ -25,7 +24,8 @@ import {
 } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { ChartHeader } from './chart_header';
 import { getTimelineChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
-import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana, useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
+import { InfraClientStartDeps } from '../../../../../../../types';
 
 const CHART_SIZE: ChartSizeArray = ['100%', 160];
 
@@ -57,6 +57,7 @@ export const ChartSection = ({
   domain,
   stack = false,
 }: Props) => {
+  const { charts: { SharedChartSettings } } = useKibana<InfraClientStartDeps>().services;
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const metrics = series.map((chartSeries) => chartSeries.metric);
   const tooltipProps = {
@@ -92,7 +93,7 @@ export const ChartSection = ({
           ticks={6}
           showGridLines
         />
-        <Settings
+        <SharedChartSettings
           onPointerUpdate={onPointerUpdate}
           tooltip={tooltipProps}
           theme={getTimelineChartTheme(isDarkMode)}

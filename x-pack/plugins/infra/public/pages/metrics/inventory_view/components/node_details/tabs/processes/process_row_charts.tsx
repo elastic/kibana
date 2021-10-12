@@ -17,10 +17,8 @@ import {
   EuiEmptyPrompt,
   EuiText,
 } from '@elastic/eui';
-import { Axis, Chart, Settings, Position, TooltipValue, niceTimeFormatter } from '@elastic/charts';
+import { Axis, Chart, Position, TooltipValue, niceTimeFormatter } from '@elastic/charts';
 import { createFormatter } from '../../../../../../../../common/formatters';
-import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import { getChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
 import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
 import { MetricsExplorerChartType } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
@@ -29,6 +27,8 @@ import { Color } from '../../../../../../../../common/color_palette';
 import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { useProcessListRowChart } from '../../../../hooks/use_process_list_row_chart';
 import { Process } from './types';
+import { useKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
+import { InfraClientStartDeps } from '../../../../../../../types';
 
 interface Props {
   command: string;
@@ -79,7 +79,7 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
     aggregation: 'avg' as MetricsExplorerAggregation,
     label,
   };
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const { charts: { SharedChartSettings } } = useKibana<InfraClientStartDeps>().services;
 
   const dateFormatter = useMemo(() => {
     if (!timeseries) return () => '';
@@ -132,7 +132,7 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
           ticks={6}
           showGridLines
         />
-        <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+        <SharedChartSettings tooltip={tooltipProps} />
       </Chart>
     </ChartContainer>
   );

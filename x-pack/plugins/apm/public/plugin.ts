@@ -18,6 +18,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -74,6 +75,7 @@ export interface ApmPluginStartDeps {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   home: void;
+  charts: ChartsPluginStart;
   inspector: InspectorPluginStart;
   licensing: void;
   maps?: MapsStartApi;

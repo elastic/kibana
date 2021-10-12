@@ -18,7 +18,6 @@ import {
   niceTimeFormatter,
   Position,
   ScaleType,
-  Settings,
   XYChartElementEvent,
 } from '@elastic/charts';
 import moment from 'moment';
@@ -47,7 +46,10 @@ export const DocumentCountChart: FC<Props> = ({
   interval,
 }) => {
   const {
-    services: { data },
+    services: {
+      data,
+      charts: { SharedChartSettings },
+    },
   } = useDataVisualizerKibana();
 
   const seriesName = i18n.translate(
@@ -117,7 +119,11 @@ export const DocumentCountChart: FC<Props> = ({
           height: 120,
         }}
       >
-        <Settings xDomain={xDomain} onBrushEnd={onBrushEnd} onElementClick={onElementClick} />
+        <SharedChartSettings
+          xDomain={xDomain}
+          onBrushEnd={onBrushEnd}
+          onElementClick={onElementClick}
+        />
         <Axis
           id="bottom"
           position={Position.Bottom}

@@ -42,6 +42,7 @@ import { Management } from './management';
 import { Ueba } from './ueba';
 import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -56,6 +57,7 @@ export interface SetupPlugins {
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
   dashboard?: DashboardStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;

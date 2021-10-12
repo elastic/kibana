@@ -13,7 +13,6 @@ import {
   Chart,
   niceTimeFormatter,
   Position,
-  Settings,
   TooltipValue,
   BrushEndListener,
 } from '@elastic/charts';
@@ -33,11 +32,11 @@ import { MetricExplorerSeriesChart } from './series_chart';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { MetricsExplorerEmptyChart } from './empty_chart';
 import { MetricsExplorerNoMetrics } from './no_metrics';
-import { getChartTheme } from './helpers/get_chart_theme';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { calculateDomain } from './helpers/calculate_domain';
-import { useKibana, useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ChartTitle } from './chart_title';
+import { InfraClientStartDeps } from '../../../../types';
 
 interface Props {
   title?: string | null;
@@ -64,8 +63,11 @@ export const MetricsExplorerChart = ({
   timeRange,
   onTimeChange,
 }: Props) => {
-  const uiCapabilities = useKibana().services.application?.capabilities;
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const {
+    application,
+    charts: { SharedChartSettings },
+  } = useKibana<InfraClientStartDeps>().services;
+  const uiCapabilities = application?.capabilities;
   const { metrics } = options;
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const handleTimeChange: BrushEndListener = ({ x }) => {
@@ -158,10 +160,9 @@ export const MetricsExplorerChart = ({
               tickFormat={yAxisFormater}
               domain={domain}
             />
-            <Settings
+            <SharedChartSettings
               tooltip={tooltipProps}
               onBrushEnd={handleTimeChange}
-              theme={getChartTheme(isDarkMode)}
             />
           </Chart>
         ) : options.metrics.length > 0 ? (

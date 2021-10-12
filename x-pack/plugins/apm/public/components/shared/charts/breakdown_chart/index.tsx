@@ -15,7 +15,6 @@ import {
   niceTimeFormatter,
   Position,
   ScaleType,
-  Settings,
   TickFormatter,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
@@ -24,7 +23,7 @@ import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Annotation } from '../../../../../common/annotations';
-import { useChartTheme } from '../../../../../../observability/public';
+import { chartThemeOverrides } from '../../../../../../observability/public';
 import {
   asAbsoluteDateTime,
   asDuration,
@@ -39,6 +38,8 @@ import { ChartContainer } from '../../charts/chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../../charts/helper/helper';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ApmPluginStartDeps } from '../../../../plugin';
 
 interface Props {
   fetchStatus: FETCH_STATUS;
@@ -61,7 +62,7 @@ export function BreakdownChart({
   yAxisType,
 }: Props) {
   const history = useHistory();
-  const chartTheme = useChartTheme();
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ApmPluginStartDeps>();
 
   const { chartRef, setPointerEvent } = useChartPointerEventContext();
 
@@ -88,13 +89,13 @@ export function BreakdownChart({
   return (
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
       <Chart ref={chartRef}>
-        <Settings
+        <SharedChartSettings
           tooltip={{ stickTo: 'top' }}
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
-          theme={chartTheme}
+          theme={chartThemeOverrides}
           xDomain={{ min, max }}
           flatLegend
           onPointerUpdate={setPointerEvent}

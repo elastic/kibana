@@ -29,7 +29,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useChartTheme } from '../../../../../../observability/public';
+import { chartThemeOverrides } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import type { HistogramItem } from '../../../../../common/search_strategies/types';
@@ -38,6 +38,8 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
 import { ChartContainer } from '../chart_container';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ApmPluginStartDeps } from '../../../../plugin';
 
 export interface TransactionDistributionChartData {
   id: string;
@@ -105,7 +107,7 @@ export function TransactionDistributionChart({
   selection,
   status,
 }: TransactionDistributionChartProps) {
-  const chartTheme = useChartTheme();
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ApmPluginStartDeps>();
   const euiTheme = useTheme();
 
   const areaSeriesColors = [
@@ -162,30 +164,31 @@ export function TransactionDistributionChart({
     >
       <ChartContainer height={250} hasData={hasData} status={status}>
         <Chart>
-          <Settings
+          <SharedChartSettings
             rotation={0}
-            theme={{
-              ...chartTheme,
-              legend: {
-                spacingBuffer: 100,
-              },
-              areaSeriesStyle: {
-                line: {
-                  visible: false,
+            theme={[
+              {
+                legend: {
+                  spacingBuffer: 100,
+                },
+                areaSeriesStyle: {
+                  line: {
+                    visible: false,
+                  },
+                },
+                axes: {
+                  tickLine: {
+                    size: 5,
+                  },
+                  tickLabel: {
+                    fontSize: 10,
+                    fill: euiTheme.eui.euiColorMediumShade,
+                    padding: 0,
+                  },
                 },
               },
-              axes: {
-                ...chartTheme.axes,
-                tickLine: {
-                  size: 5,
-                },
-                tickLabel: {
-                  fontSize: 10,
-                  fill: euiTheme.eui.euiColorMediumShade,
-                  padding: 0,
-                },
-              },
-            }}
+              chartThemeOverrides,
+            ]}
             showLegend
             legendPosition={Position.Bottom}
             onBrushEnd={onChartSelection}

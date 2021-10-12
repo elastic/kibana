@@ -34,6 +34,7 @@ export class XyVisualization {
         getXyChartRenderer({
           formatFactory,
           chartsThemeService: charts.theme,
+          SharedChartSettings: charts.SharedChartSettings,
           chartsActiveCursorService: charts.activeCursor,
           paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),

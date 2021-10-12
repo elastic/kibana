@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 
 import moment from 'moment';
 
-import { Chart, Settings, LineSeries, CurveType, Axis } from '@elastic/charts';
+import { Chart, LineSeries, CurveType, Axis } from '@elastic/charts';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 
@@ -32,13 +32,13 @@ interface Props {
   }>;
 }
 export const AnalyticsChart: React.FC<Props> = ({ height = 300, lines }) => {
-  const { charts } = useValues(KibanaLogic);
+  const {
+    charts: { SharedChartSettings },
+  } = useValues(KibanaLogic);
 
   return (
     <Chart size={{ height }}>
-      <Settings
-        theme={charts.theme.useChartsTheme()}
-        baseTheme={charts.theme.useChartsBaseTheme()}
+      <SharedChartSettings
         tooltip={{
           headerFormatter: (tooltip) => moment(tooltip.value).format(TOOLTIP_DATE_FORMAT),
         }}

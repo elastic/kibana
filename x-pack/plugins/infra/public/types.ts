@@ -27,6 +27,7 @@ import type {
 import type { SpacesPluginStart } from '../../spaces/public';
 import { MlPluginStart, MlPluginSetup } from '../../ml/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 // Our own setup and start contract values
 export type InfraClientSetupExports = void;
@@ -44,6 +45,7 @@ export interface InfraClientSetupDeps {
 
 export interface InfraClientStartDeps {
   data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
   dataEnhanced: DataEnhancedStart;
   observability: ObservabilityPublicStart;
   spaces: SpacesPluginStart;

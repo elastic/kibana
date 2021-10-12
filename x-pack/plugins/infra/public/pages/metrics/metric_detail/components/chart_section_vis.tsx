@@ -13,12 +13,10 @@ import {
   Chart,
   niceTimeFormatter,
   Position,
-  Settings,
   TooltipValue,
   BrushEndListener,
 } from '@elastic/charts';
 import { EuiPageContentBody } from '@elastic/eui';
-import { getChartTheme } from '../../metrics_explorer/components/helpers/get_chart_theme';
 import { SeriesChart } from './series_chart';
 import {
   getFormatter,
@@ -30,8 +28,9 @@ import {
 } from './helpers';
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
-import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 import { VisSectionProps } from '../types';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { InfraClientStartDeps } from '../../../../types';
 
 export const ChartSectionVis = ({
   id,
@@ -45,7 +44,7 @@ export const ChartSectionVis = ({
   seriesOverrides,
   type,
 }: VisSectionProps) => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const { charts: { SharedChartSettings } } = useKibana<InfraClientStartDeps>().services;
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [
@@ -131,10 +130,9 @@ export const ChartSectionVis = ({
                 stack={stacked}
               />
             ))}
-          <Settings
+          <SharedChartSettings
             tooltip={tooltipProps}
             onBrushEnd={handleTimeChange}
-            theme={getChartTheme(isDarkMode)}
             showLegend
             showLegendExtra
             legendPosition="right"

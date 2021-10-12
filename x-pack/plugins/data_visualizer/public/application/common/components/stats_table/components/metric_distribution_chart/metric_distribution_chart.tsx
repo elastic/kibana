@@ -16,7 +16,6 @@ import {
   CurveType,
   Position,
   ScaleType,
-  Settings,
   TooltipValue,
   TooltipValueFormatter,
 } from '@elastic/charts';
@@ -24,6 +23,7 @@ import {
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
 import { kibanaFieldFormat } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
+import { getPluginsStart } from '../../../../../../kibana_services';
 
 interface ChartTooltipValue extends TooltipValue {
   skipHeader?: boolean;
@@ -65,6 +65,7 @@ export const MetricDistributionChart: FC<Props> = ({
   );
 
   const theme = useDataVizChartTheme();
+  const { SharedChartSettings } = getPluginsStart().charts;
 
   const headerFormatter: TooltipValueFormatter = (tooltipData: ChartTooltipValue) => {
     const xValue = tooltipData.value;
@@ -87,7 +88,7 @@ export const MetricDistributionChart: FC<Props> = ({
       className="dataGridChart__histogram"
     >
       <Chart size={{ width, height }}>
-        <Settings theme={theme} tooltip={{ headerFormatter }} />
+        <SharedChartSettings theme={theme} tooltip={{ headerFormatter }} />
         <Axis
           id="bottom"
           position={Position.Bottom}

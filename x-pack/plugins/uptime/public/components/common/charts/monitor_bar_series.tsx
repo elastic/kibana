@@ -10,7 +10,6 @@ import {
   BarSeries,
   Chart,
   ScaleType,
-  Settings,
   Position,
   timeFormatter,
   BrushEndListener,
@@ -27,6 +26,8 @@ import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
 import { useUrlParams } from '../../../hooks';
 import { UptimeThemeContext } from '../../../contexts';
 import { getDateRangeFromChartElement } from './utils';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ClientPluginsStart } from '../../../apps/plugin';
 
 export interface MonitorBarSeriesProps {
   /**
@@ -43,10 +44,8 @@ export interface MonitorBarSeriesProps {
  * @param props - the values for the monitor this chart visualizes
  */
 export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSeriesProps) => {
-  const {
-    colors: { danger },
-    chartTheme,
-  } = useContext(UptimeThemeContext);
+  const { colors: { danger } } = useContext(UptimeThemeContext);
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ClientPluginsStart>();
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
 
@@ -70,7 +69,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
   return seriesHasDownValues(histogramSeries) ? (
     <div style={{ height: 50, width: '100%', maxWidth: '1200px', marginRight: 15 }}>
       <Chart>
-        <Settings
+        <SharedChartSettings
           xDomain={{
             minInterval,
             min: absoluteDateRangeStart,
@@ -78,7 +77,6 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
           }}
           onBrushEnd={onBrushEnd}
           onElementClick={onBarClicked}
-          {...chartTheme}
         />
         <Axis
           hide

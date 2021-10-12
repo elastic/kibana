@@ -5,34 +5,22 @@
  * 2.0.
  */
 
-import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { useTheme } from './use_theme';
+import { PartialTheme } from "@elastic/charts";
 
-export function useChartTheme() {
-  const theme = useTheme();
-  const baseChartTheme = theme.darkMode
-    ? EUI_CHARTS_THEME_DARK.theme
-    : EUI_CHARTS_THEME_LIGHT.theme;
-
-  return {
-    ...baseChartTheme,
-    chartMargins: {
-      left: 10,
-      right: 10,
-      top: 10,
-      bottom: 10,
-    },
-    background: {
-      ...baseChartTheme.background,
-      color: 'transparent',
-    },
-    lineSeriesStyle: {
-      ...baseChartTheme.lineSeriesStyle,
-      point: { visible: false },
-    },
-    areaSeriesStyle: {
-      ...baseChartTheme.areaSeriesStyle,
-      point: { visible: false },
-    },
-  };
-}
+export const chartThemeOverrides: PartialTheme = {
+  chartMargins: {
+    left: 10,
+    right: 10,
+    top: 10,
+    bottom: 10,
+  },
+  background: {
+    color: 'transparent',
+  },
+  lineSeriesStyle: {
+    point: { visible: false },
+  },
+  areaSeriesStyle: {
+    point: { visible: false },
+  },
+};

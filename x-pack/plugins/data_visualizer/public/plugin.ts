@@ -21,12 +21,14 @@ import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/index
 import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
 }
 export interface DataVisualizerStartDependencies {
   data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
   fileUpload: FileUploadPluginStart;
   maps: MapsStartApi;
   embeddable: EmbeddableStart;

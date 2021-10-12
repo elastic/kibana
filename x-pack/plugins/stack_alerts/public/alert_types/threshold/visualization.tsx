@@ -16,7 +16,7 @@ import {
   LineSeries,
   Position,
   ScaleType,
-  Settings,
+  PartialTheme,
   niceTimeFormatter,
 } from '@elastic/charts';
 import moment from 'moment-timezone';
@@ -40,17 +40,15 @@ import { AggregationType, Comparator } from '../../../../triggers_actions_ui/pub
 import { IndexThresholdAlertParams } from './types';
 import { parseDuration } from '../../../../alerting/common/parse_duration';
 
-const customTheme = () => {
-  return {
-    lineSeriesStyle: {
-      line: {
-        strokeWidth: 3,
-      },
-      point: {
-        visible: false,
-      },
+const customTheme: PartialTheme = {
+  lineSeriesStyle: {
+    line: {
+      strokeWidth: 3,
     },
-  };
+    point: {
+      visible: false,
+    },
+  },
 };
 
 const getTimezone = (uiSettings: IUiSettingsClient) => {
@@ -181,8 +179,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   if (!charts || !uiSettings || !dataFieldsFormats) {
     return null;
   }
-  const chartsTheme = charts.theme.useChartsTheme();
-  const chartsBaseTheme = charts.theme.useChartsBaseTheme();
+  const SharedChartSettings = charts.SharedChartSettings;
 
   const domain = getDomain(alertInterval, startVisualizationAt);
   const visualizeOptions = {
@@ -263,9 +260,8 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         )}
         {alertVisualizationDataKeys.length ? (
           <Chart size={['100%', 200]} renderer="canvas">
-            <Settings
-              theme={[customTheme(), chartsTheme]}
-              baseTheme={chartsBaseTheme}
+            <SharedChartSettings
+              theme={customTheme}
               xDomain={domain}
               showLegend={!!termField}
               showLegendExtra

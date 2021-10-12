@@ -11,7 +11,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Chart,
-  Settings,
   Axis,
   LineSeries,
   AreaSeries,
@@ -81,6 +80,7 @@ type SeriesSpec = InferPropType<typeof LineSeries> &
 
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
+  SharedChartSettings: ChartsPluginSetup['SharedChartSettings'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
@@ -122,6 +122,7 @@ const isPrimitive = (value: unknown): boolean => value != null && typeof value !
 export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginStart['theme'];
+  SharedChartSettings: ChartsPluginStart['SharedChartSettings'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
@@ -153,6 +154,7 @@ export const getXyChartRenderer = (dependencies: {
           formatFactory={dependencies.formatFactory}
           chartsActiveCursorService={dependencies.chartsActiveCursorService}
           chartsThemeService={dependencies.chartsThemeService}
+          SharedChartSettings={dependencies.SharedChartSettings}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
           minInterval={calculateMinInterval(config)}
@@ -223,6 +225,7 @@ export function XYChart({
   formatFactory,
   timeZone,
   chartsThemeService,
+  SharedChartSettings,
   chartsActiveCursorService,
   paletteService,
   minInterval,
@@ -243,8 +246,6 @@ export function XYChart({
     valuesInLegend,
   } = args;
   const chartRef = useRef<Chart>(null);
-  const chartTheme = chartsThemeService.useChartsTheme();
-  const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
 
@@ -551,7 +552,7 @@ export function XYChart({
 
   return (
     <Chart ref={chartRef}>
-      <Settings
+      <SharedChartSettings
         onPointerUpdate={handleCursorUpdate}
         debugState={window._echDebugStateFlag ?? false}
         showLegend={
@@ -561,9 +562,7 @@ export function XYChart({
         }
         legendPosition={legend?.isInside ? legendInsideParams : legend.position}
         theme={{
-          ...chartTheme,
           barSeriesStyle: {
-            ...chartTheme.barSeriesStyle,
             ...valueLabelsStyling,
           },
           background: {
@@ -574,7 +573,6 @@ export function XYChart({
           },
           // if not title or labels are shown for axes, add some padding if required by threshold markers
           chartMargins: {
-            ...chartTheme.chartPaddings,
             ...computeChartMargins(
               thresholdPaddings,
               tickLabelsVisibilitySettings,
@@ -584,7 +582,6 @@ export function XYChart({
             ),
           },
         }}
-        baseTheme={chartBaseTheme}
         tooltip={{
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),

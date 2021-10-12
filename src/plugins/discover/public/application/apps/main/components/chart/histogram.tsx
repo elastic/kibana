@@ -19,7 +19,6 @@ import {
   HistogramBarSeries,
   Position,
   ScaleType,
-  Settings,
   TooltipType,
   XYChartElementEvent,
 } from '@elastic/charts';
@@ -56,8 +55,7 @@ export function DiscoverHistogram({
   timefilterUpdateHandler,
   services,
 }: DiscoverHistogramProps) {
-  const chartTheme = services.theme.useChartsTheme();
-  const chartBaseTheme = services.theme.useChartsBaseTheme();
+  const SharedChartSettings = services.SharedChartSettings;
 
   const dataState: DataChartsMessage = useDataState(savedSearchData$);
 
@@ -182,13 +180,11 @@ export function DiscoverHistogram({
     <React.Fragment>
       <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
         <Chart size="100%">
-          <Settings
+          <SharedChartSettings
             xDomain={xDomain}
             onBrushEnd={onBrushEnd}
             onElementClick={onElementClick(xInterval)}
             tooltip={tooltipProps}
-            theme={chartTheme}
-            baseTheme={chartBaseTheme}
             allowBrushingLastHistogramBucket={true}
           />
           <Axis

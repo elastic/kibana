@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position } from '@elastic/charts';
 import { first, last } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -21,16 +21,16 @@ import { createFormatterForMetric } from '../../../pages/metrics/metrics_explore
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import {
   ChartContainer,
   LoadingState,
   NoDataState,
   TIME_LABELS,
   tooltipProps,
-  getChartTheme,
 } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { ThresholdAnnotations } from '../../common/criterion_preview_chart/threshold_annotations';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { InfraClientStartDeps } from '../../../types';
 
 interface Props {
   expression: MetricExpression;
@@ -55,14 +55,13 @@ export const ExpressionChart: React.FC<Props> = ({
     groupBy
   );
 
-  const { uiSettings } = useKibanaContextForPlugin().services;
-
   const metric = {
     field: expression.metric,
     aggregation: expression.aggType as MetricsExplorerAggregation,
     color: Color.color0,
   };
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+  const { charts: { SharedChartSettings } } = useKibana<InfraClientStartDeps>().services;
+
   const dateFormatter = useMemo(() => {
     const firstSeries = first(data?.series);
     const firstTimestamp = first(firstSeries?.rows)?.timestamp;
@@ -159,7 +158,7 @@ export const ExpressionChart: React.FC<Props> = ({
             tickFormat={dateFormatter}
           />
           <Axis id={'values'} position={Position.Left} tickFormat={yAxisFormater} domain={domain} />
-          <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+          <SharedChartSettings tooltip={tooltipProps} />
         </Chart>
       </ChartContainer>
       <div style={{ textAlign: 'center' }}>

@@ -7,7 +7,7 @@
 
 import React, { FC, ReactNode, useMemo } from 'react';
 import { EuiBasicTable, EuiSpacer, RIGHT_ALIGNMENT, HorizontalAlignment } from '@elastic/eui';
-import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
+import { Axis, BarSeries, Chart } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -19,6 +19,7 @@ import { useDataVizChartTheme } from '../../hooks';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 import { ExpandedRowPanel } from './expanded_row_panel';
+import { getPluginsStart } from '../../../../../../kibana_services';
 
 function getPercentLabel(value: number): string {
   if (value === 0) {
@@ -42,6 +43,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
   const formattedPercentages = useMemo(() => getTFPercentage(config), [config]);
   const theme = useDataVizChartTheme();
+  const { SharedChartSettings } = getPluginsStart().charts;
   if (!formattedPercentages) return null;
 
   const { trueCount, falseCount, count } = formattedPercentages;
@@ -121,7 +123,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
             tickFormat={(d: any) => getFormattedValue(d, count)}
           />
 
-          <Settings showLegend={false} theme={theme} />
+          <SharedChartSettings showLegend={false} theme={theme} />
           <BarSeries
             id={config.fieldName || fieldFormat}
             data={[

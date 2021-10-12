@@ -12,7 +12,6 @@ import {
   Chart,
   Position,
   ScaleType,
-  Settings,
   AreaSeriesStyle,
   RecursivePartial,
 } from '@elastic/charts';
@@ -20,7 +19,7 @@ import { getOr, get, isNull, isNumber } from 'lodash/fp';
 
 import { useThrottledResizeObserver } from '../utils';
 import { ChartPlaceHolder } from './chart_place_holder';
-import { useTimeZone } from '../../lib/kibana';
+import { useKibana, useTimeZone } from '../../lib/kibana';
 import {
   chartDefaultSettings,
   ChartSeriesConfigs,
@@ -28,7 +27,7 @@ import {
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  useTheme,
+  chartThemeOverrides,
 } from './common';
 
 // custom series styles: https://ela.st/areachart-styling
@@ -81,7 +80,7 @@ export const AreaChartBaseComponent = ({
   height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }) => {
-  const theme = useTheme();
+  const { SharedChartSettings } = useKibana().services.charts;
   const timeZone = useTimeZone();
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
@@ -89,13 +88,13 @@ export const AreaChartBaseComponent = ({
   const yAxisId = `group-${data[0].key}-y`;
   const settings = {
     ...chartDefaultSettings,
-    theme,
+    theme: chartThemeOverrides,
     ...get('configs.settings', chartConfigs),
   };
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
-        <Settings {...settings} />
+        <SharedChartSettings {...settings} />
         {data.map((series) => {
           const seriesKey = series.key;
           return checkIfAllTheDataInTheSeriesAreValid(series) ? (

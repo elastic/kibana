@@ -14,7 +14,6 @@ import {
   LayerValue,
   Partition,
   Position,
-  Settings,
   RenderChangeListener,
   TooltipProps,
   TooltipType,
@@ -68,14 +67,15 @@ export interface PieComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   chartsThemeService: ChartsPluginSetup['theme'];
+  SharedChartSettings: ChartsPluginSetup['SharedChartSettings'];
   palettesRegistry: PaletteRegistry;
   services: DataPublicPluginStart;
   syncColors: boolean;
 }
 
 const PieComponent = (props: PieComponentProps) => {
+  const SharedChartSettings = props.SharedChartSettings;
   const chartTheme = props.chartsThemeService.useChartsTheme();
-  const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
   const [showLegend, setShowLegend] = useState<boolean>(() => {
     const bwcLegendStateDefault =
       props.visParams.addLegend == null ? false : props.visParams.addLegend;
@@ -325,7 +325,7 @@ const PieComponent = (props: PieComponentProps) => {
               splitRowAccessor={splitChartRowAccessor}
               splitDimension={splitChartDimension}
             />
-            <Settings
+            <SharedChartSettings
               debugState={window._echDebugStateFlag ?? false}
               showLegend={showLegend}
               legendPosition={legendPosition}
@@ -351,7 +351,6 @@ const PieComponent = (props: PieComponentProps) => {
                 services.fieldFormats
               )}
               theme={[
-                chartTheme,
                 {
                   legend: {
                     labelOptions: {
@@ -360,7 +359,6 @@ const PieComponent = (props: PieComponentProps) => {
                   },
                 },
               ]}
-              baseTheme={chartBaseTheme}
               onRenderChange={onRenderChange}
             />
             <Partition

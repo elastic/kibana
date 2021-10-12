@@ -14,7 +14,6 @@ import {
   Axis,
   BarSeries,
   Chart,
-  Settings,
   RectAnnotation,
   LineAnnotation,
 } from '@elastic/charts';
@@ -30,7 +29,6 @@ import {
   getDomain,
   tooltipProps,
   useDateFormatter,
-  getChartTheme,
   yAxisFormatter,
   NUM_BUCKETS,
 } from '../../../common/criterion_preview_chart/criterion_preview_chart';
@@ -47,6 +45,7 @@ import {
 } from '../../../../../common/http_api/log_alerts/';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { InfraClientStartDeps } from '../../../../types';
 
 const GROUP_LIMIT = 5;
 
@@ -124,8 +123,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   chartAlertParams,
   showThreshold,
 }) => {
-  const { uiSettings } = useKibana().services;
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+  const { charts: { SharedChartSettings } } = useKibana<InfraClientStartDeps>().services;
 
   const {
     getChartPreviewData,
@@ -307,7 +305,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             tickFormat={yAxisFormatter}
             domain={chartDomain}
           />
-          <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+          <SharedChartSettings tooltip={tooltipProps} />
         </Chart>
       </ChartContainer>
       <div style={{ textAlign: 'center' }}>

@@ -46,7 +46,7 @@ export interface DiscoverServices {
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
   history: () => History;
-  theme: ChartsPluginStart['theme'];
+  SharedChartSettings: ChartsPluginStart['SharedChartSettings'];
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract;
   inspector: InspectorPublicPluginStart;
@@ -86,7 +86,7 @@ export function buildServices(
     core,
     data: plugins.data,
     docLinks: core.docLinks,
-    theme: plugins.charts.theme,
+    SharedChartSettings: plugins.charts.SharedChartSettings,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id?: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),

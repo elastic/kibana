@@ -11,7 +11,6 @@ import {
   niceTimeFormatter,
   Position,
   ScaleType,
-  Settings,
 } from '@elastic/charts';
 import { EuiButtonEmpty } from '@elastic/eui';
 import {
@@ -23,11 +22,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useChartTheme } from '../../../../../observability/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { chartThemeOverrides } from '../../../../../observability/public';
 import {
   getValueTypeConfig,
   ProfilingValueType,
 } from '../../../../common/profiling';
+import { ApmPluginStartDeps } from '../../../plugin';
 
 type ProfilingTimelineItem = {
   x: number;
@@ -48,7 +49,7 @@ export function ServiceProfilingTimeline({
   onValueTypeSelect: (valueType: ProfilingValueType) => void;
   selectedValueType: ProfilingValueType | undefined;
 }) {
-  const chartTheme = useChartTheme();
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ApmPluginStartDeps>();
 
   const xFormat = niceTimeFormatter([Date.parse(start), Date.parse(end)]);
 
@@ -88,7 +89,7 @@ export function ServiceProfilingTimeline({
     <EuiFlexGroup style={{ minHeight: 120 }}>
       <EuiFlexItem grow>
         <Chart size={{ width: '100%' }}>
-          <Settings theme={chartTheme} />
+          <SharedChartSettings theme={chartThemeOverrides} />
           <Axis id="time" position={Position.Bottom} tickFormat={xFormat} />
           <Axis id="count" position={Position.Left} />
           {specs.map((spec) => (

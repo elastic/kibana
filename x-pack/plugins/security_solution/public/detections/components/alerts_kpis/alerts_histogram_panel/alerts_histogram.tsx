@@ -10,16 +10,16 @@ import {
   Chart,
   HistogramBarSeries,
   Position,
-  Settings,
   ChartSizeArray,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { useTheme, UpdateDateRange } from '../../../../common/components/charts/common';
+import { chartThemeOverrides, UpdateDateRange } from '../../../../common/components/charts/common';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { DraggableLegend } from '../../../../common/components/charts/draggable_legend';
 import { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
+import { useKibana } from '../../../../common/lib/kibana';
 
 import type { HistogramData } from './types';
 
@@ -46,8 +46,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
     to,
     updateDateRange,
   }) => {
-    const theme = useTheme();
-
+    const { SharedChartSettings } = useKibana().services.charts;
     const chartSize: ChartSizeArray = useMemo(() => ['100%', chartHeight], [chartHeight]);
     const xAxisId = 'alertsHistogramAxisX';
     const yAxisId = 'alertsHistogramAxisY';
@@ -70,12 +69,12 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={true}>
             <Chart size={chartSize}>
-              <Settings
+              <SharedChartSettings
                 legendPosition={legendPosition}
                 onBrushEnd={updateDateRange}
                 showLegend={legendItems.length === 0}
                 showLegendExtra
-                theme={theme}
+                theme={chartThemeOverrides}
               />
 
               <Axis id={xAxisId} position="bottom" tickFormat={tickFormat} />

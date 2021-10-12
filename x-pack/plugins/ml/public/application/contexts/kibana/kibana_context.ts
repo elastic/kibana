@@ -1,3 +1,4 @@
+import { ChartsPluginStart } from './../../../../../../../src/plugins/charts/public/plugin';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -24,6 +25,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '../../../../../trigg
 
 interface StartPlugins {
   data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
   security?: SecurityPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   share: SharePluginStart;

@@ -8,22 +8,16 @@
 import React from 'react';
 import {
   Chart,
-  DARK_THEME,
   Datum,
-  LIGHT_THEME,
   PartialTheme,
   Partition,
   PartitionLayout,
-  Settings,
 } from '@elastic/charts';
 import styled from 'styled-components';
-import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-} from '@elastic/eui/dist/eui_charts_theme';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ChartWrapper } from '../ChartWrapper';
 import { I18LABELS } from '../translations';
+import { ApmPluginStartDeps } from '../../../../plugin';
 
 const StyleChart = styled.div`
   height: 100%;
@@ -37,28 +31,20 @@ interface Props {
   loading: boolean;
 }
 
-const theme: PartialTheme = {
+const themeOverrides: PartialTheme = {
   legend: {
     verticalWidth: 100,
   },
 };
 
 export function VisitorBreakdownChart({ loading, options }: Props) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
-  const euiChartTheme = darkMode
-    ? EUI_CHARTS_THEME_DARK
-    : EUI_CHARTS_THEME_LIGHT;
+  const { services: { charts: { SharedChartSettings, theme } } } = useKibana<ApmPluginStartDeps>();
 
   return (
     <ChartWrapper loading={loading} height="245px" maxWidth="430px">
       <StyleChart>
         <Chart>
-          <Settings
-            showLegend
-            baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
-            theme={theme}
-          />
+          <SharedChartSettings theme={themeOverrides} showLegend />
           <Partition
             id="spec_1"
             data={
@@ -74,7 +60,7 @@ export function VisitorBreakdownChart({ loading, options }: Props) {
                 groupByRollup: (d: Datum) => d.name,
                 shape: {
                   fillColor: (d) =>
-                    euiChartTheme.theme.colors?.vizColors?.[d.sortIndex]!,
+                    theme.useChartsTheme().colors?.vizColors?.[d.sortIndex]!,
                 },
               },
             ]}

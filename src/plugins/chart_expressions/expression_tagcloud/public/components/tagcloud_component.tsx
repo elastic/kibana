@@ -10,8 +10,8 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
-import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
-import type { PaletteRegistry, PaletteOutput } from '../../../../charts/public';
+import { Chart, Wordcloud, RenderChangeListener } from '@elastic/charts';
+import type { PaletteRegistry, PaletteOutput, ChartsPluginSetup } from '../../../../charts/public';
 import {
   Datatable,
   DatatableColumn,
@@ -29,6 +29,7 @@ export type TagCloudChartProps = TagcloudRendererConfig & {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   palettesRegistry: PaletteRegistry;
+  SharedChartSettings: ChartsPluginSetup['SharedChartSettings'];
 };
 
 const calculateWeight = (value: number, x1: number, y1: number, x2: number, y2: number) =>
@@ -89,6 +90,7 @@ export const TagCloudChart = ({
   visData,
   visParams,
   palettesRegistry,
+  SharedChartSettings,
   fireEvent,
   renderComplete,
   syncColors,
@@ -191,7 +193,7 @@ export const TagCloudChart = ({
       {(resizeRef) => (
         <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
           <Chart size="100%">
-            <Settings onElementClick={handleWordClick} onRenderChange={onRenderChange} />
+            <SharedChartSettings onElementClick={handleWordClick} onRenderChange={onRenderChange} />
             <Wordcloud
               id="tagCloud"
               startAngle={0}

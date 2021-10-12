@@ -39,7 +39,6 @@ import {
   RectAnnotation,
   RectAnnotationDatum,
   ScaleType,
-  Settings,
   timeFormatter,
 } from '@elastic/charts';
 
@@ -47,7 +46,7 @@ import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import { CombinedJobWithStats } from '../../../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../../../common/types/audit_message';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { useMlApiContext } from '../../../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../../../contexts/kibana';
 import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
@@ -95,6 +94,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
   } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
   const { euiTheme } = useCurrentEuiTheme();
+  const { charts: { SharedChartSettings } } = useMlKibana().services;
 
   const handleChange = (date: moment.Moment) => setEndDate(date);
 
@@ -311,7 +311,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                   <EuiFlexItem>
                     <div data-test-subj="mlAnnotationsViewDatafeedFlyoutChart">
                       <Chart size={CHART_SIZE}>
-                        <Settings
+                        <SharedChartSettings
                           showLegend
                           legendPosition={Position.Bottom}
                           theme={{

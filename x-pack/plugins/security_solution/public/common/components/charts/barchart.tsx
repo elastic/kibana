@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
+import { Chart, BarSeries, Axis, Position, ScaleType } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
 import uuid from 'uuid';
@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
-import { useTimeZone } from '../../lib/kibana';
+import { useKibana, useTimeZone } from '../../lib/kibana';
 import { defaultLegendColors } from '../matrix_histogram/utils';
 import { useThrottledResizeObserver } from '../utils';
 
@@ -28,7 +28,7 @@ import {
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  useTheme,
+  chartThemeOverrides,
 } from './common';
 import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
@@ -66,7 +66,7 @@ export const BarChartBaseComponent = ({
   configs?: ChartSeriesConfigs | undefined;
   forceHiddenLegend?: boolean;
 }) => {
-  const theme = useTheme();
+  const { SharedChartSettings } = useKibana().services.charts;
   const timeZone = useTimeZone();
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
@@ -75,12 +75,12 @@ export const BarChartBaseComponent = ({
   const yAxisId = `stat-items-barchart-${data[0].key}-y`;
   const settings = {
     ...chartDefaultSettings,
-    ...deepmerge(get('configs.settings', chartConfigs), { theme }),
+    ...deepmerge(get('configs.settings', chartConfigs), { theme: chartThemeOverrides }),
   };
 
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
+      <SharedChartSettings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
       {data.map((series) => {
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid(series) ? (

@@ -14,7 +14,6 @@ import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eu
 import {
   Axis,
   Chart,
-  Settings,
   Position,
   TooltipValue,
   niceTimeFormatter,
@@ -26,7 +25,7 @@ import {
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana, useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
@@ -44,6 +43,7 @@ import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/c
 import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
+import { InfraClientStartDeps } from '../../../../../types';
 
 interface Props {
   interval: string;
@@ -124,6 +124,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   }, [timeseries]);
 
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const { charts: { SharedChartSettings } } = useKibana<InfraClientStartDeps>().services;
   const tooltipProps = {
     headerFormatter: (tooltipValue: TooltipValue) =>
       moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
@@ -292,7 +293,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             ticks={6}
             showGridLines
           />
-          <Settings
+          <SharedChartSettings
             tooltip={tooltipProps}
             theme={getTimelineChartTheme(isDarkMode)}
             onElementClick={onClickPoint}

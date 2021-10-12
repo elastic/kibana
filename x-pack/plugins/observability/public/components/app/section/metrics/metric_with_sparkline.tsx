@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { Chart, Settings, AreaSeries } from '@elastic/charts';
+import { Chart, AreaSeries } from '@elastic/charts';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiTextColor } from '@elastic/eui';
-import React, { useContext } from 'react';
-import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-  EUI_SPARKLINE_THEME_PARTIAL,
-} from '@elastic/eui/dist/eui_charts_theme';
-import { ThemeContext } from 'styled-components';
+import React from 'react';
+import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 
 import { NumberOrNull } from '../../../..';
+import { useKibana } from '../../../../utils/kibana_react';
 
 interface Props {
   id: string;
@@ -25,14 +21,8 @@ interface Props {
   color: number;
 }
 export function MetricWithSparkline({ id, formatter, value, timeseries, color }: Props) {
-  const themeCTX = useContext(ThemeContext);
-  const isDarkTheme = (themeCTX && themeCTX.darkMode) || false;
-  const theme = [
-    EUI_SPARKLINE_THEME_PARTIAL,
-    isDarkTheme ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme,
-  ];
-
-  const colors = theme[1].colors?.vizColors ?? [];
+  const { charts: { SharedChartSettings, theme } } = useKibana().services;
+  const colors = theme.useChartsBaseTheme().colors.vizColors;
 
   if (!value) {
     return (
@@ -46,7 +36,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
     <EuiFlexGroup gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
         <Chart size={{ height: 18, width: 40 }}>
-          <Settings theme={theme} showLegend={false} tooltip="none" />
+          <SharedChartSettings theme={EUI_SPARKLINE_THEME_PARTIAL} showLegend={false} tooltip="none" />
           <AreaSeries
             id={id}
             data={timeseries}
