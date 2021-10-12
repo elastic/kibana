@@ -305,7 +305,6 @@ describe('Combined Queries', () => {
 
   test('Only Data Provider', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
@@ -325,7 +324,6 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = '@timestamp';
     dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
@@ -345,7 +343,6 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = '@timestamp';
     dataProviders[0].queryMatch.value = 1521848183232;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
@@ -365,7 +362,6 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = 'event.end';
     dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
@@ -385,7 +381,6 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = 'event.end';
     dataProviders[0].queryMatch.value = 1521848183232;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
@@ -402,7 +397,6 @@ describe('Combined Queries', () => {
   });
 
   test('Only KQL search/filter query', () => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders: [],
@@ -419,7 +413,6 @@ describe('Combined Queries', () => {
   });
 
   test('Invalid KQL search/filter query', () => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders: [],
@@ -435,7 +428,6 @@ describe('Combined Queries', () => {
 
   test('Data Provider & KQL search query', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
@@ -453,7 +445,6 @@ describe('Combined Queries', () => {
 
   test('Data Provider & KQL filter query', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
@@ -473,7 +464,6 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
     dataProviders[0].and = cloneDeep(mockDataProviders.slice(2, 4));
     dataProviders[1].and = cloneDeep(mockDataProviders.slice(4, 5));
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
@@ -493,7 +483,6 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
     dataProviders[0].and = cloneDeep(mockDataProviders.slice(2, 4));
     dataProviders[1].and = cloneDeep(mockDataProviders.slice(4, 5));
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,

@@ -35,7 +35,6 @@ describe('unknown_column_renderer', () => {
       columnName: '@timestamp',
       eventId: _id,
       values: getValues('@timestamp', mockDatum),
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       field: defaultHeaders.find((h) => h.id === '@timestamp')!,
       timelineId: 'test',
     });
@@ -52,7 +51,6 @@ describe('unknown_column_renderer', () => {
       columnName: 'a made up column name',
       eventId: _id,
       values: getValues('a made up column name', mockDatum),
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       field: defaultHeaders.find((h) => h.id === 'a made up column name')!,
       timelineId: 'test',
     });
@@ -69,7 +67,6 @@ describe('unknown_column_renderer', () => {
       columnName: '@timestamp',
       eventId: _id,
       values: getValues('@timestamp', mockDatum),
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       field: defaultHeaders.find((h) => h.id === '@timestamp')!,
       timelineId: 'test',
     });

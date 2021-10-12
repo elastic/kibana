@@ -347,7 +347,6 @@ describe('data generator', () => {
           expect(tree.childrenByParent.get(id)?.size).toBe(3);
 
           // let's make sure the children of this ID are actually in the next level and that they are the same reference
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           for (const [childID, childNode] of tree.childrenByParent.get(id)!.entries()) {
             expect(tree.childrenLevels[i + 1].get(childID)).toBe(childNode);
           }

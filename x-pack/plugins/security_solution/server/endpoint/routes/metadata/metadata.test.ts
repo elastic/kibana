@@ -135,7 +135,6 @@ describe('test endpoint route', () => {
         })
       );
       endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       mockAgentService = startContract.agentService!;
 
       registerEndpointRoutes(routerMock, {
@@ -158,7 +157,6 @@ describe('test endpoint route', () => {
           throw new IndexNotFoundException();
         })
         .mockImplementationOnce(() => Promise.resolve({ body: response }));
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
         path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
       )!;
@@ -215,7 +213,6 @@ describe('test endpoint route', () => {
           body: unitedMetadataSearchResponse(metadata),
         })
       );
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
         path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
       )!;
@@ -398,7 +395,6 @@ describe('test endpoint route', () => {
         })
       );
       endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       mockAgentService = startContract.agentService!;
 
       registerEndpointRoutes(routerMock, {
@@ -421,7 +417,6 @@ describe('test endpoint route', () => {
           throw new IndexNotFoundException();
         })
         .mockImplementationOnce(() => Promise.resolve({ body: response }));
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
         path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
       )!;
@@ -471,7 +466,6 @@ describe('test endpoint route', () => {
             body: legacyMetadataSearchResponse(new EndpointDocGenerator().generateHostMetadata()),
           })
         );
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
         path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
       )!;
@@ -532,7 +526,6 @@ describe('test endpoint route', () => {
             body: legacyMetadataSearchResponse(new EndpointDocGenerator().generateHostMetadata()),
           })
         );
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
         path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
       )!;
@@ -614,7 +607,6 @@ describe('test endpoint route', () => {
           active: true,
         } as unknown as Agent);
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
           path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
         )!;
@@ -649,7 +641,6 @@ describe('test endpoint route', () => {
           Promise.resolve({ body: response })
         );
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
           path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
         )!;
@@ -688,7 +679,6 @@ describe('test endpoint route', () => {
           Promise.resolve({ body: response })
         );
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
           path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
         )!;
@@ -727,7 +717,6 @@ describe('test endpoint route', () => {
           Promise.resolve({ body: response })
         );
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
           path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
         )!;
@@ -763,7 +752,6 @@ describe('test endpoint route', () => {
           active: false,
         } as unknown as Agent);
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
           path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
         )!;

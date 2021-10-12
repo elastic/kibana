@@ -514,7 +514,6 @@ describe('Resolver, when analyzing a tree that has 2 related registry and 1 rela
  * @param px a string with `px` preceded by numbers
  */
 function pxNum(px: string): number {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return parseInt(px.match(/\d+/)![0], 10);
 }
 
@@ -553,7 +552,6 @@ function computedEdgeTerminalCoordinates(): Vector2[] {
      * This could cause tests to break if/when certain adjustments are made to the view that might
      * regress the alignment of nodes and edges.
      */
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const edgeLineRotationInRadians = parseFloat(transform.match(/rotateZ\((-?\d+\.?\d+)/i)![1]);
     const rotateDownTo = Math.sin(edgeLineRotationInRadians) * pxNum(width);
     const rotateLeftTo = Math.cos(edgeLineRotationInRadians) * pxNum(width);

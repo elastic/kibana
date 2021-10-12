@@ -927,6 +927,22 @@ module.exports = {
       },
     },
     {
+      // typescript only for front and back end, but excludes the test files.
+      // We use this section to add rules in which we do not want to apply to test files.
+      // This should be a very small set as most linter rules are useful for tests as well.
+      files: [
+        'x-pack/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-non-null-assertion': 'error',
+      },
+    },
+    {
       // typescript only for front and back end
       files: [
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
@@ -937,7 +953,6 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
         '@typescript-eslint/unified-signatures': 'error',
-        '@typescript-eslint/no-non-null-assertion': 'error',
         'no-restricted-imports': [
           'error',
           {

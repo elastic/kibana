@@ -64,7 +64,6 @@ describe('When using the EndpointAgentStatus component', () => {
       const pendingActionsResponseProvider =
         httpMocks.responseProvider.pendingActions.getMockImplementation();
       httpMocks.responseProvider.pendingActions.mockImplementation((...args) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const response = pendingActionsResponseProvider!(...args);
         response.data.some((pendingAction) => {
           if (pendingAction.agent_id === endpointMeta.elastic.agent.id) {

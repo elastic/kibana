@@ -144,7 +144,6 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
           expect(dt).toHaveLength(1);
 
           const copyableFieldHoverArea = simulator()
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             .descriptionDetails(dt!)
             // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
             .find(`[data-test-subj="resolver:panel:copyable-field-hover-area"]`)
@@ -224,7 +223,6 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         expect(nodeLinkTitles).toHaveLength(3);
 
         return (
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           nodeLinkTitles!
             .filterWhere((linkTitle) => linkTitle.text() === 'c.ext')
             // Find the parent `tr` and the find all hover areas in that TR. The test assumes that all cells in a row are associated.
@@ -358,7 +356,6 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
                   )?.filterWhere((title) => title.text() === fieldName);
                   return (
                     simulator()
-                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                       .descriptionDetails(dt!)
                       // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
                       .find(`[data-test-subj="resolver:panel:copyable-field-hover-area"]`)

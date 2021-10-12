@@ -129,7 +129,6 @@ describe('resolver selectors', () => {
 
           // find the position of the second child
           const secondChild = selectors.graphNodeForID(state())(secondChildID);
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const positionOfSecondChild = layout.processNodePositions.get(
             secondChild as ResolverNode
           )!;

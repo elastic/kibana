@@ -131,7 +131,6 @@ describe('#getCommonColumns', () => {
       const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
       const itemIdToExpandedNotesRowMap = {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         [mockResults[0].savedObjectId!]: <NotePreviews notes={mockResults[0].notes} />,
       };
 

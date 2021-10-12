@@ -137,7 +137,6 @@ describe('Action Log API', () => {
             unknown,
             SecuritySolutionRequestHandlerContext
           >
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ] = routerMock.get.mock.calls.find(([{ path }]) =>
           path.startsWith(ENDPOINT_ACTION_LOG_ROUTE)
         )!;

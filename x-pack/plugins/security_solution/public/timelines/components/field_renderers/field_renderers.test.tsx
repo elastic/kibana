@@ -87,7 +87,6 @@ describe('Field Renderers', () => {
 
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)
       );
 

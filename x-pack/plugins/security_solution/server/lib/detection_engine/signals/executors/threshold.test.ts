@@ -46,9 +46,7 @@ describe('threshold_executor', () => {
     references: [],
   };
   const tuple = {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     from: dateMath.parse(params.from)!,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     to: dateMath.parse(params.to)!,
     maxSignals: params.maxSignals,
   };

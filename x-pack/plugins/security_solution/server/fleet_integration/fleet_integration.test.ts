@@ -258,7 +258,6 @@ describe('ingest_integration tests ', () => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);
       const policyConfig = generator.generatePolicyPackagePolicy();
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       await expect(() => callback(policyConfig, ctx, req)).rejects.toThrow(
         'Requires Platinum license'
@@ -270,10 +269,8 @@ describe('ingest_integration tests ', () => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);
       const policyConfig = generator.generatePolicyPackagePolicy();
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
   });
@@ -288,10 +285,8 @@ describe('ingest_integration tests ', () => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);
       const policyConfig = generator.generatePolicyPackagePolicy();
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
   });

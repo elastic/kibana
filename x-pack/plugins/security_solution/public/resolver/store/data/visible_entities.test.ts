@@ -100,7 +100,6 @@ describe('resolver visible entities', () => {
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
         payload: {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           result: mockResolverTree({ nodes })!,
           dataSource,
           schema,
@@ -127,7 +126,6 @@ describe('resolver visible entities', () => {
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
         payload: {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           result: mockResolverTree({ nodes })!,
           dataSource,
           schema,

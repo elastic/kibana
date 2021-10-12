@@ -82,7 +82,6 @@ describe('Endpoint Action Status', () => {
         const [, routeHandler]: [
           RouteConfig<any, any, any, any>,
           RequestHandler<any, any, any, any>
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ] = routerMock.get.mock.calls.find(([{ path }]) => path.startsWith(ACTION_STATUS_ROUTE))!;
         await routeHandler(
           createRouteHandlerContext(esClientMock, savedObjectsClientMock.create()),
