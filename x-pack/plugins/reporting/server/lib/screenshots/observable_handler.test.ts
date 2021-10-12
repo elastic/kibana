@@ -6,9 +6,17 @@
  */
 
 import expect from '@kbn/expect';
+import { first } from 'rxjs/operators';
+import { HeadlessChromiumDriver } from '../../browsers';
 import { ReportingConfigType } from '../../config';
 import { ConditionalHeaders } from '../../export_types/common';
-import { createMockLayoutInstance, createMockLevelLogger } from '../../test_helpers';
+import {
+  createMockBrowserDriverFactory,
+  createMockConfigSchema,
+  createMockLayoutInstance,
+  createMockLevelLogger,
+  createMockReportingCore,
+} from '../../test_helpers';
 import { LayoutInstance } from '../layouts';
 import { ScreenshotObservableOpts } from './';
 import { ScreenshotObservableHandler } from './observable_handler';
@@ -20,8 +28,9 @@ describe('ScreenshotObservableHandler', () => {
   let layout: LayoutInstance;
   let conditionalHeaders: ConditionalHeaders;
   let opts: ScreenshotObservableOpts;
+  let driver: HeadlessChromiumDriver;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     captureConfig = {
       timeouts: {
         openUrl: 30000,
@@ -32,6 +41,13 @@ describe('ScreenshotObservableHandler', () => {
     } as unknown as typeof captureConfig;
 
     layout = createMockLayoutInstance(captureConfig);
+
+    const reporting = await createMockReportingCore(createMockConfigSchema());
+    const driverFactory = await createMockBrowserDriverFactory(reporting, logger);
+    ({ driver } = await driverFactory
+      .createPage({ viewport: { width: 800, height: 600 } }, logger)
+      .pipe(first())
+      .toPromise());
 
     conditionalHeaders = {
       headers: { testHeader: 'testHeadValue' },
@@ -47,7 +63,14 @@ describe('ScreenshotObservableHandler', () => {
   });
 
   it('instantiates', () => {
-    const screenshots = new ScreenshotObservableHandler(captureConfig, opts);
+    const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
     expect(screenshots).to.not.be(null);
   });
+
+  // TODO: test ScreenshotObservableHandler.waitUntil
+  // TODO: test ScreenshotObservableHandler.openUrl
+  // TODO: test ScreenshotObservableHandler.waitForElements
+  // TODO: test ScreenshotObservableHandler.completeRender
+  // TODO: test ScreenshotObservableHandler.getScreenshot
+  // TODO: test ScreenshotObservableHandler.checkPageIsOpen
 });

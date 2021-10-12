@@ -197,8 +197,6 @@ export class ScreenshotObservableHandler {
   }
 }
 
-type ScreenshotObservablePhase = 'OPEN_URL' | 'WAIT_FOR_ELEMENTS' | 'RENDER_COMPLETE';
-
 const DEFAULT_SCREENSHOT_CLIP_HEIGHT = 1200;
 const DEFAULT_SCREENSHOT_CLIP_WIDTH = 1800;
 
