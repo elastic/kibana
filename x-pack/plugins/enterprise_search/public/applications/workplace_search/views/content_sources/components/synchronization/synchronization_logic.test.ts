@@ -38,7 +38,7 @@ describe('SynchronizationLogic', () => {
   const { navigateToUrl } = mockKibanaValues;
   const { mount } = new LogicMounter(SynchronizationLogic);
   const contentSource = fullContentSources[0];
-  const sourceWthNoBlockedWindows = {
+  const sourceWithNoBlockedWindows = {
     ...contentSource,
     indexing: {
       ...contentSource.indexing,
@@ -77,7 +77,7 @@ describe('SynchronizationLogic', () => {
 
     describe('addBlockedWindow', () => {
       it('creates and populates empty array when undefined', () => {
-        mount({}, { contentSource: sourceWthNoBlockedWindows });
+        mount({}, { contentSource: sourceWithNoBlockedWindows });
         SynchronizationLogic.actions.addBlockedWindow();
 
         expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([emptyBlockedWindow]);
