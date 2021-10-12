@@ -7,9 +7,9 @@
 
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiSelectOption } from '@elastic/eui';
-import { Unit } from '@elastic/datemath';
-
 import { Type, Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import { Unit } from '../../../../private/var/tmp/_bazel_eceozalp/7e23b9fe0a6162c9776c7573d1e2971b/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/elastic-datemath';
+
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { ChartSeriesConfigs } from '../../../../common/components/charts/common';

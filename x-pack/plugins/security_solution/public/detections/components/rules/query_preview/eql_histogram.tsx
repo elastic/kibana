@@ -7,8 +7,8 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import * as i18n from './translations';
-import { getHistogramConfig } from './helpers';
+import * as i18n from '../rule_preview/translations';
+import { getHistogramConfig } from '../rule_preview/helpers';
 import {
   ChartSeriesData,
   ChartSeriesConfigs,

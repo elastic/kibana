@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import React, { FC, memo, useCallback, useState, useEffect } from 'react';
+import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { isEqual } from 'lodash';
 
@@ -57,6 +57,7 @@ import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
 import { PreviewQuery } from '../query_preview';
+import { RulePreview } from '../rule_preview';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -159,6 +160,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       ruleType: formRuleType,
       queryBar: formQuery,
       threatIndex: formThreatIndex,
+      threatQueryBar: formThreatQuery,
       threshold: formThreshold,
     },
   ] = useFormData<DefineStepRule>({
@@ -176,9 +178,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ],
   });
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
+  const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
+  const isPreviewRouteEnabled = useMemo(() => ruleType === 'threat_match', [ruleType]);
+  const isQueryPreviewEnabled = useMemo(
+    () => ruleType !== 'machine_learning' && ruleType !== 'threat_match',
+    [ruleType]
+  );
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
   const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
     (groupAcc, [groupName, groupValue]) => {
@@ -316,6 +324,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         threatIndexPatterns={threatIndexPatterns as IndexPattern}
         threatIndexPatternsLoading={threatIndexPatternsLoading}
         threatMapping={threatMapping}
+        onValidityChange={setIsThreatQueryBarValid}
       />
     ),
     [
@@ -491,7 +500,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             }}
           />
         </Form>
-        {ruleType !== 'machine_learning' && ruleType !== 'threat_match' && (
+        {isQueryPreviewEnabled && (
           <>
             <EuiSpacer size="s" />
             <PreviewQuery
@@ -502,6 +511,23 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               query={formQuery}
               isDisabled={!isQueryBarValid || index.length === 0}
               threshold={formThreshold}
+            />
+          </>
+        )}
+        {isPreviewRouteEnabled && (
+          <>
+            <EuiSpacer size="s" />
+            <RulePreview
+              index={index}
+              threatIndex={threatIndex}
+              query={formQuery}
+              threatQuery={formThreatQuery}
+              isDisabled={
+                !isQueryBarValid ||
+                !isThreatQueryBarValid ||
+                index.length === 0 ||
+                threatIndex.length === 0
+              }
             />
           </>
         )}
