@@ -8,6 +8,7 @@
 export interface PostFleetSetupResponse {
   isInitialized: boolean;
   nonFatalErrors: Array<{ name: string; message: string }>;
+  packagePolicyUpgradeResults: any[];
 }
 
 export interface GetFleetStatusResponse {

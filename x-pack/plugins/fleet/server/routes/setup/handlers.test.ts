@@ -54,7 +54,11 @@ describe('FleetSetupHandler', () => {
     );
     await fleetSetupHandler(context, request, response);
 
-    const expectedBody: PostFleetSetupResponse = { isInitialized: true, nonFatalErrors: [] };
+    const expectedBody: PostFleetSetupResponse = {
+      isInitialized: true,
+      nonFatalErrors: [],
+      packagePolicyUpgradeResults: [],
+    };
     expect(response.customError).toHaveBeenCalledTimes(0);
     expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
   });
