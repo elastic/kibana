@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerTable, DocViewerTableProps } from './table';
-import { indexPatterns, IndexPattern } from '../../../../../data/public';
+import { IndexPattern } from '../../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 jest.mock('../../../kibana_services', () => ({
@@ -24,6 +24,8 @@ import { getServices } from '../../../kibana_services';
     get: (key: string) => {
       if (key === 'discover:showMultiFields') {
         return true;
+      } else if (key === 'metaFields') {
+        return ['_id', '_index'];
       }
     },
   },
@@ -448,7 +450,12 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     (getServices as jest.Mock).mockImplementationOnce(() => ({
       uiSettings: {
         get: (key: string) => {
-          return key === 'discover:showMultiFields' && false;
+          if (key === 'discover:showMultiFields') {
+            return false;
+          }
+          if (key === 'metaFields') {
+            return ['_id', '_index'];
+          }
         },
       },
     }));

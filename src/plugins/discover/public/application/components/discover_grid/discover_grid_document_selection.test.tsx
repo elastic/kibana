@@ -19,6 +19,24 @@ import { DiscoverGridContext } from './discover_grid_context';
 import { META_FIELDS } from 'src/plugins/data/common';
 import { IUiSettingsClient } from 'kibana/public';
 
+const baseContextMock = {
+  expanded: undefined,
+  setExpanded: jest.fn(),
+  rows: esHits,
+  onFilter: jest.fn(),
+  indexPattern: indexPatternMock,
+  isDarkMode: false,
+  selectedDocs: [],
+  setSelectedDocs: jest.fn(),
+  uiSettings: {
+    get: jest.fn((key) => {
+      if (key === META_FIELDS) {
+        return ['_id', '_index'];
+      }
+    }),
+  } as unknown as IUiSettingsClient,
+};
+
 describe('document selection', () => {
   describe('getDocId', () => {
     test('doc with custom routing', () => {
@@ -41,21 +59,7 @@ describe('document selection', () => {
   describe('SelectButton', () => {
     test('is not checked', () => {
       const contextMock = {
-        expanded: undefined,
-        setExpanded: jest.fn(),
-        rows: esHits,
-        onFilter: jest.fn(),
-        indexPattern: indexPatternMock,
-        isDarkMode: false,
-        selectedDocs: [],
-        setSelectedDocs: jest.fn(),
-        uiSettings: {
-          get: jest.fn((key) => {
-            if (key === META_FIELDS) {
-              return ['_id', '_index'];
-            }
-          }),
-        } as unknown as IUiSettingsClient,
+        ...baseContextMock,
       };
 
       const component = mountWithIntl(
@@ -77,14 +81,8 @@ describe('document selection', () => {
 
     test('is checked', () => {
       const contextMock = {
-        expanded: undefined,
-        setExpanded: jest.fn(),
-        rows: esHits,
-        onFilter: jest.fn(),
-        indexPattern: indexPatternMock,
-        isDarkMode: false,
+        ...baseContextMock,
         selectedDocs: ['i::1::'],
-        setSelectedDocs: jest.fn(),
       };
 
       const component = mountWithIntl(
@@ -106,14 +104,7 @@ describe('document selection', () => {
 
     test('adding a selection', () => {
       const contextMock = {
-        expanded: undefined,
-        setExpanded: jest.fn(),
-        rows: esHits,
-        onFilter: jest.fn(),
-        indexPattern: indexPatternMock,
-        isDarkMode: false,
-        selectedDocs: [],
-        setSelectedDocs: jest.fn(),
+        ...baseContextMock,
       };
 
       const component = mountWithIntl(
@@ -135,14 +126,8 @@ describe('document selection', () => {
     });
     test('removing a selection', () => {
       const contextMock = {
-        expanded: undefined,
-        setExpanded: jest.fn(),
-        rows: esHits,
-        onFilter: jest.fn(),
-        indexPattern: indexPatternMock,
-        isDarkMode: false,
+        ...baseContextMock,
         selectedDocs: ['i::1::'],
-        setSelectedDocs: jest.fn(),
       };
 
       const component = mountWithIntl(
