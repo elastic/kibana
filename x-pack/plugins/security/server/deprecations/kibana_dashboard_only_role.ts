@@ -61,7 +61,17 @@ async function getUsersDeprecations(
   try {
     users = (await client.security.getUser()).body;
   } catch (err) {
-    logger.error(`Failed to retrieve users: ${getDetailedErrorMessage(err)}`);
+    if (getErrorStatusCode(err) === 403) {
+      logger.warn(
+        `Failed to retrieve users when checking for deprecations: the "manage_security" cluster privilege is required.`
+      );
+    } else {
+      logger.error(
+        `Failed to retrieve users when checking for deprecations, unexpected error: ${getDetailedErrorMessage(
+          err
+        )}.`
+      );
+    }
     return deprecationError(packageInfo, err);
   }
 
@@ -77,7 +87,7 @@ async function getUsersDeprecations(
       title: i18n.translate(
         'xpack.security.deprecations.kibanaDashboardOnlyUser.deprecationTitle',
         {
-          defaultMessage: 'The "{roleName}" role is removed',
+          defaultMessage: 'The "{roleName}" role is deprecated',
           values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
         }
       ),
@@ -85,16 +95,13 @@ async function getUsersDeprecations(
         'xpack.security.deprecations.kibanaDashboardOnlyUser.usersDeprecationMessage',
         {
           defaultMessage:
-            'The following users have a deprecated and removed "{roleName}" role: {users}. Create a custom role with Kibana privileges to restrict access to just the Dashboard feature instead.',
-          values: {
-            roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,
-            users: usersWithKibanaDashboardOnlyRole.join(', '),
-          },
+            'Use a custom role with Kibana privileges to restrict access to just the Dashboard feature. The "{roleName}" role will be removed in 8.0.',
+          values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
         }
       ),
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/${packageInfo.branch}/kibana-privileges.html`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${packageInfo.branch}/xpack-dashboard-only-mode.html`,
       correctiveActions: {
         manualSteps: [
           i18n.translate(
@@ -108,8 +115,11 @@ async function getUsersDeprecations(
             'xpack.security.deprecations.kibanaDashboardOnlyUser.usersDeprecationCorrectiveActionTwo',
             {
               defaultMessage:
-                'Update all users with "{roleName}" role to use the custom role instead.',
-              values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
+                'Update all users to remove the "{roleName}" role and add the custom role instead. The affected users are: {users}.',
+              values: {
+                roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,
+                users: usersWithKibanaDashboardOnlyRole.join(', '),
+              },
             }
           ),
         ],
@@ -127,7 +137,17 @@ async function getRoleMappingsDeprecations(
   try {
     roleMappings = (await client.security.getRoleMapping()).body;
   } catch (err) {
-    logger.error(`Failed to retrieve role mappings: ${getDetailedErrorMessage(err)}`);
+    if (getErrorStatusCode(err) === 403) {
+      logger.warn(
+        `Failed to retrieve role mappings when checking for deprecations: the "manage_security" cluster privilege is required.`
+      );
+    } else {
+      logger.error(
+        `Failed to retrieve role mappings when checking for deprecations, unexpected error: ${getDetailedErrorMessage(
+          err
+        )}.`
+      );
+    }
     return deprecationError(packageInfo, err);
   }
 
@@ -143,7 +163,7 @@ async function getRoleMappingsDeprecations(
       title: i18n.translate(
         'xpack.security.deprecations.kibanaDashboardOnlyUser.deprecationTitle',
         {
-          defaultMessage: 'The "{roleName}" role is removed',
+          defaultMessage: 'The "{roleName}" role is deprecated',
           values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
         }
       ),
@@ -151,16 +171,13 @@ async function getRoleMappingsDeprecations(
         'xpack.security.deprecations.kibanaDashboardOnlyUser.roleMappingsDeprecationMessage',
         {
           defaultMessage:
-            'The following role mappings map to a deprecated and removed "{roleName}" role: {roleMappings}. Create a custom role with Kibana privileges to restrict access to just the Dashboard feature instead.',
-          values: {
-            roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,
-            roleMappings: roleMappingsWithKibanaDashboardOnlyRole.join(', '),
-          },
+            'Use a custom role with Kibana privileges to restrict access to just the Dashboard feature. The "{roleName}" role will be removed in 8.0.',
+          values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
         }
       ),
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/${packageInfo.branch}/kibana-privileges.html`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${packageInfo.branch}/xpack-dashboard-only-mode.html`,
       correctiveActions: {
         manualSteps: [
           i18n.translate(
@@ -174,8 +191,11 @@ async function getRoleMappingsDeprecations(
             'xpack.security.deprecations.kibanaDashboardOnlyUser.roleMappingsDeprecationCorrectiveActionTwo',
             {
               defaultMessage:
-                'Update all role mappings that map to "{roleName}" role to use the custom role instead.',
-              values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
+                'Update all role mappings to remove the "{roleName}" role and add the custom role instead. The affected role mappings are: {roleMappings}.',
+              values: {
+                roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,
+                roleMappings: roleMappingsWithKibanaDashboardOnlyRole.join(', '),
+              },
             }
           ),
         ],
@@ -188,7 +208,7 @@ function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsD
   const title = i18n.translate(
     'xpack.security.deprecations.kibanaDashboardOnlyUser.deprecationTitle',
     {
-      defaultMessage: 'The "{roleName}" role is removed',
+      defaultMessage: 'The "{roleName}" role is deprecated',
       values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
     }
   );

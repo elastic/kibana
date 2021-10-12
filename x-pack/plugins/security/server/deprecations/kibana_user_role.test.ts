@@ -214,14 +214,14 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                     "path": "/internal/security/deprecations/kibana_user_role/_fix_users",
                   },
                   "manualSteps": Array [
-                    "Change all users using the \\"kibana_user\\" role to use the \\"kibana_admin\\" role using Kibana user management.",
+                    "Update all users to remove the \\"kibana_user\\" role and add the \\"kibana_admin\\" role instead. The affected users are: userB, userD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security-authorization.html",
                 "level": "warning",
-                "message": "The following users have a deprecated and removed \\"kibana_user\\" role: userB, userD. Update these users to use \\"kibana_admin\\" role instead.",
-                "title": "The \\"kibana_user\\" role is removed and \\"kibana_admin\\" role is added",
+                "message": "Use a \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
+                "title": "The \\"kibana_user\\" role is deprecated in favor of \\"kibana_admin\\" role",
               },
             ]
           `);
@@ -252,14 +252,14 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                     "path": "/internal/security/deprecations/kibana_user_role/_fix_role_mappings",
                   },
                   "manualSteps": Array [
-                    "Change all role mappings using the \\"kibana_user\\" role to use the \\"kibana_admin\\" role using Kibana role mappings management.",
+                    "Update all role mappings to remove the \\"kibana_user\\" role and add the \\"kibana_admin\\" role instead. The affected role mappings are: mappingB, mappingD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security-authorization.html",
                 "level": "warning",
-                "message": "The following role mappings map to a deprecated and removed \\"kibana_user\\" role: mappingB, mappingD. Update these role mappings to use \\"kibana_admin\\" role instead.",
-                "title": "The \\"kibana_user\\" role is removed and \\"kibana_admin\\" role is added",
+                "message": "Use a \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
+                "title": "The \\"kibana_user\\" role is deprecated in favor of \\"kibana_admin\\" role",
               },
             ]
           `);
@@ -297,14 +297,14 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                     "path": "/internal/security/deprecations/kibana_user_role/_fix_users",
                   },
                   "manualSteps": Array [
-                    "Change all users using the \\"kibana_user\\" role to use the \\"kibana_admin\\" role using Kibana user management.",
+                    "Update all users to remove the \\"kibana_user\\" role and add the \\"kibana_admin\\" role instead. The affected users are: userB, userD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security-authorization.html",
                 "level": "warning",
-                "message": "The following users have a deprecated and removed \\"kibana_user\\" role: userB, userD. Update these users to use \\"kibana_admin\\" role instead.",
-                "title": "The \\"kibana_user\\" role is removed and \\"kibana_admin\\" role is added",
+                "message": "Use a \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
+                "title": "The \\"kibana_user\\" role is deprecated in favor of \\"kibana_admin\\" role",
               },
               Object {
                 "correctiveActions": Object {
@@ -313,14 +313,14 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                     "path": "/internal/security/deprecations/kibana_user_role/_fix_role_mappings",
                   },
                   "manualSteps": Array [
-                    "Change all role mappings using the \\"kibana_user\\" role to use the \\"kibana_admin\\" role using Kibana role mappings management.",
+                    "Update all role mappings to remove the \\"kibana_user\\" role and add the \\"kibana_admin\\" role instead. The affected role mappings are: mappingB, mappingD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security-authorization.html",
                 "level": "warning",
-                "message": "The following role mappings map to a deprecated and removed \\"kibana_user\\" role: mappingB, mappingD. Update these role mappings to use \\"kibana_admin\\" role instead.",
-                "title": "The \\"kibana_user\\" role is removed and \\"kibana_admin\\" role is added",
+                "message": "Use a \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
+                "title": "The \\"kibana_user\\" role is deprecated in favor of \\"kibana_admin\\" role",
               },
             ]
           `);

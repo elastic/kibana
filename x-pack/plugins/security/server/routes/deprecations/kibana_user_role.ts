@@ -12,7 +12,11 @@ import type {
 
 import type { RouteDefinitionParams } from '..';
 import { KIBANA_ADMIN_ROLE_NAME, KIBANA_USER_ROLE_NAME } from '../../deprecations';
-import { getDetailedErrorMessage, wrapIntoCustomErrorResponse } from '../../errors';
+import {
+  getDetailedErrorMessage,
+  getErrorStatusCode,
+  wrapIntoCustomErrorResponse,
+} from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /**
@@ -29,7 +33,17 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
       try {
         users = (await context.core.elasticsearch.client.asCurrentUser.security.getUser()).body;
       } catch (err) {
-        logger.error(`Failed to retrieve users: ${getDetailedErrorMessage(err)}.`);
+        if (getErrorStatusCode(err) === 403) {
+          logger.warn(
+            `Failed to retrieve users when checking for deprecations: the manage_security cluster privilege is required`
+          );
+        } else {
+          logger.error(
+            `Failed to retrieve users when checking for deprecations, unexpected error: ${getDetailedErrorMessage(
+              err
+            )}`
+          );
+        }
         return response.customError(wrapIntoCustomErrorResponse(err));
       }
 

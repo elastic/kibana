@@ -62,7 +62,17 @@ async function getUsersDeprecations(
   try {
     users = (await client.security.getUser()).body;
   } catch (err) {
-    logger.error(`Failed to retrieve users: ${getDetailedErrorMessage(err)}`);
+    if (getErrorStatusCode(err) === 403) {
+      logger.warn(
+        `Failed to retrieve users when checking for deprecations: the "manage_security" cluster privilege is required.`
+      );
+    } else {
+      logger.error(
+        `Failed to retrieve users when checking for deprecations, unexpected error: ${getDetailedErrorMessage(
+          err
+        )}.`
+      );
+    }
     return deprecationError(packageInfo, err);
   }
 
@@ -76,17 +86,14 @@ async function getUsersDeprecations(
   return [
     {
       title: i18n.translate('xpack.security.deprecations.kibanaUser.deprecationTitle', {
-        defaultMessage: 'The "{userRoleName}" role is removed and "{adminRoleName}" role is added',
+        defaultMessage:
+          'The "{userRoleName}" role is deprecated in favor of "{adminRoleName}" role',
         values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
       }),
       message: i18n.translate('xpack.security.deprecations.kibanaUser.usersDeprecationMessage', {
         defaultMessage:
-          'The following users have a deprecated and removed "{userRoleName}" role: {users}. Update these users to use "{adminRoleName}" role instead.',
-        values: {
-          userRoleName: KIBANA_USER_ROLE_NAME,
-          adminRoleName: KIBANA_ADMIN_ROLE_NAME,
-          users: usersWithKibanaUserRole.join(', '),
-        },
+          'Use a "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in 8.0.',
+        values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
       }),
       level: 'warning',
       deprecationType: 'feature',
@@ -101,10 +108,11 @@ async function getUsersDeprecations(
             'xpack.security.deprecations.kibanaUser.usersDeprecationCorrectiveAction',
             {
               defaultMessage:
-                'Change all users using the "{userRoleName}" role to use the "{adminRoleName}" role using Kibana user management.',
+                'Update all users to remove the "{userRoleName}" role and add the "{adminRoleName}" role instead. The affected users are: {users}.',
               values: {
                 userRoleName: KIBANA_USER_ROLE_NAME,
                 adminRoleName: KIBANA_ADMIN_ROLE_NAME,
+                users: usersWithKibanaUserRole.join(', '),
               },
             }
           ),
@@ -123,7 +131,17 @@ async function getRoleMappingsDeprecations(
   try {
     roleMappings = (await client.security.getRoleMapping()).body;
   } catch (err) {
-    logger.error(`Failed to retrieve role mappings: ${getDetailedErrorMessage(err)}`);
+    if (getErrorStatusCode(err) === 403) {
+      logger.warn(
+        `Failed to retrieve role mappings when checking for deprecations: the "manage_security" cluster privilege is required.`
+      );
+    } else {
+      logger.error(
+        `Failed to retrieve role mappings when checking for deprecations, unexpected error: ${getDetailedErrorMessage(
+          err
+        )}.`
+      );
+    }
     return deprecationError(packageInfo, err);
   }
 
@@ -137,19 +155,16 @@ async function getRoleMappingsDeprecations(
   return [
     {
       title: i18n.translate('xpack.security.deprecations.kibanaUser.deprecationTitle', {
-        defaultMessage: 'The "{userRoleName}" role is removed and "{adminRoleName}" role is added',
+        defaultMessage:
+          'The "{userRoleName}" role is deprecated in favor of "{adminRoleName}" role',
         values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
       }),
       message: i18n.translate(
         'xpack.security.deprecations.kibanaUser.roleMappingsDeprecationMessage',
         {
           defaultMessage:
-            'The following role mappings map to a deprecated and removed "{userRoleName}" role: {roleMappings}. Update these role mappings to use "{adminRoleName}" role instead.',
-          values: {
-            userRoleName: KIBANA_USER_ROLE_NAME,
-            adminRoleName: KIBANA_ADMIN_ROLE_NAME,
-            roleMappings: roleMappingsWithKibanaUserRole.join(', '),
-          },
+            'Use a "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in 8.0.',
+          values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
         }
       ),
       level: 'warning',
@@ -165,10 +180,11 @@ async function getRoleMappingsDeprecations(
             'xpack.security.deprecations.kibanaUser.roleMappingsDeprecationCorrectiveAction',
             {
               defaultMessage:
-                'Change all role mappings using the "{userRoleName}" role to use the "{adminRoleName}" role using Kibana role mappings management.',
+                'Update all role mappings to remove the "{userRoleName}" role and add the "{adminRoleName}" role instead. The affected role mappings are: {roleMappings}.',
               values: {
                 userRoleName: KIBANA_USER_ROLE_NAME,
                 adminRoleName: KIBANA_ADMIN_ROLE_NAME,
+                roleMappings: roleMappingsWithKibanaUserRole.join(', '),
               },
             }
           ),
