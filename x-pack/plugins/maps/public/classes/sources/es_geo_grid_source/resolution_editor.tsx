@@ -102,7 +102,7 @@ export class ResolutionEditor extends Component<Props, State> {
     return this.state.showModal ? (
       <EuiConfirmModal
         title={i18n.translate('xpack.maps.source.esGrid.vectorTileModal.title', {
-          defaultMessage: '"Top terms" metrics not supported',
+          defaultMessage: `'Top terms' metrics not supported`,
         })}
         onCancel={this._closeModal}
         onConfirm={this._acceptModal}
@@ -124,7 +124,7 @@ export class ResolutionEditor extends Component<Props, State> {
         <p>
           <FormattedMessage
             id="xpack.maps.source.esGrid.vectorTileModal.message"
-            defaultMessage={`Super fine grid resolution uses Elasticsearch vector tile API. Elasticsearch vector tile API does not support "Top terms" metric. Switching to super fine grid resolution will remove all "Top terms" metrics from your layer configuration.`}
+            defaultMessage="Super fine grid resolution uses Elasticsearch vector tile API. Elasticsearch vector tile API does not support 'Top terms' metric. Switching to super fine grid resolution will remove all 'Top terms' metrics from your layer configuration."
           />
         </p>
       </EuiConfirmModal>
