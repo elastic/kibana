@@ -18,7 +18,6 @@ import { getTransactionDurationPercentilesRequest } from '../search_strategies/q
 import { getTransactionDurationRangesRequest } from '../search_strategies/queries/query_ranges';
 import { Setup } from '../helpers/setup_request';
 
-export const INTERVAL_BUCKETS = 15;
 interface Options extends CorrelationsOptions {
   percentileThreshold: number;
   setup: Setup;
@@ -54,7 +53,9 @@ export async function getOverallLatencyDistribution(options: Options) {
     const { apmEventClient } = setup;
 
     const params = {
-      index: 'ignored',
+      // pass on an empty index because we're using only the body attribute
+      // of the request body getters we're reusing from search strategies.
+      index: '',
       environment,
       kuery,
       serviceName,
