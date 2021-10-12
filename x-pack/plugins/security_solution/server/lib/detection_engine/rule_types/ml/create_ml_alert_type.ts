@@ -16,15 +16,13 @@ import { createSecurityRuleTypeFactory } from '../create_security_rule_type_fact
 import { CreateRuleOptions } from '../types';
 
 export const createMlAlertType = (createOptions: CreateRuleOptions) => {
-  const { lists, logger, mergeStrategy, ignoreFields, ml, ruleDataClient, ruleDataService } =
-    createOptions;
+  const { lists, logger, config, ml, ruleDataClient, eventLogService } = createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
     lists,
     logger,
-    mergeStrategy,
-    ignoreFields,
+    config,
     ruleDataClient,
-    ruleDataService,
+    eventLogService,
   });
   return createSecurityRuleType<MachineLearningRuleParams, {}, PersistenceServices, {}>({
     id: ML_RULE_TYPE_ID,

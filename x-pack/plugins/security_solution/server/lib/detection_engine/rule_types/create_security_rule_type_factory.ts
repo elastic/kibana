@@ -6,10 +6,13 @@
  */
 
 import { isEmpty } from 'lodash';
+import { flow } from 'fp-ts/lib/function';
+import { Either, chain, fold, tryCatch } from 'fp-ts/lib/Either';
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { toError } from '@kbn/securitysolution-list-api';
 
 import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
@@ -37,8 +40,9 @@ import { scheduleThrottledNotificationActions } from '../notifications/schedule_
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
-  ({ lists, logger, mergeStrategy, ignoreFields, ruleDataClient, ruleDataService }) =>
+  ({ lists, logger, config, ruleDataClient, eventLogService }) =>
   (type) => {
+    const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeFactory({ ruleDataClient, logger });
     return persistenceRuleType({
       ...type,
@@ -62,13 +66,15 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
 
         const ruleStatusClient = new RuleExecutionLogClient({
           savedObjectsClient,
-          ruleDataService,
+          eventLogService,
+          underlyingClient: config.ruleExecutionLog.underlyingClient,
         });
         const ruleSO = await savedObjectsClient.get('alert', alertId);
 
         const {
           actions,
           name,
+          alertTypeId,
           schedule: { interval },
         } = ruleSO.attributes;
         const refresh = actions.length ? 'wait_for' : false;
@@ -84,9 +90,14 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
         logger.debug(buildRuleMessage(`interval: ${interval}`));
 
         let wroteWarningStatus = false;
-        await ruleStatusClient.logStatusChange({
+        const basicLogArguments = {
           spaceId,
           ruleId: alertId,
+          ruleName: name,
+          ruleType: alertTypeId,
+        };
+        await ruleStatusClient.logStatusChange({
+          ...basicLogArguments,
           newStatus: RuleExecutionStatus['going to run'],
         });
 
@@ -113,28 +124,43 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
               }),
             ]);
 
-            wroteWarningStatus = await hasReadIndexPrivileges({
-              spaceId,
-              ruleId: alertId,
-              privileges,
-              logger,
-              buildRuleMessage,
-              ruleStatusClient,
-            });
-
-            if (!wroteWarningStatus) {
-              wroteWarningStatus = await hasTimestampFields({
-                spaceId,
-                ruleId: alertId,
-                timestampField: hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
-                ruleName: name,
-                timestampFieldCapsResponse: timestampFieldCaps,
-                inputIndices,
-                ruleStatusClient,
-                logger,
-                buildRuleMessage,
-              });
-            }
+            fold<Error, Promise<boolean>, void>(
+              async (error: Error) => logger.error(buildRuleMessage(error.message)),
+              async (status: Promise<boolean>) => (wroteWarningStatus = await status)
+            )(
+              flow(
+                () =>
+                  tryCatch(
+                    () =>
+                      hasReadIndexPrivileges({
+                        ...basicLogArguments,
+                        privileges,
+                        logger,
+                        buildRuleMessage,
+                        ruleStatusClient,
+                      }),
+                    toError
+                  ),
+                chain((wroteStatus: unknown) =>
+                  tryCatch(
+                    () =>
+                      hasTimestampFields({
+                        ...basicLogArguments,
+                        timestampField: hasTimestampOverride
+                          ? (timestampOverride as string)
+                          : '@timestamp',
+                        ruleName: name,
+                        timestampFieldCapsResponse: timestampFieldCaps,
+                        inputIndices,
+                        ruleStatusClient,
+                        logger,
+                        buildRuleMessage,
+                      }),
+                    toError
+                  )
+                )
+              )() as Either<Error, Promise<boolean>>
+            );
           }
         } catch (exc) {
           logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
@@ -158,11 +184,10 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           logger.warn(gapMessage);
           hasError = true;
           await ruleStatusClient.logStatusChange({
-            spaceId,
-            ruleId: alertId,
+            ...basicLogArguments,
             newStatus: RuleExecutionStatus.failed,
             message: gapMessage,
-            metrics: { gap: gapString },
+            metrics: { executionGap: remainingGap },
           });
         }
 
@@ -241,8 +266,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           if (result.warningMessages.length) {
             const warningMessage = buildRuleMessage(result.warningMessages.join());
             await ruleStatusClient.logStatusChange({
-              spaceId,
-              ruleId: alertId,
+              ...basicLogArguments,
               newStatus: RuleExecutionStatus['partial failure'],
               message: warningMessage,
             });
@@ -306,13 +330,12 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
 
             if (!hasError && !wroteWarningStatus && !result.warning) {
               await ruleStatusClient.logStatusChange({
-                spaceId,
-                ruleId: alertId,
+                ...basicLogArguments,
                 newStatus: RuleExecutionStatus.succeeded,
                 message: 'succeeded',
                 metrics: {
-                  bulkCreateTimeDurations: result.bulkCreateTimes,
-                  searchAfterTimeDurations: result.searchAfterTimes,
+                  indexingDurations: result.bulkCreateTimes,
+                  searchDurations: result.searchAfterTimes,
                   lastLookBackDate: result.lastLookbackDate?.toISOString(),
                 },
               });
@@ -335,13 +358,12 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
             );
             logger.error(errorMessage);
             await ruleStatusClient.logStatusChange({
-              spaceId,
-              ruleId: alertId,
+              ...basicLogArguments,
               newStatus: RuleExecutionStatus.failed,
               message: errorMessage,
               metrics: {
-                bulkCreateTimeDurations: result.bulkCreateTimes,
-                searchAfterTimeDurations: result.searchAfterTimes,
+                indexingDurations: result.bulkCreateTimes,
+                searchDurations: result.searchAfterTimes,
                 lastLookBackDate: result.lastLookbackDate?.toISOString(),
               },
             });
@@ -355,13 +377,12 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
 
           logger.error(message);
           await ruleStatusClient.logStatusChange({
-            spaceId,
-            ruleId: alertId,
+            ...basicLogArguments,
             newStatus: RuleExecutionStatus.failed,
             message,
             metrics: {
-              bulkCreateTimeDurations: result.bulkCreateTimes,
-              searchAfterTimeDurations: result.searchAfterTimes,
+              indexingDurations: result.bulkCreateTimes,
+              searchDurations: result.searchAfterTimes,
               lastLookBackDate: result.lastLookbackDate?.toISOString(),
             },
           });

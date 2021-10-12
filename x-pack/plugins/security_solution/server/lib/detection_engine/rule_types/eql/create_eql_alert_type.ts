@@ -16,23 +16,14 @@ import { createSecurityRuleTypeFactory } from '../create_security_rule_type_fact
 import { CreateRuleOptions } from '../types';
 
 export const createEqlAlertType = (createOptions: CreateRuleOptions) => {
-  const {
-    experimentalFeatures,
-    lists,
-    logger,
-    ignoreFields,
-    mergeStrategy,
-    ruleDataClient,
-    version,
-    ruleDataService,
-  } = createOptions;
+  const { experimentalFeatures, lists, logger, config, ruleDataClient, version, eventLogService } =
+    createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
     lists,
     logger,
-    ignoreFields,
-    mergeStrategy,
+    config,
     ruleDataClient,
-    ruleDataService,
+    eventLogService,
   });
   return createSecurityRuleType<EqlRuleParams, {}, PersistenceServices, {}>({
     id: EQL_RULE_TYPE_ID,

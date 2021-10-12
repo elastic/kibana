@@ -16,23 +16,14 @@ import { createSecurityRuleTypeFactory } from '../create_security_rule_type_fact
 import { CreateRuleOptions } from '../types';
 
 export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
-  const {
-    experimentalFeatures,
-    lists,
-    logger,
-    mergeStrategy,
-    ignoreFields,
-    ruleDataClient,
-    version,
-    ruleDataService,
-  } = createOptions;
+  const { experimentalFeatures, lists, logger, config, ruleDataClient, version, eventLogService } =
+    createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
     lists,
     logger,
-    mergeStrategy,
-    ignoreFields,
+    config,
     ruleDataClient,
-    ruleDataService,
+    eventLogService,
   });
   return createSecurityRuleType<QueryRuleParams, {}, PersistenceServices, {}>({
     id: QUERY_RULE_TYPE_ID,

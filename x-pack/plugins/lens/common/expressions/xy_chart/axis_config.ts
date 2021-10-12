@@ -41,6 +41,7 @@ export interface YConfig {
   lineStyle?: LineStyle;
   fill?: FillStyle;
   iconPosition?: IconPosition;
+  textVisibility?: boolean;
 }
 
 export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
@@ -186,6 +187,10 @@ export const yAxisConfig: ExpressionFunctionDefinition<
       types: ['string'],
       options: ['auto', 'above', 'below', 'left', 'right'],
       help: 'The placement of the icon for the threshold line',
+    },
+    textVisibility: {
+      types: ['boolean'],
+      help: 'Visibility of the label on the threshold line',
     },
     fill: {
       types: ['string'],
