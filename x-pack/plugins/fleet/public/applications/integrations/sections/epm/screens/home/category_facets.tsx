@@ -26,17 +26,19 @@ export const ALL_CATEGORY = {
   }),
 };
 
+export interface Props {
+  isLoading?: boolean;
+  categories: CategoryFacet[];
+  selectedCategory: string;
+  onCategoryChange: (category: CategoryFacet) => unknown;
+}
+
 export function CategoryFacets({
   isLoading,
   categories,
   selectedCategory,
   onCategoryChange,
-}: {
-  isLoading?: boolean;
-  categories: CategoryFacet[];
-  selectedCategory: string;
-  onCategoryChange: (category: CategoryFacet) => unknown;
-}) {
+}: Props) {
   const controls = (
     <EuiFacetGroup>
       {isLoading ? (
