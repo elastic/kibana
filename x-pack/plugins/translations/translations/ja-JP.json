@@ -25052,7 +25052,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.unableToGetChoicesMessage": "選択肢を取得できません",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.urgencySelectFieldLabel": "緊急",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.usernameTextFieldLabel": "ユーザー名",
-    "xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel": "Personal Developer Instance の構成",
     "xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.actionTypeTitle": "ServiceNow ITSM",
     "xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText": "ServiceNow ITSMでインシデントを作成します。",
     "xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle": "ServiceNow SecOps",
