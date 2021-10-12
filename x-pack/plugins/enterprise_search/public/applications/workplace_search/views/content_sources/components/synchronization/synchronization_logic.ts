@@ -6,6 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import { cloneDeep, isEqual } from 'lodash';
 import moment from 'moment';
 
 export type TabId = 'source_sync_frequency' | 'blocked_time_windows';
@@ -19,7 +20,7 @@ import {
   BLOCKED_TIME_WINDOWS_PATH,
   getContentSourcePath,
 } from '../../../../routes';
-import { BlockedWindow } from '../../../../types';
+import { BlockedWindow, IndexingSchedule } from '../../../../types';
 
 import {
   SYNC_ENABLED_MESSAGE,
@@ -46,6 +47,8 @@ interface SynchronizationValues {
   thumbnailsChecked: boolean;
   contentExtractionChecked: boolean;
   blockedWindows: BlockedWindow[];
+  cachedSchedule: IndexingSchedule;
+  schedule: IndexingSchedule;
 }
 
 export const emptyBlockedWindow: BlockedWindow = {
@@ -77,7 +80,7 @@ export const SynchronizationLogic = kea<
       },
     ],
     blockedWindows: [
-      [],
+      props.contentSource.indexing.schedule.blockedWindows || [],
       {
         addBlockedWindow: (state, _) => [...state, emptyBlockedWindow],
       },
@@ -94,6 +97,8 @@ export const SynchronizationLogic = kea<
         setContentExtractionChecked: (_, contentExtractionChecked) => contentExtractionChecked,
       },
     ],
+    cachedSchedule: [stripScheduleSeconds(props.contentSource.indexing.schedule)],
+    schedule: [stripScheduleSeconds(props.contentSource.indexing.schedule)],
   }),
   selectors: ({ selectors }) => ({
     hasUnsavedObjectsAndAssetsChanges: [
@@ -117,6 +122,10 @@ export const SynchronizationLogic = kea<
           contentExtractionChecked !== contentExtractionEnabled
         );
       },
+    ],
+    hasUnsavedFrequencyChanges: [
+      () => [selectors.cachedSchedule, selectors.schedule],
+      (cachedSchedule, schedule) => isEqual(cachedSchedule, schedule),
     ],
   }),
   listeners: ({ actions, values, props }) => ({
@@ -187,3 +196,22 @@ export const SynchronizationLogic = kea<
     },
   }),
 });
+
+const SECONDS_IN_MS = 1000;
+const getDurationMS = (time: string): number => moment.duration(time).seconds() * SECONDS_IN_MS;
+const getISOStringWithoutSeconds = (time: string): string =>
+  moment.duration(time).subtract(getDurationMS(time)).toISOString();
+
+// The API allows for setting schedule values with seconds. The UI feature does not allow for setting
+// values with seconds. This function strips the seconds from the schedule values for equality checks
+// to determine if the user has unsaved changes.
+export const stripScheduleSeconds = (schedule: IndexingSchedule): IndexingSchedule => {
+  const _schedule = cloneDeep(schedule);
+  const { full, incremental, delete: _delete, permissions } = _schedule;
+  _schedule.full = getISOStringWithoutSeconds(full);
+  _schedule.incremental = getISOStringWithoutSeconds(incremental);
+  _schedule.delete = getISOStringWithoutSeconds(_delete);
+  if (permissions) _schedule.permissions = getISOStringWithoutSeconds(permissions);
+
+  return _schedule;
+};

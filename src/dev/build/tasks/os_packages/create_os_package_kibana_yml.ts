@@ -23,7 +23,7 @@ export async function createOSPackageKibanaYML(config: Config, build: Build) {
   [
     [/#pid.file:.*/g, 'pid.file: /run/kibana/kibana.pid'],
     [
-      /#logging.dest:.*/g,
+      /#logging.appenders.default:.*kibana\.log\n/gs,
       dump({
         logging: {
           appenders: {
