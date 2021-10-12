@@ -107,9 +107,9 @@
             "signature": [
               {
                 "pluginId": "charts",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibChartsPluginApi",
-                "section": "def-public.Labels",
+                "section": "def-common.Labels",
                 "text": "Labels"
               }
             ],
