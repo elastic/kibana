@@ -53,7 +53,6 @@ export function getEnterpriseSearchForClusters(
           query: createEnterpriseSearchQuery({
             start,
             end,
-            clusterUuid: STANDALONE_CLUSTER_CLUSTER_UUID,
             uuid: clusterUuid,
             metric: EnterpriseSearchMetric.getMetricFields(),
           }),

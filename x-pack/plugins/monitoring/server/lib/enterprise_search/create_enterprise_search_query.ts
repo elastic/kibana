@@ -7,9 +7,10 @@
 
 import { EnterpriseSearchMetric, EnterpriseSearchMetricFields } from '../metrics';
 import { createQuery } from '../create_query';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 
 /**
- * {@code createQuery} for all APM instances.
+ * {@code createQuery} for all Enterprise Search instances.
  *
  * @param {Object} options The options to pass to {@code createQuery}
  */
@@ -18,7 +19,6 @@ export function createEnterpriseSearchQuery(options: {
   types?: string[];
   metric?: EnterpriseSearchMetricFields;
   uuid?: string;
-  clusterUuid: string;
   start?: number;
   end?: number;
 }) {
@@ -26,6 +26,7 @@ export function createEnterpriseSearchQuery(options: {
     filters: [] as any[],
     metric: EnterpriseSearchMetric.getMetricFields(),
     types: ['health', 'stats'],
+    clusterUuid: STANDALONE_CLUSTER_CLUSTER_UUID, // This is to disable the stack monitoring clusterUuid filter
     ...(options ?? {}),
   };
 
