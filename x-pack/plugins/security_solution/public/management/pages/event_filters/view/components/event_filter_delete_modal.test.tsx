@@ -24,16 +24,8 @@ describe('When event filters delete modal is shown', () => {
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
   let store: AppContextTestRender['store'];
 
-  const getBody = (): Element => {
-    const querySelector = renderResult.baseElement.querySelector(
-      '[data-test-subj="eventFilterDeleteModalBody"]'
-    );
-    if (querySelector == null) {
-      throw new TypeError('[data-test-subj="eventFilterDeleteModalBody"] should always be defined');
-    } else {
-      return querySelector;
-    }
-  };
+  const getBody = () =>
+    renderResult.baseElement.querySelector('[data-test-subj="eventFilterDeleteModalBody"]')!;
 
   const getConfirmButton = () =>
     renderResult.baseElement.querySelector(
@@ -92,12 +84,7 @@ describe('When event filters delete modal is shown', () => {
     await renderAndSetup();
     const dialogCloseButton = renderResult.baseElement.querySelector(
       '[aria-label="Closes this modal window"]'
-    );
-    if (dialogCloseButton == null) {
-      throw new TypeError(
-        '[aria-label="Closes this modal window"] should always be defined within the tests'
-      );
-    }
+    )!;
     act(() => {
       fireEvent.click(dialogCloseButton);
     });

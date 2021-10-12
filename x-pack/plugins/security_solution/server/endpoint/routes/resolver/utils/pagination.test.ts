@@ -36,7 +36,7 @@ describe('Pagination', () => {
       const cursor = PaginationBuilder.buildCursorRequestLimit(events.length, events);
       expect(cursor).not.toBeNull();
       // we are guaranteed that the cursor won't be null from the check above
-      const builder = PaginationBuilder.createBuilder(0, cursor || undefined);
+      const builder = PaginationBuilder.createBuilder(0, cursor!);
       const fields = builder.buildQueryFields('');
       expect(fields.search_after).toStrictEqual(getSearchAfterInfo(events));
     });

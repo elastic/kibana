@@ -586,12 +586,10 @@ describe('ManifestManager', () => {
         ...ARTIFACT_EXCEPTIONS_WINDOWS,
       });
       expect(
-        JSON.parse(String(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))?.toString()))
+        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
       ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
       expect(
-        JSON.parse(
-          String(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))?.toString())
-        )
+        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))!.toString())
       ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_WINDOWS));
     });
 
@@ -635,7 +633,7 @@ describe('ManifestManager', () => {
         ...ARTIFACT_EXCEPTIONS_MACOS,
       });
       expect(
-        JSON.parse(String(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))?.toString()))
+        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
       ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
       expect(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))).toBeUndefined();
     });

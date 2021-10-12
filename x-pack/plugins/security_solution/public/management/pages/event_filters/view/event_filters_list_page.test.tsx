@@ -82,9 +82,7 @@ describe('When on the Event Filters List Page', () => {
 
   describe('And data exists', () => {
     it('should show loading indicator while retrieving data', async () => {
-      let releaseApiResponse: () => void = () => {
-        throw new TypeError('releaseApiResponse should be defined before first use');
-      };
+      let releaseApiResponse: () => void;
 
       mockedApi.responseProvider.eventFiltersList.mockDelay.mockReturnValue(
         new Promise((r) => (releaseApiResponse = r))
@@ -94,7 +92,7 @@ describe('When on the Event Filters List Page', () => {
       expect(renderResult.getByTestId('eventFiltersContent-loader')).toBeTruthy();
 
       const wasReceived = dataReceived();
-      releaseApiResponse();
+      releaseApiResponse!();
       await wasReceived;
 
       expect(renderResult.container.querySelector('.euiProgress')).toBeNull();

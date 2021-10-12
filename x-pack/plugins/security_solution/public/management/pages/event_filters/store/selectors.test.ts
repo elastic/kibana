@@ -102,11 +102,8 @@ describe('event filters selectors', () => {
 
     it('should return previous success response if currently loading', () => {
       setToLoadingState();
-      if (previousStateWhileLoading == null) {
-        throw new TypeError('previousStateWhileLoading should be defined within the unit tests');
-      }
       expect(getListApiSuccessResponse(initialState)).toEqual(
-        getLastLoadedResourceState(previousStateWhileLoading)?.data.content
+        getLastLoadedResourceState(previousStateWhileLoading!)?.data.content
       );
     });
   });

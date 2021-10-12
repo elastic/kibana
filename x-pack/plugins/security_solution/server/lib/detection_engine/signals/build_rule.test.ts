@@ -160,10 +160,7 @@ describe('buildRuleWithOverrides', () => {
       },
     ];
     const doc = sampleDocSeverity(Number(eventSeverity));
-    if (doc._source == null) {
-      throw new TypeError('doc._source should never be null/undefined within this test');
-    }
-    const rule = buildRuleWithOverrides(ruleSO, doc._source);
+    const rule = buildRuleWithOverrides(ruleSO, doc._source!);
     const expected = {
       ...expectedRule(),
       severity: 'critical',

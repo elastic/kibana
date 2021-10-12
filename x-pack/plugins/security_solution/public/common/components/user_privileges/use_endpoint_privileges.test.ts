@@ -47,9 +47,7 @@ describe('When using useEndpointPrivileges hook', () => {
 
   it('should return `loading: true` while retrieving privileges', async () => {
     // Add a daly to the API response that we can control from the test
-    let releaseApiResponse: () => void = () => {
-      throw new TypeError('releaseApiResponse should be defined before first use');
-    };
+    let releaseApiResponse: () => void;
     fleetApiMock.responseProvider.checkPermissions.mockDelay.mockReturnValue(
       new Promise<void>((resolve) => {
         releaseApiResponse = () => resolve();
@@ -74,7 +72,7 @@ describe('When using useEndpointPrivileges hook', () => {
     });
 
     // Release the API response
-    releaseApiResponse();
+    releaseApiResponse!();
     await fleetApiMock.waitForApi();
     expect(result.current).toEqual({
       canAccessEndpointManagement: true,

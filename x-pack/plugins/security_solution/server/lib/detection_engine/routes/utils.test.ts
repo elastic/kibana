@@ -125,10 +125,7 @@ describe.each([
 
       expect(statusCode).toEqual(400);
       expect(body).toBeInstanceOf(Buffer);
-      if (body == null) {
-        throw new TypeError('Body should always be defined within this test');
-      }
-      expect(JSON.parse(body?.toString())).toEqual(
+      expect(JSON.parse(body!.toString())).toEqual(
         expect.objectContaining({
           message: 'Bad Request',
           status_code: 400,
