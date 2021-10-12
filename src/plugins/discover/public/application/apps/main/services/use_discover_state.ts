@@ -107,6 +107,7 @@ export function useDiscoverState({
     const nextState = { ...state };
     nextState.hideChart = chartHidden;
     setState(nextState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
