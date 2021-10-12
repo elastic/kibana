@@ -7,10 +7,10 @@
 
 import { KibanaContext } from 'src/plugins/data/common';
 import {
+  AnyExpressionFunctionDefinition,
   Datatable,
   ExpressionValueFilter,
   ExpressionImage,
-  ExpressionFunction,
   PointSeries,
   Render,
   Style,
@@ -33,7 +33,7 @@ export interface AppState {
 
 interface StoreAppState {
   basePath: string;
-  serverFunctions: ExpressionFunction[];
+  serverFunctions: AnyExpressionFunctionDefinition[];
   ready: boolean;
 }
 
