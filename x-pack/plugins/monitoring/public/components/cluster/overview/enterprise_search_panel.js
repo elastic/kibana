@@ -124,7 +124,7 @@ export function EnterpriseSearchPanel(props) {
                 <EuiTitle size="s">
                   <h3>
                     <EuiLink
-                      href={getSafeForExternalLink('#/enterprise_search/nodes')}
+                      href={getSafeForExternalLink('#/enterprise_search')}
                       data-test-subj="entSearchNodes"
                     >
                       <FormattedMessage

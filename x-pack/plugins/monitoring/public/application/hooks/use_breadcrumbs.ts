@@ -192,21 +192,7 @@ function getEnterpriseSearchBreadcrumbs(mainInstance: any) {
     defaultMessage: 'Enterprise Search',
   });
   const breadcrumbs = [];
-  if (mainInstance.node) {
-    breadcrumbs.push(createCrumb('#/enterprise_search', entSearchLabel));
-    breadcrumbs.push(
-      createCrumb(
-        '#/enterprise_search/nodes',
-        i18n.translate('xpack.monitoring.breadcrumbs.entSearch.nodesLabel', {
-          defaultMessage: 'Nodes',
-        })
-      )
-    );
-    breadcrumbs.push(createCrumb(null, mainInstance.instance));
-  } else {
-    // don't link to Overview when we're possibly on Overview or its sibling tabs
-    breadcrumbs.push(createCrumb(null, entSearchLabel));
-  }
+  breadcrumbs.push(createCrumb('#/enterprise_search', entSearchLabel));
   return breadcrumbs;
 }
 
