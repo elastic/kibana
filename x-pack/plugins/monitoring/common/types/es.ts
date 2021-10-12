@@ -678,10 +678,8 @@ export interface ElasticsearchMetricbeatSource {
     };
   };
   enterprisesearch?: {
-    health?: {
-      cluster_uuid?: string;
-    }
-  }
+    cluster_uuid?: string;
+  };
 }
 
 export type ElasticsearchSource = ElasticsearchLegacySource & ElasticsearchMetricbeatSource;
