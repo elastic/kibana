@@ -14,7 +14,7 @@ import {
 } from '../../../../../task_manager/server';
 import {
   batchTelemetryRecords,
-  getPreviousEpMetaTaskTimestamp,
+  getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
 } from '../helpers';
 import { TelemetryEventsSender } from '../sender';
@@ -76,7 +76,7 @@ export class TelemetryEndpointTask {
           return {
             run: async () => {
               const taskExecutionTime = moment().utc().toISOString();
-              const lastExecutionTimestamp = getPreviousEpMetaTaskTimestamp(
+              const lastExecutionTimestamp = getPreviousDailyTaskTimestamp(
                 taskExecutionTime,
                 taskInstance.state?.lastExecutionTimestamp
               );
@@ -190,13 +190,11 @@ export class TelemetryEndpointTask {
      *
      * As the policy id + policy version does not exist on the Endpoint Metrics document
      * we need to fetch information about the Fleet Agent and sync the metrics document
-     * with the Fleet agent's policy data.
+     * with the Agent's policy data.
      *
-     * 7.14 ~ An issue was created with the Endpoint agent team to add the policy id +
-     * policy version to the metrics document to circumvent and refactor away from
-     * this expensive join operation.
      */
     const agentsResponse = endpointData.fleetAgentsResponse;
+
     if (agentsResponse === undefined) {
       this.logger.debug('no fleet agent information available');
       return 0;
@@ -286,7 +284,7 @@ export class TelemetryEndpointTask {
           policyConfig = endpointPolicyCache.get(policyInformation) || null;
 
           if (policyConfig) {
-            failedPolicy = policyResponses.get(policyConfig?.id);
+            failedPolicy = policyResponses.get(endpointAgentId);
           }
         }
 
@@ -294,7 +292,6 @@ export class TelemetryEndpointTask {
 
         return {
           '@timestamp': executeTo,
-          agent_id: fleetAgentId,
           endpoint_id: endpointAgentId,
           endpoint_version: endpoint.endpoint_version,
           endpoint_package_version: policyConfig?.package?.version || null,

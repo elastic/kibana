@@ -146,7 +146,7 @@ export const SeriesEditor = React.memo(function () {
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <ViewActions />
+            <ViewActions onApply={() => setItemIdToExpandedRowMap({})} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
