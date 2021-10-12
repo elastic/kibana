@@ -9,49 +9,11 @@
 export const PLUGIN_ID = 'customIntegrations';
 export const PLUGIN_NAME = 'customIntegrations';
 
-export interface IntegrationCategoryCount {
-  count: number;
-  id: IntegrationCategory;
-}
-
-export const category = [
-  'aws',
-  'azure',
-  'cloud',
-  'config_management',
-  'containers',
-  'crm',
-  'custom',
-  'datastore',
-  'elastic_stack',
-  'google_cloud',
-  'kubernetes',
-  'languages',
-  'message_queue',
-  'monitoring',
-  'network',
-  'notification',
-  'os_system',
-  'productivity',
-  'security',
-  'sample_data',
-  'support',
-  'ticketing',
-  'version_control',
-  'web',
-
-  // Kibana added
-  'language_client',
-  'upload_file',
-
-  // Internal
-  'updates_available',
-] as const;
-
-export type IntegrationCategory = typeof category[number];
-
+/**
+ * A map of category names and their corresponding titles.
+ */
 // TODO: consider i18n
-export const INTEGRATION_CATEGORY_DISPLAY: { [K in IntegrationCategory]: string } = {
+export const INTEGRATION_CATEGORY_DISPLAY = {
   aws: 'AWS',
   azure: 'Azure',
   cloud: 'Cloud',
@@ -85,19 +47,31 @@ export const INTEGRATION_CATEGORY_DISPLAY: { [K in IntegrationCategory]: string 
   updates_available: 'Updates available',
 };
 
-export const shipper = [
-  'beats',
-  'language_clients',
-  'other',
-  'sample_data',
-  'tests',
-  'tutorial',
-] as const;
+/**
+ * A category applicable to an Integration.
+ */
+export type IntegrationCategory = keyof typeof INTEGRATION_CATEGORY_DISPLAY;
 
-export type Shipper = typeof shipper[number];
+/**
+ * The list of all available categories.
+ */
+// This `as` is necessary, as Object.keys cannot be strongly typed.
+// see: https://github.com/Microsoft/TypeScript/issues/12870
+export const category = Object.keys(INTEGRATION_CATEGORY_DISPLAY) as IntegrationCategory[];
 
+/**
+ * An object containing the id of an `IntegrationCategory` and the count of all Integrations in that category.
+ */
+export interface IntegrationCategoryCount {
+  count: number;
+  id: IntegrationCategory;
+}
+
+/**
+ * A map of shipper names and their corresponding titles.
+ */
 // TODO: consider i18n
-export const SHIPPER_DISPLAY: { [K in Shipper]: string } = {
+export const SHIPPER_DISPLAY = {
   beats: 'Beats',
   language_clients: 'Language clients',
   other: 'Other',
@@ -106,11 +80,29 @@ export const SHIPPER_DISPLAY: { [K in Shipper]: string } = {
   tutorial: 'Tutorials',
 };
 
+/**
+ * A shipper-- an internal or external system capable of storing data in ES/Kibana-- applicable to an Integration.
+ */
+export type Shipper = keyof typeof SHIPPER_DISPLAY;
+
+/**
+ * The list of all known shippers.
+ */
+// This `as` is necessary, as Object.keys cannot be strongly typed.
+// see: https://github.com/Microsoft/TypeScript/issues/12870
+export const shipper = Object.keys(SHIPPER_DISPLAY) as Shipper[];
+
+/**
+ * An icon representing an Integration.
+ */
 export interface CustomIntegrationIcon {
   src: string;
   type: 'eui' | 'svg';
 }
 
+/**
+ * A definition of a dataintegration, which can be registered with Kibana.
+ */
 export interface CustomIntegration {
   id: string;
   title: string;
