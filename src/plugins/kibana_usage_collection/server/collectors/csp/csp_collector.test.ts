@@ -61,23 +61,23 @@ describe('csp collector', () => {
     expect((await collector.fetch(mockedFetchContext)).warnLegacyBrowsers).toEqual(false);
   });
 
-  test('fetches whether the csp rules have been changed or not', async () => {
+  test("fetches whether the csp directives's rules have been changed or not", async () => {
     const collector = new Collector(logger, createCspCollector(httpMock));
 
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
 
-    updateCsp({ rules: ['not', 'default'] });
+    updateCsp({ disableEmbedding: true });
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
   });
 
   test('does not include raw csp rules under any property names', async () => {
     const collector = new Collector(logger, createCspCollector(httpMock));
 
-    // It's important that we do not send the value of csp.rules here as it
+    // It's important that we do not send the raw values of csp cirectives here as they
     // can be customized with values that can be identifiable to given
     // installs, such as URLs
     //
-    // We use a snapshot here to ensure csp.rules isn't finding its way into the
+    // We use a snapshot here to ensure raw values aren't finding their way into the
     // payload under some new and unexpected variable name (e.g. cspRules).
     expect(await collector.fetch(mockedFetchContext)).toMatchInlineSnapshot(`
       Object {
