@@ -17,7 +17,7 @@ import { useStartServices } from '../hooks';
 export const AddAgentHelpPopover = ({
   button,
   isOpen,
-  offset = 0,
+  offset,
   closePopover,
 }: {
   button: ReactElement;
@@ -26,8 +26,16 @@ export const AddAgentHelpPopover = ({
   closePopover: NoArgCallback<void>;
 }) => {
   const { docLinks } = useStartServices();
+
+  const optionalProps: { offset?: number } = {};
+
+  if (offset !== undefined) {
+    optionalProps.offset = offset; // offset being present in props sets it to 0 so only add if specified
+  }
+
   return (
     <EuiTourStep
+      {...optionalProps}
       content={
         <EuiText size="m" style={{ width: 302 }}>
           <FormattedMessage
@@ -52,7 +60,6 @@ export const AddAgentHelpPopover = ({
       onFinish={() => {}}
       step={1}
       stepsTotal={1}
-      offset={offset}
       title={
         <FormattedMessage
           id="xpack.fleet.addAgentHelpPopover.title"
