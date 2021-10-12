@@ -134,8 +134,8 @@ steps:
     label: 'Jest Tests'
     agents:
       queue: jest-2-10g
-    timeout_in_minutes: 120
-    parallelism: 6
+    timeout_in_minutes: 60
+    parallelism: 10
     key: jest
 
   - command: .buildkite/scripts/steps/lint.sh

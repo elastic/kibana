@@ -10,4 +10,4 @@ is_test_execution_step
 
 echo '--- Jest'
 checks-reporter-with-killswitch "Jest Unit Tests" \
-  node --max-old-space-size=5120 scripts/jest --ci --verbose --runInBand
+  node --max-old-space-size=5632 scripts/jest --ci --verbose --runInBand --detectOpenHandles
