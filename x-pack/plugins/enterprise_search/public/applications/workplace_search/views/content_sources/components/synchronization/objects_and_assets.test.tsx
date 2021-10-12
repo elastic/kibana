@@ -21,14 +21,14 @@ import { ObjectsAndAssets } from './objects_and_assets';
 describe('ObjectsAndAssets', () => {
   const setThumbnailsChecked = jest.fn();
   const setContentExtractionChecked = jest.fn();
-  const updateSyncSettings = jest.fn();
+  const updateObjectsAndAssetsSettings = jest.fn();
   const resetSyncSettings = jest.fn();
   const contentSource = fullContentSources[0];
 
   const mockActions = {
     setThumbnailsChecked,
     setContentExtractionChecked,
-    updateSyncSettings,
+    updateObjectsAndAssetsSettings,
     resetSyncSettings,
   };
   const mockValues = {
