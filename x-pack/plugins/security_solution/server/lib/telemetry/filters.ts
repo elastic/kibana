@@ -14,6 +14,7 @@ export interface AllowlistFields {
 // Allow list process fields within events.  This includes "process" and "Target.process".'
 const allowlistProcessFields: AllowlistFields = {
   args: true,
+  entity_id: true,
   name: true,
   executable: true,
   code_signature: true,
@@ -30,6 +31,9 @@ const allowlistProcessFields: AllowlistFields = {
     dll: true,
     malware_signature: true,
     memory_region: true,
+    real: {
+      entity_id: true,
+    },
     token: {
       integrity_level_name: true,
     },
@@ -49,6 +53,7 @@ const allowlistBaseEventFields: AllowlistFields = {
       original_file_name: true,
     },
   },
+  dns: true,
   event: true,
   file: {
     extension: true,
