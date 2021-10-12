@@ -43,6 +43,7 @@ export interface IpOverviewProps {
   flowTarget: FlowTarget;
   id: string;
   ip: string;
+  isDraggable?: boolean;
   isInDetailsSidePanel: boolean;
   isLoadingAnomaliesData: boolean;
   loading: boolean;
@@ -57,6 +58,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     id,
     ip,
     data,
+    isDraggable = false,
     isInDetailsSidePanel = false, // Rather than duplicate the component, alter the structure based on it's location
     loading,
     flowTarget,
@@ -76,13 +78,14 @@ export const IpOverview = React.memo<IpOverviewProps>(
         description: locationRenderer(
           [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
           data,
-          contextID
+          contextID,
+          isDraggable
         ),
       },
       {
         title: i18n.AUTONOMOUS_SYSTEM,
         description: typeData
-          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, contextID)
+          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, contextID, isDraggable)
           : getEmptyTagValue(),
       },
     ];
@@ -122,13 +125,15 @@ export const IpOverview = React.memo<IpOverviewProps>(
           title: i18n.HOST_ID,
           description:
             typeData && data.host
-              ? hostIdRenderer({ host: data.host, ipFilter: ip, contextID })
+              ? hostIdRenderer({ host: data.host, isDraggable, ipFilter: ip, contextID })
               : getEmptyTagValue(),
         },
         {
           title: i18n.HOST_NAME,
           description:
-            typeData && data.host ? hostNameRenderer(data.host, ip, contextID) : getEmptyTagValue(),
+            typeData && data.host
+              ? hostNameRenderer(data.host, ip, contextID, isDraggable)
+              : getEmptyTagValue(),
         },
       ],
       [

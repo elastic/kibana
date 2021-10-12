@@ -11,6 +11,7 @@ import { serverMock } from './server';
 import { requestMock } from './request';
 import { responseMock } from './response_factory';
 import { ConfigType } from '../../../../config';
+import { UnderlyingLogClient } from '../../rule_execution_log/types';
 
 export { requestMock, requestContextMock, responseMock, serverMock };
 
@@ -26,8 +27,12 @@ export const createMockConfig = (): ConfigType => ({
   endpointResultListDefaultPageSize: 10,
   packagerTaskInterval: '60s',
   alertMergeStrategy: 'missingFields',
+  alertIgnoreFields: [],
   prebuiltRulesFromFileSystem: true,
   prebuiltRulesFromSavedObjects: false,
+  ruleExecutionLog: {
+    underlyingClient: UnderlyingLogClient.savedObjects,
+  },
 });
 
 export const mockGetCurrentUser = {

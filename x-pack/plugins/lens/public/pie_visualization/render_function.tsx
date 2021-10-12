@@ -55,6 +55,7 @@ export function PieComponent(
   props: PieExpressionProps & {
     formatFactory: FormatFactory;
     chartsThemeService: ChartsPluginSetup['theme'];
+    interactive?: boolean;
     paletteService: PaletteRegistry;
     onClickValue: (data: LensFilterEvent['data']) => void;
     renderMode: RenderMode;
@@ -75,6 +76,8 @@ export function PieComponent(
     legendPosition,
     nestedLegend,
     percentDecimals,
+    legendMaxLines,
+    truncateLegend,
     hideLabels,
     palette,
   } = props.args;
@@ -89,7 +92,6 @@ export function PieComponent(
   }
 
   const fillLabel: Partial<PartitionFillLabel> = {
-    textInvertible: true,
     valueFont: {
       fontWeight: 700,
     },
@@ -212,11 +214,11 @@ export function PieComponent(
     },
   });
 
-  const [state, setState] = useState({ isReady: false });
+  const [isReady, setIsReady] = useState(false);
   // It takes a cycle for the chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
-    setState({ isReady: true });
+    setIsReady(true);
   }, []);
 
   const hasNegative = firstTable.rows.some((row) => {
@@ -240,7 +242,7 @@ export function PieComponent(
         reportDescription={props.args.description}
         className="lnsPieExpression__container"
       >
-        <EmptyPlaceholder icon={LensIconChartDonut} />;
+        <EmptyPlaceholder icon={LensIconChartDonut} />
       </VisualizationContainer>
     );
   }
@@ -250,7 +252,7 @@ export function PieComponent(
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
         <FormattedMessage
           id="xpack.lens.pie.pieWithNegativeWarningLabel"
-          defaultMessage="{chartType} charts can't render with negative values. Try a different visualization type."
+          defaultMessage="{chartType} charts can't render with negative values."
           values={{
             chartType: CHART_NAMES[shape].label,
           }}
@@ -270,7 +272,7 @@ export function PieComponent(
       reportTitle={props.args.title}
       reportDescription={props.args.description}
       className="lnsPieExpression__container"
-      isReady={state.isReady}
+      isReady={isReady}
     >
       <Chart>
         <Settings
@@ -287,15 +289,16 @@ export function PieComponent(
           }
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
-          onElementClick={
-            props.renderMode !== 'noInteractivity' ? onElementClickHandler : undefined
-          }
+          onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}
           legendAction={getLegendAction(firstTable, onClickValue)}
           theme={{
             ...chartTheme,
             background: {
               ...chartTheme.background,
               color: undefined, // removes background for embeddables
+            },
+            legend: {
+              labelOptions: { maxLines: truncateLegend ? legendMaxLines ?? 1 : 0 },
             },
           }}
           baseTheme={chartBaseTheme}

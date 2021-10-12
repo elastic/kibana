@@ -20,7 +20,7 @@ describe('EngineOverview', () => {
   const values = {
     dataLoading: false,
     myRole: {},
-    isEngineEmpty: true,
+    hasNoDocuments: true,
     isMetaEngine: false,
   };
 
@@ -40,7 +40,7 @@ describe('EngineOverview', () => {
 
   describe('EngineOverviewMetrics', () => {
     it('renders when the engine has documents', () => {
-      setMockValues({ ...values, isEngineEmpty: false });
+      setMockValues({ ...values, hasNoDocuments: false });
       const wrapper = shallow(<EngineOverview />);
       expect(wrapper.find(EngineOverviewMetrics)).toHaveLength(1);
     });

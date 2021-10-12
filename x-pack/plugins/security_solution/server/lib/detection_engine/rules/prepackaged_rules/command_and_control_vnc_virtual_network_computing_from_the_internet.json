@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "This rule detects network events that may indicate the use of VNC traffic from the Internet. VNC is commonly used by system administrators to remotely control a system for maintenance or to use shared resources. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or back-door vector.",
+  "description": "This rule detects network events that may indicate the use of VNC traffic from the Internet. VNC is commonly used by system administrators to remotely control a system for maintenance or to use shared resources. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or backdoor vector.",
   "false_positives": [
     "VNC connections may be received directly to Linux cloud server instances but such connections are usually made only by engineers. VNC is less common than SSH or RDP but may be required by some work-flows such as remote access and support for specialized software products or servers. Such work-flows are usually known and not unexpected. Usage that is unfamiliar to server or network owners can be unexpected and suspicious."
   ],
@@ -65,5 +65,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 10
+  "version": 11
 }

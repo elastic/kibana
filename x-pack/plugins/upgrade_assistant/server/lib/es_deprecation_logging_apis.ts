@@ -7,10 +7,7 @@
 
 import { get } from 'lodash';
 import { IScopedClusterClient } from 'src/core/server';
-
-interface DeprecationLoggingStatus {
-  isEnabled: boolean;
-}
+import { DeprecationLoggingStatus } from '../../common/types';
 
 export async function getDeprecationLoggingStatus(
   dataClient: IScopedClusterClient
@@ -20,7 +17,8 @@ export async function getDeprecationLoggingStatus(
   });
 
   return {
-    isEnabled: isDeprecationLoggingEnabled(response),
+    isDeprecationLogIndexingEnabled: isDeprecationLogIndexingEnabled(response),
+    isDeprecationLoggingEnabled: isDeprecationLoggingEnabled(response),
   };
 }
 
@@ -30,15 +28,36 @@ export async function setDeprecationLogging(
 ): Promise<DeprecationLoggingStatus> {
   const { body: response } = await dataClient.asCurrentUser.cluster.putSettings({
     body: {
+      persistent: {
+        'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',
+        'cluster.deprecation_indexing.enabled': isEnabled,
+      },
+      /*
+       * If we only set the persistent setting, we can end up in a situation in which a user has
+       * set transient on/off. And when toggling and reloading the page the transient setting will
+       * have priority over it thus "overriding" whatever the user selected.
+       */
       transient: {
         'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',
+        'cluster.deprecation_indexing.enabled': isEnabled,
       },
     },
   });
 
   return {
-    isEnabled: isDeprecationLoggingEnabled(response),
+    isDeprecationLogIndexingEnabled: isEnabled,
+    isDeprecationLoggingEnabled: isDeprecationLoggingEnabled(response),
   };
+}
+
+export function isDeprecationLogIndexingEnabled(settings: any) {
+  const clusterDeprecationLoggingEnabled = ['default', 'persistent', 'transient'].reduce(
+    (currentLogLevel, settingsTier) =>
+      get(settings, [settingsTier, 'cluster', 'deprecation_indexing', 'enabled'], currentLogLevel),
+    'false'
+  );
+
+  return clusterDeprecationLoggingEnabled === 'true';
 }
 
 export function isDeprecationLoggingEnabled(settings: any) {

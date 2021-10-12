@@ -36,7 +36,7 @@ import {
   SavedObjectsBulkGetObject,
   ServiceStatusLevels,
 } from '../../../../src/core/server';
-import type { AlertingRequestHandlerContext } from './types';
+import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
 import { defineRoutes } from './routes';
 import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import {
@@ -221,11 +221,15 @@ export class AlertingPlugin {
       });
     }
 
+    // Usage counter for telemetry
+    const usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
+
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.ruleTypeRegistry,
-      this.logger
+      this.logger,
+      plugins.actions.isPreconfiguredConnector
     );
 
     initializeApiKeyInvalidator(
@@ -236,7 +240,7 @@ export class AlertingPlugin {
     );
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
-      level: ServiceStatusLevels.unavailable,
+      level: ServiceStatusLevels.degraded,
       summary: 'Alerting is initializing',
     });
     core.status.set(serviceStatus$);
@@ -274,8 +278,14 @@ export class AlertingPlugin {
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
-    defineRoutes(router, this.licenseState, plugins.encryptedSavedObjects);
+    defineRoutes({
+      router,
+      licenseState: this.licenseState,
+      usageCounter,
+      encryptedSavedObjects: plugins.encryptedSavedObjects,
+    });
 
+    const alertingConfig = this.config;
     return {
       registerType<
         Params extends AlertTypeParams = AlertTypeParams,
@@ -299,7 +309,14 @@ export class AlertingPlugin {
         if (!(alertType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${alertType.minimumLicenseRequired}" is not a valid license type`);
         }
-        ruleTypeRegistry.register(alertType);
+        if (!alertType.ruleTaskTimeout) {
+          alertingConfig.then((config) => {
+            alertType.ruleTaskTimeout = config.defaultRuleTaskTimeout;
+            ruleTypeRegistry.register(alertType);
+          });
+        } else {
+          ruleTypeRegistry.register(alertType);
+        }
       },
     };
   }
@@ -381,6 +398,7 @@ export class AlertingPlugin {
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+      executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),

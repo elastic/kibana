@@ -10,6 +10,7 @@ import moment from 'moment';
 import _, { isArray } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 
+import { RangeFilter } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
 import { GenericBucket, AggConfigs, getTime, AggConfig } from '../../../../common';
 import { IBucketAggConfig } from '../buckets';
@@ -212,9 +213,9 @@ export function mergeTimeShifts(
           }
           const baseSubAggregate = target[key] as estypes.AggregationsAggregate;
           // only supported bucket formats in agg configs are array of buckets and record of buckets for filters
-          const baseBuckets = ('buckets' in baseSubAggregate
-            ? baseSubAggregate.buckets
-            : undefined) as GenericBucket[] | Record<string, GenericBucket> | undefined;
+          const baseBuckets = (
+            'buckets' in baseSubAggregate ? baseSubAggregate.buckets : undefined
+          ) as GenericBucket[] | Record<string, GenericBucket> | undefined;
           // merge
           if (isArray(buckets) && isArray(baseBuckets)) {
             const baseBucketMap: Record<string, GenericBucket> = {};
@@ -258,8 +259,9 @@ export function mergeTimeShifts(
     if (shouldSplit) {
       // multiple time shifts caused a filters agg in the tree we have to merge
       if (hasMultipleTimeShifts && cursor.time_offset_split) {
-        const timeShiftedBuckets = (cursor.time_offset_split as estypes.AggregationsFiltersAggregate)
-          .buckets as Record<string, estypes.AggregationsFiltersBucketItem>;
+        const timeShiftedBuckets = (
+          cursor.time_offset_split as estypes.AggregationsFiltersAggregate
+        ).buckets as Record<string, estypes.AggregationsFiltersBucketItem>;
         const subTree = {};
         Object.entries(timeShifts).forEach(([key, shift]) => {
           mergeAggLevel(
@@ -423,13 +425,13 @@ export function insertTimeShiftSplit(
     const timeFilter = getTime(aggConfigs.indexPattern, timeRange, {
       fieldName: timeField,
       forceNow: aggConfigs.forceNow,
-    });
+    }) as RangeFilter;
     if (timeFilter) {
       filters[key] = {
         range: {
           [timeField]: {
-            gte: moment(timeFilter.range[timeField].gte).subtract(shift).toISOString(),
-            lte: moment(timeFilter.range[timeField].lte).subtract(shift).toISOString(),
+            gte: moment(timeFilter.query.range[timeField].gte).subtract(shift).toISOString(),
+            lte: moment(timeFilter.query.range[timeField].lte).subtract(shift).toISOString(),
           },
         },
       };

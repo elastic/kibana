@@ -56,9 +56,10 @@ export const useLogSummaryHighlights = (
     [sourceId, startTimestamp, endTimestamp, bucketSize, filterQuery, highlightTerms]
   );
 
-  const debouncedLoadSummaryHighlights = useMemo(() => debounce(loadLogSummaryHighlights, 275), [
-    loadLogSummaryHighlights,
-  ]);
+  const debouncedLoadSummaryHighlights = useMemo(
+    () => debounce(loadLogSummaryHighlights, 275),
+    [loadLogSummaryHighlights]
+  );
 
   useEffect(() => {
     setLogSummaryHighlights([]);

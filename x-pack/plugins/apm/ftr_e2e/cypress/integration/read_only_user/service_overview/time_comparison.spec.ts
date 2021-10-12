@@ -7,7 +7,6 @@
 import url from 'url';
 import moment from 'moment';
 import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
@@ -19,40 +18,37 @@ const serviceOverviewHref = url.format({
 
 const apisToIntercept = [
   {
-    endpoint: '/api/apm/services/opbeans-java/transactions/charts/latency',
+    endpoint:
+      '/internal/apm/services/opbeans-java/transactions/charts/latency?*',
     name: 'latencyChartRequest',
   },
   {
-    endpoint: '/api/apm/services/opbeans-java/throughput',
+    endpoint: '/internal/apm/services/opbeans-java/throughput?*',
     name: 'throughputChartRequest',
   },
   {
-    endpoint: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+    endpoint:
+      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*',
     name: 'errorRateChartRequest',
   },
   {
     endpoint:
-      '/api/apm/services/opbeans-java/transactions/groups/detailed_statistics',
+      '/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics?*',
     name: 'transactionGroupsDetailedRequest',
   },
   {
-    endpoint: '/api/apm/services/opbeans-java/error_groups/detailed_statistics',
+    endpoint:
+      '/internal/apm/services/opbeans-java/error_groups/detailed_statistics?*',
     name: 'errorGroupsDetailedRequest',
   },
   {
     endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/detailed_statistics',
+      '/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics?*',
     name: 'instancesDetailedRequest',
   },
 ];
 
 describe('Service overview: Time Comparison', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });

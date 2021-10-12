@@ -8,17 +8,23 @@
 
 import moment from 'moment-timezone';
 import { DateFormat } from './date';
+import { FieldFormatsGetConfigFn } from '../../../common';
 
 describe('Date Format', () => {
   let convert: Function;
-  let mockConfig: Record<string, any>;
+  let mockConfig: {
+    dateFormat: string;
+    'dateFormat:tz': string;
+    [other: string]: string;
+  };
 
   beforeEach(() => {
-    mockConfig = {};
-    mockConfig.dateFormat = 'MMMM Do YYYY, HH:mm:ss.SSS';
-    mockConfig['dateFormat:tz'] = 'Browser';
+    mockConfig = {
+      dateFormat: 'MMMM Do YYYY, HH:mm:ss.SSS',
+      'dateFormat:tz': 'Browser',
+    };
 
-    const getConfig = (key: string) => mockConfig[key];
+    const getConfig: FieldFormatsGetConfigFn = (key: string) => mockConfig[key];
 
     const date = new DateFormat({}, getConfig);
 

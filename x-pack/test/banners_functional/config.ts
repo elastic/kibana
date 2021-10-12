@@ -32,7 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...kibanaFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.banners.placement=header',
+        '--xpack.banners.placement=top',
         '--xpack.banners.textContent="global banner text"',
       ],
     },

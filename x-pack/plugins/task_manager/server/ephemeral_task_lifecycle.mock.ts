@@ -11,7 +11,7 @@ import { of, Observable } from 'rxjs';
 
 export const ephemeralTaskLifecycleMock = {
   create(opts: { events$?: Observable<TaskLifecycleEvent>; getQueuedTasks?: () => number }) {
-    return ({
+    return {
       attemptToRun: jest.fn(),
       get events() {
         return opts.events$ ?? of();
@@ -19,6 +19,6 @@ export const ephemeralTaskLifecycleMock = {
       get queuedTasks() {
         return opts.getQueuedTasks ? opts.getQueuedTasks() : 0;
       },
-    } as unknown) as jest.Mocked<EphemeralTaskLifecycle>;
+    } as unknown as jest.Mocked<EphemeralTaskLifecycle>;
   },
 };

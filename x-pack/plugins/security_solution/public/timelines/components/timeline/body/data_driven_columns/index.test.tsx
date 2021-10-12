@@ -47,6 +47,8 @@ describe('Columns', () => {
         eventIdToNoteIds={{}}
         leadingControlColumns={[defaultControlColumn]}
         trailingControlColumns={[]}
+        setEventsLoading={jest.fn()}
+        setEventsDeleted={jest.fn()}
       />
     );
 

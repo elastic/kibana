@@ -55,6 +55,7 @@ function createPlugin(
       requiredBundles: [],
       server,
       ui,
+      owner: { name: 'foo' },
     },
     opaqueId: Symbol(id),
     initializerContext: { logger } as any,

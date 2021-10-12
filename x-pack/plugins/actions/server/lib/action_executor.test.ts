@@ -187,10 +187,12 @@ test('successfully executes as a task', async () => {
 
   const scheduleDelay = 10000; // milliseconds
   const scheduled = new Date(Date.now() - scheduleDelay);
+  const attempts = 1;
   await actionExecutor.execute({
     ...executeParams,
     taskInfo: {
       scheduled,
+      attempts,
     },
   });
 

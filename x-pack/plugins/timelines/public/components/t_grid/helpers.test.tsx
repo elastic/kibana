@@ -288,7 +288,7 @@ describe('Combined Queries', () => {
               type: 'exists',
               value: 'exists',
             },
-            exists: { field: 'host.name' },
+            query: { exists: { field: 'host.name' } },
           } as Filter,
         ],
         kqlQuery: { query: '', language: 'kuery' },
@@ -489,8 +489,10 @@ describe('Combined Queries', () => {
             key: 'nestedField.firstAttributes',
             value: 'exists',
           },
-          exists: {
-            field: 'nestedField.firstAttributes',
+          query: {
+            exists: {
+              field: 'nestedField.firstAttributes',
+            },
           },
           $state: {
             store: esFilters.FilterStateStore.APP_STATE,

@@ -32,14 +32,22 @@ EllipsisText.displayName = 'EllipsisText';
 interface Props {
   tooltipContent?: React.ReactNode;
   children: React.ReactNode;
+  dataTestSubj?: string;
 }
 
-export function TruncatableText({ tooltipContent, children, ...props }: Props) {
-  if (!tooltipContent) return <EllipsisText {...props}>{children}</EllipsisText>;
+export function TruncatableText({ tooltipContent, children, dataTestSubj, ...props }: Props) {
+  if (!tooltipContent)
+    return (
+      <EllipsisText data-test-subj={dataTestSubj} {...props}>
+        {children}
+      </EllipsisText>
+    );
 
   return (
     <EuiToolTip display="block" content={tooltipContent}>
-      <EllipsisText {...props}>{children}</EllipsisText>
+      <EllipsisText data-test-subj={dataTestSubj} {...props}>
+        {children}
+      </EllipsisText>
     </EuiToolTip>
   );
 }

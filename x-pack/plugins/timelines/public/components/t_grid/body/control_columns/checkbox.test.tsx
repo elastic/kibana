@@ -30,6 +30,8 @@ describe('checkbox control column', () => {
       rowIndex: 1,
       showNotes: true,
       timelineId: 'test-timelineId',
+      setEventsLoading: jest.fn(),
+      setEventsDeleted: jest.fn(),
     };
     test('displays loader when id is included on loadingEventIds', () => {
       const { getByTestId } = render(

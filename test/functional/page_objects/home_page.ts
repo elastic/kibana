@@ -30,6 +30,10 @@ export class HomePageObject extends FtrService {
     return !(await this.testSubjects.exists(`addSampleDataSet${id}`));
   }
 
+  async isWelcomeInterstitialDisplayed() {
+    return await this.testSubjects.isDisplayed('homeWelcomeInterstitial');
+  }
+
   async getVisibileSolutions() {
     const solutionPanels = await this.testSubjects.findAll('~homSolutionPanel', 2000);
     const panelAttributes = await Promise.all(
@@ -41,8 +45,11 @@ export class HomePageObject extends FtrService {
   async addSampleDataSet(id: string) {
     const isInstalled = await this.isSampleDataSetInstalled(id);
     if (!isInstalled) {
-      await this.testSubjects.click(`addSampleDataSet${id}`);
-      await this._waitForSampleDataLoadingAction(id);
+      await this.retry.waitFor('wait until sample data is installed', async () => {
+        await this.testSubjects.click(`addSampleDataSet${id}`);
+        await this._waitForSampleDataLoadingAction(id);
+        return await this.isSampleDataSetInstalled(id);
+      });
     }
   }
 

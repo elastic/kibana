@@ -6,39 +6,101 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, memo, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SkipBottomButton } from '../skip_bottom_button';
+import { shouldLoadNextDocPatch } from './lib/should_load_next_doc_patch';
 
-const DocTableInfiniteContent = (props: DocTableRenderProps) => {
-  const [limit, setLimit] = useState(props.minimumVisibleRows);
+const FOOTER_PADDING = { padding: 0 };
 
-  // Reset infinite scroll limit
-  useEffect(() => {
-    setLimit(props.minimumVisibleRows);
-  }, [props.rows, props.minimumVisibleRows]);
+const DocTableWrapperMemoized = memo(DocTableWrapper);
+
+interface DocTableInfiniteContentProps extends DocTableRenderProps {
+  limit: number;
+  onSetMaxLimit: () => void;
+  onBackToTop: () => void;
+}
+
+const DocTableInfiniteContent = ({
+  rows,
+  columnLength,
+  sampleSize,
+  limit,
+  onSkipBottomButtonClick,
+  renderHeader,
+  renderRows,
+  onSetMaxLimit,
+  onBackToTop,
+}: DocTableInfiniteContentProps) => {
+  const onSkipBottomButton = useCallback(() => {
+    onSetMaxLimit();
+    onSkipBottomButtonClick();
+  }, [onSetMaxLimit, onSkipBottomButtonClick]);
+
+  return (
+    <Fragment>
+      <SkipBottomButton onClick={onSkipBottomButton} />
+      <table className="kbn-table table" data-test-subj="docTable">
+        <thead>{renderHeader()}</thead>
+        <tbody>{renderRows(rows.slice(0, limit))}</tbody>
+        <tfoot>
+          <tr>
+            <td colSpan={(columnLength || 1) + 2} style={FOOTER_PADDING}>
+              {rows.length === sampleSize ? (
+                <div
+                  className="kbnDocTable__footer"
+                  data-test-subj="discoverDocTableFooter"
+                  tabIndex={-1}
+                  id="discoverBottomMarker"
+                >
+                  <FormattedMessage
+                    id="discover.howToSeeOtherMatchingDocumentsDescription"
+                    defaultMessage="These are the first {sampleSize} documents matching
+your search, refine your search to see others."
+                    values={{ sampleSize }}
+                  />
+                  <EuiButtonEmpty onClick={onBackToTop} data-test-subj="discoverBackToTop">
+                    <FormattedMessage
+                      id="discover.backToTopLinkText"
+                      defaultMessage="Back to top."
+                    />
+                  </EuiButtonEmpty>
+                </div>
+              ) : (
+                <span tabIndex={-1} id="discoverBottomMarker">
+                  &#8203;
+                </span>
+              )}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </Fragment>
+  );
+};
+
+export const DocTableInfinite = (props: DocTableProps) => {
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
+  const [limit, setLimit] = useState(50);
 
   /**
    * depending on which version of Discover is displayed, different elements are scrolling
    * and have therefore to be considered for calculation of infinite scrolling
    */
   useEffect(() => {
-    const scrollDiv = document.querySelector('.kbnDocTableWrapper') as HTMLElement;
+    // After mounting table wrapper should be initialized
+    const scrollDiv = tableWrapperRef.current as HTMLDivElement;
     const scrollMobileElem = document.documentElement;
 
     const scheduleCheck = debounce(() => {
       const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
+
       const usedScrollDiv = isMobileView ? scrollMobileElem : scrollDiv;
-
-      const scrollusedHeight = usedScrollDiv.scrollHeight;
-      const scrollTop = Math.abs(usedScrollDiv.scrollTop);
-      const clientHeight = usedScrollDiv.clientHeight;
-
-      if (scrollTop + clientHeight === scrollusedHeight) {
+      if (shouldLoadNextDocPatch(usedScrollDiv)) {
         setLimit((prevLimit) => prevLimit + 50);
       }
     }, 50);
@@ -60,54 +122,26 @@ const DocTableInfiniteContent = (props: DocTableRenderProps) => {
     focusElem.focus();
 
     // Only the desktop one needs to target a specific container
-    if (!isMobileView) {
-      const scrollDiv = document.querySelector('.kbnDocTableWrapper') as HTMLElement;
-      scrollDiv.scrollTo(0, 0);
+    if (!isMobileView && tableWrapperRef.current) {
+      tableWrapperRef.current.scrollTo(0, 0);
     } else if (window) {
       window.scrollTo(0, 0);
     }
   }, []);
 
-  return (
-    <Fragment>
-      <SkipBottomButton onClick={props.onSkipBottomButtonClick} />
-      <table className="kbn-table table" data-test-subj="docTable">
-        <thead>{props.renderHeader()}</thead>
-        <tbody>{props.renderRows(props.rows.slice(0, limit))}</tbody>
-      </table>
-      {props.rows.length === props.sampleSize ? (
-        <div
-          className="kbnDocTable__footer"
-          data-test-subj="discoverDocTableFooter"
-          tabIndex={-1}
-          id="discoverBottomMarker"
-        >
-          <FormattedMessage
-            id="discover.howToSeeOtherMatchingDocumentsDescription"
-            defaultMessage="These are the first {sampleSize} documents matching
-  your search, refine your search to see others."
-            values={{ sampleSize: props.sampleSize }}
-          />
-          <EuiButtonEmpty onClick={onBackToTop} data-test-subj="discoverBackToTop">
-            <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
-          </EuiButtonEmpty>
-        </div>
-      ) : (
-        <span tabIndex={-1} id="discoverBottomMarker">
-          &#8203;
-        </span>
-      )}
-    </Fragment>
+  const setMaxLimit = useCallback(() => setLimit(props.rows.length), [props.rows.length]);
+
+  const renderDocTable = useCallback(
+    (tableProps: DocTableRenderProps) => (
+      <DocTableInfiniteContent
+        {...tableProps}
+        limit={limit}
+        onSetMaxLimit={setMaxLimit}
+        onBackToTop={onBackToTop}
+      />
+    ),
+    [limit, onBackToTop, setMaxLimit]
   );
-};
 
-const DocTableWrapperMemoized = memo(DocTableWrapper);
-const DocTableInfiniteContentMemoized = memo(DocTableInfiniteContent);
-
-const renderDocTable = (tableProps: DocTableRenderProps) => (
-  <DocTableInfiniteContentMemoized {...tableProps} />
-);
-
-export const DocTableInfinite = (props: DocTableProps) => {
-  return <DocTableWrapperMemoized {...props} render={renderDocTable} />;
+  return <DocTableWrapperMemoized ref={tableWrapperRef} render={renderDocTable} {...props} />;
 };

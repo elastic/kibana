@@ -368,7 +368,7 @@ describe('#run()', () => {
     const cluster = new Cluster({ log });
     await cluster.run();
 
-    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toEqual('-Xms1g -Xmx1g');
+    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(`"-Xms1536m -Xmx1536m"`);
   });
 
   it('allows Java heap to be overwritten', async () => {
@@ -378,7 +378,7 @@ describe('#run()', () => {
     const cluster = new Cluster({ log });
     await cluster.run();
 
-    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toEqual('-Xms5g -Xmx5g');
+    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(`"-Xms5g -Xmx5g"`);
   });
 });
 

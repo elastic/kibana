@@ -15,6 +15,7 @@ import {
   PinnedEvent,
 } from './pinned_event';
 import { Direction, Maybe } from '../../search_strategy';
+import { Ecs } from '../../ecs';
 
 export * from './actions';
 export * from './cells';
@@ -467,7 +468,7 @@ export enum TimelineTabs {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type EmptyObject = Record<any, never>;
+type EmptyObject = Partial<Record<any, never>>;
 
 export type TimelineExpandedEventType =
   | {
@@ -475,6 +476,7 @@ export type TimelineExpandedEventType =
       params?: {
         eventId: string;
         indexName: string;
+        ecsData?: Ecs;
       };
     }
   | EmptyObject;
@@ -510,9 +512,9 @@ export type TimelineExpandedDetailType =
   | TimelineExpandedHostType
   | TimelineExpandedNetworkType;
 
-export type TimelineExpandedDetail = {
-  [tab in TimelineTabs]?: TimelineExpandedDetailType;
-};
+export type TimelineExpandedDetail = Partial<
+  Record<TimelineTabs | string, TimelineExpandedDetailType>
+>;
 
 export type ToggleDetailPanel = TimelineExpandedDetailType & {
   tabType?: TimelineTabs;

@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { UserSetupPlugin } from './plugin';
+import { InteractiveSetupPlugin } from './plugin';
 
-export const plugin = () => new UserSetupPlugin();
+export const plugin = () => new InteractiveSetupPlugin();

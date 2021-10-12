@@ -23,23 +23,14 @@ export interface DatatableVisualizationPluginSetupPlugins {
 }
 
 export class DatatableVisualization {
-  constructor() {}
-
   setup(
     core: CoreSetup<DatatableVisualizationPluginStartPlugins, void>,
     { expressions, formatFactory, editorFrame, charts }: DatatableVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const {
-        getDatatable,
-        datatableColumn,
-        getDatatableRenderer,
-        getDatatableVisualization,
-      } = await import('../async_services');
+      const { getDatatableRenderer, getDatatableVisualization } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
 
-      expressions.registerFunction(() => datatableColumn);
-      expressions.registerFunction(() => getDatatable(() => formatFactory));
       expressions.registerRenderer(() =>
         getDatatableRenderer({
           formatFactory,
@@ -50,6 +41,7 @@ export class DatatableVisualization {
           uiSettings: core.uiSettings,
         })
       );
+
       return getDatatableVisualization({ paletteService: palettes });
     });
   }

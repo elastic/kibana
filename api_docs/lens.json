@@ -128,6 +128,19 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.DatatableVisualizationState.layerType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layerType",
+            "description": [],
+            "signature": [
+              "\"data\" | \"threshold\""
+            ],
+            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.DatatableVisualizationState.sorting",
             "type": "Object",
             "tags": [],
@@ -319,7 +332,7 @@
             "label": "operationType",
             "description": [],
             "signature": [
-              "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"overall_sum\" | \"overall_min\" | \"overall_max\" | \"overall_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\" | undefined"
+              "\"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"overall_sum\" | \"overall_min\" | \"overall_max\" | \"overall_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\" | \"static_value\" | undefined"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
             "deprecated": false
@@ -535,6 +548,36 @@
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegendConfig.maxLines",
+            "type": "number",
+            "tags": [],
+            "label": "maxLines",
+            "description": [
+              "\nMaximum number of lines per legend item"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegendConfig.shouldTruncate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shouldTruncate",
+            "description": [
+              "\nFlag whether the legend items are truncated or not"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -616,14 +659,10 @@
             ],
             "signature": [
               "(input: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.LensEmbeddableInput",
-                "text": "LensEmbeddableInput"
-              },
-              ", openInNewTab?: boolean | undefined) => void"
+              "LensByValueInput",
+              " | ",
+              "LensByReferenceInput",
+              " | undefined, options?: { openInNewTab?: boolean | undefined; originatingApp?: string | undefined; originatingPath?: string | undefined; } | undefined) => void"
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
@@ -636,31 +675,65 @@
                 "label": "input",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.LensEmbeddableInput",
-                    "text": "LensEmbeddableInput"
-                  }
-                ],
-                "path": "x-pack/plugins/lens/public/plugin.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.LensPublicStart.navigateToPrefilledEditor.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "openInNewTab",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
+                  "LensByValueInput",
+                  " | ",
+                  "LensByReferenceInput",
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.LensPublicStart.navigateToPrefilledEditor.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/plugins/lens/public/plugin.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.LensPublicStart.navigateToPrefilledEditor.$2.openInNewTab",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "openInNewTab",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/lens/public/plugin.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.LensPublicStart.navigateToPrefilledEditor.$2.originatingApp",
+                    "type": "string",
+                    "tags": [],
+                    "label": "originatingApp",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/lens/public/plugin.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.LensPublicStart.navigateToPrefilledEditor.$2.originatingPath",
+                    "type": "string",
+                    "tags": [],
+                    "label": "originatingPath",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/lens/public/plugin.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -792,6 +865,19 @@
             ],
             "path": "x-pack/plugins/lens/common/expressions/metric_chart/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricState.layerType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layerType",
+            "description": [],
+            "signature": [
+              "\"data\" | \"threshold\""
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/metric_chart/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -814,7 +900,7 @@
             "label": "dataType",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"date\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"histogram\" | \"document\""
+              "\"string\" | \"number\" | \"boolean\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"histogram\" | \"document\""
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false
@@ -921,7 +1007,7 @@
             "label": "shape",
             "description": [],
             "signature": [
-              "\"donut\" | \"pie\" | \"treemap\""
+              "\"pie\" | \"donut\" | \"treemap\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
             "deprecated": false
@@ -955,7 +1041,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<unknown> | undefined"
+              "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
             "deprecated": false
@@ -1136,6 +1222,32 @@
             ],
             "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.SharedPieLayerState.legendMaxLines",
+            "type": "number",
+            "tags": [],
+            "label": "legendMaxLines",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.SharedPieLayerState.truncateLegend",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "truncateLegend",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1310,7 +1422,20 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<unknown> | undefined"
+              "<{ [key: string]: unknown; }> | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYLayerConfig.layerType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layerType",
+            "description": [],
+            "signature": [
+              "\"data\" | \"threshold\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
             "deprecated": false
@@ -1375,7 +1500,7 @@
             "label": "fittingFunction",
             "description": [],
             "signature": [
-              "\"None\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined"
+              "\"None\" | \"Linear\" | \"Zero\" | \"Carry\" | \"Lookahead\" | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
             "deprecated": false
@@ -1600,7 +1725,7 @@
             "label": "axisMode",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"auto\" | undefined"
+              "\"bottom\" | \"left\" | \"right\" | \"auto\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
             "deprecated": false
@@ -1614,6 +1739,84 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.YConfig.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.YConfig.lineWidth",
+            "type": "number",
+            "tags": [],
+            "label": "lineWidth",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.YConfig.lineStyle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "lineStyle",
+            "description": [],
+            "signature": [
+              "\"solid\" | \"dashed\" | \"dotted\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.YConfig.fill",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fill",
+            "description": [],
+            "signature": [
+              "\"above\" | \"below\" | \"none\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.YConfig.iconPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconPosition",
+            "description": [],
+            "signature": [
+              "\"above\" | \"below\" | \"left\" | \"right\" | \"auto\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.YConfig.textVisibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "textVisibility",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
             "deprecated": false
@@ -1712,7 +1915,7 @@
         "label": "DataType",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"date\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"histogram\" | \"document\""
+          "\"string\" | \"number\" | \"boolean\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"histogram\" | \"document\""
         ],
         "path": "x-pack/plugins/lens/public/types.ts",
         "deprecated": false,
@@ -1745,7 +1948,7 @@
         "signature": [
           "(Pick<",
           "LensByValueInput",
-          ", \"palette\" | \"timeRange\" | \"syncColors\" | \"viewMode\" | \"filters\" | \"title\" | \"query\" | \"hidePanelTitles\" | \"id\" | \"lastReloadRequestTime\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"searchSessionId\" | \"className\" | \"style\" | \"onLoad\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
+          ", \"palette\" | \"id\" | \"title\" | \"timeRange\" | \"syncColors\" | \"viewMode\" | \"filters\" | \"query\" | \"executionContext\" | \"hidePanelTitles\" | \"lastReloadRequestTime\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"searchSessionId\" | \"className\" | \"style\" | \"onLoad\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -1967,7 +2170,9 @@
             "docId": "kibLensPluginApi",
             "section": "def-public.FormulaIndexPatternColumn",
             "text": "FormulaIndexPatternColumn"
-          }
+          },
+          " | ",
+          "StaticValueIndexPatternColumn"
         ],
         "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
         "deprecated": false,
@@ -2085,7 +2290,7 @@
           "\nA union type of all available operation types. The operation type is a unique id of an operation.\nEach column is assigned to exactly one operation type."
         ],
         "signature": [
-          "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"overall_sum\" | \"overall_min\" | \"overall_max\" | \"overall_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\""
+          "\"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"overall_sum\" | \"overall_min\" | \"overall_max\" | \"overall_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\" | \"static_value\""
         ],
         "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
         "deprecated": false,
@@ -2147,7 +2352,15 @@
         "description": [],
         "signature": [
           "SharedPieLayerState",
-          " & { layerId: string; }"
+          " & { layerId: string; layerType: ",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.LayerType",
+            "text": "LayerType"
+          },
+          "; }"
         ],
         "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
         "deprecated": false,
@@ -2202,7 +2415,7 @@
         "signature": [
           "Pick<",
           "LensByValueInput",
-          ", \"palette\" | \"timeRange\" | \"syncColors\" | \"viewMode\" | \"filters\" | \"title\" | \"query\" | \"hidePanelTitles\" | \"id\" | \"lastReloadRequestTime\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"searchSessionId\" | \"className\" | \"style\" | \"onLoad\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
+          ", \"palette\" | \"id\" | \"title\" | \"timeRange\" | \"syncColors\" | \"viewMode\" | \"filters\" | \"query\" | \"executionContext\" | \"hidePanelTitles\" | \"lastReloadRequestTime\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"searchSessionId\" | \"className\" | \"style\" | \"onLoad\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -2264,7 +2477,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"left\" | \"right\" | \"auto\""
+          "\"bottom\" | \"left\" | \"right\" | \"auto\""
         ],
         "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
         "deprecated": false,
@@ -2298,7 +2511,15 @@
             "section": "def-server.Plugin",
             "text": "Plugin"
           },
-          "<{}, {}, {}, {}>"
+          "<",
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.LensServerPluginSetup",
+            "text": "LensServerPluginSetup"
+          },
+          ", {}, {}, {}>"
         ],
         "path": "x-pack/plugins/lens/server/plugin.tsx",
         "deprecated": false,
@@ -2372,7 +2593,23 @@
                 "section": "def-server.PluginSetupContract",
                 "text": "PluginSetupContract"
               },
-              ") => {}"
+              ") => { lensEmbeddableFactory: () => ",
+              {
+                "pluginId": "embeddable",
+                "scope": "server",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-server.EmbeddableRegistryDefinition",
+                "text": "EmbeddableRegistryDefinition"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              ">; }"
             ],
             "path": "x-pack/plugins/lens/server/plugin.tsx",
             "deprecated": false,
@@ -2524,6 +2761,278 @@
     "interfaces": [
       {
         "parentPluginId": "lens",
+        "id": "def-server.LensDocShape715",
+        "type": "Interface",
+        "tags": [],
+        "label": "LensDocShape715",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.LensDocShape715",
+            "text": "LensDocShape715"
+          },
+          "<VisualizationState>"
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShape715.visualizationType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visualizationType",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShape715.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShape715.expression",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "expression",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShape715.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; visualization: VisualizationState; query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; }"
+            ],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.LensDocShapePost712",
+        "type": "Interface",
+        "tags": [],
+        "label": "LensDocShapePost712",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.LensDocShapePost712",
+            "text": "LensDocShapePost712"
+          },
+          "<VisualizationState>"
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShapePost712.visualizationType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visualizationType",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShapePost712.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShapePost712.expression",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "expression",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShapePost712.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }; }; visualization: VisualizationState; query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; }"
+            ],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.LensDocShapePre712",
+        "type": "Interface",
+        "tags": [],
+        "label": "LensDocShapePre712",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.LensDocShapePre712",
+            "text": "LensDocShapePre712"
+          },
+          "<VisualizationState>"
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShapePre712.visualizationType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visualizationType",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShapePre712.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShapePre712.expression",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "expression",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.LensDocShapePre712.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "{ datasourceStates: { indexpattern: { layers: Record<string, { columns: Record<string, { operationType: ",
+              {
+                "pluginId": "lens",
+                "scope": "server",
+                "docId": "kibLensPluginApi",
+                "section": "def-server.OperationTypePre712",
+                "text": "OperationTypePre712"
+              },
+              "; }>; }>; }; }; query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              "; visualization: VisualizationState; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; }"
+            ],
+            "path": "x-pack/plugins/lens/server/migrations/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-server.PluginSetupContract",
         "type": "Interface",
         "tags": [],
@@ -2555,7 +3064,7 @@
           {
             "parentPluginId": "lens",
             "id": "def-server.PluginSetupContract.taskManager",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "taskManager",
             "description": [],
@@ -2599,161 +3108,13 @@
             "label": "expressions",
             "description": [],
             "signature": [
-              "{ readonly getType: (name: string) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionType",
-                "text": "ExpressionType"
-              },
-              " | undefined; readonly registerType: (typeDefinition: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.AnyExpressionTypeDefinition",
-                "text": "AnyExpressionTypeDefinition"
-              },
-              " | (() => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.AnyExpressionTypeDefinition",
-                "text": "AnyExpressionTypeDefinition"
-              },
-              ")) => void; readonly getFunction: (name: string) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunction",
-                "text": "ExpressionFunction"
-              },
-              " | undefined; readonly getFunctions: () => Record<string, ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunction",
-                "text": "ExpressionFunction"
-              },
-              ">; readonly getRenderer: (name: string) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionRenderer",
-                "text": "ExpressionRenderer"
-              },
-              "<unknown> | null; readonly getRenderers: () => Record<string, ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionRenderer",
-                "text": "ExpressionRenderer"
-              },
-              "<unknown>>; readonly getTypes: () => Record<string, ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionType",
-                "text": "ExpressionType"
-              },
-              ">; readonly registerFunction: (functionDefinition: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.AnyExpressionFunctionDefinition",
-                "text": "AnyExpressionFunctionDefinition"
-              },
-              " | (() => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.AnyExpressionFunctionDefinition",
-                "text": "AnyExpressionFunctionDefinition"
-              },
-              ")) => void; readonly registerRenderer: (definition: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.AnyExpressionRenderDefinition",
-                "text": "AnyExpressionRenderDefinition"
-              },
-              " | (() => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.AnyExpressionRenderDefinition",
-                "text": "AnyExpressionRenderDefinition"
-              },
-              ")) => void; readonly run: <Input, Output>(ast: string | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstExpression",
-                "text": "ExpressionAstExpression"
-              },
-              ", input: Input, params?: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionExecutionParams",
-                "text": "ExpressionExecutionParams"
-              },
-              " | undefined) => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExecutionResult",
-                "text": "ExecutionResult"
-              },
-              "<",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionValueBoxed",
-                "text": "ExpressionValueBoxed"
-              },
-              "<\"error\", { error: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ErrorLike",
-                "text": "ErrorLike"
-              },
-              "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
-              " | undefined; }> | Output>>; readonly fork: () => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              },
-              "; }"
+                "section": "def-common.ExpressionsServiceSetup",
+                "text": "ExpressionsServiceSetup"
+              }
             ],
             "path": "x-pack/plugins/lens/server/plugin.tsx",
             "deprecated": false
@@ -2793,6 +3154,25 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-server.PluginStartContract.fieldFormats",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldFormats",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "server",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-server.FieldFormatsStart",
+                "text": "FieldFormatsStart"
+              }
+            ],
+            "path": "x-pack/plugins/lens/server/plugin.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-server.PluginStartContract.data",
             "type": "Object",
             "tags": [],
@@ -2815,8 +3195,232 @@
       }
     ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.LensDocShape713",
+        "type": "Type",
+        "tags": [],
+        "label": "LensDocShape713",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.LensDocShapePost712",
+            "text": "LensDocShapePost712"
+          },
+          "<unknown>, \"title\" | \"expression\" | \"visualizationType\"> & { state: Pick<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }; }; visualization: unknown; query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; }, \"filters\" | \"query\" | \"visualization\" | \"datasourceMetaData\"> & { datasourceStates: { indexpattern: Pick<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }, \"currentIndexPatternId\"> & { layers: Record<string, Pick<{ columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }, never> & { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; } | { operationType: \"date_histogram\"; params: { interval: string; timeZone?: string | undefined; }; }>; }>; }; }; }; }"
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.LensDocShape714",
+        "type": "Type",
+        "tags": [],
+        "label": "LensDocShape714",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.LensDocShapePost712",
+            "text": "LensDocShapePost712"
+          },
+          "<unknown>, \"title\" | \"expression\" | \"visualizationType\"> & { state: Pick<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }; }; visualization: unknown; query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; }, \"filters\" | \"query\" | \"visualization\" | \"datasourceMetaData\"> & { datasourceStates: { indexpattern: Pick<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }, \"currentIndexPatternId\"> & { layers: Record<string, Pick<{ columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }, never> & { columns: Record<string, { operationType: \"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; } | { operationType: \"date_histogram\"; params: { interval: string; }; }>; }>; }; }; }; }"
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.OperationTypePost712",
+        "type": "Type",
+        "tags": [],
+        "label": "OperationTypePost712",
+        "description": [],
+        "signature": [
+          "\"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\""
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.OperationTypePre712",
+        "type": "Type",
+        "tags": [],
+        "label": "OperationTypePre712",
+        "description": [],
+        "signature": [
+          "\"range\" | \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"percentile\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"cardinality\" | \"counter_rate\" | \"last_value\""
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.VisState716",
+        "type": "Type",
+        "tags": [],
+        "label": "VisState716",
+        "description": [],
+        "signature": [
+          "{ columns: { palette?: ",
+          {
+            "pluginId": "charts",
+            "scope": "common",
+            "docId": "kibChartsPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
+          "<",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
+          "> | undefined; colorMode?: \"none\" | \"text\" | \"cell\" | undefined; }[]; } | { palette?: ",
+          {
+            "pluginId": "charts",
+            "scope": "common",
+            "docId": "kibChartsPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
+          "<",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
+          "> | undefined; }"
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.VisStatePost715",
+        "type": "Type",
+        "tags": [],
+        "label": "VisStatePost715",
+        "description": [],
+        "signature": [
+          "LayerPost715 | { layers: LayerPost715[]; }"
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.VisStatePre715",
+        "type": "Type",
+        "tags": [],
+        "label": "VisStatePre715",
+        "description": [],
+        "signature": [
+          "LayerPre715 | { layers: LayerPre715[]; }"
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "lens",
+      "id": "def-server.LensServerPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "LensServerPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/lens/server/plugin.tsx",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "lens",
+          "id": "def-server.LensServerPluginSetup.lensEmbeddableFactory",
+          "type": "Function",
+          "tags": [],
+          "label": "lensEmbeddableFactory",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "embeddable",
+              "scope": "server",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-server.EmbeddableRegistryDefinition",
+              "text": "EmbeddableRegistryDefinition"
+            },
+            "<",
+            {
+              "pluginId": "embeddable",
+              "scope": "common",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-common.EmbeddableStateWithType",
+              "text": "EmbeddableStateWithType"
+            },
+            ">"
+          ],
+          "path": "x-pack/plugins/lens/server/plugin.tsx",
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
@@ -3466,7 +4070,13 @@
             "text": "PersistableFilter"
           },
           " extends ",
-          "Filter"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          }
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -3509,7 +4119,13 @@
             "text": "PersistableFilterMeta"
           },
           " extends ",
-          "FilterMeta"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.FilterMeta",
+            "text": "FilterMeta"
+          }
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -3636,9 +4252,9 @@
           },
           "<Record<string, any>> | undefined) => ",
           {
-            "pluginId": "data",
+            "pluginId": "fieldFormats",
             "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
+            "docId": "kibFieldFormatsPluginApi",
             "section": "def-common.FieldFormat",
             "text": "FieldFormat"
           }
@@ -3649,7 +4265,7 @@
         "children": [
           {
             "parentPluginId": "lens",
-            "id": "def-common.mapping",
+            "id": "def-common.FormatFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "mapping",
@@ -3668,6 +4284,20 @@
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-common.LayerType",
+        "type": "Type",
+        "tags": [],
+        "label": "LayerType",
+        "description": [],
+        "signature": [
+          "\"data\" | \"threshold\""
+        ],
+        "path": "x-pack/plugins/lens/common/types.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -3757,6 +4387,46 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "lens",
+        "id": "def-common.layerTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "layerTypes",
+        "description": [],
+        "path": "x-pack/plugins/lens/common/constants.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.layerTypes.DATA",
+            "type": "string",
+            "tags": [],
+            "label": "DATA",
+            "description": [],
+            "signature": [
+              "\"data\""
+            ],
+            "path": "x-pack/plugins/lens/common/constants.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.layerTypes.THRESHOLD",
+            "type": "string",
+            "tags": [],
+            "label": "THRESHOLD",
+            "description": [],
+            "signature": [
+              "\"threshold\""
+            ],
+            "path": "x-pack/plugins/lens/common/constants.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

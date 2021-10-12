@@ -7,6 +7,8 @@
 
 import type { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
+import type { DeepReadonly } from 'utility-types';
+
 import type {
   DeletePackagePoliciesResponse,
   NewPackagePolicy,
@@ -14,9 +16,7 @@ import type {
 } from '../../common';
 
 export type PostPackagePolicyDeleteCallback = (
-  deletedPackagePolicies: DeletePackagePoliciesResponse,
-  context: RequestHandlerContext,
-  request: KibanaRequest
+  deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>
 ) => Promise<void>;
 
 export type PostPackagePolicyCreateCallback = (

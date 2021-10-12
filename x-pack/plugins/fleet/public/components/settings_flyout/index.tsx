@@ -36,7 +36,7 @@ import {
   useGetSettings,
   useInput,
   sendPutSettings,
-  useGetOutputs,
+  useDefaultOutput,
   sendPutOutput,
 } from '../../hooks';
 import { isDiffPathProtocol, normalizeHostsForAgents } from '../../../common';
@@ -58,9 +58,11 @@ const CodeEditorPlaceholder = styled(EuiTextColor).attrs((props) => ({
 }))`
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
   // Matches monaco editor
   font-family: Menlo, Monaco, 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 21px;
   pointer-events: none;
 `;
 
@@ -102,6 +104,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     }
 
     const res: Array<{ message: string; index: number }> = [];
+    const hostIndexes: { [key: string]: number[] } = {};
     value.forEach((val, idx) => {
       if (!val.match(URL_REGEX)) {
         res.push({
@@ -111,7 +114,23 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
           index: idx,
         });
       }
+      const curIndexes = hostIndexes[val] || [];
+      hostIndexes[val] = [...curIndexes, idx];
     });
+
+    Object.values(hostIndexes)
+      .filter(({ length }) => length > 1)
+      .forEach((indexes) => {
+        indexes.forEach((index) =>
+          res.push({
+            message: i18n.translate('xpack.fleet.settings.fleetServerHostsDuplicateError', {
+              defaultMessage: 'Duplicate URL',
+            }),
+            index,
+          })
+        );
+      });
+
     if (res.length) {
       return res;
     }
@@ -132,6 +151,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
 
   const elasticsearchUrlInput = useComboInput('esHostsComboxBox', [], (value) => {
     const res: Array<{ message: string; index: number }> = [];
+    const urlIndexes: { [key: string]: number[] } = {};
     value.forEach((val, idx) => {
       if (!val.match(URL_REGEX)) {
         res.push({
@@ -141,7 +161,23 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
           index: idx,
         });
       }
+      const curIndexes = urlIndexes[val] || [];
+      urlIndexes[val] = [...curIndexes, idx];
     });
+
+    Object.values(urlIndexes)
+      .filter(({ length }) => length > 1)
+      .forEach((indexes) => {
+        indexes.forEach((index) =>
+          res.push({
+            message: i18n.translate('xpack.fleet.settings.elasticHostDuplicateError', {
+              defaultMessage: 'Duplicate URL',
+            }),
+            index,
+          })
+        );
+      });
+
     if (res.length) {
       return res;
     }
@@ -162,11 +198,11 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   });
 
   const validate = useCallback(() => {
-    if (
-      !fleetServerHostsInput.validate() ||
-      !elasticsearchUrlInput.validate() ||
-      !additionalYamlConfigInput.validate()
-    ) {
+    const fleetServerHostsValid = fleetServerHostsInput.validate();
+    const elasticsearchUrlsValid = elasticsearchUrlInput.validate();
+    const additionalYamlConfigValid = additionalYamlConfigInput.validate();
+
+    if (!fleetServerHostsValid || !elasticsearchUrlsValid || !additionalYamlConfigValid) {
       return false;
     }
 
@@ -222,8 +258,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
 
   const settingsRequest = useGetSettings();
   const settings = settingsRequest?.data?.item;
-  const outputsRequest = useGetOutputs();
-  const output = outputsRequest.data?.items?.[0];
+  const { output } = useDefaultOutput();
   const { inputs, submit, validate, isLoading } = useSettingsForm(output?.id, onClose);
 
   const [isConfirmModalVisible, setConfirmModalVisible] = React.useState(false);
@@ -347,7 +382,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
                   >
                     <FormattedMessage
                       id="xpack.fleet.settings.userGuideLink"
-                      defaultMessage="Fleet User Guide"
+                      defaultMessage="Fleet and Elastic Agent Guide"
                     />
                   </EuiLink>
                 ),

@@ -9,7 +9,7 @@ This plugin registers the Platform Usage Collectors in Kibana.
 | **Config Usage** | Reports the non-default values set via `kibana.yml` config file or CLI options. It `[redacts]` any potential PII-sensitive values. | [Link](./server/collectors/config_usage/README.md) |
 | **User-changed UI Settings** | Reports all the UI Settings that have been overwritten by the user. It `[redacts]` any potential PII-sensitive values. | [Link](./server/collectors/management/README.md) |
 | **CSP configuration** | Reports the key values regarding the CSP configuration. | - |
-| **Kibana** | It reports the number of Saved Objects per type. It is limited to `dashboard`, `visualization`, `search`, `index-pattern`, `graph-workspace` and `timelion-sheet`.<br> It exists for legacy purposes, and may still be used by Monitoring via Metricbeat. | - |
+| **Kibana** | It reports the number of Saved Objects per type. It is limited to `dashboard`, `visualization`, `search`, `index-pattern`, `graph-workspace`.<br> It exists for legacy purposes, and may still be used by Monitoring via Metricbeat. | - |
 | **Saved Objects Counts** | Number of Saved Objects per type. | - |
 | **Localization data** | Localization settings: setup locale and installed translation files. | - |
 | **Ops stats** | Operation metrics from the system. | - |

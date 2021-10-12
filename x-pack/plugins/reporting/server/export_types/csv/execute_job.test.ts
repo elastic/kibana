@@ -10,7 +10,6 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import nodeCrypto from '@elastic/node-crypto';
 import { ElasticsearchClient, IUiSettingsClient } from 'kibana/server';
 import moment from 'moment';
-// @ts-ignore
 import Puid from 'puid';
 import sinon from 'sinon';
 import { ReportingConfig, ReportingCore } from '../../';
@@ -75,10 +74,9 @@ describe('CSV Execute Job', function () {
 
   beforeEach(async function () {
     content = '';
-    stream = ({ write: jest.fn((chunk) => (content += chunk)) } as unknown) as typeof stream;
+    stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
     configGetStub = sinon.stub();
     configGetStub.withArgs('queue', 'timeout').returns(moment.duration('2m'));
-    configGetStub.withArgs('index').returns('.reporting-foo-test');
     configGetStub.withArgs('encryptionKey').returns(encryptionKey);
     configGetStub.withArgs('csv', 'maxSizeBytes').returns(1024 * 1000); // 1mB
     configGetStub.withArgs('csv', 'scroll').returns({});
@@ -86,7 +84,7 @@ describe('CSV Execute Job', function () {
 
     mockReportingCore = await createMockReportingCore(createMockConfigSchema());
     mockReportingCore.getUiSettingsServiceFactory = () =>
-      Promise.resolve((mockUiSettingsClient as unknown) as IUiSettingsClient);
+      Promise.resolve(mockUiSettingsClient as unknown as IUiSettingsClient);
     mockReportingCore.setConfig(mockReportingConfig);
 
     mockEsClient = (await mockReportingCore.getEsClient()).asScoped({} as any)
@@ -1059,7 +1057,7 @@ describe('CSV Execute Job', function () {
 
       beforeEach(async function () {
         mockReportingCore.getUiSettingsServiceFactory = () =>
-          Promise.resolve((mockUiSettingsClient as unknown) as IUiSettingsClient);
+          Promise.resolve(mockUiSettingsClient as unknown as IUiSettingsClient);
         configGetStub.withArgs('csv', 'maxSizeBytes').returns(18);
 
         mockEsClient.search.mockResolvedValueOnce({

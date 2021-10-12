@@ -19,21 +19,13 @@ interface KibanaSavedObjectCounts {
   search: { total: number };
   index_pattern: { total: number };
   graph_workspace: { total: number };
-  timelion_sheet: { total: number };
 }
 
 interface KibanaUsage extends KibanaSavedObjectCounts {
   index: string;
 }
 
-const TYPES = [
-  'dashboard',
-  'visualization',
-  'search',
-  'index-pattern',
-  'graph-workspace',
-  'timelion-sheet',
-];
+const TYPES = ['dashboard', 'visualization', 'search', 'index-pattern', 'graph-workspace'];
 
 export async function getKibanaSavedObjectCounts(
   esClient: ElasticsearchClient,
@@ -41,9 +33,9 @@ export async function getKibanaSavedObjectCounts(
 ): Promise<KibanaSavedObjectCounts> {
   const buckets = await getSavedObjectsCounts(esClient, kibanaIndex, TYPES);
 
-  const allZeros = (Object.fromEntries(
+  const allZeros = Object.fromEntries(
     TYPES.map((type) => [snakeCase(type), { total: 0 }])
-  ) as unknown) as KibanaSavedObjectCounts;
+  ) as unknown as KibanaSavedObjectCounts;
 
   return buckets.reduce((acc, { key, doc_count: total = 0 }) => {
     const type = snakeCase(key) as keyof KibanaSavedObjectCounts;
@@ -87,12 +79,6 @@ export function registerKibanaUsageCollector(
           total: {
             type: 'long',
             _meta: { description: 'Total number of graph_workspace saved objects' },
-          },
-        },
-        timelion_sheet: {
-          total: {
-            type: 'long',
-            _meta: { description: 'Total number of timelion_sheet saved objects' },
           },
         },
       },

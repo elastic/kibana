@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  FailedImport,
-  ProcessedImportResponse,
-  SavedObjectsManagementRecord,
-} from 'src/plugins/saved_objects_management/public';
-
-import type { SavedObjectTarget } from '../types';
+import type { FailedImport, ProcessedImportResponse } from '../lib';
+import type { CopyToSpaceSavedObjectTarget } from '../types';
 import { summarizeCopyResult } from './summarize_copy_result';
 
 // Sample data references:
@@ -29,7 +24,7 @@ const OBJECTS = {
     namespaces: [],
     icon: 'dashboardApp',
     title: 'my-dashboard-title',
-  } as Required<SavedObjectTarget>,
+  } as Required<CopyToSpaceSavedObjectTarget>,
   MY_DASHBOARD: {
     type: 'dashboard',
     id: 'foo',
@@ -43,7 +38,7 @@ const OBJECTS = {
       { type: 'visualization', id: 'foo', name: 'Visualization foo' },
       { type: 'visualization', id: 'bar', name: 'Visualization bar' },
     ],
-  } as SavedObjectsManagementRecord,
+  },
   VISUALIZATION_FOO: {
     type: 'visualization',
     id: 'bar',
@@ -54,7 +49,7 @@ const OBJECTS = {
       hiddenType: false,
     },
     references: [{ type: 'index-pattern', id: 'foo', name: 'Index pattern foo' }],
-  } as SavedObjectsManagementRecord,
+  },
   VISUALIZATION_BAR: {
     type: 'visualization',
     id: 'baz',
@@ -65,7 +60,7 @@ const OBJECTS = {
       hiddenType: false,
     },
     references: [{ type: 'index-pattern', id: 'bar', name: 'Index pattern bar' }],
-  } as SavedObjectsManagementRecord,
+  },
   INDEX_PATTERN_FOO: {
     type: 'index-pattern',
     id: 'foo',
@@ -76,7 +71,7 @@ const OBJECTS = {
       hiddenType: false,
     },
     references: [],
-  } as SavedObjectsManagementRecord,
+  },
   INDEX_PATTERN_BAR: {
     type: 'index-pattern',
     id: 'bar',
@@ -87,7 +82,7 @@ const OBJECTS = {
       hiddenType: false,
     },
     references: [],
-  } as SavedObjectsManagementRecord,
+  },
 };
 
 interface ObjectProperties {

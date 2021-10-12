@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapKeys, kebabCase } from 'lodash';
+import { kebabCase } from 'lodash';
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +25,7 @@ const ExamplePackLink = React.memo(() => (
 ExamplePackLink.displayName = 'ExamplePackLink';
 
 interface OsqueryPackUploaderProps {
-  onChange: (payload: Record<string, unknown>) => void;
+  onChange: (payload: Record<string, unknown>, packName: string) => void;
 }
 
 const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onChange }) => {
@@ -61,12 +61,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
       return;
     }
 
-    const queriesJSON = mapKeys(
-      parsedContent?.queries,
-      (value, key) => `pack_${packName.current}_${key}`
-    );
-
-    onChange(queriesJSON);
+    onChange(parsedContent, packName.current);
     // @ts-expect-error update types
     filePickerRef.current?.removeFiles(new Event('fake'));
   };

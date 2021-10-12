@@ -12,11 +12,11 @@ import { FIELD_FORMAT_IDS } from '../../../../src/plugins/field_formats/common';
 import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['settings', 'common']);
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
   const es = getService('es');
   const indexPatterns = getService('indexPatterns');
   const toasts = getService('toasts');
@@ -26,14 +26,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_field_formatters',
+        'test_logstash_reader',
+      ]);
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
-      await kibanaServer.uiSettings.update({});
     });
 
     after(async function afterAll() {
-      await PageObjects.settings.navigateTo();
-      await esArchiver.emptyKibanaIndex();
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
     describe('set and change field formatter', function describeIndexTests() {
@@ -488,9 +491,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 (
                   await Promise.all(
                     (
-                      await (await testSubjects.find('editorSelectedFormatId')).findAllByTagName(
-                        'option'
-                      )
+                      await (
+                        await testSubjects.find('editorSelectedFormatId')
+                      ).findAllByTagName('option')
                     ).map((option) => option.getAttribute('value'))
                   )
                 ).filter(Boolean)

@@ -17,7 +17,10 @@ import {
   RedirectAppLinks,
   useUiSetting$,
 } from '../../../../../../src/plugins/kibana_react/public';
-import { HeaderMenuPortal } from '../../../../observability/public';
+import {
+  HeaderMenuPortal,
+  InspectorContextProvider,
+} from '../../../../observability/public';
 import { ScrollToTopOnPathChange } from '../../components/app/Main/ScrollToTopOnPathChange';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
@@ -27,9 +30,11 @@ import {
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { BreadcrumbsContextProvider } from '../../context/breadcrumbs/context';
 import { LicenseProvider } from '../../context/license/license_context';
+import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_range_id_context';
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
 import { ApmPluginStartDeps } from '../../plugin';
 import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
+import { RedirectWithDefaultDateRange } from '../shared/redirect_with_default_date_range';
 import { apmRouter } from './apm_route_config';
 import { TrackPageview } from './track_pageview';
 
@@ -54,24 +59,30 @@ export function ApmAppRoot({
       <ApmPluginContext.Provider value={apmPluginContextValue}>
         <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
           <i18nCore.Context>
-            <RouterProvider history={history} router={apmRouter as any}>
-              <TrackPageview>
-                <BreadcrumbsContextProvider>
-                  <UrlParamsProvider>
-                    <LicenseProvider>
-                      <AnomalyDetectionJobsContextProvider>
-                        <ApmThemeProvider>
-                          <MountApmHeaderActionMenu />
+            <TimeRangeIdContextProvider>
+              <RouterProvider history={history} router={apmRouter as any}>
+                <RedirectWithDefaultDateRange>
+                  <TrackPageview>
+                    <BreadcrumbsContextProvider>
+                      <UrlParamsProvider>
+                        <LicenseProvider>
+                          <AnomalyDetectionJobsContextProvider>
+                            <InspectorContextProvider>
+                              <ApmThemeProvider>
+                                <MountApmHeaderActionMenu />
 
-                          <Route component={ScrollToTopOnPathChange} />
-                          <RouteRenderer />
-                        </ApmThemeProvider>
-                      </AnomalyDetectionJobsContextProvider>
-                    </LicenseProvider>
-                  </UrlParamsProvider>
-                </BreadcrumbsContextProvider>
-              </TrackPageview>
-            </RouterProvider>
+                                <Route component={ScrollToTopOnPathChange} />
+                                <RouteRenderer />
+                              </ApmThemeProvider>
+                            </InspectorContextProvider>
+                          </AnomalyDetectionJobsContextProvider>
+                        </LicenseProvider>
+                      </UrlParamsProvider>
+                    </BreadcrumbsContextProvider>
+                  </TrackPageview>
+                </RedirectWithDefaultDateRange>
+              </RouterProvider>
+            </TimeRangeIdContextProvider>
           </i18nCore.Context>
         </KibanaContextProvider>
       </ApmPluginContext.Provider>

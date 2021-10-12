@@ -6,19 +6,19 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
   CERTIFICATES_ROUTE,
+  MAPPING_ERROR_ROUTE,
   MONITOR_ROUTE,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
   SYNTHETIC_CHECK_STEPS_ROUTE,
 } from '../common/constants';
-import { MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
+import { MappingErrorPage, MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
 import { OverviewPageComponent } from './pages/overview';
@@ -27,18 +27,18 @@ import {
   SyntheticsCheckStepsPageHeader,
   SyntheticsCheckStepsPageRightSideItem,
 } from './pages/synthetics/synthetics_checks';
-import { ClientPluginsStart } from './apps/plugin';
 import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/monitor_title';
 import { UptimeDatePicker } from './components/common/uptime_date_picker';
-import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
 import { SyntheticsCallout } from './components/overview/synthetics_callout';
+import { APP_WRAPPER_CLASS } from '../../../../src/core/public';
 import {
   StepDetailPageChildren,
   StepDetailPageHeader,
   StepDetailPageRightSideItem,
 } from './pages/synthetics/step_detail_page';
+import { UptimePageTemplateComponent } from './apps/uptime_page_template';
 
 interface RouteProps {
   path: string;
@@ -143,6 +143,26 @@ const Routes: RouteProps[] = [
       rightSideItems: [<UptimeDatePicker />],
     },
   },
+  {
+    title: i18n.translate('xpack.uptime.mappingErrorRoute.title', {
+      defaultMessage: 'Synthetics | mapping error',
+    }),
+    path: MAPPING_ERROR_ROUTE,
+    component: MappingErrorPage,
+    dataTestSubj: 'uptimeMappingErrorPage',
+    telemetryId: UptimePage.MappingError,
+    pageHeader: {
+      pageTitle: (
+        <div>
+          <FormattedMessage
+            id="xpack.uptime.mappingErrorRoute.pageHeader.title"
+            defaultMessage="Mapping error"
+          />
+        </div>
+      ),
+      rightSideItems: [],
+    },
+  },
 ];
 
 const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = ({
@@ -158,28 +178,17 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 };
 
 export const PageRouter: FC = () => {
-  const {
-    services: { observability },
-  } = useKibana<ClientPluginsStart>();
-  const PageTemplateComponent = observability.navigation.PageTemplate;
-
-  const StyledPageTemplateComponent = styled(PageTemplateComponent)`
-    .euiPageHeaderContent > .euiFlexGroup {
-      flex-wrap: wrap;
-    }
-  `;
-
   return (
     <Switch>
       {Routes.map(
         ({ title, path, component: RouteComponent, dataTestSubj, telemetryId, pageHeader }) => (
           <Route path={path} key={telemetryId} exact={true}>
-            <div data-test-subj={dataTestSubj}>
+            <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              <StyledPageTemplateComponent pageHeader={pageHeader}>
+              <UptimePageTemplateComponent path={path} pageHeader={pageHeader}>
                 <RouteComponent />
-              </StyledPageTemplateComponent>
+              </UptimePageTemplateComponent>
             </div>
           </Route>
         )

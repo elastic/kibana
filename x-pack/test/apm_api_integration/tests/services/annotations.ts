@@ -14,8 +14,8 @@ import { registry } from '../../common/registry';
 const DEFAULT_INDEX_NAME = 'observability-annotations';
 
 export default function annotationApiTests({ getService }: FtrProviderContext) {
-  const supertestRead = getService('supertestAsApmReadUser');
-  const supertestWrite = getService('supertestAsApmAnnotationsWriteUser');
+  const supertestRead = getService('legacySupertestAsApmReadUser');
+  const supertestWrite = getService('legacySupertestAsApmAnnotationsWriteUser');
   const es = getService('es');
 
   function expectContainsObj(source: JsonObject, expected: JsonObject) {

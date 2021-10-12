@@ -10,7 +10,6 @@ import { isEqual } from 'lodash';
 import { History } from 'history';
 import { getState } from './discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
-import { IndexPattern } from '../../../../../../data/public';
 import { DiscoverServices } from '../../../../build_services';
 import { SavedSearch } from '../../../../saved_searches';
 import { loadIndexPattern } from '../utils/resolve_index_pattern';
@@ -29,24 +28,22 @@ import { SortPairArr } from '../components/doc_table/lib/get_sort';
 export function useDiscoverState({
   services,
   history,
-  initialIndexPattern,
-  initialSavedSearch,
+  savedSearch,
 }: {
   services: DiscoverServices;
-  initialSavedSearch: SavedSearch;
+  savedSearch: SavedSearch;
   history: History;
-  initialIndexPattern: IndexPattern;
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns } = services;
-  const [indexPattern, setIndexPattern] = useState(initialIndexPattern);
-  const [savedSearch, setSavedSearch] = useState(initialSavedSearch);
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
   const { timefilter } = data.query.timefilter;
+
+  const indexPattern = savedSearch.searchSource.getField('index')!;
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
     return savedSearch.searchSource.createChild();
-  }, [savedSearch.searchSource, indexPattern]);
+  }, [savedSearch, indexPattern]);
 
   const stateContainer = useMemo(
     () =>
@@ -99,6 +96,7 @@ export function useDiscoverState({
 
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
+
     return () => stopSync();
   }, [stateContainer, filterManager, data, indexPattern]);
 
@@ -121,12 +119,10 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        reset();
         const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
+        savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
 
-        if (nextIndexPattern) {
-          setIndexPattern(nextIndexPattern.loaded);
-        }
+        reset();
       }
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
@@ -135,7 +131,17 @@ export function useDiscoverState({
       setState(nextState);
     });
     return () => unsubscribe();
-  }, [config, indexPatterns, appStateContainer, setState, state, refetch$, reset]);
+  }, [
+    config,
+    indexPatterns,
+    appStateContainer,
+    setState,
+    state,
+    refetch$,
+    data$,
+    reset,
+    savedSearch.searchSource,
+  ]);
 
   /**
    * function to revert any changes to a given saved search
@@ -143,7 +149,8 @@ export function useDiscoverState({
   const resetSavedSearch = useCallback(
     async (id?: string) => {
       const newSavedSearch = await services.getSavedSearchById(id);
-      newSavedSearch.searchSource.setField('index', indexPattern);
+      const newIndexPattern = newSavedSearch.searchSource.getField('index') || indexPattern;
+      newSavedSearch.searchSource.setField('index', newIndexPattern);
       const newAppState = getStateDefaults({
         config,
         data,
@@ -151,11 +158,8 @@ export function useDiscoverState({
       });
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
-      if (savedSearch.id !== newSavedSearch.id) {
-        setSavedSearch(newSavedSearch);
-      }
     },
-    [services, indexPattern, config, data, stateContainer, savedSearch.id]
+    [indexPattern, services, config, data, stateContainer]
   );
 
   /**
@@ -191,17 +195,28 @@ export function useDiscoverState({
     [refetch$, searchSessionManager]
   );
 
-  /**
-   * Initial data fetching, also triggered when index pattern changes
-   */
   useEffect(() => {
-    if (!indexPattern) {
+    if (!savedSearch || !savedSearch.id) {
       return;
     }
-    if (initialFetchStatus === FetchStatus.LOADING) {
+    // handling pushing to state of a persisted saved object
+    const newAppState = getStateDefaults({
+      config,
+      data,
+      savedSearch,
+    });
+    stateContainer.replaceUrlAppState(newAppState);
+    setState(newAppState);
+  }, [config, data, savedSearch, reset, stateContainer]);
+
+  /**
+   * Trigger data fetching on indexPattern or savedSearch changes
+   */
+  useEffect(() => {
+    if (indexPattern) {
       refetch$.next();
     }
-  }, [initialFetchStatus, refetch$, indexPattern]);
+  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
   return {
     data$,
@@ -211,7 +226,6 @@ export function useDiscoverState({
     resetSavedSearch,
     onChangeIndexPattern,
     onUpdateQuery,
-    savedSearch,
     searchSource,
     setState,
     state,

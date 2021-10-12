@@ -20,17 +20,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Listing of Reports', function () {
     before(async () => {
-      await security.role.create('test_reporting_user', {
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: [],
-            feature: { canvas: ['minimal_read', 'generate_report'] },
-          },
-        ],
-      });
-      await security.testUser.setRoles(['kibana_admin', 'test_reporting_user']);
+      await security.testUser.setRoles([
+        'kibana_admin', // to access stack management
+        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+      ]);
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 

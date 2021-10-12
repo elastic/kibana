@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { RedirectTo } from '../redirect_to';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { BackendDetailOverview } from '../../app/backend_detail_overview';
@@ -45,10 +45,10 @@ export const ServiceInventoryTitle = i18n.translate(
   }
 );
 
-export const BackendInventoryTitle = i18n.translate(
-  'xpack.apm.views.backendInventory.title',
+export const DependenciesInventoryTitle = i18n.translate(
+  'xpack.apm.views.dependenciesInventory.title',
   {
-    defaultMessage: 'Backends',
+    defaultMessage: 'Dependencies',
   }
 );
 
@@ -63,12 +63,14 @@ export const home = {
         rangeTo: t.string,
         kuery: t.string,
       }),
+      t.partial({
+        refreshPaused: t.union([t.literal('true'), t.literal('false')]),
+        refreshInterval: t.string,
+      }),
     ]),
   }),
   defaults: {
     query: {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
       environment: ENVIRONMENT_ALL.value,
       kuery: '',
     },
@@ -104,7 +106,7 @@ export const home = {
       }),
       children: [
         {
-          path: '/:backendName/overview',
+          path: '/backends/{backendName}/overview',
           element: <BackendDetailOverview />,
           params: t.type({
             path: t.type({
@@ -113,15 +115,15 @@ export const home = {
           }),
         },
         page({
-          path: '/',
-          title: BackendInventoryTitle,
+          path: '/backends',
+          title: DependenciesInventoryTitle,
           element: <BackendInventory />,
         }),
       ],
     },
     {
       path: '/',
-      element: <Redirect to="/services" />,
+      element: <RedirectTo pathname="/services" />,
     },
   ],
 } as const;

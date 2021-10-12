@@ -12,7 +12,7 @@ import Util from 'util';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 
-const logFilePath = Path.join(__dirname, 'migration_test_corrupt_docs_kibana.log');
+const logFilePath = Path.join(__dirname, 'corrupt_outdated_docs.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 
@@ -40,7 +40,7 @@ describe('migration v2 with corrupt saved object documents', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  it('collects corrupt saved object documents accross batches', async () => {
+  it('collects corrupt saved object documents across batches', async () => {
     const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {

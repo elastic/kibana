@@ -8,7 +8,7 @@
 import { ExpressionValueBoxed } from 'src/plugins/expressions/common';
 import { Filter } from '../../es_query';
 import { Query, TimeRange } from '../../query';
-import { IndexPatternField } from '../../index_patterns/fields';
+import { IndexPatternField } from '../..';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ExecutionContextSearch = {

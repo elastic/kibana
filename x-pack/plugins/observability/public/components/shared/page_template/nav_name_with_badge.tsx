@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { EuiBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 
 interface Props {
   label: string;
-  badgeLabel: string;
-  localstorageId: string;
+  localStorageId: string;
 }
 
 const LabelContainer = styled.span`
@@ -30,10 +30,10 @@ const StyledBadge = styled(EuiBadge)`
 /**
  * Gets current state from local storage to show or hide the badge.
  * Default value: true
- * @param localstorageId
+ * @param localStorageId
  */
-function getBadgeVisibility(localstorageId: string) {
-  const storedItem = window.localStorage.getItem(localstorageId);
+function getBadgeVisibility(localStorageId: string) {
+  const storedItem = window.localStorage.getItem(localStorageId);
   if (storedItem) {
     return JSON.parse(storedItem) as boolean;
   }
@@ -43,20 +43,26 @@ function getBadgeVisibility(localstorageId: string) {
 
 /**
  * Saves on local storage that this item should no longer be visible
- * @param localstorageId
+ * @param localStorageId
  */
-export function hideBadge(localstorageId: string) {
-  window.localStorage.setItem(localstorageId, JSON.stringify(false));
+export function hideBadge(localStorageId: string) {
+  window.localStorage.setItem(localStorageId, JSON.stringify(false));
 }
 
-export function NavNameWithBadge({ label, badgeLabel, localstorageId }: Props) {
-  const isBadgeVisible = getBadgeVisibility(localstorageId);
+export function NavNameWithBadge({ label, localStorageId }: Props) {
+  const isBadgeVisible = getBadgeVisibility(localStorageId);
   return (
     <>
       <LabelContainer className="eui-textTruncate">
         <span>{label}</span>
       </LabelContainer>
-      {isBadgeVisible && <StyledBadge color="accent">{badgeLabel}</StyledBadge>}
+      {isBadgeVisible && (
+        <StyledBadge color="accent">
+          {i18n.translate('xpack.observability.navigation.newBadge', {
+            defaultMessage: 'NEW',
+          })}
+        </StyledBadge>
+      )}
     </>
   );
 }

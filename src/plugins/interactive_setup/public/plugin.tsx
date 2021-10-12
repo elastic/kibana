@@ -6,21 +6,39 @@
  * Side Public License, v 1.
  */
 
+import type { FunctionComponent } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { I18nProvider } from '@kbn/i18n/react';
 import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { App } from './app';
+import { KibanaProvider } from './use_kibana';
+import { VerificationProvider } from './use_verification';
 
-export class UserSetupPlugin implements Plugin {
+export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
   public setup(core: CoreSetup) {
     core.application.register({
       id: 'interactiveSetup',
-      title: 'Interactive Setup',
+      title: 'Configure Elastic to get started',
+      appRoute: '/',
       chromeless: true,
-      mount: (params) => {
-        ReactDOM.render(<App />, params.element);
+      mount: async (params) => {
+        const url = new URL(window.location.href);
+        const defaultCode = url.searchParams.get('code') || undefined;
+        const onSuccess = () => {
+          url.searchParams.delete('code');
+          window.location.replace(url.href);
+        };
+        const [services] = await core.getStartServices();
+
+        ReactDOM.render(
+          <Providers defaultCode={defaultCode} services={services}>
+            <App onSuccess={onSuccess} />
+          </Providers>,
+          params.element
+        );
         return () => ReactDOM.unmountComponentAtNode(params.element);
       },
     });
@@ -28,3 +46,20 @@ export class UserSetupPlugin implements Plugin {
 
   public start(core: CoreStart) {}
 }
+
+export interface ProvidersProps {
+  services: CoreStart;
+  defaultCode?: string;
+}
+
+export const Providers: FunctionComponent<ProvidersProps> = ({
+  defaultCode,
+  services,
+  children,
+}) => (
+  <I18nProvider>
+    <KibanaProvider services={services}>
+      <VerificationProvider defaultCode={defaultCode}>{children}</VerificationProvider>
+    </KibanaProvider>
+  </I18nProvider>
+);

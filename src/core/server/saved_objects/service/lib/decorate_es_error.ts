@@ -8,6 +8,7 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
+import { isSupportedEsServer } from '../../../elasticsearch';
 
 const responseErrors = {
   isServiceUnavailable: (statusCode: number) => statusCode === 503,
@@ -68,6 +69,11 @@ export function decorateEsError(error: EsErrors) {
     );
     if (match?.length > 0) {
       return SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError(error, match[1]);
+    }
+    // Throw EsUnavailable error if the 404 is not from elasticsearch
+    // Needed here to verify Product support for any non-ignored 404 responses from calls to ES
+    if (!isSupportedEsServer(error?.meta?.headers)) {
+      return SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
     return SavedObjectsErrorHelpers.createGenericNotFoundError();
   }

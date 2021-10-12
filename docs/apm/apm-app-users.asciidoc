@@ -113,8 +113,6 @@ Here are two examples:
 |Grants the privileges required to create, update, and view machine learning jobs
 |====
 
-include::./tab-widgets/code.asciidoc[]
-
 ////
 ***********************************  ***********************************
 ////
@@ -232,8 +230,6 @@ and the following Kibana feature privileges to anyone who needs to read central 
 ==== Central configuration API
 
 See <<apm-app-api-user>>.
-
-include::./tab-widgets/code.asciidoc[]
 
 ////
 ***********************************  ***********************************

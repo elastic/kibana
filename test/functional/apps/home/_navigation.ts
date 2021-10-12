@@ -14,11 +14,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
   const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Kibana browser back navigation should work', function describeIndexTests() {
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/discover');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('detect navigate back issues', async () => {

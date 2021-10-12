@@ -7,8 +7,9 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import {
+import type {
   ExecutionContextSearch,
   Filter,
   Query,
@@ -16,11 +17,12 @@ import {
   TimeRange,
   IndexPattern,
 } from 'src/plugins/data/public';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { Start as InspectorStart } from 'src/plugins/inspector/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
-import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
+import { RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
@@ -40,7 +42,7 @@ import {
   ReferenceOrValueEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
 import { Document, injectFilterReferences } from '../persistence';
-import { ExpressionWrapper } from './expression_wrapper';
+import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import {
   isLensBrushEvent,
@@ -56,8 +58,14 @@ import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
 import { IBasePath } from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
+import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
+import { SharingSavedObjectProps } from '../types';
+import type { SpacesPluginStart } from '../../../spaces/public';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
+export interface ResolvedLensSavedObjectAttributes extends LensSavedObjectAttributes {
+  sharingSavedObjectProps?: SharingSavedObjectProps;
+}
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
@@ -74,7 +82,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
 }
 
 export type LensByValueInput = {
-  attributes: LensSavedObjectAttributes;
+  attributes: ResolvedLensSavedObjectAttributes;
 } & LensBaseEmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
@@ -93,15 +101,18 @@ export interface LensEmbeddableDeps {
   expressionRenderer: ReactExpressionRendererType;
   timefilter: TimefilterContract;
   basePath: IBasePath;
+  inspector: InspectorStart;
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
   usageCollection?: UsageCollectionSetup;
+  spaces?: SpacesPluginStart;
 }
 
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>
+{
   type = DOC_TYPE;
 
   deferEmbeddableLoad = true;
@@ -112,10 +123,10 @@ export class Embeddable
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
-  private activeData: Partial<DefaultInspectorAdapters> | undefined;
   private errors: ErrorMessage[] | undefined;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
+  private lensInspector: LensInspector;
 
   private logError(type: 'runtime' | 'validation') {
     this.deps.usageCollection?.reportUiCounter(
@@ -144,7 +155,7 @@ export class Embeddable
       },
       parent
     );
-
+    this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
     this.subscription = this.getUpdated$().subscribe(() =>
@@ -246,19 +257,22 @@ export class Embeddable
   }
 
   public getInspectorAdapters() {
-    return this.activeData;
+    return this.lensInspector.adapters;
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
-    const attributes:
-      | LensSavedObjectAttributes
-      | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
-      this.onFatalError(e);
-      return false;
-    });
-    if (!attributes || this.isDestroyed) {
+    const attrs: ResolvedLensSavedObjectAttributes | false = await this.deps.attributeService
+      .unwrapAttributes(input)
+      .catch((e: Error) => {
+        this.onFatalError(e);
+        return false;
+      });
+    if (!attrs || this.isDestroyed) {
       return;
     }
+
+    const { sharingSavedObjectProps, ...attributes } = attrs;
+
     this.savedVis = {
       ...attributes,
       type: this.type,
@@ -266,8 +280,22 @@ export class Embeddable
     };
     const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
     this.errors = errors;
+    if (sharingSavedObjectProps?.outcome === 'conflict' && this.deps.spaces) {
+      const conflictError = {
+        shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
+          defaultMessage: `You've encountered a URL conflict`,
+        }),
+        longMessage: (
+          <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
+            targetType={DOC_TYPE}
+            sourceId={sharingSavedObjectProps.sourceId!}
+          />
+        ),
+      };
+      this.errors = this.errors ? [...this.errors, conflictError] : [conflictError];
+    }
     this.expression = ast ? toExpression(ast) : null;
-    if (errors) {
+    if (this.errors) {
       this.logError('validation');
     }
     await this.initializeOutput();
@@ -300,11 +328,7 @@ export class Embeddable
     return isDirty;
   }
 
-  private updateActiveData = (
-    data: unknown,
-    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
-  ) => {
-    this.activeData = inspectorAdapters;
+  private updateActiveData: ExpressionWrapperProps['onData$'] = () => {
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
@@ -341,11 +365,13 @@ export class Embeddable
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
         errors={this.errors}
+        lensInspector={this.lensInspector}
         searchContext={this.getMergedSearchContext()}
         variables={input.palette ? { theme: { palette: input.palette } } : {}}
         searchSessionId={this.externalSearchContext.searchSessionId}
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
+        interactive={!input.disableTriggers}
         renderMode={input.renderMode}
         syncColors={input.syncColors}
         hasCompatibleActions={this.hasCompatibleActions}
@@ -439,7 +465,7 @@ export class Embeddable
         true
       );
       if (this.input.onTableRowClick) {
-        this.input.onTableRowClick((event.data as unknown) as LensTableRowContextMenuEvent['data']);
+        this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
       }
     }
   };

@@ -24,7 +24,7 @@ export function registerSearchRoutes({
 }: RouteDependencies) {
   router.post(
     skipBodyValidation({
-      path: '/api/app_search/engines/{engineName}/search',
+      path: '/internal/app_search/engines/{engineName}/search',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -44,7 +44,7 @@ export function registerSearchRoutes({
   // requests through Kibana's server.
   router.post(
     skipBodyValidation({
-      path: '/api/app_search/search-ui/api/as/v1/engines/{engineName}/search.json',
+      path: '/internal/app_search/search-ui/api/as/v1/engines/{engineName}/search.json',
       validate: {
         params: schema.object({
           engineName: schema.string(),

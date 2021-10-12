@@ -13,7 +13,7 @@ import { StringFormat } from './string';
  * and we're not caring about in these tests.
  */
 function stripSpan(input: string): string {
-  return input.replace(/^\<span ng-non-bindable\>(.*)\<\/span\>$/, '$1');
+  return input.replace(/^\<span\>(.*)\<\/span\>$/, '$1');
 }
 
 describe('String Format', () => {
@@ -110,5 +110,19 @@ describe('String Format', () => {
     expect(stripSpan(string.convert('', 'html'))).toBe(
       '<span class="ffString__emptyValue">(empty)</span>'
     );
+  });
+
+  test('does escape value while highlighting', () => {
+    const string = new StringFormat();
+    expect(
+      stripSpan(
+        string.convert('<img />', 'html', {
+          field: { name: 'foo' },
+          hit: {
+            highlight: { foo: ['@kibana-highlighted-field@<img />@/kibana-highlighted-field@'] },
+          },
+        })
+      )
+    ).toBe('<mark>&lt;img /&gt;</mark>');
   });
 });

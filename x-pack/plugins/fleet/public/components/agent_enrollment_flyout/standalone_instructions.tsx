@@ -21,6 +21,7 @@ import {
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { safeDump } from 'js-yaml';
 
 import { useStartServices, useLink, sendGetOneAgentPolicyFull } from '../../hooks';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../services';
@@ -71,7 +72,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
     fetchFullPolicy();
   }, [selectedPolicyId, notifications.toasts]);
 
-  const yaml = useMemo(() => fullAgentPolicyToYaml(fullAgentPolicy), [fullAgentPolicy]);
+  const yaml = useMemo(() => fullAgentPolicyToYaml(fullAgentPolicy, safeDump), [fullAgentPolicy]);
   const steps = [
     DownloadStep(),
     !agentPolicy

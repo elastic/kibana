@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -650,13 +650,8 @@ export const getUngroupedESQuery = (
   };
 };
 
-type SupportedESQueryTypes = 'term' | 'match' | 'match_phrase' | 'range';
-type Filter = {
-  [key in SupportedESQueryTypes]?: object;
-};
-
 const buildFiltersForCriteria = (criteria: CountCriteria) => {
-  let filters: Filter[] = [];
+  let filters: estypes.QueryDslQueryContainer[] = [];
 
   criteria.forEach((criterion) => {
     const criterionQuery = buildCriterionQuery(criterion);
@@ -667,7 +662,7 @@ const buildFiltersForCriteria = (criteria: CountCriteria) => {
   return filters;
 };
 
-const buildCriterionQuery = (criterion: Criterion): Filter | undefined => {
+const buildCriterionQuery = (criterion: Criterion): estypes.QueryDslQueryContainer | undefined => {
   const { field, value, comparator } = criterion;
 
   const queryType = getQueryMappingForComparator(comparator);
@@ -691,7 +686,7 @@ const buildCriterionQuery = (criterion: Criterion): Filter | undefined => {
     case 'match_phrase': {
       return {
         match_phrase: {
-          [field]: value,
+          [field]: String(value),
         },
       };
     }

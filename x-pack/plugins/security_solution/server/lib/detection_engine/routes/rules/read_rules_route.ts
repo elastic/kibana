@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
+import { Logger } from 'src/core/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -19,12 +19,14 @@ import { getIdError, transform } from './utils';
 import { buildSiemResponse } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
-import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetRuleActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
 export const readRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: IRuleDataClient | null
+  logger: Logger,
+  isRuleRegistryEnabled: boolean
 ) => {
   router.get(
     {
@@ -48,7 +50,6 @@ export const readRulesRoute = (
       const { id, rule_id: ruleId } = request.query;
 
       const rulesClient = context.alerting?.getRulesClient();
-      const savedObjectsClient = context.core.savedObjects.client;
 
       try {
         if (!rulesClient) {
@@ -56,15 +57,18 @@ export const readRulesRoute = (
         }
 
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const savedObjectsClient = context.core.savedObjects.client;
         const rule = await readRules({
-          rulesClient,
           id,
+          isRuleRegistryEnabled,
+          rulesClient,
           ruleId,
         });
         if (rule != null) {
-          const ruleActions = await getRuleActionsSavedObject({
+          const legacyRuleActions = await legacyGetRuleActionsSavedObject({
             savedObjectsClient,
             ruleAlertId: rule.id,
+            logger,
           });
           const ruleStatuses = await ruleStatusClient.find({
             logsCount: 1,
@@ -74,11 +78,18 @@ export const readRulesRoute = (
           const [currentStatus] = ruleStatuses;
           if (currentStatus != null && rule.executionStatus.status === 'error') {
             currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
-            currentStatus.attributes.lastFailureAt = rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.statusDate = rule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.lastFailureAt =
+              rule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.statusDate =
+              rule.executionStatus.lastExecutionDate.toISOString();
             currentStatus.attributes.status = RuleExecutionStatus.failed;
           }
-          const transformed = transform(rule, ruleActions, currentStatus);
+          const transformed = transform(
+            rule,
+            currentStatus,
+            isRuleRegistryEnabled,
+            legacyRuleActions
+          );
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {

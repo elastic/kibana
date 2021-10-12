@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const isUsingCustomRolloverPath = '_meta.hot.customRollover.enabled';
 
 export const isUsingDefaultRolloverPath = '_meta.hot.isUsingDefaultRollover';
@@ -25,3 +27,93 @@ export const ROLLOVER_FORM_PATHS = {
  * exist as a "managed" repository.
  */
 export const CLOUD_DEFAULT_REPO = 'found-snapshots';
+
+/*
+ * Labels for byte size units
+ */
+export const byteSizeUnits = [
+  {
+    value: 'gb',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.byteSizeUnits.gigabytesLabel', {
+      defaultMessage: 'gigabytes',
+    }),
+  },
+  {
+    value: 'mb',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.byteSizeUnits.megabytesLabel', {
+      defaultMessage: 'megabytes',
+    }),
+  },
+  {
+    value: 'b',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.byteSizeUnits.bytesLabel', {
+      defaultMessage: 'bytes',
+    }),
+  },
+  {
+    value: 'kb',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.byteSizeUnits.kilobytesLabel', {
+      defaultMessage: 'kilobytes',
+    }),
+  },
+  {
+    value: 'tb',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.byteSizeUnits.terabytesLabel', {
+      defaultMessage: 'terabytes',
+    }),
+  },
+  {
+    value: 'pb',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.byteSizeUnits.petabytesLabel', {
+      defaultMessage: 'petabytes',
+    }),
+  },
+];
+
+/*
+ * Labels for time units
+ */
+export const timeUnits = [
+  {
+    value: 'd',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.daysLabel', {
+      defaultMessage: 'days',
+    }),
+  },
+  {
+    value: 'h',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.hoursLabel', {
+      defaultMessage: 'hours',
+    }),
+  },
+  {
+    value: 'm',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.minutesLabel', {
+      defaultMessage: 'minutes',
+    }),
+  },
+  {
+    value: 's',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.secondsLabel', {
+      defaultMessage: 'seconds',
+    }),
+  },
+  {
+    value: 'ms',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.millisecondsLabel', {
+      defaultMessage: 'milliseconds',
+    }),
+  },
+  {
+    value: 'micros',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.microsecondsLabel', {
+      defaultMessage: 'microseconds',
+    }),
+  },
+  {
+    value: 'nanos',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.nanosecondsLabel', {
+      defaultMessage: 'nanoseconds',
+    }),
+  },
+];

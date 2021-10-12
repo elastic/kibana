@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ShallowWrapper } from 'enzyme';
+import { CommonWrapper } from 'enzyme';
 
 /**
  * Quick and easy helper for re-rendering a React component in Enzyme
  * after (e.g.) updating Kea values
  */
-export const rerender = (wrapper: ShallowWrapper) => {
+export const rerender = (wrapper: CommonWrapper) => {
   wrapper.setProps({}); // Re-renders
   wrapper.update(); // Just in case
 };

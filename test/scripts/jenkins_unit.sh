@@ -28,10 +28,10 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   ./test/scripts/checks/test_hardening.sh
 else
   echo " -> Running jest tests with coverage"
-  node scripts/jest --ci --verbose --maxWorkers=8 --coverage || true;
+  node scripts/jest --ci --maxWorkers=8 --coverage || true;
 
   echo " -> Running jest integration tests with coverage"
-  node scripts/jest_integration --ci --verbose --coverage || true;
+  node scripts/jest_integration --ci --coverage || true;
 
   echo " -> Combine code coverage in a single report"
   yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js

@@ -17,7 +17,15 @@ import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { addTags } from './add_tags';
 import { enableRule } from './enable_rule';
 import { PatchRulesOptions } from './types';
-import { calculateInterval, calculateName, calculateVersion, removeUndefined } from './utils';
+import {
+  calculateInterval,
+  calculateName,
+  calculateVersion,
+  maybeMute,
+  removeUndefined,
+  transformToAlertThrottle,
+  transformToNotifyWhen,
+} from './utils';
 
 class PatchError extends Error {
   public readonly statusCode: number;
@@ -68,9 +76,11 @@ export const patchRules = async ({
   concurrentSearches,
   itemsPerSearch,
   timestampOverride,
+  throttle,
   to,
   type,
   references,
+  namespace,
   note,
   version,
   exceptionsList,
@@ -122,6 +132,7 @@ export const patchRules = async ({
     type,
     references,
     version,
+    namespace,
     note,
     exceptionsList,
     anomalyThreshold,
@@ -167,6 +178,7 @@ export const patchRules = async ({
       to,
       type,
       references,
+      namespace,
       note,
       version: calculatedVersion,
       exceptionsList,
@@ -179,8 +191,8 @@ export const patchRules = async ({
 
   const newRule = {
     tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
-    throttle: null,
-    notifyWhen: null,
+    throttle: throttle !== undefined ? transformToAlertThrottle(throttle) : rule.throttle,
+    notifyWhen: throttle !== undefined ? transformToNotifyWhen(throttle) : rule.notifyWhen,
     name: calculateName({ updatedName: name, originalName: rule.name }),
     schedule: {
       interval: calculateInterval(interval, rule.schedule.interval),
@@ -188,6 +200,7 @@ export const patchRules = async ({
     actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
     params: removeUndefined(nextParams),
   };
+
   const [validated, errors] = validate(newRule, internalRuleUpdate);
   if (errors != null || validated === null) {
     throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
@@ -197,6 +210,10 @@ export const patchRules = async ({
     id: rule.id,
     data: validated,
   });
+
+  if (throttle !== undefined) {
+    await maybeMute({ rulesClient, muteAll: rule.muteAll, throttle, id: update.id });
+  }
 
   if (rule.enabled && enabled === false) {
     await rulesClient.disable({ id: rule.id });

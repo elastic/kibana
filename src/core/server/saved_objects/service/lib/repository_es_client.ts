@@ -39,6 +39,7 @@ export function createRepositoryEsClient(client: ElasticsearchClient): Repositor
             (client[key] as Function)(params, { maxRetries: 0, ...options })
           );
         } catch (e) {
+          // retry failures are caught here, as are 404's that aren't ignored (e.g update calls)
           throw decorateEsError(e);
         }
       },

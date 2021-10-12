@@ -7,31 +7,43 @@
 
 # Tech leads
 /dev_docs @elastic/kibana-tech-leads
+/src/dev/license_checker/config.ts @elastic/kibana-tech-leads
 /packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
-# App
-/x-pack/plugins/discover_enhanced/ @elastic/kibana-app
-/x-pack/plugins/lens/ @elastic/kibana-app
-/x-pack/plugins/graph/ @elastic/kibana-app
-/src/plugins/advanced_settings/ @elastic/kibana-app
-/src/plugins/charts/ @elastic/kibana-app
-/src/plugins/discover/ @elastic/kibana-app
-/src/plugins/management/ @elastic/kibana-app
-/src/plugins/kibana_legacy/ @elastic/kibana-app
-/src/plugins/timelion/ @elastic/kibana-app
-/src/plugins/vis_default_editor/ @elastic/kibana-app
-/src/plugins/vis_type_metric/ @elastic/kibana-app
-/src/plugins/vis_type_table/ @elastic/kibana-app
-/src/plugins/vis_type_tagcloud/ @elastic/kibana-app
-/src/plugins/vis_type_timelion/ @elastic/kibana-app
-/src/plugins/vis_type_timeseries/ @elastic/kibana-app
-/src/plugins/vis_type_vega/ @elastic/kibana-app
-/src/plugins/vis_type_vislib/ @elastic/kibana-app
-/src/plugins/vis_type_xy/ @elastic/kibana-app
-/src/plugins/vis_type_pie/ @elastic/kibana-app
-/src/plugins/visualize/ @elastic/kibana-app
-/src/plugins/visualizations/ @elastic/kibana-app
-/packages/kbn-tinymath/ @elastic/kibana-app
+# Virtual teams
+/x-pack/plugins/rule_registry/ @elastic/rac
+
+# Data Discovery
+/src/plugins/discover/ @elastic/kibana-data-discovery
+/x-pack/plugins/discover_enhanced/ @elastic/kibana-data-discovery
+/test/functional/apps/discover/ @elastic/kibana-data-discovery
+/x-pack/plugins/graph/ @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/graph @elastic/kibana-data-discovery
+
+# Vis Editors
+/x-pack/plugins/lens/ @elastic/kibana-vis-editors
+/src/plugins/advanced_settings/ @elastic/kibana-vis-editors
+/src/plugins/charts/ @elastic/kibana-vis-editors
+/src/plugins/management/ @elastic/kibana-vis-editors
+/src/plugins/kibana_legacy/ @elastic/kibana-vis-editors
+/src/plugins/vis_default_editor/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/metric/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/table/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/tagcloud/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/timelion/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/timeseries/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/vega/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/vislib/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/xy/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/pie/ @elastic/kibana-vis-editors
+/src/plugins/visualize/ @elastic/kibana-vis-editors
+/src/plugins/visualizations/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_metric/ @elastic/kibana-vis-editors
+/src/plugins/url_forwarding/ @elastic/kibana-vis-editors
+/packages/kbn-tinymath/ @elastic/kibana-vis-editors
+/x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
+/test/functional/apps/visualize/ @elastic/kibana-vis-editors
 
 # Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-services
@@ -46,12 +58,16 @@
 /examples/url_generators_examples/ @elastic/kibana-app-services
 /examples/url_generators_explorer/ @elastic/kibana-app-services
 /examples/field_formats_example/ @elastic/kibana-app-services
+/examples/partial_results_example/ @elastic/kibana-app-services
 /packages/elastic-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-app-services
+/src/plugins/data-views/ @elastic/kibana-app-services
 /src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/expressions/ @elastic/kibana-app-services
+/src/plugins/field_formats/ @elastic/kibana-app-services
+/src/plugins/index_pattern_editor/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
 /src/plugins/kibana_react/ @elastic/kibana-app-services
 /src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
@@ -113,8 +129,6 @@
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
-/x-pack/plugins/apm/e2e/cypress/support/step_definitions/csm @elastic/uptime
-/x-pack/plugins/apm/e2e/cypress/integration/csm_dashboard.feature @elastic/uptime
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
 /x-pack/plugins/apm/public/components/app/RumDashboard @elastic/uptime
 /x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
@@ -136,11 +150,11 @@
 /src/plugins/vis_type_markdown/ @elastic/kibana-presentation
 /src/plugins/presentation_util/ @elastic/kibana-presentation
 /test/functional/apps/dashboard/  @elastic/kibana-presentation
+/test/functional/apps/dashboard_elements/  @elastic/kibana-presentation
 /x-pack/plugins/canvas/  @elastic/kibana-presentation
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
-#CC# /x-pack/plugins/dashboard_mode @elastic/kibana-presentation
 
 # Machine Learning
 /x-pack/plugins/ml/  @elastic/ml-ui
@@ -174,12 +188,8 @@
 /x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
 /x-pack/plugins/stack_alerts/server/alert_types/geo_containment @elastic/kibana-gis
 /x-pack/plugins/stack_alerts/public/alert_types/geo_containment @elastic/kibana-gis
-#CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
-/src/plugins/maps_legacy/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 /x-pack/plugins/file_upload @elastic/kibana-gis
-/src/plugins/tile_map/ @elastic/kibana-gis
-/src/plugins/region_map/ @elastic/kibana-gis
 /packages/kbn-mapbox-gl @elastic/kibana-gis
 
 # Operations
@@ -192,7 +202,8 @@
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
-/packages/kbn-ui-shared-deps/ @elastic/kibana-operations
+/packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
+/packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations
@@ -233,7 +244,6 @@
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
-/packages/kbn-legacy-logging/ @elastic/kibana-core
 /packages/kbn-crypto/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
@@ -244,7 +254,6 @@
 /src/plugins/kibana_overview/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
 #CC# /src/core/server/csp/ @elastic/kibana-core
-#CC# /src/plugins/legacy_export/ @elastic/kibana-core
 #CC# /src/plugins/xpack_legacy/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
@@ -279,10 +288,7 @@
 
 # Security
 /src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
-/src/plugins/security_oss/ @elastic/kibana-security
-/src/plugins/spaces_oss/ @elastic/kibana-security
 /src/plugins/interactive_setup/ @elastic/kibana-security
-/test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/ @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/ @elastic/kibana-security
 /x-pack/plugins/security/ @elastic/kibana-security
@@ -369,6 +375,7 @@
 /x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/plugins/security_solution/ @elastic/security-solution
+/x-pack/plugins/metrics_entities/ @elastic/security-solution
 /x-pack/test/detection_engine_api_integration @elastic/security-solution
 /x-pack/test/lists_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
@@ -423,6 +430,21 @@
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
 
 # Reporting
+/x-pack/examples/reporting_example/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/plugins/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/apps/dashboard/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/apps/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/apps/reporting_management/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/es_archives/lens/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/es_archives/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/reporting_api_integration/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/reporting_functional/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/stack_functional_integration/apps/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/docs/user/reporting @elastic/kibana-reporting-services @elastic/kibana-app-services
+/docs/settings/reporting-settings.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
+/docs/setup/configuring-reporting.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
-
+# EUI design
+/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-app-services

@@ -44,7 +44,8 @@ export type PatchLogSourceConfigurationRequestBody = rt.TypeOf<
  * response
  */
 
-export const patchLogSourceConfigurationSuccessResponsePayloadRT = getLogSourceConfigurationSuccessResponsePayloadRT;
+export const patchLogSourceConfigurationSuccessResponsePayloadRT =
+  getLogSourceConfigurationSuccessResponsePayloadRT;
 
 export type PatchLogSourceConfigurationSuccessResponsePayload = rt.TypeOf<
   typeof patchLogSourceConfigurationSuccessResponsePayloadRT

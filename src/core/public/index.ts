@@ -28,7 +28,6 @@ import './index.scss';
 
 import {
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
@@ -104,6 +103,8 @@ export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
@@ -287,7 +288,6 @@ export interface CoreStart {
 export type {
   Capabilities,
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,

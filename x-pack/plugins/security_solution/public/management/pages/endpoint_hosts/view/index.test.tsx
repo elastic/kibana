@@ -10,6 +10,8 @@ import * as reactTestingLibrary from '@testing-library/react';
 import { EndpointList } from './index';
 import '../../../../common/mock/match_media';
 
+import { createUseUiSetting$Mock } from '../../../../../public/common/lib/kibana/kibana_react.mock';
+
 import {
   mockEndpointDetailsApiResult,
   mockEndpointResultList,
@@ -28,7 +30,7 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
-import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
+import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../../../common/lib/kibana';
 import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
 import {
   createFailedResourceState,
@@ -40,8 +42,13 @@ import {
 import { getCurrentIsolationRequestState } from '../store/selectors';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
-import { APP_PATH, MANAGEMENT_PATH } from '../../../../../common/constants';
-import { TransformStats, TRANSFORM_STATE } from '../types';
+import {
+  APP_PATH,
+  MANAGEMENT_PATH,
+  DEFAULT_TIMEPICKER_QUICK_RANGES,
+  TRANSFORM_STATES,
+} from '../../../../../common/constants';
+import { TransformStats } from '../types';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -63,6 +70,59 @@ jest.mock('../../policy/store/services/ingest', () => {
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   };
 });
+const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
+const timepickerRanges = [
+  {
+    from: 'now/d',
+    to: 'now/d',
+    display: 'Today',
+  },
+  {
+    from: 'now/w',
+    to: 'now/w',
+    display: 'This week',
+  },
+  {
+    from: 'now-15m',
+    to: 'now',
+    display: 'Last 15 minutes',
+  },
+  {
+    from: 'now-30m',
+    to: 'now',
+    display: 'Last 30 minutes',
+  },
+  {
+    from: 'now-1h',
+    to: 'now',
+    display: 'Last 1 hour',
+  },
+  {
+    from: 'now-24h',
+    to: 'now',
+    display: 'Last 24 hours',
+  },
+  {
+    from: 'now-7d',
+    to: 'now',
+    display: 'Last 7 days',
+  },
+  {
+    from: 'now-30d',
+    to: 'now',
+    display: 'Last 30 days',
+  },
+  {
+    from: 'now-90d',
+    to: 'now',
+    display: 'Last 90 days',
+  },
+  {
+    from: 'now-1y',
+    to: 'now',
+    display: 'Last 1 year',
+  },
+];
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_license');
@@ -413,7 +473,7 @@ describe('when on the endpoint list page', () => {
         const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink'))[0];
         expect(firstPolicyName).not.toBeNull();
         expect(firstPolicyName.getAttribute('href')).toEqual(
-          `${APP_PATH}${MANAGEMENT_PATH}/policy/${firstPolicyID}`
+          `${APP_PATH}${MANAGEMENT_PATH}/policy/${firstPolicyID}/settings`
         );
       });
 
@@ -651,7 +711,7 @@ describe('when on the endpoint list page', () => {
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
-        `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}/settings`
       );
     });
 
@@ -673,7 +733,7 @@ describe('when on the endpoint list page', () => {
       });
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.pathname).toEqual(
-        `${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}/settings`
       );
     });
 
@@ -759,16 +819,36 @@ describe('when on the endpoint list page', () => {
           disconnect: jest.fn(),
         }));
 
+        mockUseUiSetting$.mockImplementation((key, defaultValue) => {
+          const useUiSetting$Mock = createUseUiSetting$Mock();
+
+          return key === DEFAULT_TIMEPICKER_QUICK_RANGES
+            ? [timepickerRanges, jest.fn()]
+            : useUiSetting$Mock(key, defaultValue);
+        });
+
         const fleetActionGenerator = new FleetActionGenerator('seed');
         const responseData = fleetActionGenerator.generateResponse({
           agent_id: agentId,
         });
         const actionData = fleetActionGenerator.generate({
           agents: [agentId],
+          data: {
+            comment: 'some comment',
+          },
         });
+        const isolatedActionData = fleetActionGenerator.generateIsolateAction({
+          agents: [agentId],
+          data: {
+            comment: ' ', // has space for comment,
+          },
+        });
+
         getMockData = () => ({
           page: 1,
           pageSize: 50,
+          startDate: 'now-1d',
+          endDate: 'now',
           data: [
             {
               type: 'response',
@@ -782,6 +862,13 @@ describe('when on the endpoint list page', () => {
               item: {
                 id: 'some_id_1',
                 data: actionData,
+              },
+            },
+            {
+              type: 'action',
+              item: {
+                id: 'some_id_3',
+                data: isolatedActionData,
               },
             },
           ],
@@ -820,7 +907,7 @@ describe('when on the endpoint list page', () => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
         });
         const logEntries = await renderResult.queryAllByTestId('timelineEntry');
-        expect(logEntries.length).toEqual(2);
+        expect(logEntries.length).toEqual(3);
         expect(`${logEntries[0]} .euiCommentTimeline__icon--update`).not.toBe(null);
         expect(`${logEntries[1]} .euiCommentTimeline__icon--regular`).not.toBe(null);
       });
@@ -838,7 +925,7 @@ describe('when on the endpoint list page', () => {
         expect(emptyState).not.toBe(null);
       });
 
-      it('should display empty state when no log data', async () => {
+      it('should not display empty state when no log data', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
         reactTestingLibrary.act(() => {
           reactTestingLibrary.fireEvent.click(activityLogTab);
@@ -848,33 +935,17 @@ describe('when on the endpoint list page', () => {
           dispatchEndpointDetailsActivityLogChanged('success', {
             page: 1,
             pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
             data: [],
           });
         });
 
         const emptyState = await renderResult.queryByTestId('activityLogEmpty');
-        expect(emptyState).not.toBe(null);
-      });
-
-      it('should not display empty state with no log data while date range filter is active', async () => {
-        const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('success', {
-            page: 1,
-            pageSize: 50,
-            startDate: new Date().toISOString(),
-            data: [],
-          });
-        });
-
-        const emptyState = await renderResult.queryByTestId('activityLogEmpty');
-        const dateRangePicker = await renderResult.queryByTestId('activityLogDateRangePicker');
         expect(emptyState).toBe(null);
-        expect(dateRangePicker).not.toBe(null);
+
+        const superDatePicker = await renderResult.queryByTestId('activityLogSuperDatePicker');
+        expect(superDatePicker).not.toBe(null);
       });
 
       it('should display activity log when tab is loaded using the URL', async () => {
@@ -893,7 +964,56 @@ describe('when on the endpoint list page', () => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
         });
         const logEntries = await renderResult.queryAllByTestId('timelineEntry');
-        expect(logEntries.length).toEqual(2);
+        expect(logEntries.length).toEqual(3);
+      });
+
+      it('should display a callout message if no log data', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
+            data: [],
+          });
+        });
+
+        const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
+        expect(activityLogCallout).not.toBeNull();
+      });
+
+      it('should correctly display non-empty comments only for actions', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
+        });
+        const commentTexts = await renderResult.queryAllByTestId('activityLogCommentText');
+        expect(commentTexts.length).toEqual(1);
+        expect(commentTexts[0].textContent).toEqual('some comment');
+        expect(commentTexts[0].parentElement?.parentElement?.className).toContain(
+          'euiCommentEvent--regular'
+        );
       });
     });
 
@@ -1284,7 +1404,7 @@ describe('when on the endpoint list page', () => {
       const transforms: TransformStats[] = [
         {
           id: `${metadataTransformPrefix}-0.20.0`,
-          state: TRANSFORM_STATE.STARTED,
+          state: TRANSFORM_STATES.STARTED,
         } as TransformStats,
       ];
       setEndpointListApiMockImplementation(coreStart.http, { transforms });
@@ -1295,7 +1415,7 @@ describe('when on the endpoint list page', () => {
 
     it('is not displayed when non-relevant transform is failing', () => {
       const transforms: TransformStats[] = [
-        { id: 'not-metadata', state: TRANSFORM_STATE.FAILED } as TransformStats,
+        { id: 'not-metadata', state: TRANSFORM_STATES.FAILED } as TransformStats,
       ];
       setEndpointListApiMockImplementation(coreStart.http, { transforms });
       render();
@@ -1307,7 +1427,7 @@ describe('when on the endpoint list page', () => {
       const transforms: TransformStats[] = [
         {
           id: `${metadataTransformPrefix}-0.20.0`,
-          state: TRANSFORM_STATE.FAILED,
+          state: TRANSFORM_STATES.FAILED,
         } as TransformStats,
       ];
       setEndpointListApiMockImplementation(coreStart.http, { transforms });

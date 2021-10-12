@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiTabs, EuiFlyoutBody, EuiTab } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { connect } from 'react-redux';
@@ -14,7 +14,7 @@ import { bindActionCreators } from 'redux';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlocklistForm } from './blocklist_form';
 import { UrlTemplateList } from './url_template_list';
-import { WorkspaceNode, AdvancedSettings, UrlTemplate, WorkspaceField } from '../../types';
+import { AdvancedSettings, BlockListedNode, UrlTemplate, WorkspaceField } from '../../types';
 import {
   GraphState,
   settingsSelector,
@@ -47,16 +47,6 @@ const tabs = [
   },
 ];
 
-/**
- * These props are wired in the angular scope and are passed in via observable
- * to catch update outside updates
- */
-export interface AngularProps {
-  blocklistedNodes: WorkspaceNode[];
-  unblocklistNode: (node: WorkspaceNode) => void;
-  canEditDrillDownUrls: boolean;
-}
-
 export interface StateProps {
   advancedSettings: AdvancedSettings;
   urlTemplates: UrlTemplate[];
@@ -69,26 +59,43 @@ export interface DispatchProps {
   saveTemplate: (props: { index: number; template: UrlTemplate }) => void;
 }
 
-interface AsObservable<P> {
+export interface SettingsWorkspaceProps {
+  blocklistedNodes: BlockListedNode[];
+  unblockNode: (node: BlockListedNode) => void;
+  unblockAll: () => void;
+  canEditDrillDownUrls: boolean;
+}
+
+export interface AsObservable<P> {
   observable: Readonly<Rx.Observable<P>>;
 }
 
-export interface SettingsProps extends AngularProps, StateProps, DispatchProps {}
+export interface SettingsStateProps extends StateProps, DispatchProps {}
 
 export function SettingsComponent({
   observable,
-  ...props
-}: AsObservable<AngularProps> & StateProps & DispatchProps) {
-  const [angularProps, setAngularProps] = useState<AngularProps | undefined>(undefined);
+  advancedSettings,
+  urlTemplates,
+  allFields,
+  saveTemplate: saveTemplateAction,
+  updateSettings: updateSettingsAction,
+  removeTemplate: removeTemplateAction,
+}: AsObservable<SettingsWorkspaceProps> & SettingsStateProps) {
+  const [workspaceProps, setWorkspaceProps] = useState<SettingsWorkspaceProps | undefined>(
+    undefined
+  );
   const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
-    observable.subscribe(setAngularProps);
+    observable.subscribe(setWorkspaceProps);
   }, [observable]);
 
-  if (!angularProps) return null;
+  if (!workspaceProps) {
+    return null;
+  }
 
   const ActiveTabContent = tabs[activeTab].component;
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -97,7 +104,7 @@ export function SettingsComponent({
         </EuiTitle>
         <EuiTabs style={{ margin: '0 -16px -25px' }}>
           {tabs
-            .filter(({ id }) => id !== 'drillDowns' || angularProps.canEditDrillDownUrls)
+            .filter(({ id }) => id !== 'drillDowns' || workspaceProps.canEditDrillDownUrls)
             .map(({ title }, index) => (
               <EuiTab
                 key={title}
@@ -112,13 +119,28 @@ export function SettingsComponent({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <ActiveTabContent {...angularProps} {...props} />
+        <ActiveTabContent
+          blocklistedNodes={workspaceProps.blocklistedNodes}
+          unblockNode={workspaceProps.unblockNode}
+          unblockAll={workspaceProps.unblockAll}
+          advancedSettings={advancedSettings}
+          urlTemplates={urlTemplates}
+          allFields={allFields}
+          updateSettings={updateSettingsAction}
+          removeTemplate={removeTemplateAction}
+          saveTemplate={saveTemplateAction}
+        />
       </EuiFlyoutBody>
     </>
   );
 }
 
-export const Settings = connect<StateProps, DispatchProps, AsObservable<AngularProps>, GraphState>(
+export const Settings = connect<
+  StateProps,
+  DispatchProps,
+  AsObservable<SettingsWorkspaceProps>,
+  GraphState
+>(
   (state: GraphState) => ({
     advancedSettings: settingsSelector(state),
     urlTemplates: templatesSelector(state),

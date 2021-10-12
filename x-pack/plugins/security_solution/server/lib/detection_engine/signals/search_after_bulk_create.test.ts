@@ -74,6 +74,7 @@ describe('searchAfterAndBulkCreate', () => {
       ruleSO,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       mergeStrategy: 'missingFields',
+      ignoreFields: [],
     });
   });
 
@@ -993,29 +994,25 @@ describe('searchAfterAndBulkCreate', () => {
         sampleDocSearchResultsNoSortIdNoHits()
       )
     );
-    const {
-      success,
-      createdSignalsCount,
-      lastLookBackDate,
-      errors,
-    } = await searchAfterAndBulkCreate({
-      ruleSO,
-      tuple,
-      listClient,
-      exceptionsList: [],
-      services: mockService,
-      logger: mockLogger,
-      eventsTelemetry: undefined,
-      id: sampleRuleGuid,
-      inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
-      pageSize: 1,
-      filter: undefined,
-      buildReasonMessage,
-      buildRuleMessage,
-      bulkCreate,
-      wrapHits,
-    });
+    const { success, createdSignalsCount, lastLookBackDate, errors } =
+      await searchAfterAndBulkCreate({
+        ruleSO,
+        tuple,
+        listClient,
+        exceptionsList: [],
+        services: mockService,
+        logger: mockLogger,
+        eventsTelemetry: undefined,
+        id: sampleRuleGuid,
+        inputIndexPattern,
+        signalsIndex: DEFAULT_SIGNALS_INDEX,
+        pageSize: 1,
+        filter: undefined,
+        buildReasonMessage,
+        buildRuleMessage,
+        bulkCreate,
+        wrapHits,
+      });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);

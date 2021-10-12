@@ -226,10 +226,7 @@ export interface PluginManifest {
    */
   readonly serviceFolders?: readonly string[];
 
-  /**
-   * TODO: make required once all internal plugins have this specified.
-   */
-  readonly owner?: {
+  readonly owner: {
     /**
      * The name of the team that currently owns this plugin.
      */

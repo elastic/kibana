@@ -258,7 +258,7 @@ export function getMlClient(
       // this should use DataFrameAnalyticsStats, but needs a refactor to move DataFrameAnalyticsStats to common
       await jobIdsCheck('data-frame-analytics', p, true);
       try {
-        const { body } = ((await mlClient.getDataFrameAnalyticsStats(...p)) as unknown) as {
+        const { body } = (await mlClient.getDataFrameAnalyticsStats(...p)) as unknown as {
           body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
         };
         const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
@@ -473,6 +473,10 @@ export function getMlClient(
     async updateJob(...p: Parameters<MlClient['updateJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.updateJob(...p);
+    },
+    async resetJob(...p: Parameters<MlClient['resetJob']>) {
+      await jobIdsCheck('anomaly-detector', p);
+      return mlClient.resetJob(...p);
     },
     async updateModelSnapshot(...p: Parameters<MlClient['updateModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);

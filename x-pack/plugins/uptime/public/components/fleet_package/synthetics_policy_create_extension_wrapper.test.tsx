@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import 'jest-canvas-mock';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
@@ -16,6 +18,10 @@ import { ConfigKeys, DataStream, ScheduleUnit, VerificationMode } from './types'
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
+
+jest.mock('./code_editor', () => ({
+  CodeEditor: () => <div>code editor mock</div>,
 }));
 
 const defaultNewPolicy: NewPackagePolicy = {
@@ -148,6 +154,7 @@ const defaultNewPolicy: NewPackagePolicy = {
               type: 'text',
             },
             name: {
+              value: 'Sample name',
               type: 'text',
             },
             schedule: {
@@ -217,6 +224,7 @@ const defaultNewPolicy: NewPackagePolicy = {
               type: 'text',
             },
             name: {
+              value: 'Sample name',
               type: 'text',
             },
             schedule: {
@@ -236,8 +244,53 @@ const defaultNewPolicy: NewPackagePolicy = {
             timeout: {
               type: 'text',
             },
-            max_redirects: {
-              type: 'integer',
+            tags: {
+              type: 'yaml',
+            },
+          },
+        },
+      ],
+    },
+    {
+      type: 'synthetics/browser',
+      enabled: false,
+      streams: [
+        {
+          enabled: false,
+          data_stream: {
+            type: 'synthetics',
+            dataset: 'browser',
+          },
+          vars: {
+            type: {
+              value: 'browser',
+              type: 'text',
+            },
+            name: {
+              value: 'Sample name',
+              type: 'text',
+            },
+            schedule: {
+              value: '10s',
+              type: 'text',
+            },
+            'source.zip_url.url': {
+              type: 'text',
+            },
+            'source.zip_url.username': {
+              type: 'text',
+            },
+            'source.zip_url.password': {
+              type: 'password',
+            },
+            'source.zip_url.folder': {
+              type: 'text',
+            },
+            'source.inline.script': {
+              type: 'yaml',
+            },
+            timeout: {
+              type: 'text',
             },
             tags: {
               type: 'yaml',
@@ -262,6 +315,10 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
   const WrappedComponent = ({ newPolicy = defaultNewPolicy }) => {
     return <SyntheticsPolicyCreateExtensionWrapper newPolicy={newPolicy} onChange={onChange} />;
   };
+
+  beforeEach(() => {
+    onChange.mockClear();
+  });
 
   it('renders SyntheticsPolicyCreateExtension', async () => {
     const { getByText, getByLabelText, queryByLabelText } = render(<WrappedComponent />);
@@ -371,6 +428,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
             },
             defaultNewPolicy.inputs[1],
             defaultNewPolicy.inputs[2],
+            defaultNewPolicy.inputs[3],
           ],
         },
       });
@@ -406,6 +464,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
             },
             defaultNewPolicy.inputs[1],
             defaultNewPolicy.inputs[2],
+            defaultNewPolicy.inputs[3],
           ],
         },
       });
@@ -434,6 +493,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
               enabled: true,
             },
             defaultNewPolicy.inputs[2],
+            defaultNewPolicy.inputs[3],
           ],
         },
       });
@@ -481,7 +541,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const urlError = getByText('URL is required');
     const monitorIntervalError = getByText('Monitor interval is required');
     const maxRedirectsError = getByText('Max redirects must be 0 or greater');
-    const timeoutError = getByText('Timeout must be 0 or greater and less than schedule interval');
+    const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
     expect(urlError).toBeInTheDocument();
     expect(monitorIntervalError).toBeInTheDocument();
@@ -508,9 +568,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
       expect(queryByText('URL is required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
       expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
-      expect(
-        queryByText('Timeout must be 0 or greater and less than schedule interval')
-      ).not.toBeInTheDocument();
+      expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: true,
@@ -537,9 +595,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     await waitFor(() => {
       const hostError = getByText('Host and port are required');
       const monitorIntervalError = getByText('Monitor interval is required');
-      const timeoutError = getByText(
-        'Timeout must be 0 or greater and less than schedule interval'
-      );
+      const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
       expect(hostError).toBeInTheDocument();
       expect(monitorIntervalError).toBeInTheDocument();
@@ -560,9 +616,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
       expect(queryByText('Host and port are required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
       expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
-      expect(
-        queryByText('Timeout must be 0 or greater and less than schedule interval')
-      ).not.toBeInTheDocument();
+      expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: true,
@@ -591,9 +645,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     await waitFor(() => {
       const hostError = getByText('Host is required');
       const monitorIntervalError = getByText('Monitor interval is required');
-      const timeoutError = getByText(
-        'Timeout must be 0 or greater and less than schedule interval'
-      );
+      const timeoutError = getByText('Timeout must be greater than or equal to 0');
       const waitError = getByText('Wait must be 0 or greater');
 
       expect(hostError).toBeInTheDocument();
@@ -616,9 +668,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     await waitFor(() => {
       expect(queryByText('Host is required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
-      expect(
-        queryByText('Timeout must be 0 or greater and less than schedule interval')
-      ).not.toBeInTheDocument();
+      expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(queryByText('Wait must be 0 or greater')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
@@ -628,13 +678,67 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     });
   });
 
+  it('handles browser validation', async () => {
+    const { getByText, getByLabelText, queryByText, getByRole } = render(<WrappedComponent />);
+
+    const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
+    fireEvent.change(monitorType, { target: { value: DataStream.BROWSER } });
+
+    const zipUrl = getByRole('textbox', { name: 'Zip URL' }) as HTMLInputElement;
+    const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
+
+    // create errors
+    fireEvent.change(zipUrl, { target: { value: '' } });
+    fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
+    fireEvent.change(timeout, { target: { value: '-1' } });
+
+    await waitFor(() => {
+      const hostError = getByText('Zip URL is required');
+      const monitorIntervalError = getByText('Monitor interval is required');
+      const timeoutError = getByText('Timeout must be greater than or equal to 0');
+
+      expect(hostError).toBeInTheDocument();
+      expect(monitorIntervalError).toBeInTheDocument();
+      expect(timeoutError).toBeInTheDocument();
+      expect(onChange).toBeCalledWith(
+        expect.objectContaining({
+          isValid: false,
+        })
+      );
+    });
+
+    // resolve errors
+    fireEvent.change(zipUrl, { target: { value: 'http://github.com/tests.zip' } });
+    fireEvent.change(monitorIntervalNumber, { target: { value: '1' } });
+    fireEvent.change(timeout, { target: { value: '1' } });
+
+    await waitFor(() => {
+      expect(queryByText('Zip URL is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
+      expect(onChange).toBeCalledWith(
+        expect.objectContaining({
+          isValid: true,
+        })
+      );
+    });
+
+    // test inline script validation
+    fireEvent.click(getByText('Inline script'));
+
+    await waitFor(() => {
+      expect(getByText('Script is required')).toBeInTheDocument();
+    });
+  });
+
   it('handles changing TLS fields', async () => {
     const { findByLabelText, queryByLabelText } = render(<WrappedComponent />);
     const enableSSL = queryByLabelText('Enable TLS configuration') as HTMLInputElement;
 
     await waitFor(() => {
       expect(onChange).toBeCalledWith({
-        isValid: true,
+        isValid: false,
         updatedPolicy: {
           ...defaultNewPolicy,
           inputs: [
@@ -671,6 +775,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
             },
             defaultNewPolicy.inputs[1],
             defaultNewPolicy.inputs[2],
+            defaultNewPolicy.inputs[3],
           ],
         },
       });
@@ -714,7 +819,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       expect(onChange).toBeCalledWith({
-        isValid: true,
+        isValid: false,
         updatedPolicy: {
           ...defaultNewPolicy,
           inputs: [
@@ -751,6 +856,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
             },
             defaultNewPolicy.inputs[1],
             defaultNewPolicy.inputs[2],
+            defaultNewPolicy.inputs[3],
           ],
         },
       });

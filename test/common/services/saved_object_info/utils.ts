@@ -9,13 +9,22 @@
 import { inspect } from 'util';
 import { createFlagError, ToolingLog } from '@kbn/dev-utils';
 
-export const format = (obj: unknown) =>
-  inspect(obj, {
-    compact: false,
-    depth: 99,
-    breakLength: 80,
-    sorted: true,
-  });
+interface ResolvedPayload {
+  xs: any;
+  count: number;
+}
+
+export const format = (obj: any): ResolvedPayload => {
+  return {
+    xs: inspect(obj, {
+      compact: false,
+      depth: 99,
+      breakLength: 80,
+      sorted: true,
+    }),
+    count: obj.length,
+  };
+};
 
 export const noop = () => {};
 
@@ -24,20 +33,23 @@ export const areValid = (flags: any) => {
   return true;
 };
 
-// @ts-ignore
-export const print = (log: ToolingLog) => (msg: string | null = null) => ({ xs, count }) =>
-  log.success(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
+export const print =
+  (log: ToolingLog) =>
+  (msg: string | null = null) =>
+  ({ xs, count }: ResolvedPayload) =>
+    log.write(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
 
 export const expectedFlags = () => ({
   string: ['esUrl'],
-  boolean: ['soTypes'],
+  boolean: ['soTypes', 'json'],
   help: `
---esUrl             Required, tells the app which url to point to
+--esUrl             Required, tells the svc which url to point to
 --soTypes           Not Required, tells the svc to show the types within the .kibana index
+--json              Not Required, tells the svc to show the types, with only json output.  Useful for piping into jq
         `,
 });
 
-export const payload = (xs: any) => ({
-  xs: format(xs),
-  count: xs.length,
+export const payload = ({ xs, count }: ResolvedPayload) => ({
+  xs,
+  count,
 });

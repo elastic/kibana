@@ -102,13 +102,13 @@ export class DynamicActionManager {
 
     const supportedTriggers = factory.supportedTriggers();
     for (const trigger of triggers) {
-      if (!supportedTriggers.includes(trigger as any))
+      if (!supportedTriggers.includes(trigger))
         throw new Error(
           `Can't attach [action=${actionId}] to [trigger=${trigger}]. Supported triggers for this action: ${supportedTriggers.join(
             ','
           )}`
         );
-      uiActions.attachAction(trigger as any, actionId);
+      uiActions.attachAction(trigger as string, actionId);
     }
   }
 
@@ -117,7 +117,7 @@ export class DynamicActionManager {
     const actionId = this.generateActionId(eventId);
     if (!uiActions.hasAction(actionId)) return;
 
-    for (const trigger of triggers) uiActions.detachAction(trigger as any, actionId);
+    for (const trigger of triggers) uiActions.detachAction(trigger, actionId);
     uiActions.unregisterAction(actionId);
   }
 

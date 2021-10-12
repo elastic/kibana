@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { TIMESTAMP } from '@kbn/rule-data-utils';
+
 import { get } from 'lodash/fp';
 import set from 'set-value';
 import {
@@ -46,7 +49,7 @@ interface BulkCreateThresholdSignalsParams {
   signalsIndex: string;
   startedAt: Date;
   from: Date;
-  thresholdSignalHistory: ThresholdSignalHistory;
+  signalHistory: ThresholdSignalHistory;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
 }
@@ -61,7 +64,7 @@ const getTransformedHits = (
   ruleId: string,
   filter: unknown,
   timestampOverride: TimestampOverrideOrUndefined,
-  thresholdSignalHistory: ThresholdSignalHistory
+  signalHistory: ThresholdSignalHistory
 ) => {
   const aggParts = threshold.field.length
     ? results.aggregations && getThresholdAggregationParts(results.aggregations)
@@ -96,7 +99,7 @@ const getTransformedHits = (
               ...val.terms,
             ].filter((term) => term.field != null),
             cardinality: val.cardinality,
-            topThresholdHits: val.topThresholdHits,
+            maxTimestamp: val.maxTimestamp,
             docCount: val.docCount,
           };
           acc.push(el as MultiAggBucket);
@@ -117,7 +120,7 @@ const getTransformedHits = (
                 },
               ]
             : undefined,
-          topThresholdHits: bucket.top_threshold_hits,
+          maxTimestamp: bucket.max_timestamp.value_as_string,
           docCount: bucket.doc_count,
         };
         acc.push(el as MultiAggBucket);
@@ -132,28 +135,15 @@ const getTransformedHits = (
     0,
     aggParts.field
   ).reduce((acc: Array<BaseHit<SignalSource>>, bucket) => {
-    const hit = bucket.topThresholdHits?.hits.hits[0];
-    if (hit == null) {
-      return acc;
-    }
-
-    const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
-    if (timestampArray == null) {
-      return acc;
-    }
-
-    const timestamp = timestampArray[0];
-    if (typeof timestamp !== 'string') {
-      return acc;
-    }
-
     const termsHash = getThresholdTermsHash(bucket.terms);
-    const signalHit = thresholdSignalHistory[termsHash];
+    const signalHit = signalHistory[termsHash];
 
     const source = {
-      '@timestamp': timestamp,
+      [TIMESTAMP]: bucket.maxTimestamp,
       ...bucket.terms.reduce<object>((termAcc, term) => {
         if (!term.field.startsWith('signal.')) {
+          // We don't want to overwrite `signal.*` fields.
+          // See: https://github.com/elastic/kibana/issues/83218
           return {
             ...termAcc,
             [term.field]: term.value,
@@ -170,7 +160,7 @@ const getTransformedHits = (
         // the `original_time` of the signal (the timestamp of the latest event
         // in the set).
         from:
-          signalHit?.lastSignalTimestamp != null ? new Date(signalHit!.lastSignalTimestamp) : from,
+          signalHit?.lastSignalTimestamp != null ? new Date(signalHit.lastSignalTimestamp) : from,
       },
     };
 
@@ -202,7 +192,7 @@ export const transformThresholdResultsToEcs = (
   threshold: ThresholdNormalized,
   ruleId: string,
   timestampOverride: TimestampOverrideOrUndefined,
-  thresholdSignalHistory: ThresholdSignalHistory
+  signalHistory: ThresholdSignalHistory
 ): SignalSearchResponse => {
   const transformedHits = getTransformedHits(
     results,
@@ -214,7 +204,7 @@ export const transformThresholdResultsToEcs = (
     ruleId,
     filter,
     timestampOverride,
-    thresholdSignalHistory
+    signalHistory
   );
   const thresholdResults = {
     ...results,
@@ -246,7 +236,7 @@ export const bulkCreateThresholdSignals = async (
     ruleParams.threshold,
     ruleParams.ruleId,
     ruleParams.timestampOverride,
-    params.thresholdSignalHistory
+    params.signalHistory
   );
 
   return params.bulkCreate(

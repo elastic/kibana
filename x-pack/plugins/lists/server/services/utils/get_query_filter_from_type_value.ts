@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty, isObject } from 'lodash/fp';
 import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
-export type QueryFilterType = [
-  { term: Record<string, unknown> },
-  { terms: Record<string, unknown[]> } | { bool: {} }
-];
+export type QueryFilterType = estypes.QueryDslQueryContainer[];
 
 /**
  * Given a type, value, and listId, this will return a valid query. If the type is
@@ -166,6 +163,7 @@ export const getShouldQuery = ({
     {
       bool: {
         minimum_should_match: 1,
+        // @ts-expect-error unknown is not assignable to estypes.QueryDslQueryContainer
         should,
       },
     },

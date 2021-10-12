@@ -7,27 +7,23 @@
  */
 
 import { getDefaultSort } from './get_default_sort';
-// @ts-expect-error
-import FixturesStubbedLogstashIndexPatternProvider from '../../../../../../__fixtures__/stubbed_logstash_index_pattern';
-import { IndexPattern } from '../../../../../../kibana_services';
+import {
+  stubIndexPattern,
+  stubIndexPatternWithoutTimeField,
+} from '../../../../../../../../data/common/stubs';
 
 describe('getDefaultSort function', function () {
-  let indexPattern: IndexPattern;
-  beforeEach(() => {
-    indexPattern = FixturesStubbedLogstashIndexPatternProvider() as IndexPattern;
-  });
   test('should be a function', function () {
     expect(typeof getDefaultSort === 'function').toBeTruthy();
   });
 
   test('should return default sort for an index pattern with timeFieldName', function () {
-    expect(getDefaultSort(indexPattern, 'desc')).toEqual([['time', 'desc']]);
-    expect(getDefaultSort(indexPattern, 'asc')).toEqual([['time', 'asc']]);
+    expect(getDefaultSort(stubIndexPattern, 'desc')).toEqual([['@timestamp', 'desc']]);
+    expect(getDefaultSort(stubIndexPattern, 'asc')).toEqual([['@timestamp', 'asc']]);
   });
 
   test('should return default sort for an index pattern without timeFieldName', function () {
-    delete indexPattern.timeFieldName;
-    expect(getDefaultSort(indexPattern, 'desc')).toEqual([]);
-    expect(getDefaultSort(indexPattern, 'asc')).toEqual([]);
+    expect(getDefaultSort(stubIndexPatternWithoutTimeField, 'desc')).toEqual([]);
+    expect(getDefaultSort(stubIndexPatternWithoutTimeField, 'asc')).toEqual([]);
   });
 });

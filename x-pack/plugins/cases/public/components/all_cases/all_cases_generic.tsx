@@ -203,7 +203,8 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       handleIsLoading,
       isLoadingCases: loading,
       refreshCases,
-      showActions,
+      // isSelectorView is boolean | undefined. We need to convert it to a boolean.
+      isSelectorView: !!isSelectorView,
       userCanCrud,
       connectors,
     });

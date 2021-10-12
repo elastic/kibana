@@ -39,7 +39,7 @@ import { deprecationsServiceMock } from './deprecations/deprecations_service.moc
 import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 import { prebootServiceMock } from './preboot/preboot_service.mock';
 
-export { configServiceMock } from './config/mocks';
+export { configServiceMock, configDeprecationsMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
@@ -169,6 +169,9 @@ function createCoreSetupMock({
     metrics: metricsServiceMock.createSetupContract(),
     deprecations: deprecationsServiceMock.createSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    coreUsageData: {
+      registerUsageCounter: coreUsageDataServiceMock.createSetupContract().registerUsageCounter,
+    },
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
@@ -222,6 +225,7 @@ function createInternalCoreSetupMock() {
     metrics: metricsServiceMock.createInternalSetupContract(),
     deprecations: deprecationsServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    coreUsageData: coreUsageDataServiceMock.createSetupContract(),
   };
   return setupDeps;
 }
@@ -252,9 +256,6 @@ function createCoreRequestHandlerContextMock() {
     },
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),
-      legacy: {
-        client: elasticsearchServiceMock.createLegacyScopedClusterClient(),
-      },
     },
     uiSettings: {
       client: uiSettingsServiceMock.createClient(),

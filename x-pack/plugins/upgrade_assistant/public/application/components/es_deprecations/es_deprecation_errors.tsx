@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
 import { ResponseError } from '../../lib/api';
-import { getEsDeprecationError } from '../../lib/es_deprecation_errors';
+import { getEsDeprecationError } from '../../lib/get_es_deprecation_error';
 interface Props {
   error: ResponseError;
 }

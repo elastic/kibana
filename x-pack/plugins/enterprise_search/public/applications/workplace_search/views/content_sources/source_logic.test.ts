@@ -26,13 +26,8 @@ import { SourceLogic } from './source_logic';
 
 describe('SourceLogic', () => {
   const { http } = mockHttpValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    setSuccessMessage,
-    setQueuedSuccessMessage,
-    setErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast, setErrorMessage } =
+    mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount, getListeners } = new LogicMounter(SourceLogic);
 
@@ -63,8 +58,8 @@ describe('SourceLogic', () => {
   });
 
   describe('actions', () => {
-    it('onInitializeSource', () => {
-      SourceLogic.actions.onInitializeSource(contentSource);
+    it('setContentSource', () => {
+      SourceLogic.actions.setContentSource(contentSource);
 
       expect(SourceLogic.values.contentSource).toEqual(contentSource);
       expect(SourceLogic.values.dataLoading).toEqual(false);
@@ -72,14 +67,14 @@ describe('SourceLogic', () => {
 
     it('onUpdateSourceName', () => {
       const NAME = 'foo';
-      SourceLogic.actions.onInitializeSource(contentSource);
+      SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.onUpdateSourceName(NAME);
 
       expect(SourceLogic.values.contentSource).toEqual({
         ...contentSource,
         name: NAME,
       });
-      expect(setSuccessMessage).toHaveBeenCalled();
+      expect(flashSuccessToast).toHaveBeenCalled();
     });
 
     it('setSearchResults', () => {
@@ -93,7 +88,7 @@ describe('SourceLogic', () => {
     it('setContentFilterValue', () => {
       const VALUE = 'bar';
       SourceLogic.actions.setSearchResults(searchServerResponse);
-      SourceLogic.actions.onInitializeSource(contentSource);
+      SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.setContentFilterValue(VALUE);
 
       expect(SourceLogic.values.contentMeta).toEqual({
@@ -132,12 +127,12 @@ describe('SourceLogic', () => {
   describe('listeners', () => {
     describe('initializeSource', () => {
       it('calls API and sets values (org)', async () => {
-        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'onInitializeSource');
+        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
         const promise = Promise.resolve(contentSource);
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/sources/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/sources/123');
         await promise;
         expect(onInitializeSourceSpy).toHaveBeenCalledWith(contentSource);
       });
@@ -145,12 +140,12 @@ describe('SourceLogic', () => {
       it('calls API and sets values (account)', async () => {
         AppLogic.values.isOrganization = false;
 
-        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'onInitializeSource');
+        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
         const promise = Promise.resolve(contentSource);
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/sources/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/sources/123');
         await promise;
         expect(onInitializeSourceSpy).toHaveBeenCalledWith(contentSource);
       });
@@ -169,7 +164,7 @@ describe('SourceLogic', () => {
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/sources/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/sources/123');
         await promise;
         expect(initializeFederatedSummarySpy).toHaveBeenCalledWith(contentSource.id);
       });
@@ -203,7 +198,7 @@ describe('SourceLogic', () => {
             AppLogic.values.isOrganization = false;
             http.get.mockReturnValue(mock404);
 
-            SourceLogic.actions.initializeSource('404ing_personal_source');
+            SourceLogic.actions.initializeSource('404ing_private_source');
             await expectedAsyncError(mock404);
 
             expect(navigateToUrl).toHaveBeenCalledWith('/p/sources');
@@ -234,7 +229,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.initializeFederatedSummary(contentSource.id);
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/federated_summary'
+          '/internal/workplace_search/account/sources/123/federated_summary'
         );
         await promise;
         expect(onUpdateSummarySpy).toHaveBeenCalledWith(contentSource.summary);
@@ -271,9 +266,12 @@ describe('SourceLogic', () => {
         http.post.mockReturnValue(promise);
 
         await searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/sources/123/documents', {
-          body: JSON.stringify({ query: '', page: meta.page }),
-        });
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/documents',
+          {
+            body: JSON.stringify({ query: '', page: meta.page }),
+          }
+        );
 
         await promise;
         expect(actions.setSearchResults).toHaveBeenCalledWith(searchServerResponse);
@@ -287,7 +285,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.searchContentSourceDocuments(contentSource.id);
         await searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
         expect(http.post).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/documents',
+          '/internal/workplace_search/account/sources/123/documents',
           {
             body: JSON.stringify({ query: '', page: meta.page }),
           }
@@ -323,9 +321,12 @@ describe('SourceLogic', () => {
         http.patch.mockReturnValue(promise);
         SourceLogic.actions.updateContentSource(contentSource.id, contentSource);
 
-        expect(http.patch).toHaveBeenCalledWith('/api/workplace_search/org/sources/123/settings', {
-          body: JSON.stringify({ content_source: contentSource }),
-        });
+        expect(http.patch).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/settings',
+          {
+            body: JSON.stringify({ content_source: contentSource }),
+          }
+        );
         await promise;
         expect(onUpdateSourceNameSpy).toHaveBeenCalledWith(contentSource.name);
       });
@@ -338,9 +339,12 @@ describe('SourceLogic', () => {
         http.patch.mockReturnValue(promise);
         SourceLogic.actions.updateContentSource(contentSource.id, { indexing: { enabled: true } });
 
-        expect(http.patch).toHaveBeenCalledWith('/api/workplace_search/org/sources/123/settings', {
-          body: JSON.stringify({ content_source: { indexing: { enabled: true } } }),
-        });
+        expect(http.patch).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/settings',
+          {
+            body: JSON.stringify({ content_source: { indexing: { enabled: true } } }),
+          }
+        );
         await promise;
         expect(onUpdateSourceNameSpy).not.toHaveBeenCalledWith(contentSource.name);
       });
@@ -354,7 +358,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.updateContentSource(contentSource.id, contentSource);
 
         expect(http.patch).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/settings',
+          '/internal/workplace_search/account/sources/123/settings',
           {
             body: JSON.stringify({ content_source: contentSource }),
           }
@@ -389,9 +393,9 @@ describe('SourceLogic', () => {
         SourceLogic.actions.removeContentSource(contentSource.id);
 
         expect(clearFlashMessages).toHaveBeenCalled();
-        expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/org/sources/123');
+        expect(http.delete).toHaveBeenCalledWith('/internal/workplace_search/org/sources/123');
         await promise;
-        expect(setQueuedSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
         expect(setButtonNotLoadingSpy).toHaveBeenCalled();
       });
 
@@ -404,7 +408,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.removeContentSource(contentSource.id);
 
         expect(clearFlashMessages).toHaveBeenCalled();
-        expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/account/sources/123');
+        expect(http.delete).toHaveBeenCalledWith('/internal/workplace_search/account/sources/123');
         await promise;
         expect(setButtonNotLoadingSpy).toHaveBeenCalled();
       });

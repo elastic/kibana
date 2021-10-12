@@ -6,8 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -35,6 +37,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('datastreams', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
 
     beforeEach(async () => {
       await installPackage(pkgKey);
@@ -90,7 +93,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should list the logs and metrics datastream', async function () {
-      namespaces.forEach(async (namespace) => {
+      await asyncForEach(namespaces, async (namespace) => {
         const resLogsDatastream = await es.transport.request({
           method: 'GET',
           path: `/_data_stream/${logsTemplateName}-${namespace}`,
@@ -108,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('after update, it should have rolled over logs datastream because mappings are not compatible and not metrics', async function () {
       await installPackage(pkgUpdateKey);
-      namespaces.forEach(async (namespace) => {
+      await asyncForEach(namespaces, async (namespace) => {
         const resLogsDatastream = await es.transport.request({
           method: 'GET',
           path: `/_data_stream/${logsTemplateName}-${namespace}`,
@@ -123,7 +126,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should be able to upgrade a package after a rollover', async function () {
-      namespaces.forEach(async (namespace) => {
+      await asyncForEach(namespaces, async (namespace) => {
         await es.transport.request({
           method: 'POST',
           path: `/${logsTemplateName}-${namespace}/_rollover`,

@@ -27,12 +27,10 @@ describe('AppLogic', () => {
 
   const expectedLogicValues = {
     account: {
-      canCreateInvitations: true,
-      canCreatePersonalSources: true,
+      canCreatePrivateSources: true,
       groups: ['Default', 'Cats'],
       id: 'some-id-string',
       isAdmin: true,
-      isCurated: false,
       viewedOnboardingPage: true,
     },
     hasInitialized: true,
@@ -81,7 +79,7 @@ describe('AppLogic', () => {
       mount(DEFAULT_INITIAL_APP_DATA);
       AppLogic.actions.setSourceRestriction(true);
 
-      expect(AppLogic.values.account.canCreatePersonalSources).toEqual(true);
+      expect(AppLogic.values.account.canCreatePrivateSources).toEqual(true);
     });
   });
 

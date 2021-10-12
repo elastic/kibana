@@ -25,6 +25,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { DetailView } from './detail_view';
 import { ErrorDistribution } from './Distribution';
 
@@ -94,7 +95,7 @@ function ErrorGroupHeader({
 
 export function ErrorGroupDetails() {
   const { urlParams } = useUrlParams();
-  const { start, end } = urlParams;
+
   const { serviceName } = useApmServiceContext();
 
   const apmRouter = useApmRouter();
@@ -102,11 +103,13 @@ export function ErrorGroupDetails() {
   const {
     path: { groupId },
     query: { rangeFrom, rangeTo, environment, kuery },
-  } = useApmParams('/services/:serviceName/errors/:groupId');
+  } = useApmParams('/services/{serviceName}/errors/{groupId}');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   useBreadcrumb({
     title: groupId,
-    href: apmRouter.link('/services/:serviceName/errors/:groupId', {
+    href: apmRouter.link('/services/{serviceName}/errors/{groupId}', {
       path: {
         serviceName,
         groupId,
@@ -124,7 +127,7 @@ export function ErrorGroupDetails() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
+          endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
           params: {
             path: {
               serviceName,
@@ -217,7 +220,11 @@ export function ErrorGroupDetails() {
       </EuiPanel>
       <EuiSpacer size="s" />
       {showDetails && (
-        <DetailView errorGroup={errorGroupData} urlParams={urlParams} />
+        <DetailView
+          errorGroup={errorGroupData}
+          urlParams={urlParams}
+          kuery={kuery}
+        />
       )}
     </>
   );

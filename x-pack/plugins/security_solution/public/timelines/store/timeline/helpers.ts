@@ -156,7 +156,9 @@ export const addTimelineToStore = ({
     ...timelineById,
     [id]: {
       ...timeline,
+      filterManager: timelineById[id].filterManager,
       isLoading: timelineById[id].isLoading,
+      initialized: timelineById[id].initialized,
       dateRange:
         timeline.status === TimelineStatus.immutable &&
         timeline.timelineType === TimelineType.template

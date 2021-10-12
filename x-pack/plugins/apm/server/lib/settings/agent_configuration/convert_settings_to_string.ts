@@ -16,11 +16,13 @@ export function convertConfigSettingsToString(
   const config = hit._source;
 
   if (config.settings?.transaction_sample_rate) {
-    config.settings.transaction_sample_rate = config.settings.transaction_sample_rate.toString();
+    config.settings.transaction_sample_rate =
+      config.settings.transaction_sample_rate.toString();
   }
 
   if (config.settings?.transaction_max_spans) {
-    config.settings.transaction_max_spans = config.settings.transaction_max_spans.toString();
+    config.settings.transaction_max_spans =
+      config.settings.transaction_max_spans.toString();
   }
 
   return hit;

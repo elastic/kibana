@@ -137,6 +137,7 @@ export async function getPackageInfo(options: {
     assets: Registry.groupPathsByService(paths || []),
     removable: !isUnremovablePackage(pkgName),
     notice: Registry.getNoticePath(paths || []),
+    keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
   const updated = { ...packageInfo, ...additions };
 
@@ -217,7 +218,10 @@ export async function getPackageFromSource(options: {
         installedPkg.package_assets,
         savedObjectsClient
       );
-      logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
+
+      if (res) {
+        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
+      }
     }
     // for packages not in cache or package storage and installed from registry, check registry
     if (!res && pkgInstallSource === 'registry') {

@@ -8,7 +8,7 @@
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import { getEqlRule, getEqlSequenceRule, getIndexPatterns } from '../../objects/rule';
 
-import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import { ALERT_DATA_GRID, NUMBER_OF_ALERTS } from '../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
@@ -161,11 +161,13 @@ describe('Detection rules, EQL', () => {
     waitForAlertsToPopulate();
 
     cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
-    // EuiDataGrid doesn't seem to have a way to apply data-test-subj to the individual cells
-    // Also, text detailing the row and column shows up in this search so switched 'have.text' to 'contains'
-    cy.get(ALERT_GRID_CELL).eq(3).contains(this.rule.name);
-    cy.get(ALERT_GRID_CELL).eq(4).contains(this.rule.severity.toLowerCase());
-    cy.get(ALERT_GRID_CELL).eq(5).contains(this.rule.riskScore);
+    cy.get(ALERT_DATA_GRID)
+      .invoke('text')
+      .then((text) => {
+        expect(text).contains(this.rule.name);
+        expect(text).contains(this.rule.severity.toLowerCase());
+        expect(text).contains(this.rule.riskScore);
+      });
   });
 });
 
@@ -213,10 +215,13 @@ describe('Detection rules, sequence EQL', () => {
     waitForAlertsToPopulate();
 
     cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfSequenceAlerts);
-    // EuiDataGrid doesn't seem to have a way to apply data-test-subj to the individual cells
-    // Also, text detailing the row and column shows up in this search so switched 'have.text' to 'contains'
-    cy.get(ALERT_GRID_CELL).eq(3).contains(this.rule.name);
-    cy.get(ALERT_GRID_CELL).eq(4).contains(this.rule.severity.toLowerCase());
-    cy.get(ALERT_GRID_CELL).eq(5).contains(this.rule.riskScore);
+    cy.get(ALERT_DATA_GRID)
+      .invoke('text')
+      .then((text) => {
+        cy.log('ALERT_DATA_GRID', text);
+        expect(text).contains(this.rule.name);
+        expect(text).contains(this.rule.severity.toLowerCase());
+        expect(text).contains(this.rule.riskScore);
+      });
   });
 });

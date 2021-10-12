@@ -42,6 +42,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
     defaultValue,
     handleSubmit,
   });
+  const { submit, isSubmitting } = form;
 
   return (
     <EuiPortal>
@@ -72,7 +73,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={form.submit} fill>
+              <EuiButton isLoading={isSubmitting} onClick={submit} fill>
                 <FormattedMessage
                   id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.saveButtonLabel"
                   defaultMessage="Save"

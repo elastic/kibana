@@ -7,7 +7,7 @@
 
 import { ITileLayerArguments } from '../tile_layer/tile_layer';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { MapFilters, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
+import { DataFilters, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { ITMSSource, AbstractTMSSource } from '../../sources/tms_source';
 import { ILayer } from '../layer';
 import { VectorTileLayer } from './vector_tile_layer';
@@ -56,15 +56,15 @@ describe('VectorTileLayer', () => {
 
     let actualMeta;
     let actualErrorMessage;
-    const mockContext = ({
+    const mockContext = {
       startLoading: (requestId: string, token: string, meta: unknown) => {
         actualMeta = meta;
       },
       onLoadError: (requestId: string, token: string, message: string) => {
         actualErrorMessage = message;
       },
-      dataFilters: ({ foo: 'bar' } as unknown) as MapFilters,
-    } as unknown) as DataRequestContext;
+      dataFilters: { foo: 'bar' } as unknown as DataFilters,
+    } as unknown as DataRequestContext;
 
     await layer.syncData(mockContext);
 

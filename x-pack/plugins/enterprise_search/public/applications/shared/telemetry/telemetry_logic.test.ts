@@ -28,7 +28,7 @@ describe('Telemetry logic', () => {
         product: 'enterprise_search',
       });
 
-      expect(http.put).toHaveBeenCalledWith('/api/enterprise_search/stats', {
+      expect(http.put).toHaveBeenCalledWith('/internal/enterprise_search/stats', {
         headers,
         body: '{"product":"enterprise_search","action":"viewed","metric":"setup_guide"}',
       });

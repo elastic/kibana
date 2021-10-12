@@ -8,25 +8,7 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
   ],
   "template": {
     "settings": {
-      "index": {
-        "lifecycle": {
-          "name": "logs"
-        },
-        "codec": "best_compression",
-        "mapping": {
-          "total_fields": {
-            "limit": "10000"
-          }
-        },
-        "refresh_interval": "5s",
-        "number_of_shards": "1",
-        "number_of_routing_shards": "30",
-        "query": {
-          "default_field": [
-            "long.nested.foo"
-          ]
-        }
-      }
+      "index": {}
     },
     "mappings": {
       "dynamic_templates": [
@@ -123,30 +105,7 @@ exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
   ],
   "template": {
     "settings": {
-      "index": {
-        "lifecycle": {
-          "name": "logs"
-        },
-        "codec": "best_compression",
-        "mapping": {
-          "total_fields": {
-            "limit": "10000"
-          }
-        },
-        "refresh_interval": "5s",
-        "number_of_shards": "1",
-        "number_of_routing_shards": "30",
-        "query": {
-          "default_field": [
-            "coredns.id",
-            "coredns.query.class",
-            "coredns.query.name",
-            "coredns.query.type",
-            "coredns.response.code",
-            "coredns.response.flags"
-          ]
-        }
-      }
+      "index": {}
     },
     "mappings": {
       "dynamic_templates": [
@@ -239,58 +198,7 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
   ],
   "template": {
     "settings": {
-      "index": {
-        "lifecycle": {
-          "name": "metrics"
-        },
-        "codec": "best_compression",
-        "mapping": {
-          "total_fields": {
-            "limit": "10000"
-          }
-        },
-        "refresh_interval": "5s",
-        "number_of_shards": "1",
-        "number_of_routing_shards": "30",
-        "query": {
-          "default_field": [
-            "system.diskio.name",
-            "system.diskio.serial_number",
-            "system.filesystem.device_name",
-            "system.filesystem.type",
-            "system.filesystem.mount_point",
-            "system.network.name",
-            "system.process.state",
-            "system.process.cmdline",
-            "system.process.cgroup.id",
-            "system.process.cgroup.path",
-            "system.process.cgroup.cpu.id",
-            "system.process.cgroup.cpu.path",
-            "system.process.cgroup.cpuacct.id",
-            "system.process.cgroup.cpuacct.path",
-            "system.process.cgroup.memory.id",
-            "system.process.cgroup.memory.path",
-            "system.process.cgroup.blkio.id",
-            "system.process.cgroup.blkio.path",
-            "system.raid.name",
-            "system.raid.status",
-            "system.raid.level",
-            "system.raid.sync_action",
-            "system.socket.remote.host",
-            "system.socket.remote.etld_plus_one",
-            "system.socket.remote.host_error",
-            "system.socket.process.cmdline",
-            "system.users.id",
-            "system.users.seat",
-            "system.users.path",
-            "system.users.type",
-            "system.users.service",
-            "system.users.state",
-            "system.users.scope",
-            "system.users.remote_host"
-          ]
-        }
-      }
+      "index": {}
     },
     "mappings": {
       "dynamic_templates": [

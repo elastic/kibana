@@ -16,7 +16,6 @@ import { DefaultDraggable } from '../../../../common/components/draggables';
 import type { GenericBuckets } from '../../../../../common';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { AlertsCountAggregation } from './types';
-import { MISSING_IP } from '../common/helpers';
 
 interface AlertsCountProps {
   loading: boolean;
@@ -25,12 +24,7 @@ interface AlertsCountProps {
 }
 
 const Wrapper = styled.div`
-  overflow: scroll;
-  margin-top: -8px;
-`;
-
-const StyledSpan = styled.span`
-  padding-left: 8px;
+  margin-top: -${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const getAlertsCountTableColumns = (
@@ -43,13 +37,14 @@ const getAlertsCountTableColumns = (
       name: selectedStackByOption,
       truncateText: true,
       render: function DraggableStackOptionField(value: string) {
-        return value === i18n.ALL_OTHERS || value === MISSING_IP ? (
-          <StyledSpan>{value}</StyledSpan>
-        ) : (
+        return (
           <DefaultDraggable
+            isDraggable={false}
             field={selectedStackByOption}
+            hideTopN={true}
             id={`alert-count-draggable-${selectedStackByOption}-${value}`}
             value={value}
+            tooltipContent={null}
           />
         );
       },
@@ -77,7 +72,7 @@ export const AlertsCount = memo<AlertsCountProps>(({ loading, selectedStackByOpt
     <>
       {loading && <EuiProgress size="xs" position="absolute" color="accent" />}
 
-      <Wrapper data-test-subj="alertsCountTable">
+      <Wrapper data-test-subj="alertsCountTable" className="eui-yScroll">
         <EuiInMemoryTable
           isSelectable={false}
           columns={tableColumns}

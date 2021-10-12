@@ -9,13 +9,13 @@ import React, { createContext, useMemo } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
-import { useUrlParams } from '../url_params_context/use_url_params';
+import { useTimeRange } from '../../hooks/use_time_range';
 
 export const ApmBackendContext = createContext<
   | {
       backendName: string;
       metadata: {
-        data?: APIReturnType<'GET /api/apm/backends/{backendName}/metadata'>;
+        data?: APIReturnType<'GET /internal/apm/backends/{backendName}/metadata'>;
         status?: FETCH_STATUS;
       };
     }
@@ -29,11 +29,10 @@ export function ApmBackendContextProvider({
 }) {
   const {
     path: { backendName },
-  } = useApmParams('/backends/:backendName/overview');
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/backends/{backendName}/overview');
 
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const backendMetadataFetch = useFetcher(
     (callApmApi) => {
@@ -42,7 +41,7 @@ export function ApmBackendContextProvider({
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/backends/{backendName}/metadata',
+        endpoint: 'GET /internal/apm/backends/{backendName}/metadata',
         params: {
           path: {
             backendName,

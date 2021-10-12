@@ -10,11 +10,13 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_VALUE,
-  ALERT_ID,
-  ALERT_SEVERITY_LEVEL,
+  ALERT_INSTANCE_ID,
+  ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_UUID,
+  TIMESTAMP,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
@@ -40,8 +42,8 @@ import {
 import { LatencyChart } from './';
 
 interface Args {
-  alertsResponse: APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>;
-  latencyChartResponse: APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
+  alertsResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>;
+  latencyChartResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 }
 
 export default {
@@ -59,7 +61,7 @@ export default {
       const { alertsResponse, latencyChartResponse } = args as Args;
       const serviceName = 'testService';
 
-      const apmPluginContextMock = ({
+      const apmPluginContextMock = {
         core: {
           notifications: {
             toasts: { addWarning: () => {}, addDanger: () => {} },
@@ -68,7 +70,7 @@ export default {
             basePath: { prepend: () => {} },
             get: (endpoint: string) => {
               switch (endpoint) {
-                case `/api/apm/services/${serviceName}/transactions/charts/latency`:
+                case `/internal/apm/services/${serviceName}/transactions/charts/latency`:
                   return latencyChartResponse;
                 default:
                   return {};
@@ -79,7 +81,7 @@ export default {
         },
         plugins: { observability: { isAlertingExperienceEnabled: () => true } },
         observabilityRuleTypeRegistry: { getFormatter: () => undefined },
-      } as unknown) as ApmPluginContextValue;
+      } as unknown as ApmPluginContextValue;
 
       createCallApmApi(apmPluginContextMock.core);
 
@@ -88,7 +90,7 @@ export default {
       return (
         <ApmPluginContext.Provider value={apmPluginContextMock}>
           <MemoryRouter initialEntries={[`/services/${serviceName}`]}>
-            <Route path="/services/:serviceName">
+            <Route path="/services/{serviceName}">
               <KibanaContextProvider
                 services={{ ...apmPluginContextMock.core }}
               >
@@ -133,15 +135,15 @@ Example.args = {
         'service.name': ['frontend-rum'],
         [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
         [ALERT_DURATION]: [10000000000],
-        [ALERT_STATUS]: ['open'],
+        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
         [ALERT_RULE_PRODUCER]: ['apm'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
-        [ALERT_ID]: ['apm.transaction_duration_All'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
+        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
         [ALERT_EVALUATION_THRESHOLD]: [500000],
         [ALERT_START]: ['2021-06-02T04:00:00.000Z'],
@@ -154,16 +156,16 @@ Example.args = {
         'service.name': ['frontend-rum'],
         [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
         [ALERT_DURATION]: [10000000000],
-        [ALERT_STATUS]: ['open'],
+        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
         [ALERT_RULE_PRODUCER]: ['apm'],
-        [ALERT_SEVERITY_LEVEL]: ['warning'],
+        [ALERT_SEVERITY]: ['warning'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478181'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
-        [ALERT_ID]: ['apm.transaction_duration_All'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
+        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
         [ALERT_EVALUATION_THRESHOLD]: [500000],
         [ALERT_START]: ['2021-06-02T10:45:00.000Z'],
@@ -176,16 +178,16 @@ Example.args = {
         'service.name': ['frontend-rum'],
         [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
         [ALERT_DURATION]: [1000000000],
-        [ALERT_STATUS]: ['open'],
+        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
         [ALERT_RULE_PRODUCER]: ['apm'],
-        [ALERT_SEVERITY_LEVEL]: ['critical'],
+        [ALERT_SEVERITY]: ['critical'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478182'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
-        [ALERT_ID]: ['apm.transaction_duration_All'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
+        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
         [ALERT_EVALUATION_THRESHOLD]: [500000],
         [ALERT_START]: ['2021-06-02T16:50:00.000Z'],

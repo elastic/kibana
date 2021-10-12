@@ -13,6 +13,7 @@ import {
   TCPContextProvider,
   ICMPSimpleFieldsContextProvider,
   HTTPContextProvider,
+  BrowserContextProvider,
   TLSFieldsContextProvider,
 } from './contexts';
 
@@ -20,21 +21,22 @@ import {
  * Exports Synthetics-specific package policy instructions
  * for use in the Ingest app create / edit package policy
  */
-export const SyntheticsPolicyCreateExtensionWrapper = memo<PackagePolicyCreateExtensionComponentProps>(
-  ({ newPolicy, onChange }) => {
+export const SyntheticsPolicyCreateExtensionWrapper =
+  memo<PackagePolicyCreateExtensionComponentProps>(({ newPolicy, onChange }) => {
     return (
       <MonitorTypeContextProvider>
         <HTTPContextProvider>
           <TCPContextProvider>
             <TLSFieldsContextProvider>
               <ICMPSimpleFieldsContextProvider>
-                <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />
+                <BrowserContextProvider>
+                  <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />
+                </BrowserContextProvider>
               </ICMPSimpleFieldsContextProvider>
             </TLSFieldsContextProvider>
           </TCPContextProvider>
         </HTTPContextProvider>
       </MonitorTypeContextProvider>
     );
-  }
-);
+  });
 SyntheticsPolicyCreateExtensionWrapper.displayName = 'SyntheticsPolicyCreateExtensionWrapper';

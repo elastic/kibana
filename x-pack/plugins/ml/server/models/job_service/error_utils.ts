@@ -7,9 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
+import { JobAction } from '../../../common/constants/job_actions';
 
 const REQUEST_TIMEOUT_NAME = 'RequestTimeout';
-type ACTION_STATE = DATAFEED_STATE | JOB_STATE;
+type ACTION_STATE = DATAFEED_STATE | JOB_STATE | JobAction;
 
 export function isRequestTimeout(error: { name: string }) {
   return error.name === REQUEST_TIMEOUT_NAME;

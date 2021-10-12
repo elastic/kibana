@@ -70,6 +70,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
+          `--xpack.securitySolution.alertIgnoreFields=${JSON.stringify([
+            'testing_ignored.constant',
+            '/testing_regex*/',
+          ])}`, // See tests within the file "ignore_fields.ts" which use these values in "alertIgnoreFields"
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           ...(ssl
             ? [

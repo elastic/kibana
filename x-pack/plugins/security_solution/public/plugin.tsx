@@ -33,6 +33,7 @@ import {
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
+import { SOLUTION_NAME } from './common/translations';
 
 import {
   APP_ID,
@@ -40,9 +41,8 @@ import {
   APP_OVERVIEW_PATH,
   APP_PATH,
   DEFAULT_INDEX_KEY,
-  DETECTION_ENGINE_INDEX_URL,
-  DEFAULT_ALERTS_INDEX,
   APP_ICON_SOLUTION,
+  DETECTION_ENGINE_INDEX_URL,
 } from '../common/constants';
 
 import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
@@ -54,6 +54,7 @@ import {
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
 import { SecuritySolutionUiConfigType } from './common/types';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
@@ -104,25 +105,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
         id: APP_ID,
-        title: APP_NAME,
-        subtitle: i18n.translate('xpack.securitySolution.featureCatalogue.subtitle', {
-          defaultMessage: 'SIEM & Endpoint Security',
-        }),
+        title: SOLUTION_NAME,
         description: i18n.translate('xpack.securitySolution.featureCatalogueDescription', {
           defaultMessage:
             'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
         }),
-        appDescriptions: [
-          i18n.translate('xpack.securitySolution.featureCatalogueDescription1', {
-            defaultMessage: 'Prevent threats autonomously.',
-          }),
-          i18n.translate('xpack.securitySolution.featureCatalogueDescription2', {
-            defaultMessage: 'Detect and respond.',
-          }),
-          i18n.translate('xpack.securitySolution.featureCatalogueDescription3', {
-            defaultMessage: 'Investigate incidents.',
-          }),
-        ],
         icon: 'logoSecurity',
         path: APP_OVERVIEW_PATH,
         order: 300,
@@ -148,7 +135,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: APP_ID,
-      title: APP_NAME,
+      title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
@@ -199,6 +186,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
+    ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
@@ -305,7 +293,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
         network: new subPluginClasses.Network(),
-        ...(this.experimentalFeatures.uebaEnabled ? { ueba: new subPluginClasses.Ueba() } : {}),
+        ueba: new subPluginClasses.Ueba(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -331,9 +319,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
       network: subPlugins.network.start(storage),
-      ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-        ? { ueba: subPlugins.ueba.start(storage) }
-        : {}),
+      ueba: subPlugins.ueba.start(storage),
       timelines: subPlugins.timelines.start(),
       management: subPlugins.management.start(core, plugins),
     };
@@ -349,34 +335,33 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): Promise<SecurityAppStore> {
     if (!this._store) {
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      const [
-        { createStore, createInitialState },
-        kibanaIndexPatterns,
-        configIndexPatterns,
-      ] = await Promise.all([
-        this.lazyApplicationDependencies(),
-        startPlugins.data.indexPatterns.getIdsWithTitle(),
-        startPlugins.data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
-            {
-              strategy: 'indexFields',
-            }
-          )
-          .toPromise(),
-      ]);
+      const [{ createStore, createInitialState }, kibanaIndexPatterns, configIndexPatterns] =
+        await Promise.all([
+          this.lazyApplicationDependencies(),
+          startPlugins.data.indexPatterns.getIdsWithTitle(),
+          startPlugins.data.search
+            .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+              { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
+              {
+                strategy: 'indexFields',
+              }
+            )
+            .toPromise(),
+        ]);
 
       let signal: { name: string | null } = { name: null };
       try {
-        // TODO: Once we are past experimental phase this code should be removed
-        // TODO: This currently prevents TGrid from refreshing
-        if (this.experimentalFeatures.ruleRegistryEnabled) {
-          signal = { name: DEFAULT_ALERTS_INDEX };
-        } else {
-          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-            method: 'GET',
-          });
-        }
+        // const { index_name: indexName } = await coreStart.http.fetch(
+        //   `${BASE_RAC_ALERTS_API_PATH}/index`,
+        //   {
+        //     method: 'GET',
+        //     query: { features: SERVER_APP_ID },
+        //   }
+        // );
+        // signal = { name: indexName[0] };
+        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+          method: 'GET',
+        });
       } catch {
         signal = { name: null };
       }
@@ -388,7 +373,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         timeline: {
           ...subPlugins.timelines.store.initialState.timeline!,
           timelineById: {
-            ...subPlugins.timelines.store.initialState.timeline!.timelineById,
+            ...subPlugins.timelines.store.initialState.timeline.timelineById,
             ...subPlugins.alerts.storageTimelines!.timelineById,
             ...subPlugins.rules.storageTimelines!.timelineById,
             ...subPlugins.exceptions.storageTimelines!.timelineById,
@@ -402,20 +387,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       };
 
       const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
-      const timelineReducer = (reduceReducers(
+      const timelineReducer = reduceReducers(
         timelineInitialState.timeline,
         tGridReducer,
         subPlugins.timelines.store.reducer.timeline
-      ) as unknown) as Reducer<TimelineState, AnyAction>;
+      ) as unknown as Reducer<TimelineState, AnyAction>;
 
       this._store = createStore(
         createInitialState(
           {
             ...subPlugins.hosts.store.initialState,
             ...subPlugins.network.store.initialState,
-            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-              ? subPlugins.ueba.store.initialState
-              : {}),
+            ...subPlugins.ueba.store.initialState,
             ...timelineInitialState,
             ...subPlugins.management.store.initialState,
           },
@@ -440,14 +423,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.storage,
         [...(subPlugins.management.store.middleware ?? [])]
       );
-      if (startPlugins.timelines) {
-        startPlugins.timelines.setTGridEmbeddedStore(this._store);
-      }
+    }
+    if (startPlugins.timelines) {
+      startPlugins.timelines.setTGridEmbeddedStore(this._store);
     }
     return this._store;
   }
 }
-
-const APP_NAME = i18n.translate('xpack.securitySolution.security.title', {
-  defaultMessage: 'Security',
-});

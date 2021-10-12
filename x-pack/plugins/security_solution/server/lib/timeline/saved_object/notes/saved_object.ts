@@ -25,11 +25,13 @@ import {
   NoteResult,
   ResponseNotes,
   ResponseNote,
+  NoteWithoutExternalRefs,
 } from '../../../../../common/types/timeline/note';
 import { FrameworkRequest } from '../../../framework';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
-import { convertSavedObjectToSavedTimeline, pickSavedTimeline } from '../timelines';
+import { createTimeline } from '../timelines';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
+import { noteFieldsMigrator } from './field_migrator';
 
 export const deleteNote = async (request: FrameworkRequest, noteIds: string[]) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
@@ -42,8 +44,7 @@ export const deleteNote = async (request: FrameworkRequest, noteIds: string[]) =
 export const deleteNoteByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
-    search: timelineId,
-    searchFields: ['timelineId'],
+    hasReference: { type: timelineSavedObjectType, id: timelineId },
   };
   const notesToBeDeleted = await getAllSavedNote(request, options);
   const savedObjectsClient = request.context.core.savedObjects.client;
@@ -81,8 +82,7 @@ export const getNotesByTimelineId = async (
 ): Promise<NoteSavedObject[]> => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
-    search: timelineId,
-    searchFields: ['timelineId'],
+    hasReference: { type: timelineSavedObjectType, id: timelineId },
   };
   const notesByTimelineId = await getAllSavedNote(request, options);
   return notesByTimelineId.notes;
@@ -106,62 +106,29 @@ export const getAllNotes = async (
   return getAllSavedNote(request, options);
 };
 
-export const persistNote = async (
-  request: FrameworkRequest,
-  noteId: string | null,
-  version: string | null,
-  note: SavedNote,
-  overrideOwner: boolean = true
-): Promise<ResponseNote> => {
+export const persistNote = async ({
+  request,
+  noteId,
+  note,
+  overrideOwner = true,
+}: {
+  request: FrameworkRequest;
+  noteId: string | null;
+  note: SavedNote;
+  overrideOwner?: boolean;
+}): Promise<ResponseNote> => {
   try {
-    const savedObjectsClient = request.context.core.savedObjects.client;
-
     if (noteId == null) {
-      const timelineVersionSavedObject =
-        note.timelineId == null
-          ? await (async () => {
-              const timelineResult = convertSavedObjectToSavedTimeline(
-                await savedObjectsClient.create(
-                  timelineSavedObjectType,
-                  pickSavedTimeline(null, {}, request.user)
-                )
-              );
-              note.timelineId = timelineResult.savedObjectId;
-              return timelineResult.version;
-            })()
-          : null;
-
-      // Create new note
-      return {
-        code: 200,
-        message: 'success',
-        note: convertSavedObjectToSavedNote(
-          await savedObjectsClient.create(
-            noteSavedObjectType,
-            overrideOwner ? pickSavedNote(noteId, note, request.user) : note
-          ),
-          timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
-        ),
-      };
+      return await createNote({
+        request,
+        noteId,
+        note,
+        overrideOwner,
+      });
     }
 
     // Update existing note
-
-    const existingNote = await getSavedNote(request, noteId);
-    return {
-      code: 200,
-      message: 'success',
-      note: convertSavedObjectToSavedNote(
-        await savedObjectsClient.update(
-          noteSavedObjectType,
-          noteId,
-          overrideOwner ? pickSavedNote(noteId, note, request.user) : note,
-          {
-            version: existingNote.version || undefined,
-          }
-        )
-      ),
-    };
+    return await updateNote({ request, noteId, note, overrideOwner });
   } catch (err) {
     if (getOr(null, 'output.statusCode', err) === 403) {
       const noteToReturn: NoteResult = {
@@ -181,22 +148,138 @@ export const persistNote = async (
   }
 };
 
+const createNote = async ({
+  request,
+  noteId,
+  note,
+  overrideOwner = true,
+}: {
+  request: FrameworkRequest;
+  noteId: string | null;
+  note: SavedNote;
+  overrideOwner?: boolean;
+}) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
+  const userInfo = request.user;
+
+  const shallowCopyOfNote = { ...note };
+  let timelineVersion: string | undefined;
+
+  if (note.timelineId == null) {
+    const { timeline: timelineResult } = await createTimeline({
+      timelineId: null,
+      timeline: {},
+      savedObjectsClient,
+      userInfo,
+    });
+
+    shallowCopyOfNote.timelineId = timelineResult.savedObjectId;
+    timelineVersion = timelineResult.version;
+  }
+
+  const noteWithCreator = overrideOwner
+    ? pickSavedNote(noteId, shallowCopyOfNote, userInfo)
+    : shallowCopyOfNote;
+
+  const { transformedFields: migratedAttributes, references } =
+    noteFieldsMigrator.extractFieldsToReferences<NoteWithoutExternalRefs>({
+      data: noteWithCreator,
+    });
+
+  const createdNote = await savedObjectsClient.create<NoteWithoutExternalRefs>(
+    noteSavedObjectType,
+    migratedAttributes,
+    {
+      references,
+    }
+  );
+
+  const repopulatedSavedObject = noteFieldsMigrator.populateFieldsFromReferences(createdNote);
+
+  const convertedNote = convertSavedObjectToSavedNote(repopulatedSavedObject, timelineVersion);
+
+  // Create new note
+  return {
+    code: 200,
+    message: 'success',
+    note: convertedNote,
+  };
+};
+
+const updateNote = async ({
+  request,
+  noteId,
+  note,
+  overrideOwner = true,
+}: {
+  request: FrameworkRequest;
+  noteId: string;
+  note: SavedNote;
+  overrideOwner?: boolean;
+}) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
+  const userInfo = request.user;
+
+  const existingNote = await savedObjectsClient.get<NoteWithoutExternalRefs>(
+    noteSavedObjectType,
+    noteId
+  );
+
+  const noteWithCreator = overrideOwner ? pickSavedNote(noteId, note, userInfo) : note;
+
+  const { transformedFields: migratedPatchAttributes, references } =
+    noteFieldsMigrator.extractFieldsToReferences<NoteWithoutExternalRefs>({
+      data: noteWithCreator,
+      existingReferences: existingNote.references,
+    });
+
+  const updatedNote = await savedObjectsClient.update(
+    noteSavedObjectType,
+    noteId,
+    migratedPatchAttributes,
+    {
+      version: existingNote.version || undefined,
+      references,
+    }
+  );
+
+  const populatedNote = noteFieldsMigrator.populateFieldsFromReferencesForPatch({
+    dataBeforeRequest: note,
+    dataReturnedFromRequest: updatedNote,
+  });
+
+  const convertedNote = convertSavedObjectToSavedNote(populatedNote);
+
+  return {
+    code: 200,
+    message: 'success',
+    note: convertedNote,
+  };
+};
+
 const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
-  const savedObject = await savedObjectsClient.get(noteSavedObjectType, NoteId);
+  const savedObject = await savedObjectsClient.get<NoteWithoutExternalRefs>(
+    noteSavedObjectType,
+    NoteId
+  );
 
-  return convertSavedObjectToSavedNote(savedObject);
+  const populatedNote = noteFieldsMigrator.populateFieldsFromReferences(savedObject);
+
+  return convertSavedObjectToSavedNote(populatedNote);
 };
 
 const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
-  const savedObjects = await savedObjectsClient.find(options);
+  const savedObjects = await savedObjectsClient.find<NoteWithoutExternalRefs>(options);
 
   return {
     totalCount: savedObjects.total,
-    notes: savedObjects.saved_objects.map((savedObject) =>
-      convertSavedObjectToSavedNote(savedObject)
-    ),
+    notes: savedObjects.saved_objects.map((savedObject) => {
+      const populatedNote = noteFieldsMigrator.populateFieldsFromReferences(savedObject);
+
+      return convertSavedObjectToSavedNote(populatedNote);
+    }),
   };
 };
 
@@ -233,11 +316,9 @@ const pickSavedNote = (
   if (noteId == null) {
     savedNote.created = new Date().valueOf();
     savedNote.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
-    savedNote.updated = new Date().valueOf();
-    savedNote.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
-  } else if (noteId != null) {
-    savedNote.updated = new Date().valueOf();
-    savedNote.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
+
+  savedNote.updated = new Date().valueOf();
+  savedNote.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   return savedNote;
 };

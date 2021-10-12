@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('test-index-unmapped-fields');
     });
 
     after(async () => {

@@ -35,6 +35,7 @@ export type ElasticsearchClientConfig = Pick<
   requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
   ssl?: Partial<ElasticsearchConfig['ssl']>;
   keepAlive?: boolean;
+  caFingerprint?: ClientOptions['caFingerprint'];
 };
 
 /**
@@ -55,6 +56,13 @@ export function parseClientOptions(
       ...DEFAULT_HEADERS,
       ...config.customHeaders,
     },
+    // do not make assumption on user-supplied data content
+    // fixes https://github.com/elastic/kibana/issues/101944
+    disablePrototypePoisoningProtection: true,
+    agent: {
+      maxSockets: Infinity,
+      keepAlive: config.keepAlive ?? true,
+    },
   };
 
   if (config.pingTimeout != null) {
@@ -68,11 +76,6 @@ export function parseClientOptions(
       typeof config.sniffInterval === 'boolean'
         ? config.sniffInterval
         : getDurationAsMs(config.sniffInterval);
-  }
-  if (config.keepAlive) {
-    clientOptions.agent = {
-      keepAlive: config.keepAlive,
-    };
   }
 
   if (!scoped) {
@@ -94,6 +97,10 @@ export function parseClientOptions(
       config.ssl,
       scoped && !config.ssl.alwaysPresentCertificate
     );
+  }
+
+  if (config.caFingerprint != null) {
+    clientOptions.caFingerprint = config.caFingerprint;
   }
 
   return clientOptions;

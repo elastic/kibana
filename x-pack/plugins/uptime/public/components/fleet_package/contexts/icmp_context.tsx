@@ -6,7 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { IICMPSimpleFields, ConfigKeys, ScheduleUnit, DataStream } from '../types';
+import { IICMPSimpleFields, ConfigKeys, DataStream } from '../types';
+import { defaultValues as commonDefaultValues } from '../common/default_values';
 
 interface IICMPSimpleFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<IICMPSimpleFields>>;
@@ -19,17 +20,10 @@ interface IICMPSimpleFieldsContextProvider {
   defaultValues?: IICMPSimpleFields;
 }
 
-export const initialValues = {
+export const initialValues: IICMPSimpleFields = {
+  ...commonDefaultValues,
   [ConfigKeys.HOSTS]: '',
-  [ConfigKeys.MAX_REDIRECTS]: '0',
   [ConfigKeys.MONITOR_TYPE]: DataStream.ICMP,
-  [ConfigKeys.SCHEDULE]: {
-    number: '3',
-    unit: ScheduleUnit.MINUTES,
-  },
-  [ConfigKeys.APM_SERVICE_NAME]: '',
-  [ConfigKeys.TAGS]: [],
-  [ConfigKeys.TIMEOUT]: '16',
   [ConfigKeys.WAIT]: '1',
 };
 

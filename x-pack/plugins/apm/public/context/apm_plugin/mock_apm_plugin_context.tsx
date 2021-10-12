@@ -10,6 +10,7 @@ import { Observable, of } from 'rxjs';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { useHistory } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
+import { merge } from 'lodash';
 import { UrlService } from '../../../../../../src/plugins/share/common/url_service';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
@@ -61,6 +62,9 @@ const mockCore = {
   docLinks: {
     DOC_LINK_VERSION: '0',
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    links: {
+      apm: {},
+    },
   },
   http: {
     basePath: {
@@ -96,6 +100,7 @@ const urlService = new UrlService({
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
+  shortUrls: {} as any,
 });
 const locator = urlService.locators.create(new MlLocatorDefinition());
 
@@ -134,26 +139,28 @@ export function MockApmPluginContextWrapper({
   value?: ApmPluginContextValue;
   history?: History;
 }) {
-  if (value.core) {
-    createCallApmApi(value.core);
+  const contextValue = merge({}, mockApmPluginContextValue, value);
+
+  if (contextValue.core) {
+    createCallApmApi(contextValue.core);
   }
 
   const contextHistory = useHistory();
 
   const usedHistory = useMemo(() => {
-    return history || contextHistory || createMemoryHistory();
+    return (
+      history ||
+      contextHistory ||
+      createMemoryHistory({
+        initialEntries: ['/services/?rangeFrom=now-15m&rangeTo=now'],
+      })
+    );
   }, [history, contextHistory]);
-
   return (
-    <RouterProvider router={apmRouter as any} history={usedHistory}>
-      <ApmPluginContext.Provider
-        value={{
-          ...mockApmPluginContextValue,
-          ...value,
-        }}
-      >
+    <ApmPluginContext.Provider value={contextValue}>
+      <RouterProvider router={apmRouter as any} history={usedHistory}>
         {children}
-      </ApmPluginContext.Provider>
-    </RouterProvider>
+      </RouterProvider>
+    </ApmPluginContext.Provider>
   );
 }

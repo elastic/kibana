@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
 import type { FormatFactory } from '../../../common';
-import { LensGridDirection } from '../../../common/expressions';
+import type { LensGridDirection } from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder, findMinMaxByColumnId } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
@@ -116,10 +116,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [dispatchEvent]
   );
 
-  const handleFilterClick = useMemo(() => createGridFilterHandler(firstTableRef, onClickValue), [
-    firstTableRef,
-    onClickValue,
-  ]);
+  const handleFilterClick = useMemo(
+    () => createGridFilterHandler(firstTableRef, onClickValue),
+    [firstTableRef, onClickValue]
+  );
 
   const handleTransposedColumnClick = useMemo(
     () => createTransposeColumnFilterHandler(onClickValue, untransposedDataRef),

@@ -83,8 +83,9 @@ export class CsvGenerator {
   private async scan(
     index: IndexPattern,
     searchSource: ISearchSource,
-    scrollSettings: CsvExportSettings['scroll']
+    settings: CsvExportSettings
   ) {
+    const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody = searchSource.getSearchRequestBody();
     this.logger.debug(`executing search request`);
     const searchParams = {
@@ -93,8 +94,10 @@ export class CsvGenerator {
         index: index.title,
         scroll: scrollSettings.duration,
         size: scrollSettings.size,
+        ignore_throttled: !includeFrozen,
       },
     };
+
     const results = (
       await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
     ).rawResponse as estypes.SearchResponse<unknown>;
@@ -181,7 +184,7 @@ export class CsvGenerator {
       data: dataTableCell,
     }: {
       column: string;
-      data: any;
+      data: unknown;
     }): string => {
       let cell: string[] | string | object;
       // check truthiness to guard against _score, _type, etc
@@ -231,7 +234,6 @@ export class CsvGenerator {
 
     if (!builder.tryAppend(header)) {
       return {
-        size: 0,
         content: '',
         maxSizeReached: true,
         warnings: [],
@@ -289,7 +291,7 @@ export class CsvGenerator {
     const index = searchSource.getField('index');
 
     if (!index) {
-      throw new Error(`The search must have a revference to an index pattern!`);
+      throw new Error(`The search must have a reference to an index pattern!`);
     }
 
     const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
@@ -327,7 +329,7 @@ export class CsvGenerator {
         let results: estypes.SearchResponse<unknown> | undefined;
         if (scrollId == null) {
           // open a scroll cursor in Elasticsearch
-          results = await this.scan(index, searchSource, scrollSettings);
+          results = await this.scan(index, searchSource, settings);
           scrollId = results?._scroll_id;
           if (results.hits?.total != null) {
             totalRecords = results.hits.total as number;
@@ -341,6 +343,15 @@ export class CsvGenerator {
         if (!results) {
           this.logger.warning(`Search results are undefined!`);
           break;
+        }
+
+        // TODO check for shard failures, log them and add a warning if found
+        {
+          const {
+            hits: { hits, ...hitsMeta },
+            ...header
+          } = results;
+          this.logger.debug('Results metadata: ' + JSON.stringify({ header, hitsMeta }));
         }
 
         let table: Datatable | undefined;
@@ -401,16 +412,20 @@ export class CsvGenerator {
       }
     }
 
-    const size = builder.getSizeInBytes();
-    this.logger.debug(
-      `Finished generating. Total size in bytes: ${size}. Row count: ${this.csvRowCount}.`
-    );
+    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
+
+    // FIXME: https://github.com/elastic/kibana/issues/112186 -- find root cause
+    if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
+      this.logger.warning(
+        `ES scroll returned fewer total hits than expected! ` +
+          `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
+      );
+    }
 
     return {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
-      size,
       warnings,
     };
   }

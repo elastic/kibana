@@ -13,6 +13,7 @@ import {
   KibanaRequest,
   CoreStart,
   IContextProvider,
+  SharedGlobalConfig,
 } from 'src/core/server';
 
 import { PluginStartContract as AlertingStart } from '../../alerting/server';
@@ -49,16 +50,22 @@ export class RuleRegistryPlugin
       RuleRegistryPluginStartContract,
       RuleRegistryPluginSetupDependencies,
       RuleRegistryPluginStartDependencies
-    > {
+    >
+{
   private readonly config: RuleRegistryPluginConfig;
+  private readonly legacyConfig: SharedGlobalConfig;
   private readonly logger: Logger;
+  private readonly kibanaVersion: string;
   private readonly alertsClientFactory: AlertsClientFactory;
   private ruleDataService: RuleDataPluginService | null;
   private security: SecurityPluginSetup | undefined;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config.get<RuleRegistryPluginConfig>();
+    // TODO: Can be removed in 8.0.0. Exists to work around multi-tenancy users.
+    this.legacyConfig = initContext.config.legacy.get();
     this.logger = initContext.logger.get();
+    this.kibanaVersion = initContext.env.packageInfo.version;
     this.ruleDataService = null;
     this.alertsClientFactory = new AlertsClientFactory();
   }
@@ -67,7 +74,7 @@ export class RuleRegistryPlugin
     core: CoreSetup<RuleRegistryPluginStartDependencies, RuleRegistryPluginStartContract>,
     plugins: RuleRegistryPluginSetupDependencies
   ): RuleRegistryPluginSetupContract {
-    const { config, logger } = this;
+    const { logger, kibanaVersion } = this;
 
     const startDependencies = core.getStartServices().then(([coreStart, pluginStart]) => {
       return {
@@ -78,10 +85,26 @@ export class RuleRegistryPlugin
 
     this.security = plugins.security;
 
+    const isWriteEnabled = (config: RuleRegistryPluginConfig, legacyConfig: SharedGlobalConfig) => {
+      const hasEnabledWrite = config.write.enabled;
+      const hasSetCustomKibanaIndex = legacyConfig.kibana.index !== '.kibana';
+      const hasSetUnsafeAccess = config.unsafe.legacyMultiTenancy.enabled;
+
+      if (!hasEnabledWrite) return false;
+
+      // Not using legacy multi-tenancy
+      if (!hasSetCustomKibanaIndex) {
+        return hasEnabledWrite;
+      } else {
+        return hasSetUnsafeAccess;
+      }
+    };
+
     this.ruleDataService = new RuleDataPluginService({
       logger,
-      isWriteEnabled: config.write.enabled,
-      index: config.index,
+      kibanaVersion,
+      isWriteEnabled: isWriteEnabled(this.config, this.legacyConfig),
+      isIndexUpgradeEnabled: this.config.unsafe.indexUpgrade.enabled,
       getClusterClient: async () => {
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
@@ -106,7 +129,7 @@ export class RuleRegistryPlugin
     core: CoreStart,
     plugins: RuleRegistryPluginStartDependencies
   ): RuleRegistryPluginStartContract {
-    const { logger, alertsClientFactory, security } = this;
+    const { logger, alertsClientFactory, ruleDataService, security } = this;
 
     alertsClientFactory.initialize({
       logger,
@@ -116,6 +139,7 @@ export class RuleRegistryPlugin
         return plugins.alerting.getAlertingAuthorizationWithRequest(request);
       },
       securityPluginSetup: security,
+      ruleDataService,
     });
 
     const getRacClientWithRequest = (request: KibanaRequest) => {

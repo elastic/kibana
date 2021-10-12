@@ -9,6 +9,7 @@ exports[`AddFilterToGlobalSearchBar Component Rendering 1`] = `
       <EuiToolTip
         content="Filter for value"
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <EuiButtonIcon
@@ -22,6 +23,7 @@ exports[`AddFilterToGlobalSearchBar Component Rendering 1`] = `
       <EuiToolTip
         content="Filter out value"
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <EuiButtonIcon

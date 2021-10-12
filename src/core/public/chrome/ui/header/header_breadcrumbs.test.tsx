@@ -15,9 +15,7 @@ import { HeaderBreadcrumbs } from './header_breadcrumbs';
 describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
-    const wrapper = mount(
-      <HeaderBreadcrumbs appTitle$={new BehaviorSubject('')} breadcrumbs$={breadcrumbs$} />
-    );
+    const wrapper = mount(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
 
     act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));

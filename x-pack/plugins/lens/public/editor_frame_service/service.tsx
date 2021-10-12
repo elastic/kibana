@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CoreSetup, CoreStart } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
@@ -22,7 +22,6 @@ import {
   EditorFrameStart,
 } from '../types';
 import { Document } from '../persistence/saved_object_store';
-import { mergeTables } from '../../common/expressions';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
@@ -59,8 +58,6 @@ async function collectAsyncDefinitions<T extends { id: string }>(
 }
 
 export class EditorFrameService {
-  constructor() {}
-
   private readonly datasources: Array<Datasource | (() => Promise<Datasource>)> = [];
   private readonly visualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
 
@@ -81,12 +78,7 @@ export class EditorFrameService {
     return await persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc);
   };
 
-  public setup(
-    core: CoreSetup<EditorFrameStartPlugins>,
-    plugins: EditorFrameSetupPlugins
-  ): EditorFrameSetup {
-    plugins.expressions.registerFunction(() => mergeTables);
-
+  public setup(): EditorFrameSetup {
     return {
       registerDatasource: (datasource) => {
         this.datasources.push(datasource as Datasource<unknown, unknown>);
@@ -107,13 +99,14 @@ export class EditorFrameService {
       const { EditorFrame } = await import('../async_services');
 
       return {
-        EditorFrameContainer: ({ showNoDataPopover }) => {
+        EditorFrameContainer: ({ showNoDataPopover, lensInspector }) => {
           return (
             <div className="lnsApp__frame">
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
                 core={core}
                 plugins={plugins}
+                lensInspector={lensInspector}
                 showNoDataPopover={showNoDataPopover}
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}

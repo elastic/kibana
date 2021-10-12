@@ -9,45 +9,7 @@ exports[`Header renders 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
-      ],
+      "observers": Array [],
       "thrownError": null,
     }
   }
@@ -4305,7 +4267,7 @@ exports[`Header renders 1`] = `
                     }
                     button={
                       <EuiHeaderSectionItemButton
-                        aria-controls="mockId"
+                        aria-controls="generated-id"
                         aria-expanded={false}
                         aria-label="Toggle primary navigation"
                         aria-pressed={false}
@@ -4375,7 +4337,7 @@ exports[`Header renders 1`] = `
                       }
                     }
                     homeHref="/"
-                    id="mockId"
+                    id="generated-id"
                     isLocked={true}
                     isNavOpen={false}
                     navLinks$={
@@ -4535,7 +4497,7 @@ exports[`Header renders 1`] = `
                       aria-label="Primary"
                       button={
                         <EuiHeaderSectionItemButton
-                          aria-controls="mockId"
+                          aria-controls="generated-id"
                           aria-expanded={false}
                           aria-label="Toggle primary navigation"
                           aria-pressed={false}
@@ -4549,14 +4511,14 @@ exports[`Header renders 1`] = `
                         </EuiHeaderSectionItemButton>
                       }
                       data-test-subj="collapsibleNav"
-                      id="mockId"
+                      id="generated-id"
                       isOpen={false}
                       onClose={[Function]}
                       ownFocus={false}
                       size={248}
                     >
                       <EuiHeaderSectionItemButton
-                        aria-controls="mockId"
+                        aria-controls="generated-id"
                         aria-expanded={false}
                         aria-label="Toggle primary navigation"
                         aria-pressed={false}
@@ -4566,14 +4528,14 @@ exports[`Header renders 1`] = `
                         onTouchEnd={[Function]}
                       >
                         <EuiButtonEmpty
-                          aria-controls="mockId"
+                          aria-controls="generated-id"
                           aria-expanded={false}
                           aria-label="Toggle primary navigation"
                           aria-pressed={false}
                           buttonRef={
                             Object {
                               "current": <button
-                                aria-controls="mockId"
+                                aria-controls="generated-id"
                                 aria-expanded="false"
                                 aria-label="Toggle primary navigation"
                                 aria-pressed="false"
@@ -4607,7 +4569,7 @@ exports[`Header renders 1`] = `
                           onTouchEnd={[Function]}
                         >
                           <button
-                            aria-controls="mockId"
+                            aria-controls="generated-id"
                             aria-expanded={false}
                             aria-label="Toggle primary navigation"
                             aria-pressed={false}
@@ -4713,55 +4675,6 @@ exports[`Header renders 1`] = `
             </div>
           </EuiHeaderSection>
           <HeaderBreadcrumbs
-            appTitle$={
-              BehaviorSubject {
-                "_isScalar": false,
-                "_value": "test",
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [
-                  Subscriber {
-                    "_parentOrParents": null,
-                    "_subscriptions": Array [
-                      SubjectSubscription {
-                        "_parentOrParents": [Circular],
-                        "_subscriptions": null,
-                        "closed": false,
-                        "subject": [Circular],
-                        "subscriber": [Circular],
-                      },
-                    ],
-                    "closed": false,
-                    "destination": SafeSubscriber {
-                      "_complete": undefined,
-                      "_context": [Circular],
-                      "_error": undefined,
-                      "_next": [Function],
-                      "_parentOrParents": null,
-                      "_parentSubscriber": [Circular],
-                      "_subscriptions": null,
-                      "closed": false,
-                      "destination": Object {
-                        "closed": true,
-                        "complete": [Function],
-                        "error": [Function],
-                        "next": [Function],
-                      },
-                      "isStopped": false,
-                      "syncErrorThrowable": false,
-                      "syncErrorThrown": false,
-                      "syncErrorValue": null,
-                    },
-                    "isStopped": false,
-                    "syncErrorThrowable": true,
-                    "syncErrorThrown": false,
-                    "syncErrorValue": null,
-                  },
-                ],
-                "thrownError": null,
-              }
-            }
             breadcrumbs$={
               BehaviorSubject {
                 "_isScalar": false,

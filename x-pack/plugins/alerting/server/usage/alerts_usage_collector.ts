@@ -17,6 +17,7 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   // Built-in
   '__index-threshold': { type: 'long' },
   '__es-query': { type: 'long' },
+  transform_health: { type: 'long' },
   // APM
   apm__error_rate: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   apm__transaction_error_rate: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
@@ -45,7 +46,8 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   // Maps
   '__geo-containment': { type: 'long' },
   // ML
-  xpack_ml_anomaly_detection_alert: { type: 'long' },
+  xpack__ml__anomaly_detection_alert: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  xpack__ml__anomaly_detection_jobs_health: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
 };
 
 export function createAlertsUsageCollector(

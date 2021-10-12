@@ -1,0 +1,75 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies suspicious commands executed via a web server, which may suggest a vulnerability and remote shell access.",
+  "false_positives": [
+    "Security audits, maintenance and network administrative scripts may trigger this alert when run under web processes."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Webshell Detection: Script Process Child of Common Web Processes",
+  "note": "## Triage and analysis\n\nDetections should be investigated to identify if the activity corresponds to legitimate activity. As this rule detects post-exploitation process activity, investigations into this should be prioritized.",
+  "query": "process where event.type == \"start\" and\n  process.parent.name : (\"w3wp.exe\", \"httpd.exe\", \"nginx.exe\", \"php.exe\", \"php-cgi.exe\", \"tomcat.exe\") and \n  process.name : (\"cmd.exe\", \"cscript.exe\", \"powershell.exe\", \"pwsh.exe\", \"wmic.exe\", \"wscript.exe\")\n",
+  "references": [
+    "https://www.microsoft.com/security/blog/2020/02/04/ghost-in-the-shell-investigating-web-shell-attacks/"
+  ],
+  "risk_score": 73,
+  "rule_id": "2917d495-59bd-4250-b395-c29409b76086",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1505",
+          "name": "Server Software Component",
+          "reference": "https://attack.mitre.org/techniques/T1505/",
+          "subtechnique": [
+            {
+              "id": "T1505.003",
+              "name": "Web Shell",
+              "reference": "https://attack.mitre.org/techniques/T1505/003/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "reference": "https://attack.mitre.org/techniques/T1190/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

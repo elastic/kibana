@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash';
 import React, { SetStateAction, useEffect, useState } from 'react';
 
-import { fetchQueryAlerts } from './api';
+import { fetchQueryAlerts, fetchQueryRuleRegistryAlerts } from './api';
 import { AlertSearchResponse } from './types';
 
 type Func = () => Promise<void>;
@@ -23,6 +23,7 @@ export interface ReturnQueryAlerts<Hit, Aggs> {
 }
 
 interface AlertsQueryParams {
+  fetchMethod?: typeof fetchQueryAlerts | typeof fetchQueryRuleRegistryAlerts;
   query: object;
   indexName?: string | null;
   skip?: boolean;
@@ -35,6 +36,7 @@ interface AlertsQueryParams {
  *
  */
 export const useQueryAlerts = <Hit, Aggs>({
+  fetchMethod = fetchQueryAlerts,
   query: initialQuery,
   indexName,
   skip,
@@ -58,7 +60,8 @@ export const useQueryAlerts = <Hit, Aggs>({
     const fetchData = async () => {
       try {
         setLoading(true);
-        const alertResponse = await fetchQueryAlerts<Hit, Aggs>({
+
+        const alertResponse = await fetchMethod<Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
         });
@@ -95,7 +98,7 @@ export const useQueryAlerts = <Hit, Aggs>({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query, indexName, skip]);
+  }, [query, indexName, skip, fetchMethod]);
 
   return { loading, ...alerts };
 };

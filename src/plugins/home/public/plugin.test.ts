@@ -10,8 +10,10 @@ import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks
 import { HomePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
 import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
+import { SharePluginSetup } from '../../share/public';
 
 const mockInitializerContext = coreMock.createPluginInitializerContext();
+const mockShare = {} as SharePluginSetup;
 
 describe('HomePublicPlugin', () => {
   beforeEach(() => {
@@ -26,6 +28,7 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
         {
+          share: mockShare,
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
         }
       );
@@ -45,6 +48,7 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
         {
+          share: mockShare,
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
         }
       );
@@ -56,6 +60,7 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
         {
+          share: {} as SharePluginSetup,
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
         }
       );
@@ -67,6 +72,7 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
         {
+          share: mockShare,
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
         }
       );

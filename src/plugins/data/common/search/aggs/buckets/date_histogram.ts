@@ -11,7 +11,7 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
 import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
-import { IFieldType } from '../../../index_patterns';
+import { IFieldType } from '../../..';
 
 import { ExtendedBounds, extendedBoundsToAst, timerangeToAst } from '../../expressions';
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';

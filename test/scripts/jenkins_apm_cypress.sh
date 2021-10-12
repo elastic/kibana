@@ -6,7 +6,7 @@ echo " -> Running APM cypress tests"
 cd "$XPACK_DIR"
 
 checks-reporter-with-killswitch "APM Cypress Tests" \
- node plugins/apm/scripts/ftr_e2e/cypress_run
+ node plugins/apm/scripts/test/e2e.js
 
 echo ""
 echo ""

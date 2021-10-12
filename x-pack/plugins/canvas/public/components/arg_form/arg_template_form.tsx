@@ -49,10 +49,10 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
     [template, argumentProps, updatedHandlers]
   );
 
-  const renderErrorTemplate = useCallback(() => React.createElement(errorTemplate, argumentProps), [
-    errorTemplate,
-    argumentProps,
-  ]);
+  const renderErrorTemplate = useCallback(
+    () => React.createElement(errorTemplate, argumentProps),
+    [errorTemplate, argumentProps]
+  );
 
   useEffect(() => {
     setHandlers(mergeWithFormHandlers(handlers));

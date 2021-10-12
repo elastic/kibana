@@ -56,6 +56,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     requiredBundles: [],
     server: true,
     ui: true,
+    owner: { name: 'Core' },
     ...manifestProps,
   };
 }

@@ -16,6 +16,7 @@ import {
   Logger,
   SavedObjectsUtils,
 } from '../../../../../../src/core/server';
+import { LensServerPluginSetup } from '../../../../lens/server';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 
 import {
@@ -105,7 +106,7 @@ async function getSubCase({
         caseId,
         subCaseId: newSubCase.id,
         fields: ['status', 'sub_case'],
-        newValue: JSON.stringify({ status: newSubCase.attributes.status }),
+        newValue: { status: newSubCase.attributes.status },
         owner: newSubCase.attributes.owner,
       }),
     ],
@@ -124,6 +125,7 @@ const addGeneratedAlerts = async (
     caseService,
     userActionService,
     logger,
+    lensEmbeddableFactory,
     authorization,
   } = clientArgs;
 
@@ -182,17 +184,16 @@ const addGeneratedAlerts = async (
       unsecuredSavedObjectsClient,
       caseService,
       attachmentService,
+      lensEmbeddableFactory,
     });
 
-    const {
-      comment: newComment,
-      commentableCase: updatedCase,
-    } = await commentableCase.createComment({
-      createdDate,
-      user: userDetails,
-      commentReq: query,
-      id: savedObjectID,
-    });
+    const { comment: newComment, commentableCase: updatedCase } =
+      await commentableCase.createComment({
+        createdDate,
+        user: userDetails,
+        commentReq: query,
+        id: savedObjectID,
+      });
 
     if (
       (newComment.attributes.type === CommentType.alert ||
@@ -219,7 +220,7 @@ const addGeneratedAlerts = async (
           subCaseId: updatedCase.subCaseId,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: JSON.stringify(query),
+          newValue: query,
           owner: newComment.attributes.owner,
         }),
       ],
@@ -241,12 +242,14 @@ async function getCombinedCase({
   unsecuredSavedObjectsClient,
   id,
   logger,
+  lensEmbeddableFactory,
 }: {
   caseService: CasesService;
   attachmentService: AttachmentService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   id: string;
   logger: Logger;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }): Promise<CommentableCase> {
   const [casePromise, subCasePromise] = await Promise.allSettled([
     caseService.getCase({
@@ -276,6 +279,7 @@ async function getCombinedCase({
         caseService,
         attachmentService,
         unsecuredSavedObjectsClient,
+        lensEmbeddableFactory,
       });
     } else {
       throw Boom.badRequest('Sub case found without reference to collection');
@@ -291,6 +295,7 @@ async function getCombinedCase({
       caseService,
       attachmentService,
       unsecuredSavedObjectsClient,
+      lensEmbeddableFactory,
     });
   }
 }
@@ -332,6 +337,7 @@ export const addComment = async (
     attachmentService,
     user,
     logger,
+    lensEmbeddableFactory,
     authorization,
   } = clientArgs;
 
@@ -362,6 +368,7 @@ export const addComment = async (
       unsecuredSavedObjectsClient,
       id: caseId,
       logger,
+      lensEmbeddableFactory,
     });
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -401,7 +408,7 @@ export const addComment = async (
           subCaseId: updatedCase.subCaseId,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: JSON.stringify(query),
+          newValue: query,
           owner: newComment.attributes.owner,
         }),
       ],

@@ -12,8 +12,7 @@ import { useKibana } from '../common/lib/kibana';
 import { savedQuerySavedObjectType } from '../../common/types';
 import { pagePathGetters } from '../common/page_paths';
 import { useErrorToast } from '../common/hooks/use_error_toast';
-
-export const SAVED_QUERY_ID = 'savedQuery';
+import { SAVED_QUERY_ID } from './constants';
 
 interface UseSavedQueryProps {
   savedQueryId: string;

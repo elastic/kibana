@@ -18,23 +18,25 @@ type RuleDataClientMock = jest.Mocked<Omit<IRuleDataClient, 'getWriter' | 'getRe
   getWriter: (...args: Parameters<IRuleDataClient['getWriter']>) => MockInstances<IRuleDataWriter>;
 };
 
-export function createRuleDataClientMock(): RuleDataClientMock {
+export const createRuleDataClientMock = (
+  indexName: string = '.alerts-security.alerts'
+): RuleDataClientMock => {
   const bulk = jest.fn();
   const search = jest.fn();
   const getDynamicIndexPattern = jest.fn();
 
   return {
-    indexName: '.alerts-security.alerts',
-
+    indexName,
+    kibanaVersion: '7.16.0',
     isWriteEnabled: jest.fn(() => true),
 
     getReader: jest.fn((_options?: { namespace?: string }) => ({
-      getDynamicIndexPattern,
       search,
+      getDynamicIndexPattern,
     })),
 
     getWriter: jest.fn(() => ({
       bulk,
     })),
   };
-}
+};

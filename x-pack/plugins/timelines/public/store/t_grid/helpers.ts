@@ -16,6 +16,8 @@ import type {
   ColumnHeaderOptions,
   DataProvider,
   SortColumnTimeline,
+  TimelineExpandedDetail,
+  TimelineExpandedDetailType,
 } from '../../../common/types/timeline';
 import { getTGridManageDefaults, tGridDefaults } from './defaults';
 
@@ -160,20 +162,24 @@ export const setInitializeTgridSettings = ({
 }: InitializeTgridParams): TimelineById => {
   const timeline = timelineById[id];
 
-  return {
-    ...timelineById,
-    [id]: {
-      ...tGridDefaults,
-      ...timeline,
-      ...getTGridManageDefaults(id),
-      ...tGridSettingsProps,
-      ...(!timeline || (isEmpty(timeline.columns) && !isEmpty(tGridSettingsProps.defaultColumns))
-        ? { columns: tGridSettingsProps.defaultColumns }
-        : {}),
-      sort: tGridSettingsProps.sort ?? tGridDefaults.sort,
-      loadingEventIds: tGridDefaults.loadingEventIds,
-    },
-  };
+  return !timeline?.initialized
+    ? {
+        ...timelineById,
+        [id]: {
+          ...tGridDefaults,
+          ...getTGridManageDefaults(id),
+          ...timeline,
+          ...tGridSettingsProps,
+          ...(!timeline ||
+          (isEmpty(timeline.columns) && !isEmpty(tGridSettingsProps.defaultColumns))
+            ? { columns: tGridSettingsProps.defaultColumns }
+            : {}),
+          sort: tGridSettingsProps.sort ?? tGridDefaults.sort,
+          loadingEventIds: tGridDefaults.loadingEventIds,
+          initialized: true,
+        },
+      }
+    : timelineById;
 };
 
 interface ApplyDeltaToTimelineColumnWidth {
@@ -408,22 +414,20 @@ export const setSelectedTimelineEvents = ({
   };
 };
 
-export const updateTimelineDetailsPanel = (action: ToggleDetailPanel) => {
-  const { tabType } = action;
+export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineExpandedDetail => {
+  const { tabType, timelineId, ...expandedDetails } = action;
 
   const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail']);
   const expandedTabType = tabType ?? TimelineTabs.query;
-
-  return action.panelView && panelViewOptions.has(action.panelView)
-    ? {
-        [expandedTabType]: {
-          params: action.params ? { ...action.params } : {},
-          panelView: action.panelView,
-        },
-      }
-    : {
-        [expandedTabType]: {},
-      };
+  const newExpandDetails = {
+    params: expandedDetails.params ? { ...expandedDetails.params } : {},
+    panelView: expandedDetails.panelView,
+  } as TimelineExpandedDetailType;
+  return {
+    [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
+      ? newExpandDetails
+      : {},
+  };
 };
 
 export const addProviderToTimelineHelper = (

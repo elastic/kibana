@@ -19,9 +19,7 @@ import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import type { FormatFactory } from '../../common';
 import type { MetricChartProps } from '../../common/expressions';
-
-export { metricChart } from '../../common/expressions';
-export type { MetricState, MetricConfig } from '../../common/expressions';
+export type { MetricChartProps, MetricState, MetricConfig } from '../../common/expressions';
 
 export const getMetricChartRenderer = (
   formatFactory: FormatFactory

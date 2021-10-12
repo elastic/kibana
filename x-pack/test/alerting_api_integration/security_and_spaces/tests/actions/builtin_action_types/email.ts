@@ -8,13 +8,19 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('create email action', () => {
     let createdActionId = '';
+    let createdMSExchangeActionId = '';
 
     it('should return 200 when creating an email action successfully', async () => {
       const { body: createdAction } = await supertest
@@ -48,6 +54,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
           host: null,
           port: null,
           secure: null,
+          clientId: null,
+          oauthTokenUrl: null,
+          tenantId: null,
           from: 'bob@example.com',
         },
       });
@@ -71,6 +80,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
           host: null,
           port: null,
           secure: null,
+          clientId: null,
+          oauthTokenUrl: null,
+          tenantId: null,
         },
       });
     });
@@ -111,8 +123,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
               bcc: null,
               subject: 'email-subject',
               html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601\">Go to Kibana</a>.</p>\n`,
-              text:
-                'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
+              text: 'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
               headers: {},
             },
           });
@@ -312,12 +323,227 @@ export default function emailTest({ getService }: FtrProviderContext) {
               bcc: null,
               subject: 'email-subject',
               html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601\">Go to Kibana</a>.</p>\n`,
-              text:
-                'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
+              text: 'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
               headers: {},
             },
           });
         });
+    });
+
+    it('should return 200 when creating an email action without defining service', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action',
+          connector_type_id: '.email',
+          config: {
+            from: 'bob@example.com',
+            host: 'some.non.existent.com',
+            port: 25,
+            hasAuth: true,
+          },
+          secrets: {
+            user: 'bob',
+            password: 'supersecret',
+          },
+        })
+        .expect(200);
+
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+        is_preconfigured: false,
+        name: 'An email action',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
+        config: {
+          service: 'other',
+          hasAuth: true,
+          host: 'some.non.existent.com',
+          port: 25,
+          secure: null,
+          from: 'bob@example.com',
+          clientId: null,
+          oauthTokenUrl: null,
+          tenantId: null,
+        },
+      });
+
+      expect(typeof createdAction.id).to.be('string');
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/actions/connector/${createdAction.id}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        id: fetchedAction.id,
+        is_preconfigured: false,
+        name: 'An email action',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
+        config: {
+          from: 'bob@example.com',
+          service: 'other',
+          hasAuth: true,
+          host: 'some.non.existent.com',
+          port: 25,
+          secure: null,
+          clientId: null,
+          oauthTokenUrl: null,
+          tenantId: null,
+        },
+      });
+    });
+
+    it('should return 200 when creating an email action with nodemailer well-defined service', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action',
+          connector_type_id: '.email',
+          config: {
+            from: 'bob@example.com',
+            service: 'hotmail',
+            hasAuth: true,
+          },
+          secrets: {
+            user: 'bob',
+            password: 'supersecret',
+          },
+        })
+        .expect(200);
+
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+        is_preconfigured: false,
+        name: 'An email action',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
+        config: {
+          service: 'hotmail',
+          hasAuth: true,
+          host: null,
+          port: null,
+          secure: null,
+          from: 'bob@example.com',
+          clientId: null,
+          oauthTokenUrl: null,
+          tenantId: null,
+        },
+      });
+
+      expect(typeof createdAction.id).to.be('string');
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/actions/connector/${createdAction.id}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        id: fetchedAction.id,
+        is_preconfigured: false,
+        name: 'An email action',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
+        config: {
+          from: 'bob@example.com',
+          service: 'hotmail',
+          hasAuth: true,
+          host: null,
+          port: null,
+          secure: null,
+          clientId: null,
+          oauthTokenUrl: null,
+          tenantId: null,
+        },
+      });
+    });
+
+    it('should return 200 when creating an email connector for MS Exchange successfully', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action',
+          connector_type_id: '.email',
+          config: {
+            service: 'exchange_server',
+            from: 'bob@example.com',
+            hasAuth: true,
+            clientId: '12345',
+            tenantId: '1234567',
+            oauthTokenUrl: `${kibanaServer.resolveUrl(
+              getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE)
+            )}/1234567/oauth2/v2.0/token`,
+          },
+          secrets: {
+            clientSecret: 'test-secret',
+          },
+        })
+        .expect(200);
+
+      createdMSExchangeActionId = createdAction.id;
+      expect(createdAction).to.eql({
+        id: createdMSExchangeActionId,
+        is_preconfigured: false,
+        name: 'An email action',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
+        config: {
+          service: 'exchange_server',
+          hasAuth: true,
+          clientId: '12345',
+          tenantId: '1234567',
+          host: null,
+          port: null,
+          secure: null,
+          oauthTokenUrl: `${kibanaServer.resolveUrl(
+            getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE)
+          )}/1234567/oauth2/v2.0/token`,
+          from: 'bob@example.com',
+        },
+      });
+
+      expect(typeof createdMSExchangeActionId).to.be('string');
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/actions/connector/${createdMSExchangeActionId}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        id: fetchedAction.id,
+        is_preconfigured: false,
+        name: 'An email action',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
+        config: {
+          from: 'bob@example.com',
+          service: 'exchange_server',
+          hasAuth: true,
+          host: null,
+          port: null,
+          secure: null,
+          oauthTokenUrl: `${kibanaServer.resolveUrl(
+            getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE)
+          )}/1234567/oauth2/v2.0/token`,
+          clientId: '12345',
+          tenantId: '1234567',
+        },
+      });
+    });
+
+    it('should return 200 when executing email action with MS Exchange Graph API', async () => {
+      await supertest
+        .post(`/api/actions/connector/${createdMSExchangeActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'email-subject',
+            message: 'email-message',
+          },
+        })
+        .expect(200);
     });
   });
 }

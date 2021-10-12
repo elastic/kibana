@@ -14,7 +14,10 @@ describe('http auth', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
 
   beforeEach(async () => {
-    root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+    root = kbnTestServer.createRoot({
+      plugins: { initialize: false },
+      elasticsearch: { skipStartupConnectionCheck: true },
+    });
     await root.preboot();
   }, 30000);
 

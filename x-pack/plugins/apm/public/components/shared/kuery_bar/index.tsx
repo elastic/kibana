@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { i18n } from '@kbn/i18n';
-import { startsWith, uniqueId } from 'lodash';
+import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
@@ -34,7 +35,11 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IndexPattern) {
   return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
 
-export function KueryBar(props: { prepend?: React.ReactNode | string }) {
+export function KueryBar(props: {
+  placeholder?: string;
+  boolFilter?: QueryDslQueryContainer[];
+  prepend?: React.ReactNode | string;
+}) {
   const { path, query } = useApmParams('/*');
 
   const serviceName = 'serviceName' in path ? path.serviceName : undefined;
@@ -67,18 +72,20 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
 
   const { indexPattern } = useDynamicIndexPatternFetcher();
 
-  const placeholder = i18n.translate('xpack.apm.kueryBar.placeholder', {
-    defaultMessage: `Search {event, select,
+  const placeholder =
+    props.placeholder ??
+    i18n.translate('xpack.apm.kueryBar.placeholder', {
+      defaultMessage: `Search {event, select,
             transaction {transactions}
             metric {metrics}
             error {errors}
             other {transactions, errors and metrics}
           } (E.g. {queryExample})`,
-    values: {
-      queryExample: example,
-      event: processorEvent,
-    },
-  });
+      values: {
+        queryExample: example,
+        event: processorEvent,
+      },
+    });
 
   async function onChange(inputValue: string, selectionStart: number) {
     if (indexPattern == null) {
@@ -95,22 +102,22 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
         (await data.autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [indexPattern],
-          boolFilter: getBoolFilter({
-            groupId,
-            processorEvent,
-            serviceName,
-            environment,
-            urlParams,
-          }),
+          boolFilter:
+            props.boolFilter ??
+            getBoolFilter({
+              groupId,
+              processorEvent,
+              serviceName,
+              environment,
+              urlParams,
+            }),
           query: inputValue,
           selectionStart,
           selectionEnd: selectionStart,
           useTimeRange: true,
           method: 'terms_agg',
         })) || []
-      )
-        .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
-        .slice(0, 15);
+      ).slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {
         return;

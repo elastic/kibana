@@ -46,6 +46,7 @@ export const eventsStackByOptions: MatrixHistogramOption[] = [
 ];
 
 const DEFAULT_STACK_BY = 'event.action';
+const unit = (n: number) => i18n.EVENTS_UNIT(n);
 
 export const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
@@ -119,6 +120,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         scopeId={SourcererScopeName.default}
         start={startDate}
         pageFilters={pageFilters}
+        unit={unit}
       />
     </>
   );

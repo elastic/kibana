@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -29,6 +28,11 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       timelines: { ...mockTimelines },
+      application: {
+        capabilities: {
+          siem: { crud_alerts: true, read_alerts: true },
+        },
+      },
     },
   }),
   useToasts: jest.fn().mockReturnValue({
@@ -89,6 +93,8 @@ describe('EventColumnView', () => {
     isEventPinned: false,
     leadingControlColumns: [defaultControlColumn],
     trailingControlColumns: [],
+    setEventsLoading: jest.fn(),
+    setEventsDeleted: jest.fn(),
   };
 
   test('it does NOT render a notes button when isEventsViewer is true', () => {
@@ -132,41 +138,6 @@ describe('EventColumnView', () => {
     });
 
     expect(wrapper.find('[data-test-subj="pin"]').exists()).toBe(false);
-  });
-
-  test('it render AddToCaseAction if timelineId === TimelineId.detectionsPage', () => {
-    const wrapper = mount(<EventColumnView {...props} timelineId={TimelineId.detectionsPage} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
-  });
-
-  test('it render AddToCaseAction if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
-    const wrapper = mount(
-      <EventColumnView {...props} timelineId={TimelineId.detectionsRulesDetailsPage} />,
-      {
-        wrappingComponent: TestProviders,
-      }
-    );
-
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
-  });
-
-  test('it render AddToCaseAction if timelineId === TimelineId.active', () => {
-    const wrapper = mount(<EventColumnView {...props} timelineId={TimelineId.active} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
-  });
-
-  test('it does NOT render AddToCaseAction when timelineId is not in the allowed list', () => {
-    const wrapper = mount(<EventColumnView {...props} timelineId="timeline-test" />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeFalsy();
   });
 
   test('it renders a custom control column in addition to the default control column', () => {

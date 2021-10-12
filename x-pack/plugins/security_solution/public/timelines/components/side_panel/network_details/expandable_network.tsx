@@ -66,7 +66,8 @@ export const ExpandableNetworkDetailsPageLink = ({
 export const ExpandableNetworkDetails = ({
   contextID,
   expandedNetwork,
-}: ExpandableNetworkProps & { contextID: string }) => {
+  isDraggable,
+}: ExpandableNetworkProps & { contextID: string; isDraggable?: boolean }) => {
   const { ip, flowTarget } = expandedNetwork;
   const dispatch = useDispatch();
   const { to, from, isInitializing } = useGlobalTime();
@@ -132,6 +133,7 @@ export const ExpandableNetworkDetails = ({
       loading={loading}
       isInDetailsSidePanel
       isLoadingAnomaliesData={isLoadingAnomaliesData}
+      isDraggable={isDraggable}
       type={type}
       flowTarget={flowTarget}
       startDate={from}

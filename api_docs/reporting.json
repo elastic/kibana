@@ -345,9 +345,7 @@
             "label": "getReportingJobPath",
             "description": [],
             "signature": [
-              "(exportType: string, jobParams: ",
-              "BaseParams",
-              ") => string"
+              "(exportType: string, jobParams: { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => string"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -374,7 +372,7 @@
                 "label": "jobParams",
                 "description": [],
                 "signature": [
-                  "BaseParams"
+                  "{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
                 ],
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
@@ -391,9 +389,7 @@
             "label": "createReportingJob",
             "description": [],
             "signature": [
-              "(exportType: string, jobParams: ",
-              "BaseParams",
-              ") => Promise<",
+              "(exportType: string, jobParams: { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => Promise<",
               "Job",
               ">"
             ],
@@ -422,7 +418,7 @@
                 "label": "jobParams",
                 "description": [],
                 "signature": [
-                  "BaseParams"
+                  "{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
                 ],
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
@@ -439,9 +435,7 @@
             "label": "createImmediateReport",
             "description": [],
             "signature": [
-              "(baseParams: ",
-              "BaseParams",
-              ") => Promise<any>"
+              "(baseParams: { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => Promise<any>"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -454,7 +448,7 @@
                 "label": "baseParams",
                 "description": [],
                 "signature": [
-                  "BaseParams"
+                  "{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
                 ],
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
@@ -471,10 +465,7 @@
             "label": "getDecoratedJobParams",
             "description": [],
             "signature": [
-              "<T extends Pick<",
-              "BaseParams",
-              ", \"title\" | \"objectType\" | \"layout\">>(baseParams: T) => ",
-              "BaseParams"
+              "<T extends Pick<{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }, \"title\" | \"layout\" | \"objectType\">>(baseParams: T) => { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -550,21 +541,6 @@
             "description": [],
             "signature": [
               "() => string"
-            ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "reporting",
-            "id": "def-public.ReportingAPIClient.verifyConfig",
-            "type": "Function",
-            "tags": [],
-            "label": "verifyConfig",
-            "description": [],
-            "signature": [
-              "() => Promise<any>"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -720,7 +696,9 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, setupDeps: ",
+              "<",
+              "ReportingPublicPluginStartDendencies",
+              ", unknown>, setupDeps: ",
               "ReportingPublicPluginSetupDendencies",
               ") => ",
               {
@@ -749,7 +727,9 @@
                     "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<object, unknown>"
+                  "<",
+                  "ReportingPublicPluginStartDendencies",
+                  ", unknown>"
                 ],
                 "path": "x-pack/plugins/reporting/public/plugin.ts",
                 "deprecated": false,
@@ -842,25 +822,7 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [
-      {
-        "parentPluginId": "reporting",
-        "id": "def-public.getDefaultLayoutSelectors",
-        "type": "Function",
-        "tags": [],
-        "label": "getDefaultLayoutSelectors",
-        "description": [],
-        "signature": [
-          "() => ",
-          "LayoutSelectorDictionary"
-        ],
-        "path": "x-pack/plugins/reporting/common/index.ts",
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -963,8 +925,14 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
-                  "ByteSizeValue",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; zoom: number; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
                   "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
                 "path": "x-pack/plugins/reporting/server/core.ts",
@@ -1310,23 +1278,6 @@
           },
           {
             "parentPluginId": "reporting",
-            "id": "def-server.ReportingCore.getScreenshotsObservable",
-            "type": "Function",
-            "tags": [],
-            "label": "getScreenshotsObservable",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              "ScreenshotsObservableFn",
-              ">"
-            ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getEnableScreenshotMode",
             "type": "Function",
             "tags": [],
@@ -1372,7 +1323,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Promise<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1401,7 +1352,7 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
                 "path": "x-pack/plugins/reporting/server/core.ts",
                 "deprecated": false,
@@ -1820,8 +1771,14 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
-                  "ByteSizeValue",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; zoom: number; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
                   "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
                 "path": "x-pack/plugins/reporting/server/plugin.ts",
@@ -2011,8 +1968,14 @@
             "section": "def-server.ReportingConfig",
             "text": "ReportingConfig"
           },
-          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
-          "ByteSizeValue",
+          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; zoom: number; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
           "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
         ],
         "path": "x-pack/plugins/reporting/server/config/config.ts",
@@ -2084,6 +2047,25 @@
           },
           {
             "parentPluginId": "reporting",
+            "id": "def-server.ReportingSetupDeps.screenshotMode",
+            "type": "Object",
+            "tags": [],
+            "label": "screenshotMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "screenshotMode",
+                "scope": "server",
+                "docId": "kibScreenshotModePluginApi",
+                "section": "def-server.ScreenshotModePluginSetup",
+                "text": "ScreenshotModePluginSetup"
+              }
+            ],
+            "path": "x-pack/plugins/reporting/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingSetupDeps.security",
             "type": "Object",
             "tags": [],
@@ -2125,16 +2107,18 @@
           {
             "parentPluginId": "reporting",
             "id": "def-server.ReportingSetupDeps.taskManager",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "taskManager",
             "description": [],
             "signature": [
-              "{ index: string; addMiddleware: (middleware: ",
-              "Middleware",
-              ") => void; } & Pick<",
-              "TaskTypeDictionary",
-              ", \"registerTaskDefinitions\">"
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskManagerSetupContract",
+                "text": "TaskManagerSetupContract"
+              }
             ],
             "path": "x-pack/plugins/reporting/server/types.ts",
             "deprecated": false
@@ -2155,25 +2139,6 @@
                 "text": "UsageCollectionSetup"
               },
               " | undefined"
-            ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "reporting",
-            "id": "def-server.ReportingSetupDeps.screenshotMode",
-            "type": "Object",
-            "tags": [],
-            "label": "screenshotMode",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "screenshotMode",
-                "scope": "server",
-                "docId": "kibScreenshotModePluginApi",
-                "section": "def-server.ScreenshotModePluginSetup",
-                "text": "ScreenshotModePluginSetup"
-              }
             ],
             "path": "x-pack/plugins/reporting/server/types.ts",
             "deprecated": false
@@ -2473,25 +2438,7 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [
-      {
-        "parentPluginId": "reporting",
-        "id": "def-common.getDefaultLayoutSelectors",
-        "type": "Function",
-        "tags": [],
-        "label": "getDefaultLayoutSelectors",
-        "description": [],
-        "signature": [
-          "() => ",
-          "LayoutSelectorDictionary"
-        ],
-        "path": "x-pack/plugins/reporting/common/index.ts",
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

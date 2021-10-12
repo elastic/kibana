@@ -21,6 +21,8 @@ import {
   getComparisonChartTheme,
   getTimeRangeComparison,
 } from '../../time_comparison/get_time_range_comparison';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -33,7 +35,8 @@ interface Props {
   environment: string;
 }
 
-type ErrorRate = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/error_rate'>;
+type ErrorRate =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
 
 const INITIAL_STATE: ErrorRate = {
   currentPeriod: {
@@ -56,14 +59,15 @@ export function TransactionErrorRateChart({
 }: Props) {
   const theme = useTheme();
   const {
-    urlParams: {
-      start,
-      end,
-      transactionName,
-      comparisonEnabled,
-      comparisonType,
-    },
+    urlParams: { transactionName, comparisonEnabled, comparisonType },
   } = useUrlParams();
+
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { serviceName, transactionType, alerts } = useApmServiceContext();
   const comparisonChartThem = getComparisonChartTheme(theme);
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
@@ -78,7 +82,7 @@ export function TransactionErrorRateChart({
       if (transactionType && serviceName && start && end) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
+            'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
           params: {
             path: {
               serviceName,

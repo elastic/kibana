@@ -9,8 +9,10 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { EmailActionConnector } from '../types';
 import EmailActionConnectorFields from './email_connector';
+import * as hooks from './use_email_config';
 
 jest.mock('../../../../common/lib/kibana');
+
 describe('EmailActionConnectorFields renders', () => {
   test('all connector fields is rendered', () => {
     const actionConnector = {
@@ -29,7 +31,7 @@ describe('EmailActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <EmailActionConnectorFields
         action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [] }}
+        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
@@ -39,6 +41,7 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="emailFromInput"]').first().prop('value')).toBe(
       'test@test.com'
     );
+    expect(wrapper.find('[data-test-subj="emailServiceSelectInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailHostInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeTruthy();
@@ -59,7 +62,7 @@ describe('EmailActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <EmailActionConnectorFields
         action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [] }}
+        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
@@ -73,6 +76,136 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeFalsy();
     expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeFalsy();
+  });
+
+  test('service field defaults to empty when not defined', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+      },
+    } as EmailActionConnector;
+    const wrapper = mountWithIntl(
+      <EmailActionConnectorFields
+        action={actionConnector}
+        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="emailFromInput"]').first().prop('value')).toBe(
+      'test@test.com'
+    );
+    expect(wrapper.find('[data-test-subj="emailServiceSelectInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('select[data-test-subj="emailServiceSelectInput"]').prop('value')).toEqual(
+      ''
+    );
+  });
+
+  test('service field is correctly selected when defined', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+        service: 'gmail',
+      },
+    } as EmailActionConnector;
+    const wrapper = mountWithIntl(
+      <EmailActionConnectorFields
+        action={actionConnector}
+        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="emailServiceSelectInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('select[data-test-subj="emailServiceSelectInput"]').prop('value')).toEqual(
+      'gmail'
+    );
+  });
+
+  test('host, port and secure fields should be disabled when service field is set to well known service', () => {
+    jest
+      .spyOn(hooks, 'useEmailConfig')
+      .mockImplementation(() => ({ emailServiceConfigurable: false, setEmailService: jest.fn() }));
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+        service: 'gmail',
+      },
+    } as EmailActionConnector;
+    const wrapper = mountWithIntl(
+      <EmailActionConnectorFields
+        action={actionConnector}
+        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="emailHostInput"]').first().prop('disabled')).toBe(true);
+    expect(wrapper.find('[data-test-subj="emailPortInput"]').first().prop('disabled')).toBe(true);
+    expect(wrapper.find('[data-test-subj="emailSecureSwitch"]').first().prop('disabled')).toBe(
+      true
+    );
+  });
+
+  test('host, port and secure fields should not be disabled when service field is set to other', () => {
+    jest
+      .spyOn(hooks, 'useEmailConfig')
+      .mockImplementation(() => ({ emailServiceConfigurable: true, setEmailService: jest.fn() }));
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+        service: 'other',
+      },
+    } as EmailActionConnector;
+    const wrapper = mountWithIntl(
+      <EmailActionConnectorFields
+        action={actionConnector}
+        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="emailHostInput"]').first().prop('disabled')).toBe(false);
+    expect(wrapper.find('[data-test-subj="emailPortInput"]').first().prop('disabled')).toBe(false);
+    expect(wrapper.find('[data-test-subj="emailSecureSwitch"]').first().prop('disabled')).toBe(
+      false
+    );
   });
 
   test('should display a message to remember username and password when creating a connector with authentication', () => {

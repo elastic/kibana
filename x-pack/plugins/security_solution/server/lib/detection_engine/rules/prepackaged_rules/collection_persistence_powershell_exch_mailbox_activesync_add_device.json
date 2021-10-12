@@ -43,11 +43,16 @@
           "id": "T1114",
           "name": "Email Collection",
           "reference": "https://attack.mitre.org/techniques/T1114/"
+        },
+        {
+          "id": "T1005",
+          "name": "Data from Local System",
+          "reference": "https://attack.mitre.org/techniques/T1005/"
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

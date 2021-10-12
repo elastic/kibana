@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { SuperTest } from 'supertest';
-import supertestAsPromised from 'supertest-as-promised';
+import type SuperTest from 'supertest';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
 import type {
@@ -26,7 +25,7 @@ import { countDownES, countDownTest } from '../detection_engine_api_integration/
  * @param supertest The supertest client library
  */
 export const createListsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   return countDownTest(async () => {
     await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
@@ -39,7 +38,7 @@ export const createListsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteListsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   return countDownTest(async () => {
     await supertest.delete(LIST_INDEX).set('kbn-xsrf', 'true').send();
@@ -53,7 +52,7 @@ export const deleteListsIndex = async (
  * @param supertest The supertest client library
  */
 export const createExceptionListsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   return countDownTest(async () => {
     await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
@@ -117,21 +116,29 @@ export const waitFor = async (
   timeoutWait: number = 10
 ) => {
   await new Promise<void>(async (resolve, reject) => {
-    let found = false;
-    let numberOfTries = 0;
-    while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
-      const itPasses = await functionToTest();
-      if (itPasses) {
-        found = true;
-      } else {
-        numberOfTries++;
+    try {
+      let found = false;
+      let numberOfTries = 0;
+
+      while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+        const itPasses = await functionToTest();
+
+        if (itPasses) {
+          found = true;
+        } else {
+          numberOfTries++;
+        }
+
+        await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
       }
-      await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
-    }
-    if (found) {
-      resolve();
-    } else {
-      reject(new Error(`timed out waiting for function ${functionName} condition to be true`));
+
+      if (found) {
+        resolve();
+      } else {
+        reject(new Error(`timed out waiting for function ${functionName} condition to be true`));
+      }
+    } catch (error) {
+      reject(error);
     }
   });
 };
@@ -179,7 +186,7 @@ export const deleteAllExceptions = async (es: KibanaClient): Promise<void> => {
  * @param testValues Optional test values in case you're using CIDR or range based lists
  */
 export const importFile = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   type: Type,
   contents: string[],
   fileName: string,
@@ -208,7 +215,7 @@ export const importFile = async (
  * @param fileName filename to import as
  */
 export const importTextFile = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   type: Type,
   contents: string[],
   fileName: string
@@ -233,7 +240,7 @@ export const importTextFile = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItem = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValue: string,
   fileName: string
 ): Promise<void> => {
@@ -254,7 +261,7 @@ export const waitForListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItems = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValues: string[],
   fileName: string
 ): Promise<void> => {
@@ -269,7 +276,7 @@ export const waitForListItems = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItem = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValue: string,
   fileName: string
 ): Promise<void> => {
@@ -296,7 +303,7 @@ export const waitForTextListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItems = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValues: string[],
   fileName: string
 ): Promise<void> => {

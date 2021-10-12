@@ -12,10 +12,11 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 
-type ErrorGroupsMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
+type ErrorGroupsMainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -28,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/main_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/error_groups/main_statistics`,
             query: {
               start,
               end,
@@ -55,7 +56,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct data', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/main_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/error_groups/main_statistics`,
             query: {
               start,
               end,

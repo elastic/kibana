@@ -7,8 +7,8 @@
 
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
-export const indexPatternMock = ({
+export const indexPatternMock = {
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
   fields: [],
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;

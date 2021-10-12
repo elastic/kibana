@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { Moment } from 'moment';
+
 import { SearchHit } from '@elastic/elasticsearch/api/types';
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Moment } from 'moment';
+
 import { SavedObject } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
@@ -28,12 +30,12 @@ import {
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
-import { IRuleDataPluginService } from '../rule_execution_log/types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { BuildRuleMessage } from '../signals/rule_messages';
-import { AlertAttributes, BulkCreate, WrapHits } from '../signals/types';
+import { AlertAttributes, BulkCreate, WrapHits, WrapSequences } from '../signals/types';
 import { AlertsFieldMap, RulesFieldMap } from './field_maps';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { IEventLogService } from '../../../../../event_log/server';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
@@ -67,6 +69,7 @@ export interface RunOpts<TParams extends RuleParams> {
     maxSignals: number;
   };
   wrapHits: WrapHits;
+  wrapSequences: WrapSequences;
 }
 
 export type SecurityAlertTypeExecutor<
@@ -95,11 +98,11 @@ type SecurityAlertTypeWithExecutor<
 export type CreateSecurityRuleTypeFactory = (options: {
   lists: SetupPlugins['lists'];
   logger: Logger;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
+  config: ConfigType;
   ruleDataClient: IRuleDataClient;
-  ruleDataService: IRuleDataPluginService;
+  eventLogService: IEventLogService;
 }) => <
-  TParams extends RuleParams & { index: string[] | undefined },
+  TParams extends RuleParams & { index?: string[] | undefined },
   TAlertInstanceContext extends AlertInstanceContext,
   TServices extends PersistenceServices<TAlertInstanceContext>,
   TState extends AlertTypeState
@@ -123,8 +126,9 @@ export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
   lists: SetupPlugins['lists'];
   logger: Logger;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
+  config: ConfigType;
+  ml?: SetupPlugins['ml'];
   ruleDataClient: IRuleDataClient;
   version: string;
-  ruleDataService: IRuleDataPluginService;
+  eventLogService: IEventLogService;
 }

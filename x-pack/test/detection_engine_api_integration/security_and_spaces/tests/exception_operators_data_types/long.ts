@@ -33,11 +33,19 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('Rule exception operators for data type long', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/long');
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/long_as_string');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/long');
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/long_as_string');
+    });
+
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       await createListsIndex(supertest);
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/long');
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/long_as_string');
     });
 
     afterEach(async () => {
@@ -45,8 +53,6 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllAlerts(supertest);
       await deleteAllExceptions(es);
       await deleteListsIndex(supertest);
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/long');
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/long_as_string');
     });
 
     describe('"is" operator', () => {

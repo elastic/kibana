@@ -56,12 +56,8 @@ const confirmModalOptionsDelete = {
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const {
-      uiSettings,
-      overlays,
-      chrome,
-      data,
-    } = useKibana<IndexPatternManagmentContext>().services;
+    const { uiSettings, overlays, chrome, data } =
+      useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
@@ -88,7 +84,7 @@ export const EditIndexPattern = withRouter(
     const removePattern = () => {
       async function doRemove() {
         if (indexPattern.id === defaultIndex) {
-          const indexPatterns = await data.indexPatterns.getIdsWithTitle();
+          const indexPatterns = await data.dataViews.getIdsWithTitle();
           uiSettings.remove('defaultIndex');
           const otherPatterns = filter(indexPatterns, (pattern) => {
             return pattern.id !== indexPattern.id;
@@ -99,7 +95,7 @@ export const EditIndexPattern = withRouter(
           }
         }
         if (indexPattern.id) {
-          Promise.resolve(data.indexPatterns.delete(indexPattern.id)).then(function () {
+          Promise.resolve(data.dataViews.delete(indexPattern.id)).then(function () {
             history.push('');
           });
         }

@@ -10,7 +10,7 @@ import uuid from 'uuid/v4';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { BoundsFilters, GeoJsonWithMeta } from '../vector_source';
+import { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
 import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import {
   FIELD_ORIGIN,
@@ -25,7 +25,6 @@ import {
   MapExtent,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -42,7 +41,8 @@ export const sourceTitle = i18n.translate(
 
 export class MVTSingleLayerVectorSource
   extends AbstractSource
-  implements ITiledSingleLayerVectorSource {
+  implements ITiledSingleLayerVectorSource
+{
   static createDescriptor({
     urlTemplate,
     layerName,
@@ -190,13 +190,13 @@ export class MVTSingleLayerVectorSource
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;
   }
 
-  getSyncMeta(): VectorSourceSyncMeta {
+  getSyncMeta(): null {
     return null;
   }
 
@@ -238,6 +238,18 @@ export class MVTSingleLayerVectorSource
 
   async supportsFeatureEditing(): Promise<boolean> {
     return false;
+  }
+
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
+    return {};
+  }
+
+  showJoinEditor(): boolean {
+    return false;
+  }
+
+  getJoinsDisabledReason(): string | null {
+    return null;
   }
 }
 

@@ -38,9 +38,10 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const [pageIndex, setPageIndex] = useState(0);
   // @ts-expect-error update types
   const [pageSize, setPageSize] = useState(50);
-  const expired = useMemo(() => (!expirationDate ? false : new Date(expirationDate) < new Date()), [
-    expirationDate,
-  ]);
+  const expired = useMemo(
+    () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
+    [expirationDate]
+  );
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
   const {

@@ -10,6 +10,7 @@ import { UMServerLibs } from '../../lib';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../../adapters';
 import type { UptimeRouter } from '../../../types';
 import type { IRuleDataClient } from '../../../../../rule_registry/server';
+import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 import { getUptimeESMockClient } from '../../requests/helper';
 import { alertsMock } from '../../../../../alerting/server/mocks';
 import { DynamicSettings } from '../../../../common/runtime_types';
@@ -42,11 +43,11 @@ export const createRuleTypeMocks = (
     certExpirationThreshold: DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
   }
 ) => {
-  const loggerMock = ({
+  const loggerMock = {
     debug: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown) as Logger;
+  } as unknown as Logger;
 
   const scheduleActions = jest.fn();
   const replaceState = jest.fn();
@@ -61,20 +62,9 @@ export const createRuleTypeMocks = (
   return {
     dependencies: {
       logger: loggerMock,
-      ruleDataClient: ({
-        getReader: () => {
-          return {
-            search: jest.fn(),
-          };
-        },
-        getWriter: () => {
-          return {
-            bulk: jest.fn(),
-          };
-        },
-        isWriteEnabled: jest.fn(() => true),
-        indexName: '.alerts-observability.synthetics.alerts',
-      } as unknown) as IRuleDataClient,
+      ruleDataClient: ruleRegistryMocks.createRuleDataClient(
+        '.alerts-observability.uptime.alerts'
+      ) as IRuleDataClient,
     },
     services,
     scheduleActions,

@@ -16,6 +16,8 @@ import {
   CrawlerDomainValidationStep,
   CrawlRequestFromServer,
   CrawlRequest,
+  CrawlEventFromServer,
+  CrawlEvent,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -29,6 +31,9 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
     crawl_rules: crawlRules,
     default_crawl_rule: defaultCrawlRule,
     entry_points: entryPoints,
+    deduplication_enabled: deduplicationEnabled,
+    deduplication_fields: deduplicationFields,
+    available_deduplication_fields: availableDeduplicationFields,
   } = payload;
 
   const clientPayload: CrawlerDomain = {
@@ -39,6 +44,9 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
     crawlRules,
     sitemaps,
     entryPoints,
+    deduplicationEnabled,
+    deduplicationFields,
+    availableDeduplicationFields,
   };
 
   if (lastCrawl) {
@@ -70,11 +78,34 @@ export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer)
   };
 }
 
+export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEvent {
+  const {
+    id,
+    stage,
+    status,
+    created_at: createdAt,
+    began_at: beganAt,
+    completed_at: completedAt,
+  } = event;
+
+  return {
+    id,
+    stage,
+    status,
+    createdAt,
+    beganAt,
+    completedAt,
+  };
+}
+
 export function crawlerDataServerToClient(payload: CrawlerDataFromServer): CrawlerData {
-  const { domains } = payload;
+  const { domains, events, most_recent_crawl_request: mostRecentCrawlRequest } = payload;
 
   return {
     domains: domains.map((domain) => crawlerDomainServerToClient(domain)),
+    events: events.map((event) => crawlerEventServerToClient(event)),
+    mostRecentCrawlRequest:
+      mostRecentCrawlRequest && crawlRequestServerToClient(mostRecentCrawlRequest),
   };
 }
 
@@ -93,7 +124,7 @@ export function crawlDomainValidationToResult(
 
   if (warningResult) {
     return {
-      state: 'invalid',
+      state: 'warning',
       blockingFailure: !data.valid,
       message: warningResult.comment,
     };

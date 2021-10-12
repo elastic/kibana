@@ -79,9 +79,9 @@ describe('kuery functions', () => {
         const result = geoPolygon.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('geo_polygon');
-        expect(result.geo_polygon.geo).toHaveProperty('points');
+        expect((result.geo_polygon as any).geo).toHaveProperty('points');
 
-        (result.geo_polygon.geo as any).points.forEach((point: any, index: number) => {
+        (result.geo_polygon as any).geo.points.forEach((point: any, index: number) => {
           const expectedLatLon = `${points[index].lat}, ${points[index].lon}`;
 
           expect(point).toBe(expectedLatLon);
@@ -93,9 +93,9 @@ describe('kuery functions', () => {
         const result = geoPolygon.toElasticsearchQuery(node);
 
         expect(result).toHaveProperty('geo_polygon');
-        expect(result.geo_polygon.geo).toHaveProperty('points');
+        expect((result.geo_polygon as any).geo).toHaveProperty('points');
 
-        (result.geo_polygon.geo as any).points.forEach((point: any, index: number) => {
+        (result.geo_polygon as any).geo.points.forEach((point: any, index: number) => {
           const expectedLatLon = `${points[index].lat}, ${points[index].lon}`;
 
           expect(point).toBe(expectedLatLon);
@@ -106,7 +106,7 @@ describe('kuery functions', () => {
         const node = nodeTypes.function.buildNode('geoPolygon', 'geo', points);
         const result = geoPolygon.toElasticsearchQuery(node, indexPattern);
 
-        expect(result.geo_polygon.ignore_unmapped).toBe(true);
+        expect((result.geo_polygon as any).ignore_unmapped).toBe(true);
       });
 
       test('should throw an error for scripted fields', () => {
@@ -126,7 +126,7 @@ describe('kuery functions', () => {
         );
 
         expect(result).toHaveProperty('geo_polygon');
-        expect(result.geo_polygon['nestedField.geo']).toBeDefined();
+        expect((result.geo_polygon as any)['nestedField.geo']).toBeDefined();
       });
     });
   });

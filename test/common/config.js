@@ -28,7 +28,6 @@ export default function () {
       buildArgs: [],
       sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
-        '--logging.json=false',
         `--server.port=${kbnTestConfig.getPort()}`,
         '--status.allowAnonymous=true',
         // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
@@ -41,7 +40,6 @@ export default function () {
         )}`,
         `--elasticsearch.username=${kibanaServerTestUser.username}`,
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
-        `--home.disableWelcomeScreen=true`,
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
         `--security.showInsecureClusterWarning=false`,

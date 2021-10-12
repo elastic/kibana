@@ -27,7 +27,10 @@ describe('request logging', () => {
   describe('http server response logging', () => {
     describe('configuration', () => {
       it('does not log with a default config', async () => {
-        const root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+        const root = kbnTestServer.createRoot({
+          plugins: { initialize: false },
+          elasticsearch: { skipStartupConnectionCheck: true },
+        });
         await root.preboot();
         const { http } = await root.setup();
 
@@ -48,7 +51,6 @@ describe('request logging', () => {
       it('logs at the correct level and with the correct context', async () => {
         const root = kbnTestServer.createRoot({
           logging: {
-            silent: true,
             appenders: {
               'test-console': {
                 type: 'console',
@@ -69,6 +71,7 @@ describe('request logging', () => {
           plugins: {
             initialize: false,
           },
+          elasticsearch: { skipStartupConnectionCheck: true },
         });
         await root.preboot();
         const { http } = await root.setup();
@@ -95,7 +98,6 @@ describe('request logging', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       const config = {
         logging: {
-          silent: true,
           appenders: {
             'test-console': {
               type: 'console',
@@ -116,6 +118,7 @@ describe('request logging', () => {
         plugins: {
           initialize: false,
         },
+        elasticsearch: { skipStartupConnectionCheck: true },
       };
 
       beforeEach(() => {
@@ -295,7 +298,6 @@ describe('request logging', () => {
         it('filters sensitive request headers when RewriteAppender is configured', async () => {
           root = kbnTestServer.createRoot({
             logging: {
-              silent: true,
               appenders: {
                 'test-console': {
                   type: 'console',
@@ -327,6 +329,7 @@ describe('request logging', () => {
             plugins: {
               initialize: false,
             },
+            elasticsearch: { skipStartupConnectionCheck: true },
           });
           await root.preboot();
           const { http } = await root.setup();
@@ -396,7 +399,6 @@ describe('request logging', () => {
         it('filters sensitive response headers when RewriteAppender is configured', async () => {
           root = kbnTestServer.createRoot({
             logging: {
-              silent: true,
               appenders: {
                 'test-console': {
                   type: 'console',
@@ -426,6 +428,7 @@ describe('request logging', () => {
             plugins: {
               initialize: false,
             },
+            elasticsearch: { skipStartupConnectionCheck: true },
           });
           await root.preboot();
           const { http } = await root.setup();

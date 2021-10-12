@@ -23,13 +23,14 @@ import type {
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { FleetStart } from '../../fleet/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
 } from '../../alerting/public';
 import type { FeaturesPluginSetup } from '../../features/public';
+import type { FleetStart } from '../../fleet/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { MapsStartApi } from '../../maps/public';
 import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
@@ -45,14 +46,14 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
-import { featureCatalogueEntry } from './featureCatalogueEntry';
 import {
   getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,
 } from './components/fleet_integration';
+import { getLazyApmAgentsTabExtension } from './components/fleet_integration/lazy_apm_agents_tab_extension';
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
-
+import { featureCatalogueEntry } from './featureCatalogueEntry';
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
 export type ApmPluginStart = void;
@@ -73,6 +74,7 @@ export interface ApmPluginStartDeps {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   home: void;
+  inspector: InspectorPluginStart;
   licensing: void;
   maps?: MapsStartApi;
   ml?: MlPluginStart;
@@ -91,13 +93,12 @@ const serviceMapTitle = i18n.translate('xpack.apm.navigation.serviceMapTitle', {
   defaultMessage: 'Service Map',
 });
 
-const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
-  defaultMessage: 'Backends',
-});
-
-const newBadgeLabel = i18n.translate('xpack.apm.navigation.newBadge', {
-  defaultMessage: 'NEW',
-});
+const dependenciesTitle = i18n.translate(
+  'xpack.apm.navigation.dependenciesTitle',
+  {
+    defaultMessage: 'Dependencies',
+  }
+);
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
@@ -128,10 +129,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                   { label: servicesTitle, app: 'apm', path: '/services' },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
                   {
-                    label: backendsTitle,
+                    label: dependenciesTitle,
                     app: 'apm',
                     path: '/backends',
-                    sideBadgeLabel: newBadgeLabel,
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -272,7 +272,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         { id: 'services', title: servicesTitle, path: '/services' },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
-        { id: 'backends', title: backendsTitle, path: '/backends' },
+        { id: 'backends', title: dependenciesTitle, path: '/backends' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
@@ -368,6 +368,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         package: 'apm',
         view: 'package-policy-edit',
         Component: getLazyAPMPolicyEditExtension(),
+      });
+
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'package-policy-edit-tabs',
+        tabs: [
+          { title: 'APM Agents', Component: getLazyApmAgentsTabExtension() },
+        ],
       });
     }
   }

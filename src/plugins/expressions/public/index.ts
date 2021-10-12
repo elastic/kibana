@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/109902
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import './index.scss';
 
 import { PluginInitializerContext } from '../../../core/public';
@@ -94,7 +97,6 @@ export {
   PointSeriesRow,
   Range,
   SerializedDatatable,
-  SerializedFieldFormat,
   Style,
   TextAlignment,
   TextDecoration,
@@ -108,4 +110,5 @@ export {
   ExpressionsServiceStart,
   TablesAdapter,
   ExpressionsInspectorAdapter,
+  createDefaultInspectorAdapters,
 } from '../common';

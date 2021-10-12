@@ -1,5 +1,9 @@
 {
   "id": "securitySolution",
+  "owner": {
+    "name": "Security solution",
+    "githubTeam": "security-solution"
+  },
   "version": "8.0.0",
   "extraPublicDirs": ["common"],
   "kibanaVersion": "kibana",
@@ -8,15 +12,16 @@
     "actions",
     "alerting",
     "cases",
-    "ruleRegistry",
     "data",
     "dataEnhanced",
     "embeddable",
+    "eventLog",
     "features",
-    "taskManager",
     "inspector",
     "licensing",
     "maps",
+    "ruleRegistry",
+    "taskManager",
     "timelines",
     "triggersActionsUi",
     "uiActions"
@@ -30,6 +35,7 @@
     "security",
     "spaces",
     "usageCollection",
+    "lens",
     "lists",
     "home",
     "telemetry",

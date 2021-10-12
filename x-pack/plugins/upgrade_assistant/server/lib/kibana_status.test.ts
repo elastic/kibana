@@ -13,6 +13,7 @@ import { getKibanaUpgradeStatus } from './kibana_status';
 
 const mockKibanaDeprecations: DomainDeprecationDetails[] = [
   {
+    title: 'mock-deprecation-title',
     correctiveActions: {
       manualSteps: [
         'Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.',

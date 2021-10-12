@@ -47,6 +47,7 @@ interface Props {
   helpText: string;
   image?: string | null;
   stagedImage?: string | null;
+  buttonLoading: boolean;
   stageImage(image: string | null): void;
   saveImage(): void;
   resetImage(): void;
@@ -58,6 +59,7 @@ export const BrandingSection: React.FC<Props> = ({
   helpText,
   image,
   stagedImage,
+  buttonLoading,
   stageImage,
   saveImage,
   resetImage,
@@ -81,7 +83,7 @@ export const BrandingSection: React.FC<Props> = ({
 
   const resetConfirmModal = (
     <EuiConfirmModal
-      title={isLogo ? RESET_IMAGE_TITLE : RESET_IMAGE_TITLE}
+      title={RESET_IMAGE_TITLE}
       onCancel={closeDeleteModal}
       onConfirm={() => {
         resetImage();
@@ -121,6 +123,7 @@ export const BrandingSection: React.FC<Props> = ({
           <img
             src={`data:image/png;base64,${image || defaultImage}`}
             alt={`${BRAND_TEXT} ${imageType}`}
+            height={32} // Same as icon and logo height in the Search experience
           />
           <EuiSpacer size="m" />
           <EuiFilePicker
@@ -133,7 +136,12 @@ export const BrandingSection: React.FC<Props> = ({
       <EuiFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton disabled={!stagedImage} color="primary" onClick={saveImage}>
+            <EuiButton
+              isLoading={buttonLoading}
+              disabled={!stagedImage}
+              color="primary"
+              onClick={saveImage}
+            >
               {SAVE_BUTTON_LABEL}
             </EuiButton>
           </EuiFlexItem>

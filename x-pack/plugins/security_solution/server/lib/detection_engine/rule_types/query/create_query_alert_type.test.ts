@@ -14,6 +14,7 @@ import { allowedExperimentalValues } from '../../../../../common/experimental_fe
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -22,25 +23,18 @@ jest.mock('../utils/get_list_client', () => ({
   }),
 }));
 
-jest.mock('../../signals/rule_status_service', () => ({
-  ruleStatusServiceFactory: () => ({
-    goingToRun: jest.fn(),
-    success: jest.fn(),
-    partialFailure: jest.fn(),
-    error: jest.fn(),
-  }),
-}));
+jest.mock('../../rule_execution_log/rule_execution_log_client');
 
-describe('Custom query alerts', () => {
+describe('Custom Query Alerts', () => {
   it('does not send an alert when no events found', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
     const queryAlertType = createQueryAlertType({
       experimentalFeatures: allowedExperimentalValues,
       lists: dependencies.lists,
       logger: dependencies.logger,
-      mergeStrategy: 'allFields',
+      config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
+      eventLogService: dependencies.eventLogService,
       version: '1.0.0',
     });
 
@@ -85,9 +79,9 @@ describe('Custom query alerts', () => {
       experimentalFeatures: allowedExperimentalValues,
       lists: dependencies.lists,
       logger: dependencies.logger,
-      mergeStrategy: 'allFields',
+      config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
+      eventLogService: dependencies.eventLogService,
       version: '1.0.0',
     });
 

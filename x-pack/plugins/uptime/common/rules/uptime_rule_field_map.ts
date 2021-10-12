@@ -16,9 +16,6 @@ export const uptimeRuleFieldMap = {
   'observer.geo.name': {
     type: 'keyword',
   },
-  reason: {
-    type: 'text',
-  },
   // monitor status alert fields
   'error.message': {
     type: 'text',

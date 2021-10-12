@@ -121,7 +121,7 @@ export class HeadlessChromiumDriver {
         (key: string, value: unknown) => {
           Object.defineProperty(window, key, {
             configurable: false,
-            writable: false,
+            writable: true,
             enumerable: true,
             value,
           });
@@ -160,7 +160,7 @@ export class HeadlessChromiumDriver {
   /*
    * Call Page.screenshot and return a base64-encoded string of the image
    */
-  public async screenshot(elementPosition: ElementPosition): Promise<string | void> {
+  public async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
       clip: {
@@ -171,10 +171,15 @@ export class HeadlessChromiumDriver {
       },
     });
 
-    if (screenshot) {
-      return screenshot.toString('base64');
+    if (Buffer.isBuffer(screenshot)) {
+      return screenshot;
     }
-    return screenshot;
+
+    if (typeof screenshot === 'string') {
+      return Buffer.from(screenshot, 'base64');
+    }
+
+    return undefined;
   }
 
   public async evaluate(

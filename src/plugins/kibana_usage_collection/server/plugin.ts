@@ -21,7 +21,7 @@ import type {
   Logger,
   CoreUsageDataStart,
 } from 'src/core/server';
-import { SavedObjectsClient } from '../../../core/server';
+import { SavedObjectsClient, EventLoopDelaysMonitor } from '../../../core/server';
 import {
   startTrackingEventLoopDelaysUsage,
   startTrackingEventLoopDelaysThreshold,
@@ -56,6 +56,7 @@ type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
 export class KibanaUsageCollectionPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly legacyConfig$: Observable<SharedGlobalConfig>;
+  private readonly instanceUuid: string;
   private savedObjectsClient?: ISavedObjectsRepository;
   private uiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
@@ -68,11 +69,13 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.metric$ = new Subject<OpsMetrics>();
     this.pluginStop$ = new Subject();
+    this.instanceUuid = initializerContext.env.instanceUuid;
   }
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
     usageCollection.createUsageCounter('uiCounters');
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
+    coreSetup.coreUsageData.registerUsageCounter(usageCollection.createUsageCounter('core'));
     this.registerUsageCollectors(
       usageCollection,
       coreSetup,
@@ -92,11 +95,17 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     core.metrics.getOpsMetrics$().subscribe(this.metric$);
     this.coreUsageData = core.coreUsageData;
-    startTrackingEventLoopDelaysUsage(this.savedObjectsClient, this.pluginStop$.asObservable());
+    startTrackingEventLoopDelaysUsage(
+      this.savedObjectsClient,
+      this.instanceUuid,
+      this.pluginStop$.asObservable(),
+      new EventLoopDelaysMonitor()
+    );
     startTrackingEventLoopDelaysThreshold(
       this.eventLoopUsageCounter,
       this.logger,
-      this.pluginStop$.asObservable()
+      this.pluginStop$.asObservable(),
+      new EventLoopDelaysMonitor()
     );
   }
 

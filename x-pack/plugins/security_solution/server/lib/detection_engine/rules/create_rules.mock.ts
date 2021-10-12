@@ -8,7 +8,8 @@
 import { CreateRulesOptions } from './types';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 
-export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
+export const getCreateRulesOptionsMock = (isRuleRegistryEnabled: boolean): CreateRulesOptions => ({
+  isRuleRegistryEnabled,
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
@@ -51,6 +52,7 @@ export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   threatIndicatorPath: undefined,
   threshold: undefined,
   timestampOverride: undefined,
+  throttle: null,
   to: 'now',
   type: 'query',
   references: ['http://www.example.com'],
@@ -60,7 +62,10 @@ export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   actions: [],
 });
 
-export const getCreateMlRulesOptionsMock = (): CreateRulesOptions => ({
+export const getCreateMlRulesOptionsMock = (
+  isRuleRegistryEnabled: boolean
+): CreateRulesOptions => ({
+  isRuleRegistryEnabled,
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
@@ -103,6 +108,7 @@ export const getCreateMlRulesOptionsMock = (): CreateRulesOptions => ({
   itemsPerSearch: undefined,
   threshold: undefined,
   timestampOverride: undefined,
+  throttle: null,
   to: 'now',
   type: 'machine_learning',
   references: ['http://www.example.com'],

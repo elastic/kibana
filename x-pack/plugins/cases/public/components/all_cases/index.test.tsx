@@ -144,7 +144,7 @@ describe('AllCasesGeneric', () => {
     filterStatus: CaseStatuses.open,
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
-    showActions: true,
+    isSelectorView: false,
     userCanCrud: true,
   };
 
@@ -377,7 +377,7 @@ describe('AllCasesGeneric', () => {
         isLoadingCases: [],
         filterStatus: CaseStatuses.open,
         handleIsLoading: jest.fn(),
-        showActions: false,
+        isSelectorView: true,
         userCanCrud: true,
       })
     );
@@ -925,5 +925,28 @@ describe('AllCasesGeneric', () => {
         wrapper.find('[data-test-subj="configure-case-button"]').first().prop('isDisabled')
       ).toBeFalsy();
     });
+  });
+
+  it('should not render status when isSelectorView=true', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases {...defaultAllCasesProps} isSelectorView={true} />
+      </TestProviders>
+    );
+
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
+      useCasesColumns({
+        ...defaultColumnArgs,
+        isSelectorView: true,
+      })
+    );
+
+    expect(result.current.find((i) => i.name === 'Status')).toBeFalsy();
+
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="cases-table"]').exists()).toBeTruthy();
+    });
+
+    expect(wrapper.find('[data-test-subj="case-view-status-dropdown"]').exists()).toBeFalsy();
   });
 });

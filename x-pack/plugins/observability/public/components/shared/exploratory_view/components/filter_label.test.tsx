@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { mockAppIndexPattern, mockIndexPattern, render } from '../rtl_helpers';
+import { mockAppIndexPattern, mockIndexPattern, mockUxSeries, render } from '../rtl_helpers';
 import { FilterLabel } from './filter_label';
 import * as useSeriesHook from '../hooks/use_series_filters';
 import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
@@ -27,9 +27,10 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-over-time'}
+        seriesId={0}
         removeFilter={jest.fn()}
         indexPattern={mockIndexPattern}
+        series={mockUxSeries}
       />
     );
 
@@ -51,9 +52,10 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-over-time'}
+        seriesId={0}
         removeFilter={removeFilter}
         indexPattern={mockIndexPattern}
+        series={mockUxSeries}
       />
     );
 
@@ -74,9 +76,10 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-over-time'}
+        seriesId={0}
         removeFilter={removeFilter}
         indexPattern={mockIndexPattern}
+        series={mockUxSeries}
       />
     );
 
@@ -100,9 +103,10 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={true}
-        seriesId={'kpi-over-time'}
+        seriesId={0}
         removeFilter={jest.fn()}
         indexPattern={mockIndexPattern}
+        series={mockUxSeries}
       />
     );
 

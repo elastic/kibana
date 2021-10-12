@@ -35,6 +35,7 @@ describe('transform rule for export', () => {
         apiKey: '4tndskbuhewotw4klrhgjewrt9u',
         apiKeyOwner: 'me',
         throttle: null,
+        legacyId: '1',
         notifyWhen: 'onActionGroupChange',
         muteAll: false,
         mutedInstanceIds: [],
@@ -66,6 +67,7 @@ describe('transform rule for export', () => {
         apiKey: null,
         apiKeyOwner: null,
         throttle: null,
+        legacyId: '2',
         notifyWhen: 'onActionGroupChange',
         muteAll: false,
         mutedInstanceIds: [],
@@ -90,6 +92,7 @@ describe('transform rule for export', () => {
           apiKey: null,
           apiKeyOwner: null,
           scheduledTaskId: null,
+          legacyId: null,
           executionStatus: {
             status: 'pending',
             lastExecutionDate: '2020-08-20T19:23:38Z',

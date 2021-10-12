@@ -8,8 +8,11 @@
 import { extractExceptionsList } from './extract_exceptions_list';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
-import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils';
+import {
+  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+} from '@kbn/securitysolution-list-constants';
+import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils/constants';
 
 describe('extract_exceptions_list', () => {
   type FuncReturn = ReturnType<typeof extractExceptionsList>;
@@ -34,7 +37,7 @@ describe('extract_exceptions_list', () => {
   test('logs expect error message if the exceptionsList is undefined', () => {
     extractExceptionsList({
       logger,
-      exceptionsList: (undefined as unknown) as RuleParams['exceptionsList'],
+      exceptionsList: undefined as unknown as RuleParams['exceptionsList'],
     });
     expect(logger.error).toBeCalledWith(
       'Exception list is null when it never should be. This indicates potentially that saved object migrations did not run correctly. Returning empty saved object reference'
@@ -48,21 +51,21 @@ describe('extract_exceptions_list', () => {
       {
         id: '123',
         name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
-        type: EXCEPTION_LIST_NAMESPACE,
+        type: EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
       },
     ]);
   });
 
-  test('It returns two exception lists transformed into a saved object references', () => {
+  test('It returns 2 exception lists transformed into a saved object references', () => {
     const twoInputs: RuleParams['exceptionsList'] = [
       mockExceptionsList()[0],
-      { ...mockExceptionsList()[0], id: '976' },
+      { ...mockExceptionsList()[0], id: '976', namespace_type: 'single' },
     ];
     expect(extractExceptionsList({ logger, exceptionsList: twoInputs })).toEqual<FuncReturn>([
       {
         id: '123',
         name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
-        type: EXCEPTION_LIST_NAMESPACE,
+        type: EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
       },
       {
         id: '976',

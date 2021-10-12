@@ -54,7 +54,8 @@ export const ExpandableHostDetailsPageLink = ({ hostName }: ExpandableHostProps)
 export const ExpandableHostDetails = ({
   contextID,
   hostName,
-}: ExpandableHostProps & { contextID: string }) => {
+  isDraggable = false,
+}: ExpandableHostProps & { contextID: string; isDraggable?: boolean }) => {
   const { to, from, isInitializing } = useGlobalTime();
   const { docValueFields } = useSourcererScope();
   /*
@@ -92,6 +93,7 @@ export const ExpandableHostDetails = ({
           isInDetailsSidePanel
           data={hostOverview as HostItem}
           anomaliesData={anomaliesData}
+          isDraggable={isDraggable}
           isLoadingAnomaliesData={isLoadingAnomaliesData}
           indexNames={allPatterns}
           loading={loading}

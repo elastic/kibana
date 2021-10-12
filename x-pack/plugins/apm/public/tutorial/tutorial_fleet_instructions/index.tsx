@@ -29,7 +29,7 @@ const CentralizedContainer = styled.div`
   align-items: center;
 `;
 
-type APIResponseType = APIReturnType<'GET /api/apm/fleet/has_data'>;
+type APIResponseType = APIReturnType<'GET /internal/apm/fleet/has_data'>;
 
 function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
   const [data, setData] = useState<APIResponseType | undefined>();
@@ -39,7 +39,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const response = await http.get('/api/apm/fleet/has_data');
+        const response = await http.get('/internal/apm/fleet/has_data');
         setData(response as APIResponseType);
       } catch (e) {
         setIsLoading(false);
@@ -80,20 +80,20 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
             display="plain"
             textAlign="left"
             title={i18n.translate('xpack.apm.tutorial.apmServer.fleet.title', {
-              defaultMessage: 'Elastic APM (beta) now available in Fleet!',
+              defaultMessage: 'Elastic APM now available in Fleet!',
             })}
             description={i18n.translate(
               'xpack.apm.tutorial.apmServer.fleet.message',
               {
                 defaultMessage:
-                  'The APM integration installs Elasticsearch templates and Ingest Node pipelines for APM data.',
+                  'The APM integration installs Elasticsearch templates and ingest pipelines for APM data.',
               }
             )}
             footer={
               <EuiButton
                 iconType="analyzeEvent"
                 color="secondary"
-                href={`${basePath}/app/integrations#/detail/apm-0.3.0/overview`}
+                href={`${basePath}/app/integrations#/detail/apm-0.4.0/overview`}
               >
                 {i18n.translate(
                   'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',
@@ -107,7 +107,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
           <EuiImage
-            src={`${basePath}/plugins/apm/assets/${
+            src={`${basePath}/plugins/kibanaReact/assets/${
               isDarkTheme
                 ? 'illustration_integrations_darkmode.svg'
                 : 'illustration_integrations_lightmode.svg'

@@ -39,13 +39,8 @@ interface FactoryGroup {
 }
 
 export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
-  const {
-    core,
-    embeddable,
-    visualizations,
-    usageCollection,
-    uiSettings,
-  } = useKibana<DashboardAppServices>().services;
+  const { core, embeddable, visualizations, usageCollection, uiSettings } =
+    useKibana<DashboardAppServices>().services;
 
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
@@ -133,7 +128,10 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
       name: titleInWizard || title,
       icon: icon as string,
       onClick:
-        group === VisGroups.AGGBASED ? createNewAggsBasedVis(visType) : createNewVisType(visType),
+        // not all the agg-based visualizations need to be created via the wizard
+        group === VisGroups.AGGBASED && visType.options.showIndexSelection
+          ? createNewAggsBasedVis(visType)
+          : createNewVisType(visType),
       'data-test-subj': `visType-${name}`,
       toolTipContent: description,
     };

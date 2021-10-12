@@ -97,7 +97,7 @@ export class MockRouter {
  */
 // const mockRouter = new MockRouter({
 //   method: 'get',
-//   path: '/api/app_search/test',
+//   path: '/internal/app_search/test',
 // });
 //
 // beforeEach(() => {

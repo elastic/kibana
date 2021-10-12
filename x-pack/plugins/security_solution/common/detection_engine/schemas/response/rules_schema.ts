@@ -75,6 +75,7 @@ import {
   license,
   rule_name_override,
   timestamp_override,
+  namespace,
 } from '../common/schemas';
 
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
@@ -174,7 +175,9 @@ export const partialRulesSchema = t.partial({
   filters,
   meta,
   index,
+  namespace,
   note,
+  uuid: id, // Move to 'required' post-migration
 });
 
 /**

@@ -8,3 +8,4 @@
 
 export * from './url_service';
 export * from './locators';
+export * from './short_urls';

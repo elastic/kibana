@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { safeDump } from 'js-yaml';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -54,7 +55,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
       </EuiCallOut>
     ) : (
       <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
-        {fullAgentPolicyToYaml(yamlData!.item)}
+        {fullAgentPolicyToYaml(yamlData!.item, safeDump)}
       </EuiCodeBlock>
     );
 

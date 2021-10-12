@@ -134,5 +134,10 @@ const validateType = ({ name, management }: SavedObjectsType) => {
         `Type ${name}: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport'`
       );
     }
+    if (management.visibleInManagement !== undefined && !management.importableAndExportable) {
+      throw new Error(
+        `Type ${name}: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement'`
+      );
+    }
   }
 };

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { IndexPatternBase, KueryNode, LatLon } from '../..';
+import { IndexPatternBase, KueryNode, KueryQueryOptions, LatLon } from '../..';
 import { LiteralTypeBuildNode } from '../node_types/types';
 
 export function buildNodeParams(fieldName: string, points: LatLon[]) {
@@ -26,9 +27,9 @@ export function buildNodeParams(fieldName: string, points: LatLon[]) {
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IndexPatternBase,
-  config: Record<string, any> = {},
+  config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-) {
+): estypes.QueryDslQueryContainer {
   const [fieldNameArg, ...points] = node.arguments;
   const fullFieldNameArg = {
     ...fieldNameArg,
@@ -48,6 +49,7 @@ export function toElasticsearchQuery(
   }
 
   return {
+    // @ts-expect-error @elastic/elasticsearch doesn't support ignore_unmapped in QueryDslGeoPolygonQuery
     geo_polygon: {
       [fieldName]: queryParams,
       ignore_unmapped: true,

@@ -12,17 +12,15 @@ pageLoadAssetSize:
   crossClusterReplication: 65408
   dashboard: 374194
   dashboardEnhanced: 65646
-  dashboardMode: 22716
   data: 824229
   dataEnhanced: 50420
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
-  embeddable: 312874
+  embeddable: 99999
   embeddableEnhanced: 41145
   enterpriseSearch: 35741
   esUiShared: 326654
-  expressions: 224136
   features: 21723
   fieldFormats: 92628
   globalSearch: 29696
@@ -36,7 +34,7 @@ pageLoadAssetSize:
   indexPatternManagement: 28222
   indexPatternEditor: 25000
   infra: 184320
-  fleet: 465774
+  fleet: 250000
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -50,15 +48,13 @@ pageLoadAssetSize:
   lists: 22900
   logstash: 53548
   management: 46112
-  maps: 80000
-  mapsLegacy: 87859
+  maps: 90000
   ml: 82187
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
   observability: 89709
   painlessLab: 179748
-  regionMap: 66098
   remoteClusters: 51327
   reporting: 183418
   rollup: 97204
@@ -68,19 +64,15 @@ pageLoadAssetSize:
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
   security: 95864
-  securityOss: 30806
-  securitySolution: 217673
   share: 99061
   snapshotRestore: 79032
   spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
-  tileMap: 65337
-  timelion: 29920
   transform: 41007
   triggersActionsUi: 100000
   uiActions: 97717
-  uiActionsEnhanced: 313011
+  uiActionsEnhanced: 32000
   upgradeAssistant: 81241
   uptime: 40825
   urlDrilldown: 70674
@@ -88,7 +80,6 @@ pageLoadAssetSize:
   usageCollection: 39762
   visDefaultEditor: 50178
   visTypeMarkdown: 30896
-  visTypeMetric: 42790
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
@@ -102,7 +93,6 @@ pageLoadAssetSize:
   runtimeFields: 41752
   stackAlerts: 29684
   presentationUtil: 94301
-  spacesOss: 18817
   indexPatternFieldEditor: 50000
   osquery: 107090
   fileUpload: 25664
@@ -119,4 +109,11 @@ pageLoadAssetSize:
   expressionImage: 19288
   expressionMetric: 22238
   expressionShape: 34008
-  interactiveSetup: 18532
+  interactiveSetup: 80000
+  expressionTagcloud: 27505
+  expressions: 239290
+  securitySolution: 231753
+  customIntegrations: 28810
+  expressionMetricVis: 23121
+  visTypeMetric: 23332
+  dataViews: 42000

@@ -6,19 +6,19 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { createSearchItems } from './new_job_utils';
 
 describe('createSearchItems', () => {
   const kibanaConfig = {} as IUiSettingsClient;
-  const indexPattern = ({
+  const indexPattern = {
     fields: [],
-  } as unknown) as IIndexPattern;
+  } as unknown as IIndexPattern;
 
-  let savedSearch = ({} as unknown) as SavedSearchSavedObject;
+  let savedSearch = {} as unknown as SavedSearchSavedObject;
   beforeEach(() => {
-    savedSearch = ({
+    savedSearch = {
       client: {
         http: {
           basePath: {
@@ -53,7 +53,7 @@ describe('createSearchItems', () => {
           id: '7e252840-bd27-11ea-8a6c-75d1a0bd08ab',
         },
       ],
-    } as unknown) as SavedSearchSavedObject;
+    } as unknown as SavedSearchSavedObject;
   });
 
   test('should match index pattern', () => {

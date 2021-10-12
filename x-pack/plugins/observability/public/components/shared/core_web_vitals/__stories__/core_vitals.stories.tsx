@@ -13,9 +13,9 @@ import { createKibanaReactContext } from '../../../../../../../../src/plugins/ki
 import { CoreVitalItem } from '../core_vital_item';
 import { LCP_HELP_LABEL, LCP_LABEL } from '../translations';
 
-const KibanaReactContext = createKibanaReactContext(({
+const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => {}, get$: () => new Observable() },
-} as unknown) as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>);
 
 export default {
   title: 'app/RumDashboard/CoreVitalItem',

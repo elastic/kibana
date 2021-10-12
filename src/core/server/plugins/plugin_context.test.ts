@@ -38,6 +38,10 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     optionalPlugins: ['some-optional-dep'],
     server: true,
     ui: true,
+    owner: {
+      name: 'Core',
+      githubTeam: 'kibana-core',
+    },
     ...manifestProps,
   };
 }

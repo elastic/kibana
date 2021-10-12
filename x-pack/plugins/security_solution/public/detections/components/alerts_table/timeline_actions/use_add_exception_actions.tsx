@@ -5,25 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { EuiContextMenuItem } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
-
-interface ExceptionActions {
-  name: string;
-  onClick: () => void;
-  disabled: boolean;
-}
-
-interface UseExceptionActions {
-  disabledAddEndpointException: boolean;
-  disabledAddException: boolean;
-  exceptionActions: ExceptionActions[];
-  handleEndpointExceptionModal: () => void;
-  handleDetectionExceptionModal: () => void;
-}
 
 interface UseExceptionActionProps {
   isEndpointAlert: boolean;
@@ -33,7 +20,7 @@ interface UseExceptionActionProps {
 export const useExceptionActions = ({
   isEndpointAlert,
   onAddExceptionTypeClick,
-}: UseExceptionActionProps): UseExceptionActions => {
+}: UseExceptionActionProps) => {
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
 
   const handleDetectionExceptionModal = useCallback(() => {
@@ -47,20 +34,25 @@ export const useExceptionActions = ({
   const disabledAddEndpointException = !canUserCRUD || !hasIndexWrite || !isEndpointAlert;
   const disabledAddException = !canUserCRUD || !hasIndexWrite;
 
-  const exceptionActions = useMemo(
+  const exceptionActionItems = useMemo(
     () => [
-      {
-        name: ACTION_ADD_ENDPOINT_EXCEPTION,
-        onClick: handleEndpointExceptionModal,
-        disabled: disabledAddEndpointException,
-        [`data-test-subj`]: 'add-endpoint-exception-menu-item',
-      },
-      {
-        name: ACTION_ADD_EXCEPTION,
-        onClick: handleDetectionExceptionModal,
-        disabled: disabledAddException,
-        [`data-test-subj`]: 'add-exception-menu-item',
-      },
+      <EuiContextMenuItem
+        key="add-endpoint-exception-menu-item"
+        data-test-subj="add-endpoint-exception-menu-item"
+        disabled={disabledAddEndpointException}
+        onClick={handleEndpointExceptionModal}
+      >
+        {ACTION_ADD_ENDPOINT_EXCEPTION}
+      </EuiContextMenuItem>,
+
+      <EuiContextMenuItem
+        key="add-exception-menu-item"
+        data-test-subj="add-exception-menu-item"
+        disabled={disabledAddException}
+        onClick={handleDetectionExceptionModal}
+      >
+        {ACTION_ADD_EXCEPTION}
+      </EuiContextMenuItem>,
     ],
     [
       disabledAddEndpointException,
@@ -70,11 +62,5 @@ export const useExceptionActions = ({
     ]
   );
 
-  return {
-    disabledAddEndpointException,
-    disabledAddException,
-    exceptionActions,
-    handleEndpointExceptionModal,
-    handleDetectionExceptionModal,
-  };
+  return { exceptionActionItems };
 };

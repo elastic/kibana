@@ -55,10 +55,10 @@ describe('DeprecationsFactory', () => {
   });
 
   describe('getAllDeprecations', () => {
-    const mockDependencies = ({
+    const mockDependencies = {
       esClient: jest.fn(),
       savedObjectsClient: jest.fn(),
-    } as unknown) as GetDeprecationsContext;
+    } as unknown as GetDeprecationsContext;
 
     it('returns a flattened array of deprecations', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });
@@ -124,16 +124,21 @@ describe('DeprecationsFactory', () => {
         `Failed to get deprecations info for plugin "${domainId}".`,
         mockError
       );
-      expect(derpecations).toStrictEqual([
-        {
-          domainId,
-          message: `Failed to get deprecations info for plugin "${domainId}".`,
-          level: 'fetch_error',
-          correctiveActions: {
-            manualSteps: ['Check Kibana server logs for error message.'],
+      expect(derpecations).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "correctiveActions": Object {
+              "manualSteps": Array [
+                "Check Kibana server logs for error message.",
+              ],
+            },
+            "domainId": "mockPlugin",
+            "level": "fetch_error",
+            "message": "Unable to fetch deprecations info for plugin mockPlugin.",
+            "title": "Failed to fetch deprecations for mockPlugin",
           },
-        },
-      ]);
+        ]
+      `);
     });
 
     it(`returns successful results even when some getDeprecations fail`, async () => {
@@ -167,7 +172,8 @@ describe('DeprecationsFactory', () => {
         ...mockPluginDeprecationsInfo.map((info) => ({ ...info, domainId: 'mockPlugin' })),
         {
           domainId: 'anotherMockPlugin',
-          message: `Failed to get deprecations info for plugin "anotherMockPlugin".`,
+          title: 'Failed to fetch deprecations for anotherMockPlugin',
+          message: 'Unable to fetch deprecations info for plugin anotherMockPlugin.',
           level: 'fetch_error',
           correctiveActions: {
             manualSteps: ['Check Kibana server logs for error message.'],
@@ -178,10 +184,10 @@ describe('DeprecationsFactory', () => {
   });
 
   describe('getDeprecations', () => {
-    const mockDependencies = ({
+    const mockDependencies = {
       esClient: jest.fn(),
       savedObjectsClient: jest.fn(),
-    } as unknown) as GetDeprecationsContext;
+    } as unknown as GetDeprecationsContext;
 
     it('returns a flattened array of DeprecationInfo', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });

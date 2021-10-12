@@ -7,6 +7,7 @@
 
 import { notFound } from '@hapi/boom';
 import { debounce } from 'lodash';
+import { nodeBuilder, fromKueryExpression } from '@kbn/es-query';
 import {
   CoreSetup,
   CoreStart,
@@ -20,12 +21,10 @@ import {
 import {
   IKibanaSearchRequest,
   ISearchOptions,
-  nodeBuilder,
   ENHANCED_ES_SEARCH_STRATEGY,
   SEARCH_SESSION_TYPE,
 } from '../../../../../../src/plugins/data/common';
 import {
-  esKuery,
   ISearchSessionService,
   NoSearchIdInSessionError,
 } from '../../../../../../src/plugins/data/server';
@@ -91,7 +90,8 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 export class SearchSessionService
-  implements ISearchSessionService<SearchSessionSavedObjectAttributes> {
+  implements ISearchSessionService<SearchSessionSavedObjectAttributes>
+{
   private sessionConfig: SearchSessionsConfig;
   private readonly updateOrCreateBatchQueue: UpdateOrCreateQueueEntry[] = [];
 
@@ -375,9 +375,7 @@ export class SearchSessionService
             nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.username`, `${user.username}`),
           ];
     const filterKueryNode =
-      typeof options.filter === 'string'
-        ? esKuery.fromKueryExpression(options.filter)
-        : options.filter;
+      typeof options.filter === 'string' ? fromKueryExpression(options.filter) : options.filter;
     const filter = nodeBuilder.and(userFilters.concat(filterKueryNode ?? []));
     return savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       ...options,

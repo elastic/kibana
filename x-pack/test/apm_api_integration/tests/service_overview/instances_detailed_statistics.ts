@@ -14,19 +14,19 @@ import { APIReturnType } from '../../../../plugins/apm/public/services/rest/crea
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
+import { createApmApiClient } from '../../common/apm_api_supertest';
 import { getServiceNodeIds } from './get_service_node_ids';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const apmApiSupertest = createApmApiSupertest(supertest);
+  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiSupertest = createApmApiClient(supertest);
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
 
   interface Response {
     status: number;
-    body: APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
+    body: APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
   }
 
   registry.when(
@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('handles the empty state', async () => {
           const response: Response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
+              pathname: `/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
               query: {
                 latencyAggregationType: 'avg',
                 start,
@@ -75,7 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         beforeEach(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
+              pathname: `/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
               query: {
                 latencyAggregationType: 'avg',
                 start,
@@ -129,7 +129,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         beforeEach(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
+              pathname: `/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
               query: {
                 latencyAggregationType: 'avg',
                 numBuckets: 20,

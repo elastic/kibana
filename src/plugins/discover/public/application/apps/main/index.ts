@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { DiscoverMainApp } from './discover_main_app';
+export { DiscoverMainRoute } from './discover_main_route';

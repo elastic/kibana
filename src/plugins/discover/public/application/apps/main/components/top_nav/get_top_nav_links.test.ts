@@ -13,7 +13,7 @@ import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
 
-const services = ({
+const services = {
   capabilities: {
     discover: {
       save: true,
@@ -22,9 +22,9 @@ const services = ({
       save: true,
     },
   },
-} as unknown) as DiscoverServices;
+} as unknown as DiscoverServices;
 
-const state = ({} as unknown) as GetStateReturn;
+const state = {} as unknown as GetStateReturn;
 
 test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({
@@ -35,6 +35,7 @@ test('getTopNavLinks result', () => {
     services,
     state,
     searchSource: {} as ISearchSource,
+    onOpenSavedSearch: () => {},
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [

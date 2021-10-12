@@ -20,17 +20,19 @@ import { useUrlParams } from '../../../../context/url_params_context/use_url_par
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
-import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
-import { getColumns } from './get_column';
+import { getColumns } from './get_columns';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 interface Props {
   serviceName: string;
 }
-type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
-type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
+type ErrorGroupMainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
+type ErrorGroupDetailedStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
 type SortField = 'name' | 'lastSeen' | 'occurrences';
@@ -58,7 +60,7 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: { start, end, comparisonType, comparisonEnabled },
+    urlParams: { comparisonType, comparisonEnabled },
   } = useUrlParams();
   const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
@@ -72,6 +74,12 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     sort: DEFAULT_SORT,
   });
 
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/overview');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
@@ -82,10 +90,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
 
-  const {
-    query: { environment, kuery },
-  } = useApmParams('/services/:serviceName/overview');
-
   const { data = INITIAL_STATE_MAIN_STATISTICS, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !transactionType) {
@@ -93,7 +97,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/error_groups/main_statistics',
+          'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -146,7 +150,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       if (requestId && items.length && start && end && transactionType) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics',
+            'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -201,46 +205,64 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <TableFetchWrapper status={status}>
-          <OverviewTableContainer
-            isEmptyAndLoading={
-              totalItems === 0 && status === FETCH_STATUS.LOADING
+        <OverviewTableContainer
+          fixedHeight={true}
+          isEmptyAndNotInitiated={
+            totalItems === 0 && status === FETCH_STATUS.NOT_INITIATED
+          }
+        >
+          <EuiBasicTable
+            error={
+              status === FETCH_STATUS.FAILURE
+                ? i18n.translate(
+                    'xpack.apm.serviceOverview.errorsTable.errorMessage',
+                    { defaultMessage: 'Failed to fetch' }
+                  )
+                : ''
             }
-          >
-            <EuiBasicTable
-              columns={columns}
-              items={items}
-              pagination={{
-                pageIndex,
-                pageSize: PAGE_SIZE,
-                totalItemCount: totalItems,
-                pageSizeOptions: [PAGE_SIZE],
-                hidePerPageOptions: true,
-              }}
-              loading={status === FETCH_STATUS.LOADING}
-              onChange={(newTableOptions: {
-                page?: {
-                  index: number;
-                };
-                sort?: { field: string; direction: SortDirection };
-              }) => {
-                setTableOptions({
-                  pageIndex: newTableOptions.page?.index ?? 0,
-                  sort: newTableOptions.sort
-                    ? {
-                        field: newTableOptions.sort.field as SortField,
-                        direction: newTableOptions.sort.direction,
-                      }
-                    : DEFAULT_SORT,
-                });
-              }}
-              sorting={{
-                enableAllColumns: true,
-                sort,
-              }}
-            />
-          </OverviewTableContainer>
-        </TableFetchWrapper>
+            noItemsMessage={
+              status === FETCH_STATUS.LOADING
+                ? i18n.translate(
+                    'xpack.apm.serviceOverview.errorsTable.loading',
+                    { defaultMessage: 'Loading...' }
+                  )
+                : i18n.translate(
+                    'xpack.apm.serviceOverview.errorsTable.noResults',
+                    { defaultMessage: 'No errors found' }
+                  )
+            }
+            columns={columns}
+            items={items}
+            pagination={{
+              pageIndex,
+              pageSize: PAGE_SIZE,
+              totalItemCount: totalItems,
+              pageSizeOptions: [PAGE_SIZE],
+              hidePerPageOptions: true,
+            }}
+            loading={status === FETCH_STATUS.LOADING}
+            onChange={(newTableOptions: {
+              page?: {
+                index: number;
+              };
+              sort?: { field: string; direction: SortDirection };
+            }) => {
+              setTableOptions({
+                pageIndex: newTableOptions.page?.index ?? 0,
+                sort: newTableOptions.sort
+                  ? {
+                      field: newTableOptions.sort.field as SortField,
+                      direction: newTableOptions.sort.direction,
+                    }
+                  : DEFAULT_SORT,
+              });
+            }}
+            sorting={{
+              enableAllColumns: true,
+              sort,
+            }}
+          />
+        </OverviewTableContainer>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -39,7 +39,7 @@ import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { SavedObjectAttributes } from '../../../../core/types';
-import { SavedVisualizationsLoader } from '../saved_visualizations';
+import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
 
@@ -85,7 +85,8 @@ type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>
+{
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
@@ -107,7 +108,6 @@ export class VisualizeEmbeddable
     VisualizeByValueInput,
     VisualizeByReferenceInput
   >;
-  private savedVisualizationsLoader?: SavedVisualizationsLoader;
 
   constructor(
     timefilter: TimefilterContract,
@@ -118,7 +118,6 @@ export class VisualizeEmbeddable
       VisualizeByValueInput,
       VisualizeByReferenceInput
     >,
-    savedVisualizationsLoader?: SavedVisualizationsLoader,
     parent?: IContainer
   ) {
     super(
@@ -143,7 +142,6 @@ export class VisualizeEmbeddable
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
-    this.savedVisualizationsLoader = savedVisualizationsLoader;
 
     if (this.attributeService) {
       const isByValue = !this.inputIsRefType(initialInput);
@@ -186,7 +184,11 @@ export class VisualizeEmbeddable
     if (!adapters) return;
 
     return this.deps.start().plugins.inspector.open(adapters, {
-      title: this.getTitle(),
+      title:
+        this.getTitle() ||
+        i18n.translate('visualizations.embeddable.inspectorTitle', {
+          defaultMessage: 'Inspector',
+        }),
     });
   };
 
@@ -340,14 +342,6 @@ export class VisualizeEmbeddable
               data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
             };
           }
-          // do not trigger the filter click event if the filter bar is not visible
-          if (
-            triggerId === VIS_EVENT_TO_TRIGGER.filter &&
-            !this.input.id &&
-            !this.vis.type.options.showFilterBar
-          ) {
-            return;
-          }
 
           getUiActions().getTrigger(triggerId).exec(context);
         }
@@ -402,6 +396,7 @@ export class VisualizeEmbeddable
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
       uiState: this.vis.uiState,
+      interactive: !this.input.disableTriggers,
       inspectorAdapters: this.inspectorAdapters,
       executionContext: context,
     };
@@ -457,7 +452,15 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const savedVis = await this.savedVisualizationsLoader?.get({});
+    const { savedObjectsClient, data, spaces, savedObjectsTaggingOss } = await this.deps.start()
+      .plugins;
+    const savedVis = await getSavedVisualization({
+      savedObjectsClient,
+      search: data.search,
+      dataViews: data.dataViews,
+      spaces,
+      savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+    });
     if (!savedVis) {
       throw new Error('Error creating a saved vis object');
     }

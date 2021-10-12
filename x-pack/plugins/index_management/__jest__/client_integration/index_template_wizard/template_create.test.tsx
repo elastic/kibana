@@ -8,6 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import '../../../test/global_mocks';
 import { setupEnvironment } from '../helpers';
 
 import {
@@ -31,15 +32,6 @@ jest.mock('@elastic/eui', () => {
         data-test-subj="mockComboBox"
         onChange={(syntheticEvent: any) => {
           props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj="mockCodeEditor"
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.jsonString);
         }}
       />
     ),

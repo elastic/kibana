@@ -42,7 +42,7 @@ export const deleteList = async ({
     await esClient.delete({
       id,
       index: listIndex,
-      refresh: false,
+      refresh: 'wait_for',
     });
     return list;
   }

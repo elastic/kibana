@@ -16,23 +16,16 @@ import uuid from 'uuid/v4';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {
-  AGG_TYPE,
-  FIELD_ORIGIN,
   LAYER_TYPE,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
   SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
-  SOURCE_TYPES,
-  STYLE_TYPE,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
-  AggDescriptor,
   Attribution,
-  ESTermSourceDescriptor,
-  JoinDescriptor,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
@@ -42,7 +35,6 @@ import {
 import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
-import { getJoinAggKey } from '../../../common/get_agg_key';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
 
@@ -97,8 +89,6 @@ export interface ILayer {
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
-  showJoinEditor(): boolean;
-  getJoinsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
@@ -177,68 +167,11 @@ export class AbstractLayer implements ILayer {
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
-
-    if (clonedDescriptor.joins) {
-      clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
-        if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
-          throw new Error(
-            'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
-          );
-        }
-        const termSourceDescriptor: ESTermSourceDescriptor = joinDescriptor.right as ESTermSourceDescriptor;
-
-        // todo: must tie this to generic thing
-        const originalJoinId = joinDescriptor.right.id!;
-
-        // right.id is uuid used to track requests in inspector
-        joinDescriptor.right.id = uuid();
-
-        // Update all data driven styling properties using join fields
-        if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
-          const metrics =
-            termSourceDescriptor.metrics && termSourceDescriptor.metrics.length
-              ? termSourceDescriptor.metrics
-              : [{ type: AGG_TYPE.COUNT }];
-          metrics.forEach((metricsDescriptor: AggDescriptor) => {
-            const originalJoinKey = getJoinAggKey({
-              aggType: metricsDescriptor.type,
-              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: originalJoinId,
-            });
-            const newJoinKey = getJoinAggKey({
-              aggType: metricsDescriptor.type,
-              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: joinDescriptor.right.id!,
-            });
-
-            Object.keys(clonedDescriptor.style.properties).forEach((key) => {
-              const styleProp = clonedDescriptor.style.properties[key];
-              if (
-                styleProp.type === STYLE_TYPE.DYNAMIC &&
-                styleProp.options.field &&
-                styleProp.options.field.origin === FIELD_ORIGIN.JOIN &&
-                styleProp.options.field.name === originalJoinKey
-              ) {
-                styleProp.options.field.name = newJoinKey;
-              }
-            });
-          });
-        }
-      });
-    }
     return clonedDescriptor;
   }
 
   makeMbLayerId(layerNameSuffix: string): string {
     return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
-  }
-
-  showJoinEditor(): boolean {
-    return this.getSource().showJoinEditor();
-  }
-
-  getJoinsDisabledReason() {
-    return this.getSource().getJoinsDisabledReason();
   }
 
   isPreviewLayer(): boolean {

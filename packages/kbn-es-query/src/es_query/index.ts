@@ -6,8 +6,18 @@
  * Side Public License, v 1.
  */
 
+export { migrateFilter } from './migrate_filter';
 export { buildEsQuery, EsQueryConfig } from './build_es_query';
 export { buildQueryFromFilters } from './from_filters';
 export { luceneStringToDsl } from './lucene_string_to_dsl';
 export { decorateQuery } from './decorate_query';
-export { IndexPatternBase, IndexPatternFieldBase, IFieldSubType, BoolQuery } from './types';
+export {
+  IndexPatternBase,
+  IndexPatternFieldBase,
+  IFieldSubType,
+  BoolQuery,
+  DataViewBase,
+  DataViewFieldBase,
+  IFieldSubTypeMulti,
+  IFieldSubTypeNested,
+} from './types';

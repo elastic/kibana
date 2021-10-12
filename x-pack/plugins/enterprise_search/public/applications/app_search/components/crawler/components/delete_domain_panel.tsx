@@ -9,13 +9,13 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { CrawlerSingleDomainLogic } from '../crawler_single_domain_logic';
-import { getDeleteDomainSuccessMessage } from '../utils';
+import { getDeleteDomainConfirmationMessage } from '../utils';
 
 export const DeleteDomainPanel: React.FC = ({}) => {
   const { domain } = useValues(CrawlerSingleDomainLogic);
@@ -27,6 +27,14 @@ export const DeleteDomainPanel: React.FC = ({}) => {
 
   return (
     <>
+      <EuiTitle size="s">
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.deleteDomainPanel.title', {
+            defaultMessage: 'Delete domain',
+          })}
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <EuiText size="s">
         <p>
           <FormattedMessage
@@ -53,7 +61,7 @@ export const DeleteDomainPanel: React.FC = ({}) => {
         color="danger"
         iconType="trash"
         onClick={() => {
-          if (confirm(getDeleteDomainSuccessMessage(domain.url))) {
+          if (confirm(getDeleteDomainConfirmationMessage(domain.url))) {
             deleteDomain(domain);
           }
         }}

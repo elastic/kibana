@@ -34,15 +34,23 @@ interface ProductSelectorProps {
     hasAppSearchAccess?: boolean;
     hasWorkplaceSearchAccess?: boolean;
   };
+  isWorkplaceSearchAdmin: boolean;
 }
 
-export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
+export const ProductSelector: React.FC<ProductSelectorProps> = ({
+  access,
+  isWorkplaceSearchAdmin,
+}) => {
   const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
   const { config } = useValues(KibanaLogic);
 
   // If Enterprise Search hasn't been set up yet, show all products. Otherwise, only show products the user has access to
   const shouldShowAppSearchCard = !config.host || hasAppSearchAccess;
   const shouldShowWorkplaceSearchCard = !config.host || hasWorkplaceSearchAccess;
+
+  const WORKPLACE_SEARCH_URL = isWorkplaceSearchAdmin
+    ? WORKPLACE_SEARCH_PLUGIN.URL
+    : WORKPLACE_SEARCH_PLUGIN.NON_ADMIN_URL;
 
   return (
     <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
@@ -84,7 +92,11 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
         )}
         {shouldShowWorkplaceSearchCard && (
           <EuiFlexItem grow={false}>
-            <ProductCard product={WORKPLACE_SEARCH_PLUGIN} image={WorkplaceSearchImage} />
+            <ProductCard
+              product={WORKPLACE_SEARCH_PLUGIN}
+              url={WORKPLACE_SEARCH_URL}
+              image={WorkplaceSearchImage}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

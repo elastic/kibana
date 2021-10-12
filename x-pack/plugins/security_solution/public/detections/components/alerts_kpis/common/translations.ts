@@ -13,10 +13,3 @@ export const STACK_BY_LABEL = i18n.translate(
     defaultMessage: 'Stack by',
   }
 );
-
-export const ALL_OTHERS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.histogram.allOthersGroupingLabel',
-  {
-    defaultMessage: 'All others',
-  }
-);

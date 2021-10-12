@@ -17,7 +17,7 @@ import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
 import { Router } from '../router';
-import { loggerMock } from '@kbn/logging/target/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -64,9 +64,12 @@ describe('Options', () => {
       });
 
       it('Authenticated user has access to a route', async () => {
-        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => {
@@ -91,9 +94,12 @@ describe('Options', () => {
       });
 
       it('User with no credentials can access a route', async () => {
-        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => toolkit.notHandled());
@@ -117,9 +123,12 @@ describe('Options', () => {
       });
 
       it('User with invalid credentials can access a route', async () => {
-        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => res.unauthorized());
@@ -143,9 +152,12 @@ describe('Options', () => {
       });
 
       it('does not redirect user and allows access to a resource', async () => {
-        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) =>
@@ -197,9 +209,12 @@ describe('Options', () => {
       });
 
       it('Authenticated user has access to a route', async () => {
-        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => {
@@ -277,9 +292,12 @@ describe('Options', () => {
 
     describe('false', () => {
       it('does not try to authenticate a user', async () => {
-        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const authHook = jest.fn();
@@ -1844,9 +1862,11 @@ describe('ETag', () => {
 
 describe('registerRouterAfterListening', () => {
   it('allows a router to be registered before server has started listening', async () => {
-    const { server: innerServer, createRouter, registerRouterAfterListening } = await server.setup(
-      setupDeps
-    );
+    const {
+      server: innerServer,
+      createRouter,
+      registerRouterAfterListening,
+    } = await server.setup(setupDeps);
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -1869,9 +1889,11 @@ describe('registerRouterAfterListening', () => {
   });
 
   it('allows a router to be registered after server has started listening', async () => {
-    const { server: innerServer, createRouter, registerRouterAfterListening } = await server.setup(
-      setupDeps
-    );
+    const {
+      server: innerServer,
+      createRouter,
+      registerRouterAfterListening,
+    } = await server.setup(setupDeps);
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => {

@@ -50,13 +50,13 @@ and lighter shades will symbolize countries with less traffic.
 
 . In **Statistics source**, set:
 ** **Index pattern** to **kibana_sample_data_logs**
-** **Join field** to **geo.src**
+** **Join field** to **geo.dest**
 
 . Click **Add layer**.
 
 . In **Layer settings**, set:
 
-** **Name** to `Total Requests by Country`
+** **Name** to `Total Requests by Destination`
 ** **Opacity** to 50%
 
 . Add a Tooltip field:
@@ -136,7 +136,7 @@ grids with less bytes transferred.
 ** **Visibility** to the range [0, 9]
 ** **Opacity** to 100%
 . In **Metrics**:
-** Set **Agregation** to **Count**.
+** Set **Aggregation** to **Count**.
 ** Click **Add metric**.
 ** Set **Aggregation** to **Sum** with **Field** set to **bytes**.
 . In **Layer style**, change **Symbol size**:

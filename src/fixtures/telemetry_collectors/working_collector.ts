@@ -18,13 +18,17 @@ interface MyObject {
   total: number;
   type: boolean;
 }
-
+const COMPUTED_TERM = 'computed_term';
+export interface CONSTANT_TERM_INTERFACE {
+  [COMPUTED_TERM]?: MyObject;
+}
 interface Usage {
   flat?: string;
   my_str?: string;
   my_objects: MyObject;
   my_array?: MyObject[];
   my_str_array?: string[];
+  interface_terms?: CONSTANT_TERM_INTERFACE;
   my_index_signature_prop?: {
     [key: string]: number;
   };
@@ -89,6 +93,12 @@ export const myCollector = makeUsageCollector<Usage>({
       },
     },
     my_str_array: { type: 'array', items: { type: 'keyword' } },
+    interface_terms: {
+      computed_term: {
+        total: { type: 'long' },
+        type: { type: 'boolean' },
+      },
+    },
     my_index_signature_prop: {
       count: { type: 'long' },
       avg: { type: 'float' },

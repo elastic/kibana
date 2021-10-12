@@ -25,7 +25,7 @@ import { State } from '../../store';
 import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const TopNContainer = styled.div`
-  width: 600px;
+  min-width: 600px;
 `;
 
 const CloseButton = styled(EuiButtonIcon)`
@@ -80,9 +80,10 @@ const TopNComponent: React.FC<Props> = ({
   toggleTopN,
 }) => {
   const [view, setView] = useState<TimelineEventsType>(defaultView);
-  const onViewSelected = useCallback((value: string) => setView(value as TimelineEventsType), [
-    setView,
-  ]);
+  const onViewSelected = useCallback(
+    (value: string) => setView(value as TimelineEventsType),
+    [setView]
+  );
   const indicesSelector = useMemo(getIndicesSelector, []);
   const { all: allIndices, raw: rawIndices } = useSelector<State, IndicesSelector>(
     (state) => indicesSelector(state),

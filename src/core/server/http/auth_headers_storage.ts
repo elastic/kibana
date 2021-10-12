@@ -15,7 +15,7 @@ import { AuthHeaders } from './lifecycle/auth';
  * @return authentication headers {@link AuthHeaders} for - an incoming request.
  * @public
  * */
-export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHeaders | undefined;
+export type GetAuthHeaders = (request: KibanaRequest) => AuthHeaders | undefined;
 
 /** @internal */
 export class AuthHeadersStorage {

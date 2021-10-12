@@ -9,8 +9,11 @@
 import { cloneDeep } from 'lodash';
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '../../../core/server/mocks';
 
 import { autocompleteConfigDeprecationProvider } from './config_deprecations';
+
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = autocompleteConfigDeprecationProvider(configDeprecationFactory);
@@ -20,8 +23,11 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
     deprecations.map((deprecation) => ({
       deprecation,
       path: '',
+      context: deprecationContext,
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
@@ -48,7 +54,7 @@ describe('Config Deprecations', () => {
     expect(migrated.data.autocomplete.valueSuggestions.terminateAfter).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"kibana.autocompleteTerminateAfter\\" is deprecated and has been replaced by \\"data.autocomplete.valueSuggestions.terminateAfter\\"",
+        "Setting \\"kibana.autocompleteTerminateAfter\\" has been replaced by \\"data.autocomplete.valueSuggestions.terminateAfter\\"",
       ]
     `);
   });
@@ -64,7 +70,7 @@ describe('Config Deprecations', () => {
     expect(migrated.data.autocomplete.valueSuggestions.timeout).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"kibana.autocompleteTimeout\\" is deprecated and has been replaced by \\"data.autocomplete.valueSuggestions.timeout\\"",
+        "Setting \\"kibana.autocompleteTimeout\\" has been replaced by \\"data.autocomplete.valueSuggestions.timeout\\"",
       ]
     `);
   });

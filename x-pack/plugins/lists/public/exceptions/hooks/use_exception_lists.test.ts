@@ -41,13 +41,13 @@ describe('useExceptionLists', () => {
           errorMessage: 'Uh oh',
           filterOptions: {},
           http: mockKibanaHttpService,
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          pagination: {
+          initialPagination: {
             page: 1,
             perPage: 20,
             total: 0,
           },
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
           showEventFilters: false,
           showTrustedApps: false,
         })
@@ -62,7 +62,8 @@ describe('useExceptionLists', () => {
           perPage: 20,
           total: 0,
         },
-        null,
+        expect.any(Function),
+        expect.any(Function),
       ]);
     });
   });
@@ -77,13 +78,13 @@ describe('useExceptionLists', () => {
           errorMessage: 'Uh oh',
           filterOptions: {},
           http: mockKibanaHttpService,
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          pagination: {
+          initialPagination: {
             page: 1,
             perPage: 20,
             total: 0,
           },
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
           showEventFilters: false,
           showTrustedApps: false,
         })
@@ -100,10 +101,11 @@ describe('useExceptionLists', () => {
         expectedListItemsResult,
         {
           page: 1,
-          perPage: 1,
+          perPage: 20,
           total: 1,
         },
-        result.current[3],
+        expect.any(Function),
+        expect.any(Function),
       ]);
     });
   });
@@ -117,13 +119,13 @@ describe('useExceptionLists', () => {
           errorMessage: 'Uh oh',
           filterOptions: {},
           http: mockKibanaHttpService,
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          pagination: {
+          initialPagination: {
             page: 1,
             perPage: 20,
             total: 0,
           },
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
           showEventFilters: false,
           showTrustedApps: true,
         })
@@ -153,13 +155,13 @@ describe('useExceptionLists', () => {
           errorMessage: 'Uh oh',
           filterOptions: {},
           http: mockKibanaHttpService,
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          pagination: {
+          initialPagination: {
             page: 1,
             perPage: 20,
             total: 0,
           },
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
           showEventFilters: false,
           showTrustedApps: false,
         })
@@ -189,13 +191,13 @@ describe('useExceptionLists', () => {
           errorMessage: 'Uh oh',
           filterOptions: {},
           http: mockKibanaHttpService,
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          pagination: {
+          initialPagination: {
             page: 1,
             perPage: 20,
             total: 0,
           },
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
           showEventFilters: true,
           showTrustedApps: false,
         })
@@ -225,13 +227,13 @@ describe('useExceptionLists', () => {
           errorMessage: 'Uh oh',
           filterOptions: {},
           http: mockKibanaHttpService,
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          pagination: {
+          initialPagination: {
             page: 1,
             perPage: 20,
             total: 0,
           },
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
           showEventFilters: false,
           showTrustedApps: false,
         })
@@ -264,13 +266,13 @@ describe('useExceptionLists', () => {
             name: 'Sample Endpoint',
           },
           http: mockKibanaHttpService,
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          pagination: {
+          initialPagination: {
             page: 1,
             perPage: 20,
             total: 0,
           },
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
           showEventFilters: false,
           showTrustedApps: false,
         })
@@ -302,9 +304,9 @@ describe('useExceptionLists', () => {
           errorMessage,
           filterOptions,
           http,
+          initialPagination,
           namespaceTypes,
           notifications,
-          pagination,
           showEventFilters,
           showTrustedApps,
         }) =>
@@ -312,9 +314,9 @@ describe('useExceptionLists', () => {
             errorMessage,
             filterOptions,
             http,
+            initialPagination,
             namespaceTypes,
             notifications,
-            pagination,
             showEventFilters,
             showTrustedApps,
           }),
@@ -323,13 +325,13 @@ describe('useExceptionLists', () => {
             errorMessage: 'Uh oh',
             filterOptions: {},
             http: mockKibanaHttpService,
-            namespaceTypes: ['single'],
-            notifications: mockKibanaNotificationsService,
-            pagination: {
+            initialPagination: {
               page: 1,
               perPage: 20,
               total: 0,
             },
+            namespaceTypes: ['single'],
+            notifications: mockKibanaNotificationsService,
             showEventFilters: false,
             showTrustedApps: false,
           },
@@ -344,13 +346,13 @@ describe('useExceptionLists', () => {
         errorMessage: 'Uh oh',
         filterOptions: {},
         http: mockKibanaHttpService,
-        namespaceTypes: ['single', 'agnostic'],
-        notifications: mockKibanaNotificationsService,
-        pagination: {
+        initialPagination: {
           page: 1,
           perPage: 20,
           total: 0,
         },
+        namespaceTypes: ['single', 'agnostic'],
+        notifications: mockKibanaNotificationsService,
         showEventFilters: false,
         showTrustedApps: false,
       });
@@ -372,13 +374,13 @@ describe('useExceptionLists', () => {
           errorMessage: 'Uh oh',
           filterOptions: {},
           http: mockKibanaHttpService,
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          pagination: {
+          initialPagination: {
             page: 1,
             perPage: 20,
             total: 0,
           },
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
           showEventFilters: false,
           showTrustedApps: false,
         })
@@ -390,8 +392,8 @@ describe('useExceptionLists', () => {
 
       expect(typeof result.current[3]).toEqual('function');
 
-      if (result.current[3] != null) {
-        result.current[3]();
+      if (result.current[4] != null) {
+        result.current[4]();
       }
       // NOTE: Only need one call here because hook already initilaized
       await waitForNextUpdate();
@@ -411,13 +413,13 @@ describe('useExceptionLists', () => {
           errorMessage: 'Uh oh',
           filterOptions: {},
           http: mockKibanaHttpService,
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          pagination: {
+          initialPagination: {
             page: 1,
             perPage: 20,
             total: 0,
           },
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
           showEventFilters: false,
           showTrustedApps: false,
         })

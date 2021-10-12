@@ -56,13 +56,14 @@ export const useGetIssueTypes = ({
         });
 
         if (!didCancel.current) {
-          setIsLoading(false);
           const asOptions = (res.data ?? []).map((type) => ({
             text: type.name ?? '',
             value: type.id ?? '',
           }));
+
           setIssueTypes(res.data ?? []);
           handleIssueType(asOptions);
+          setIsLoading(false);
           if (res.status && res.status === 'error') {
             toastNotifications.addDanger({
               title: i18n.ISSUE_TYPES_API_ERROR,

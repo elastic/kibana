@@ -40,6 +40,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // retrieve rules from the filesystem but not from fleet for Cypress tests
         '--xpack.securitySolution.prebuiltRulesFromFileSystem=true',
         '--xpack.securitySolution.prebuiltRulesFromSavedObjects=false',
+        '--xpack.securitySolution.enableExperimental=["riskyHostsEnabled"]',
+        `--home.disableWelcomeScreen=true`,
       ],
     },
   };

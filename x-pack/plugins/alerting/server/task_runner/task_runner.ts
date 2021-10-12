@@ -135,7 +135,7 @@ export class TaskRunner<
 
     const path = addSpaceIdToPath('/', spaceId);
 
-    const fakeRequest = KibanaRequest.from(({
+    const fakeRequest = KibanaRequest.from({
       headers: requestHeaders,
       path: '/',
       route: { settings: {} },
@@ -147,7 +147,7 @@ export class TaskRunner<
           url: '/',
         },
       },
-    } as unknown) as Request);
+    } as unknown as Request);
 
     this.context.basePathService.set(fakeRequest, path);
 
@@ -262,44 +262,55 @@ export class TaskRunner<
 
     let updatedAlertTypeState: void | Record<string, unknown>;
     try {
-      updatedAlertTypeState = await this.alertType.executor({
-        alertId,
-        services: {
-          ...services,
-          alertInstanceFactory: createAlertInstanceFactory<
-            InstanceState,
-            InstanceContext,
-            WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-          >(alertInstances),
-        },
-        params,
-        state: alertTypeState as State,
-        startedAt: this.taskInstance.startedAt!,
-        previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
-        spaceId,
-        namespace,
-        name,
-        tags,
-        createdBy,
-        updatedBy,
-        rule: {
+      const ctx = {
+        type: 'alert',
+        name: `execute ${alert.alertTypeId}`,
+        id: alertId,
+        description: `execute [${alert.alertTypeId}] with name [${name}] in [${
+          namespace ?? 'default'
+        }] namespace`,
+      };
+
+      updatedAlertTypeState = await this.context.executionContext.withContext(ctx, () =>
+        this.alertType.executor({
+          alertId,
+          services: {
+            ...services,
+            alertInstanceFactory: createAlertInstanceFactory<
+              InstanceState,
+              InstanceContext,
+              WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+            >(alertInstances),
+          },
+          params,
+          state: alertTypeState as State,
+          startedAt: this.taskInstance.startedAt!,
+          previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
+          spaceId,
+          namespace,
           name,
           tags,
-          consumer,
-          producer: alertType.producer,
-          ruleTypeId: alert.alertTypeId,
-          ruleTypeName: alertType.name,
-          enabled,
-          schedule,
-          actions,
           createdBy,
           updatedBy,
-          createdAt,
-          updatedAt,
-          throttle,
-          notifyWhen,
-        },
-      });
+          rule: {
+            name,
+            tags,
+            consumer,
+            producer: alertType.producer,
+            ruleTypeId: alert.alertTypeId,
+            ruleTypeName: alertType.name,
+            enabled,
+            schedule,
+            actions,
+            createdBy,
+            updatedBy,
+            createdAt,
+            updatedAt,
+            throttle,
+            notifyWhen,
+          },
+        })
+      );
     } catch (err) {
       event.message = `alert execution failure: ${alertLabel}`;
       event.error = event.error || {};
@@ -373,7 +384,8 @@ export class TaskRunner<
                 string,
                 AlertInstance<InstanceState, InstanceContext>
               ]) => {
-                const shouldExecuteAction = alertInstance.scheduledActionGroupOrSubgroupHasChanged();
+                const shouldExecuteAction =
+                  alertInstance.scheduledActionGroupOrSubgroupHasChanged();
                 if (!shouldExecuteAction) {
                   this.logger.debug(
                     `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`
@@ -572,6 +584,11 @@ export class TaskRunner<
     event.kibana = event.kibana || {};
     event.kibana.alerting = event.kibana.alerting || {};
     event.kibana.alerting.status = executionStatus.status;
+
+    // Copy duration into execution status if available
+    if (null != event.event?.duration) {
+      executionStatus.lastDuration = Math.round(event.event?.duration / Millis2Nanos);
+    }
 
     // if executionStatus indicates an error, fill in fields in
     // event from it

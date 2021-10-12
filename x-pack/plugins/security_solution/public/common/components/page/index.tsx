@@ -32,6 +32,15 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
   }
 
   /*
+    overrides the default styling of EuiDataGrid expand popover footer to
+    make it a column of actions instead of the default actions row
+  */
+  .euiDataGridRowCell__popover .euiPopoverFooter .euiFlexGroup {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /*
     overrides the default styling of euiComboBoxOptionsList because it's implemented
     as a popover, so it's not selectable as a child of the styled component
   */
@@ -95,9 +104,9 @@ export const DescriptionListStyled = styled(EuiDescriptionList)`
 
 DescriptionListStyled.displayName = 'DescriptionListStyled';
 
-export const CountBadge = (styled(EuiBadge)`
+export const CountBadge = styled(EuiBadge)`
   margin-left: 5px;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 CountBadge.displayName = 'CountBadge';
 
@@ -107,9 +116,9 @@ export const Spacer = styled.span`
 
 Spacer.displayName = 'Spacer';
 
-export const Badge = (styled(EuiBadge)`
+export const Badge = styled(EuiBadge)`
   vertical-align: top;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 Badge.displayName = 'Badge';
 

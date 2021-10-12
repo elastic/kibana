@@ -119,12 +119,8 @@ export class CategorizationJobCreator extends JobCreator {
   }
 
   public async loadCategorizationFieldExamples() {
-    const {
-      examples,
-      sampleSize,
-      overallValidStatus,
-      validationChecks,
-    } = await this._examplesLoader.loadExamples();
+    const { examples, sampleSize, overallValidStatus, validationChecks } =
+      await this._examplesLoader.loadExamples();
     this._categoryFieldExamples = examples;
     this._validationChecks = validationChecks;
     this._overallValidStatus = overallValidStatus;

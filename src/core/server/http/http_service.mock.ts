@@ -88,6 +88,7 @@ const createInternalPrebootContractMock = () => {
     csp: CspConfig.DEFAULT,
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
+    getServerInfo: jest.fn(),
   };
   return mock;
 };
@@ -98,6 +99,7 @@ const createPrebootContractMock = () => {
   const mock: HttpServicePrebootMock = {
     registerRoutes: internalMock.registerRoutes,
     basePath: createBasePathMock(),
+    getServerInfo: jest.fn(),
   };
 
   return mock;
@@ -106,7 +108,7 @@ const createPrebootContractMock = () => {
 const createInternalSetupContractMock = () => {
   const mock: InternalHttpServiceSetupMock = {
     // we can mock other hapi server methods when we need it
-    server: ({
+    server: {
       name: 'http-server-test',
       version: 'kibana',
       route: jest.fn(),
@@ -114,7 +116,7 @@ const createInternalSetupContractMock = () => {
       stop: jest.fn(),
       config: jest.fn().mockReturnValue(configMock.create()),
       // @ts-expect-error somehow it thinks that `Server` isn't a `Construtable`
-    } as unknown) as jest.MockedClass<Server>,
+    } as unknown as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreRouting: jest.fn(),
     registerOnPreAuth: jest.fn(),

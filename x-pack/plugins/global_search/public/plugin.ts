@@ -25,7 +25,8 @@ export class GlobalSearchPlugin
       GlobalSearchPluginStart,
       GlobalSearchPluginSetupDeps,
       GlobalSearchPluginStartDeps
-    > {
+    >
+{
   private readonly config: GlobalSearchClientConfigType;
   private licenseChecker?: ILicenseChecker;
   private readonly searchService = new SearchService();

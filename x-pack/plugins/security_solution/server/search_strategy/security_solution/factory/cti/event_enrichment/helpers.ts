@@ -27,6 +27,7 @@ export const buildIndicatorShouldClauses = (
 
     if (!isEmpty(eventFieldValue)) {
       shoulds.push({
+        // @ts-expect-error unknown is not assignable to query
         match: {
           [EVENT_ENRICHMENT_INDICATOR_FIELD_MAP[eventField]]: {
             query: eventFieldValue,

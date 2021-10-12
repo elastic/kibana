@@ -70,3 +70,9 @@ export const ERROR_FETCHING_EVENTS_DATA = i18n.translate(
     defaultMessage: 'Failed to query events data',
   }
 );
+
+export const EVENTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.hosts.navigaton.eventsUnit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
+  });

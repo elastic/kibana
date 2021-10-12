@@ -8,9 +8,11 @@
 
 import React from 'react';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { EuiColorPalettePicker } from '@elastic/eui';
+import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+const DEFAULT_PALETTE = 'default';
 
 export interface PalettePickerProps<ParamName extends string> {
   activePalette?: PaletteOutput;
@@ -25,6 +27,21 @@ export function PalettePicker<ParamName extends string>({
   paramName,
   setPalette,
 }: PalettePickerProps<ParamName>) {
+  const palettesList: EuiColorPalettePickerPaletteProps[] = palettes
+    .getAll()
+    .filter(({ internal }) => !internal)
+    .map(({ id, title, getCategoricalColors }) => {
+      return {
+        value: id,
+        title,
+        type: 'fixed',
+        palette: getCategoricalColors(
+          10,
+          id === activePalette?.name ? activePalette?.params : undefined
+        ),
+      };
+    });
+
   return (
     <EuiFormRow
       fullWidth
@@ -36,27 +53,15 @@ export function PalettePicker<ParamName extends string>({
         fullWidth
         data-test-subj="visEditorPalettePicker"
         compressed
-        palettes={palettes
-          .getAll()
-          .filter(({ internal }) => !internal)
-          .map(({ id, title, getCategoricalColors }) => {
-            return {
-              value: id,
-              title,
-              type: 'fixed',
-              palette: getCategoricalColors(
-                10,
-                id === activePalette?.name ? activePalette?.params : undefined
-              ),
-            };
-          })}
+        palettes={palettesList}
         onChange={(newPalette) => {
+          const palette = palettesList.find((item) => item.value === newPalette);
           setPalette(paramName, {
             type: 'palette',
-            name: newPalette,
+            name: palette?.value ?? DEFAULT_PALETTE,
           });
         }}
-        valueOfSelected={activePalette?.name || 'default'}
+        valueOfSelected={activePalette?.name || DEFAULT_PALETTE}
         selectionDisplay={'palette'}
       />
     </EuiFormRow>

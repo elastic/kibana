@@ -13,7 +13,11 @@ describe('SavedObjects /_migrate endpoint', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
 
   beforeEach(async () => {
-    root = kbnTestServer.createRoot({ migrations: { skip: true }, plugins: { initialize: false } });
+    root = kbnTestServer.createRoot({
+      migrations: { skip: true },
+      plugins: { initialize: false },
+      elasticsearch: { skipStartupConnectionCheck: true },
+    });
     await root.preboot();
     await root.setup();
     await root.start();

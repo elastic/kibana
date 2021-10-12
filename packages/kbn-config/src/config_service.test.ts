@@ -13,8 +13,9 @@ import { mockApplyDeprecations, mockedChangedPaths } from './config_service.test
 import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
-import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
 
+import type { ConfigDeprecationContext } from './deprecation';
 import { ConfigService, Env, RawPackageInfo } from '.';
 
 import { getEnvOptions } from './__mocks__/env';
@@ -364,6 +365,37 @@ test('read "enabled" even if its schema is not present', async () => {
   expect(isEnabled).toBe(true);
 });
 
+test('logs deprecation if schema is not present and "enabled" is used', async () => {
+  const initialConfig = {
+    foo: {
+      enabled: true,
+    },
+  };
+
+  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+
+  await configService.isEnabledAtPath('foo');
+  expect(configService.getHandledDeprecatedConfigs()).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "foo",
+        Array [
+          Object {
+            "correctiveActions": Object {
+              "manualSteps": Array [
+                "Remove \\"foo.enabled\\" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.",
+              ],
+            },
+            "message": "Configuring \\"foo.enabled\\" is deprecated and will be removed in 8.0.0.",
+            "title": "Setting \\"foo.enabled\\" is deprecated",
+          },
+        ],
+      ],
+    ]
+  `);
+});
+
 test('allows plugins to specify "enabled" flag via validation schema', async () => {
   const initialConfig = {};
 
@@ -442,6 +474,43 @@ test('logs deprecation warning during validation', async () => {
       ],
     ]
   `);
+});
+
+test('calls `applyDeprecations` with the correct parameters', async () => {
+  const cfg = { foo: { bar: 1 } };
+  const rawConfig = getRawConfigProvider(cfg);
+  const configService = new ConfigService(rawConfig, defaultEnv, logger);
+
+  const context: ConfigDeprecationContext = {
+    branch: defaultEnv.packageInfo.branch,
+    version: defaultEnv.packageInfo.version,
+  };
+
+  const deprecationA = jest.fn();
+  const deprecationB = jest.fn();
+
+  configService.addDeprecationProvider('foo', () => [deprecationA]);
+  configService.addDeprecationProvider('bar', () => [deprecationB]);
+
+  await configService.validate();
+
+  expect(mockApplyDeprecations).toHaveBeenCalledTimes(1);
+  expect(mockApplyDeprecations).toHaveBeenCalledWith(
+    cfg,
+    [
+      {
+        deprecation: deprecationA,
+        path: 'foo',
+        context,
+      },
+      {
+        deprecation: deprecationB,
+        path: 'bar',
+        context,
+      },
+    ],
+    expect.any(Function)
+  );
 });
 
 test('does not log warnings for silent deprecations during validation', async () => {

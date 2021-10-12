@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
+import uuid from 'uuid/v4';
 import type {
   Map as MbMap,
   AnyLayer as MbLayer,
   GeoJSONSource as MbGeoJSONSource,
 } from '@kbn/mapbox-gl';
+import type { Query } from 'src/plugins/data/common';
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
@@ -18,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
+  AGG_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
@@ -28,8 +31,11 @@ import {
   FIELD_ORIGIN,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
+  SOURCE_TYPES,
+  STYLE_TYPE,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
   KBN_IS_TILE_COMPLETE,
+  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -47,15 +53,17 @@ import {
   TimesliceMaskConfig,
 } from '../../util/mb_filter_expressions';
 import {
+  AggDescriptor,
   DynamicStylePropertyOptions,
-  MapFilters,
-  MapQuery,
+  DataFilters,
+  ESTermSourceDescriptor,
+  JoinDescriptor,
   StyleMetaDescriptor,
   Timeslice,
-  VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
+  VectorJoinSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { ISource } from '../../sources/source';
 import { IVectorSource } from '../../sources/vector_source';
@@ -70,6 +78,12 @@ import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../../sources/term_join_source';
 import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
 import { JoinState, performInnerJoins } from './perform_inner_joins';
+import { buildVectorRequestMeta } from '../build_vector_request_meta';
+import { getJoinAggKey } from '../../../../common/get_agg_key';
+
+export function isVectorLayer(layer: ILayer) {
+  return (layer as IVectorLayer).canShowTooltip !== undefined;
+}
 
 export interface VectorLayerArguments {
   source: IVectorSource;
@@ -82,11 +96,13 @@ export interface IVectorLayer extends ILayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getJoins(): InnerJoin[];
+  getJoinsDisabledReason(): string | null;
   getValidJoins(): InnerJoin[];
   getSource(): IVectorSource;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
+  showJoinEditor(): boolean;
   canShowTooltip(): boolean;
   supportsFeatureEditing(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
@@ -112,8 +128,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     options: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = super.createDescriptor(options);
-    layerDescriptor.type = VectorLayer.type;
+    const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
+    layerDescriptor.type = LAYER_TYPE.VECTOR;
 
     if (!options.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -124,7 +140,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       layerDescriptor.joins = [];
     }
 
-    return layerDescriptor as VectorLayerDescriptor;
+    return layerDescriptor;
   }
 
   constructor({
@@ -144,6 +160,62 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       this,
       chartsPaletteServiceGetColor
     );
+  }
+
+  async cloneDescriptor(): Promise<VectorLayerDescriptor> {
+    const clonedDescriptor = (await super.cloneDescriptor()) as VectorLayerDescriptor;
+    if (clonedDescriptor.joins) {
+      clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
+        if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
+          throw new Error(
+            'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
+          );
+        }
+        const termSourceDescriptor: ESTermSourceDescriptor =
+          joinDescriptor.right as ESTermSourceDescriptor;
+
+        // todo: must tie this to generic thing
+        const originalJoinId = joinDescriptor.right.id!;
+
+        // right.id is uuid used to track requests in inspector
+        joinDescriptor.right.id = uuid();
+
+        // Update all data driven styling properties using join fields
+        if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
+          const metrics =
+            termSourceDescriptor.metrics && termSourceDescriptor.metrics.length
+              ? termSourceDescriptor.metrics
+              : [{ type: AGG_TYPE.COUNT }];
+          metrics.forEach((metricsDescriptor: AggDescriptor) => {
+            const originalJoinKey = getJoinAggKey({
+              aggType: metricsDescriptor.type,
+              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
+              rightSourceId: originalJoinId,
+            });
+            const newJoinKey = getJoinAggKey({
+              aggType: metricsDescriptor.type,
+              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
+              rightSourceId: joinDescriptor.right.id!,
+            });
+
+            Object.keys(clonedDescriptor.style.properties).forEach((key) => {
+              const styleProp = clonedDescriptor.style.properties[key as VECTOR_STYLES];
+              if ('type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
+                const options = styleProp.options as DynamicStylePropertyOptions;
+                if (
+                  options.field &&
+                  options.field.origin === FIELD_ORIGIN.JOIN &&
+                  options.field.name === originalJoinKey
+                ) {
+                  options.field.name = newJoinKey;
+                }
+              }
+            });
+          });
+        }
+      });
+    }
+    return clonedDescriptor;
   }
 
   getSource(): IVectorSource {
@@ -175,6 +247,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this._joins.slice();
   }
 
+  getJoinsDisabledReason() {
+    return this.getSource().getJoinsDisabledReason();
+  }
+
   getValidJoins() {
     return this.getJoins().filter((join) => {
       return join.hasCompleteConfig();
@@ -184,12 +260,15 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   supportsFeatureEditing(): boolean {
     const dataRequest = this.getDataRequest(SUPPORTS_FEATURE_EDITING_REQUEST_ID);
     const data = dataRequest?.getData() as { supportsFeatureEditing: boolean } | undefined;
-
     return data ? data.supportsFeatureEditing : false;
   }
 
   hasJoins() {
     return this.getValidJoins().length > 0;
+  }
+
+  showJoinEditor(): boolean {
+    return this.getSource().showJoinEditor();
   }
 
   isInitialDataLoadComplete() {
@@ -231,11 +310,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const sourceDataRequest = this.getSourceDataRequest();
-    const {
-      tooltipContent,
-      areResultsTrimmed,
-      isDeprecated,
-    } = this.getSource().getSourceTooltipContent(sourceDataRequest);
+    const { tooltipContent, areResultsTrimmed, isDeprecated } =
+      this.getSource().getSourceTooltipContent(sourceDataRequest);
     return {
       icon: isDeprecated ? (
         <EuiIcon type="alert" color="danger" />
@@ -267,7 +343,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
           layerId: this.getId(),
           syncContext,
           source: this.getSource(),
-          sourceQuery: this.getQuery() as MapQuery,
+          sourceQuery: this.getQuery(),
         });
   }
 
@@ -333,29 +409,31 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     onLoadError,
     registerCancelCallback,
     dataFilters,
+    isForceRefresh,
   }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
-    const searchFilters: VectorJoinSourceRequestMeta = {
-      ...dataFilters,
-      fieldNames: joinSource.getFieldNames(),
-      sourceQuery: joinSource.getWhereQuery(),
-      applyGlobalQuery: joinSource.getApplyGlobalQuery(),
-      applyGlobalTime: joinSource.getApplyGlobalTime(),
-      sourceMeta: joinSource.getSyncMeta(),
-    };
-    const prevDataRequest = this.getDataRequest(sourceDataId);
 
+    const joinRequestMeta: VectorJoinSourceRequestMeta = buildVectorRequestMeta(
+      joinSource,
+      joinSource.getFieldNames(),
+      dataFilters,
+      joinSource.getWhereQuery(),
+      isForceRefresh
+    ) as VectorJoinSourceRequestMeta;
+
+    const prevDataRequest = this.getDataRequest(sourceDataId);
     const canSkipFetch = await canSkipSourceUpdate({
       source: joinSource,
       prevDataRequest,
-      nextMeta: searchFilters,
+      nextRequestMeta: joinRequestMeta,
       extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
       getUpdateDueToTimeslice: () => {
         return true;
       },
     });
+
     if (canSkipFetch) {
       return {
         dataHasChanged: false,
@@ -365,10 +443,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     try {
-      startLoading(sourceDataId, requestToken, searchFilters);
+      startLoading(sourceDataId, requestToken, joinRequestMeta);
       const leftSourceName = await this._source.getDisplayName();
       const propertiesMap = await joinSource.getPropertiesMap(
-        searchFilters,
+        joinRequestMeta,
         leftSourceName,
         join.getLeftField().getName(),
         registerCancelCallback.bind(null, requestToken)
@@ -397,8 +475,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return await Promise.all(joinSyncs);
   }
 
-  async _getSearchFilters(
-    dataFilters: MapFilters,
+  async _getVectorSourceRequestMeta(
+    isForceRefresh: boolean,
+    dataFilters: DataFilters,
     source: IVectorSource,
     style: IVectorStyle
   ): Promise<VectorSourceRequestMeta> {
@@ -412,17 +491,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     if (timesliceMaskFieldName) {
       fieldNames.push(timesliceMaskFieldName);
     }
-
-    const sourceQuery = this.getQuery() as MapQuery;
-    return {
-      ...dataFilters,
-      fieldNames: _.uniq(fieldNames).sort(),
-      geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
-      sourceQuery: sourceQuery ? sourceQuery : undefined,
-      applyGlobalQuery: source.getApplyGlobalQuery(),
-      applyGlobalTime: source.getApplyGlobalTime(),
-      sourceMeta: source.getSyncMeta(),
-    };
+    return buildVectorRequestMeta(source, fieldNames, dataFilters, this.getQuery(), isForceRefresh);
   }
 
   async _syncSourceStyleMeta(
@@ -430,7 +499,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     source: IVectorSource,
     style: IVectorStyle
   ) {
-    const sourceQuery = this.getQuery() as MapQuery;
+    const sourceQuery = this.getQuery();
     return this._syncStyleMeta({
       source,
       style,
@@ -482,7 +551,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     dataRequestId: string;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     source: IVectorSource | ITermJoinSource;
-    sourceQuery?: MapQuery;
+    sourceQuery?: Query;
     style: IVectorStyle;
   } & DataRequestContext) {
     if (!source.isESSource() || dynamicStyleProps.length === 0) {
@@ -642,7 +711,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         layerId: this.getId(),
         layerName: await this.getDisplayName(source),
         prevDataRequest: this.getSourceDataRequest(),
-        requestMeta: await this._getSearchFilters(syncContext.dataFilters, source, style),
+        requestMeta: await this._getVectorSourceRequestMeta(
+          syncContext.isForceRefresh,
+          syncContext.dataFilters,
+          source,
+          style
+        ),
         syncContext,
         source,
         getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
@@ -996,9 +1070,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const prevMeta = this.getSourceDataRequest()?.getMeta();
-    return prevMeta !== undefined && prevMeta.timesiceMaskField !== undefined
+    return prevMeta !== undefined && prevMeta.timesliceMaskField !== undefined
       ? {
-          timesiceMaskField: prevMeta.timesiceMaskField,
+          timesliceMaskField: prevMeta.timesliceMaskField,
           timeslice,
         }
       : undefined;
@@ -1116,7 +1190,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   async addFeature(geometry: Geometry | Position[]) {
     const layerSource = this.getSource();
-    await layerSource.addFeature(geometry);
+    const defaultFields = await layerSource.getDefaultFields();
+    await layerSource.addFeature(geometry, defaultFields);
   }
 
   async deleteFeature(featureId: string) {

@@ -98,6 +98,9 @@ export interface CrawlerDomain {
   defaultCrawlRule?: CrawlRule;
   entryPoints: EntryPoint[];
   sitemaps: Sitemap[];
+  deduplicationEnabled: boolean;
+  deduplicationFields: string[];
+  availableDeduplicationFields: string[];
 }
 
 export interface CrawlerDomainFromServer {
@@ -110,14 +113,21 @@ export interface CrawlerDomainFromServer {
   default_crawl_rule?: CrawlRule;
   entry_points: EntryPoint[];
   sitemaps: Sitemap[];
+  deduplication_enabled: boolean;
+  deduplication_fields: string[];
+  available_deduplication_fields: string[];
 }
 
 export interface CrawlerData {
   domains: CrawlerDomain[];
+  events: CrawlEvent[];
+  mostRecentCrawlRequest: CrawlRequest | null;
 }
 
 export interface CrawlerDataFromServer {
   domains: CrawlerDomainFromServer[];
+  events: CrawlEventFromServer[];
+  most_recent_crawl_request: CrawlRequestFromServer | null;
 }
 
 export interface CrawlerDomainValidationResultFromServer {
@@ -129,7 +139,7 @@ export interface CrawlerDomainValidationResultFromServer {
   }>;
 }
 
-export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'invalid';
+export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'warning' | 'invalid';
 
 export interface CrawlerDomainValidationStep {
   state: CrawlerDomainValidationStepState;
@@ -179,6 +189,26 @@ export interface CrawlRequestFromServer {
 
 export interface CrawlRequest {
   id: string;
+  status: CrawlerStatus;
+  createdAt: string;
+  beganAt: string | null;
+  completedAt: string | null;
+}
+
+export type CrawlEventStage = 'crawl' | 'process';
+
+export interface CrawlEventFromServer {
+  id: string;
+  stage: CrawlEventStage;
+  status: CrawlerStatus;
+  created_at: string;
+  began_at: string | null;
+  completed_at: string | null;
+}
+
+export interface CrawlEvent {
+  id: string;
+  stage: CrawlEventStage;
   status: CrawlerStatus;
   createdAt: string;
   beganAt: string | null;

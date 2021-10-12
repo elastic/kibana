@@ -1,0 +1,4 @@
+{
+  "main": "../target_node/theme.js",
+  "types": "../target_types/theme.d.ts"
+}

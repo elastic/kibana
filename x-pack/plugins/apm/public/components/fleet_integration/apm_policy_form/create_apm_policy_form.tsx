@@ -21,7 +21,7 @@ export function CreateAPMPolicyForm({ newPolicy, onChange }: Props) {
   const [firstInput, ...restInputs] = newPolicy?.inputs;
   const vars = firstInput?.vars;
 
-  function handleChange(newVars: PackagePolicyVars, isValid: boolean) {
+  function updateAPMPolicy(newVars: PackagePolicyVars, isValid: boolean) {
     onChange({
       isValid,
       updatedPolicy: {
@@ -31,6 +31,10 @@ export function CreateAPMPolicyForm({ newPolicy, onChange }: Props) {
     });
   }
   return (
-    <APMPolicyForm vars={vars} onChange={handleChange} isCloudPolicy={false} />
+    <APMPolicyForm
+      vars={vars}
+      updateAPMPolicy={updateAPMPolicy}
+      isCloudPolicy={false}
+    />
   );
 }

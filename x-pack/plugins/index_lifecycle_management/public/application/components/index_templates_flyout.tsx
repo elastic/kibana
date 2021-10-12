@@ -18,15 +18,19 @@ import {
   EuiLink,
   EuiTitle,
 } from '@elastic/eui';
-import { PolicyFromES } from '../../../common/types';
 import { useKibana } from '../../shared_imports';
 import { getTemplateDetailsLink } from '../../../../index_management/public/';
 
 interface Props {
-  policy: PolicyFromES;
+  policyName: string;
+  indexTemplates: string[];
   close: () => void;
 }
-export const IndexTemplatesFlyout: FunctionComponent<Props> = ({ policy, close }) => {
+export const IndexTemplatesFlyout: FunctionComponent<Props> = ({
+  policyName,
+  indexTemplates,
+  close,
+}) => {
   const {
     services: { getUrlForApp },
   } = useKibana();
@@ -43,7 +47,7 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({ policy, close }
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.policyTable.indexTemplatesFlyout.headerText"
               defaultMessage="Index templates that apply {policyName}"
-              values={{ policyName: policy.name }}
+              values={{ policyName }}
             />
           </h2>
         </EuiTitle>
@@ -51,7 +55,7 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({ policy, close }
       <EuiFlyoutBody>
         <EuiInMemoryTable
           pagination={true}
-          items={policy.indexTemplates ?? []}
+          items={indexTemplates ?? []}
           columns={[
             {
               name: i18n.translate(

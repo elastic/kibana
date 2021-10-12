@@ -22,39 +22,41 @@ export interface RemoveWriteBlockParams {
 /**
  * Removes a write block from an index
  */
-export const removeWriteBlock = ({
-  client,
-  index,
-}: RemoveWriteBlockParams): TaskEither.TaskEither<
-  RetryableEsClientError,
-  'remove_write_block_succeeded'
-> => () => {
-  return client.indices
-    .putSettings<{
-      acknowledged: boolean;
-      shards_acknowledged: boolean;
-    }>(
-      {
-        index,
-        // Don't change any existing settings
-        preserve_existing: true,
-        body: {
-          settings: {
-            blocks: {
-              write: false,
+export const removeWriteBlock =
+  ({
+    client,
+    index,
+  }: RemoveWriteBlockParams): TaskEither.TaskEither<
+    RetryableEsClientError,
+    'remove_write_block_succeeded'
+  > =>
+  () => {
+    return client.indices
+      .putSettings<{
+        acknowledged: boolean;
+        shards_acknowledged: boolean;
+      }>(
+        {
+          index,
+          // Don't change any existing settings
+          preserve_existing: true,
+          body: {
+            settings: {
+              blocks: {
+                write: false,
+              },
             },
           },
         },
-      },
-      { maxRetries: 0 /** handle retry ourselves for now */ }
-    )
-    .then((res) => {
-      return res.body.acknowledged === true
-        ? Either.right('remove_write_block_succeeded' as const)
-        : Either.left({
-            type: 'retryable_es_client_error' as const,
-            message: 'remove_write_block_failed',
-          });
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+        { maxRetries: 0 /** handle retry ourselves for now */ }
+      )
+      .then((res) => {
+        return res.body.acknowledged === true
+          ? Either.right('remove_write_block_succeeded' as const)
+          : Either.left({
+              type: 'retryable_es_client_error' as const,
+              message: 'remove_write_block_failed',
+            });
+      })
+      .catch(catchRetryableEsClientErrors);
+  };

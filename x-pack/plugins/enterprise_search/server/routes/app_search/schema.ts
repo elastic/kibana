@@ -16,7 +16,7 @@ export function registerSchemaRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/schema',
+      path: '/internal/app_search/engines/{engineName}/schema',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -30,7 +30,7 @@ export function registerSchemaRoutes({
 
   router.post(
     skipBodyValidation({
-      path: '/api/app_search/engines/{engineName}/schema',
+      path: '/internal/app_search/engines/{engineName}/schema',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -44,7 +44,7 @@ export function registerSchemaRoutes({
 
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/reindex_job/{reindexJobId}',
+      path: '/internal/app_search/engines/{engineName}/reindex_job/{reindexJobId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

@@ -145,8 +145,12 @@ Object {
                   "isVisible": Array [
                     true,
                   ],
+                  "maxLines": Array [],
                   "position": Array [
                     "bottom",
+                  ],
+                  "shouldTruncate": Array [
+                    true,
                   ],
                   "showSingleSeries": Array [],
                   "verticalAlignment": Array [],

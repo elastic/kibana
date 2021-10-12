@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { satisfies } from 'semver';
 
 import {
   OsqueryManagerPackagePolicyInputStream,
@@ -23,6 +24,7 @@ import { OsqueryPackUploader } from './pack_uploader';
 import { getSupportedPlatforms } from '../queries/platforms/helpers';
 
 interface QueriesFieldProps {
+  handleNameChange: (name: string) => void;
   field: FieldHook<OsqueryManagerPackagePolicyInput[]>;
   integrationPackageVersion?: string | undefined;
   scheduledQueryGroupId: string;
@@ -82,6 +84,7 @@ const getNewStream = (payload: GetNewStreamProps) =>
 
 const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   field,
+  handleNameChange,
   integrationPackageVersion,
   scheduledQueryGroupId,
 }) => {
@@ -135,33 +138,42 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
         if (showEditQueryFlyout >= 0) {
           setValue(
             produce((draft) => {
+              // @ts-expect-error update
               draft[0].streams[showEditQueryFlyout].vars.id.value = updatedQuery.id;
+              // @ts-expect-error update
               draft[0].streams[showEditQueryFlyout].vars.interval.value = updatedQuery.interval;
+              // @ts-expect-error update
               draft[0].streams[showEditQueryFlyout].vars.query.value = updatedQuery.query;
 
               if (updatedQuery.platform?.length) {
+                // @ts-expect-error update
                 draft[0].streams[showEditQueryFlyout].vars.platform = {
                   type: 'text',
                   value: updatedQuery.platform,
                 };
               } else {
+                // @ts-expect-error update
                 delete draft[0].streams[showEditQueryFlyout].vars.platform;
               }
 
               if (updatedQuery.version?.length) {
+                // @ts-expect-error update
                 draft[0].streams[showEditQueryFlyout].vars.version = {
                   type: 'text',
                   value: updatedQuery.version,
                 };
               } else {
+                // @ts-expect-error update
                 delete draft[0].streams[showEditQueryFlyout].vars.version;
               }
 
               if (updatedQuery.ecs_mapping) {
+                // @ts-expect-error update
                 draft[0].streams[showEditQueryFlyout].vars.ecs_mapping = {
                   value: updatedQuery.ecs_mapping,
                 };
               } else {
+                // @ts-expect-error update
                 delete draft[0].streams[showEditQueryFlyout].vars.ecs_mapping;
               }
 
@@ -182,6 +194,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
         setValue(
           produce((draft) => {
             draft[0].streams.push(
+              // @ts-expect-error update
               getNewStream({
                 ...newQuery,
                 scheduledQueryGroupId,
@@ -208,17 +221,23 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   }, [setValue, tableSelectedItems]);
 
   const handlePackUpload = useCallback(
-    (newQueries) => {
+    (parsedContent, packName) => {
+      /* Osquery scheduled packs are supported since osquery_manager@0.5.0 */
+      const isOsqueryPackSupported = integrationPackageVersion
+        ? satisfies(integrationPackageVersion, '>=0.5.0')
+        : false;
+
       setValue(
         produce((draft) => {
-          forEach(newQueries, (newQuery, newQueryId) => {
+          forEach(parsedContent.queries, (newQuery, newQueryId) => {
             draft[0].streams.push(
+              // @ts-expect-error update
               getNewStream({
-                id: newQueryId,
-                interval: newQuery.interval,
+                id: isOsqueryPackSupported ? newQueryId : `pack_${packName}_${newQueryId}`,
+                interval: newQuery.interval ?? parsedContent.interval,
                 query: newQuery.query,
-                version: newQuery.version,
-                platform: getSupportedPlatforms(newQuery.platform),
+                version: newQuery.version ?? parsedContent.version,
+                platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
                 scheduledQueryGroupId,
               })
             );
@@ -227,13 +246,18 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
           return draft;
         })
       );
+
+      if (isOsqueryPackSupported) {
+        handleNameChange(packName);
+      }
     },
-    [scheduledQueryGroupId, setValue]
+    [handleNameChange, integrationPackageVersion, scheduledQueryGroupId, setValue]
   );
 
-  const tableData = useMemo(() => (field.value.length ? field.value[0].streams : []), [
-    field.value,
-  ]);
+  const tableData = useMemo(
+    () => (field.value.length ? field.value[0].streams : []),
+    [field.value]
+  );
 
   const uniqueQueryIds = useMemo<string[]>(
     () =>
@@ -277,7 +301,6 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       <EuiSpacer />
       {field.value && field.value[0].streams?.length ? (
         <ScheduledQueryGroupQueriesTable
-          editMode={true}
           data={tableData}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}

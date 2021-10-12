@@ -10,6 +10,7 @@ import '../../../typings/rison_node';
 import '../../infra/types/eui';
 // EUIBasicTable
 import '../../reporting/public/components/report_listing';
+import '../../reporting/server/lib/puid';
 import './apm_rum_react';
 
 // Allow unknown properties in an object

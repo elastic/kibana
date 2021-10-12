@@ -26,16 +26,22 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
 
   describe('find_statuses', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+    });
+
     beforeEach(async () => {
       await createSignalsIndex(supertest);
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
       await deleteAllRulesStatuses(es);
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     it('should return an empty find statuses body correctly if no statuses are loaded', async () => {

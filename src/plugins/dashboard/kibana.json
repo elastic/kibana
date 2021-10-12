@@ -10,7 +10,6 @@
     "data",
     "embeddable",
     "inspector",
-    "kibanaLegacy",
     "navigation",
     "savedObjects",
     "share",
@@ -19,7 +18,7 @@
     "presentationUtil",
     "visualizations"
   ],
-  "optionalPlugins": ["home", "spacesOss", "savedObjectsTaggingOss", "usageCollection"],
+  "optionalPlugins": ["home", "spaces", "savedObjectsTaggingOss", "usageCollection"],
   "server": true,
   "ui": true,
   "requiredBundles": ["home", "kibanaReact", "kibanaUtils", "presentationUtil"]

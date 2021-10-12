@@ -9,19 +9,12 @@
 import { getHighlightRequest } from './highlight_request';
 
 describe('getHighlightRequest', () => {
-  const queryStringQuery = { query_string: { query: 'foo' } };
-
   test('should be a function', () => {
     expect(getHighlightRequest).toBeInstanceOf(Function);
   });
 
-  test('should not modify the original query', () => {
-    getHighlightRequest(queryStringQuery, true);
-    expect(queryStringQuery.query_string).not.toHaveProperty('highlight');
-  });
-
   test('should return undefined if highlighting is turned off', () => {
-    const request = getHighlightRequest(queryStringQuery, false);
+    const request = getHighlightRequest(false);
     expect(request).toBe(undefined);
   });
 });

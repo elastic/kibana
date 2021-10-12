@@ -28,11 +28,13 @@ interface Props {
 
 const Illustration = styled(EuiImage)`
   margin-bottom: -68px;
+  position: relative;
+  top: -20px;
   width: 80%;
 `;
 
 const HeroImage = memo(() => {
-  const { toAssets } = useLinks();
+  const { toSharedAssets } = useLinks();
   const theme = useTheme() as EuiTheme;
   const IS_DARK_THEME = theme.darkMode;
 
@@ -43,8 +45,8 @@ const HeroImage = memo(() => {
       })}
       url={
         IS_DARK_THEME
-          ? toAssets('illustration_integrations_darkmode.svg')
-          : toAssets('illustration_integrations_lightmode.svg')
+          ? toSharedAssets('illustration_integrations_darkmode.svg')
+          : toSharedAssets('illustration_integrations_lightmode.svg')
       }
     />
   );
@@ -86,7 +88,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
           name: (
             <FormattedMessage
               id="xpack.fleet.appNavigation.integrationsAllLinkText"
-              defaultMessage="Browse"
+              defaultMessage="Browse integrations"
             />
           ),
           isSelected: section === 'browse',
@@ -96,7 +98,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
           name: (
             <FormattedMessage
               id="xpack.fleet.appNavigation.integrationsInstalledLinkText"
-              defaultMessage="Manage"
+              defaultMessage="Installed integrations"
             />
           ),
           isSelected: section === 'manage',

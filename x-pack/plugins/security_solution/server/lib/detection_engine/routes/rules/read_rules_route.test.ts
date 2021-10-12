@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { readRulesRoute } from './read_rules_route';
 import {
@@ -16,19 +18,24 @@ import {
 } from '../__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
 
-describe('read_signals', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('read_rules - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     server = serverMock.create();
+    logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
     clients.ruleExecutionLogClient.find.mockResolvedValue([]);
 
-    readRulesRoute(server.router);
+    readRulesRoute(server.router, logger, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -45,7 +52,7 @@ describe('read_signals', () => {
     });
 
     test('returns error if requesting a non-rule', async () => {
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(isRuleRegistryEnabled));
       const response = await server.inject(getReadRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({

@@ -25,7 +25,9 @@ import { mockLogger } from '../test_utils';
 import { throwUnrecoverableError } from './errors';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
+import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
 
+const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 
 let fakeTimer: sinon.SinonFakeTimers;
@@ -102,6 +104,31 @@ describe('TaskManagerRunner', () => {
         'taskManager markTaskAsRunning'
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+    });
+    test('provides execution context on run', async () => {
+      const { runner } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(executionContext.withContext).toHaveBeenCalledTimes(1);
+      expect(executionContext.withContext).toHaveBeenCalledWith(
+        {
+          description: 'run task',
+          id: 'foo',
+          name: 'run bar',
+          type: 'task manager',
+        },
+        expect.any(Function)
+      );
     });
     test('provides details about the task that is running', async () => {
       const { runner } = await pendingStageSetup({
@@ -690,6 +717,31 @@ describe('TaskManagerRunner', () => {
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
     });
+    test('provides execution context on run', async () => {
+      const { runner } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(executionContext.withContext).toHaveBeenCalledTimes(1);
+      expect(executionContext.withContext).toHaveBeenCalledWith(
+        {
+          description: 'run task',
+          id: 'foo',
+          name: 'run bar',
+          type: 'task manager',
+        },
+        expect.any(Function)
+      );
+    });
     test('queues a reattempt if the task fails', async () => {
       const initialAttempts = _.random(0, 2);
       const id = Date.now().toString();
@@ -858,7 +910,11 @@ describe('TaskManagerRunner', () => {
       const id = _.random(1, 20).toString();
       const error = new Error('Dangit!');
       const onTaskEvent = jest.fn();
-      const { runner, store, instance: originalInstance } = await readyToRunStageSetup({
+      const {
+        runner,
+        store,
+        instance: originalInstance,
+      } = await readyToRunStageSetup({
         onTaskEvent,
         instance: {
           id,
@@ -1355,7 +1411,11 @@ describe('TaskManagerRunner', () => {
         const id = _.random(1, 20).toString();
         const error = new Error('Dangit!');
         const onTaskEvent = jest.fn();
-        const { runner, store, instance: originalInstance } = await readyToRunStageSetup({
+        const {
+          runner,
+          store,
+          instance: originalInstance,
+        } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
             id,
@@ -1465,6 +1525,7 @@ describe('TaskManagerRunner', () => {
       instance,
       definitions,
       onTaskEvent: opts.onTaskEvent,
+      executionContext,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

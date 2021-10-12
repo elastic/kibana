@@ -38,7 +38,7 @@ interface ConfigWithoutBodyOptions<P, Q, B, Method extends RouteMethod>
  *
  * Example:
  *  router.put({
- *    path: '/api/app_search/engines/{engineName}/example',
+ *    path: '/internal/app_search/engines/{engineName}/example',
  *    validate: {
  *      params: schema.object({
  *        engineName: schema.string(),
@@ -52,7 +52,7 @@ interface ConfigWithoutBodyOptions<P, Q, B, Method extends RouteMethod>
  * This helper applies that pattern, while maintaining existing options:
  *
  *  router.put(skipBodyValidation({
- *    path: '/api/app_search/engines/{engineName}/example',
+ *    path: '/internal/app_search/engines/{engineName}/example',
  *    validate: {
  *      params: schema.object({
  *        engineName: schema.string(),

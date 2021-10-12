@@ -78,7 +78,9 @@ export const MetricsAPISeriesRT = rt.intersection([
 ]);
 
 export const MetricsAPIResponseRT = rt.type({
-  series: rt.array(MetricsAPISeriesRT),
+  series: rt.array(
+    rt.intersection([MetricsAPISeriesRT, rt.partial({ metricsets: rt.array(rt.string) })])
+  ),
   info: MetricsAPIPageInfoRT,
 });
 

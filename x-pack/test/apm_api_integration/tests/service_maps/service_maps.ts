@@ -15,8 +15,10 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const supertestAsApmReadUserWithoutMlAccess = getService('supertestAsApmReadUserWithoutMlAccess');
+  const supertest = getService('legacySupertestAsApmReadUser');
+  const supertestAsApmReadUserWithoutMlAccess = getService(
+    'legacySupertestAsApmReadUserWithoutMlAccess'
+  );
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -26,7 +28,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   registry.when('Service map with a basic license', { config: 'basic', archives: [] }, () => {
     it('is only be available to users with Platinum license (or higher)', async () => {
       const response = await supertest.get(
-        `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+        `/internal/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
       );
 
       expect(response.status).to.be(403);
@@ -38,10 +40,10 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   });
 
   registry.when('Service map without data', { config: 'trial', archives: [] }, () => {
-    describe('/api/apm/service-map', () => {
+    describe('/internal/apm/service-map', () => {
       it('returns an empty list', async () => {
         const response = await supertest.get(
-          `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+          `/internal/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
         );
 
         expect(response.status).to.be(200);
@@ -49,14 +51,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/api/apm/service-map/service/{serviceName}', () => {
+    describe('/internal/apm/service-map/service/{serviceName}', () => {
       it('returns an object with nulls', async () => {
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
           environment: 'ENVIRONMENT_ALL',
         });
-        const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
+        const response = await supertest.get(`/internal/apm/service-map/service/opbeans-node?${q}`);
 
         expect(response.status).to.be(200);
 
@@ -74,14 +76,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/api/apm/service-map/backend/{backendName}', () => {
+    describe('/internal/apm/service-map/backend/{backendName}', () => {
       it('returns an object with nulls', async () => {
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
           environment: 'ENVIRONMENT_ALL',
         });
-        const response = await supertest.get(`/api/apm/service-map/backend/postgres?${q}`);
+        const response = await supertest.get(`/internal/apm/service-map/backend/postgres?${q}`);
 
         expect(response.status).to.be(200);
 
@@ -99,12 +101,12 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   });
 
   registry.when('Service Map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
-    describe('/api/apm/service-map', () => {
+    describe('/internal/apm/service-map', () => {
       let response: PromiseReturnType<typeof supertest.get>;
 
       before(async () => {
         response = await supertest.get(
-          `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+          `/internal/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
         );
       });
 
@@ -157,7 +159,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         describe('with the default apm user', () => {
           before(async () => {
             response = await supertest.get(
-              `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+              `/internal/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
             );
           });
 
@@ -244,7 +246,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         describe('with a user that does not have access to ML', () => {
           before(async () => {
             response = await supertestAsApmReadUserWithoutMlAccess.get(
-              `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+              `/internal/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
             );
           });
 
@@ -265,7 +267,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           it('returns service map elements', async () => {
             response = await supertest.get(
               url.format({
-                pathname: '/api/apm/service-map',
+                pathname: '/internal/apm/service-map',
                 query: {
                   environment: 'ENVIRONMENT_ALL',
                   start: metadata.start,
@@ -282,14 +284,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/api/apm/service-map/service/{serviceName}', () => {
+    describe('/internal/apm/service-map/service/{serviceName}', () => {
       it('returns an object with data', async () => {
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
           environment: 'ENVIRONMENT_ALL',
         });
-        const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
+        const response = await supertest.get(`/internal/apm/service-map/service/opbeans-node?${q}`);
 
         expect(response.status).to.be(200);
 
@@ -307,14 +309,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/api/apm/service-map/backend/{backendName}', () => {
+    describe('/internal/apm/service-map/backend/{backendName}', () => {
       it('returns an object with data', async () => {
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
           environment: 'ENVIRONMENT_ALL',
         });
-        const response = await supertest.get(`/api/apm/service-map/backend/postgresql?${q}`);
+        const response = await supertest.get(`/internal/apm/service-map/backend/postgresql?${q}`);
 
         expect(response.status).to.be(200);
 

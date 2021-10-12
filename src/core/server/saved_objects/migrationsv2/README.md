@@ -36,7 +36,7 @@
   - [REINDEX_SOURCE_TO_TEMP_READ](#reindex_source_to_temp_read)
     - [Next action](#next-action-11)
     - [New control state](#new-control-state-11)
-  - [REINDEX_SOURCE_TO_TEMP_INDEX](#reindex_source_to_temp_index)
+  - [REINDEX_SOURCE_TO_TEMP_TRANSFORM](#REINDEX_SOURCE_TO_TEMP_TRANSFORM)
     - [Next action](#next-action-12)
     - [New control state](#new-control-state-12)
   - [REINDEX_SOURCE_TO_TEMP_INDEX_BULK](#reindex_source_to_temp_index_bulk)
@@ -284,11 +284,11 @@ Read the next batch of outdated documents from the source index by using search 
 
 ### New control state
 1. If the batch contained > 0 documents
-  → `REINDEX_SOURCE_TO_TEMP_INDEX`
+  → `REINDEX_SOURCE_TO_TEMP_TRANSFORM`
 2. If there are no more documents returned
   → `REINDEX_SOURCE_TO_TEMP_CLOSE_PIT`
 
-## REINDEX_SOURCE_TO_TEMP_INDEX
+## REINDEX_SOURCE_TO_TEMP_TRANSFORM
 ### Next action
 `transformRawDocs`
 
@@ -316,7 +316,10 @@ completed this step:
  - temp index has a write block
  - temp index is not found
 ### New control state
+1. If `currentBatch` is the last batch in `transformedDocBatches`
   → `REINDEX_SOURCE_TO_TEMP_READ`
+2. If there are more batches left in `transformedDocBatches`
+  → `REINDEX_SOURCE_TO_TEMP_INDEX_BULK`
    
 ## REINDEX_SOURCE_TO_TEMP_CLOSE_PIT
 ### Next action
@@ -354,7 +357,7 @@ documents.
 If another instance has a disabled plugin it will reindex that plugin's
 documents without transforming them. Because this instance doesn't know which
 plugins were disabled by the instance that performed the
-`REINDEX_SOURCE_TO_TEMP_INDEX` step, we need to search for outdated documents
+`REINDEX_SOURCE_TO_TEMP_TRANSFORM` step, we need to search for outdated documents
 and transform them to ensure that everything is up to date.
 
 ### New control state

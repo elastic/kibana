@@ -20,7 +20,7 @@ describe('utils', () => {
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
-    ((uuid.v4 as unknown) as jest.Mock)
+    (uuid.v4 as unknown as jest.Mock)
       .mockImplementationOnce(() => '123')
       .mockImplementationOnce(() => '456');
 

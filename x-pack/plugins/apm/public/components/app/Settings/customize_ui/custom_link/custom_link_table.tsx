@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -50,7 +51,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
     },
     {
       width: '160px',
-      align: 'right',
+      align: RIGHT_ALIGNMENT,
       field: '@timestamp',
       name: i18n.translate(
         'xpack.apm.settings.customizeUI.customLink.table.lastUpdated',
@@ -79,6 +80,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
                 icon: 'pencil',
                 color: 'primary',
                 type: 'icon',
+                'data-test-subj': 'editCustomLink',
                 onClick: (customLink: CustomLink) => {
                   onCustomLinkSelected(customLink);
                 },

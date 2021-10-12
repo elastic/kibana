@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { WorkpadApp } from './workpad_app';
+export { WorkpadApp, WORKPAD_CONTAINER_ID } from './workpad_app';
 export { WorkpadApp as WorkpadAppComponent } from './workpad_app.component';

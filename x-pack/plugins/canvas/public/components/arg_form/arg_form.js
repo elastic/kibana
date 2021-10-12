@@ -75,7 +75,6 @@ export const ArgForm = (props) => {
             Promise.resolve().then(() => {
               // Provide templates with a renderError method, and wrap the error in a known error type
               // to stop Kibana's window.error from being called
-              // see window_error_handler.js for details,
               isMounted.current && setRenderError(true);
             });
           },

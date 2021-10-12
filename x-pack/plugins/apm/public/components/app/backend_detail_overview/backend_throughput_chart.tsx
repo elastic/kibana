@@ -23,7 +23,7 @@ export function BackendThroughputChart({ height }: { height: number }) {
 
   const {
     query: { rangeFrom, rangeTo, kuery, environment },
-  } = useApmParams('/backends/:backendName/overview');
+  } = useApmParams('/backends/{backendName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -36,7 +36,7 @@ export function BackendThroughputChart({ height }: { height: number }) {
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/backends/{backendName}/charts/throughput',
+        endpoint: 'GET /internal/apm/backends/{backendName}/charts/throughput',
         params: {
           path: {
             backendName,

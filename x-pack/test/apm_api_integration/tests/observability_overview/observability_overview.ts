@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
           const response = await supertest.get(
-            `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
+            `/internal/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
           );
           expect(response.status).to.be(200);
 
@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('returns the service count and transaction coordinates', async () => {
         const response = await supertest.get(
-          `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
+          `/internal/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
         );
         expect(response.status).to.be(200);
 

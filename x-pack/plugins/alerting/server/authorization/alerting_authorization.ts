@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { JsonObject } from '@kbn/utility-types';
+import { KueryNode } from '@kbn/es-query';
 import { ALERTS_FEATURE_ID, RuleTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryRuleType } from '../rule_type_registry';
@@ -20,7 +21,6 @@ import {
   asFiltersBySpaceId,
   AlertingAuthorizationFilterOpts,
 } from './alerting_authorization_kuery';
-import { KueryNode } from '../../../../../src/plugins/data/server';
 
 export enum AlertingAuthorizationEntity {
   Rule = 'rule',
@@ -312,7 +312,11 @@ export class AlertingAuthorization {
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
-        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterOpts, this.spaceId),
+        filter: asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          filterOpts,
+          this.spaceId
+        ) as JsonObject,
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(
@@ -356,7 +360,7 @@ export class AlertingAuthorization {
     }
 
     return {
-      filter: asFiltersBySpaceId(filterOpts, this.spaceId),
+      filter: asFiltersBySpaceId(filterOpts, this.spaceId) as JsonObject,
       ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {},
       logSuccessfulAuthorization: () => {},
     };
@@ -431,12 +435,8 @@ export class AlertingAuthorization {
           : // only has some of the required privileges
             privileges.kibana.reduce((authorizedRuleTypes, { authorized, privilege }) => {
               if (authorized && privilegeToRuleType.has(privilege)) {
-                const [
-                  ruleType,
-                  feature,
-                  hasPrivileges,
-                  isAuthorizedAtProducerLevel,
-                ] = privilegeToRuleType.get(privilege)!;
+                const [ruleType, feature, hasPrivileges, isAuthorizedAtProducerLevel] =
+                  privilegeToRuleType.get(privilege)!;
                 ruleType.authorizedConsumers[feature] = mergeHasPrivileges(
                   hasPrivileges,
                   ruleType.authorizedConsumers[feature]
@@ -486,8 +486,8 @@ function mergeHasPrivileges(left: HasPrivileges, right?: HasPrivileges): HasPriv
 }
 
 function hasPrivilegeByOperation(operation: ReadOperations | WriteOperations): HasPrivileges {
-  const read = Object.values(ReadOperations).includes((operation as unknown) as ReadOperations);
-  const all = Object.values(WriteOperations).includes((operation as unknown) as WriteOperations);
+  const read = Object.values(ReadOperations).includes(operation as unknown as ReadOperations);
+  const all = Object.values(WriteOperations).includes(operation as unknown as WriteOperations);
   return {
     read: read || all,
     all,

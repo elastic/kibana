@@ -9,14 +9,14 @@ import { groupBy, zip } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
-import { getRedirectAppPathHome } from '../../../../common/constants';
 import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../../common/types';
 import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
 import { getScreenshots$, ScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
 import { PdfMaker } from '../../common/pdf';
-import { getFullUrls } from '../../common/v2/get_full_urls';
+import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
+import type { TaskPayloadPDFV2 } from '../types';
 import { getTracker } from './tracker';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
@@ -36,7 +36,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
 
   return function generatePdfObservable(
     logger: LevelLogger,
-    jobId: string,
+    job: TaskPayloadPDFV2,
     title: string,
     locatorParams: LocatorParams[],
     browserTimezone: string | undefined,
@@ -56,8 +56,9 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     /**
      * For each locator we get the relative URL to the redirect app
      */
-    const relativeUrls = locatorParams.map(() => getRedirectAppPathHome());
-    const urls = getFullUrls(reporting.getConfig(), relativeUrls);
+    const urls = locatorParams.map(() =>
+      getFullRedirectAppUrl(reporting.getConfig(), job.spaceId, job.forceNow)
+    );
 
     const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
@@ -80,12 +81,12 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
 
         results.forEach((r) => {
           r.screenshots.forEach((screenshot) => {
-            logger.debug(`Adding image to PDF. Image base64 size: ${screenshot.base64EncodedData?.length || 0}`); // prettier-ignore
+            logger.debug(`Adding image to PDF. Image base64 size: ${screenshot.data.byteLength}`); // prettier-ignore
             tracker.startAddImage();
             tracker.endAddImage();
-            pdfOutput.addImage(screenshot.base64EncodedData, {
-              title: screenshot.title,
-              description: screenshot.description,
+            pdfOutput.addImage(screenshot.data, {
+              title: screenshot.title ?? undefined,
+              description: screenshot.description ?? undefined,
             });
           });
         });

@@ -44,7 +44,7 @@ It might happen that a user modifies their FanciPlugin 1.0 export file to have d
 
 Similarly, Kibana server APIs assume that they are sent up to date documents unless a document specifies a migrationVersion. This means that out-of-date callers of our APIs will send us out-of-date documents, and those documents will be accepted and stored as if they are up-to-date.
 
-To prevent this from happening, migration authors should _always_ write a [validation](../validation) function that throws an error if a document is not up to date, and this validation function should always be updated any time a new migration is added for the relevent document types.
+To prevent this from happening, migration authors should _always_ write a [validation](../validation) function that throws an error if a document is not up to date, and this validation function should always be updated any time a new migration is added for the relevant document types.
 
 ## Document ownership
 
@@ -92,7 +92,7 @@ Each migration function only needs to be able to handle documents belonging to t
 
 ## Disabled plugins
 
-If a plugin is disbled, all of its documents are retained in the Kibana index. They can be imported and exported. When the plugin is re-enabled, Kibana will migrate any out of date documents that were imported or retained while it was disabled.
+If a plugin is disabled, all of its documents are retained in the Kibana index. They can be imported and exported. When the plugin is re-enabled, Kibana will migrate any out of date documents that were imported or retained while it was disabled.
 
 ## Configuration
 
@@ -116,7 +116,7 @@ Kibana index migrations expose a few config settings which might be tweaked:
 
 To illustrate how migrations work, let's walk through an example, using a fictional plugin: `FanciPlugin`.
 
-FanciPlugin 1.0 had a mappping that looked like this:
+FanciPlugin 1.0 had a mapping that looked like this:
 
 ```js
 {

@@ -1,0 +1,28 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "alerts-test-data",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "env": {
+          "ignore_above": 256,
+          "type": "keyword"
+        },
+        "value": {
+          "type": "long"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

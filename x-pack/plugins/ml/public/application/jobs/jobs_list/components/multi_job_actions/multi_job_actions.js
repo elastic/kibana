@@ -66,6 +66,7 @@ export class MultiJobActions extends Component {
                 jobs={this.props.selectedJobs}
                 showStartDatafeedModal={this.props.showStartDatafeedModal}
                 showDeleteJobModal={this.props.showDeleteJobModal}
+                showResetJobModal={this.props.showResetJobModal}
                 refreshJobs={this.props.refreshJobs}
                 showCreateAlertFlyout={this.props.showCreateAlertFlyout}
               />
@@ -81,6 +82,7 @@ MultiJobActions.propTypes = {
   allJobIds: PropTypes.array.isRequired,
   showStartDatafeedModal: PropTypes.func.isRequired,
   showDeleteJobModal: PropTypes.func.isRequired,
+  showResetJobModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
   showCreateAlertFlyout: PropTypes.func.isRequired,
 };

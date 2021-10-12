@@ -16,11 +16,14 @@ import { getListArrayMock } from '../../../../common/detection_engine/schemas/ty
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
-describe('getExportAll', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('getExportAll - %s', (_, isRuleRegistryEnabled) => {
   test('it exports everything from the alerts client', async () => {
     const rulesClient = rulesClientMock.create();
-    const result = getFindResultWithSingleHit();
-    const alert = getAlertMock(getQueryRuleParams());
+    const result = getFindResultWithSingleHit(isRuleRegistryEnabled);
+    const alert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
     alert.params = {
       ...alert.params,
       filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
@@ -32,7 +35,7 @@ describe('getExportAll', () => {
     result.data = [alert];
     rulesClient.find.mockResolvedValue(result);
 
-    const exports = await getExportAll(rulesClient);
+    const exports = await getExportAll(rulesClient, isRuleRegistryEnabled);
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
     expect(rulesJson).toEqual({
@@ -94,7 +97,7 @@ describe('getExportAll', () => {
 
     rulesClient.find.mockResolvedValue(findResult);
 
-    const exports = await getExportAll(rulesClient);
+    const exports = await getExportAll(rulesClient, isRuleRegistryEnabled);
     expect(exports).toEqual({
       rulesNdjson: '',
       exportDetails: '{"exported_count":0,"missing_rules":[],"missing_rules_count":0}\n',

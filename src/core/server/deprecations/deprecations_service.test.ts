@@ -66,7 +66,7 @@ describe('DeprecationsService', () => {
     const deprecationsRegistry = mockDeprecationsRegistry.create();
     const getDeprecationsContext = mockDeprecationsRegistry.createGetDeprecationsContext();
 
-    it('registers config deprecations', () => {
+    it('registers config deprecations', async () => {
       const deprecationsService = new DeprecationsService(coreContext);
       coreContext.configService.getHandledDeprecatedConfigs.mockReturnValue([
         [
@@ -78,7 +78,7 @@ describe('DeprecationsService', () => {
               correctiveActions: {
                 manualSteps: [
                   'Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.',
-                  'Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role.',
+                  'Using Kibana role-mapping management, change all role-mappings which assign the kibana_user role to the kibana_admin role.',
                 ],
               },
             },
@@ -93,16 +93,17 @@ describe('DeprecationsService', () => {
       expect(deprecationsFactory.getRegistry).toBeCalledTimes(1);
       expect(deprecationsFactory.getRegistry).toBeCalledWith('testDomain');
       expect(deprecationsRegistry.registerDeprecations).toBeCalledTimes(1);
-      const configDeprecations = deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
-        getDeprecationsContext
-      );
+      const configDeprecations =
+        await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
+          getDeprecationsContext
+        );
       expect(configDeprecations).toMatchInlineSnapshot(`
         Array [
           Object {
             "correctiveActions": Object {
               "manualSteps": Array [
                 "Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.",
-                "Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role.",
+                "Using Kibana role-mapping management, change all role-mappings which assign the kibana_user role to the kibana_admin role.",
               ],
             },
             "deprecationType": "config",
@@ -110,9 +111,37 @@ describe('DeprecationsService', () => {
             "level": "critical",
             "message": "testMessage",
             "requireRestart": true,
+            "title": "testDomain has a deprecated setting",
           },
         ]
       `);
+    });
+
+    it('accepts `level` field overrides', async () => {
+      const deprecationsService = new DeprecationsService(coreContext);
+      coreContext.configService.getHandledDeprecatedConfigs.mockReturnValue([
+        [
+          'testDomain',
+          [
+            {
+              message: 'testMessage',
+              level: 'warning',
+              correctiveActions: {
+                manualSteps: ['step a'],
+              },
+            },
+          ],
+        ],
+      ]);
+
+      deprecationsFactory.getRegistry.mockReturnValue(deprecationsRegistry);
+      deprecationsService['registerConfigDeprecationsInfo'](deprecationsFactory);
+
+      const configDeprecations =
+        await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
+          getDeprecationsContext
+        );
+      expect(configDeprecations[0].level).toBe('warning');
     });
   });
 });

@@ -22,9 +22,9 @@ describe('API keys enabled', () => {
   function getMockContext(
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
-    return ({
+    return {
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-    } as unknown) as SecurityRequestHandlerContext;
+    } as unknown as SecurityRequestHandlerContext;
   }
 
   let routeHandler: RequestHandler<any, any, any, any>;

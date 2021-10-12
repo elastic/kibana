@@ -9,6 +9,7 @@ import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
 import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
 import { ChromeStart, I18nStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { CoreStart } from 'src/core/public';
+import { ReactElement } from 'react';
 import {
   fieldsReducer,
   FieldsState,
@@ -24,19 +25,10 @@ import {
 } from './advanced_settings';
 import { DatasourceState, datasourceReducer } from './datasource';
 import { datasourceSaga } from './datasource.sagas';
-import {
-  IndexPatternProvider,
-  Workspace,
-  IndexPatternSavedObject,
-  GraphSavePolicy,
-  GraphWorkspaceSavedObject,
-  AdvancedSettings,
-  WorkspaceField,
-  UrlTemplate,
-} from '../types';
+import { IndexPatternProvider, Workspace, GraphSavePolicy, AdvancedSettings } from '../types';
 import { loadingSaga, savingSaga } from './persistence';
 import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
-import { fillWorkspaceSaga } from './workspace';
+import { fillWorkspaceSaga, submitSearchSaga, workspaceReducer, WorkspaceState } from './workspace';
 
 export interface GraphState {
   fields: FieldsState;
@@ -44,28 +36,26 @@ export interface GraphState {
   advancedSettings: AdvancedSettingsState;
   datasource: DatasourceState;
   metaData: MetaDataState;
+  workspace: WorkspaceState;
 }
 
 export interface GraphStoreDependencies {
   addBasePath: (url: string) => string;
   indexPatternProvider: IndexPatternProvider;
-  indexPatterns: IndexPatternSavedObject[];
-  createWorkspace: (index: string, advancedSettings: AdvancedSettings) => void;
-  getWorkspace: () => Workspace | null;
-  getSavedWorkspace: () => GraphWorkspaceSavedObject;
+  createWorkspace: (index: string, advancedSettings: AdvancedSettings) => Workspace;
+  getWorkspace: () => Workspace | undefined;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   overlays: OverlayStart;
   savedObjectsClient: SavedObjectsClientContract;
-  showSaveModal: (el: React.ReactNode, I18nContext: I18nStart['Context']) => void;
+  showSaveModal: (el: ReactElement, I18nContext: I18nStart['Context']) => void;
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
-  notifyAngular: () => void;
-  setLiveResponseFields: (fields: WorkspaceField[]) => void;
-  setUrlTemplates: (templates: UrlTemplate[]) => void;
-  setWorkspaceInitialized: () => void;
+  notifyReact: () => void;
   chrome: ChromeStart;
   I18nContext: I18nStart['Context'];
+  basePath: string;
+  handleSearchQueryError: (err: Error | string) => void;
 }
 
 export function createRootReducer(addBasePath: (url: string) => string) {
@@ -75,6 +65,7 @@ export function createRootReducer(addBasePath: (url: string) => string) {
     advancedSettings: advancedSettingsReducer,
     datasource: datasourceReducer,
     metaData: metaDataReducer,
+    workspace: workspaceReducer,
   });
 }
 
@@ -89,6 +80,7 @@ function registerSagas(sagaMiddleware: SagaMiddleware<object>, deps: GraphStoreD
   sagaMiddleware.run(syncBreadcrumbSaga(deps));
   sagaMiddleware.run(syncTemplatesSaga(deps));
   sagaMiddleware.run(fillWorkspaceSaga(deps));
+  sagaMiddleware.run(submitSearchSaga(deps));
 }
 
 export const createGraphStore = (deps: GraphStoreDependencies) => {

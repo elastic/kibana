@@ -10,6 +10,7 @@ exports[`IntegrationLink component renders a disabled link when href is undefine
     <EuiToolTip
       content="Required data for this integration was not found."
       delay="regular"
+      display="inlineBlock"
       position="top"
     >
       <EuiIcon
@@ -41,6 +42,7 @@ exports[`IntegrationLink component renders without errors 1`] = `
       <EuiToolTip
         content="info for bar"
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <EuiIcon

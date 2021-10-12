@@ -18,7 +18,7 @@ describe('DetailView', () => {
 
   it('should render empty state', () => {
     const wrapper = shallow(
-      <DetailView errorGroup={{} as any} urlParams={{}} />
+      <DetailView errorGroup={{} as any} urlParams={{}} kuery="" />
     );
     expect(wrapper.isEmptyRender()).toBe(true);
   });
@@ -41,7 +41,7 @@ describe('DetailView', () => {
     };
 
     const wrapper = shallow(
-      <DetailView errorGroup={errorGroup} urlParams={{}} />
+      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
     ).find('DiscoverErrorLink');
 
     expect(wrapper.exists()).toBe(true);
@@ -60,7 +60,7 @@ describe('DetailView', () => {
       transaction: undefined,
     };
     const wrapper = shallow(
-      <DetailView errorGroup={errorGroup} urlParams={{}} />
+      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
     ).find('Summary');
 
     expect(wrapper.exists()).toBe(true);
@@ -80,7 +80,7 @@ describe('DetailView', () => {
       } as any,
     };
     const wrapper = shallow(
-      <DetailView errorGroup={errorGroup} urlParams={{}} />
+      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
     ).find('EuiTabs');
 
     expect(wrapper.exists()).toBe(true);
@@ -100,7 +100,7 @@ describe('DetailView', () => {
       } as any,
     };
     const wrapper = shallow(
-      <DetailView errorGroup={errorGroup} urlParams={{}} />
+      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
     ).find('TabContent');
 
     expect(wrapper.exists()).toBe(true);
@@ -124,7 +124,7 @@ describe('DetailView', () => {
       } as any,
     };
     expect(() =>
-      shallow(<DetailView errorGroup={errorGroup} urlParams={{}} />)
+      shallow(<DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />)
     ).not.toThrowError();
   });
 });

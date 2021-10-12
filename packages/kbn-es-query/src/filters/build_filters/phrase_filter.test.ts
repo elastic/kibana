@@ -10,9 +10,11 @@ import {
   buildInlineScriptForPhraseFilter,
   buildPhraseFilter,
   getPhraseFilterField,
+  PhraseFilter,
 } from './phrase_filter';
 import { fields, getField } from '../stubs';
 import { IndexPatternBase } from '../../es_query';
+import { estypes } from '@elastic/elasticsearch';
 
 describe('Phrase filter builder', () => {
   let indexPattern: IndexPatternBase;
@@ -81,13 +83,15 @@ describe('Phrase filter builder', () => {
         index: 'id',
         field: 'script number',
       },
-      script: {
+      query: {
         script: {
-          lang: 'expression',
-          params: {
-            value: 5,
+          script: {
+            lang: 'expression',
+            params: {
+              value: 5,
+            },
+            source: '(1234) == value',
           },
-          source: '(1234) == value',
         },
       },
     });
@@ -101,13 +105,15 @@ describe('Phrase filter builder', () => {
         index: 'id',
         field: 'script number',
       },
-      script: {
+      query: {
         script: {
-          lang: 'expression',
-          params: {
-            value: 5,
+          script: {
+            lang: 'expression',
+            params: {
+              value: 5,
+            },
+            source: '(1234) == value',
           },
-          source: '(1234) == value',
         },
       },
     });
@@ -117,7 +123,9 @@ describe('Phrase filter builder', () => {
 describe('buildInlineScriptForPhraseFilter', () => {
   it('should wrap painless scripts in a lambda', () => {
     const field = {
-      lang: 'painless',
+      name: 'aa',
+      type: 'b',
+      lang: 'painless' as estypes.ScriptLanguage,
       script: 'return foo;',
     };
 
@@ -130,7 +138,9 @@ describe('buildInlineScriptForPhraseFilter', () => {
 
   it('should create a simple comparison for other langs', () => {
     const field = {
-      lang: 'expression',
+      name: 'aa',
+      type: 'b',
+      lang: 'expression' as estypes.ScriptLanguage,
       script: 'doc[bytes].value',
     };
 
@@ -148,7 +158,7 @@ describe('getPhraseFilterField', function () {
   it('should return the name of the field a phrase query is targeting', () => {
     const field = indexPattern.fields.find((patternField) => patternField.name === 'extension');
     const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
-    const result = getPhraseFilterField(filter);
+    const result = getPhraseFilterField(filter as PhraseFilter);
     expect(result).toBe('extension');
   });
 });

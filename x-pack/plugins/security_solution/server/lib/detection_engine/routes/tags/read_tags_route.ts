@@ -12,7 +12,10 @@ import { buildSiemResponse } from '../utils';
 
 import { readTags } from '../../tags/read_tags';
 
-export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
+export const readTagsRoute = (
+  router: SecuritySolutionPluginRouter,
+  isRuleRegistryEnabled: boolean
+) => {
   router.get(
     {
       path: DETECTION_ENGINE_TAGS_URL,
@@ -31,6 +34,7 @@ export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
 
       try {
         const tags = await readTags({
+          isRuleRegistryEnabled,
           rulesClient,
         });
         return response.ok({ body: tags });

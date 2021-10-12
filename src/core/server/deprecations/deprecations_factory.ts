@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { DeprecationsRegistry } from './deprecations_registry';
 import type { Logger } from '../logging';
 import type {
@@ -89,10 +90,24 @@ export class DeprecationsFactory {
           );
           return [
             {
-              message: `Failed to get deprecations info for plugin "${domainId}".`,
+              title: i18n.translate('core.deprecations.deprecations.fetchFailedTitle', {
+                defaultMessage: `Failed to fetch deprecations for {domainId}`,
+                values: { domainId },
+              }),
+              message: i18n.translate('core.deprecations.deprecations.fetchFailedMessage', {
+                defaultMessage: 'Unable to fetch deprecations info for plugin {domainId}.',
+                values: { domainId },
+              }),
               level: 'fetch_error',
               correctiveActions: {
-                manualSteps: ['Check Kibana server logs for error message.'],
+                manualSteps: [
+                  i18n.translate(
+                    'core.deprecations.deprecations.fetchFailed.manualStepOneMessage',
+                    {
+                      defaultMessage: 'Check Kibana server logs for error message.',
+                    }
+                  ),
+                ],
               },
             },
           ];

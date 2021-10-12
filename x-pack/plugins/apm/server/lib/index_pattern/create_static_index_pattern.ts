@@ -8,7 +8,7 @@
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
 import apmIndexPattern from '../../tutorial/index_pattern.json';
-import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
+import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client.js';
@@ -45,29 +45,12 @@ export async function createStaticIndexPattern({
       return false;
     }
 
-    const apmIndexPatternTitle = getApmIndexPatternTitle(config);
-
-    if (!overwrite) {
-      try {
-        const {
-          attributes: { title: existingApmIndexPatternTitle },
-        }: {
-          attributes: ApmIndexPatternAttributes;
-        } = await savedObjectsClient.get(
-          'index-pattern',
-          APM_STATIC_INDEX_PATTERN_ID
-        );
-        // if the existing index pattern does not matches the new one, force an update
-        if (existingApmIndexPatternTitle !== apmIndexPatternTitle) {
-          overwrite = true;
-        }
-      } catch (e) {
-        // if the index pattern (saved object) is not found, then we can continue with creation
-        if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
-          throw e;
-        }
-      }
-    }
+    const apmIndexPatternTitle = getApmIndexPatternTitle(setup.indices);
+    const forceOverwrite = await getForceOverwrite({
+      apmIndexPatternTitle,
+      overwrite,
+      savedObjectsClient,
+    });
 
     try {
       await withApmSpan('create_index_pattern_saved_object', () =>
@@ -79,7 +62,7 @@ export async function createStaticIndexPattern({
           },
           {
             id: APM_STATIC_INDEX_PATTERN_ID,
-            overwrite,
+            overwrite: forceOverwrite ? true : overwrite,
             namespace: spaceId,
           }
         )
@@ -94,4 +77,35 @@ export async function createStaticIndexPattern({
       throw e;
     }
   });
+}
+
+// force an overwrite of the index pattern if the index pattern has been changed
+async function getForceOverwrite({
+  savedObjectsClient,
+  overwrite,
+  apmIndexPatternTitle,
+}: {
+  savedObjectsClient: InternalSavedObjectsClient;
+  overwrite: boolean;
+  apmIndexPatternTitle: string;
+}) {
+  if (!overwrite) {
+    try {
+      const existingIndexPattern =
+        await savedObjectsClient.get<ApmIndexPatternAttributes>(
+          'index-pattern',
+          APM_STATIC_INDEX_PATTERN_ID
+        );
+
+      // if the existing index pattern does not matches the new one, force an update
+      return existingIndexPattern.attributes.title !== apmIndexPatternTitle;
+    } catch (e) {
+      // ignore exception if the index pattern (saved object) is not found
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return false;
+      }
+
+      throw e;
+    }
+  }
 }

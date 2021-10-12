@@ -70,6 +70,8 @@ function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerTy
     legend: {
       isVisible: true,
       position: Position.Right,
+      maxLines: 1,
+      shouldTruncate: true,
       type: LEGEND_FUNCTION,
     },
     gridConfig: {
@@ -156,16 +158,12 @@ export const getHeatmapVisualization = ({
       return { groups: [] };
     }
 
-    const { displayStops, activePalette } = state.valueAccessor
-      ? getSafePaletteParams(
-          paletteService,
-          frame.activeData?.[state.layerId],
-          state.valueAccessor,
-          state?.palette && state.palette.accessor === state.valueAccessor
-            ? state.palette
-            : undefined
-        )
-      : { displayStops: [], activePalette: {} as HeatmapVisualizationState['palette'] };
+    const { displayStops, activePalette } = getSafePaletteParams(
+      paletteService,
+      frame.activeData?.[state.layerId],
+      state.valueAccessor,
+      state?.palette && state.palette.accessor === state.valueAccessor ? state.palette : undefined
+    );
 
     return {
       groups: [
@@ -197,11 +195,21 @@ export const getHeatmapVisualization = ({
           }),
           accessors: state.valueAccessor
             ? [
-                {
-                  columnId: state.valueAccessor,
-                  triggerIcon: 'colorBy',
-                  palette: getStopsForFixedMode(displayStops, activePalette?.params?.colorStops),
-                },
+                // When data is not available and the range type is numeric, return a placeholder while refreshing
+                displayStops.length &&
+                (frame.activeData || activePalette?.params?.rangeType !== 'number')
+                  ? {
+                      columnId: state.valueAccessor,
+                      triggerIcon: 'colorBy',
+                      palette: getStopsForFixedMode(
+                        displayStops,
+                        activePalette?.params?.colorStops
+                      ),
+                    }
+                  : {
+                      columnId: state.valueAccessor,
+                      triggerIcon: 'none',
+                    },
               ]
             : [],
           filterOperations: isCellValueSupported,

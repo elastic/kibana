@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110891
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { ChartsPlugin } from './plugin';
 
 export const plugin = () => new ChartsPlugin();
@@ -23,4 +26,19 @@ export {
   CustomPaletteState,
   SystemPaletteArguments,
   paletteIds,
+  ColorSchemas,
+  ColorSchema,
+  RawColorSchema,
+  ColorMap,
+  vislibColorMaps,
+  colorSchemas,
+  getHeatmapColors,
+  truncatedColorMaps,
+  truncatedColorSchemas,
+  ColorMode,
+  LabelRotation,
+  defaultCountLabel,
+  ColorSchemaParams,
+  Labels,
+  Style,
 } from '../common';

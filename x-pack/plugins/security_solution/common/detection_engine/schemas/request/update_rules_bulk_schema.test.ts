@@ -187,6 +187,18 @@ describe('update_rules_bulk_schema', () => {
     expect(output.schema).toEqual({});
   });
 
+  test('You can set "namespace" to a string', () => {
+    const payload: UpdateRulesBulkSchema = [
+      { ...getUpdateRulesSchemaMock(), namespace: 'a namespace' },
+    ];
+
+    const decoded = updateRulesBulkSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const output = foldLeftRight(checked);
+    expect(formatErrors(output.errors)).toEqual([]);
+    expect(output.schema).toEqual(payload);
+  });
+
   test('You can set "note" to a string', () => {
     const payload: UpdateRulesBulkSchema = [
       { ...getUpdateRulesSchemaMock(), note: '# test markdown' },

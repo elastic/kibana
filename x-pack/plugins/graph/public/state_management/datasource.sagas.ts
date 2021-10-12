@@ -30,7 +30,7 @@ export const datasourceSaga = ({
   indexPatternProvider,
   notifications,
   createWorkspace,
-  notifyAngular,
+  notifyReact,
 }: GraphStoreDependencies) => {
   function* fetchFields(action: Action<IndexpatternDatasource>) {
     try {
@@ -39,7 +39,7 @@ export const datasourceSaga = ({
       yield put(datasourceLoaded());
       const advancedSettings = settingsSelector(yield select());
       createWorkspace(indexPattern.title, advancedSettings);
-      notifyAngular();
+      notifyReact();
     } catch (e) {
       // in case of errors, reset the datasource and show notification
       yield put(setDatasource({ type: 'none' }));

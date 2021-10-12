@@ -154,7 +154,7 @@ describe('ApiLogsLogic', () => {
 
         ApiLogsLogic.actions.fetchApiLogs();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/api_logs', {
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/api_logs', {
           query: {
             'page[current]': 1,
             'filters[date][from]': '1970-01-01T00:00:00.000Z',

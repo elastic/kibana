@@ -64,7 +64,7 @@ describe('From alert', () => {
     esArchiverUnload('auditbeat_for_exceptions2');
   });
 
-  // TODO: Looks like the signal is missing some fields. Need to update to make sure it shows up
+  // TODO: Unskip the test when `https://github.com/elastic/kibana/issues/108244` it is fixed
   it.skip('Creates an exception and deletes it', () => {
     addExceptionFromFirstAlert();
     addsException(getException());

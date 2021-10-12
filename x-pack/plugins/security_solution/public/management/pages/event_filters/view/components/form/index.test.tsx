@@ -8,7 +8,7 @@ import React from 'react';
 import { EventFiltersForm } from '.';
 import { RenderResult, act } from '@testing-library/react';
 import { fireEvent, waitFor } from '@testing-library/dom';
-import { stubIndexPatternWithFields } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
+import { stubIndexPattern } from 'src/plugins/data/common/stubs';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { ecsEventMock } from '../../../test_utils';
@@ -52,7 +52,7 @@ describe('Event filter form', () => {
     (useFetchIndex as jest.Mock).mockImplementation(() => [
       false,
       {
-        indexPatterns: stubIndexPatternWithFields,
+        indexPatterns: stubIndexPattern,
       },
     ]);
     (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });

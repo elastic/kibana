@@ -7,4 +7,3 @@
  */
 
 export { getFieldFormatsRegistry } from '../../field_formats/public/mocks';
-export { getStubIndexPattern, StubIndexPattern } from './index_patterns/index_pattern.stub';

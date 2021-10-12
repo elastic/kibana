@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Top traces when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
       const response = await supertest.get(
-        `/api/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+        `/internal/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
       );
 
       expect(response.status).to.be(200);
@@ -39,7 +39,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let response: any;
       before(async () => {
         response = await supertest.get(
-          `/api/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+          `/internal/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
         );
       });
 

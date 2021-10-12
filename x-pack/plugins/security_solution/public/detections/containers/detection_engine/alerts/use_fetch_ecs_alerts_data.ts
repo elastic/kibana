@@ -60,7 +60,7 @@ export const useFetchEcsAlertsData = ({
       } catch (e) {
         if (isSubscribed) {
           if (onError) {
-            onError(e);
+            onError(e as Error);
           }
         }
       }

@@ -15,7 +15,7 @@ export function registerCrawlerEntryPointRoutes({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -36,8 +36,7 @@ export function registerCrawlerEntryPointRoutes({
 
   router.put(
     {
-      path:
-        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -59,8 +58,7 @@ export function registerCrawlerEntryPointRoutes({
 
   router.delete(
     {
-      path:
-        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

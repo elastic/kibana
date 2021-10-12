@@ -12,7 +12,7 @@ import {
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
-import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 import { SavedObjectReference } from '../../../../../../src/core/types';

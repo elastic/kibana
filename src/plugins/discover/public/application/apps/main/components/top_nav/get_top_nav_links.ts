@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
+import type { IndexPattern, ISearchSource } from 'src/plugins/data/common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../utils/get_sharing_data';
 import { unhashUrl } from '../../../../../../../kibana_utils/public';
@@ -15,7 +15,6 @@ import { DiscoverServices } from '../../../../../build_services';
 import { SavedSearch } from '../../../../../saved_searches';
 import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../services/discover_state';
-import { IndexPattern, ISearchSource } from '../../../../../kibana_services';
 import { openOptionsPopover } from './open_options_popover';
 
 /**
@@ -29,6 +28,7 @@ export const getTopNavLinks = ({
   state,
   onOpenInspector,
   searchSource,
+  onOpenSavedSearch,
 }: {
   indexPattern: IndexPattern;
   navigateTo: (url: string) => void;
@@ -37,6 +37,7 @@ export const getTopNavLinks = ({
   state: GetStateReturn;
   onOpenInspector: () => void;
   searchSource: ISearchSource;
+  onOpenSavedSearch: (id: string) => void;
 }) => {
   const options = {
     id: 'options',
@@ -89,7 +90,7 @@ export const getTopNavLinks = ({
     testId: 'discoverOpenButton',
     run: () =>
       showOpenSearchPanel({
-        makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
+        onOpenSavedSearch,
         I18nContext: services.core.i18n.Context,
       }),
   };
@@ -110,8 +111,9 @@ export const getTopNavLinks = ({
       const sharingData = await getSharingData(
         searchSource,
         state.appStateContainer.getState(),
-        services.uiSettings
+        services
       );
+
       services.share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: false,
@@ -125,8 +127,7 @@ export const getTopNavLinks = ({
           title:
             savedSearch.title ||
             i18n.translate('discover.localMenu.fallbackReportTitle', {
-              defaultMessage: 'Discover search [{date}]',
-              values: { date: moment().toISOString(true) },
+              defaultMessage: 'Untitled discover search',
             }),
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),

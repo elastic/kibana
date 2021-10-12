@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { getField } from '../../../../../common/elasticsearch_util';
 
 export interface ScriptField {
@@ -34,9 +34,7 @@ export function getDocValueAndSourceFields(
           lang: field.lang || '',
         },
       };
-    }
-    // @ts-expect-error runtimeField has not been added to public API yet. exact shape of type TBD.
-    else if (field.readFromDocValues || field.runtimeField) {
+    } else if (field.readFromDocValues || field.runtimeField) {
       const docValueField =
         field.type === 'date'
           ? {

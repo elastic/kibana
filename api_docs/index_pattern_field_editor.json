@@ -172,74 +172,6 @@
     "interfaces": [
       {
         "parentPluginId": "indexPatternFieldEditor",
-        "id": "def-public.FieldEditorContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldEditorContext",
-        "description": [],
-        "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "indexPatternFieldEditor",
-            "id": "def-public.FieldEditorContext.indexPattern",
-            "type": "Object",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
-              }
-            ],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "indexPatternFieldEditor",
-            "id": "def-public.FieldEditorContext.fieldTypeToProcess",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "fieldTypeToProcess",
-            "description": [
-              "\nThe Kibana field type of the field to create or edit\nDefault: \"runtime\""
-            ],
-            "signature": [
-              "\"concrete\" | \"runtime\""
-            ],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "indexPatternFieldEditor",
-            "id": "def-public.FieldEditorContext.search",
-            "type": "Object",
-            "tags": [],
-            "label": "search",
-            "description": [
-              "The search service from the data plugin"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-public.ISearchStart",
-                "text": "ISearchStart"
-              }
-            ],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "indexPatternFieldEditor",
         "id": "def-public.FormatEditorProps",
         "type": "Interface",
         "tags": [],
@@ -279,9 +211,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               }
@@ -317,7 +249,7 @@
             "children": [
               {
                 "parentPluginId": "indexPatternFieldEditor",
-                "id": "def-public.FormatEditorProps.onChange.$1.newParams",
+                "id": "def-public.FormatEditorProps.onChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "newParams",
@@ -327,7 +259,7 @@
                 "children": [
                   {
                     "parentPluginId": "indexPatternFieldEditor",
-                    "id": "def-public.FormatEditorProps.onChange.$1.newParams.Unnamed",
+                    "id": "def-public.FormatEditorProps.onChange.$1.Unnamed",
                     "type": "Any",
                     "tags": [],
                     "label": "Unnamed",
@@ -359,7 +291,7 @@
             "children": [
               {
                 "parentPluginId": "indexPatternFieldEditor",
-                "id": "def-public.error",
+                "id": "def-public.FormatEditorProps.onError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "error",
@@ -395,9 +327,9 @@
             "signature": [
               "{ indexPattern: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -472,9 +404,9 @@
             "signature": [
               "{ indexPattern: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -493,9 +425,9 @@
             "signature": [
               "((field: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPatternField",
                 "text": "IndexPatternField"
               },
@@ -513,9 +445,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "data",
+                    "pluginId": "dataViews",
                     "scope": "common",
-                    "docId": "kibDataIndexPatternsPluginApi",
+                    "docId": "kibDataViewsPluginApi",
                     "section": "def-common.IndexPatternField",
                     "text": "IndexPatternField"
                   }
@@ -606,6 +538,41 @@
       }
     ],
     "objects": [],
+    "setup": {
+      "parentPluginId": "indexPatternFieldEditor",
+      "id": "def-public.PluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "PluginSetup",
+      "description": [],
+      "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "indexPatternFieldEditor",
+          "id": "def-public.PluginSetup.fieldFormatEditors",
+          "type": "Object",
+          "tags": [],
+          "label": "fieldFormatEditors",
+          "description": [],
+          "signature": [
+            "{ register: (editor: ",
+            {
+              "pluginId": "indexPatternFieldEditor",
+              "scope": "public",
+              "docId": "kibIndexPatternFieldEditorPluginApi",
+              "section": "def-public.FieldFormatEditorFactory",
+              "text": "FieldFormatEditorFactory"
+            },
+            "<any>) => void; }"
+          ],
+          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
     "start": {
       "parentPluginId": "indexPatternFieldEditor",
       "id": "def-public.PluginStart",
@@ -764,7 +731,7 @@
           "children": [
             {
               "parentPluginId": "indexPatternFieldEditor",
-              "id": "def-public.props",
+              "id": "def-public.PluginStart.DeleteRuntimeFieldProvider.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "props",
@@ -777,7 +744,7 @@
             },
             {
               "parentPluginId": "indexPatternFieldEditor",
-              "id": "def-public.context",
+              "id": "def-public.PluginStart.DeleteRuntimeFieldProvider.$2",
               "type": "Any",
               "tags": [],
               "label": "context",

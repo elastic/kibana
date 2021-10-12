@@ -15,14 +15,14 @@ import { TopNavMenuData } from '../../../../navigation/public';
 /**
  * @param actions - A mapping of TopNavIds to an action function that should run when the
  * corresponding top nav is clicked.
- * @param hideWriteControls if true, does not include any controls that allow editing or creating objects.
+ * @param showWriteControls if false, does not include any controls that allow editing or creating objects.
  * @return an array of objects for a top nav configuration, based on the mode.
  */
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
   options: {
-    hideWriteControls: boolean;
+    showWriteControls: boolean;
     isNewDashboard: boolean;
     isDirty: boolean;
     isSaveInProgress?: boolean;
@@ -32,7 +32,7 @@ export function getTopNavConfig(
   const labs = options.isLabsEnabled ? [getLabsConfig(actions[TopNavIds.LABS])] : [];
   switch (dashboardMode) {
     case ViewMode.VIEW:
-      return options.hideWriteControls
+      return !options.showWriteControls
         ? [
             ...labs,
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),

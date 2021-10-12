@@ -1,0 +1,12 @@
+$fullscreenFlyoutTop: 72px;
+.kbnBody.euiBody--headerIsFixed.euiDataGrid__restrictBody {
+  .euiOverlayMask--belowHeader {
+    top: $fullscreenFlyoutTop;
+  }
+
+  .euiFlyout,
+  .euiCollapsibleNav {
+    top: $fullscreenFlyoutTop;
+    height: calc(100% - #{$fullscreenFlyoutTop});
+  }
+}

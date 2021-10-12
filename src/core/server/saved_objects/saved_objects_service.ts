@@ -16,12 +16,13 @@ import {
 } from './';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
-import { CoreUsageDataSetup } from '../core_usage_data';
+import { InternalCoreUsageDataSetup } from '../core_usage_data';
 import {
   ElasticsearchClient,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from '../elasticsearch';
+import { InternalDeprecationsServiceSetup } from '../deprecations';
 import { KibanaConfigType } from '../kibana_config';
 import {
   SavedObjectsConfigType,
@@ -44,6 +45,7 @@ import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
+import { getSavedObjectsDeprecationsProvider } from './deprecations';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -250,7 +252,8 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsSetupDeps {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  coreUsageData: CoreUsageDataSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
+  deprecations: InternalDeprecationsServiceSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -266,7 +269,8 @@ export interface SavedObjectsStartDeps {
 }
 
 export class SavedObjectsService
-  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
+  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart>
+{
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;
@@ -286,7 +290,7 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
-    const { http, elasticsearch, coreUsageData } = setupDeps;
+    const { http, elasticsearch, coreUsageData, deprecations } = setupDeps;
 
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
@@ -298,6 +302,20 @@ export class SavedObjectsService
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
 
+    const kibanaConfig = await this.coreContext.configService
+      .atPath<KibanaConfigType>('kibana')
+      .pipe(first())
+      .toPromise();
+
+    deprecations.getRegistry('savedObjects').registerDeprecations(
+      getSavedObjectsDeprecationsProvider({
+        kibanaConfig,
+        savedObjectsConfig: this.config,
+        kibanaVersion: this.coreContext.env.packageInfo.version,
+        typeRegistry: this.typeRegistry,
+      })
+    );
+
     coreUsageData.registerType(this.typeRegistry);
 
     registerRoutes({
@@ -306,6 +324,8 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
+      kibanaConfig,
+      kibanaVersion: this.coreContext.env.packageInfo.version,
     });
 
     registerCoreObjectTypes(this.typeRegistry);
@@ -399,20 +419,20 @@ export class SavedObjectsService
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
 
-      // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
-      this.setupDeps!.elasticsearch.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-        if (!isCompatible && message) {
-          this.logger.error(message);
-        }
-      });
-
-      await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
+      // The Elasticsearch service should already ensure that, but let's double check just in case.
+      // Should it be replaced with elasticsearch.status$ API instead?
+      const compatibleNodes = await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
         filter((nodes) => nodes.isCompatible),
         take(1)
       ).toPromise();
 
-      this.logger.info('Starting saved objects migrations');
-      await migrator.runMigrations();
+      // Running migrations only if we got compatible nodes.
+      // It may happen that the observable completes due to Kibana shutting down
+      // and the promise above fulfils as undefined. We shouldn't trigger migrations at that point.
+      if (compatibleNodes) {
+        this.logger.info('Starting saved objects migrations');
+        await migrator.runMigrations();
+      }
     }
 
     const createRepository = (

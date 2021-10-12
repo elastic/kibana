@@ -240,7 +240,7 @@ exports.Cluster = class Cluster {
    * @return {undefined}
    */
   _exec(installPath, opts = {}) {
-    const { skipNativeRealmSetup = false, ...options } = opts;
+    const { skipNativeRealmSetup = false, reportTime = () => {}, startTime, ...options } = opts;
 
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
@@ -278,7 +278,8 @@ exports.Cluster = class Cluster {
     // especially because we currently run many instances of ES on the same machine during CI
     // inital and max must be the same, so we only need to check the max
     if (!esJavaOpts.includes('Xmx')) {
-      esJavaOpts += ' -Xms1g -Xmx1g';
+      // 1536m === 1.5g
+      esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
 
     this._log.debug('ES_JAVA_OPTS: %s', esJavaOpts.trim());
@@ -320,10 +321,17 @@ exports.Cluster = class Cluster {
       await nativeRealm.setPasswords(options);
     });
 
+    let reportSent = false;
     // parse and forward es stdout to the log
     this._process.stdout.on('data', (data) => {
       const lines = parseEsLog(data.toString());
       lines.forEach((line) => {
+        if (!reportSent && line.message.includes('publish_address')) {
+          reportSent = true;
+          reportTime(startTime, 'ready', {
+            success: true,
+          });
+        }
         this._log.info(line.formattedMessage);
       });
     });
@@ -340,7 +348,16 @@ exports.Cluster = class Cluster {
 
       // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
       if (code > 0 && !(code === 143 || code === 130)) {
+        reportTime(startTime, 'abort', {
+          success: true,
+          error: code,
+        });
         throw createCliError(`ES exited with code ${code}`);
+      } else {
+        reportTime(startTime, 'error', {
+          success: false,
+          error: `exited with ${code}`,
+        });
       }
     });
   }

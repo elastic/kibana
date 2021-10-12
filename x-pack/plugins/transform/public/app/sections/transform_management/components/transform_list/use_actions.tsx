@@ -41,7 +41,11 @@ export const useActions = ({
       <>
         {startAction.isModalVisible && <StartActionModal {...startAction} />}
         {editAction.config && editAction.isFlyoutVisible && (
-          <EditTransformFlyout closeFlyout={editAction.closeFlyout} config={editAction.config} />
+          <EditTransformFlyout
+            closeFlyout={editAction.closeFlyout}
+            config={editAction.config}
+            indexPatternId={editAction.indexPatternId}
+          />
         )}
         {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
       </>

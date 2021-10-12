@@ -52,7 +52,7 @@ export const datafeedConfigSchema = schema.object({
   runtime_mappings: schema.maybe(schema.any()),
   scroll_size: schema.maybe(schema.number()),
   delayed_data_check_config: schema.maybe(schema.any()),
-  indices_options: indicesOptionsSchema,
+  indices_options: schema.maybe(indicesOptionsSchema),
 });
 
 export const datafeedIdSchema = schema.object({ datafeedId: schema.string() });

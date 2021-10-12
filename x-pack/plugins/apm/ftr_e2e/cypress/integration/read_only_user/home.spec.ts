@@ -7,7 +7,6 @@
 
 import url from 'url';
 import archives_metadata from '../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
@@ -18,25 +17,20 @@ const serviceInventoryHref = url.format({
 
 const apisToIntercept = [
   {
-    endpoint: '/api/apm/service',
+    endpoint: '/internal/apm/service?*',
     name: 'servicesMainStatistics',
   },
   {
-    endpoint: '/api/apm/services/detailed_statistics',
+    endpoint: '/internal/apm/services/detailed_statistics?*',
     name: 'servicesDetailedStatistics',
   },
 ];
 
 describe('Home page', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
+
   it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
     cy.visit('/app/apm');
 

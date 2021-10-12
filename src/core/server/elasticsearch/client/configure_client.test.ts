@@ -10,6 +10,7 @@ import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
 import { RequestEvent, errors } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import type {
   TransportRequestOptions,
   TransportRequestParams,
@@ -18,21 +19,23 @@ import type {
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { EventEmitter } from 'events';
 import type { ElasticsearchClientConfig } from './client_config';
 import { configureClient } from './configure_client';
 
 const createFakeConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
 ): ElasticsearchClientConfig => {
-  return ({
+  return {
     type: 'fake-config',
     ...parts,
-  } as unknown) as ElasticsearchClientConfig;
+  } as unknown as ElasticsearchClientConfig;
 };
 
 const createFakeClient = () => {
-  const client = new EventEmitter();
+  const actualEs = jest.requireActual('@elastic/elasticsearch');
+  const client = new actualEs.Client({
+    nodes: ['http://localhost'], // Enforcing `nodes` because it's mandatory
+  });
   jest.spyOn(client, 'on');
   return client;
 };
@@ -58,6 +61,7 @@ const createApiResponse = <T>({
     headers,
     warnings,
     meta: {
+      body,
       request: {
         params: params!,
         options: requestOptions,
@@ -65,6 +69,14 @@ const createApiResponse = <T>({
     } as any,
   };
 };
+
+function getProductCheckValue(client: Client) {
+  const tSymbol = Object.getOwnPropertySymbols(client.transport || client).filter(
+    (symbol) => symbol.description === 'product check'
+  )[0];
+  // @ts-expect-error `tSymbol` is missing in the index signature of Transport
+  return (client.transport || client)[tSymbol];
+}
 
 describe('configureClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -114,6 +126,24 @@ describe('configureClient', () => {
 
     expect(client.on).toHaveBeenCalledTimes(1);
     expect(client.on).toHaveBeenCalledWith('response', expect.any(Function));
+  });
+
+  describe('Product check', () => {
+    it('should not skip the product check for the unscoped client', () => {
+      const client = configureClient(config, { logger, type: 'test', scoped: false });
+      expect(getProductCheckValue(client)).toBe(0);
+    });
+
+    it('should skip the product check for the scoped client', () => {
+      const client = configureClient(config, { logger, type: 'test', scoped: true });
+      expect(getProductCheckValue(client)).toBe(2);
+    });
+
+    it('should skip the product check for the children of the scoped client', () => {
+      const client = configureClient(config, { logger, type: 'test', scoped: true });
+      const asScoped = client.child({ headers: { 'x-custom-header': 'Custom value' } });
+      expect(getProductCheckValue(asScoped)).toBe(2);
+    });
   });
 
   describe('Client logging', () => {
@@ -367,7 +397,7 @@ describe('configureClient', () => {
       it('logs default error info when the error response body is empty', () => {
         const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
-        let response = createApiResponse({
+        let response: RequestEvent<any, any> = createApiResponse({
           statusCode: 400,
           headers: {},
           params: {
@@ -384,7 +414,7 @@ describe('configureClient', () => {
           Array [
             Array [
               "400
-          GET /_path [undefined]: Response Error",
+          GET /_path [undefined]: {\\"error\\":{}}",
               undefined,
             ],
           ]
@@ -399,7 +429,7 @@ describe('configureClient', () => {
             method: 'GET',
             path: '/_path',
           },
-          body: {} as any,
+          body: undefined,
         });
         client.emit('response', new errors.ResponseError(response), response);
 

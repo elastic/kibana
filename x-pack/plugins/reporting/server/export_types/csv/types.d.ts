@@ -78,7 +78,6 @@ type FormatsMapDeprecatedCSV = Map<
 >;
 
 export interface SavedSearchGeneratorResultDeprecatedCSV {
-  size: number;
   maxSizeReached: boolean;
   csvContainsFormulas?: boolean;
   warnings: string[];

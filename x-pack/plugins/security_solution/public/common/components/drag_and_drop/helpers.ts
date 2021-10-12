@@ -92,9 +92,11 @@ export const addProviderToTimeline = ({
 export const allowTopN = ({
   browserField,
   fieldName,
+  hideTopN,
 }: {
   browserField: Partial<BrowserField> | undefined;
   fieldName: string;
+  hideTopN: boolean;
 }): boolean => {
   const isAggregatable = browserField?.aggregatable ?? false;
   const fieldType = browserField?.type ?? '';
@@ -180,6 +182,10 @@ export const allowTopN = ({
     'signal.rule.version',
     'signal.status',
   ].includes(fieldName);
+
+  if (hideTopN) {
+    return false;
+  }
 
   return isAllowlistedNonBrowserField || (isAggregatable && isAllowedType);
 };

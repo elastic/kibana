@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { CoreSetup } from 'kibana/public';
-import { PaletteOutput } from 'src/plugins/charts/public';
-import { SavedObjectReference } from 'kibana/public';
-import { MutableRefObject } from 'react';
-import { RowClickContext } from '../../../../src/plugins/ui_actions/public';
-import {
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
+import type { CoreSetup, SavedObjectReference } from 'kibana/public';
+import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { MutableRefObject } from 'react';
+import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
@@ -19,20 +17,28 @@ import {
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType } from '../common';
-import { Query, Filter } from '../../../../src/plugins/data/public';
-import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
-import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
-import {
-  LENS_EDIT_SORT_ACTION,
-  LENS_EDIT_RESIZE_ACTION,
-  LENS_TOGGLE_ACTION,
-} from './datatable_visualization/components/constants';
+import type { Query, Filter } from '../../../../src/plugins/data/public';
+import type {
+  RangeSelectContext,
+  ValueClickContext,
+} from '../../../../src/plugins/embeddable/public';
 import type {
   LensSortActionData,
   LensResizeActionData,
   LensToggleActionData,
 } from './datatable_visualization/components/types';
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import type {
+  UiActionsStart,
+  RowClickContext,
+  VisualizeFieldContext,
+} from '../../../../src/plugins/ui_actions/public';
+
+import {
+  LENS_EDIT_SORT_ACTION,
+  LENS_EDIT_RESIZE_ACTION,
+  LENS_TOGGLE_ACTION,
+} from './datatable_visualization/components/constants';
+import type { LensInspector } from './lens_inspector_service';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -43,6 +49,7 @@ export interface PublicAPIProps<T> {
 
 export interface EditorFrameProps {
   showNoDataPopover: () => void;
+  lensInspector: LensInspector;
 }
 
 export type VisualizationMap = Record<string, Visualization>;
@@ -227,7 +234,11 @@ export interface Datasource<T = unknown, P = unknown> {
 
   toExpression: (state: T, layerId: string) => ExpressionAstExpression | string | null;
 
-  getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForField: (
+    state: T,
+    field: unknown,
+    filterFn: (layerId: string) => boolean
+  ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
     state: T,
     indexPatternId: string,
@@ -235,6 +246,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (
     state: T,
+    filterFn?: (layerId: string) => boolean,
     activeData?: Record<string, Datatable>
   ) => Array<DatasourceSuggestion<T>>;
 
@@ -249,7 +261,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) =>
     | Array<{
         shortMessage: string;
-        longMessage: string;
+        longMessage: React.ReactNode;
         fixAction?: { label: string; newState: () => Promise<T> };
       }>
     | undefined;
@@ -319,6 +331,8 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  invalid?: boolean;
+  invalidMessage?: string;
 };
 
 // The only way a visualization has to restrict the query building
@@ -328,6 +342,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
     newState: Parameters<StateSetter<T>>[0],
     publishToVisualization?: {
       isDimensionComplete?: boolean;
+      forceRender?: boolean;
     }
   ) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
@@ -336,6 +351,8 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   toggleFullscreen: () => void;
   isFullscreen: boolean;
   layerType: LayerType | undefined;
+  supportStaticValue: boolean;
+  supportFieldFormat?: boolean;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -427,7 +444,7 @@ export interface VisualizationToolbarProps<T = unknown> {
 export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
   groupId: string;
   accessor: string;
-  setState: (newState: T) => void;
+  setState(newState: T | ((currState: T) => T)): void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
@@ -459,13 +476,18 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // this dimension group in the hierarchy. If not specified, the position of the dimension in the array is used. specified nesting
   // orders are always higher in the hierarchy than non-specified ones.
   nestingOrder?: number;
+  // some type of layers can produce groups even if invalid. Keep this information to visually show the user that.
+  invalid?: boolean;
+  invalidMessage?: string;
+  // need a special flag to know when to pass the previous column on duplicating
+  requiresPreviousColumnOnDuplicate?: boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
-  frame: Pick<FramePublicAPI, 'datasourceLayers'>;
+  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
 }
 
 /**
@@ -645,9 +667,11 @@ export interface Visualization<T = unknown> {
   /**
    * For consistency across different visualizations, the dimension configuration UI is standardized
    */
-  getConfiguration: (
-    props: VisualizationConfigProps<T>
-  ) => { groups: VisualizationDimensionGroupConfig[]; supportStaticValue?: boolean };
+  getConfiguration: (props: VisualizationConfigProps<T>) => {
+    groups: VisualizationDimensionGroupConfig[];
+    supportStaticValue?: boolean;
+    supportFieldFormat?: boolean;
+  };
 
   /**
    * Header rendered as layer title This can be used for both static and dynamic content lioke
@@ -722,7 +746,7 @@ export interface Visualization<T = unknown> {
   ) =>
     | Array<{
         shortMessage: string;
-        longMessage: string;
+        longMessage: React.ReactNode;
       }>
     | undefined;
 
@@ -805,4 +829,10 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
   ) => void;
+}
+
+export interface SharingSavedObjectProps {
+  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
+  aliasTargetId?: string;
+  sourceId?: string;
 }

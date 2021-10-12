@@ -16,7 +16,7 @@
  */
 export const encodeHitVersion = <T>(hit: T): string | undefined => {
   // Have to do this "as cast" here as these two types aren't included in the SearchResponse hit type
-  const { _seq_no: seqNo, _primary_term: primaryTerm } = (hit as unknown) as {
+  const { _seq_no: seqNo, _primary_term: primaryTerm } = hit as unknown as {
     _seq_no: number;
     _primary_term: number;
   };

@@ -28,17 +28,16 @@ export default ({ getService }: FtrProviderContext) => {
   const SPACE1 = 'space1';
 
   const getAPMIndexName = async (user: User) => {
-    const {
-      body: indexNames,
-    }: { body: { index_name: string[] | undefined } } = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
-      .auth(user.username, user.password)
-      .set('kbn-xsrf', 'true')
-      .expect(200);
+    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
+      await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
+        .auth(user.username, user.password)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
     const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === '.alerts-observability-apm'
+      (indexName) => indexName === '.alerts-observability.apm.alerts'
     );
-    expect(observabilityIndex).to.eql('.alerts-observability-apm');
+    expect(observabilityIndex).to.eql('.alerts-observability.apm.alerts');
     return observabilityIndex;
   };
 
@@ -107,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         expect(omit(['_version', '_seq_no'], res.body)).to.eql({
           success: true,
-          _index: '.alerts-observability-apm',
+          _index: '.alerts-observability.apm.alerts',
           _id: 'NoxgpHkBqbdrfX07MqXV',
           result: 'updated',
           _shards: { total: 2, successful: 1, failed: 0 },

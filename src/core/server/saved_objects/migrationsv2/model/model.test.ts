@@ -20,7 +20,7 @@ import type {
   ReindexSourceToTempOpenPit,
   ReindexSourceToTempRead,
   ReindexSourceToTempClosePit,
-  ReindexSourceToTempIndex,
+  ReindexSourceToTempTransform,
   RefreshTarget,
   UpdateTargetMappingsState,
   UpdateTargetMappingsWaitForTaskState,
@@ -58,6 +58,7 @@ describe('migrations v2 model', () => {
     retryDelay: 0,
     retryAttempts: 15,
     batchSize: 1000,
+    maxBatchSizeBytes: 1e8,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -555,9 +556,8 @@ describe('migrations v2 model', () => {
         legacyIndex: '',
       };
       test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_REINDEX', () => {
-        const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.right(
-          'create_index_succeeded'
-        );
+        const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> =
+          Either.right('create_index_succeeded');
         const newState = model(legacyCreateReindexTargetState, res);
         expect(newState.controlState).toEqual('LEGACY_REINDEX');
         expect(newState.retryCount).toEqual(0);
@@ -565,7 +565,7 @@ describe('migrations v2 model', () => {
       });
       // The createIndex action called by LEGACY_CREATE_REINDEX_TARGET never
       // returns a left, it will always succeed or timeout. Since timeout
-      // failures are always retried we don't explicity test this logic
+      // failures are always retried we don't explicitly test this logic
     });
 
     describe('LEGACY_REINDEX', () => {
@@ -962,7 +962,7 @@ describe('migrations v2 model', () => {
         progress: createInitialProgress(),
       };
 
-      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_INDEX if the index has outdated documents to reindex', () => {
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM if the index has outdated documents to reindex', () => {
         const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
         const lastHitSortValue = [123456];
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
@@ -970,8 +970,8 @@ describe('migrations v2 model', () => {
           lastHitSortValue,
           totalHits: 1,
         });
-        const newState = model(state, res) as ReindexSourceToTempIndex;
-        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_INDEX');
+        const newState = model(state, res) as ReindexSourceToTempTransform;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
         expect(newState.outdatedDocuments).toBe(outdatedDocuments);
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
@@ -1032,16 +1032,16 @@ describe('migrations v2 model', () => {
 
       it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> SET_TEMP_WRITE_BLOCK if action succeeded', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
-        const newState = model(state, res) as ReindexSourceToTempIndex;
+        const newState = model(state, res) as ReindexSourceToTempTransform;
         expect(newState.controlState).toBe('SET_TEMP_WRITE_BLOCK');
         expect(newState.sourceIndex).toEqual(state.sourceIndex);
       });
     });
 
-    describe('REINDEX_SOURCE_TO_TEMP_INDEX', () => {
-      const state: ReindexSourceToTempIndex = {
+    describe('REINDEX_SOURCE_TO_TEMP_TRANSFORM', () => {
+      const state: ReindexSourceToTempTransform = {
         ...baseState,
-        controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX',
+        controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM',
         outdatedDocuments: [],
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -1059,17 +1059,19 @@ describe('migrations v2 model', () => {
         },
       ] as SavedObjectsRawDoc[];
 
-      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK if action succeeded', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right({
+      it('REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK if action succeeded', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_TRANSFORM'> = Either.right({
           processedDocs,
         });
         const newState = model(state, res) as ReindexSourceToTempIndexBulk;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
+        expect(newState.currentBatch).toEqual(0);
+        expect(newState.transformedDocBatches).toEqual([processedDocs]);
         expect(newState.progress.processed).toBe(0); // Result of `(undefined ?? 0) + corruptDocumentsId.length`
       });
 
       it('increments the progress.processed counter', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right({
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_TRANSFORM'> = Either.right({
           processedDocs,
         });
 
@@ -1087,8 +1089,8 @@ describe('migrations v2 model', () => {
         expect(newState.progress.processed).toBe(2);
       });
 
-      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded but we have carried through previous failures', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right({
+      it('REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded but we have carried through previous failures', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_TRANSFORM'> = Either.right({
           processedDocs,
         });
         const testState = {
@@ -1096,15 +1098,15 @@ describe('migrations v2 model', () => {
           corruptDocumentIds: ['a:b'],
           transformErrors: [],
         };
-        const newState = model(testState, res) as ReindexSourceToTempIndex;
+        const newState = model(testState, res) as ReindexSourceToTempTransform;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.corruptDocumentIds.length).toEqual(1);
         expect(newState.transformErrors.length).toEqual(0);
         expect(newState.progress.processed).toBe(0);
       });
 
-      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ when response is left documents_transform_failed', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.left({
+      it('REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_READ when response is left documents_transform_failed', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_TRANSFORM'> = Either.left({
           type: 'documents_transform_failed',
           corruptDocumentIds: ['a:b'],
           transformErrors: [],
@@ -1119,16 +1121,19 @@ describe('migrations v2 model', () => {
     });
 
     describe('REINDEX_SOURCE_TO_TEMP_INDEX_BULK', () => {
-      const transformedDocs = [
-        {
-          _id: 'a:b',
-          _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-        },
-      ] as SavedObjectsRawDoc[];
+      const transformedDocBatches = [
+        [
+          {
+            _id: 'a:b',
+            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+          },
+        ],
+      ] as [SavedObjectsRawDoc[]];
       const reindexSourceToTempIndexBulkState: ReindexSourceToTempIndexBulk = {
         ...baseState,
         controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
-        transformedDocs,
+        transformedDocBatches,
+        currentBatch: 0,
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         sourceIndexPitId: 'pit_id',
@@ -1137,9 +1142,8 @@ describe('migrations v2 model', () => {
         progress: createInitialProgress(),
       };
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.right(
-          'bulk_index_succeeded'
-        );
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> =
+          Either.right('bulk_index_succeeded');
         const newState = model(reindexSourceToTempIndexBulkState, res);
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.retryCount).toEqual(0);
@@ -1171,7 +1175,7 @@ describe('migrations v2 model', () => {
         const newState = model(reindexSourceToTempIndexBulkState, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Try to use smaller batches by changing the Kibana 'migrations.batchSize' configuration option and restarting Kibana."`
+          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option."`
         );
       });
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK should throw a throwBadResponse error if action failed', () => {
@@ -1438,7 +1442,8 @@ describe('migrations v2 model', () => {
             res
           ) as TransformedDocumentsBulkIndex;
           expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
-          expect(newState.transformedDocs).toEqual(processedDocs);
+          expect(newState.transformedDocBatches).toEqual([processedDocs]);
+          expect(newState.currentBatch).toEqual(0);
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
           expect(newState.progress.processed).toBe(outdatedDocuments.length);
@@ -1521,16 +1526,31 @@ describe('migrations v2 model', () => {
     });
 
     describe('TRANSFORMED_DOCUMENTS_BULK_INDEX', () => {
-      const transformedDocs = [
-        {
-          _id: 'a:b',
-          _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-        },
-      ] as SavedObjectsRawDoc[];
+      const transformedDocBatches = [
+        [
+          // batch 0
+          {
+            _id: 'a:b',
+            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+          },
+          {
+            _id: 'a:c',
+            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+          },
+        ],
+        [
+          // batch 1
+          {
+            _id: 'a:d',
+            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+          },
+        ],
+      ] as SavedObjectsRawDoc[][];
       const transformedDocumentsBulkIndexState: TransformedDocumentsBulkIndex = {
         ...baseState,
         controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-        transformedDocs,
+        transformedDocBatches,
+        currentBatch: 0,
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
@@ -1539,6 +1559,27 @@ describe('migrations v2 model', () => {
         hasTransformedDocs: false,
         progress: createInitialProgress(),
       };
+
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> TRANSFORMED_DOCUMENTS_BULK_INDEX and increments currentBatch if more batches are left', () => {
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> =
+          Either.right('bulk_index_succeeded');
+        const newState = model(
+          transformedDocumentsBulkIndexState,
+          res
+        ) as TransformedDocumentsBulkIndex;
+        expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
+        expect(newState.currentBatch).toEqual(1);
+      });
+
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> OUTDATED_DOCUMENTS_SEARCH_READ if all batches were written', () => {
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> =
+          Either.right('bulk_index_succeeded');
+        const newState = model(
+          { ...transformedDocumentsBulkIndexState, ...{ currentBatch: 1 } },
+          res
+        );
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_READ');
+      });
 
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX throws if action returns left index_not_found_exception', () => {
         const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
@@ -1570,7 +1611,7 @@ describe('migrations v2 model', () => {
         const newState = model(transformedDocumentsBulkIndexState, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Try to use smaller batches by changing the Kibana 'migrations.batchSize' configuration option and restarting Kibana."`
+          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option."`
         );
       });
     });

@@ -22,6 +22,7 @@ describe('Kibana deprecations', () => {
   describe('With deprecations', () => {
     const kibanaDeprecationsMockResponse: DomainDeprecationDetails[] = [
       {
+        title: 'mock-deprecation-title',
         correctiveActions: {
           manualSteps: ['Step 1', 'Step 2', 'Step 3'],
           api: {
@@ -78,7 +79,7 @@ describe('Kibana deprecations', () => {
         // the component DOM tree.
         let modal = document.body.querySelector('[data-test-subj="stepsModal"]');
 
-        expect(modal).not.toBe(null);
+        expect(modal).not.toBeNull();
         expect(modal!.textContent).toContain(`Resolve deprecation in '${deprecation.domainId}'`);
 
         const steps: NodeListOf<Element> | null = modal!.querySelectorAll(
@@ -160,7 +161,9 @@ describe('Kibana deprecations', () => {
     test('renders prompt', () => {
       const { exists, find } = testBed;
       expect(exists('noDeprecationsPrompt')).toBe(true);
-      expect(find('noDeprecationsPrompt').text()).toContain('Ready to upgrade!');
+      expect(find('noDeprecationsPrompt').text()).toContain(
+        'Your Kibana configuration is up to date'
+      );
     });
   });
 
@@ -190,6 +193,7 @@ describe('Kibana deprecations', () => {
       const kibanaDeprecationsMockResponse: DomainDeprecationDetails[] = [
         {
           domainId,
+          title: `Failed to fetch deprecations for ${domainId}`,
           message: `Failed to get deprecations info for plugin "${domainId}".`,
           level: 'fetch_error',
           correctiveActions: {

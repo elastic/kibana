@@ -12,7 +12,7 @@ import { AlertCluster } from '../../../common/types/alerts';
 interface RangeFilter {
   [field: string]: {
     format?: string;
-    gte: string | number;
+    gte: string;
   };
 }
 

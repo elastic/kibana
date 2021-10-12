@@ -54,7 +54,8 @@ export const updatePrepackagedRules = async (
   spaceId: string,
   ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
-  outputIndex: string
+  outputIndex: string,
+  isRuleRegistryEnabled: boolean
 ): Promise<void> => {
   const ruleChunks = chunk(UPDATE_CHUNK_SIZE, rules);
   for (const ruleChunk of ruleChunks) {
@@ -63,7 +64,8 @@ export const updatePrepackagedRules = async (
       spaceId,
       ruleStatusClient,
       ruleChunk,
-      outputIndex
+      outputIndex,
+      isRuleRegistryEnabled
     );
     await Promise.all(rulePromises);
   }
@@ -83,7 +85,8 @@ export const createPromises = (
   spaceId: string,
   ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
-  outputIndex: string
+  outputIndex: string,
+  isRuleRegistryEnabled: boolean
 ): Array<Promise<PartialAlert<RuleParams> | null>> => {
   return rules.map(async (rule) => {
     const {
@@ -125,6 +128,7 @@ export const createPromises = (
       references,
       version,
       note,
+      throttle,
       anomaly_threshold: anomalyThreshold,
       timeline_id: timelineId,
       timeline_title: timelineTitle,
@@ -132,7 +136,12 @@ export const createPromises = (
       exceptions_list: exceptionsList,
     } = rule;
 
-    const existingRule = await readRules({ rulesClient, ruleId, id: undefined });
+    const existingRule = await readRules({
+      isRuleRegistryEnabled,
+      rulesClient,
+      ruleId,
+      id: undefined,
+    });
 
     // TODO: Fix these either with an is conversion or by better typing them within io-ts
     const filters: PartialFilter[] | undefined = filtersObject as PartialFilter[];
@@ -188,6 +197,7 @@ export const createPromises = (
       timelineTitle,
       machineLearningJobId,
       exceptionsList,
+      throttle,
       actions: undefined,
     });
   });

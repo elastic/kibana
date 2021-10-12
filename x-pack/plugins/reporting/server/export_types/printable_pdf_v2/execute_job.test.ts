@@ -22,9 +22,9 @@ let content: string;
 let mockReporting: ReportingCore;
 let stream: jest.Mocked<Writable>;
 
-const cancellationToken = ({
+const cancellationToken = {
   on: jest.fn(),
-} as unknown) as CancellationToken;
+} as unknown as CancellationToken;
 
 const mockLoggerFactory = {
   get: jest.fn().mockImplementation(() => ({
@@ -49,7 +49,7 @@ const getBasePayload = (baseObj: any) =>
 
 beforeEach(async () => {
   content = '';
-  stream = ({ write: jest.fn((chunk) => (content += chunk)) } as unknown) as typeof stream;
+  stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
 
   const reportingConfig = {
     'server.basePath': '/sbp',
@@ -97,7 +97,7 @@ test(`returns content_type of application/pdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
-  (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of(Buffer.from('')));
+  (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
   const { content_type: contentType } = await runTask(
     'pdfJobId',
@@ -122,5 +122,5 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
     stream
   );
 
-  expect(content).toEqual(Buffer.from(testContent).toString('base64'));
+  expect(content).toEqual(testContent);
 });

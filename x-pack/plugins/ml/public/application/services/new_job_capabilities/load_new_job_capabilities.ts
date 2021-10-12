@@ -23,27 +23,34 @@ export function loadNewJobCapabilities(
   jobType: JobType
 ) {
   return new Promise(async (resolve, reject) => {
-    const serviceToUse =
-      jobType === ANOMALY_DETECTOR ? newJobCapsService : newJobCapsServiceAnalytics;
-    if (indexPatternId !== undefined) {
-      // index pattern is being used
-      const indexPattern: IIndexPattern = await indexPatterns.get(indexPatternId);
-      await serviceToUse.initializeFromIndexPattern(indexPattern);
-      resolve(serviceToUse.newJobCaps);
-    } else if (savedSearchId !== undefined) {
-      // saved search is being used
-      // load the index pattern from the saved search
-      const { indexPattern } = await getIndexPatternAndSavedSearch(savedSearchId);
-      if (indexPattern === null) {
-        // eslint-disable-next-line no-console
-        console.error('Cannot retrieve index pattern from saved search');
+    try {
+      const serviceToUse =
+        jobType === ANOMALY_DETECTOR ? newJobCapsService : newJobCapsServiceAnalytics;
+
+      if (indexPatternId !== undefined) {
+        // index pattern is being used
+        const indexPattern: IIndexPattern = await indexPatterns.get(indexPatternId);
+        await serviceToUse.initializeFromIndexPattern(indexPattern);
+        resolve(serviceToUse.newJobCaps);
+      } else if (savedSearchId !== undefined) {
+        // saved search is being used
+        // load the index pattern from the saved search
+        const { indexPattern } = await getIndexPatternAndSavedSearch(savedSearchId);
+
+        if (indexPattern === null) {
+          // eslint-disable-next-line no-console
+          console.error('Cannot retrieve index pattern from saved search');
+          reject();
+          return;
+        }
+
+        await serviceToUse.initializeFromIndexPattern(indexPattern);
+        resolve(serviceToUse.newJobCaps);
+      } else {
         reject();
-        return;
       }
-      await serviceToUse.initializeFromIndexPattern(indexPattern);
-      resolve(serviceToUse.newJobCaps);
-    } else {
-      reject();
+    } catch (error) {
+      reject(error);
     }
   });
 }

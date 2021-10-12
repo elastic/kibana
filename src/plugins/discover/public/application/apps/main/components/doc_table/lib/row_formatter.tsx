@@ -7,8 +7,11 @@
  */
 
 import React, { Fragment } from 'react';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../common';
-import { getServices, IndexPattern } from '../../../../../../kibana_services';
+import { getServices } from '../../../../../../kibana_services';
+
+import './row_formatter.scss';
 
 interface Props {
   defPairs: Array<[string, unknown]>;
@@ -20,6 +23,7 @@ const TemplateComponent = ({ defPairs }: Props) => {
         <Fragment key={idx}>
           <dt>{pair[0]}:</dt>
           <dd
+            className="rowFormatter__value"
             // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
             dangerouslySetInnerHTML={{ __html: `${pair[1]}` }} // eslint-disable-line react/no-danger
           />{' '}
@@ -29,8 +33,12 @@ const TemplateComponent = ({ defPairs }: Props) => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) => {
+export const formatRow = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  hit: Record<string, any>,
+  indexPattern: IndexPattern,
+  fieldsToShow: string[]
+) => {
   const highlights = hit?.highlight ?? {};
   // Keys are sorted in the hits object
   const formatted = indexPattern.formatHit(hit);
@@ -40,7 +48,13 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
   Object.entries(formatted).forEach(([key, val]) => {
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
-    pairs.push([displayKey ? displayKey : key, val]);
+    if (displayKey) {
+      if (fieldsToShow.includes(displayKey)) {
+        pairs.push([displayKey, val]);
+      }
+    } else {
+      pairs.push([key, val]);
+    }
   });
   const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
   return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
@@ -62,7 +76,7 @@ export const formatTopLevelObject = (
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const formatter = field
       ? indexPattern.getFormatterForField(field)
-      : { convert: (v: string, ...rest: unknown[]) => String(v) };
+      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
     if (!values.map) return;
     const formatted = values
       .map((val: unknown) =>

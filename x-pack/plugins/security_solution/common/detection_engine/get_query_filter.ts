@@ -109,7 +109,7 @@ export const buildEqlSearchRequest = (
     requestFilter.push({
       bool: {
         must_not: {
-          bool: exceptionFilter?.query.bool,
+          bool: exceptionFilter.query?.bool,
         },
       },
     });

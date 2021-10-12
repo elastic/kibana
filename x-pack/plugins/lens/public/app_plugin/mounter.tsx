@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback } from 'react';
-import { DeepPartial } from '@reduxjs/toolkit';
+import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
@@ -37,6 +37,7 @@ import {
   navigateAway,
   LensRootStore,
   loadInitial,
+  LensAppState,
   LensState,
 } from '../state_management';
 import { getPreloadedState } from '../state_management/lens_slice';
@@ -44,15 +45,17 @@ import { getPreloadedState } from '../state_management/lens_slice';
 export async function getLensServices(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
-  attributeService: () => Promise<LensAttributeService>
+  attributeService: LensAttributeService
 ): Promise<LensAppServices> {
   const {
     data,
+    inspector,
     navigation,
     embeddable,
     savedObjectsTagging,
     usageCollection,
     fieldFormats,
+    spaces,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -62,12 +65,13 @@ export async function getLensServices(
   return {
     data,
     storage,
+    inspector,
     navigation,
     fieldFormats,
     stateTransfer,
     usageCollection,
     savedObjectsTagging,
-    attributeService: await attributeService(),
+    attributeService,
     http: coreStart.http,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
@@ -82,9 +86,9 @@ export async function getLensServices(
         ? stateTransfer?.getAppNameFromId(embeddableEditorIncomingState.originatingApp)
         : undefined;
     },
-
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
+    spaces,
   };
 }
 
@@ -93,8 +97,8 @@ export async function mountApp(
   params: AppMountParameters,
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
-    attributeService: () => Promise<LensAttributeService>;
-    getPresentationUtilContext: () => Promise<FC>;
+    attributeService: LensAttributeService;
+    getPresentationUtilContext: () => FC;
   }
 ) {
   const { createEditorFrame, attributeService, getPresentationUtilContext } = mountProps;
@@ -147,6 +151,7 @@ export async function mountApp(
     if (stateTransfer && props?.input) {
       const { input, isCopied } = props;
       stateTransfer.navigateToWithEmbeddablePackage(embeddableEditorIncomingState?.originatingApp, {
+        path: embeddableEditorIncomingState?.originatingPath,
         state: {
           embeddableId: isCopied ? undefined : embeddableEditorIncomingState.embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
@@ -155,7 +160,9 @@ export async function mountApp(
         },
       });
     } else {
-      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp);
+      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp, {
+        path: embeddableEditorIncomingState?.originatingPath,
+      });
     }
   };
   const initialContext =
@@ -182,9 +189,10 @@ export async function mountApp(
     embeddableEditorIncomingState,
     initialContext,
   };
+  const emptyState = getPreloadedState(storeDeps) as LensAppState;
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
-    lens: getPreloadedState(storeDeps),
-  } as DeepPartial<LensState>);
+    lens: emptyState,
+  } as PreloadedState<LensState>);
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
@@ -196,7 +204,10 @@ export async function mountApp(
       );
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
-      lensStore.dispatch(loadInitial({ redirectCallback, initialInput }));
+
+      lensStore.dispatch(
+        loadInitial({ redirectCallback, initialInput, emptyState, history: props.history })
+      );
 
       return (
         <Provider store={lensStore}>
@@ -241,7 +252,7 @@ export async function mountApp(
 
   params.element.classList.add('lnsAppWrapper');
 
-  const PresentationUtilContext = await getPresentationUtilContext();
+  const PresentationUtilContext = getPresentationUtilContext();
 
   render(
     <I18nProvider>

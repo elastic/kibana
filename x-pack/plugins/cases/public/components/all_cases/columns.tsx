@@ -72,7 +72,7 @@ export interface GetCasesColumn {
   handleIsLoading: (a: boolean) => void;
   isLoadingCases: string[];
   refreshCases?: (a?: boolean) => void;
-  showActions: boolean;
+  isSelectorView: boolean;
   userCanCrud: boolean;
   connectors?: ActionConnector[];
 }
@@ -84,7 +84,7 @@ export const useCasesColumns = ({
   handleIsLoading,
   isLoadingCases,
   refreshCases,
-  showActions,
+  isSelectorView,
   userCanCrud,
   connectors = [],
 }: GetCasesColumn): CasesColumns[] => {
@@ -281,38 +281,42 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    {
-      name: i18n.STATUS,
-      render: (theCase: Case) => {
-        if (theCase?.subCases == null || theCase.subCases.length === 0) {
-          if (theCase.status == null || theCase.type === CaseType.collection) {
-            return getEmptyTagValue();
-          }
-          return (
-            <StatusContextMenu
-              currentStatus={theCase.status}
-              disabled={!userCanCrud || isLoadingCases.length > 0}
-              onStatusChanged={(status) =>
-                handleDispatchUpdate({
-                  updateKey: 'status',
-                  updateValue: status,
-                  caseId: theCase.id,
-                  version: theCase.version,
-                })
+    ...(!isSelectorView
+      ? [
+          {
+            name: i18n.STATUS,
+            render: (theCase: Case) => {
+              if (theCase?.subCases == null || theCase.subCases.length === 0) {
+                if (theCase.status == null || theCase.type === CaseType.collection) {
+                  return getEmptyTagValue();
+                }
+                return (
+                  <StatusContextMenu
+                    currentStatus={theCase.status}
+                    disabled={!userCanCrud || isLoadingCases.length > 0}
+                    onStatusChanged={(status) =>
+                      handleDispatchUpdate({
+                        updateKey: 'status',
+                        updateValue: status,
+                        caseId: theCase.id,
+                        version: theCase.version,
+                      })
+                    }
+                  />
+                );
               }
-            />
-          );
-        }
 
-        const badges = getSubCasesStatusCountsBadges(theCase.subCases);
-        return badges.map(({ color, count }, index) => (
-          <EuiBadge key={index} color={color}>
-            {count}
-          </EuiBadge>
-        ));
-      },
-    },
-    ...(showActions
+              const badges = getSubCasesStatusCountsBadges(theCase.subCases);
+              return badges.map(({ color, count }, index) => (
+                <EuiBadge key={index} color={color}>
+                  {count}
+                </EuiBadge>
+              ));
+            },
+          },
+        ]
+      : []),
+    ...(userCanCrud && !isSelectorView
       ? [
           {
             name: (

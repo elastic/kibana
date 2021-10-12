@@ -82,19 +82,25 @@ export interface TGridModel extends TGridModelSettings {
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
   version: string | null;
+  initialized?: boolean;
 }
 
 export type TGridModelForTimeline = Pick<
   TGridModel,
   | 'columns'
+  | 'defaultColumns'
   | 'dataProviders'
   | 'dateRange'
   | 'deletedEventIds'
+  | 'documentType'
   | 'excludedRowRendererIds'
   | 'expandedDetail'
   | 'filters'
+  | 'filterManager'
+  | 'footerText'
   | 'graphEventId'
   | 'kqlQuery'
+  | 'queryFields'
   | 'id'
   | 'indexNames'
   | 'isLoading'
@@ -102,11 +108,14 @@ export type TGridModelForTimeline = Pick<
   | 'itemsPerPage'
   | 'itemsPerPageOptions'
   | 'loadingEventIds'
+  | 'loadingText'
+  | 'selectAll'
   | 'showCheckboxes'
   | 'sort'
   | 'selectedEventIds'
   | 'savedObjectId'
   | 'title'
+  | 'unit'
   | 'version'
 >;
 
@@ -114,6 +123,7 @@ export type SubsetTGridModel = Readonly<
   Pick<
     TGridModel,
     | 'columns'
+    | 'defaultColumns'
     | 'dateRange'
     | 'deletedEventIds'
     | 'excludedRowRendererIds'

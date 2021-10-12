@@ -182,7 +182,7 @@ export const searchAfterAndBulkCreate = async ({
         break;
       }
     } catch (exc: unknown) {
-      logger.error(buildRuleMessage(`[-] search_after and bulk threw an error ${exc}`));
+      logger.error(buildRuleMessage(`[-] search_after_bulk_create threw an error ${exc}`));
       return mergeReturns([
         toReturn,
         createSearchAfterReturnType({

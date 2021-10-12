@@ -32,6 +32,7 @@ import {
   buildingBlockTypeOrUndefined,
   description,
   enabled,
+  namespaceOrUndefined,
   noteOrUndefined,
   false_positives,
   rule_id,
@@ -62,7 +63,15 @@ import {
   updated_at,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
-import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
+import {
+  SIGNALS_ID,
+  SERVER_APP_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+} from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export const baseRuleParams = t.exact(
@@ -70,6 +79,7 @@ export const baseRuleParams = t.exact(
     author,
     buildingBlockType: buildingBlockTypeOrUndefined,
     description,
+    namespace: namespaceOrUndefined,
     note: noteOrUndefined,
     falsePositives: false_positives,
     from,
@@ -189,10 +199,27 @@ export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 export const ruleParams = t.intersection([baseRuleParams, typeSpecificRuleParams]);
 export type RuleParams = t.TypeOf<typeof ruleParams>;
 
+export const notifyWhen = t.union([
+  t.literal('onActionGroupChange'),
+  t.literal('onActiveAlert'),
+  t.literal('onThrottleInterval'),
+  t.null,
+]);
+
+export const allRuleTypes = t.union([
+  t.literal(SIGNALS_ID),
+  t.literal(EQL_RULE_TYPE_ID),
+  t.literal(ML_RULE_TYPE_ID),
+  t.literal(QUERY_RULE_TYPE_ID),
+  t.literal(INDICATOR_RULE_TYPE_ID),
+  t.literal(THRESHOLD_RULE_TYPE_ID),
+]);
+export type AllRuleTypes = t.TypeOf<typeof allRuleTypes>;
+
 export const internalRuleCreate = t.type({
   name,
   tags,
-  alertTypeId: t.literal(SIGNALS_ID),
+  alertTypeId: allRuleTypes,
   consumer: t.literal(SERVER_APP_ID),
   schedule: t.type({
     interval: t.string,
@@ -201,7 +228,7 @@ export const internalRuleCreate = t.type({
   actions: actionsCamel,
   params: ruleParams,
   throttle: throttleOrNull,
-  notifyWhen: t.null,
+  notifyWhen,
 });
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
 
@@ -214,7 +241,7 @@ export const internalRuleUpdate = t.type({
   actions: actionsCamel,
   params: ruleParams,
   throttle: throttleOrNull,
-  notifyWhen: t.null,
+  notifyWhen,
 });
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
 

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { MatrixHistogramTypeToAggName } from '../../../../../../common';
 import { buildAnomaliesHistogramQuery } from './query.anomalies_histogram.dsl';
 
 export const anomaliesMatrixHistogramConfig = {
   buildDsl: buildAnomaliesHistogramQuery,
-  aggName: 'aggregations.anomalyActionGroup.buckets',
+  aggName: MatrixHistogramTypeToAggName.anomalies,
   parseKey: 'anomalies.buckets',
 };

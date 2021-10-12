@@ -48,6 +48,10 @@ export const indexFleetAgentForHost = async (
 ): Promise<IndexedFleetAgentResponse> => {
   const agentDoc = fleetAgentGenerator.generateEsHit({
     _source: {
+      agent: {
+        id: endpointHost.agent.id,
+        version: endpointHost.agent.version,
+      },
       local_metadata: {
         elastic: {
           agent: {
@@ -83,12 +87,14 @@ export const indexFleetAgentForHost = async (
 };
 
 const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<Agent> => {
-  return ((await kbnClient
-    .request({
-      path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
-      method: 'GET',
-    })
-    .catch(wrapErrorAndRejectPromise)) as AxiosResponse<GetOneAgentResponse>).data.item;
+  return (
+    (await kbnClient
+      .request({
+        path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
+        method: 'GET',
+      })
+      .catch(wrapErrorAndRejectPromise)) as AxiosResponse<GetOneAgentResponse>
+  ).data.item;
 };
 
 export interface DeleteIndexedFleetAgentsResponse {

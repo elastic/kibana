@@ -24,10 +24,11 @@ import styled from 'styled-components';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useScheduledQueryGroup } from '../../../scheduled_query_groups/use_scheduled_query_group';
-import { ScheduledQueryGroupQueriesTable } from '../../../scheduled_query_groups/scheduled_query_group_queries_table';
+import { ScheduledQueryGroupQueriesStatusTable } from '../../../scheduled_query_groups/scheduled_query_group_queries_status_table';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { AgentsPolicyLink } from '../../../agent_policies/agents_policy_link';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
+import { useAgentPolicyAgentIds } from '../../../agents/use_agent_policy_agent_ids';
 
 const Divider = styled.div`
   width: 0;
@@ -44,6 +45,10 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
   );
 
   const { data } = useScheduledQueryGroup({ scheduledQueryGroupId });
+  const { data: agentIds } = useAgentPolicyAgentIds({
+    agentPolicyId: data?.policy_id,
+    skip: !data,
+  });
 
   useBreadcrumbs('scheduled_query_group_details', { scheduledQueryGroupName: data?.name ?? '' });
 
@@ -131,7 +136,13 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {data && <ScheduledQueryGroupQueriesTable data={data.inputs[0].streams} />}
+      {data && (
+        <ScheduledQueryGroupQueriesStatusTable
+          agentIds={agentIds}
+          scheduledQueryGroupName={data.name}
+          data={data.inputs[0].streams}
+        />
+      )}
     </WithHeaderLayout>
   );
 };

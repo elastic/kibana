@@ -6,8 +6,14 @@
  */
 
 import { useState, useEffect } from 'react';
+import {
+  decorateQuery,
+  fromKueryExpression,
+  luceneStringToDsl,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
+import { estypes } from '@elastic/elasticsearch';
 import { useMlContext } from '../../../../../contexts/ml';
-import { esQuery, esKuery } from '../../../../../../../../../../src/plugins/data/public';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { getQueryFromSavedSearch } from '../../../../../util/index_utils';
 
@@ -30,7 +36,7 @@ export function useSavedSearch() {
   const { currentSavedSearch, currentIndexPattern, kibanaConfig } = mlContext;
 
   const getQueryData = () => {
-    let qry;
+    let qry: estypes.QueryDslQueryContainer = {};
     let qryString;
 
     if (currentSavedSearch !== null) {
@@ -39,11 +45,11 @@ export function useSavedSearch() {
       qryString = query.query;
 
       if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-        const ast = esKuery.fromKueryExpression(qryString);
-        qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
+        const ast = fromKueryExpression(qryString);
+        qry = toElasticsearchQuery(ast, currentIndexPattern);
       } else {
-        qry = esQuery.luceneStringToDsl(qryString);
-        esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+        qry = luceneStringToDsl(qryString);
+        decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
       }
 
       setSavedSearchQuery(qry);

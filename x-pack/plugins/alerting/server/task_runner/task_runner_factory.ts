@@ -6,11 +6,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type {
   Logger,
   KibanaRequest,
   ISavedObjectsRepository,
   IBasePath,
+  ExecutionContextStart,
 } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
@@ -36,6 +37,7 @@ export interface TaskRunnerContext {
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  executionContext: ExecutionContextStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   basePathService: IBasePath;
   internalSavedObjectsRepository: ISavedObjectsRepository;

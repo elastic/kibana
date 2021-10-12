@@ -129,8 +129,8 @@ export const getProcessList = async (
 
     let summary: { [p: string]: number } = {};
     if (result.aggregations!.summaryEvent.summary.hits.hits.length) {
-      summary = result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process
-        .summary;
+      summary =
+        result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process.summary;
     }
 
     return {

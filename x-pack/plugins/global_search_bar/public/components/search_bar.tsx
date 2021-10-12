@@ -135,8 +135,8 @@ const resultToOption = (
 ): EuiSelectableTemplateSitewideOption => {
   const { id, title, url, icon, type, meta = {} } = result;
   const { tagIds = [], categoryLabel = '' } = meta as { tagIds: string[]; categoryLabel: string };
-  // only displaying icons for applications
-  const useIcon = type === 'application';
+  // only displaying icons for applications and integrations
+  const useIcon = type === 'application' || type === 'integration';
   const option: EuiSelectableTemplateSitewideOption = {
     key: id,
     label: title,

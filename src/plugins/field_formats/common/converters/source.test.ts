@@ -10,21 +10,6 @@ import { SourceFormat } from './source';
 import { HtmlContextTypeConvert } from '../types';
 import { HTML_CONTEXT_TYPE } from '../content_types';
 
-export const stubIndexPatternWithFields = {
-  id: '1234',
-  title: 'logstash-*',
-  fields: [
-    {
-      name: 'response',
-      type: 'number',
-      esTypes: ['integer'],
-      aggregatable: true,
-      filterable: true,
-      searchable: true,
-    },
-  ],
-};
-
 describe('Source Format', () => {
   let convertHtml: Function;
 
@@ -43,7 +28,7 @@ describe('Source Format', () => {
     };
 
     expect(convertHtml(hit)).toBe(
-      '<span ng-non-bindable>{&quot;foo&quot;:&quot;bar&quot;,&quot;number&quot;:42,&quot;hello&quot;:&quot;&lt;h1&gt;World&lt;/h1&gt;&quot;,&quot;also&quot;:&quot;with \\&quot;quotes\\&quot; or &#39;single quotes&#39;&quot;}</span>'
+      '{&quot;foo&quot;:&quot;bar&quot;,&quot;number&quot;:42,&quot;hello&quot;:&quot;&lt;h1&gt;World&lt;/h1&gt;&quot;,&quot;also&quot;:&quot;with \\&quot;quotes\\&quot; or &#39;single quotes&#39;&quot;}'
     );
   });
 
@@ -55,10 +40,10 @@ describe('Source Format', () => {
       also: 'with "quotes" or \'single quotes\'',
     };
 
-    const indexPattern = { ...stubIndexPatternWithFields, formatHit: (h: string) => h };
-
-    expect(convertHtml(hit, { field: 'field', indexPattern, hit })).toMatchInlineSnapshot(
-      `"<span ng-non-bindable><dl class=\\"source truncate-by-height\\"><dt>foo:</dt><dd>bar</dd> <dt>number:</dt><dd>42</dd> <dt>hello:</dt><dd><h1>World</h1></dd> <dt>also:</dt><dd>with \\"quotes\\" or 'single quotes'</dd> </dl></span>"`
+    expect(
+      convertHtml(hit, { field: 'field', indexPattern: { formatHit: (h: string) => h }, hit })
+    ).toMatchInlineSnapshot(
+      `"<dl class=\\"source truncate-by-height\\"><dt>foo:</dt><dd>bar</dd> <dt>number:</dt><dd>42</dd> <dt>hello:</dt><dd><h1>World</h1></dd> <dt>also:</dt><dd>with \\"quotes\\" or 'single quotes'</dd> </dl>"`
     );
   });
 });

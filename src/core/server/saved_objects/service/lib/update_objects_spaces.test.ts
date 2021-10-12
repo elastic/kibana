@@ -23,6 +23,7 @@ import type {
   UpdateObjectsSpacesParams,
 } from './update_objects_spaces';
 import { updateObjectsSpaces } from './update_objects_spaces';
+import { SavedObjectsErrorHelpers } from './errors';
 
 type SetupParams = Partial<
   Pick<UpdateObjectsSpacesParams, 'objects' | 'spacesToAdd' | 'spacesToRemove' | 'options'>
@@ -103,6 +104,32 @@ describe('#updateObjectsSpaces', () => {
               }
         ),
       })
+    );
+  }
+  /** Mocks the saved objects client so as to test unsupported server responding with 404 */
+  function mockMgetResultsNotFound(...results: Array<{ found: boolean }>) {
+    client.mget.mockReturnValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        {
+          docs: results.map((x) =>
+            x.found
+              ? {
+                  _id: 'doesnt-matter',
+                  _index: 'doesnt-matter',
+                  _source: { namespaces: [EXISTING_SPACE] },
+                  ...VERSION_PROPS,
+                  found: true,
+                }
+              : {
+                  _id: 'doesnt-matter',
+                  _index: 'doesnt-matter',
+                  found: false,
+                }
+          ),
+        },
+        { statusCode: 404 },
+        {}
+      )
     );
   }
 
@@ -239,6 +266,17 @@ describe('#updateObjectsSpaces', () => {
         { ...obj6, spaces: [], error: BULK_ERROR },
         { ...obj7, spaces: [EXISTING_SPACE, 'foo-space'] },
       ]);
+    });
+
+    it('throws when mget not found response is missing the Elasticsearch header', async () => {
+      const objects = [{ type: SHAREABLE_OBJ_TYPE, id: 'id-1' }];
+      const spacesToAdd = ['foo-space'];
+      const params = setup({ objects, spacesToAdd });
+      mockMgetResultsNotFound({ found: true });
+
+      await expect(() => updateObjectsSpaces(params)).rejects.toThrowError(
+        SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError()
+      );
     });
   });
 

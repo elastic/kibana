@@ -9,7 +9,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { ChromeBadge, ChromeBrand, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
+import { ChromeBadge, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
@@ -19,7 +19,6 @@ const createStartContractMock = () => {
       has: jest.fn(),
       get: jest.fn(),
       getAll: jest.fn(),
-      showOnly: jest.fn(),
       enableForcedAppSwitcherNavigation: jest.fn(),
       getForceAppSwitcherNavigation$: jest.fn(),
     },
@@ -40,14 +39,8 @@ const createStartContractMock = () => {
       getCenter$: jest.fn(),
       getRight$: jest.fn(),
     },
-    setAppTitle: jest.fn(),
-    setBrand: jest.fn(),
-    getBrand$: jest.fn(),
     setIsVisible: jest.fn(),
     getIsVisible$: jest.fn(),
-    addApplicationClass: jest.fn(),
-    removeApplicationClass: jest.fn(),
-    getApplicationClasses$: jest.fn(),
     getBadge$: jest.fn(),
     setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn(),
@@ -61,12 +54,11 @@ const createStartContractMock = () => {
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
     setHeaderBanner: jest.fn(),
+    hasHeaderBanner$: jest.fn(),
     getBodyClasses$: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
-  startContract.getBrand$.mockReturnValue(new BehaviorSubject({} as ChromeBrand));
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
-  startContract.getApplicationClasses$.mockReturnValue(new BehaviorSubject(['class-name']));
   startContract.getBadge$.mockReturnValue(new BehaviorSubject({} as ChromeBadge));
   startContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb]));
   startContract.getBreadcrumbsAppendExtension$.mockReturnValue(new BehaviorSubject(undefined));
@@ -74,6 +66,7 @@ const createStartContractMock = () => {
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
   startContract.getBodyClasses$.mockReturnValue(new BehaviorSubject([]));
+  startContract.hasHeaderBanner$.mockReturnValue(new BehaviorSubject(false));
   return startContract;
 };
 

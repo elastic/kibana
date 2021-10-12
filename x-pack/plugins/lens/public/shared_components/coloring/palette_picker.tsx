@@ -83,7 +83,7 @@ export function PalettePicker({
         value: id,
         title,
         type: FIXED_PROGRESSION,
-        palette: activePalette?.params?.reverse ? colors.reverse() : colors,
+        palette: colors,
         'data-test-subj': `${id}-palette`,
       };
     });

@@ -8,14 +8,12 @@
 
 import { FieldFormatsRegistry } from './field_formats_registry';
 import { BoolFormat, PercentFormat, StringFormat } from './converters';
-import { FieldFormatsGetConfigFn, FieldFormatInstanceType } from './types';
+import { FieldFormatConfig, FieldFormatsGetConfigFn } from './types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-
-const getValueOfPrivateField = (instance: any, field: string) => instance[field];
 
 describe('FieldFormatsRegistry', () => {
   let fieldFormatsRegistry: FieldFormatsRegistry;
-  let defaultMap = {};
+  let defaultMap: Record<string, FieldFormatConfig> = ({} = {});
   const getConfig = (() => defaultMap) as FieldFormatsGetConfigFn;
 
   beforeEach(() => {
@@ -35,9 +33,6 @@ describe('FieldFormatsRegistry', () => {
 
   test('should allows to create an instance of "FieldFormatsRegistry"', () => {
     expect(fieldFormatsRegistry).toBeDefined();
-
-    expect(getValueOfPrivateField(fieldFormatsRegistry, 'fieldFormats')).toBeDefined();
-    expect(getValueOfPrivateField(fieldFormatsRegistry, 'defaultMap')).toEqual({});
   });
 
   describe('init', () => {
@@ -48,11 +43,13 @@ describe('FieldFormatsRegistry', () => {
 
     test('should populate the "defaultMap" object', () => {
       defaultMap = {
-        number: { id: 'number', params: {} },
+        [KBN_FIELD_TYPES.NUMBER]: { id: KBN_FIELD_TYPES.NUMBER, params: {} },
       };
 
       fieldFormatsRegistry.init(getConfig, {}, []);
-      expect(getValueOfPrivateField(fieldFormatsRegistry, 'defaultMap')).toEqual(defaultMap);
+      expect(fieldFormatsRegistry.getDefaultConfig(KBN_FIELD_TYPES.NUMBER)).toEqual(
+        defaultMap[KBN_FIELD_TYPES.NUMBER]
+      );
     });
   });
 
@@ -65,16 +62,9 @@ describe('FieldFormatsRegistry', () => {
     test('should register field formats', () => {
       fieldFormatsRegistry.register([StringFormat, BoolFormat]);
 
-      const registeredFieldFormatters: Map<
-        string,
-        FieldFormatInstanceType
-      > = getValueOfPrivateField(fieldFormatsRegistry, 'fieldFormats');
-
-      expect(registeredFieldFormatters.size).toBe(2);
-
-      expect(registeredFieldFormatters.get(BoolFormat.id)).toBe(BoolFormat);
-      expect(registeredFieldFormatters.get(StringFormat.id)).toBe(StringFormat);
-      expect(registeredFieldFormatters.get(PercentFormat.id)).toBeUndefined();
+      expect(fieldFormatsRegistry.has(StringFormat.id)).toBe(true);
+      expect(fieldFormatsRegistry.has(BoolFormat.id)).toBe(true);
+      expect(fieldFormatsRegistry.has(PercentFormat.id)).toBe(false);
     });
 
     test('should throw if registering a formatter with existing id ', () => {
@@ -130,8 +120,8 @@ describe('FieldFormatsRegistry', () => {
         const stringFormat = new DecoratedStingFormat({
           foo: 'foo',
         });
-        const params = getValueOfPrivateField(stringFormat, '_params');
 
+        const params = stringFormat.params();
         expect(params).toHaveProperty('foo');
         expect(params).toHaveProperty('parsedUrl');
         expect(params.parsedUrl).toHaveProperty('origin');
@@ -168,7 +158,7 @@ describe('FieldFormatsRegistry', () => {
       expect(DecoratedStringFormat).toBeDefined();
 
       const stingFormat = new DecoratedStringFormat({ foo: 'foo' });
-      const params = getValueOfPrivateField(stingFormat, '_params');
+      const params = stingFormat.params();
 
       expect(params).toHaveProperty('foo');
       expect(params).toHaveProperty('parsedUrl');

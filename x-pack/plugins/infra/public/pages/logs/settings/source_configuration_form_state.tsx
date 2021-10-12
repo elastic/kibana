@@ -28,19 +28,16 @@ export const useLogSourceConfigurationFormState = (
     )
   );
 
-  const {
-    fieldsFormElement,
-    tiebreakerFieldFormElement,
-    timestampFieldFormElement,
-  } = useFieldsFormElement(
-    useMemo(
-      () => ({
-        tiebreakerField: configuration?.fields?.tiebreaker ?? '_doc',
-        timestampField: configuration?.fields?.timestamp ?? '@timestamp',
-      }),
-      [configuration]
-    )
-  );
+  const { fieldsFormElement, tiebreakerFieldFormElement, timestampFieldFormElement } =
+    useFieldsFormElement(
+      useMemo(
+        () => ({
+          tiebreakerField: configuration?.fields?.tiebreaker ?? '_doc',
+          timestampField: configuration?.fields?.timestamp ?? '@timestamp',
+        }),
+        [configuration]
+      )
+    );
 
   const logColumnsFormElement = useLogColumnsFormElement(
     useMemo(() => configuration?.logColumns ?? [], [configuration])

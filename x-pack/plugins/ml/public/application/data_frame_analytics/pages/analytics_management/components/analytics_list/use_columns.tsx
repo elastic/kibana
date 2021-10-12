@@ -299,6 +299,7 @@ export const useColumns = (
             />
           ) : null,
         width: '90px',
+        'data-test-subj': 'mlAnalyticsTableColumnSpaces',
       });
     }
     // Remove actions if Ml not enabled in current space

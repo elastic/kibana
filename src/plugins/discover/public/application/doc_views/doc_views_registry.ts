@@ -6,33 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { auto } from 'angular';
-import { convertDirectiveToRenderFn } from './doc_views_helpers';
 import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_views_types';
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];
-  private angularInjectorGetter: (() => Promise<auto.IInjectorService>) | null = null;
-
-  setAngularInjectorGetter = (injectorGetter: () => Promise<auto.IInjectorService>) => {
-    this.angularInjectorGetter = injectorGetter;
-  };
 
   /**
    * Extends and adds the given doc view to the registry array
    */
   addDocView(docViewRaw: DocViewInput | DocViewInputFn) {
     const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
-    if (docView.directive) {
-      // convert angular directive to render function for backwards compatibility
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (docView.render as any) = convertDirectiveToRenderFn(docView.directive as any, () => {
-        if (!this.angularInjectorGetter) {
-          throw new Error('Angular was not initialized');
-        }
-        return this.angularInjectorGetter();
-      });
-    }
     if (typeof docView.shouldShow !== 'function') {
       docView.shouldShow = () => true;
     }

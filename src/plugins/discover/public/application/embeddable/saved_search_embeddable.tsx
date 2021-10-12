@@ -38,12 +38,13 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import * as columnActions from '../apps/main/components/doc_table/actions/columns';
-import { handleSourceColumnState } from '../angular/helpers';
+import { handleSourceColumnState } from '../helpers/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapper';
-import { getDefaultSort, getSortForSearchSource } from '../apps/main/components/doc_table';
+import { getDefaultSort } from '../apps/main/components/doc_table';
 import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
+import { updateSearchSource } from './helpers/update_search_source';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -70,7 +71,8 @@ interface SearchEmbeddableConfig {
 
 export class SavedSearchEmbeddable
   extends Embeddable<SearchInput, SearchOutput>
-  implements ISearchEmbeddable {
+  implements ISearchEmbeddable
+{
   private readonly savedSearch: SavedSearch;
   private inspectorAdapters: Adapters;
   private panelTitle: string = '';
@@ -143,26 +145,16 @@ export class SavedSearchEmbeddable
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', this.services.uiSettings.get(SAMPLE_SIZE_SETTING));
-    searchSource.setField(
-      'sort',
-      getSortForSearchSource(
-        this.searchProps!.sort,
-        this.searchProps!.indexPattern,
-        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-      )
-    );
-    if (useNewFieldsApi) {
-      searchSource.removeField('fieldsFromSource');
-      const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };
-      searchSource.setField('fields', [fields]);
-    } else {
-      searchSource.removeField('fields');
-      if (this.searchProps.indexPattern) {
-        const fieldNames = this.searchProps.indexPattern.fields.map((field) => field.name);
-        searchSource.setField('fieldsFromSource', fieldNames);
+    updateSearchSource(
+      searchSource,
+      this.searchProps!.indexPattern,
+      this.searchProps!.sort,
+      useNewFieldsApi,
+      {
+        sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
+        defaultSort: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
       }
-    }
+    );
 
     // Log request to inspector
     this.inspectorAdapters.requests!.reset();
@@ -204,9 +196,11 @@ export class SavedSearchEmbeddable
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
-      this.updateOutput({ loading: false, error });
+      if (!this.destroyed) {
+        this.updateOutput({ loading: false, error });
 
-      this.searchProps!.isLoading = false;
+        this.searchProps!.isLoading = false;
+      }
     }
   };
 
@@ -222,7 +216,7 @@ export class SavedSearchEmbeddable
     if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
       this.savedSearch.sort = getDefaultSort(
         indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
       );
     }
 
@@ -232,7 +226,7 @@ export class SavedSearchEmbeddable
       isLoading: false,
       sort: getDefaultSort(
         indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
       ),
       rows: [],
       searchDescription: this.savedSearch.description,

@@ -11,14 +11,9 @@ export const defaultLifecyclePolicy = {
       hot: {
         actions: {
           rollover: {
-            max_age: '90d',
-            max_size: '50gb',
+            max_age: '30d',
+            max_primary_shard_size: '50gb',
           },
-        },
-      },
-      delete: {
-        actions: {
-          delete: {},
         },
       },
     },

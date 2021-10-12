@@ -17,4 +17,5 @@ export const config: PluginConfigDescriptor<IndexLifecycleManagementConfig> = {
   exposeToBrowser: {
     ui: true,
   },
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };

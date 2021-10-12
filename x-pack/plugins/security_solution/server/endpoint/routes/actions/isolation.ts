@@ -120,6 +120,7 @@ export const isolationRequestHandler = function (
           input_type: 'endpoint',
           agents: endpointData.map((endpt: HostMetadata) => endpt.elastic.agent.id),
           user_id: user!.username,
+          timeout: 300, // 5 minutes
           data: {
             command: isolate ? 'isolate' : 'unisolate',
             comment: req.body.comment ?? undefined,

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test';
 
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -17,13 +18,18 @@ export interface ExpectedSectionTable {
 }
 
 export type AnalyticsTableRowDetails = Record<'jobDetails', ExpectedSectionTable[]>;
+
+export type MlDFAJobTable = ProvidedType<typeof MachineLearningDataFrameAnalyticsTableProvider>;
+
 export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return new (class AnalyticsTable {
-    public async parseAnalyticsTable() {
+    public async parseAnalyticsTable(
+      tableEnvironment: 'mlDataFrameAnalytics' | 'stackMgmtJobList' = 'mlDataFrameAnalytics'
+    ) {
       const table = await testSubjects.find('~mlAnalyticsTable');
       const $ = await table.parseDomContent();
       const rows = [];
@@ -31,7 +37,17 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       for (const tr of $.findTestSubjects('~mlAnalyticsTableRow').toArray()) {
         const $tr = $(tr);
 
-        rows.push({
+        const rowObject: {
+          id: string;
+          description: string;
+          memoryStatus: string;
+          sourceIndex: string;
+          destinationIndex: string;
+          type: string;
+          status: string;
+          progress: string;
+          spaces?: string[];
+        } = {
           id: $tr
             .findTestSubject('mlAnalyticsTableColumnId')
             .find('.euiTableCellContent')
@@ -39,6 +55,11 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
             .trim(),
           description: $tr
             .findTestSubject('mlAnalyticsTableColumnJobDescription')
+            .find('.euiTableCellContent')
+            .text()
+            .trim(),
+          memoryStatus: $tr
+            .findTestSubject('mlAnalyticsTableColumnJobMemoryStatus')
             .find('.euiTableCellContent')
             .text()
             .trim(),
@@ -66,7 +87,23 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
             .findTestSubject('mlAnalyticsTableColumnProgress')
             .findTestSubject('mlAnalyticsTableProgress')
             .attr('value'),
-        });
+        };
+
+        if (tableEnvironment === 'stackMgmtJobList') {
+          const $spaces = $tr
+            .findTestSubject('mlAnalyticsTableColumnSpaces')
+            .find('.euiTableCellContent')
+            .find('.euiAvatar--space');
+          const spaces = [];
+          for (const el of $spaces.toArray()) {
+            // extract the space id from data-test-subj and add to list
+            spaces.push($(el).attr('data-test-subj').replace('space-avatar-', ''));
+          }
+
+          rowObject.spaces = spaces;
+        }
+
+        rows.push(rowObject);
       }
 
       return rows;
@@ -153,6 +190,21 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
         expectedRowCount,
         `Filtered DFA job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
       );
+    }
+
+    public async assertAnalyticsJobDisplayedInTable(
+      analyticsId: string,
+      shouldBeDisplayed: boolean
+    ) {
+      if (shouldBeDisplayed) {
+        await this.filterWithSearchString(analyticsId, 1);
+      } else {
+        if (await testSubjects.exists('mlNoDataFrameAnalyticsFound', { timeout: 1000 })) {
+          // no jobs at all, no other assertion needed
+          return;
+        }
+        await this.filterWithSearchString(analyticsId, 0);
+      }
     }
 
     public async assertAnalyticsRowFields(analyticsId: string, expectedRow: object) {

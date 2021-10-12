@@ -22,6 +22,7 @@ import {
 import { FlowTarget } from '../../search_strategy/security_solution/network';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 import { Direction, Maybe } from '../../search_strategy';
+import { Ecs } from '../../ecs';
 
 export * from './actions';
 export * from './cells';
@@ -296,7 +297,15 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
 
 export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
+export type SavedTimelineWithSavedObjectId = SavedTimeline & { savedObjectId?: string | null };
+
 export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
+
+/**
+ * This type represents a timeline type stored in a saved object that does not include any fields that reference
+ * other saved objects.
+ */
+export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'savedQueryId'>;
 
 /*
  *  Timeline IDs
@@ -328,21 +337,6 @@ export const TimelineIdLiteralRt = runtimeTypes.union([
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
 
-/**
- * Timeline Saved object type with metadata
- */
-
-export const TimelineSavedObjectRuntimeType = runtimeTypes.intersection([
-  runtimeTypes.type({
-    id: runtimeTypes.string,
-    attributes: SavedTimelineRuntimeType,
-    version: runtimeTypes.string,
-  }),
-  runtimeTypes.partial({
-    savedObjectId: runtimeTypes.string,
-  }),
-]);
-
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
   SavedTimelineRuntimeType,
   runtimeTypes.type({
@@ -369,6 +363,33 @@ export const SingleTimelineResponseType = runtimeTypes.type({
 });
 
 export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineResponseType>;
+
+/** Resolved Timeline Response */
+export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes.intersection([
+  runtimeTypes.type({
+    timeline: TimelineSavedToReturnObjectRuntimeType,
+    outcome: runtimeTypes.union([
+      runtimeTypes.literal('exactMatch'),
+      runtimeTypes.literal('aliasMatch'),
+      runtimeTypes.literal('conflict'),
+    ]),
+  }),
+  runtimeTypes.partial({
+    alias_target_id: runtimeTypes.string,
+  }),
+]);
+
+export type ResolvedTimelineWithOutcomeSavedObject = runtimeTypes.TypeOf<
+  typeof ResolvedTimelineSavedObjectToReturnObjectRuntimeType
+>;
+
+export const ResolvedSingleTimelineResponseType = runtimeTypes.type({
+  data: ResolvedTimelineSavedObjectToReturnObjectRuntimeType,
+});
+
+export type SingleTimelineResolveResponse = runtimeTypes.TypeOf<
+  typeof ResolvedSingleTimelineResponseType
+>;
 
 /**
  * All Timeline Saved object type with metadata
@@ -460,6 +481,17 @@ export enum TimelineTabs {
   eql = 'eql',
 }
 
+/**
+ * Used for scrolling top inside a tab. Especially when swiching tabs.
+ */
+export interface ScrollToTopEvent {
+  /**
+   * Timestamp of the moment when the event happened.
+   * The timestamp might be necessary for the scenario where the event could happen multiple times.
+   */
+  timestamp: number;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Record<any, never>;
 
@@ -470,6 +502,7 @@ export type TimelineExpandedEventType =
         eventId: string;
         indexName: string;
         refetch?: () => void;
+        ecsData?: Ecs;
       };
     }
   | EmptyObject;

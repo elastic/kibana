@@ -44,9 +44,8 @@ describe('ES deprecations API', () => {
   describe('GET /api/upgrade_assistant/es_deprecations', () => {
     it('returns state', async () => {
       ESUpgradeStatusApis.getESUpgradeStatus.mockResolvedValue({
-        cluster: [],
-        indices: [],
-        nodes: [],
+        deprecations: [],
+        totalCriticalDeprecations: 0,
       });
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
@@ -55,15 +54,18 @@ describe('ES deprecations API', () => {
 
       expect(resp.status).toEqual(200);
       expect(JSON.stringify(resp.payload)).toMatchInlineSnapshot(
-        `"{\\"cluster\\":[],\\"indices\\":[],\\"nodes\\":[]}"`
+        `"{\\"deprecations\\":[],\\"totalCriticalDeprecations\\":0}"`
       );
     });
 
     it('returns an 403 error if it throws forbidden', async () => {
-      const e: any = new Error(`you can't go here!`);
-      e.statusCode = 403;
+      const error = {
+        name: 'ResponseError',
+        message: `you can't go here!`,
+        statusCode: 403,
+      };
 
-      ESUpgradeStatusApis.getESUpgradeStatus.mockRejectedValue(e);
+      ESUpgradeStatusApis.getESUpgradeStatus.mockRejectedValue(error);
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/es_deprecations',

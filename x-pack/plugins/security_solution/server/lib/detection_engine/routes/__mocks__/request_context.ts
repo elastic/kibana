@@ -14,14 +14,14 @@ import {
 import { rulesClientMock } from '../../../../../../alerting/server/mocks';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
 import { siemMock } from '../../../../mocks';
-import { RuleExecutionLogClient } from '../../rule_execution_log/__mocks__/rule_execution_log_client';
+import { ruleExecutionLogClientMock } from '../../rule_execution_log/__mocks__/rule_execution_log_client';
 
 const createMockClients = () => ({
   rulesClient: rulesClientMock.create(),
   licensing: { license: licensingMock.createLicenseMock() },
   clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
-  ruleExecutionLogClient: new RuleExecutionLogClient(),
+  ruleExecutionLogClient: ruleExecutionLogClientMock.create(),
   appClient: siemMock.createClient(),
 });
 
@@ -35,8 +35,8 @@ type SecuritySolutionRequestHandlerContextMock = SecuritySolutionRequestHandlerC
         asCurrentUser: {
           updateByQuery: jest.Mock;
           search: jest.Mock;
-          transport: {
-            request: jest.Mock;
+          security: {
+            hasPrivileges: jest.Mock;
           };
         };
       };
@@ -48,7 +48,7 @@ const createRequestContextMock = (
   clients: ReturnType<typeof createMockClients> = createMockClients()
 ): SecuritySolutionRequestHandlerContextMock => {
   const coreContext = coreMock.createRequestHandlerContext();
-  return ({
+  return {
     alerting: { getRulesClient: jest.fn(() => clients.rulesClient) },
     core: {
       ...coreContext,
@@ -64,7 +64,7 @@ const createRequestContextMock = (
       getExecutionLogClient: jest.fn(() => clients.ruleExecutionLogClient),
       getSpaceId: jest.fn(() => 'default'),
     },
-  } as unknown) as SecuritySolutionRequestHandlerContextMock;
+  } as unknown as SecuritySolutionRequestHandlerContextMock;
 };
 
 const createTools = () => {

@@ -16,22 +16,22 @@ export const technicalRuleFieldMap = {
     Fields.EVENT_ACTION,
     Fields.TAGS
   ),
+  [Fields.ALERT_RULE_PARAMS]: { type: 'keyword', index: false },
   [Fields.ALERT_RULE_TYPE_ID]: { type: 'keyword', required: true },
   [Fields.ALERT_RULE_CONSUMER]: { type: 'keyword', required: true },
-  [Fields.ALERT_RULE_PRODUCER]: { type: 'keyword' },
+  [Fields.ALERT_RULE_PRODUCER]: { type: 'keyword', required: true },
   [Fields.SPACE_IDS]: { type: 'keyword', array: true, required: true },
-  [Fields.ALERT_UUID]: { type: 'keyword' },
-  [Fields.ALERT_ID]: { type: 'keyword' },
+  [Fields.ALERT_UUID]: { type: 'keyword', required: true },
+  [Fields.ALERT_INSTANCE_ID]: { type: 'keyword', required: true },
   [Fields.ALERT_START]: { type: 'date' },
   [Fields.ALERT_END]: { type: 'date' },
   [Fields.ALERT_DURATION]: { type: 'long' },
-  [Fields.ALERT_SEVERITY_LEVEL]: { type: 'keyword' },
-  [Fields.ALERT_SEVERITY_VALUE]: { type: 'long' },
-  [Fields.ALERT_STATUS]: { type: 'keyword' },
+  [Fields.ALERT_SEVERITY]: { type: 'keyword' },
+  [Fields.ALERT_STATUS]: { type: 'keyword', required: true },
   [Fields.ALERT_EVALUATION_THRESHOLD]: { type: 'scaled_float', scaling_factor: 100 },
   [Fields.ALERT_EVALUATION_VALUE]: { type: 'scaled_float', scaling_factor: 100 },
   [Fields.VERSION]: {
-    type: 'keyword',
+    type: 'version',
     array: false,
     required: false,
   },
@@ -88,17 +88,12 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_RULE_CATEGORY]: {
     type: 'keyword',
     array: false,
-    required: false,
+    required: true,
   },
   [Fields.ALERT_RULE_UUID]: {
     type: 'keyword',
     array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_ID]: {
-    type: 'keyword',
-    array: false,
-    required: false,
+    required: true,
   },
   [Fields.ALERT_RULE_CREATED_AT]: {
     type: 'date',
@@ -121,7 +116,7 @@ export const technicalRuleFieldMap = {
     required: false,
   },
   [Fields.ALERT_RULE_FROM]: {
-    type: 'date',
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -138,7 +133,7 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_RULE_NAME]: {
     type: 'keyword',
     array: false,
-    required: false,
+    required: true,
   },
   [Fields.ALERT_RULE_NOTE]: {
     type: 'keyword',

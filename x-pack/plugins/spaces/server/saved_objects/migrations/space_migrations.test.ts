@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Space } from 'src/plugins/spaces_oss/common';
-
+import type { Space } from '../../../common';
 import { migrateTo660 } from './space_migrations';
 
 describe('migrateTo660', () => {

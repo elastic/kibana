@@ -51,25 +51,21 @@ export const useTimelineLastEventTime = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    TimelineLastEventTimeRequest,
-    setTimelineLastEventTimeRequest,
-  ] = useState<TimelineEventsLastEventTimeRequestOptions>({
-    defaultIndex: indexNames,
-    docValueFields,
-    factoryQueryType: TimelineEventsQueries.lastEventTime,
-    indexKey,
-    details,
-  });
+  const [TimelineLastEventTimeRequest, setTimelineLastEventTimeRequest] =
+    useState<TimelineEventsLastEventTimeRequestOptions>({
+      defaultIndex: indexNames,
+      docValueFields,
+      factoryQueryType: TimelineEventsQueries.lastEventTime,
+      indexKey,
+      details,
+    });
 
-  const [
-    timelineLastEventTimeResponse,
-    setTimelineLastEventTimeResponse,
-  ] = useState<UseTimelineLastEventTimeArgs>({
-    lastSeen: null,
-    refetch: refetch.current,
-    errorMessage: undefined,
-  });
+  const [timelineLastEventTimeResponse, setTimelineLastEventTimeResponse] =
+    useState<UseTimelineLastEventTimeArgs>({
+      lastSeen: null,
+      refetch: refetch.current,
+      errorMessage: undefined,
+    });
   const { addError, addWarning } = useAppToasts();
 
   const timelineLastEventTimeSearch = useCallback(

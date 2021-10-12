@@ -2,6 +2,9 @@
   "type": "index",
   "value": {
     "aliases": {
+      ".alerts-security.alerts-default": {
+        "is_write_index": false
+      },
       ".siem-signals-default": {
         "is_write_index": true
       }
@@ -9,7 +12,8 @@
     "index": ".siem-signals-default-000001",
     "mappings": {
       "_meta": {
-        "version": 14
+        "aliases_version": 1,
+        "version": 55
       },
       "dynamic": "false",
       "properties": {
@@ -18,6 +22,14 @@
         },
         "agent": {
           "properties": {
+            "build": {
+              "properties": {
+                "original": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
             "ephemeral_id": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -101,6 +113,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "continent_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "continent_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -120,11 +136,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -154,6 +178,10 @@
               "type": "long"
             },
             "registered_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "subdomain": {
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -214,6 +242,10 @@
                   },
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -224,6 +256,10 @@
             "account": {
               "properties": {
                 "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -253,6 +289,18 @@
                 }
               }
             },
+            "project": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
             "provider": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -260,6 +308,14 @@
             "region": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "service": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
@@ -315,6 +371,19 @@
             }
           }
         },
+        "data_stream": {
+          "properties": {
+            "dataset": {
+              "type": "keyword"
+            },
+            "namespace": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
         "destination": {
           "properties": {
             "address": {
@@ -355,6 +424,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "continent_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "continent_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -374,11 +447,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -408,6 +489,10 @@
               "type": "long"
             },
             "registered_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "subdomain": {
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -468,6 +553,10 @@
                   },
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -480,11 +569,19 @@
                 "exists": {
                   "type": "boolean"
                 },
+                "signing_id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "status": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "subject_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "team_id": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -513,6 +610,10 @@
                 "sha512": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "ssdeep": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
@@ -526,6 +627,10 @@
             },
             "pe": {
               "properties": {
+                "architecture": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "company": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -535,6 +640,10 @@
                   "type": "keyword"
                 },
                 "file_version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "imphash": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -728,6 +837,10 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
+            "reason": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
             "reference": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -775,11 +888,19 @@
                 "exists": {
                   "type": "boolean"
                 },
+                "signing_id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "status": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "subject_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "team_id": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -838,6 +959,10 @@
                 "sha512": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "ssdeep": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
@@ -876,6 +1001,10 @@
             },
             "pe": {
               "properties": {
+                "architecture": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "company": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -885,6 +1014,10 @@
                   "type": "keyword"
                 },
                 "file_version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "imphash": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -918,6 +1051,112 @@
             "uid": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "x509": {
+              "properties": {
+                "alternative_names": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "issuer": {
+                  "properties": {
+                    "common_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "distinguished_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "locality": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "organization": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "organizational_unit": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "state_or_province": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "not_after": {
+                  "type": "date"
+                },
+                "not_before": {
+                  "type": "date"
+                },
+                "public_key_algorithm": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "public_key_curve": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "public_key_exponent": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "long"
+                },
+                "public_key_size": {
+                  "type": "long"
+                },
+                "serial_number": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "signature_algorithm": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "subject": {
+                  "properties": {
+                    "common_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "distinguished_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "locality": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "organization": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "organizational_unit": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "state_or_province": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "version_number": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
@@ -998,6 +1237,32 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
+            "cpu": {
+              "properties": {
+                "usage": {
+                  "scaling_factor": 1000,
+                  "type": "scaled_float"
+                }
+              }
+            },
+            "disk": {
+              "properties": {
+                "read": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "write": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
             "domain": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -1005,6 +1270,10 @@
             "geo": {
               "properties": {
                 "city_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "continent_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -1027,11 +1296,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -1055,6 +1332,30 @@
             "name": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "network": {
+              "properties": {
+                "egress": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    },
+                    "packets": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "ingress": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    },
+                    "packets": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
             },
             "os": {
               "properties": {
@@ -1087,6 +1388,10 @@
                   "type": "keyword"
                 },
                 "platform": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "type": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -1156,6 +1461,10 @@
                   },
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -1185,7 +1494,15 @@
                 "bytes": {
                   "type": "long"
                 },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "method": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "mime_type": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -1217,6 +1534,10 @@
                 "bytes": {
                   "type": "long"
                 },
+                "mime_type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "status_code": {
                   "type": "long"
                 }
@@ -1244,11 +1565,475 @@
             }
           }
         },
+        "kibana": {
+          "properties": {
+            "alert": {
+              "properties": {
+                "ancestors": {
+                  "properties": {
+                    "depth": {
+                      "path": "signal.ancestors.depth",
+                      "type": "alias"
+                    },
+                    "id": {
+                      "path": "signal.ancestors.id",
+                      "type": "alias"
+                    },
+                    "index": {
+                      "path": "signal.ancestors.index",
+                      "type": "alias"
+                    },
+                    "type": {
+                      "path": "signal.ancestors.type",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "depth": {
+                  "path": "signal.depth",
+                  "type": "alias"
+                },
+                "original_event": {
+                  "properties": {
+                    "action": {
+                      "path": "signal.original_event.action",
+                      "type": "alias"
+                    },
+                    "category": {
+                      "path": "signal.original_event.category",
+                      "type": "alias"
+                    },
+                    "code": {
+                      "path": "signal.original_event.code",
+                      "type": "alias"
+                    },
+                    "created": {
+                      "path": "signal.original_event.created",
+                      "type": "alias"
+                    },
+                    "dataset": {
+                      "path": "signal.original_event.dataset",
+                      "type": "alias"
+                    },
+                    "duration": {
+                      "path": "signal.original_event.duration",
+                      "type": "alias"
+                    },
+                    "end": {
+                      "path": "signal.original_event.end",
+                      "type": "alias"
+                    },
+                    "hash": {
+                      "path": "signal.original_event.hash",
+                      "type": "alias"
+                    },
+                    "id": {
+                      "path": "signal.original_event.id",
+                      "type": "alias"
+                    },
+                    "kind": {
+                      "path": "signal.original_event.kind",
+                      "type": "alias"
+                    },
+                    "module": {
+                      "path": "signal.original_event.module",
+                      "type": "alias"
+                    },
+                    "outcome": {
+                      "path": "signal.original_event.outcome",
+                      "type": "alias"
+                    },
+                    "provider": {
+                      "path": "signal.original_event.provider",
+                      "type": "alias"
+                    },
+                    "reason": {
+                      "path": "signal.original_event.reason",
+                      "type": "alias"
+                    },
+                    "risk_score": {
+                      "path": "signal.original_event.risk_score",
+                      "type": "alias"
+                    },
+                    "risk_score_norm": {
+                      "path": "signal.original_event.risk_score_norm",
+                      "type": "alias"
+                    },
+                    "sequence": {
+                      "path": "signal.original_event.sequence",
+                      "type": "alias"
+                    },
+                    "severity": {
+                      "path": "signal.original_event.severity",
+                      "type": "alias"
+                    },
+                    "start": {
+                      "path": "signal.original_event.start",
+                      "type": "alias"
+                    },
+                    "timezone": {
+                      "path": "signal.original_event.timezone",
+                      "type": "alias"
+                    },
+                    "type": {
+                      "path": "signal.original_event.type",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "original_time": {
+                  "path": "signal.original_time",
+                  "type": "alias"
+                },
+                "reason": {
+                  "path": "signal.reason",
+                  "type": "alias"
+                },
+                "risk_score": {
+                  "path": "signal.rule.risk_score",
+                  "type": "alias"
+                },
+                "rule": {
+                  "properties": {
+                    "author": {
+                      "path": "signal.rule.author",
+                      "type": "alias"
+                    },
+                    "building_block_type": {
+                      "path": "signal.rule.building_block_type",
+                      "type": "alias"
+                    },
+                    "consumer": {
+                      "type": "constant_keyword",
+                      "value": "siem"
+                    },
+                    "created_at": {
+                      "path": "signal.rule.created_at",
+                      "type": "alias"
+                    },
+                    "created_by": {
+                      "path": "signal.rule.created_by",
+                      "type": "alias"
+                    },
+                    "description": {
+                      "path": "signal.rule.description",
+                      "type": "alias"
+                    },
+                    "enabled": {
+                      "path": "signal.rule.enabled",
+                      "type": "alias"
+                    },
+                    "false_positives": {
+                      "path": "signal.rule.false_positives",
+                      "type": "alias"
+                    },
+                    "from": {
+                      "path": "signal.rule.from",
+                      "type": "alias"
+                    },
+                    "id": {
+                      "path": "signal.rule.id",
+                      "type": "alias"
+                    },
+                    "immutable": {
+                      "path": "signal.rule.immutable",
+                      "type": "alias"
+                    },
+                    "index": {
+                      "path": "signal.rule.index",
+                      "type": "alias"
+                    },
+                    "interval": {
+                      "path": "signal.rule.interval",
+                      "type": "alias"
+                    },
+                    "language": {
+                      "path": "signal.rule.language",
+                      "type": "alias"
+                    },
+                    "license": {
+                      "path": "signal.rule.license",
+                      "type": "alias"
+                    },
+                    "max_signals": {
+                      "path": "signal.rule.max_signals",
+                      "type": "alias"
+                    },
+                    "name": {
+                      "path": "signal.rule.name",
+                      "type": "alias"
+                    },
+                    "note": {
+                      "path": "signal.rule.note",
+                      "type": "alias"
+                    },
+                    "producer": {
+                      "type": "constant_keyword",
+                      "value": "siem"
+                    },
+                    "query": {
+                      "path": "signal.rule.query",
+                      "type": "alias"
+                    },
+                    "references": {
+                      "path": "signal.rule.references",
+                      "type": "alias"
+                    },
+                    "risk_score_mapping": {
+                      "properties": {
+                        "field": {
+                          "path": "signal.rule.risk_score_mapping.field",
+                          "type": "alias"
+                        },
+                        "operator": {
+                          "path": "signal.rule.risk_score_mapping.operator",
+                          "type": "alias"
+                        },
+                        "value": {
+                          "path": "signal.rule.risk_score_mapping.value",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "rule_id": {
+                      "path": "signal.rule.rule_id",
+                      "type": "alias"
+                    },
+                    "rule_name_override": {
+                      "path": "signal.rule.rule_name_override",
+                      "type": "alias"
+                    },
+                    "rule_type_id": {
+                      "type": "constant_keyword",
+                      "value": "siem.signals"
+                    },
+                    "saved_id": {
+                      "path": "signal.rule.saved_id",
+                      "type": "alias"
+                    },
+                    "severity_mapping": {
+                      "properties": {
+                        "field": {
+                          "path": "signal.rule.severity_mapping.field",
+                          "type": "alias"
+                        },
+                        "operator": {
+                          "path": "signal.rule.severity_mapping.operator",
+                          "type": "alias"
+                        },
+                        "severity": {
+                          "path": "signal.rule.severity_mapping.severity",
+                          "type": "alias"
+                        },
+                        "value": {
+                          "path": "signal.rule.severity_mapping.value",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "tags": {
+                      "path": "signal.rule.tags",
+                      "type": "alias"
+                    },
+                    "threat": {
+                      "properties": {
+                        "framework": {
+                          "path": "signal.rule.threat.framework",
+                          "type": "alias"
+                        },
+                        "tactic": {
+                          "properties": {
+                            "id": {
+                              "path": "signal.rule.threat.tactic.id",
+                              "type": "alias"
+                            },
+                            "name": {
+                              "path": "signal.rule.threat.tactic.name",
+                              "type": "alias"
+                            },
+                            "reference": {
+                              "path": "signal.rule.threat.tactic.reference",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "technique": {
+                          "properties": {
+                            "id": {
+                              "path": "signal.rule.threat.technique.id",
+                              "type": "alias"
+                            },
+                            "name": {
+                              "path": "signal.rule.threat.technique.name",
+                              "type": "alias"
+                            },
+                            "reference": {
+                              "path": "signal.rule.threat.technique.reference",
+                              "type": "alias"
+                            },
+                            "subtechnique": {
+                              "properties": {
+                                "id": {
+                                  "path": "signal.rule.threat.technique.subtechnique.id",
+                                  "type": "alias"
+                                },
+                                "name": {
+                                  "path": "signal.rule.threat.technique.subtechnique.name",
+                                  "type": "alias"
+                                },
+                                "reference": {
+                                  "path": "signal.rule.threat.technique.subtechnique.reference",
+                                  "type": "alias"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "threat_index": {
+                      "path": "signal.rule.threat_index",
+                      "type": "alias"
+                    },
+                    "threat_indicator_path": {
+                      "path": "signal.rule.threat_indicator_path",
+                      "type": "alias"
+                    },
+                    "threat_language": {
+                      "path": "signal.rule.threat_language",
+                      "type": "alias"
+                    },
+                    "threat_mapping": {
+                      "properties": {
+                        "entries": {
+                          "properties": {
+                            "field": {
+                              "path": "signal.rule.threat_mapping.entries.field",
+                              "type": "alias"
+                            },
+                            "type": {
+                              "path": "signal.rule.threat_mapping.entries.type",
+                              "type": "alias"
+                            },
+                            "value": {
+                              "path": "signal.rule.threat_mapping.entries.value",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "threat_query": {
+                      "path": "signal.rule.threat_query",
+                      "type": "alias"
+                    },
+                    "threshold": {
+                      "properties": {
+                        "field": {
+                          "path": "signal.rule.threshold.field",
+                          "type": "alias"
+                        },
+                        "value": {
+                          "path": "signal.rule.threshold.value",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "timeline_id": {
+                      "path": "signal.rule.timeline_id",
+                      "type": "alias"
+                    },
+                    "timeline_title": {
+                      "path": "signal.rule.timeline_title",
+                      "type": "alias"
+                    },
+                    "to": {
+                      "path": "signal.rule.to",
+                      "type": "alias"
+                    },
+                    "type": {
+                      "path": "signal.rule.type",
+                      "type": "alias"
+                    },
+                    "updated_at": {
+                      "path": "signal.rule.updated_at",
+                      "type": "alias"
+                    },
+                    "updated_by": {
+                      "path": "signal.rule.updated_by",
+                      "type": "alias"
+                    },
+                    "version": {
+                      "path": "signal.rule.version",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "severity": {
+                  "path": "signal.rule.severity",
+                  "type": "alias"
+                },
+                "threshold_result": {
+                  "properties": {
+                    "cardinality": {
+                      "properties": {
+                        "field": {
+                          "path": "signal.threshold_result.cardinality.field",
+                          "type": "alias"
+                        },
+                        "value": {
+                          "path": "signal.threshold_result.cardinality.value",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "count": {
+                      "path": "signal.threshold_result.count",
+                      "type": "alias"
+                    },
+                    "from": {
+                      "path": "signal.threshold_result.from",
+                      "type": "alias"
+                    },
+                    "terms": {
+                      "properties": {
+                        "field": {
+                          "path": "signal.threshold_result.terms.field",
+                          "type": "alias"
+                        },
+                        "value": {
+                          "path": "signal.threshold_result.terms.value",
+                          "type": "alias"
+                        }
+                      }
+                    }
+                  }
+                },
+                "workflow_status": {
+                  "path": "signal.status",
+                  "type": "alias"
+                }
+              }
+            },
+            "space_ids": {
+              "type": "constant_keyword",
+              "value": "default"
+            }
+          }
+        },
         "labels": {
           "type": "object"
         },
         "log": {
           "properties": {
+            "file": {
+              "properties": {
+                "path": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
             "level": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -1434,6 +2219,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "continent_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "continent_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -1453,11 +2242,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -1548,6 +2345,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "version": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -1571,6 +2372,54 @@
               "type": "keyword"
             },
             "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "orchestrator": {
+          "properties": {
+            "api_version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "cluster": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "url": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "namespace": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "organization": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "resource": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "type": {
               "ignore_above": 1024,
               "type": "keyword"
             }
@@ -1726,11 +2575,19 @@
                 "exists": {
                   "type": "boolean"
                 },
+                "signing_id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "status": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "subject_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "team_id": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -1786,6 +2643,10 @@
                 "sha512": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "ssdeep": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
@@ -1813,11 +2674,19 @@
                     "exists": {
                       "type": "boolean"
                     },
+                    "signing_id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
                     "status": {
                       "ignore_above": 1024,
                       "type": "keyword"
                     },
                     "subject_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "team_id": {
                       "ignore_above": 1024,
                       "type": "keyword"
                     },
@@ -1873,6 +2742,10 @@
                     "sha512": {
                       "ignore_above": 1024,
                       "type": "keyword"
+                    },
+                    "ssdeep": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
@@ -1885,6 +2758,38 @@
                   },
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "pe": {
+                  "properties": {
+                    "architecture": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "company": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "description": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "file_version": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "imphash": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "original_file_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "product": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "pgid": {
                   "type": "long"
@@ -1936,6 +2841,10 @@
             },
             "pe": {
               "properties": {
+                "architecture": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "company": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -1945,6 +2854,10 @@
                   "type": "keyword"
                 },
                 "file_version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "imphash": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -2048,6 +2961,10 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
+            "hosts": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
             "ip": {
               "type": "ip"
             },
@@ -2141,6 +3058,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "continent_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "continent_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -2160,11 +3081,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -2194,6 +3123,10 @@
               "type": "long"
             },
             "registered_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "subdomain": {
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -2252,6 +3185,10 @@
                       "type": "text"
                     }
                   },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "roles": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -2382,6 +3319,9 @@
                 "provider": {
                   "type": "keyword"
                 },
+                "reason": {
+                  "type": "keyword"
+                },
                 "risk_score": {
                   "type": "float"
                 },
@@ -2450,6 +3390,9 @@
                   "type": "keyword"
                 }
               }
+            },
+            "reason": {
+              "type": "keyword"
             },
             "rule": {
               "properties": {
@@ -2612,6 +3555,38 @@
                     }
                   }
                 },
+                "threat_filters": {
+                  "type": "object"
+                },
+                "threat_index": {
+                  "type": "keyword"
+                },
+                "threat_indicator_path": {
+                  "type": "keyword"
+                },
+                "threat_language": {
+                  "type": "keyword"
+                },
+                "threat_mapping": {
+                  "properties": {
+                    "entries": {
+                      "properties": {
+                        "field": {
+                          "type": "keyword"
+                        },
+                        "type": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "threat_query": {
+                  "type": "keyword"
+                },
                 "threshold": {
                   "properties": {
                     "field": {
@@ -2656,11 +3631,31 @@
             },
             "threshold_result": {
               "properties": {
+                "cardinality": {
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "count": {
                   "type": "long"
                 },
-                "value": {
-                  "type": "keyword"
+                "from": {
+                  "type": "date"
+                },
+                "terms": {
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             }
@@ -2706,6 +3701,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "continent_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "continent_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -2725,11 +3724,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -2759,6 +3766,10 @@
               "type": "long"
             },
             "registered_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "subdomain": {
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -2819,8 +3830,20 @@
                   },
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
+            }
+          }
+        },
+        "span": {
+          "properties": {
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
@@ -2833,6 +3856,241 @@
             "framework": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "indicator": {
+              "properties": {
+                "as": {
+                  "properties": {
+                    "number": {
+                      "type": "long"
+                    },
+                    "organization": {
+                      "properties": {
+                        "name": {
+                          "fields": {
+                            "text": {
+                              "norms": false,
+                              "type": "text"
+                            }
+                          },
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "confidence": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "dataset": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "description": {
+                  "type": "wildcard"
+                },
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "properties": {
+                    "address": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "event": {
+                  "properties": {
+                    "action": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "category": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "created": {
+                      "type": "date"
+                    },
+                    "dataset": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "duration": {
+                      "type": "long"
+                    },
+                    "end": {
+                      "type": "date"
+                    },
+                    "hash": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "ingested": {
+                      "type": "date"
+                    },
+                    "kind": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "module": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "original": {
+                      "doc_values": false,
+                      "ignore_above": 1024,
+                      "index": false,
+                      "type": "keyword"
+                    },
+                    "outcome": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "provider": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "reason": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "reference": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "risk_score": {
+                      "type": "float"
+                    },
+                    "risk_score_norm": {
+                      "type": "float"
+                    },
+                    "sequence": {
+                      "type": "long"
+                    },
+                    "severity": {
+                      "type": "long"
+                    },
+                    "start": {
+                      "type": "date"
+                    },
+                    "timezone": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "url": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "first_seen": {
+                  "type": "date"
+                },
+                "geo": {
+                  "properties": {
+                    "city_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "continent_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country_iso_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "location": {
+                      "type": "geo_point"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "region_iso_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "region_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "last_seen": {
+                  "type": "date"
+                },
+                "marking": {
+                  "properties": {
+                    "tlp": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "matched": {
+                  "properties": {
+                    "atomic": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "field": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "module": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "port": {
+                  "type": "long"
+                },
+                "provider": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "scanner_stats": {
+                  "type": "long"
+                },
+                "sightings": {
+                  "type": "long"
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
             },
             "tactic": {
               "properties": {
@@ -2869,6 +4127,28 @@
                 "reference": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "subtechnique": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "fields": {
+                        "text": {
+                          "norms": false,
+                          "type": "text"
+                        }
+                      },
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "reference": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             }
@@ -2931,6 +4211,112 @@
                 "supported_ciphers": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "x509": {
+                  "properties": {
+                    "alternative_names": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "issuer": {
+                      "properties": {
+                        "common_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "country": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "distinguished_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "locality": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organization": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organizational_unit": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "state_or_province": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "not_after": {
+                      "type": "date"
+                    },
+                    "not_before": {
+                      "type": "date"
+                    },
+                    "public_key_algorithm": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "public_key_curve": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "public_key_exponent": {
+                      "doc_values": false,
+                      "index": false,
+                      "type": "long"
+                    },
+                    "public_key_size": {
+                      "type": "long"
+                    },
+                    "serial_number": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "signature_algorithm": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "subject": {
+                      "properties": {
+                        "common_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "country": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "distinguished_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "locality": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organization": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organizational_unit": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "state_or_province": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "version_number": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             },
@@ -2991,6 +4377,112 @@
                 "subject": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "x509": {
+                  "properties": {
+                    "alternative_names": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "issuer": {
+                      "properties": {
+                        "common_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "country": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "distinguished_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "locality": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organization": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organizational_unit": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "state_or_province": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "not_after": {
+                      "type": "date"
+                    },
+                    "not_before": {
+                      "type": "date"
+                    },
+                    "public_key_algorithm": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "public_key_curve": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "public_key_exponent": {
+                      "doc_values": false,
+                      "index": false,
+                      "type": "long"
+                    },
+                    "public_key_size": {
+                      "type": "long"
+                    },
+                    "serial_number": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "signature_algorithm": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "subject": {
+                      "properties": {
+                        "common_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "country": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "distinguished_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "locality": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organization": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organizational_unit": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "state_or_province": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "version_number": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             },
@@ -3077,6 +4569,10 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
+            "subdomain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
             "top_level_domain": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -3089,9 +4585,129 @@
         },
         "user": {
           "properties": {
+            "changes": {
+              "properties": {
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "group": {
+                  "properties": {
+                    "domain": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "hash": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
             "domain": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "effective": {
+              "properties": {
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "group": {
+                  "properties": {
+                    "domain": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "hash": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             },
             "email": {
               "ignore_above": 1024,
@@ -3140,6 +4756,70 @@
               },
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "roles": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "target": {
+              "properties": {
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "group": {
+                  "properties": {
+                    "domain": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "hash": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
@@ -3198,6 +4878,10 @@
                   "type": "keyword"
                 },
                 "platform": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "type": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -3320,7 +5004,8 @@
     "index": ".siem-signals-default-000002",
     "mappings": {
       "_meta": {
-        "version": 14
+        "aliases_version": 1,
+        "version": 55
       },
       "dynamic": "false",
       "properties": {
@@ -3329,6 +5014,14 @@
         },
         "agent": {
           "properties": {
+            "build": {
+              "properties": {
+                "original": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
             "ephemeral_id": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -3412,6 +5105,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "continent_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "continent_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -3431,11 +5128,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -3465,6 +5170,10 @@
               "type": "long"
             },
             "registered_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "subdomain": {
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -3525,6 +5234,10 @@
                   },
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -3535,6 +5248,10 @@
             "account": {
               "properties": {
                 "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -3564,6 +5281,18 @@
                 }
               }
             },
+            "project": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
             "provider": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -3571,6 +5300,14 @@
             "region": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "service": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
@@ -3626,6 +5363,19 @@
             }
           }
         },
+        "data_stream": {
+          "properties": {
+            "dataset": {
+              "type": "keyword"
+            },
+            "namespace": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
         "destination": {
           "properties": {
             "address": {
@@ -3666,6 +5416,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "continent_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "continent_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -3685,11 +5439,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -3719,6 +5481,10 @@
               "type": "long"
             },
             "registered_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "subdomain": {
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -3779,6 +5545,10 @@
                   },
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -3791,11 +5561,19 @@
                 "exists": {
                   "type": "boolean"
                 },
+                "signing_id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "status": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "subject_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "team_id": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -3824,6 +5602,10 @@
                 "sha512": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "ssdeep": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
@@ -3837,6 +5619,10 @@
             },
             "pe": {
               "properties": {
+                "architecture": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "company": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -3846,6 +5632,10 @@
                   "type": "keyword"
                 },
                 "file_version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "imphash": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -4039,6 +5829,10 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
+            "reason": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
             "reference": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -4086,11 +5880,19 @@
                 "exists": {
                   "type": "boolean"
                 },
+                "signing_id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "status": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "subject_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "team_id": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -4149,6 +5951,10 @@
                 "sha512": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "ssdeep": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
@@ -4187,6 +5993,10 @@
             },
             "pe": {
               "properties": {
+                "architecture": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "company": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -4196,6 +6006,10 @@
                   "type": "keyword"
                 },
                 "file_version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "imphash": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -4229,6 +6043,112 @@
             "uid": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "x509": {
+              "properties": {
+                "alternative_names": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "issuer": {
+                  "properties": {
+                    "common_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "distinguished_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "locality": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "organization": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "organizational_unit": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "state_or_province": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "not_after": {
+                  "type": "date"
+                },
+                "not_before": {
+                  "type": "date"
+                },
+                "public_key_algorithm": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "public_key_curve": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "public_key_exponent": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "long"
+                },
+                "public_key_size": {
+                  "type": "long"
+                },
+                "serial_number": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "signature_algorithm": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "subject": {
+                  "properties": {
+                    "common_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "distinguished_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "locality": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "organization": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "organizational_unit": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "state_or_province": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "version_number": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
@@ -4309,6 +6229,32 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
+            "cpu": {
+              "properties": {
+                "usage": {
+                  "scaling_factor": 1000,
+                  "type": "scaled_float"
+                }
+              }
+            },
+            "disk": {
+              "properties": {
+                "read": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "write": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
             "domain": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -4316,6 +6262,10 @@
             "geo": {
               "properties": {
                 "city_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "continent_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -4338,11 +6288,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -4366,6 +6324,30 @@
             "name": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "network": {
+              "properties": {
+                "egress": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    },
+                    "packets": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "ingress": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    },
+                    "packets": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
             },
             "os": {
               "properties": {
@@ -4398,6 +6380,10 @@
                   "type": "keyword"
                 },
                 "platform": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "type": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -4467,6 +6453,10 @@
                   },
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -4496,7 +6486,15 @@
                 "bytes": {
                   "type": "long"
                 },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "method": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "mime_type": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -4528,6 +6526,10 @@
                 "bytes": {
                   "type": "long"
                 },
+                "mime_type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "status_code": {
                   "type": "long"
                 }
@@ -4555,11 +6557,475 @@
             }
           }
         },
+        "kibana": {
+          "properties": {
+            "alert": {
+              "properties": {
+                "ancestors": {
+                  "properties": {
+                    "depth": {
+                      "path": "signal.ancestors.depth",
+                      "type": "alias"
+                    },
+                    "id": {
+                      "path": "signal.ancestors.id",
+                      "type": "alias"
+                    },
+                    "index": {
+                      "path": "signal.ancestors.index",
+                      "type": "alias"
+                    },
+                    "type": {
+                      "path": "signal.ancestors.type",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "depth": {
+                  "path": "signal.depth",
+                  "type": "alias"
+                },
+                "original_event": {
+                  "properties": {
+                    "action": {
+                      "path": "signal.original_event.action",
+                      "type": "alias"
+                    },
+                    "category": {
+                      "path": "signal.original_event.category",
+                      "type": "alias"
+                    },
+                    "code": {
+                      "path": "signal.original_event.code",
+                      "type": "alias"
+                    },
+                    "created": {
+                      "path": "signal.original_event.created",
+                      "type": "alias"
+                    },
+                    "dataset": {
+                      "path": "signal.original_event.dataset",
+                      "type": "alias"
+                    },
+                    "duration": {
+                      "path": "signal.original_event.duration",
+                      "type": "alias"
+                    },
+                    "end": {
+                      "path": "signal.original_event.end",
+                      "type": "alias"
+                    },
+                    "hash": {
+                      "path": "signal.original_event.hash",
+                      "type": "alias"
+                    },
+                    "id": {
+                      "path": "signal.original_event.id",
+                      "type": "alias"
+                    },
+                    "kind": {
+                      "path": "signal.original_event.kind",
+                      "type": "alias"
+                    },
+                    "module": {
+                      "path": "signal.original_event.module",
+                      "type": "alias"
+                    },
+                    "outcome": {
+                      "path": "signal.original_event.outcome",
+                      "type": "alias"
+                    },
+                    "provider": {
+                      "path": "signal.original_event.provider",
+                      "type": "alias"
+                    },
+                    "reason": {
+                      "path": "signal.original_event.reason",
+                      "type": "alias"
+                    },
+                    "risk_score": {
+                      "path": "signal.original_event.risk_score",
+                      "type": "alias"
+                    },
+                    "risk_score_norm": {
+                      "path": "signal.original_event.risk_score_norm",
+                      "type": "alias"
+                    },
+                    "sequence": {
+                      "path": "signal.original_event.sequence",
+                      "type": "alias"
+                    },
+                    "severity": {
+                      "path": "signal.original_event.severity",
+                      "type": "alias"
+                    },
+                    "start": {
+                      "path": "signal.original_event.start",
+                      "type": "alias"
+                    },
+                    "timezone": {
+                      "path": "signal.original_event.timezone",
+                      "type": "alias"
+                    },
+                    "type": {
+                      "path": "signal.original_event.type",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "original_time": {
+                  "path": "signal.original_time",
+                  "type": "alias"
+                },
+                "reason": {
+                  "path": "signal.reason",
+                  "type": "alias"
+                },
+                "risk_score": {
+                  "path": "signal.rule.risk_score",
+                  "type": "alias"
+                },
+                "rule": {
+                  "properties": {
+                    "author": {
+                      "path": "signal.rule.author",
+                      "type": "alias"
+                    },
+                    "building_block_type": {
+                      "path": "signal.rule.building_block_type",
+                      "type": "alias"
+                    },
+                    "consumer": {
+                      "type": "constant_keyword",
+                      "value": "siem"
+                    },
+                    "created_at": {
+                      "path": "signal.rule.created_at",
+                      "type": "alias"
+                    },
+                    "created_by": {
+                      "path": "signal.rule.created_by",
+                      "type": "alias"
+                    },
+                    "description": {
+                      "path": "signal.rule.description",
+                      "type": "alias"
+                    },
+                    "enabled": {
+                      "path": "signal.rule.enabled",
+                      "type": "alias"
+                    },
+                    "false_positives": {
+                      "path": "signal.rule.false_positives",
+                      "type": "alias"
+                    },
+                    "from": {
+                      "path": "signal.rule.from",
+                      "type": "alias"
+                    },
+                    "id": {
+                      "path": "signal.rule.id",
+                      "type": "alias"
+                    },
+                    "immutable": {
+                      "path": "signal.rule.immutable",
+                      "type": "alias"
+                    },
+                    "index": {
+                      "path": "signal.rule.index",
+                      "type": "alias"
+                    },
+                    "interval": {
+                      "path": "signal.rule.interval",
+                      "type": "alias"
+                    },
+                    "language": {
+                      "path": "signal.rule.language",
+                      "type": "alias"
+                    },
+                    "license": {
+                      "path": "signal.rule.license",
+                      "type": "alias"
+                    },
+                    "max_signals": {
+                      "path": "signal.rule.max_signals",
+                      "type": "alias"
+                    },
+                    "name": {
+                      "path": "signal.rule.name",
+                      "type": "alias"
+                    },
+                    "note": {
+                      "path": "signal.rule.note",
+                      "type": "alias"
+                    },
+                    "producer": {
+                      "type": "constant_keyword",
+                      "value": "siem"
+                    },
+                    "query": {
+                      "path": "signal.rule.query",
+                      "type": "alias"
+                    },
+                    "references": {
+                      "path": "signal.rule.references",
+                      "type": "alias"
+                    },
+                    "risk_score_mapping": {
+                      "properties": {
+                        "field": {
+                          "path": "signal.rule.risk_score_mapping.field",
+                          "type": "alias"
+                        },
+                        "operator": {
+                          "path": "signal.rule.risk_score_mapping.operator",
+                          "type": "alias"
+                        },
+                        "value": {
+                          "path": "signal.rule.risk_score_mapping.value",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "rule_id": {
+                      "path": "signal.rule.rule_id",
+                      "type": "alias"
+                    },
+                    "rule_name_override": {
+                      "path": "signal.rule.rule_name_override",
+                      "type": "alias"
+                    },
+                    "rule_type_id": {
+                      "type": "constant_keyword",
+                      "value": "siem.signals"
+                    },
+                    "saved_id": {
+                      "path": "signal.rule.saved_id",
+                      "type": "alias"
+                    },
+                    "severity_mapping": {
+                      "properties": {
+                        "field": {
+                          "path": "signal.rule.severity_mapping.field",
+                          "type": "alias"
+                        },
+                        "operator": {
+                          "path": "signal.rule.severity_mapping.operator",
+                          "type": "alias"
+                        },
+                        "severity": {
+                          "path": "signal.rule.severity_mapping.severity",
+                          "type": "alias"
+                        },
+                        "value": {
+                          "path": "signal.rule.severity_mapping.value",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "tags": {
+                      "path": "signal.rule.tags",
+                      "type": "alias"
+                    },
+                    "threat": {
+                      "properties": {
+                        "framework": {
+                          "path": "signal.rule.threat.framework",
+                          "type": "alias"
+                        },
+                        "tactic": {
+                          "properties": {
+                            "id": {
+                              "path": "signal.rule.threat.tactic.id",
+                              "type": "alias"
+                            },
+                            "name": {
+                              "path": "signal.rule.threat.tactic.name",
+                              "type": "alias"
+                            },
+                            "reference": {
+                              "path": "signal.rule.threat.tactic.reference",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "technique": {
+                          "properties": {
+                            "id": {
+                              "path": "signal.rule.threat.technique.id",
+                              "type": "alias"
+                            },
+                            "name": {
+                              "path": "signal.rule.threat.technique.name",
+                              "type": "alias"
+                            },
+                            "reference": {
+                              "path": "signal.rule.threat.technique.reference",
+                              "type": "alias"
+                            },
+                            "subtechnique": {
+                              "properties": {
+                                "id": {
+                                  "path": "signal.rule.threat.technique.subtechnique.id",
+                                  "type": "alias"
+                                },
+                                "name": {
+                                  "path": "signal.rule.threat.technique.subtechnique.name",
+                                  "type": "alias"
+                                },
+                                "reference": {
+                                  "path": "signal.rule.threat.technique.subtechnique.reference",
+                                  "type": "alias"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "threat_index": {
+                      "path": "signal.rule.threat_index",
+                      "type": "alias"
+                    },
+                    "threat_indicator_path": {
+                      "path": "signal.rule.threat_indicator_path",
+                      "type": "alias"
+                    },
+                    "threat_language": {
+                      "path": "signal.rule.threat_language",
+                      "type": "alias"
+                    },
+                    "threat_mapping": {
+                      "properties": {
+                        "entries": {
+                          "properties": {
+                            "field": {
+                              "path": "signal.rule.threat_mapping.entries.field",
+                              "type": "alias"
+                            },
+                            "type": {
+                              "path": "signal.rule.threat_mapping.entries.type",
+                              "type": "alias"
+                            },
+                            "value": {
+                              "path": "signal.rule.threat_mapping.entries.value",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "threat_query": {
+                      "path": "signal.rule.threat_query",
+                      "type": "alias"
+                    },
+                    "threshold": {
+                      "properties": {
+                        "field": {
+                          "path": "signal.rule.threshold.field",
+                          "type": "alias"
+                        },
+                        "value": {
+                          "path": "signal.rule.threshold.value",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "timeline_id": {
+                      "path": "signal.rule.timeline_id",
+                      "type": "alias"
+                    },
+                    "timeline_title": {
+                      "path": "signal.rule.timeline_title",
+                      "type": "alias"
+                    },
+                    "to": {
+                      "path": "signal.rule.to",
+                      "type": "alias"
+                    },
+                    "type": {
+                      "path": "signal.rule.type",
+                      "type": "alias"
+                    },
+                    "updated_at": {
+                      "path": "signal.rule.updated_at",
+                      "type": "alias"
+                    },
+                    "updated_by": {
+                      "path": "signal.rule.updated_by",
+                      "type": "alias"
+                    },
+                    "version": {
+                      "path": "signal.rule.version",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "severity": {
+                  "path": "signal.rule.severity",
+                  "type": "alias"
+                },
+                "threshold_result": {
+                  "properties": {
+                    "cardinality": {
+                      "properties": {
+                        "field": {
+                          "path": "signal.threshold_result.cardinality.field",
+                          "type": "alias"
+                        },
+                        "value": {
+                          "path": "signal.threshold_result.cardinality.value",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "count": {
+                      "path": "signal.threshold_result.count",
+                      "type": "alias"
+                    },
+                    "from": {
+                      "path": "signal.threshold_result.from",
+                      "type": "alias"
+                    },
+                    "terms": {
+                      "properties": {
+                        "field": {
+                          "path": "signal.threshold_result.terms.field",
+                          "type": "alias"
+                        },
+                        "value": {
+                          "path": "signal.threshold_result.terms.value",
+                          "type": "alias"
+                        }
+                      }
+                    }
+                  }
+                },
+                "workflow_status": {
+                  "path": "signal.status",
+                  "type": "alias"
+                }
+              }
+            },
+            "space_ids": {
+              "type": "constant_keyword",
+              "value": "default"
+            }
+          }
+        },
         "labels": {
           "type": "object"
         },
         "log": {
           "properties": {
+            "file": {
+              "properties": {
+                "path": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
             "level": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -4745,6 +7211,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "continent_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "continent_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -4764,11 +7234,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -4859,6 +7337,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "version": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -4882,6 +7364,54 @@
               "type": "keyword"
             },
             "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "orchestrator": {
+          "properties": {
+            "api_version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "cluster": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "url": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "namespace": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "organization": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "resource": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "type": {
               "ignore_above": 1024,
               "type": "keyword"
             }
@@ -5037,11 +7567,19 @@
                 "exists": {
                   "type": "boolean"
                 },
+                "signing_id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "status": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "subject_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "team_id": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -5097,6 +7635,10 @@
                 "sha512": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "ssdeep": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
@@ -5124,11 +7666,19 @@
                     "exists": {
                       "type": "boolean"
                     },
+                    "signing_id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
                     "status": {
                       "ignore_above": 1024,
                       "type": "keyword"
                     },
                     "subject_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "team_id": {
                       "ignore_above": 1024,
                       "type": "keyword"
                     },
@@ -5184,6 +7734,10 @@
                     "sha512": {
                       "ignore_above": 1024,
                       "type": "keyword"
+                    },
+                    "ssdeep": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
@@ -5196,6 +7750,38 @@
                   },
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "pe": {
+                  "properties": {
+                    "architecture": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "company": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "description": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "file_version": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "imphash": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "original_file_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "product": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "pgid": {
                   "type": "long"
@@ -5247,6 +7833,10 @@
             },
             "pe": {
               "properties": {
+                "architecture": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "company": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -5256,6 +7846,10 @@
                   "type": "keyword"
                 },
                 "file_version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "imphash": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -5359,6 +7953,10 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
+            "hosts": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
             "ip": {
               "type": "ip"
             },
@@ -5452,6 +8050,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "continent_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "continent_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -5471,11 +8073,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -5505,6 +8115,10 @@
               "type": "long"
             },
             "registered_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "subdomain": {
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -5563,6 +8177,10 @@
                       "type": "text"
                     }
                   },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "roles": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -5693,6 +8311,9 @@
                 "provider": {
                   "type": "keyword"
                 },
+                "reason": {
+                  "type": "keyword"
+                },
                 "risk_score": {
                   "type": "float"
                 },
@@ -5761,6 +8382,9 @@
                   "type": "keyword"
                 }
               }
+            },
+            "reason": {
+              "type": "keyword"
             },
             "rule": {
               "properties": {
@@ -5923,6 +8547,38 @@
                     }
                   }
                 },
+                "threat_filters": {
+                  "type": "object"
+                },
+                "threat_index": {
+                  "type": "keyword"
+                },
+                "threat_indicator_path": {
+                  "type": "keyword"
+                },
+                "threat_language": {
+                  "type": "keyword"
+                },
+                "threat_mapping": {
+                  "properties": {
+                    "entries": {
+                      "properties": {
+                        "field": {
+                          "type": "keyword"
+                        },
+                        "type": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "threat_query": {
+                  "type": "keyword"
+                },
                 "threshold": {
                   "properties": {
                     "field": {
@@ -5967,11 +8623,31 @@
             },
             "threshold_result": {
               "properties": {
+                "cardinality": {
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "count": {
                   "type": "long"
                 },
-                "value": {
-                  "type": "keyword"
+                "from": {
+                  "type": "date"
+                },
+                "terms": {
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             }
@@ -6017,6 +8693,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "continent_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "continent_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -6036,11 +8716,19 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "postal_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "region_iso_code": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "region_name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "timezone": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -6070,6 +8758,10 @@
               "type": "long"
             },
             "registered_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "subdomain": {
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -6130,8 +8822,20 @@
                   },
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
+            }
+          }
+        },
+        "span": {
+          "properties": {
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
@@ -6144,6 +8848,241 @@
             "framework": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "indicator": {
+              "properties": {
+                "as": {
+                  "properties": {
+                    "number": {
+                      "type": "long"
+                    },
+                    "organization": {
+                      "properties": {
+                        "name": {
+                          "fields": {
+                            "text": {
+                              "norms": false,
+                              "type": "text"
+                            }
+                          },
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "confidence": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "dataset": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "description": {
+                  "type": "wildcard"
+                },
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "properties": {
+                    "address": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "event": {
+                  "properties": {
+                    "action": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "category": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "created": {
+                      "type": "date"
+                    },
+                    "dataset": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "duration": {
+                      "type": "long"
+                    },
+                    "end": {
+                      "type": "date"
+                    },
+                    "hash": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "ingested": {
+                      "type": "date"
+                    },
+                    "kind": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "module": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "original": {
+                      "doc_values": false,
+                      "ignore_above": 1024,
+                      "index": false,
+                      "type": "keyword"
+                    },
+                    "outcome": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "provider": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "reason": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "reference": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "risk_score": {
+                      "type": "float"
+                    },
+                    "risk_score_norm": {
+                      "type": "float"
+                    },
+                    "sequence": {
+                      "type": "long"
+                    },
+                    "severity": {
+                      "type": "long"
+                    },
+                    "start": {
+                      "type": "date"
+                    },
+                    "timezone": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "url": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "first_seen": {
+                  "type": "date"
+                },
+                "geo": {
+                  "properties": {
+                    "city_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "continent_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country_iso_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "location": {
+                      "type": "geo_point"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "region_iso_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "region_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "last_seen": {
+                  "type": "date"
+                },
+                "marking": {
+                  "properties": {
+                    "tlp": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "matched": {
+                  "properties": {
+                    "atomic": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "field": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "module": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "port": {
+                  "type": "long"
+                },
+                "provider": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "scanner_stats": {
+                  "type": "long"
+                },
+                "sightings": {
+                  "type": "long"
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
             },
             "tactic": {
               "properties": {
@@ -6180,6 +9119,28 @@
                 "reference": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "subtechnique": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "fields": {
+                        "text": {
+                          "norms": false,
+                          "type": "text"
+                        }
+                      },
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "reference": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             }
@@ -6242,6 +9203,112 @@
                 "supported_ciphers": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "x509": {
+                  "properties": {
+                    "alternative_names": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "issuer": {
+                      "properties": {
+                        "common_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "country": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "distinguished_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "locality": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organization": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organizational_unit": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "state_or_province": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "not_after": {
+                      "type": "date"
+                    },
+                    "not_before": {
+                      "type": "date"
+                    },
+                    "public_key_algorithm": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "public_key_curve": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "public_key_exponent": {
+                      "doc_values": false,
+                      "index": false,
+                      "type": "long"
+                    },
+                    "public_key_size": {
+                      "type": "long"
+                    },
+                    "serial_number": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "signature_algorithm": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "subject": {
+                      "properties": {
+                        "common_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "country": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "distinguished_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "locality": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organization": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organizational_unit": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "state_or_province": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "version_number": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             },
@@ -6302,6 +9369,112 @@
                 "subject": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "x509": {
+                  "properties": {
+                    "alternative_names": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "issuer": {
+                      "properties": {
+                        "common_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "country": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "distinguished_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "locality": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organization": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organizational_unit": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "state_or_province": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "not_after": {
+                      "type": "date"
+                    },
+                    "not_before": {
+                      "type": "date"
+                    },
+                    "public_key_algorithm": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "public_key_curve": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "public_key_exponent": {
+                      "doc_values": false,
+                      "index": false,
+                      "type": "long"
+                    },
+                    "public_key_size": {
+                      "type": "long"
+                    },
+                    "serial_number": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "signature_algorithm": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "subject": {
+                      "properties": {
+                        "common_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "country": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "distinguished_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "locality": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organization": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organizational_unit": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "state_or_province": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "version_number": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             },
@@ -6388,6 +9561,10 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
+            "subdomain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
             "top_level_domain": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -6400,9 +9577,129 @@
         },
         "user": {
           "properties": {
+            "changes": {
+              "properties": {
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "group": {
+                  "properties": {
+                    "domain": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "hash": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
             "domain": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "effective": {
+              "properties": {
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "group": {
+                  "properties": {
+                    "domain": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "hash": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             },
             "email": {
               "ignore_above": 1024,
@@ -6451,6 +9748,70 @@
               },
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "roles": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "target": {
+              "properties": {
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "group": {
+                  "properties": {
+                    "domain": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "hash": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "roles": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
@@ -6509,6 +9870,10 @@
                   "type": "keyword"
                 },
                 "platform": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "type": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },

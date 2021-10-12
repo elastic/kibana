@@ -6,23 +6,12 @@
  */
 
 import {
-  TIMELINE_DATA_PROVIDERS,
-  TIMELINE_DATA_PROVIDERS_EMPTY,
   TIMELINE_DROPPED_DATA_PROVIDERS,
   TIMELINE_DATA_PROVIDERS_ACTION_MENU,
-  IS_DRAGGING_DATA_PROVIDERS,
   TIMELINE_FLYOUT_HEADER,
-  TIMELINE_FLYOUT,
 } from '../../screens/timeline';
-import { HOSTS_NAMES_DRAGGABLE } from '../../screens/hosts/all_hosts';
 
-import {
-  dragAndDropFirstHostToTimeline,
-  dragFirstHostToEmptyTimelineDataProviders,
-  unDragFirstHostToEmptyTimelineDataProviders,
-  dragFirstHostToTimeline,
-  waitForAllHostsToBeLoaded,
-} from '../../tasks/hosts/all_hosts';
+import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
 import { loginAndWaitForPage } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
@@ -44,22 +33,6 @@ describe('timeline data providers', () => {
     closeTimeline();
   });
 
-  it.skip('renders the data provider of a host dragged from the All Hosts widget on the hosts page', () => {
-    dragAndDropFirstHostToTimeline();
-    openTimelineUsingToggle();
-    cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
-      .first()
-      .invoke('text')
-      .then((dataProviderText) => {
-        cy.get(HOSTS_NAMES_DRAGGABLE)
-          .first()
-          .invoke('text')
-          .should((hostname) => {
-            expect(dataProviderText).to.eq(`host.name: "${hostname}"AND`);
-          });
-      });
-  });
-
   it('displays the data provider action menu when Enter is pressed', (done) => {
     openTimelineUsingToggle();
     addDataProvider({ field: 'host.name', operator: 'exists' }).then(() => {
@@ -76,26 +49,5 @@ describe('timeline data providers', () => {
       cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
       done();
     });
-  });
-
-  it.skip('sets correct classes when the user starts dragging a host, but is not hovering over the data providers', () => {
-    dragFirstHostToTimeline();
-
-    cy.get(IS_DRAGGING_DATA_PROVIDERS)
-      .find(TIMELINE_DATA_PROVIDERS)
-      .filter(':visible')
-      .should('have.class', 'drop-target-data-providers');
-  });
-
-  it.skip('render an extra highlighted area in dataProvider when the user starts dragging a host AND is hovering over the data providers', () => {
-    dragFirstHostToEmptyTimelineDataProviders();
-
-    cy.get(IS_DRAGGING_DATA_PROVIDERS)
-      .find(TIMELINE_DATA_PROVIDERS_EMPTY)
-      .children()
-      .should('exist');
-
-    // Release the dragging item so the cursor can peform other action
-    unDragFirstHostToEmptyTimelineDataProviders();
   });
 });

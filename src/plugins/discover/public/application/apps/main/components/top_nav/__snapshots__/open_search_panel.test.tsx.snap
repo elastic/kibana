@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`render 1`] = `
+exports[`OpenSearchPanel render 1`] = `
 <EuiFlyout
   data-test-subj="loadSearchForm"
   onClose={[MockFunction]}
@@ -52,6 +52,7 @@ exports[`render 1`] = `
         grow={false}
       >
         <EuiButton
+          data-test-subj="manageSearchesBtn"
           fill={true}
           href="/app/management/kibana/objects?_a=(tab:search)"
           onClick={[MockFunction]}

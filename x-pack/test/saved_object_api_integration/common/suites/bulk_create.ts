@@ -85,40 +85,43 @@ const createRequest = ({ type, id, initialNamespaces }: BulkCreateTestCase) => (
 
 export function bulkCreateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
-  const expectResponseBody = (
-    testCases: BulkCreateTestCase | BulkCreateTestCase[],
-    statusCode: 200 | 403,
-    user?: TestUser
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
-    if (statusCode === 403) {
-      const types = testCaseArray.map((x) => x.type);
-      await expectSavedObjectForbidden(types)(response);
-    } else {
-      // permitted
-      const savedObjects = response.body.saved_objects;
-      expect(savedObjects).length(testCaseArray.length);
-      for (let i = 0; i < savedObjects.length; i++) {
-        const object = savedObjects[i];
-        const testCase = testCaseArray[i];
-        if (testCase.failure === 409 && testCase.fail409Param === 'unresolvableConflict') {
-          const { type, id } = testCase;
-          const error = SavedObjectsErrorHelpers.createConflictError(type, id);
-          const payload = { ...error.output.payload, metadata: { isNotOverwritable: true } };
-          expect(object.type).to.eql(type);
-          expect(object.id).to.eql(id);
-          expect(object.error).to.eql(payload);
-          continue;
-        }
-        await expectResponses.permitted(object, testCase);
-        if (!testCase.failure) {
-          expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
-          const redactedNamespaces = getRedactedNamespaces(user, testCase.expectedNamespaces);
-          expect(object.namespaces).to.eql(redactedNamespaces);
+  const expectResponseBody =
+    (
+      testCases: BulkCreateTestCase | BulkCreateTestCase[],
+      statusCode: 200 | 403,
+      user?: TestUser
+    ): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
+      if (statusCode === 403) {
+        const types = testCaseArray.map((x) => x.type);
+        await expectSavedObjectForbidden(types)(response);
+      } else {
+        // permitted
+        const savedObjects = response.body.saved_objects;
+        expect(savedObjects).length(testCaseArray.length);
+        for (let i = 0; i < savedObjects.length; i++) {
+          const object = savedObjects[i];
+          const testCase = testCaseArray[i];
+          if (testCase.failure === 409 && testCase.fail409Param === 'unresolvableConflict') {
+            const { type, id } = testCase;
+            const error = SavedObjectsErrorHelpers.createConflictError(type, id);
+            const payload = { ...error.output.payload, metadata: { isNotOverwritable: true } };
+            expect(object.type).to.eql(type);
+            expect(object.id).to.eql(id);
+            expect(object.error).to.eql(payload);
+            continue;
+          }
+          await expectResponses.permitted(object, testCase);
+          if (!testCase.failure) {
+            expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+            const redactedNamespaces = getRedactedNamespaces(user, testCase.expectedNamespaces);
+            expect(object.namespaces).to.eql(redactedNamespaces);
+            // TODO: improve assertions for redacted namespaces? (#112455)
+          }
         }
       }
-    }
-  };
+    };
   const createTestDefinitions = (
     testCases: BulkCreateTestCase | BulkCreateTestCase[],
     forbidden: boolean,
@@ -158,40 +161,38 @@ export function bulkCreateTestSuiteFactory(esArchiver: any, supertest: SuperTest
     ];
   };
 
-  const makeBulkCreateTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: BulkCreateTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeBulkCreateTest =
+    (describeFn: Mocha.SuiteFunction) => (description: string, definition: BulkCreateTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      const attrs = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };
+        const attrs = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const requestBody = test.request.map((x) => ({ ...x, ...attrs }));
-          const query = test.overwrite ? '?overwrite=true' : '';
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create${query}`)
-            .auth(user?.username, user?.password)
-            .send(requestBody)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            const requestBody = test.request.map((x) => ({ ...x, ...attrs }));
+            const query = test.overwrite ? '?overwrite=true' : '';
+            await supertest
+              .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create${query}`)
+              .auth(user?.username, user?.password)
+              .send(requestBody)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeBulkCreateTest(describe);
   // @ts-ignore

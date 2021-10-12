@@ -13,15 +13,16 @@ import { isEmpty } from 'lodash';
 
 import { useKibana } from '../../lib/kibana';
 import { getAllFieldsByName } from '../../containers/source';
-import { allowTopN } from './utils';
+import { allowTopN } from '../drag_and_drop/helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
-interface UseHoverActionItemsProps {
+export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
   dataType?: string;
   defaultFocusedButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
@@ -29,6 +30,8 @@ interface UseHoverActionItemsProps {
   enableOverflowButton?: boolean;
   field: string;
   handleHoverActionClicked: () => void;
+  hideTopN: boolean;
+  isCaseView: boolean;
   isObjectArray: boolean;
   isOverflowPopoverOpen?: boolean;
   itemsToShow?: number;
@@ -43,7 +46,7 @@ interface UseHoverActionItemsProps {
   values?: string[] | string | null;
 }
 
-interface UseHoverActionItems {
+export interface UseHoverActionItems {
   overflowActionItems: JSX.Element[];
   allActionItems: JSX.Element[];
 }
@@ -56,6 +59,8 @@ export const useHoverActionItems = ({
   enableOverflowButton,
   field,
   handleHoverActionClicked,
+  hideTopN,
+  isCaseView,
   isObjectArray,
   isOverflowPopoverOpen,
   itemsToShow = 2,
@@ -70,7 +75,7 @@ export const useHoverActionItems = ({
   values,
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
-  const { timelines } = kibana.services;
+  const { timelines, uiSettings } = kibana.services;
   // Common actions used by the alert table and alert flyout
   const {
     getAddToTimelineButton,
@@ -80,17 +85,20 @@ export const useHoverActionItems = ({
     getFilterOutValueButton,
     getOverflowButton,
   } = timelines.getHoverActions();
-
-  const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
-    kibana.services.data.query.filterManager,
-  ]);
+  const filterManagerBackup = useMemo(
+    () => kibana.services.data.query.filterManager,
+    [kibana.services.data.query.filterManager]
+  );
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { filterManager: activeFilterMananager } = useDeepEqualSelector((state) =>
+  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
     getManageTimeline(state, timelineId ?? '')
   );
   const filterManager = useMemo(
-    () => (timelineId === TimelineId.active ? activeFilterMananager : filterManagerBackup),
-    [timelineId, activeFilterMananager, filterManagerBackup]
+    () =>
+      timelineId === TimelineId.active
+        ? activeFilterManager ?? new FilterManager(uiSettings)
+        : filterManagerBackup,
+    [uiSettings, timelineId, activeFilterManager, filterManagerBackup]
   );
 
   //  Regarding data from useManageTimeline:
@@ -115,7 +123,38 @@ export const useHoverActionItems = ({
    * in the case of `EnableOverflowButton`, we only need to hide all the items in the overflow popover as the chart's panel opens in the overflow popover, so non-overflowed actions are not affected.
    */
   const showFilters =
-    values != null && (enableOverflowButton || (!showTopN && !enableOverflowButton));
+    values != null && (enableOverflowButton || (!showTopN && !enableOverflowButton)) && !isCaseView;
+  const shouldDisableColumnToggle = (isObjectArray && field !== 'geo_point') || isCaseView;
+
+  const showTopNBtn = useMemo(
+    () => (
+      <ShowTopNButton
+        Component={enableOverflowButton ? EuiContextMenuItem : undefined}
+        data-test-subj="hover-actions-show-top-n"
+        enablePopOver={!enableOverflowButton && isCaseView}
+        field={field}
+        key="hover-actions-show-top-n"
+        onClick={toggleTopN}
+        onFilterAdded={onFilterAdded}
+        ownFocus={ownFocus}
+        showTopN={showTopN}
+        showTooltip={enableOverflowButton ? false : true}
+        timelineId={timelineId}
+        value={values}
+      />
+    ),
+    [
+      enableOverflowButton,
+      field,
+      isCaseView,
+      onFilterAdded,
+      ownFocus,
+      showTopN,
+      timelineId,
+      toggleTopN,
+      values,
+    ]
+  );
 
   const allItems = useMemo(
     () =>
@@ -149,7 +188,7 @@ export const useHoverActionItems = ({
             })}
           </div>
         ) : null,
-        toggleColumn ? (
+        toggleColumn && !shouldDisableColumnToggle ? (
           <div data-test-subj="hover-actions-toggle-column" key="hover-actions-toggle-column">
             {getColumnToggleButton({
               Component: enableOverflowButton ? EuiContextMenuItem : undefined,
@@ -183,21 +222,10 @@ export const useHoverActionItems = ({
         allowTopN({
           browserField: getAllFieldsByName(browserFields)[field],
           fieldName: field,
-        }) ? (
-          <ShowTopNButton
-            Component={enableOverflowButton ? EuiContextMenuItem : undefined}
-            data-test-subj="hover-actions-show-top-n"
-            field={field}
-            key="hover-actions-show-top-n"
-            onClick={toggleTopN}
-            onFilterAdded={onFilterAdded}
-            ownFocus={ownFocus}
-            showTopN={showTopN}
-            showTooltip={enableOverflowButton ? false : true}
-            timelineId={timelineId}
-            value={values}
-          />
-        ) : null,
+          hideTopN,
+        })
+          ? showTopNBtn
+          : null,
         field != null ? (
           <div data-test-subj="hover-actions-copy-button" key="hover-actions-copy-button">
             {getCopyButton({
@@ -230,43 +258,24 @@ export const useHoverActionItems = ({
       getFilterForValueButton,
       getFilterOutValueButton,
       handleHoverActionClicked,
+      hideTopN,
       isObjectArray,
       onFilterAdded,
       ownFocus,
+      shouldDisableColumnToggle,
       showFilters,
-      showTopN,
+      showTopNBtn,
       stKeyboardEvent,
-      timelineId,
       toggleColumn,
-      toggleTopN,
       values,
     ]
   ) as JSX.Element[];
-
-  const overflowBtn = useMemo(
-    () => (
-      <ShowTopNButton
-        Component={enableOverflowButton ? EuiContextMenuItem : undefined}
-        data-test-subj="hover-actions-show-top-n"
-        field={field}
-        key="hover-actions-show-top-n"
-        onClick={toggleTopN}
-        onFilterAdded={onFilterAdded}
-        ownFocus={ownFocus}
-        showTopN={showTopN}
-        showTooltip={enableOverflowButton ? false : true}
-        timelineId={timelineId}
-        value={values}
-      />
-    ),
-    [enableOverflowButton, field, onFilterAdded, ownFocus, showTopN, timelineId, toggleTopN, values]
-  );
 
   const overflowActionItems = useMemo(
     () =>
       [
         ...allItems.slice(0, itemsToShow),
-        ...(enableOverflowButton && itemsToShow > 0
+        ...(enableOverflowButton && itemsToShow > 0 && itemsToShow < allItems.length
           ? [
               getOverflowButton({
                 closePopOver: handleHoverActionClicked,
@@ -276,7 +285,7 @@ export const useHoverActionItems = ({
                 onClick: onOverflowButtonClick,
                 showTooltip: enableOverflowButton ? false : true,
                 value: values,
-                items: showTopN ? [overflowBtn] : allItems.slice(itemsToShow),
+                items: showTopN ? [showTopNBtn] : allItems.slice(itemsToShow),
                 isOverflowPopoverOpen: !!isOverflowPopoverOpen,
               }),
             ]
@@ -293,7 +302,7 @@ export const useHoverActionItems = ({
       isOverflowPopoverOpen,
       itemsToShow,
       onOverflowButtonClick,
-      overflowBtn,
+      showTopNBtn,
       ownFocus,
       showTopN,
       stKeyboardEvent,
@@ -301,11 +310,10 @@ export const useHoverActionItems = ({
     ]
   );
 
-  const allActionItems = useMemo(() => (showTopN ? [overflowBtn] : allItems), [
-    allItems,
-    overflowBtn,
-    showTopN,
-  ]);
+  const allActionItems = useMemo(
+    () => (showTopN && !enableOverflowButton && !isCaseView ? [showTopNBtn] : allItems),
+    [showTopN, enableOverflowButton, isCaseView, showTopNBtn, allItems]
+  );
 
   return {
     overflowActionItems,

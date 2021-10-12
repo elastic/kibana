@@ -16,6 +16,7 @@ import { createIndicatorMatchAlertType } from './create_indicator_match_alert_ty
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { CountResponse } from 'kibana/server';
 import { RuleParams } from '../../schemas/rule_schemas';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -26,14 +27,7 @@ jest.mock('../utils/get_list_client', () => ({
   }),
 }));
 
-jest.mock('../../signals/rule_status_service', () => ({
-  ruleStatusServiceFactory: () => ({
-    goingToRun: jest.fn(),
-    success: jest.fn(),
-    partialFailure: jest.fn(),
-    error: jest.fn(),
-  }),
-}));
+jest.mock('../../rule_execution_log/rule_execution_log_client');
 
 describe('Indicator Match Alerts', () => {
   const params: Partial<RuleParams> = {
@@ -63,9 +57,9 @@ describe('Indicator Match Alerts', () => {
       experimentalFeatures: allowedExperimentalValues,
       lists: dependencies.lists,
       logger: dependencies.logger,
-      mergeStrategy: 'allFields',
+      config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
+      eventLogService: dependencies.eventLogService,
       version: '1.0.0',
     });
 
@@ -103,9 +97,9 @@ describe('Indicator Match Alerts', () => {
       experimentalFeatures: allowedExperimentalValues,
       lists: dependencies.lists,
       logger: dependencies.logger,
-      mergeStrategy: 'allFields',
+      config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
+      eventLogService: dependencies.eventLogService,
       version: '1.0.0',
     });
 
@@ -141,9 +135,9 @@ describe('Indicator Match Alerts', () => {
       experimentalFeatures: allowedExperimentalValues,
       lists: dependencies.lists,
       logger: dependencies.logger,
-      mergeStrategy: 'allFields',
+      config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
+      eventLogService: dependencies.eventLogService,
       version: '1.0.0',
     });
 

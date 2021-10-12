@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
-export interface RefreshInterval {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type RefreshInterval = {
   pause: boolean;
   value: number;
-}
+};
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TimeRange = {
   from: string;
   to: string;

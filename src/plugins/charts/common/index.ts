@@ -7,5 +7,32 @@
  */
 
 export const COLOR_MAPPING_SETTING = 'visualization:colorMapping';
-export * from './palette';
-export * from './constants';
+
+export {
+  CustomPaletteArguments,
+  CustomPaletteState,
+  SystemPaletteArguments,
+  PaletteOutput,
+  defaultCustomColors,
+  palette,
+  systemPalette,
+} from './palette';
+
+export { paletteIds } from './constants';
+
+export {
+  ColorSchemas,
+  ColorSchema,
+  RawColorSchema,
+  ColorMap,
+  vislibColorMaps,
+  colorSchemas,
+  getHeatmapColors,
+  truncatedColorMaps,
+  truncatedColorSchemas,
+  ColorMode,
+  LabelRotation,
+  defaultCountLabel,
+} from './static';
+
+export { ColorSchemaParams, Labels, Style } from './types';

@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { last, omit, pick, sortBy } from 'lodash';
 import { ValuesType } from 'utility-types';
 import { Node, NodeType } from '../../../../../plugins/apm/common/connections';
-import { createApmApiSupertest } from '../../../common/apm_api_supertest';
 import { roundNumber } from '../../../utils';
 import {
   ENVIRONMENT_ALL,
@@ -22,7 +21,7 @@ import { registry } from '../../../common/registry';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiSupertest = createApmApiSupertest(getService('supertest'));
+  const apmApiClient = getService('apmApiClient');
   const es = getService('es');
 
   const archiveName = 'apm_8.0.0';
@@ -37,8 +36,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await apmApiSupertest({
-          endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,
           params: {
             path: { serviceName: 'opbeans-java' },
             query: {
@@ -62,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: {
         status: number;
-        body: APIReturnType<'GET /api/apm/services/{serviceName}/dependencies'>;
+        body: APIReturnType<'GET /internal/apm/services/{serviceName}/dependencies'>;
       };
 
       const indices = {
@@ -212,8 +211,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           refresh: 'wait_for',
         });
 
-        response = await apmApiSupertest({
-          endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
+        response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,
           params: {
             path: { serviceName: 'opbeans-java' },
             query: {
@@ -310,12 +309,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: {
         status: number;
-        body: APIReturnType<'GET /api/apm/services/{serviceName}/dependencies'>;
+        body: APIReturnType<'GET /internal/apm/services/{serviceName}/dependencies'>;
       };
 
       before(async () => {
-        response = await apmApiSupertest({
-          endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
+        response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,
           params: {
             path: { serviceName: 'opbeans-python' },
             query: {

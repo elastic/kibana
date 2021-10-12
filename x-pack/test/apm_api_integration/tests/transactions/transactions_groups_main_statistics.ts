@@ -13,10 +13,11 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
 
-type TransactionsGroupsPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+type TransactionsGroupsPrimaryStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -28,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles the empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/main_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/transactions/groups/main_statistics`,
             query: {
               start,
               end,
@@ -41,7 +42,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        const transctionsGroupsPrimaryStatistics = response.body as TransactionsGroupsPrimaryStatistics;
+        const transctionsGroupsPrimaryStatistics =
+          response.body as TransactionsGroupsPrimaryStatistics;
         expect(transctionsGroupsPrimaryStatistics.transactionGroups).to.empty();
         expect(transctionsGroupsPrimaryStatistics.isAggregationAccurate).to.be(true);
       });
@@ -55,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct data', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/main_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/transactions/groups/main_statistics`,
             query: {
               start,
               end,
@@ -69,7 +71,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        const transctionsGroupsPrimaryStatistics = response.body as TransactionsGroupsPrimaryStatistics;
+        const transctionsGroupsPrimaryStatistics =
+          response.body as TransactionsGroupsPrimaryStatistics;
 
         expectSnapshot(
           transctionsGroupsPrimaryStatistics.transactionGroups.map((group: any) => group.name)
@@ -129,7 +132,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct data for latency aggregation 99th percentile', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/main_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/transactions/groups/main_statistics`,
             query: {
               start,
               end,
@@ -143,7 +146,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        const transctionsGroupsPrimaryStatistics = response.body as TransactionsGroupsPrimaryStatistics;
+        const transctionsGroupsPrimaryStatistics =
+          response.body as TransactionsGroupsPrimaryStatistics;
 
         const firstItem = transctionsGroupsPrimaryStatistics.transactionGroups[0];
         expectSnapshot(firstItem.latency).toMatchInline(`66846719`);

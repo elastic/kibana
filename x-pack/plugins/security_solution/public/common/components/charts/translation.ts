@@ -20,7 +20,3 @@ export const DATA_NOT_AVAILABLE_TITLE = i18n.translate(
     defaultMessage: 'Chart Data Not Available',
   }
 );
-
-export const ALL_OTHERS = i18n.translate('xpack.securitySolution.chart.allOthersGroupingLabel', {
-  defaultMessage: 'All others',
-});

@@ -9,7 +9,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('correlations', function () {
-    this.tags('skipFirefox');
+    this.tags(['skipFirefox', 'apm']);
     loadTestFile(require.resolve('./latency_correlations'));
+    loadTestFile(require.resolve('./failed_transaction_correlations'));
   });
 }

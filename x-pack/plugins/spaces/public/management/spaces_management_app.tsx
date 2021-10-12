@@ -12,13 +12,13 @@ import { Route, Router, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from 'src/core/public';
 import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
 } from '../../../../../src/plugins/kibana_react/public';
+import type { Space } from '../../common';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -40,15 +40,8 @@ export const spacesManagementApp = Object.freeze({
       title,
 
       async mount({ element, setBreadcrumbs, history }) {
-        const [
-          [coreStart, { features }],
-          { SpacesGridPage },
-          { ManageSpacePage },
-        ] = await Promise.all([
-          getStartServices(),
-          import('./spaces_grid'),
-          import('./edit_space'),
-        ]);
+        const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
+          await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
 
         const spacesBreadcrumbs = [
           {

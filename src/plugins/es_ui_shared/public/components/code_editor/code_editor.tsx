@@ -46,7 +46,7 @@ export interface EuiCodeEditorProps extends SupportedAriaAttributes, Omit<IAceEd
   onBlur?: IAceEditorProps['onBlur'];
   onFocus?: IAceEditorProps['onFocus'];
   isReadOnly?: boolean;
-  setOptions: IAceEditorProps['setOptions'];
+  setOptions?: IAceEditorProps['setOptions'];
   cursorStart?: number;
   'data-test-subj'?: string;
   /**
@@ -70,7 +70,10 @@ export interface EuiCodeEditorState {
 
 class EuiCodeEditor extends Component<EuiCodeEditorProps, EuiCodeEditorState> {
   static defaultProps = {
-    setOptions: {},
+    setOptions: {
+      showLineNumbers: false,
+      tabSize: 2,
+    },
   };
 
   state: EuiCodeEditorState = {

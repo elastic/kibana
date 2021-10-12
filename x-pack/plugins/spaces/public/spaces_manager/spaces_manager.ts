@@ -13,9 +13,13 @@ import type {
   HttpSetup,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { GetAllSpacesOptions, GetSpaceResult, LegacyUrlAliasTarget } from '../../common';
+import type {
+  GetAllSpacesOptions,
+  GetSpaceResult,
+  LegacyUrlAliasTarget,
+  Space,
+} from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 interface SavedObjectTarget {

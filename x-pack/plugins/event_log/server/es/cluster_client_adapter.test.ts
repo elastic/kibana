@@ -16,7 +16,7 @@ import { findOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { times } from 'lodash';
 import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { RequestEvent } from '@elastic/elasticsearch';
+import { estypes, RequestEvent } from '@elastic/elasticsearch';
 
 type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
 
@@ -215,22 +215,39 @@ describe('doesIndexTemplateExist', () => {
     });
   });
 
-  test('should return true when call cluster returns true', async () => {
+  test('should return true when call cluster to legacy template API returns true', async () => {
     clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse(true));
+    clusterClient.indices.existsIndexTemplate.mockResolvedValue(asApiResponse(false));
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
   });
 
-  test('should return false when call cluster returns false', async () => {
+  test('should return true when call cluster to index template API returns true', async () => {
     clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse(false));
+    clusterClient.indices.existsIndexTemplate.mockResolvedValue(asApiResponse(true));
+    await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
+  });
+
+  test('should return false when both call cluster calls returns false', async () => {
+    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse(false));
+    clusterClient.indices.existsIndexTemplate.mockResolvedValue(asApiResponse(false));
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(false);
   });
 
-  test('should throw error when call cluster throws an error', async () => {
+  test('should throw error when call cluster to legacy template API throws an error', async () => {
     clusterClient.indices.existsTemplate.mockRejectedValue(new Error('Fail'));
     await expect(
       clusterClientAdapter.doesIndexTemplateExist('foo')
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error checking existance of index template: Fail"`
+      `"error checking existence of index template: Fail"`
+    );
+  });
+
+  test('should throw error when call cluster to index template API throws an error', async () => {
+    clusterClient.indices.existsIndexTemplate.mockRejectedValue(new Error('Fail'));
+    await expect(
+      clusterClientAdapter.doesIndexTemplateExist('foo')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error checking existence of index template: Fail"`
     );
   });
 });
@@ -238,7 +255,7 @@ describe('doesIndexTemplateExist', () => {
 describe('createIndexTemplate', () => {
   test('should call cluster with given template', async () => {
     await clusterClientAdapter.createIndexTemplate('foo', { args: true });
-    expect(clusterClient.indices.putTemplate).toHaveBeenCalledWith({
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: 'foo',
       create: true,
       body: { args: true },
@@ -246,17 +263,271 @@ describe('createIndexTemplate', () => {
   });
 
   test(`should throw error if index template still doesn't exist after error is thrown`, async () => {
-    clusterClient.indices.putTemplate.mockRejectedValueOnce(new Error('Fail'));
+    clusterClient.indices.putIndexTemplate.mockRejectedValueOnce(new Error('Fail'));
     clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse(false));
+    clusterClient.indices.existsIndexTemplate.mockResolvedValueOnce(asApiResponse(false));
     await expect(
       clusterClientAdapter.createIndexTemplate('foo', { args: true })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"error creating index template: Fail"`);
   });
 
   test('should not throw error if index template exists after error is thrown', async () => {
-    clusterClient.indices.putTemplate.mockRejectedValueOnce(new Error('Fail'));
+    clusterClient.indices.putIndexTemplate.mockRejectedValueOnce(new Error('Fail'));
     clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse(true));
     await clusterClientAdapter.createIndexTemplate('foo', { args: true });
+  });
+});
+
+describe('getExistingLegacyIndexTemplates', () => {
+  test('should call cluster with given index template pattern', async () => {
+    await clusterClientAdapter.getExistingLegacyIndexTemplates('foo*');
+    expect(clusterClient.indices.getTemplate).toHaveBeenCalledWith(
+      {
+        name: 'foo*',
+      },
+      { ignore: [404] }
+    );
+  });
+
+  test('should return templates when found', async () => {
+    const response = {
+      'foo-bar-template': {
+        order: 0,
+        index_patterns: ['foo-bar-*'],
+        settings: { index: { number_of_shards: '1' } },
+        mappings: { dynamic: false, properties: {} },
+        aliases: {},
+      },
+    };
+    clusterClient.indices.getTemplate.mockResolvedValue(
+      asApiResponse<estypes.IndicesGetTemplateResponse>(response)
+    );
+    await expect(clusterClientAdapter.getExistingLegacyIndexTemplates('foo*')).resolves.toEqual(
+      response
+    );
+  });
+
+  test('should throw error when call cluster throws an error', async () => {
+    clusterClient.indices.getTemplate.mockRejectedValue(new Error('Fail'));
+    await expect(
+      clusterClientAdapter.getExistingLegacyIndexTemplates('foo*')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error getting existing legacy index templates: Fail"`
+    );
+  });
+});
+
+describe('setLegacyIndexTemplateToHidden', () => {
+  test('should call cluster with given index template name and template', async () => {
+    const currentTemplate = {
+      order: 0,
+      index_patterns: ['foo-bar-*'],
+      settings: { index: { number_of_shards: '1' } },
+      mappings: { dynamic: false, properties: {} },
+      aliases: {},
+    };
+    await clusterClientAdapter.setLegacyIndexTemplateToHidden('foo-bar-template', currentTemplate);
+    expect(clusterClient.indices.putTemplate).toHaveBeenCalledWith({
+      name: 'foo-bar-template',
+      body: {
+        order: 0,
+        index_patterns: ['foo-bar-*'],
+        settings: { index: { number_of_shards: '1' }, 'index.hidden': true },
+        mappings: { dynamic: false, properties: {} },
+        aliases: {},
+      },
+    });
+  });
+
+  test('should throw error when call cluster throws an error', async () => {
+    clusterClient.indices.putTemplate.mockRejectedValue(new Error('Fail'));
+    await expect(
+      clusterClientAdapter.setLegacyIndexTemplateToHidden('foo-bar-template', {
+        aliases: {},
+        index_patterns: [],
+        mappings: {},
+        order: 0,
+        settings: {},
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error setting existing legacy index template foo-bar-template to hidden: Fail"`
+    );
+  });
+});
+
+describe('getExistingIndices', () => {
+  test('should call cluster with given index pattern', async () => {
+    await clusterClientAdapter.getExistingIndices('foo*');
+    expect(clusterClient.indices.getSettings).toHaveBeenCalledWith(
+      {
+        index: 'foo*',
+      },
+      { ignore: [404] }
+    );
+  });
+
+  test('should return indices when found', async () => {
+    const response = {
+      'foo-bar-000001': {
+        settings: {
+          index: {
+            number_of_shards: 1,
+            uuid: 'Ure4d9edQbCMtcmyy0ObrA',
+          },
+        },
+      },
+    };
+    clusterClient.indices.getSettings.mockResolvedValue(
+      asApiResponse<estypes.IndicesGetSettingsResponse>(response)
+    );
+    await expect(clusterClientAdapter.getExistingIndices('foo*')).resolves.toEqual(response);
+  });
+
+  test('should throw error when call cluster throws an error', async () => {
+    clusterClient.indices.getSettings.mockRejectedValue(new Error('Fail'));
+    await expect(
+      clusterClientAdapter.getExistingIndices('foo*')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error getting existing indices matching pattern foo*: Fail"`
+    );
+  });
+});
+
+describe('setIndexToHidden', () => {
+  test('should call cluster with given index name', async () => {
+    await clusterClientAdapter.setIndexToHidden('foo-bar-000001');
+    expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
+      index: 'foo-bar-000001',
+      body: {
+        settings: {
+          'index.hidden': true,
+        },
+      },
+    });
+  });
+
+  test('should throw error when call cluster throws an error', async () => {
+    clusterClient.indices.putSettings.mockRejectedValue(new Error('Fail'));
+    await expect(
+      clusterClientAdapter.setIndexToHidden('foo-bar-000001')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error setting existing index foo-bar-000001 to hidden: Fail"`
+    );
+  });
+});
+
+describe('getExistingIndexAliases', () => {
+  test('should call cluster with given index pattern', async () => {
+    await clusterClientAdapter.getExistingIndexAliases('foo*');
+    expect(clusterClient.indices.getAlias).toHaveBeenCalledWith(
+      {
+        index: 'foo*',
+      },
+      { ignore: [404] }
+    );
+  });
+
+  test('should return aliases when found', async () => {
+    const response = {
+      'foo-bar-000001': {
+        aliases: {
+          'foo-bar': {
+            is_write_index: true,
+          },
+        },
+      },
+    };
+    clusterClient.indices.getAlias.mockResolvedValue(
+      asApiResponse<estypes.IndicesGetAliasResponse>(response)
+    );
+    await expect(clusterClientAdapter.getExistingIndexAliases('foo*')).resolves.toEqual(response);
+  });
+
+  test('should throw error when call cluster throws an error', async () => {
+    clusterClient.indices.getAlias.mockRejectedValue(new Error('Fail'));
+    await expect(
+      clusterClientAdapter.getExistingIndexAliases('foo*')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error getting existing index aliases matching pattern foo*: Fail"`
+    );
+  });
+});
+
+describe('setIndexAliasToHidden', () => {
+  test('should call cluster with given index name and aliases', async () => {
+    await clusterClientAdapter.setIndexAliasToHidden('foo-bar-000001', {
+      aliases: {
+        'foo-bar': {
+          is_write_index: true,
+        },
+      },
+    });
+    expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
+      body: {
+        actions: [
+          {
+            add: {
+              index: 'foo-bar-000001',
+              alias: 'foo-bar',
+              is_hidden: true,
+              is_write_index: true,
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should update multiple aliases at once and preserve existing alias settings', async () => {
+    await clusterClientAdapter.setIndexAliasToHidden('foo-bar-000001', {
+      aliases: {
+        'foo-bar': {
+          is_write_index: true,
+        },
+        'foo-b': {
+          index_routing: 'index',
+          routing: 'route',
+        },
+      },
+    });
+    expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
+      body: {
+        actions: [
+          {
+            add: {
+              index: 'foo-bar-000001',
+              alias: 'foo-bar',
+              is_hidden: true,
+              is_write_index: true,
+            },
+          },
+          {
+            add: {
+              index: 'foo-bar-000001',
+              alias: 'foo-b',
+              is_hidden: true,
+              index_routing: 'index',
+              routing: 'route',
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should throw error when call cluster throws an error', async () => {
+    clusterClient.indices.updateAliases.mockRejectedValue(new Error('Fail'));
+    await expect(
+      clusterClientAdapter.setIndexAliasToHidden('foo-bar-000001', {
+        aliases: {
+          'foo-bar': {
+            is_write_index: true,
+          },
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error setting existing index aliases for index foo-bar-000001 to is_hidden: Fail"`
+    );
   });
 });
 
@@ -338,16 +609,106 @@ describe('queryEventsBySavedObject', () => {
         },
       })
     );
-    await clusterClientAdapter.queryEventsBySavedObjects(
-      'index-name',
-      'namespace',
-      'saved-object-type',
-      ['saved-object-id'],
-      DEFAULT_OPTIONS
-    );
+    await clusterClientAdapter.queryEventsBySavedObjects({
+      index: 'index-name',
+      namespace: 'namespace',
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      findOptions: DEFAULT_OPTIONS,
+    });
 
     const [query] = clusterClient.search.mock.calls[0];
-    expect(query).toMatchInlineSnapshot(`
+    expect(query).toMatchInlineSnapshot(
+      {
+        body: {
+          from: 0,
+          query: {
+            bool: {
+              filter: [],
+              must: [
+                {
+                  nested: {
+                    path: 'kibana.saved_objects',
+                    query: {
+                      bool: {
+                        must: [
+                          {
+                            term: {
+                              'kibana.saved_objects.rel': {
+                                value: 'primary',
+                              },
+                            },
+                          },
+                          {
+                            term: {
+                              'kibana.saved_objects.type': {
+                                value: 'saved-object-type',
+                              },
+                            },
+                          },
+                          {
+                            term: {
+                              'kibana.saved_objects.namespace': {
+                                value: 'namespace',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              nested: {
+                                path: 'kibana.saved_objects',
+                                query: {
+                                  bool: {
+                                    must: [
+                                      {
+                                        terms: {
+                                          'kibana.saved_objects.id': ['saved-object-id'],
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              },
+                            },
+                            {
+                              range: {
+                                'kibana.version': {
+                                  gte: '8.0.0',
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          size: 10,
+          sort: [
+            {
+              '@timestamp': {
+                order: 'asc',
+              },
+            },
+          ],
+        },
+        index: 'index-name',
+        track_total_hits: true,
+      },
+      `
       Object {
         "body": Object {
           "from": 0,
@@ -376,13 +737,6 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "terms": Object {
-                              "kibana.saved_objects.id": Array [
-                                "saved-object-id",
-                              ],
-                            },
-                          },
-                          Object {
                             "term": Object {
                               "kibana.saved_objects.namespace": Object {
                                 "value": "namespace",
@@ -392,6 +746,43 @@ describe('queryEventsBySavedObject', () => {
                         ],
                       },
                     },
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "must": Array [
+                            Object {
+                              "nested": Object {
+                                "path": "kibana.saved_objects",
+                                "query": Object {
+                                  "bool": Object {
+                                    "must": Array [
+                                      Object {
+                                        "terms": Object {
+                                          "kibana.saved_objects.id": Array [
+                                            "saved-object-id",
+                                          ],
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              },
+                            },
+                            Object {
+                              "range": Object {
+                                "kibana.version": Object {
+                                  "gte": "8.0.0",
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
                   },
                 },
               ],
@@ -409,7 +800,8 @@ describe('queryEventsBySavedObject', () => {
         "index": "index-name",
         "track_total_hits": true,
       }
-    `);
+    `
+    );
   });
 
   test('should call cluster with proper arguments with default namespace', async () => {
@@ -429,80 +821,106 @@ describe('queryEventsBySavedObject', () => {
         },
       })
     );
-    await clusterClientAdapter.queryEventsBySavedObjects(
-      'index-name',
-      undefined,
-      'saved-object-type',
-      ['saved-object-id'],
-      DEFAULT_OPTIONS
-    );
+    await clusterClientAdapter.queryEventsBySavedObjects({
+      index: 'index-name',
+      namespace: undefined,
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      findOptions: DEFAULT_OPTIONS,
+    });
 
     const [query] = clusterClient.search.mock.calls[0];
-    expect(query).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "from": 0,
-          "query": Object {
-            "bool": Object {
-              "filter": Array [],
-              "must": Array [
-                Object {
-                  "nested": Object {
-                    "path": "kibana.saved_objects",
-                    "query": Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.rel": Object {
-                                "value": "primary",
+    expect(query).toMatchObject({
+      body: {
+        from: 0,
+        query: {
+          bool: {
+            filter: [],
+            must: [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: 'saved-object-type',
+                            },
+                          },
+                        },
+                        {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: 'kibana.saved_objects.namespace',
                               },
                             },
                           },
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.type": Object {
-                                "value": "saved-object-type",
-                              },
-                            },
-                          },
-                          Object {
-                            "terms": Object {
-                              "kibana.saved_objects.id": Array [
-                                "saved-object-id",
-                              ],
-                            },
-                          },
-                          Object {
-                            "bool": Object {
-                              "must_not": Object {
-                                "exists": Object {
-                                  "field": "kibana.saved_objects.namespace",
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        must: [
+                          {
+                            nested: {
+                              path: 'kibana.saved_objects',
+                              query: {
+                                bool: {
+                                  must: [
+                                    {
+                                      terms: {
+                                        'kibana.saved_objects.id': ['saved-object-id'],
+                                      },
+                                    },
+                                  ],
                                 },
+                              },
+                            },
+                          },
+                          {
+                            range: {
+                              'kibana.version': {
+                                gte: '8.0.0',
                               },
                             },
                           },
                         ],
                       },
                     },
-                  },
+                  ],
                 },
-              ],
+              },
+            ],
+          },
+        },
+        size: 10,
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
             },
           },
-          "size": 10,
-          "sort": Array [
-            Object {
-              "@timestamp": Object {
-                "order": "asc",
-              },
-            },
-          ],
-        },
-        "index": "index-name",
-        "track_total_hits": true,
-      }
-    `);
+        ],
+      },
+      index: 'index-name',
+      track_total_hits: true,
+    });
   });
 
   test('should call cluster with sort', async () => {
@@ -522,13 +940,13 @@ describe('queryEventsBySavedObject', () => {
         },
       })
     );
-    await clusterClientAdapter.queryEventsBySavedObjects(
-      'index-name',
-      'namespace',
-      'saved-object-type',
-      ['saved-object-id'],
-      { ...DEFAULT_OPTIONS, sort_field: 'event.end', sort_order: 'desc' }
-    );
+    await clusterClientAdapter.queryEventsBySavedObjects({
+      index: 'index-name',
+      namespace: 'namespace',
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      findOptions: { ...DEFAULT_OPTIONS, sort_field: 'event.end', sort_order: 'desc' },
+    });
 
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toMatchObject({
@@ -559,85 +977,111 @@ describe('queryEventsBySavedObject', () => {
 
     const start = '2020-07-08T00:52:28.350Z';
 
-    await clusterClientAdapter.queryEventsBySavedObjects(
-      'index-name',
-      'namespace',
-      'saved-object-type',
-      ['saved-object-id'],
-      { ...DEFAULT_OPTIONS, start }
-    );
+    await clusterClientAdapter.queryEventsBySavedObjects({
+      index: 'index-name',
+      namespace: 'namespace',
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      findOptions: { ...DEFAULT_OPTIONS, start },
+    });
 
     const [query] = clusterClient.search.mock.calls[0];
-    expect(query).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "from": 0,
-          "query": Object {
-            "bool": Object {
-              "filter": Array [],
-              "must": Array [
-                Object {
-                  "nested": Object {
-                    "path": "kibana.saved_objects",
-                    "query": Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.rel": Object {
-                                "value": "primary",
+    expect(query).toMatchObject({
+      body: {
+        from: 0,
+        query: {
+          bool: {
+            filter: [],
+            must: [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: 'saved-object-type',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.namespace': {
+                              value: 'namespace',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        must: [
+                          {
+                            nested: {
+                              path: 'kibana.saved_objects',
+                              query: {
+                                bool: {
+                                  must: [
+                                    {
+                                      terms: {
+                                        'kibana.saved_objects.id': ['saved-object-id'],
+                                      },
+                                    },
+                                  ],
+                                },
                               },
                             },
                           },
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.type": Object {
-                                "value": "saved-object-type",
-                              },
-                            },
-                          },
-                          Object {
-                            "terms": Object {
-                              "kibana.saved_objects.id": Array [
-                                "saved-object-id",
-                              ],
-                            },
-                          },
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.namespace": Object {
-                                "value": "namespace",
+                          {
+                            range: {
+                              'kibana.version': {
+                                gte: '8.0.0',
                               },
                             },
                           },
                         ],
                       },
                     },
+                  ],
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2020-07-08T00:52:28.350Z',
                   },
                 },
-                Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "gte": "2020-07-08T00:52:28.350Z",
-                    },
-                  },
-                },
-              ],
+              },
+            ],
+          },
+        },
+        size: 10,
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
             },
           },
-          "size": 10,
-          "sort": Array [
-            Object {
-              "@timestamp": Object {
-                "order": "asc",
-              },
-            },
-          ],
-        },
-        "index": "index-name",
-        "track_total_hits": true,
-      }
-    `);
+        ],
+      },
+      index: 'index-name',
+      track_total_hits: true,
+    });
   });
 
   test('supports optional date range', async () => {
@@ -661,92 +1105,163 @@ describe('queryEventsBySavedObject', () => {
     const start = '2020-07-08T00:52:28.350Z';
     const end = '2020-07-08T00:00:00.000Z';
 
-    await clusterClientAdapter.queryEventsBySavedObjects(
-      'index-name',
-      'namespace',
-      'saved-object-type',
-      ['saved-object-id'],
-      { ...DEFAULT_OPTIONS, start, end }
-    );
+    await clusterClientAdapter.queryEventsBySavedObjects({
+      index: 'index-name',
+      namespace: 'namespace',
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      findOptions: { ...DEFAULT_OPTIONS, start, end },
+      legacyIds: ['legacy-id'],
+    });
 
     const [query] = clusterClient.search.mock.calls[0];
-    expect(query).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "from": 0,
-          "query": Object {
-            "bool": Object {
-              "filter": Array [],
-              "must": Array [
-                Object {
-                  "nested": Object {
-                    "path": "kibana.saved_objects",
-                    "query": Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.rel": Object {
-                                "value": "primary",
+    expect(query).toMatchObject({
+      body: {
+        from: 0,
+        query: {
+          bool: {
+            filter: [],
+            must: [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: 'saved-object-type',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.namespace': {
+                              value: 'namespace',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        must: [
+                          {
+                            nested: {
+                              path: 'kibana.saved_objects',
+                              query: {
+                                bool: {
+                                  must: [
+                                    {
+                                      terms: {
+                                        'kibana.saved_objects.id': ['saved-object-id'],
+                                      },
+                                    },
+                                  ],
+                                },
                               },
                             },
                           },
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.type": Object {
-                                "value": "saved-object-type",
-                              },
-                            },
-                          },
-                          Object {
-                            "terms": Object {
-                              "kibana.saved_objects.id": Array [
-                                "saved-object-id",
-                              ],
-                            },
-                          },
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.namespace": Object {
-                                "value": "namespace",
+                          {
+                            range: {
+                              'kibana.version': {
+                                gte: '8.0.0',
                               },
                             },
                           },
                         ],
                       },
                     },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "gte": "2020-07-08T00:52:28.350Z",
+                    {
+                      bool: {
+                        must: [
+                          {
+                            nested: {
+                              path: 'kibana.saved_objects',
+                              query: {
+                                bool: {
+                                  must: [
+                                    {
+                                      terms: {
+                                        'kibana.saved_objects.id': ['legacy-id'],
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            },
+                          },
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  range: {
+                                    'kibana.version': {
+                                      lt: '8.0.0',
+                                    },
+                                  },
+                                },
+                                {
+                                  bool: {
+                                    must_not: {
+                                      exists: {
+                                        field: 'kibana.version',
+                                      },
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
                     },
+                  ],
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2020-07-08T00:52:28.350Z',
                   },
                 },
-                Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "lte": "2020-07-08T00:00:00.000Z",
-                    },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    lte: '2020-07-08T00:00:00.000Z',
                   },
                 },
-              ],
+              },
+            ],
+          },
+        },
+        size: 10,
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
             },
           },
-          "size": 10,
-          "sort": Array [
-            Object {
-              "@timestamp": Object {
-                "order": "asc",
-              },
-            },
-          ],
-        },
-        "index": "index-name",
-        "track_total_hits": true,
-      }
-    `);
+        ],
+      },
+      index: 'index-name',
+      track_total_hits: true,
+    });
   });
 });
 

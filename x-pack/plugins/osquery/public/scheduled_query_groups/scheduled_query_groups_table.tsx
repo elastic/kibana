@@ -6,7 +6,7 @@
  */
 
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';

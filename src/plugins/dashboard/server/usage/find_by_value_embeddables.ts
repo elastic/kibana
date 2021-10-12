@@ -20,9 +20,9 @@ export const findByValueEmbeddables = async (
   return dashboards.saved_objects
     .map((dashboard) => {
       try {
-        return (JSON.parse(
+        return JSON.parse(
           dashboard.attributes.panelsJSON as string
-        ) as unknown) as SavedDashboardPanel730ToLatest[];
+        ) as unknown as SavedDashboardPanel730ToLatest[];
       } catch (exception) {
         return [];
       }

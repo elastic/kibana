@@ -12,7 +12,14 @@ export const AlertHistoryDefaultIndexName = `${ALERT_HISTORY_PREFIX}default`;
 export const AlertHistoryEsIndexConnectorId = 'preconfigured-alert-history-es-index';
 
 export const buildAlertHistoryDocument = (variables: Record<string, unknown>) => {
-  const { date, alert: alertVariables, context, params, tags, rule: ruleVariables } = variables as {
+  const {
+    date,
+    alert: alertVariables,
+    context,
+    params,
+    tags,
+    rule: ruleVariables,
+  } = variables as {
     date: string;
     alert: Record<string, unknown>;
     context: Record<string, unknown>;
@@ -25,13 +32,22 @@ export const buildAlertHistoryDocument = (variables: Record<string, unknown>) =>
     return null;
   }
 
-  const { actionGroup, actionGroupName, id: alertId } = alertVariables as {
+  const {
+    actionGroup,
+    actionGroupName,
+    id: alertId,
+  } = alertVariables as {
     actionGroup: string;
     actionGroupName: string;
     id: string;
   };
 
-  const { id: ruleId, name, spaceId, type } = ruleVariables as {
+  const {
+    id: ruleId,
+    name,
+    spaceId,
+    type,
+  } = ruleVariables as {
     id: string;
     name: string;
     spaceId: string;

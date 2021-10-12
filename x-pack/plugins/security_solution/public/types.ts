@@ -9,6 +9,8 @@ import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { SpacesPluginStart } from '../../../plugins/spaces/public';
+import { LensPublicStart } from '../../../plugins/lens/public';
 import { NewsfeedPublicPluginStart } from '../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
@@ -58,6 +60,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
@@ -65,6 +68,7 @@ export interface StartPlugins {
   timelines: TimelinesUIStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export type StartServices = CoreStart &
@@ -92,8 +96,7 @@ export interface SubPlugins {
   cases: Cases;
   hosts: Hosts;
   network: Network;
-  // TODO: Steph/ueba require ueba once no longer experimental
-  ueba?: Ueba;
+  ueba: Ueba;
   overview: Overview;
   timelines: Timelines;
   management: Management;
@@ -107,8 +110,7 @@ export interface StartedSubPlugins {
   cases: ReturnType<Cases['start']>;
   hosts: ReturnType<Hosts['start']>;
   network: ReturnType<Network['start']>;
-  // TODO: Steph/ueba require ueba once no longer experimental
-  ueba?: ReturnType<Ueba['start']>;
+  ueba: ReturnType<Ueba['start']>;
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;

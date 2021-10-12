@@ -19,21 +19,13 @@ import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
 import { APMPluginDependencies } from '../types';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import { UxUIFilters } from '../../typings/ui_filters';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   rac: RacApiRequestHandlerContext;
 }
-
-export type InspectResponse = Array<{
-  response: any;
-  duration: number;
-  requestType: string;
-  requestParams: Record<string, unknown>;
-  esError: Error;
-  operationName: string;
-}>;
 
 export interface APMRouteCreateOptions {
   options: {
@@ -58,6 +50,9 @@ export interface APMRouteHandlerResources {
   params: {
     query: {
       _inspect: boolean;
+      start?: number;
+      end?: number;
+      uiFilters?: UxUIFilters;
     };
   };
   config: APMConfig;

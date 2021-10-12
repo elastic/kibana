@@ -17,13 +17,13 @@ import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { TestProviders } from '../../../mock';
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_selector');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
-
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
     [CONSTANTS.appQuery]: { query: 'host.name:"security-solution-es"', language: 'kuery' },
@@ -75,12 +75,19 @@ describe('useSecuritySolutionNavigation', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ urlState: mockUrlState });
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
+
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
             `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`,
+          capabilities: {
+            siem: {
+              crud_alerts: true,
+              read_alerts: true,
+            },
+          },
         },
         chrome: {
           setBreadcrumbs: jest.fn(),
@@ -90,8 +97,9 @@ describe('useSecuritySolutionNavigation', () => {
   });
 
   it('should create navigation config', async () => {
-    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(() =>
-      useSecuritySolutionNavigation()
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
     );
 
     expect(result.current).toMatchInlineSnapshot(`
@@ -225,6 +233,16 @@ describe('useSecuritySolutionNavigation', () => {
                 "name": "Event filters",
                 "onClick": [Function],
               },
+              Object {
+                "data-href": "securitySolution/host_isolation_exceptions",
+                "data-test-subj": "navigation-host_isolation_exceptions",
+                "disabled": false,
+                "href": "securitySolution/host_isolation_exceptions",
+                "id": "host_isolation_exceptions",
+                "isSelected": false,
+                "name": "Host Isolation Exceptions",
+                "onClick": [Function],
+              },
             ],
             "name": "Manage",
           },
@@ -237,8 +255,9 @@ describe('useSecuritySolutionNavigation', () => {
   // TODO: Steph/ueba remove when no longer experimental
   it('should include ueba when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(() =>
-      useSecuritySolutionNavigation()
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
     );
 
     // @ts-ignore possibly undefined, but if undefined we want this test to fail
@@ -253,8 +272,9 @@ describe('useSecuritySolutionNavigation', () => {
           read: true,
         });
 
-        const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(() =>
-          useSecuritySolutionNavigation()
+        const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+          () => useSecuritySolutionNavigation(),
+          { wrapper: TestProviders }
         );
 
         const caseNavItem = (result.current?.items || [])[3].items?.find(
@@ -280,8 +300,9 @@ describe('useSecuritySolutionNavigation', () => {
           read: false,
         });
 
-        const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(() =>
-          useSecuritySolutionNavigation()
+        const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+          () => useSecuritySolutionNavigation(),
+          { wrapper: TestProviders }
         );
 
         const caseNavItem = (result.current?.items || [])[3].items?.find(

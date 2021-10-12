@@ -18,7 +18,6 @@ describe('mergeConfigs', () => {
       spanIndices: 'apm-*-span-*',
       errorIndices: 'apm-*-error-*',
       metricsIndices: 'apm-*-metric-*',
-      indexPattern: 'apm-*',
     } as APMOSSConfig;
 
     const apmConfig = {
@@ -30,7 +29,6 @@ describe('mergeConfigs', () => {
 
     expect(mergeConfigs(apmOssConfig, apmConfig)).toEqual({
       'apm_oss.errorIndices': 'logs-apm*,apm-*-error-*',
-      'apm_oss.indexPattern': 'traces-apm*,logs-apm*,metrics-apm*,apm-*',
       'apm_oss.metricsIndices': 'metrics-apm*,apm-*-metric-*',
       'apm_oss.spanIndices': 'traces-apm*,apm-*-span-*',
       'apm_oss.transactionIndices': 'traces-apm*,apm-*-transaction-*',

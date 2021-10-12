@@ -1,15 +1,14 @@
 {
   "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "allowJs": true,
-    "declarationDir": "./target_types",
-    "outDir": "target_node",
     "declaration": true,
     "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "target_types",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-securitysolution-autocomplete/src",
     "rootDir": "src",
     "types": ["jest", "node", "resize-observer-polyfill"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
 }

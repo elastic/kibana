@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  TermsEnumRequest,
+  TermsEnumResponse,
+} from '@elastic/elasticsearch/api/types';
 import { ValuesType } from 'utility-types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { Profile } from '../../../../../typings/es_schemas/ui/profile';
@@ -39,6 +43,10 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
 };
 
+export type APMEventESTermsEnumRequest = Omit<TermsEnumRequest, 'index'> & {
+  apm: { events: ProcessorEvent[] };
+};
+
 // These keys shoul all be `ProcessorEvent.x`, but until TypeScript 4.2 we're inlining them here.
 // See https://github.com/microsoft/TypeScript/issues/37888
 type TypeOfProcessorEvent<T extends ProcessorEvent> = {
@@ -54,12 +62,11 @@ type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<
   'apm'
 > & { index: string[] | string };
 
-type TypedSearchResponse<
-  TParams extends APMEventESSearchRequest
-> = InferSearchResponseOf<
-  TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
-  ESSearchRequestOf<TParams>
->;
+type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
+  InferSearchResponseOf<
+    TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
+    ESSearchRequestOf<TParams>
+  >;
 
 export type APMEventClient = ReturnType<typeof createApmEventClient>;
 
@@ -95,6 +102,7 @@ export function createApmEventClient({
         ...withPossibleLegacyDataFilter,
         ignore_throttled: !includeFrozen,
         ignore_unavailable: true,
+        preference: 'any',
       };
 
       // only "search" operation is currently supported
@@ -122,6 +130,45 @@ export function createApmEventClient({
         requestType,
         operationName,
         requestParams: searchParams,
+      });
+    },
+
+    async termsEnum(
+      operationName: string,
+      params: APMEventESTermsEnumRequest
+    ): Promise<TermsEnumResponse> {
+      const requestType = 'terms_enum';
+      const { index } = unpackProcessorEvents(params, indices);
+
+      return callAsyncWithDebug({
+        cb: () => {
+          const { apm, ...rest } = params;
+          const termsEnumPromise = withApmSpan(operationName, () =>
+            cancelEsRequestOnAbort(
+              esClient.termsEnum({
+                index: Array.isArray(index) ? index.join(',') : index,
+                ...rest,
+              }),
+              request
+            )
+          );
+
+          return unwrapEsResponse(termsEnumPromise);
+        },
+        getDebugMessage: () => ({
+          body: getDebugBody({
+            params,
+            requestType,
+            operationName,
+          }),
+          title: getDebugTitle(request),
+        }),
+        isCalledWithInternalUser: false,
+        debug,
+        request,
+        requestType,
+        operationName,
+        requestParams: params,
       });
     },
   };

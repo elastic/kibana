@@ -18,34 +18,55 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { SearchBar } from '../../shared/search_bar';
 import { BackendLatencyChart } from './backend_latency_chart';
-import { BackendInventoryTitle } from '../../routing/home';
+import { DependenciesInventoryTitle } from '../../routing/home';
 import { BackendDetailDependenciesTable } from './backend_detail_dependencies_table';
 import { BackendThroughputChart } from './backend_throughput_chart';
 import { BackendFailedTransactionRateChart } from './backend_error_rate_chart';
 import { BackendDetailTemplate } from '../../routing/templates/backend_detail_template';
+import {
+  getKueryBarBoolFilter,
+  kueryBarPlaceholder,
+} from '../../../../common/backends';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 export function BackendDetailOverview() {
   const {
     path: { backendName },
-    query: { rangeFrom, rangeTo, environment, kuery },
-  } = useApmParams('/backends/:backendName/overview');
+    query: {
+      rangeFrom,
+      rangeTo,
+      refreshInterval,
+      refreshPaused,
+      environment,
+      kuery,
+    },
+  } = useApmParams('/backends/{backendName}/overview');
 
   const apmRouter = useApmRouter();
 
   useBreadcrumb([
     {
-      title: BackendInventoryTitle,
+      title: DependenciesInventoryTitle,
       href: apmRouter.link('/backends', {
-        query: { rangeFrom, rangeTo, environment, kuery },
+        query: {
+          rangeFrom,
+          rangeTo,
+          refreshInterval,
+          refreshPaused,
+          environment,
+          kuery,
+        },
       }),
     },
     {
       title: backendName,
-      href: apmRouter.link('/backends/:backendName/overview', {
+      href: apmRouter.link('/backends/{backendName}/overview', {
         path: { backendName },
         query: {
           rangeFrom,
           rangeTo,
+          refreshInterval,
+          refreshPaused,
           environment,
           kuery,
         },
@@ -53,12 +74,26 @@ export function BackendDetailOverview() {
     },
   ]);
 
+  const kueryBarBoolFilter = getKueryBarBoolFilter({
+    environment,
+    backendName,
+  });
+
+  const largeScreenOrSmaller = useBreakpoints().isLarge;
+
   return (
     <ApmBackendContextProvider>
       <BackendDetailTemplate title={backendName}>
-        <SearchBar showTimeComparison />
+        <SearchBar
+          showTimeComparison
+          kueryBarPlaceholder={kueryBarPlaceholder}
+          kueryBarBoolFilter={kueryBarBoolFilter}
+        />
         <ChartPointerEventContextProvider>
-          <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexGroup
+            direction={largeScreenOrSmaller ? 'column' : 'row'}
+            gutterSize="s"
+          >
             <EuiFlexItem>
               <EuiPanel hasBorder={true}>
                 <EuiTitle size="xs">
@@ -100,7 +135,7 @@ export function BackendDetailOverview() {
             </EuiFlexItem>
           </EuiFlexGroup>
         </ChartPointerEventContextProvider>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="l" />
         <BackendDetailDependenciesTable />
       </BackendDetailTemplate>
     </ApmBackendContextProvider>

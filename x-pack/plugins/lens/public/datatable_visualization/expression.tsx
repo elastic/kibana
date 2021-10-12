@@ -18,9 +18,7 @@ import { DatatableComponent } from './components/table_basic';
 
 import type { ILensInterpreterRenderHandlers } from '../types';
 import type { FormatFactory } from '../../common';
-import { DatatableProps } from '../../common/expressions';
-
-export { datatableColumn, getDatatable } from '../../common/expressions';
+import type { DatatableProps } from '../../common/expressions';
 
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;

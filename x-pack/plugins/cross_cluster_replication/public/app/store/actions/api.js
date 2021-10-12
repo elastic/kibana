@@ -28,29 +28,24 @@ export const clearApiError = (scope) => ({
   payload: { error: null, scope },
 });
 
-export const sendApiRequest = ({
-  label,
-  scope,
-  status,
-  handler,
-  onSuccess = () => undefined,
-  onError = () => undefined,
-}) => async (dispatch, getState) => {
-  dispatch(clearApiError(scope));
-  dispatch(apiRequestStart({ label, scope, status }));
+export const sendApiRequest =
+  ({ label, scope, status, handler, onSuccess = () => undefined, onError = () => undefined }) =>
+  async (dispatch, getState) => {
+    dispatch(clearApiError(scope));
+    dispatch(apiRequestStart({ label, scope, status }));
 
-  try {
-    const response = await handler(dispatch);
+    try {
+      const response = await handler(dispatch);
 
-    dispatch(apiRequestEnd({ label, scope }));
-    dispatch({ type: `${label}_SUCCESS`, payload: response });
+      dispatch(apiRequestEnd({ label, scope }));
+      dispatch({ type: `${label}_SUCCESS`, payload: response });
 
-    onSuccess(response, dispatch, getState);
-  } catch (error) {
-    dispatch(apiRequestEnd({ label, scope }));
-    dispatch(setApiError({ error, scope }));
-    dispatch({ type: `${label}_FAILURE`, payload: error });
+      onSuccess(response, dispatch, getState);
+    } catch (error) {
+      dispatch(apiRequestEnd({ label, scope }));
+      dispatch(setApiError({ error, scope }));
+      dispatch({ type: `${label}_FAILURE`, payload: error });
 
-    onError(error, dispatch, getState);
-  }
-};
+      onError(error, dispatch, getState);
+    }
+  };

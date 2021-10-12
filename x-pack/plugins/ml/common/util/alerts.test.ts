@@ -95,6 +95,9 @@ describe('getResultJobsHealthRuleConfig', () => {
         enabled: true,
         timeInterval: null,
       },
+      errorMessages: {
+        enabled: true,
+      },
     });
   });
   test('returns config with overridden values based on provided configuration', () => {
@@ -118,6 +121,9 @@ describe('getResultJobsHealthRuleConfig', () => {
         docsCount: 1,
         enabled: true,
         timeInterval: null,
+      },
+      errorMessages: {
+        enabled: true,
       },
     });
   });

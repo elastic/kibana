@@ -14,6 +14,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { useServiceName } from '../../../hooks/use_service_name';
+import { InspectorHeaderLink } from './inspector_header_link';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
@@ -65,6 +66,7 @@ export function ApmHeaderActionMenu() {
           defaultMessage: 'Add data',
         })}
       </EuiHeaderLink>
+      <InspectorHeaderLink />
     </EuiHeaderLinks>
   );
 }

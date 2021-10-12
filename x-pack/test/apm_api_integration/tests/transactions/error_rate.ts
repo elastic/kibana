@@ -14,10 +14,11 @@ import archives_metadata from '../../common/fixtures/es_archiver/archives_metada
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
-type ErrorRate = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/error_rate'>;
+type ErrorRate =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
 
@@ -29,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('handles the empty state', async () => {
       const response = await supertest.get(
         format({
-          pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+          pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
           query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
         })
       );
@@ -45,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('handles the empty state with comparison data', async () => {
       const response = await supertest.get(
         format({
-          pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+          pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
           query: {
             transactionType,
             start: moment(end).subtract(15, 'minutes').toISOString(),
@@ -77,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           const response = await supertest.get(
             format({
-              pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+              pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
               query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
             })
           );
@@ -137,7 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           const response = await supertest.get(
             format({
-              pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+              pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
               query: {
                 transactionType,
                 start: moment(end).subtract(15, 'minutes').toISOString(),
@@ -159,13 +160,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(errorRateResponse.currentPeriod.transactionErrorRate.length).to.be.greaterThan(0);
           expect(errorRateResponse.previousPeriod.transactionErrorRate.length).to.be.greaterThan(0);
 
-          const currentPeriodNonNullDataPoints = errorRateResponse.currentPeriod.transactionErrorRate.filter(
-            ({ y }) => y !== null
-          );
+          const currentPeriodNonNullDataPoints =
+            errorRateResponse.currentPeriod.transactionErrorRate.filter(({ y }) => y !== null);
 
-          const previousPeriodNonNullDataPoints = errorRateResponse.previousPeriod.transactionErrorRate.filter(
-            ({ y }) => y !== null
-          );
+          const previousPeriodNonNullDataPoints =
+            errorRateResponse.previousPeriod.transactionErrorRate.filter(({ y }) => y !== null);
 
           expect(currentPeriodNonNullDataPoints.length).to.be.greaterThan(0);
           expect(previousPeriodNonNullDataPoints.length).to.be.greaterThan(0);

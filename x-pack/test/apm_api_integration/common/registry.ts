@@ -15,6 +15,7 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 type ArchiveName =
   | 'apm_8.0.0'
+  | 'apm_8.0.0_empty'
   | '8.0.0'
   | 'metrics_8.0.0'
   | 'ml_8.0.0'
@@ -110,7 +111,7 @@ export const registry = {
     const esArchiver = context.getService('esArchiver');
     const logger = context.getService('log');
 
-    const supertest = context.getService('supertestAsApmWriteUser');
+    const supertest = context.getService('legacySupertestAsApmWriteUser');
 
     const logWithTimer = () => {
       const start = process.hrtime();

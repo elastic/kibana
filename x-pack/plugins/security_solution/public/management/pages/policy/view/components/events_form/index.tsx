@@ -24,9 +24,8 @@ interface OperatingSystemToOsMap {
   [OperatingSystem.MAC]: OS.mac;
 }
 
-export type ProtectionField<
-  T extends OperatingSystem
-> = keyof UIPolicyConfig[OperatingSystemToOsMap[T]]['events'];
+export type ProtectionField<T extends OperatingSystem> =
+  keyof UIPolicyConfig[OperatingSystemToOsMap[T]]['events'];
 
 export type EventFormSelection<T extends OperatingSystem> = { [K in ProtectionField<T>]: boolean };
 
@@ -54,7 +53,7 @@ export const EventsForm = <T extends OperatingSystem>({
 }: EventsFormProps<T>) => (
   <ConfigForm
     type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
-      defaultMessage: 'Event Collection',
+      defaultMessage: 'Event collection',
     })}
     supportedOss={[os]}
     rightCorner={

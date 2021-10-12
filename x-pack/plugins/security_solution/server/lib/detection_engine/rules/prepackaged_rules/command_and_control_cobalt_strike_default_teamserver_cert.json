@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "This rule detects the use of the default Cobalt Strike Team Server TLS certificate. Cobalt Strike is software for Adversary Simulations and Red Team Operations which are security assessments that replicate the tactics and techniques of an advanced adversary in a network. Modifications to the Packetbeat configuration can be made to include MD5 and SHA256 hashing algorithms (the default is SHA1) - see the Reference section for additional information on module configuration.",
+  "description": "This rule detects the use of the default Cobalt Strike Team Server TLS certificate. Cobalt Strike is software for Adversary Simulations and Red Team Operations which are security assessments that replicate the tactics and techniques of an advanced adversary in a network. Modifications to the Packetbeat configuration can be made to include MD5 and SHA256 hashing algorithms (the default is SHA1). See the References section for additional information on module configuration.",
   "from": "now-9m",
   "index": [
     "auditbeat-*",
@@ -13,7 +13,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Default Cobalt Strike Team Server Certificate",
-  "note": "## Threat intel\n\nWhile Cobalt Strike is intended to be used for penetration tests and IR training, it is frequently used by actual threat actors (TA) such as APT19, APT29, APT32, APT41, FIN6, DarkHydrus, CopyKittens, Cobalt Group, Leviathan, and many other unnamed criminal TAs. This rule uses high-confidence atomic indicators, alerts should be investigated rapidly.",
+  "note": "## Threat intel\n\nWhile Cobalt Strike is intended to be used for penetration tests and IR training, it is frequently used by actual threat actors (TA) such as APT19, APT29, APT32, APT41, FIN6, DarkHydrus, CopyKittens, Cobalt Group, Leviathan, and many other unnamed criminal TAs. This rule uses high-confidence atomic indicators, so alerts should be investigated rapidly.",
   "query": "event.category:(network or network_traffic) and (tls.server.hash.md5:950098276A495286EB2A2556FBAB6D83 or\n  tls.server.hash.sha1:6ECE5ECE4192683D2D84E25B0BA7E04F9CB7EB7C or\n  tls.server.hash.sha256:87F2085C32B6A2CC709B365F55873E207A9CAA10BFFECF2FD16D3CF9D94D390C)\n",
   "references": [
     "https://attack.mitre.org/software/S0154/",
@@ -59,5 +59,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

@@ -21,37 +21,14 @@ export interface XyVisualizationPluginSetupPlugins {
 }
 
 export class XyVisualization {
-  constructor() {}
-
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
     { expressions, formatFactory, editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const {
-        legendConfig,
-        yAxisConfig,
-        tickLabelsConfig,
-        gridlinesConfig,
-        axisTitlesVisibilityConfig,
-        axisExtentConfig,
-        labelsOrientationConfig,
-        layerConfig,
-        xyChart,
-        getXyChartRenderer,
-        getXyVisualization,
-      } = await import('../async_services');
+      const { getXyChartRenderer, getXyVisualization } = await import('../async_services');
       const [, { charts, fieldFormats }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
-      expressions.registerFunction(() => legendConfig);
-      expressions.registerFunction(() => yAxisConfig);
-      expressions.registerFunction(() => tickLabelsConfig);
-      expressions.registerFunction(() => axisExtentConfig);
-      expressions.registerFunction(() => labelsOrientationConfig);
-      expressions.registerFunction(() => gridlinesConfig);
-      expressions.registerFunction(() => axisTitlesVisibilityConfig);
-      expressions.registerFunction(() => layerConfig);
-      expressions.registerFunction(() => xyChart);
 
       expressions.registerRenderer(
         getXyChartRenderer({

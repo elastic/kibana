@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
-import { createNewPackagePolicyMock } from '../../../fleet/common/mocks';
+import { createNewPackagePolicyMock, deletePackagePolicyMock } from '../../../fleet/common/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
@@ -14,6 +14,7 @@ import {
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
   getPackagePolicyCreateCallback,
+  getPackagePolicyDeleteCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
 import { KibanaRequest } from 'kibana/server';
@@ -28,6 +29,7 @@ import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../types';
 import { getExceptionListClientMock } from '../../../lists/server/services/exception_lists/exception_list_client.mock';
+import { getExceptionListSchemaMock } from '../../../lists/common/schemas/response/exception_list_schema.mock';
 import { ExceptionListClient } from '../../../lists/server';
 import { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
 import { ManifestManager } from '../endpoint/services/artifacts/manifest_manager';
@@ -35,6 +37,12 @@ import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/m
 import { Manifest } from '../endpoint/lib/artifacts';
 import { NewPackagePolicy } from '../../../fleet/common/types/models';
 import { ManifestSchema } from '../../common/endpoint/schema/manifest';
+import {
+  allowedExperimentalValues,
+  ExperimentalFeatures,
+} from '../../common/experimental_features';
+import { DeletePackagePoliciesResponse } from '../../../fleet/common';
+import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
@@ -280,6 +288,68 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
+    });
+  });
+
+  describe('package policy delete callback with trusted apps by policy enabled', () => {
+    const invokeDeleteCallback = async (
+      experimentalFeatures?: ExperimentalFeatures
+    ): Promise<void> => {
+      const callback = getPackagePolicyDeleteCallback(exceptionListClient, experimentalFeatures);
+      await callback(deletePackagePolicyMock());
+    };
+
+    let removedPolicies: DeletePackagePoliciesResponse;
+    let policyId: string;
+    let fakeTA: ExceptionListSchema;
+
+    beforeEach(() => {
+      removedPolicies = deletePackagePolicyMock();
+      policyId = removedPolicies[0].id;
+      fakeTA = {
+        ...getExceptionListSchemaMock(),
+        tags: [`policy:${policyId}`],
+      };
+
+      exceptionListClient.findExceptionListItem = jest
+        .fn()
+        .mockResolvedValueOnce({ data: [fakeTA], total: 1 });
+      exceptionListClient.updateExceptionListItem = jest
+        .fn()
+        .mockResolvedValueOnce({ ...fakeTA, tags: [] });
+    });
+
+    it('removes policy from trusted app FF enabled', async () => {
+      await invokeDeleteCallback({
+        ...allowedExperimentalValues,
+        trustedAppsByPolicyEnabled: true, // Needs to be enabled, it needs also a test with this disabled.
+      });
+
+      expect(exceptionListClient.findExceptionListItem).toHaveBeenCalledWith({
+        filter: `exception-list-agnostic.attributes.tags:"policy:${policyId}"`,
+        listId: 'endpoint_trusted_apps',
+        namespaceType: 'agnostic',
+        page: 1,
+        perPage: 50,
+        sortField: undefined,
+        sortOrder: undefined,
+      });
+
+      expect(exceptionListClient.updateExceptionListItem).toHaveBeenCalledWith({
+        ...fakeTA,
+        namespaceType: fakeTA.namespace_type,
+        osTypes: fakeTA.os_types,
+        tags: [],
+      });
+    });
+
+    it("doesn't remove policy from trusted app FF disabled", async () => {
+      await invokeDeleteCallback({
+        ...allowedExperimentalValues,
+      });
+
+      expect(exceptionListClient.findExceptionListItem).toHaveBeenCalledTimes(0);
+      expect(exceptionListClient.updateExceptionListItem).toHaveBeenCalledTimes(0);
     });
   });
 });

@@ -249,7 +249,7 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.updateSchema();
         await nextTick();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/some-engine/schema', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/schema', {
           body: '{}',
         });
         expect(SchemaLogic.actions.onSchemaLoad).toHaveBeenCalledWith(MOCK_RESPONSE);

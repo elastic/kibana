@@ -68,15 +68,21 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('creating threat match rule', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -106,16 +112,22 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('tests with auditbeat data', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
       beforeEach(async () => {
         await deleteAllAlerts(supertest);
         await createSignalsIndex(supertest);
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should be able to execute and get 10 signals when doing a specific query', async () => {
@@ -275,7 +287,8 @@ export default ({ getService }: FtrProviderContext) => {
                 depth: 0,
               },
             ],
-            reason: `Alert Query with a rule id created at ${fullSignal['@timestamp']} with a high severity and risk score of 55 by root on zeek-sensor-amsterdam.`,
+            reason:
+              'user-login event by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
             rule: fullSignal.signal.rule,
             status: 'open',
           },
@@ -399,11 +412,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('indicator enrichment', () => {
-        beforeEach(async () => {
+        before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/filebeat/threat_intel');
         });
 
-        afterEach(async () => {
+        after(async () => {
           await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/threat_intel');
         });
 

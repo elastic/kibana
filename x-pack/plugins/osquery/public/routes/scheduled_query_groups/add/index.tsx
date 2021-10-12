@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { startCase } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
@@ -26,7 +27,7 @@ const AddScheduledQueryGroupPageComponent = () => {
 
     return {
       name: osqueryIntegration.name,
-      title: osqueryIntegration.title,
+      title: osqueryIntegration.title ?? startCase(osqueryIntegration.name),
       version: osqueryIntegration.version,
     };
   }, [osqueryIntegration]);

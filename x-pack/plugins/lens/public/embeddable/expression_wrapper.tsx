@@ -20,12 +20,14 @@ import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { ErrorMessage } from '../editor_frame_service/types';
+import { LensInspector } from '../lens_inspector_service';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
   expression: string | null;
   errors: ErrorMessage[] | undefined;
   variables?: Record<string, unknown>;
+  interactive?: boolean;
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
@@ -41,6 +43,7 @@ export interface ExpressionWrapperProps {
   canEdit: boolean;
   onRuntimeError: () => void;
   executionContext?: KibanaExecutionContext;
+  lensInspector: LensInspector;
 }
 
 interface VisualizationErrorProps {
@@ -100,6 +103,7 @@ export function ExpressionWrapper({
   searchContext,
   variables,
   handleEvent,
+  interactive,
   searchSessionId,
   onData$,
   renderMode,
@@ -111,6 +115,7 @@ export function ExpressionWrapper({
   canEdit,
   onRuntimeError,
   executionContext,
+  lensInspector,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -123,9 +128,11 @@ export function ExpressionWrapper({
             padding="s"
             variables={variables}
             expression={expression}
+            interactive={interactive}
             searchContext={searchContext}
             searchSessionId={searchSessionId}
             onData$={onData$}
+            inspectorAdapters={lensInspector.adapters}
             renderMode={renderMode}
             syncColors={syncColors}
             executionContext={executionContext}

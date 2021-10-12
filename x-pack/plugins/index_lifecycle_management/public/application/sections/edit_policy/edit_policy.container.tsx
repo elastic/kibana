@@ -96,6 +96,9 @@ export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps
         license: {
           canUseSearchableSnapshot: () => license.hasAtLeast(MIN_SEARCHABLE_SNAPSHOT_LICENSE),
         },
+        indices: existingPolicy && existingPolicy.indices ? existingPolicy.indices : [],
+        indexTemplates:
+          existingPolicy && existingPolicy.indexTemplates ? existingPolicy.indexTemplates : [],
       }}
     >
       <PresentationComponent />

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   CoreSetup,
   CoreStart,
@@ -25,7 +26,7 @@ import {
 } from '../../../../src/plugins/home/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { constants, getDefaultLayoutSelectors } from '../common';
+import { constants } from '../common';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from './';
@@ -77,6 +78,7 @@ export interface ReportingPublicPluginSetupDendencies {
 
 export interface ReportingPublicPluginStartDendencies {
   home: HomePublicPluginStart;
+  data: DataPublicPluginStart;
   management: ManagementStart;
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
@@ -90,7 +92,8 @@ export class ReportingPublicPlugin
       ReportingStart,
       ReportingPublicPluginSetupDendencies,
       ReportingPublicPluginStartDendencies
-    > {
+    >
+{
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
   private readonly stop$ = new Rx.ReplaySubject(1);
@@ -121,7 +124,6 @@ export class ReportingPublicPlugin
   private getContract(core?: CoreSetup) {
     if (core) {
       this.contract = {
-        getDefaultLayoutSelectors,
         usesUiCapabilities: () => this.config.roles?.enabled === false,
         components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
       };
@@ -134,7 +136,10 @@ export class ReportingPublicPlugin
     return this.contract;
   }
 
-  public setup(core: CoreSetup, setupDeps: ReportingPublicPluginSetupDendencies) {
+  public setup(
+    core: CoreSetup<ReportingPublicPluginStartDendencies>,
+    setupDeps: ReportingPublicPluginSetupDendencies
+  ) {
     const { getStartServices, uiSettings } = core;
     const {
       home,

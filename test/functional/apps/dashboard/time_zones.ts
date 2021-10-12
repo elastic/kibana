@@ -22,8 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
     'savedObjects',
   ]);
-
-  describe('dashboard time zones', function () {
+  // Legacy imports are no longer supported https://github.com/elastic/kibana/issues/103921
+  describe.skip('dashboard time zones', function () {
     this.tags('includeFirefox');
 
     before(async () => {

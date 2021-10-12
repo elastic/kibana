@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities, IUiSettingsClient } from 'kibana/public';
-import { ISearchSource } from '../../../../../../data/common';
+import type { Capabilities } from 'kibana/public';
+import type { IUiSettingsClient } from 'src/core/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { ISearchSource, SearchSourceFields } from 'src/plugins/data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import type { SavedSearch, SortOrder } from '../../../../saved_searches/types';
 import { getSortForSearchSource } from '../components/doc_table';
@@ -19,8 +21,9 @@ import { AppState } from '../services/discover_state';
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: AppState | SavedSearch,
-  config: IUiSettingsClient
+  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart }
 ) {
+  const { uiSettings: config, data } = services;
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
 
@@ -28,6 +31,8 @@ export async function getSharingData(
     'sort',
     getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
   );
+
+  searchSource.removeField('filter');
   searchSource.removeField('highlight');
   searchSource.removeField('highlightAll');
   searchSource.removeField('aggs');
@@ -49,7 +54,15 @@ export async function getSharingData(
   }
 
   return {
-    searchSource: searchSource.getSerializedFields(true),
+    getSearchSource: (absoluteTime?: boolean): SearchSourceFields => {
+      const filter = absoluteTime
+        ? data.query.timefilter.timefilter.createFilter(index)
+        : data.query.timefilter.timefilter.createRelativeFilter(index);
+
+      searchSource.setField('filter', filter);
+
+      return searchSource.getSerializedFields(true);
+    },
     columns,
   };
 }
@@ -65,7 +78,7 @@ export interface DiscoverCapabilities {
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.discover) return false;
 
-  const discover = (anonymousUserCapabilities.discover as unknown) as DiscoverCapabilities;
+  const discover = anonymousUserCapabilities.discover as unknown as DiscoverCapabilities;
 
   return !!discover.show;
 };

@@ -238,6 +238,37 @@
       },
       {
         "parentPluginId": "ml",
+        "id": "def-public.MLJobsAwaitingNodeWarning",
+        "type": "Function",
+        "tags": [],
+        "label": "MLJobsAwaitingNodeWarning",
+        "description": [],
+        "signature": [
+          "({ jobIds }: React.PropsWithChildren<Props>) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MLJobsAwaitingNodeWarning.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ jobIds }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
+            "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
         "id": "def-public.useMlHref",
         "type": "Function",
         "tags": [],
@@ -692,7 +723,7 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; }"
+              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; }"
             ],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false
@@ -958,13 +989,14 @@
           },
           {
             "parentPluginId": "ml",
-            "id": "def-public.MlSummaryJob.deleting",
-            "type": "CompoundType",
+            "id": "def-public.MlSummaryJob.blocked",
+            "type": "Object",
             "tags": [],
-            "label": "deleting",
+            "label": "blocked",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "MlJobBlocked",
+              " | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -1023,7 +1055,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"enabled\" | \"id\" | \"name\" | \"tags\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -1084,7 +1116,7 @@
             "children": [
               {
                 "parentPluginId": "ml",
-                "id": "def-public.__0",
+                "id": "def-public.UseIndexDataReturnType.renderCellValue.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -1251,7 +1283,7 @@
         "children": [
           {
             "parentPluginId": "ml",
-            "id": "def-public.__0",
+            "id": "def-public.RenderCellValue.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -2316,6 +2348,9 @@
             "tags": [],
             "label": "level",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
@@ -2346,6 +2381,9 @@
             "tags": [],
             "label": "text",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
@@ -2786,13 +2824,14 @@
           },
           {
             "parentPluginId": "ml",
-            "id": "def-server.MlSummaryJob.deleting",
-            "type": "CompoundType",
+            "id": "def-server.MlSummaryJob.blocked",
+            "type": "Object",
             "tags": [],
-            "label": "deleting",
+            "label": "blocked",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "MlJobBlocked",
+              " | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -2851,7 +2890,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"enabled\" | \"id\" | \"name\" | \"tags\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -3246,6 +3285,17 @@
       },
       {
         "parentPluginId": "ml",
+        "id": "def-server.MlJobBlocked",
+        "type": "Type",
+        "tags": [],
+        "label": "MlJobBlocked",
+        "description": [],
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
         "id": "def-server.MlSummaryJobs",
         "type": "Type",
         "tags": [],
@@ -3384,7 +3434,7 @@
           "section": "def-server.SavedObjectsClient",
           "text": "SavedObjectsClient"
         },
-        ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, request: ",
+        ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, request: ",
         {
           "pluginId": "core",
           "scope": "server",

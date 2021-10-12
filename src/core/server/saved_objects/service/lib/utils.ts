@@ -15,7 +15,8 @@ export const DEFAULT_NAMESPACE_STRING = 'default';
 export const ALL_NAMESPACES_STRING = '*';
 export const FIND_DEFAULT_PAGE = 1;
 export const FIND_DEFAULT_PER_PAGE = 20;
-const UUID_REGEX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+const UUID_REGEX =
+  /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
 
 /**
  * @public

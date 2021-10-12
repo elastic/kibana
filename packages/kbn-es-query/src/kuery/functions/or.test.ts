@@ -48,7 +48,7 @@ describe('kuery functions', () => {
         expect(result).toHaveProperty('bool');
         expect(Object.keys(result).length).toBe(1);
         expect(result.bool).toHaveProperty('should');
-        expect(result.bool.should).toEqual(
+        expect(result.bool!.should).toEqual(
           [childNode1, childNode2].map((childNode) =>
             ast.toElasticsearchQuery(childNode, indexPattern)
           )

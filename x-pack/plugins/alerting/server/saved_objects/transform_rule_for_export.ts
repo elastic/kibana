@@ -22,6 +22,7 @@ function transformRuleForExport(
     ...rule,
     attributes: {
       ...rule.attributes,
+      legacyId: null,
       enabled: false,
       apiKey: null,
       apiKeyOwner: null,

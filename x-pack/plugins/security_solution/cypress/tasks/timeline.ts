@@ -8,6 +8,7 @@
 import { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
+import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 import {
@@ -20,7 +21,7 @@ import {
   CLOSE_TIMELINE_BTN,
   COMBO_BOX,
   CREATE_NEW_TIMELINE,
-  DATAGRID_HEADERS,
+  FIELD_BROWSER,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
@@ -69,6 +70,8 @@ import {
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
 import { drag, drop } from '../tasks/common';
+
+import { closeFieldsBrowser, filterFieldsBrowser } from '../tasks/fields_browser';
 
 export const hostExistsQuery = 'host.name: *';
 
@@ -133,15 +136,16 @@ export const goToQueryTab = () => {
 
 export const addNotesToTimeline = (notes: string) => {
   goToNotesTab().then(() => {
-    cy.get(NOTES_TEXT_AREA).type(notes);
-    cy.root()
-      .pipe(($el) => {
-        $el.find(ADD_NOTE_BUTTON).trigger('click');
-        return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
-      })
-      .should('have.text', '1');
-  });
+    cy.get(NOTES_TAB_BUTTON)
+      .find('.euiBadge__text')
+      .then(($el) => {
+        const notesCount = parseInt($el.text(), 10);
 
+        cy.get(NOTES_TEXT_AREA).type(notes);
+        cy.get(ADD_NOTE_BUTTON).trigger('click');
+        cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
+      });
+  });
   goToQueryTab();
   goToNotesTab();
 };
@@ -326,13 +330,11 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
     .then((headersDropArea) => drop(headersDropArea));
 };
 
-export const removeColumn = (column: number) => {
-  cy.get(DATAGRID_HEADERS)
-    .eq(column)
-    .click()
-    .within(() => {
-      cy.get('button').eq(0).click({ force: true });
-    });
+export const removeColumn = (columnName: string) => {
+  cy.get(FIELD_BROWSER).first().click();
+  filterFieldsBrowser(columnName);
+  cy.get(FIELDS_BROWSER_CHECKBOX(columnName)).click();
+  closeFieldsBrowser();
 };
 
 export const resetFields = () => {
@@ -388,5 +390,10 @@ export const clickingOnCreateTemplateFromTimelineBtn = () => {
 };
 
 export const expandEventAction = () => {
-  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();
+  cy.waitUntil(() => {
+    cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).should('exist');
+    cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).should('be.visible');
+    return cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).then(($el) => $el.length === 1);
+  });
+  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).click();
 };

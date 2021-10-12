@@ -78,11 +78,11 @@
           },
           " extends ",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
           }
         ],
         "path": "src/plugins/discover/public/locator.ts",
@@ -160,11 +160,11 @@
               },
               " & ",
               {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
               },
               ") | undefined"
             ],
@@ -181,7 +181,13 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -197,7 +203,13 @@
               "\nOptionally set a query."
             ],
             "signature": [
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -275,11 +287,11 @@
             "signature": [
               "(string[][] & ",
               {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
               },
               ") | undefined"
             ],
@@ -398,7 +410,13 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/url_generator.ts",
@@ -414,7 +432,13 @@
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined"
             ],
             "path": "src/plugins/discover/public/url_generator.ts",
@@ -908,7 +932,13 @@
             "label": "query",
             "description": [],
             "signature": [
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined"
             ],
             "path": "src/plugins/discover/public/application/embeddable/types.ts",
@@ -922,7 +952,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/application/embeddable/types.ts",
@@ -1027,7 +1063,7 @@
         "signature": [
           "\"search\""
         ],
-        "path": "src/plugins/discover/public/application/embeddable/constants.ts",
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1053,7 +1089,7 @@
           "signature": [
             "{ addDocView(docViewRaw: ComponentDocViewInput | ",
             "RenderDocViewInput",
-            " | DirectiveDocViewInput | ",
+            " | ",
             "DocViewInputFn",
             "): void; }"
           ],
@@ -1143,7 +1179,7 @@
             },
             {
               "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_table.tsx"
+              "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
             },
             {
               "plugin": "osquery",
@@ -1327,6 +1363,20 @@
         "description": [],
         "signature": [
           "\"discover:sampleSize\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.SEARCH_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"search\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

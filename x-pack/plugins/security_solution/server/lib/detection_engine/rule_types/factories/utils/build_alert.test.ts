@@ -10,8 +10,10 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
@@ -31,13 +33,14 @@ import {
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   ALERT_ANCESTORS,
+  ALERT_DEPTH,
   ALERT_ORIGINAL_EVENT,
   ALERT_ORIGINAL_TIME,
 } from '../../field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 
 type SignalDoc = SignalSourceHit & {
-  _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
+  _source: Required<SignalSourceHit>['_source'] & { [TIMESTAMP]: string };
 };
 
 const SPACE_ID = 'space';
@@ -56,9 +59,9 @@ describe('buildAlert', () => {
       ...buildAlert([doc], rule, SPACE_ID, reason),
       ...additionalAlertFields(doc),
     };
-    const timestamp = alert['@timestamp'];
+    const timestamp = alert[TIMESTAMP];
     const expected = {
-      '@timestamp': timestamp,
+      [TIMESTAMP]: timestamp,
       [SPACE_IDS]: [SPACE_ID],
       [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [
@@ -71,11 +74,11 @@ describe('buildAlert', () => {
       ],
       [ALERT_ORIGINAL_TIME]: '2020-04-20T21:27:45.000Z',
       [ALERT_REASON]: 'alert reasonable reason',
-      [ALERT_STATUS]: 'open',
+      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
-        id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+        uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
         updated_at: new Date(ANCHOR_DATE).toISOString(),
         created_by: 'elastic',
@@ -99,7 +102,6 @@ describe('buildAlert', () => {
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',
-        output_index: '.siem-signals-default',
         max_signals: 100,
         risk_score: 55,
         risk_score_mapping: [],
@@ -108,7 +110,7 @@ describe('buildAlert', () => {
         interval: '5m',
         exceptions_list: getListArrayMock(),
       }),
-      'kibana.alert.depth': 1,
+      [ALERT_DEPTH]: 1,
     };
     expect(alert).toEqual(expected);
   });
@@ -127,9 +129,9 @@ describe('buildAlert', () => {
       ...buildAlert([doc], rule, SPACE_ID, reason),
       ...additionalAlertFields(doc),
     };
-    const timestamp = alert['@timestamp'];
+    const timestamp = alert[TIMESTAMP];
     const expected = {
-      '@timestamp': timestamp,
+      [TIMESTAMP]: timestamp,
       [SPACE_IDS]: [SPACE_ID],
       [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [
@@ -148,11 +150,11 @@ describe('buildAlert', () => {
         module: 'system',
       },
       [ALERT_REASON]: 'alert reasonable reason',
-      [ALERT_STATUS]: 'open',
+      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
-        id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+        uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
         updated_at: new Date(ANCHOR_DATE).toISOString(),
         created_by: 'elastic',
@@ -176,7 +178,6 @@ describe('buildAlert', () => {
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',
-        output_index: '.siem-signals-default',
         max_signals: 100,
         risk_score: 55,
         risk_score_mapping: [],
@@ -185,7 +186,7 @@ describe('buildAlert', () => {
         interval: '5m',
         exceptions_list: getListArrayMock(),
       }),
-      'kibana.alert.depth': 1,
+      [ALERT_DEPTH]: 1,
     };
     expect(alert).toEqual(expected);
   });
@@ -255,7 +256,7 @@ describe('buildAlert', () => {
       ...sampleDoc,
       _source: {
         ...sampleDoc._source,
-        '@timestamp': new Date().toISOString(),
+        [TIMESTAMP]: new Date().toISOString(),
       },
     };
     doc._source.event = {
@@ -282,7 +283,7 @@ describe('buildAlert', () => {
       ...sampleDoc,
       _source: {
         ...sampleDoc._source,
-        '@timestamp': new Date().toISOString(),
+        [TIMESTAMP]: new Date().toISOString(),
       },
     };
     doc._source.event = {
@@ -339,7 +340,7 @@ describe('buildAlert', () => {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
-          '@timestamp': new Date().toISOString(),
+          [TIMESTAMP]: new Date().toISOString(),
         },
       };
       const output = removeClashes(doc);
@@ -352,7 +353,7 @@ describe('buildAlert', () => {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
-          '@timestamp': new Date().toISOString(),
+          [TIMESTAMP]: new Date().toISOString(),
         },
       };
       const output = removeClashes(doc);
@@ -361,61 +362,61 @@ describe('buildAlert', () => {
 
     test('it will remove a "signal" numeric clash', () => {
       const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: 127,
         },
-      } as unknown) as SignalDoc;
+      } as unknown as SignalDoc;
       const output = removeClashes(doc);
-      const timestamp = output._source['@timestamp'];
+      const timestamp = output._source[TIMESTAMP];
       expect(output).toEqual({
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
-          '@timestamp': timestamp,
+          [TIMESTAMP]: timestamp,
         },
       });
     });
 
     test('it will remove a "signal" object clash', () => {
       const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { child_1: { child_2: 'Test nesting' } },
         },
-      } as unknown) as SignalDoc;
+      } as unknown as SignalDoc;
       const output = removeClashes(doc);
-      const timestamp = output._source['@timestamp'];
+      const timestamp = output._source[TIMESTAMP];
       expect(output).toEqual({
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
-          '@timestamp': timestamp,
+          [TIMESTAMP]: timestamp,
         },
       });
     });
 
     test('it will not remove a "signal" if that is signal is one of our signals', () => {
       const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { rule: { id: '123' } },
         },
-      } as unknown) as SignalDoc;
+      } as unknown as SignalDoc;
       const output = removeClashes(doc);
-      const timestamp = output._source['@timestamp'];
+      const timestamp = output._source[TIMESTAMP];
       const expected = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { rule: { id: '123' } },
-          '@timestamp': timestamp,
+          [TIMESTAMP]: timestamp,
         },
       };
       expect(output).toEqual(expected);

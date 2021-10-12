@@ -31,6 +31,7 @@ describe('BrandingSection', () => {
     imageType: 'logo' as 'logo',
     description: 'logo test',
     helpText: 'this is a logo',
+    buttonLoading: false,
     stageImage,
     saveImage,
     resetImage,

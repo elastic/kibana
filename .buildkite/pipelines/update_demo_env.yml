@@ -1,0 +1,8 @@
+steps:
+  - command: .buildkite/scripts/steps/demo_env/es_and_init.sh
+    label: Initialize Environment and Deploy ES
+
+  - command: .buildkite/scripts/steps/demo_env/kibana.sh
+    label: Build and Deploy Kibana
+    agents:
+      queue: c2-8

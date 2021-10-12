@@ -8,7 +8,6 @@
 import React, { createContext } from 'react';
 import { Annotation } from '../../../common/annotations';
 import { useFetcher } from '../../hooks/use_fetcher';
-import { useUrlParams } from '../url_params_context/use_url_params';
 
 export const AnnotationsContext = createContext({ annotations: [] } as {
   annotations: Annotation[];
@@ -19,16 +18,16 @@ const INITIAL_STATE = { annotations: [] };
 export function AnnotationsContextProvider({
   children,
   environment,
+  start,
+  end,
   serviceName,
 }: {
   children: React.ReactNode;
   environment: string;
+  start: string;
+  end: string;
   serviceName?: string;
 }) {
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
-
   const { data = INITIAL_STATE } = useFetcher(
     (callApmApi) => {
       if (start && end && serviceName) {

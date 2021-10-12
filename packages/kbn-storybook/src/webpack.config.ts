@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { externals } from '@kbn/ui-shared-deps';
+import { externals } from '@kbn/ui-shared-deps-src';
 import { stringifyRequest } from 'loader-utils';
 import { resolve } from 'path';
 import { Configuration, Stats } from 'webpack';
@@ -55,12 +55,13 @@ export default function ({ config: storybookConfig }: { config: Configuration })
             {
               loader: 'sass-loader',
               options: {
-                prependData(loaderContext: any) {
+                additionalData(content: string, loaderContext: any) {
                   return `@import ${stringifyRequest(
                     loaderContext,
                     resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
-                  )};\n`;
+                  )};\n${content}`;
                 },
+                implementation: require('node-sass'),
                 sassOptions: {
                   includePaths: [resolve(REPO_ROOT, 'node_modules')],
                 },

@@ -10,4 +10,9 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/screenshot_mode'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/screenshot_mode',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/plugins/screenshot_mode/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };

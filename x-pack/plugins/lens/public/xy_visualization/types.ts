@@ -17,8 +17,8 @@ import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizonta
 import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
 import { LensIconChartLine } from '../assets/chart_line';
 
-import { VisualizationType } from '../types';
-import {
+import type { VisualizationType } from '../types';
+import type {
   SeriesType,
   ValueLabelConfig,
   LegendConfig,

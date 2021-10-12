@@ -15,16 +15,20 @@ type ReturnTypeGetTransformChangesIfTheyExist = ReturnType<typeof getTransformCh
 describe('get_transform_changes_if_they_exist', () => {
   beforeEach(() => {
     // Adds extra switch to suppress deprecation warnings that moment does not expose in TypeScript
-    (moment as typeof moment & {
-      suppressDeprecationWarnings: boolean;
-    }).suppressDeprecationWarnings = true;
+    (
+      moment as typeof moment & {
+        suppressDeprecationWarnings: boolean;
+      }
+    ).suppressDeprecationWarnings = true;
   });
 
   afterEach(() => {
     // Adds extra switch to suppress deprecation warnings that moment does not expose in TypeScript
-    (moment as typeof moment & {
-      suppressDeprecationWarnings: boolean;
-    }).suppressDeprecationWarnings = false;
+    (
+      moment as typeof moment & {
+        suppressDeprecationWarnings: boolean;
+      }
+    ).suppressDeprecationWarnings = false;
   });
 
   describe('transformSettings enabled conditional logic', () => {

@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/109904
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
 import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
@@ -27,7 +30,7 @@ export const exporters = {
  * Field Formats:
  */
 
-export { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../common';
+export { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
 
 /*
  * Index patterns:
@@ -38,7 +41,8 @@ export {
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
   getCapabilitiesForRollupIndices,
-} from './index_patterns';
+  IndexPatternsServiceStart,
+} from './data_views';
 
 export {
   IndexPatternField,
@@ -50,6 +54,7 @@ export {
   IndexPattern,
   IndexPatternsService,
   IndexPatternsService as IndexPatternsCommonService,
+  DataView,
 } from '../common';
 
 /**

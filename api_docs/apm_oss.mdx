@@ -1,7 +1,7 @@
 ---
 id: kibApmOssPluginApi
-slug: /kibana-dev-docs/apmOssPluginApi
-title: apmOss
+slug: /kibana-dev-docs/api/apmOss
+title: "apmOss"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the apmOss plugin
 date: 2020-11-16
@@ -12,13 +12,21 @@ import apmOssObj from './apm_oss.json';
 
 
 
-Contact APM UI for questions regarding this plugin.
+Contact [APM UI](https://github.com/orgs/elastic/teams/apm-ui) for questions regarding this plugin.
 
 **Code health stats**
 
 | Public API count  | Any count | Items lacking comments | Missing exports | 
 |-------------------|-----------|------------------------|-----------------|
-| 4 | 0 | 4 | 0 |
+| 6 | 0 | 6 | 0 |
+
+## Client
+
+### Setup
+<DocDefinitionList data={[apmOssObj.client.setup]}/>
+
+### Start
+<DocDefinitionList data={[apmOssObj.client.start]}/>
 
 ## Server
 

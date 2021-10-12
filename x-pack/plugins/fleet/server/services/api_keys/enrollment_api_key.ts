@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
-import { esKuery } from '../../../../../../src/plugins/data/server';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+
 import type { ESSearchResponse as SearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { IngestManagerError } from '../../errors';
@@ -21,7 +22,8 @@ import { escapeSearchQueryPhrase } from '../saved_object';
 
 import { invalidateAPIKeys } from './security';
 
-const uuidRegex = /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
+const uuidRegex =
+  /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
 
 export async function listEnrollmentApiKeys(
   esClient: ElasticsearchClient,
@@ -29,13 +31,12 @@ export async function listEnrollmentApiKeys(
     page?: number;
     perPage?: number;
     kuery?: string;
-    query?: ReturnType<typeof esKuery['toElasticsearchQuery']>;
+    query?: ReturnType<typeof toElasticsearchQuery>;
     showInactive?: boolean;
   }
 ): Promise<{ items: EnrollmentAPIKey[]; total: any; page: any; perPage: any }> {
   const { page = 1, perPage = 20, kuery } = options;
-  const query =
-    options.query ?? (kuery && esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kuery)));
+  const query = options.query ?? (kuery && toElasticsearchQuery(fromKueryExpression(kuery)));
 
   const res = await esClient.search<SearchResponse<FleetServerEnrollmentAPIKey, {}>>({
     index: ENROLLMENT_API_KEYS_INDEX,

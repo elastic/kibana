@@ -200,6 +200,7 @@ const providersConfigSchema = schema.object(
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
+  showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
   loginHelp: schema.maybe(schema.string()),
   cookieName: schema.string({ defaultValue: 'sid' }),
   encryptionKey: schema.conditional(
@@ -228,6 +229,11 @@ export const ConfigSchema = schema.object({
   sameSiteCookies: schema.maybe(
     schema.oneOf([schema.literal('Strict'), schema.literal('Lax'), schema.literal('None')])
   ),
+  public: schema.object({
+    protocol: schema.maybe(schema.oneOf([schema.literal('http'), schema.literal('https')])),
+    hostname: schema.maybe(schema.string({ hostname: true })),
+    port: schema.maybe(schema.number({ min: 0, max: 65535 })),
+  }),
   authc: schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
@@ -256,14 +262,14 @@ export const ConfigSchema = schema.object({
     saml: providerOptionsSchema(
       'saml',
       schema.object({
-        realm: schema.string(),
+        realm: schema.maybe(schema.string()),
         maxRedirectURLSize: schema.maybe(schema.byteSize()),
       })
     ),
     http: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       autoSchemesEnabled: schema.boolean({ defaultValue: true }),
-      schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
+      schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey', 'bearer'] }),
     }),
   }),
   audit: schema.object(
@@ -324,20 +330,22 @@ export function createConfig(
   }
 
   const isUsingLegacyProvidersFormat = Array.isArray(config.authc.providers);
-  const providers = (isUsingLegacyProvidersFormat
-    ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
-        (legacyProviders, providerType, order) => {
-          legacyProviders[providerType] = {
-            [providerType]:
-              providerType === 'saml' || providerType === 'oidc'
-                ? { enabled: true, showInSelector: true, order, ...config.authc[providerType] }
-                : { enabled: true, showInSelector: true, order },
-          };
-          return legacyProviders;
-        },
-        {} as Record<string, unknown>
-      )
-    : config.authc.providers) as ProvidersConfigType;
+  const providers = (
+    isUsingLegacyProvidersFormat
+      ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
+          (legacyProviders, providerType, order) => {
+            legacyProviders[providerType] = {
+              [providerType]:
+                providerType === 'saml' || providerType === 'oidc'
+                  ? { enabled: true, showInSelector: true, order, ...config.authc[providerType] }
+                  : { enabled: true, showInSelector: true, order },
+            };
+            return legacyProviders;
+          },
+          {} as Record<string, unknown>
+        )
+      : config.authc.providers
+  ) as ProvidersConfigType;
 
   // Remove disabled providers and sort the rest.
   const sortedProviders: Array<{
@@ -391,11 +399,18 @@ export function createConfig(
 function getSessionConfig(session: RawConfigType['session'], providers: ProvidersConfigType) {
   return {
     cleanupInterval: session.cleanupInterval,
-    getExpirationTimeouts({ type, name }: AuthenticationProvider) {
+    getExpirationTimeouts(provider: AuthenticationProvider | undefined) {
       // Both idle timeout and lifespan from the provider specific session config can have three
       // possible types of values: `Duration`, `null` and `undefined`. The `undefined` type means that
       // provider doesn't override session config and we should fall back to the global one instead.
-      const providerSessionConfig = providers[type as keyof ProvidersConfigType]?.[name]?.session;
+      // Note: using an `undefined` provider argument returns the global timeouts.
+      let providerSessionConfig:
+        | { idleTimeout?: Duration | null; lifespan?: Duration | null }
+        | undefined;
+      if (provider) {
+        const { type, name } = provider;
+        providerSessionConfig = providers[type as keyof ProvidersConfigType]?.[name]?.session;
+      }
       const [idleTimeout, lifespan] = [
         [session.idleTimeout, providerSessionConfig?.idleTimeout],
         [session.lifespan, providerSessionConfig?.lifespan],

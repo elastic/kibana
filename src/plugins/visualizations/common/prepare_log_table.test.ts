@@ -19,13 +19,14 @@ describe('prepareLogTable', () => {
           meta: {},
         },
         {
+          id: 'd3',
           meta: {},
         },
       ],
     };
     const logTable = prepareLogTable(datatable as any, [
       [[{ accessor: 0 } as any], 'dimension1'],
-      [[{ accessor: 2 } as any], 'dimension3'],
+      [[{ accessor: { id: 'd3' } } as any], 'dimension3'],
       [[{ accessor: 1 } as any], 'dimension2'],
     ]);
     expect(logTable).toMatchInlineSnapshot(
@@ -42,6 +43,7 @@ describe('prepareLogTable', () => {
             },
           },
           {
+            id: 'd3',
             meta: {
               dimensionName: 'dimension3',
             },
@@ -62,6 +64,7 @@ describe('prepareLogTable', () => {
             },
           },
           Object {
+            "id": "d3",
             "meta": Object {
               "dimensionName": "dimension3",
             },

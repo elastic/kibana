@@ -202,11 +202,11 @@ const FormattedFieldValueComponent: React.FC<{
             </EuiFlexGroup>
           }
         >
-          <>{value}</>
+          <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
         </EuiToolTip>
       </TruncatableText>
     ) : (
-      <>{value}</>
+      <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
     );
   } else {
     const contentValue = getOrEmptyTagFromValue(value);

@@ -53,7 +53,7 @@ const DEFAULT_SORT_OPTIONS: SortOption[] = [
 export const SearchExperience: React.FC = () => {
   const { engine } = useValues(EngineLogic);
   const { http } = useValues(HttpLogic);
-  const endpointBase = http.basePath.prepend('/api/app_search/search-ui');
+  const endpointBase = http.basePath.prepend('/internal/app_search/search-ui');
 
   const [showCustomizationModal, setShowCustomizationModal] = useState(false);
   const openCustomizationModal = () => setShowCustomizationModal(true);

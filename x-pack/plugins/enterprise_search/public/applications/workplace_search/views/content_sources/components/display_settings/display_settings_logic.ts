@@ -11,7 +11,7 @@ import { cloneDeep, isEqual, differenceBy } from 'lodash';
 import { DropResult } from '@elastic/eui';
 
 import {
-  setSuccessMessage,
+  flashSuccessToast,
   clearFlashMessages,
   flashAPIErrors,
 } from '../../../../../shared/flash_messages';
@@ -377,8 +377,8 @@ export const DisplaySettingsLogic = kea<
       } = SourceLogic.values;
 
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/display_settings/config`
-        : `/api/workplace_search/account/sources/${sourceId}/display_settings/config`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/display_settings/config`
+        : `/internal/workplace_search/account/sources/${sourceId}/display_settings/config`;
 
       try {
         const response = await HttpLogic.values.http.get(route);
@@ -405,7 +405,7 @@ export const DisplaySettingsLogic = kea<
       }
     },
     setServerResponseData: () => {
-      setSuccessMessage(SUCCESS_MESSAGE);
+      flashSuccessToast(SUCCESS_MESSAGE);
     },
     toggleFieldEditorModal: () => {
       clearFlashMessages();

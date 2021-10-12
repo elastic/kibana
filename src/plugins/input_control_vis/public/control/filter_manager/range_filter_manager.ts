@@ -8,13 +8,8 @@
 
 import _ from 'lodash';
 
+import { RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
-import {
-  esFilters,
-  RangeFilter,
-  RangeFilterParams,
-  IndexPatternField,
-} from '../../../../data/public';
 
 interface SliderValue {
   min?: string | number;
@@ -54,11 +49,10 @@ export class RangeFilterManager extends FilterManager {
    * @param {object} react-input-range value - POJO with `min` and `max` properties
    * @return {object} range filter
    */
-  createFilter(value: SliderValue): RangeFilter {
+  createFilter(value: SliderValue): ReturnType<typeof buildRangeFilter> {
     const indexPattern = this.getIndexPattern()!;
-    const newFilter = esFilters.buildRangeFilter(
-      // TODO: Fix type to be required
-      indexPattern.fields.getByName(this.fieldName) as IndexPatternField,
+    const newFilter = buildRangeFilter(
+      indexPattern.fields.getByName(this.fieldName)!,
       toRange(value),
       indexPattern
     );
@@ -74,10 +68,10 @@ export class RangeFilterManager extends FilterManager {
     }
 
     let range: RangeFilterParams;
-    if (_.has(kbnFilters[0], 'script')) {
-      range = _.get(kbnFilters[0], 'script.script.params');
+    if (_.has(kbnFilters[0], 'query.script')) {
+      range = _.get(kbnFilters[0], 'query.script.script.params');
     } else {
-      range = _.get(kbnFilters[0], ['range', this.fieldName]);
+      range = _.get(kbnFilters[0], ['query', 'range', this.fieldName]);
     }
 
     if (!range) {

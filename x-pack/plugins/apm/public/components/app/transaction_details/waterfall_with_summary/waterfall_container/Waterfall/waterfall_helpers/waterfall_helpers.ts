@@ -6,13 +6,13 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { first, flatten, groupBy, isEmpty, sortBy, sum, uniq } from 'lodash';
+import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { APIReturnType } from '../../../../../../../services/rest/createCallApmApi';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 
-type TraceAPIResponse = APIReturnType<'GET /api/apm/traces/{traceId}'>;
+type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 
 interface IWaterfallGroup {
   [key: string]: IWaterfallSpanOrTransaction[];
@@ -35,10 +35,10 @@ export interface IWaterfall {
   duration: number;
   items: IWaterfallItem[];
   childrenByParentId: Record<string | number, IWaterfallSpanOrTransaction[]>;
-  errorsPerTransaction: TraceAPIResponse['errorsPerTransaction'];
-  errorsCount: number;
+  getErrorCount: (parentId: string) => number;
   legends: IWaterfallLegend[];
   errorItems: IWaterfallError[];
+  apiResponse: TraceAPIResponse;
 }
 
 interface IWaterfallSpanItemBase<TDocument, TDoctype>
@@ -80,7 +80,8 @@ export type IWaterfallSpanOrTransaction =
   | IWaterfallTransaction
   | IWaterfallSpan;
 
-export type IWaterfallItem = IWaterfallSpanOrTransaction | IWaterfallError;
+// export type IWaterfallItem = IWaterfallSpanOrTransaction | IWaterfallError;
+export type IWaterfallItem = IWaterfallSpanOrTransaction;
 
 export interface IWaterfallLegend {
   type: WaterfallLegendType;
@@ -264,7 +265,7 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
     0
   );
 
-const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
+const getWaterfallItems = (items: TraceAPIResponse['traceDocs']) =>
   items.map((item) => {
     const docType = item.processor.event;
     switch (docType) {
@@ -332,7 +333,7 @@ function isInEntryTransaction(
 }
 
 function getWaterfallErrors(
-  errorDocs: TraceAPIResponse['trace']['errorDocs'],
+  errorDocs: TraceAPIResponse['errorDocs'],
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ) {
@@ -358,24 +359,44 @@ function getWaterfallErrors(
   );
 }
 
+// map parent.id to the number of errors
+/*
+  { 'parentId': 2 }
+  */
+function getErrorCountByParentId(errorDocs: TraceAPIResponse['errorDocs']) {
+  return errorDocs.reduce<Record<string, number>>((acc, doc) => {
+    const parentId = doc.parent?.id;
+
+    if (!parentId) {
+      return acc;
+    }
+
+    acc[parentId] = (acc[parentId] ?? 0) + 1;
+
+    return acc;
+  }, {});
+}
+
 export function getWaterfall(
-  { trace, errorsPerTransaction }: TraceAPIResponse,
+  apiResponse: TraceAPIResponse,
   entryTransactionId?: Transaction['transaction']['id']
 ): IWaterfall {
-  if (isEmpty(trace.items) || !entryTransactionId) {
+  if (isEmpty(apiResponse.traceDocs) || !entryTransactionId) {
     return {
+      apiResponse,
       duration: 0,
       items: [],
-      errorsPerTransaction,
-      errorsCount: sum(Object.values(errorsPerTransaction)),
       legends: [],
       errorItems: [],
       childrenByParentId: {},
+      getErrorCount: () => 0,
     };
   }
 
+  const errorCountByParentId = getErrorCountByParentId(apiResponse.errorDocs);
+
   const waterfallItems: IWaterfallSpanOrTransaction[] = getWaterfallItems(
-    trace.items
+    apiResponse.traceDocs
   );
 
   const childrenByParentId = getChildrenGroupedByParentId(
@@ -392,7 +413,7 @@ export function getWaterfall(
     entryWaterfallTransaction
   );
   const errorItems = getWaterfallErrors(
-    trace.errorDocs,
+    apiResponse.errorDocs,
     items,
     entryWaterfallTransaction
   );
@@ -402,14 +423,14 @@ export function getWaterfall(
   const legends = getLegends(items);
 
   return {
+    apiResponse,
     entryWaterfallTransaction,
     rootTransaction,
     duration,
     items,
-    errorsPerTransaction,
-    errorsCount: errorItems.length,
     legends,
     errorItems,
     childrenByParentId: getChildrenGroupedByParentId(items),
+    getErrorCount: (parentId: string) => errorCountByParentId[parentId] ?? 0,
   };
 }

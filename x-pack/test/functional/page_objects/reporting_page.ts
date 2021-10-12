@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { format as formatUrl } from 'url';
-import supertestAsPromised from 'supertest-as-promised';
+import type SuperTest from 'supertest';
 
 import { FtrService } from '../ftr_provider_context';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../../plugins/reporting/common/constants';
@@ -52,7 +52,7 @@ export class ReportingPageObject extends FtrService {
     `);
   }
 
-  async getResponse(fullUrl: string): Promise<supertestAsPromised.Response> {
+  async getResponse(fullUrl: string): Promise<SuperTest.Response> {
     this.log.debug(`getResponse for ${fullUrl}`);
     const kibanaServerConfig = this.config.get('servers.kibana');
     const baseURL = formatUrl({
@@ -145,14 +145,18 @@ export class ReportingPageObject extends FtrService {
     return isToastPresent;
   }
 
-  async setTimepickerInDataRange() {
+  // set the time picker to a range matching 720 documents when using the
+  // reporting/ecommerce archive
+  async setTimepickerInEcommerceDataRange() {
     this.log.debug('Reporting:setTimepickerInDataRange');
-    const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
-    const toTime = 'Aug 23, 2019 @ 16:18:51.821';
+    const fromTime = 'Jun 20, 2019 @ 00:00:00.000';
+    const toTime = 'Jun 25, 2019 @ 00:00:00.000';
     await this.timePicker.setAbsoluteRange(fromTime, toTime);
   }
 
-  async setTimepickerInNoDataRange() {
+  // set the time picker to a range matching 0 documents when using the
+  // reporting/ecommerce archive
+  async setTimepickerInEcommerceNoDataRange() {
     this.log.debug('Reporting:setTimepickerInNoDataRange');
     const fromTime = 'Sep 19, 1999 @ 06:31:44.000';
     const toTime = 'Sep 23, 1999 @ 18:31:44.000';

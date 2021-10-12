@@ -40,20 +40,39 @@ export const PROJECTS = [
   createProject('x-pack/plugins/security_solution/cypress/tsconfig.json', {
     name: 'security_solution/cypress',
   }),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/shared/cypress/tsconfig.json',
+    { name: 'enterprise_search/shared/cypress' }
+  ),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/enterprise_search/cypress/tsconfig.json',
+    { name: 'enterprise_search/overview/cypress' }
+  ),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/app_search/cypress/tsconfig.json',
+    { name: 'enterprise_search/app_search/cypress' }
+  ),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/workplace_search/cypress/tsconfig.json',
+    { name: 'enterprise_search/workplace_search/cypress' }
+  ),
   createProject('x-pack/plugins/osquery/cypress/tsconfig.json', {
     name: 'osquery/cypress',
-  }),
-  createProject('x-pack/plugins/apm/e2e/tsconfig.json', {
-    name: 'apm/cypress',
-    disableTypeCheck: true,
   }),
   createProject('x-pack/plugins/apm/ftr_e2e/tsconfig.json', {
     name: 'apm/ftr_e2e',
     disableTypeCheck: true,
   }),
 
+  createProject('x-pack/plugins/uptime/e2e/tsconfig.json', {
+    name: 'uptime/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+
   ...findProjects('packages/*/tsconfig.json'),
   ...findProjects('src/plugins/*/tsconfig.json'),
+  ...findProjects('src/plugins/chart_expressions/*/tsconfig.json'),
+  ...findProjects('src/plugins/vis_types/*/tsconfig.json'),
   ...findProjects('x-pack/plugins/*/tsconfig.json'),
   ...findProjects('examples/*/tsconfig.json'),
   ...findProjects('x-pack/examples/*/tsconfig.json'),

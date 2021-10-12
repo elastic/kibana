@@ -19,7 +19,7 @@ interface ITLSFieldsContextProvider {
   defaultValues?: ITLSFields;
 }
 
-export const initialValues = {
+export const initialValues: ITLSFields = {
   [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
     value: '',
     isEnabled: false,

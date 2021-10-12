@@ -15,6 +15,38 @@ import { SavedObjectsErrorHelpers } from './errors';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
 
 /**
+ * Discriminated union (TypeScript approximation of an algebraic data type); this design pattern used for internal repository operations.
+ * @internal
+ */
+export type Either<L = unknown, R = L> = Left<L> | Right<R>;
+/**
+ * Left part of discriminated union ({@link Either}).
+ * @internal
+ */
+export interface Left<L> {
+  tag: 'Left';
+  value: L;
+}
+/**
+ * Right part of discriminated union ({@link Either}).
+ * @internal
+ */
+export interface Right<R> {
+  tag: 'Right';
+  value: R;
+}
+/**
+ * Type guard for left part of discriminated union ({@link Left}, {@link Either}).
+ * @internal
+ */
+export const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => either.tag === 'Left';
+/**
+ * Type guard for right part of discriminated union ({@link Right}, {@link Either}).
+ * @internal
+ */
+export const isRight = <L, R>(either: Either<L, R>): either is Right<R> => either.tag === 'Right';
+
+/**
  * Checks the raw response of a bulk operation and returns an error if necessary.
  *
  * @param type
@@ -121,6 +153,8 @@ export function getSavedObjectFromSource<T>(
  * @param registry
  * @param raw
  * @param namespace
+ *
+ * @internal
  */
 export function rawDocExistsInNamespace(
   registry: ISavedObjectTypeRegistry,
@@ -140,4 +174,71 @@ export function rawDocExistsInNamespace(
     namespaces?.includes(SavedObjectsUtils.namespaceIdToString(namespace)) ||
     namespaces?.includes(ALL_NAMESPACES_STRING);
   return existsInNamespace ?? false;
+}
+
+/**
+ * Check to ensure that a raw document exists in at least one of the given namespaces. If the document is not a multi-namespace type, then
+ * this returns `true` as we rely on the guarantees of the document ID format. If the document is a multi-namespace type, this checks to
+ * ensure that the document's `namespaces` value includes the string representation of at least one of the given namespaces.
+ *
+ * WARNING: This should only be used for documents that were retrieved from Elasticsearch. Otherwise, the guarantees of the document ID
+ * format mentioned above do not apply.
+ *
+ * @param registry
+ * @param raw
+ * @param namespaces
+ *
+ * @internal
+ */
+export function rawDocExistsInNamespaces(
+  registry: ISavedObjectTypeRegistry,
+  raw: SavedObjectsRawDoc,
+  namespaces: string[]
+) {
+  const rawDocType = raw._source.type;
+
+  // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
+  // of the document ID format and don't need to check this
+  if (!registry.isMultiNamespace(rawDocType)) {
+    return true;
+  }
+
+  const namespacesToCheck = new Set(namespaces);
+  const existingNamespaces = raw._source.namespaces ?? [];
+
+  if (namespacesToCheck.size === 0 || existingNamespaces.length === 0) {
+    return false;
+  }
+  if (namespacesToCheck.has(ALL_NAMESPACES_STRING)) {
+    return true;
+  }
+
+  return existingNamespaces.some((x) => x === ALL_NAMESPACES_STRING || namespacesToCheck.has(x));
+}
+
+/**
+ * Ensure that a namespace is always in its namespace ID representation.
+ * This allows `'default'` to be used interchangeably with `undefined`.
+ *
+ * @param namespace
+ *
+ * @internal
+ */
+export function normalizeNamespace(namespace?: string) {
+  if (namespace === ALL_NAMESPACES_STRING) {
+    throw SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"');
+  } else if (namespace === undefined) {
+    return namespace;
+  } else {
+    return SavedObjectsUtils.namespaceStringToId(namespace);
+  }
+}
+
+/**
+ * Returns the current time. For use in Elasticsearch operations.
+ *
+ * @internal
+ */
+export function getCurrentTime() {
+  return new Date(Date.now()).toISOString();
 }

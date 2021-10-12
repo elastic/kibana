@@ -4,23 +4,4 @@ APM uses [FTR](../../../../packages/kbn-test/README.md) (functional test runner)
 
 ## Running tests
 
-**Run all tests**
-
-```sh
-//kibana directory
-node x-pack/plugins/apm/scripts/ftr_e2e/cypress_run.js
-```
-
-**Run specific test**
-
-```sh
-//kibana directory
-node x-pack/plugins/apm/scripts/ftr_e2e/cypress_run.js --spec ./cypress/integration/read_only_user/home.spec.ts
-```
-
-## Opening tests
-
-```sh
-//kibana directory
-node x-pack/plugins/apm/scripts/ftr_e2e/cypress_open.js
-```
+Go to [tests documentation](../scripts/test#e2e-tests-cypress/README.md)

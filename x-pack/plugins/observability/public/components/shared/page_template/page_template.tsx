@@ -31,7 +31,10 @@ export type WrappedPageTemplateProps = Pick<
   | 'restrictWidth'
   | 'template'
   | 'isEmptyState'
->;
+  | 'noDataConfig'
+> & {
+  showSolutionNav?: boolean;
+};
 
 export interface ObservabilityPageTemplateDependencies {
   currentAppId$: Observable<string | undefined>;
@@ -49,6 +52,7 @@ export function ObservabilityPageTemplate({
   getUrlForApp,
   navigateToApp,
   navigationSections$,
+  showSolutionNav = true,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
@@ -75,12 +79,8 @@ export function ObservabilityPageTemplate({
           const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           return {
             id: `${sectionIndex}.${entryIndex}`,
-            name: entry.sideBadgeLabel ? (
-              <NavNameWithBadge
-                label={entry.label}
-                badgeLabel={entry.sideBadgeLabel}
-                localstorageId={badgeLocalStorageId}
-              />
+            name: entry.isNewFeature ? (
+              <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
             ) : (
               entry.label
             ),
@@ -91,8 +91,8 @@ export function ObservabilityPageTemplate({
                 entry.onClick(event);
               }
 
-              // When side badge is defined hides it when the item is clicked
-              if (entry.sideBadgeLabel) {
+              // Hides NEW badge when the item is clicked
+              if (entry.isNewFeature) {
                 hideBadge(badgeLocalStorageId);
               }
 
@@ -122,11 +122,15 @@ export function ObservabilityPageTemplate({
     <KibanaPageTemplate
       restrictWidth={false}
       {...pageTemplateProps}
-      solutionNav={{
-        icon: 'logoObservability',
-        items: sideNavItems,
-        name: sideNavTitle,
-      }}
+      solutionNav={
+        showSolutionNav
+          ? {
+              icon: 'logoObservability',
+              items: sideNavItems,
+              name: sideNavTitle,
+            }
+          : undefined
+      }
     >
       {children}
     </KibanaPageTemplate>

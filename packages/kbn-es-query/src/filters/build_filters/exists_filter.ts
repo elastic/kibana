@@ -8,13 +8,15 @@
 
 import { has } from 'lodash';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import type { Filter, FilterMeta } from './types';
 
 /** @public */
 export type ExistsFilter = Filter & {
   meta: FilterMeta;
-  exists?: {
-    field: string;
+  query: {
+    exists?: {
+      field: string;
+    };
   };
 };
 
@@ -24,14 +26,14 @@ export type ExistsFilter = Filter & {
  *
  * @public
  */
-export const isExistsFilter = (filter: FieldFilter): filter is ExistsFilter =>
-  has(filter, 'exists');
+export const isExistsFilter = (filter: Filter): filter is ExistsFilter =>
+  has(filter, 'query.exists');
 
 /**
  * @internal
  */
 export const getExistsFilterField = (filter: ExistsFilter) => {
-  return filter.exists && filter.exists.field;
+  return filter.query.exists && filter.query.exists.field;
 };
 
 /**
@@ -47,8 +49,10 @@ export const buildExistsFilter = (field: IndexPatternFieldBase, indexPattern: In
     meta: {
       index: indexPattern.id,
     },
-    exists: {
-      field: field.name,
+    query: {
+      exists: {
+        field: field.name,
+      },
     },
   } as ExistsFilter;
 };

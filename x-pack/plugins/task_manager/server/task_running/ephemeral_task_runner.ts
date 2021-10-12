@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
 import { identity } from 'lodash';
-import { Logger } from '../../../../../src/core/server';
+import { Logger, ExecutionContextStart } from '../../../../../src/core/server';
 
 import { Middleware } from '../lib/middleware';
 import { asOk, asErr, eitherAsync, Result } from '../lib/result_type';
@@ -54,6 +54,7 @@ type Opts = {
   definitions: TaskTypeDictionary;
   instance: EphemeralTaskInstance;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
+  executionContext: ExecutionContextStart;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 // ephemeral tasks cannot be rescheduled or scheduled to run again in the future
@@ -74,6 +75,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
+  private readonly executionContext: ExecutionContextStart;
 
   /**
    * Creates an instance of EphemeralTaskManagerRunner.
@@ -91,6 +93,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     beforeRun,
     beforeMarkRunning,
     onTaskEvent = identity,
+    executionContext,
   }: Opts) {
     this.instance = asPending(asConcreteInstance(sanitizeInstance(instance)));
     this.definitions = definitions;
@@ -98,6 +101,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     this.beforeRun = beforeRun;
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
+    this.executionContext = executionContext;
   }
 
   /**
@@ -193,8 +197,14 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     const stopTaskTimer = startTaskTimer();
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
-      const result = await withSpan({ name: 'ephemeral run', type: 'task manager' }, () =>
-        this.task!.run()
+      const ctx = {
+        type: 'task manager',
+        name: `run ephemeral ${this.instance.task.taskType}`,
+        id: this.instance.task.id,
+        description: 'run ephemeral task',
+      };
+      const result = await this.executionContext.withContext(ctx, () =>
+        withSpan({ name: 'ephemeral run', type: 'task manager' }, () => this.task!.run())
       );
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan(

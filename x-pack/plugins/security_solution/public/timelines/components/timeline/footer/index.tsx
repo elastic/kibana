@@ -90,7 +90,7 @@ const LoadingPanelContainer = styled.div`
 
 LoadingPanelContainer.displayName = 'LoadingPanelContainer';
 
-const PopoverRowItems = styled((EuiPopover as unknown) as FC)<
+const PopoverRowItems = styled(EuiPopover as unknown as FC)<
   EuiPopoverProps & {
     className?: string;
     id?: string;
@@ -132,9 +132,10 @@ export const EventsCountComponent = ({
   serverSideEventCount: number;
   footerText: string | React.ReactNode;
 }) => {
-  const totalCount = useMemo(() => (serverSideEventCount > 0 ? serverSideEventCount : 0), [
-    serverSideEventCount,
-  ]);
+  const totalCount = useMemo(
+    () => (serverSideEventCount > 0 ? serverSideEventCount : 0),
+    [serverSideEventCount]
+  );
   return (
     <h5>
       <PopoverRowItems
@@ -284,10 +285,10 @@ export const FooterComponent = ({
     [onChangePage]
   );
 
-  const onButtonClick = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [
-    isPopoverOpen,
-    setIsPopoverOpen,
-  ]);
+  const onButtonClick = useCallback(
+    () => setIsPopoverOpen(!isPopoverOpen),
+    [isPopoverOpen, setIsPopoverOpen]
+  );
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
@@ -316,10 +317,10 @@ export const FooterComponent = ({
     [closePopover, itemsPerPage, itemsPerPageOptions, onChangeItemsPerPage]
   );
 
-  const totalPages = useMemo(() => Math.ceil(totalCount / itemsPerPage), [
-    itemsPerPage,
-    totalCount,
-  ]);
+  const totalPages = useMemo(
+    () => Math.ceil(totalCount / itemsPerPage),
+    [itemsPerPage, totalCount]
+  );
 
   useEffect(() => {
     if (paginationLoading && !isLoading) {

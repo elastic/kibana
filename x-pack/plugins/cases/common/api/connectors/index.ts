@@ -84,14 +84,22 @@ export const ConnectorTypeFieldsRt = rt.union([
   ConnectorSwimlaneTypeFieldsRt,
 ]);
 
-export const CaseConnectorRt = rt.intersection([
-  rt.type({
-    id: rt.string,
-    name: rt.string,
-  }),
+/**
+ * This type represents the connector's format when it is encoded within a user action.
+ */
+export const CaseUserActionConnectorRt = rt.intersection([
+  rt.type({ name: rt.string }),
   ConnectorTypeFieldsRt,
 ]);
 
+export const CaseConnectorRt = rt.intersection([
+  rt.type({
+    id: rt.string,
+  }),
+  CaseUserActionConnectorRt,
+]);
+
+export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
 export type ConnectorJiraTypeFields = rt.TypeOf<typeof ConnectorJiraTypeFieldsRt>;

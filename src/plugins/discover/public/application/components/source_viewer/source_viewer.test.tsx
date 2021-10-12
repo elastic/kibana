@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { mountWithIntl } from '@kbn/test/jest';
 import { SourceViewer } from './source_viewer';
-import * as hooks from '../doc/use_es_doc_search';
+import * as hooks from '../../services/use_es_doc_search';
 import * as useUiSettingHook from 'src/plugins/kibana_react/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../json_code_editor/json_code_editor_common';
@@ -18,15 +19,15 @@ jest.mock('../../../kibana_services', () => ({
   getServices: jest.fn(),
 }));
 
-import { getServices, IndexPattern } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
 
 const mockIndexPattern = {
   getComputedFields: () => [],
 } as never;
 const getMock = jest.fn(() => Promise.resolve(mockIndexPattern));
-const mockIndexPatternService = ({
+const mockIndexPatternService = {
   get: getMock,
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 (getServices as jest.Mock).mockImplementation(() => ({
   uiSettings: {

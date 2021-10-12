@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
-import '../../../__mocks__/shallow_useeffect.mock';
+import { setMockValues } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -29,7 +28,7 @@ import {
   CrawlerPolicies,
   CrawlerRules,
   CrawlerStatus,
-  CrawlRequestFromServer,
+  CrawlEventFromServer,
 } from './types';
 
 const domains: CrawlerDomainFromServer[] = [
@@ -47,6 +46,9 @@ const domains: CrawlerDomainFromServer[] = [
       rule: CrawlerRules.regex,
       pattern: '.*',
     },
+    deduplication_enabled: false,
+    deduplication_fields: ['title'],
+    available_deduplication_fields: ['title', 'description'],
   },
   {
     id: 'y',
@@ -57,12 +59,16 @@ const domains: CrawlerDomainFromServer[] = [
     sitemaps: [],
     entry_points: [],
     crawl_rules: [],
+    deduplication_enabled: false,
+    deduplication_fields: ['title'],
+    available_deduplication_fields: ['title', 'description'],
   },
 ];
 
-const crawlRequests: CrawlRequestFromServer[] = [
+const events: CrawlEventFromServer[] = [
   {
     id: 'a',
+    stage: 'crawl',
     status: CrawlerStatus.Canceled,
     created_at: 'Mon, 31 Aug 2020 11:00:00 +0000',
     began_at: 'Mon, 31 Aug 2020 12:00:00 +0000',
@@ -70,6 +76,7 @@ const crawlRequests: CrawlRequestFromServer[] = [
   },
   {
     id: 'b',
+    stage: 'crawl',
     status: CrawlerStatus.Success,
     created_at: 'Mon, 31 Aug 2020 14:00:00 +0000',
     began_at: 'Mon, 31 Aug 2020 15:00:00 +0000',
@@ -78,52 +85,43 @@ const crawlRequests: CrawlRequestFromServer[] = [
 ];
 
 describe('CrawlerOverview', () => {
-  const mockActions = {
-    fetchCrawlerData: jest.fn(),
-    getLatestCrawlRequests: jest.fn(),
-  };
-
   const mockValues = {
     dataLoading: false,
     domains,
-    crawlRequests,
+    events,
+    mostRecentCrawlRequest: null,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockActions(mockActions);
-  });
-
-  it('calls fetchCrawlerData and starts polling on page load', () => {
-    setMockValues(mockValues);
-
-    shallow(<CrawlerOverview />);
-
-    expect(mockActions.fetchCrawlerData).toHaveBeenCalledTimes(1);
-    expect(mockActions.getLatestCrawlRequests).toHaveBeenCalledWith(false);
   });
 
   it('contains a crawler status banner', () => {
     setMockValues(mockValues);
+
     const wrapper = shallow(<CrawlerOverview />);
 
     expect(wrapper.find(CrawlerStatusBanner)).toHaveLength(1);
   });
 
   it('contains a crawler status indicator', () => {
+    setMockValues(mockValues);
+
     const wrapper = shallow(<CrawlerOverview />);
 
     expect(getPageHeaderActions(wrapper).find(CrawlerStatusIndicator)).toHaveLength(1);
   });
 
   it('contains a popover to manage crawls', () => {
+    setMockValues(mockValues);
+
     const wrapper = shallow(<CrawlerOverview />);
 
     expect(getPageHeaderActions(wrapper).find(ManageCrawlsPopover)).toHaveLength(1);
   });
 
   it('hides the domain and crawl request tables when there are no domains, and no crawl requests', () => {
-    setMockValues({ ...mockValues, domains: [], crawlRequests: [] });
+    setMockValues({ ...mockValues, domains: [], events: [] });
 
     const wrapper = shallow(<CrawlerOverview />);
 
@@ -135,7 +133,7 @@ describe('CrawlerOverview', () => {
   });
 
   it('shows the domain and the crawl request tables when there are domains, but no crawl requests', () => {
-    setMockValues({ ...mockValues, crawlRequests: [] });
+    setMockValues({ ...mockValues, events: [] });
 
     const wrapper = shallow(<CrawlerOverview />);
 

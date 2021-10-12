@@ -6,6 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { SharePluginSetup } from 'src/plugins/share/public';
 import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
 import { ReportingStart } from '../../reporting/public';
 import {
@@ -18,9 +19,11 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { SpacesPluginStart } from '../../spaces/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { getSessionStorage } from './lib/storage';
-import { SESSIONSTORAGE_LASTPATH } from '../common/lib/constants';
+import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
+import { CanvasAppLocatorDefinition } from '../common/locator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -43,6 +46,7 @@ export { CoreStart, CoreSetup };
 // This interface will be built out as we require other plugins for setup
 export interface CanvasSetupDeps {
   data: DataPublicPluginSetup;
+  share: SharePluginSetup;
   expressions: ExpressionsSetup;
   home?: HomePublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -59,6 +63,7 @@ export interface CanvasStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -73,7 +78,8 @@ export type CanvasStart = void;
 
 /** @internal */
 export class CanvasPlugin
-  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
+  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps>
+{
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private initContext: PluginInitializerContext;
 
@@ -97,7 +103,7 @@ export class CanvasPlugin
 
     coreSetup.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,
-      id: 'canvas',
+      id: CANVAS_APP,
       title: 'Canvas',
       euiIconType: 'logoKibana',
       order: 3000,
@@ -105,6 +111,7 @@ export class CanvasPlugin
       mount: async (params: AppMountParameters) => {
         const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin');
         const srcPlugin = new CanvasSrcPlugin();
+
         srcPlugin.setup(coreSetup, { canvas: canvasApi });
         setupExpressions({ coreSetup, setupPlugins });
 
@@ -127,8 +134,7 @@ export class CanvasPlugin
           setupPlugins,
           startPlugins,
           registries,
-          this.appUpdater,
-          pluginServices
+          this.appUpdater
         );
 
         const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });
@@ -142,6 +148,10 @@ export class CanvasPlugin
 
     if (setupPlugins.home) {
       setupPlugins.home.featureCatalogue.register(featureCatalogueEntry);
+    }
+
+    if (setupPlugins.share) {
+      setupPlugins.share.url.locators.create(new CanvasAppLocatorDefinition());
     }
 
     canvasApi.addArgumentUIs(async () => {

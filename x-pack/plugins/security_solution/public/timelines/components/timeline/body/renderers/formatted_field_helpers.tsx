@@ -52,7 +52,11 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const ruleId = linkValue;
   const { search } = useFormatUrl(SecurityPageName.rules);
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
-  const content = truncate ? <TruncatableText>{value}</TruncatableText> : value;
+  const content = truncate ? (
+    <TruncatableText dataTestSubj={`formatted-field-${fieldName}`}>{value}</TruncatableText>
+  ) : (
+    value
+  );
 
   const goToRuleDetails = useCallback(
     (ev) => {

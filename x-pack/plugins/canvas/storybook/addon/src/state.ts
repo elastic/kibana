@@ -32,22 +32,21 @@ export const getInitialState: () => State = () => getState();
 export const getMiddleware = () => applyMiddleware(thunkMiddleware);
 export const getReducer = () => getRootReducer(getInitialState());
 
-export const patchDispatch: (store: Store, dispatch: Dispatch) => Dispatch = (store, dispatch) => (
-  action
-) => {
-  const channel = addons.getChannel();
+export const patchDispatch: (store: Store, dispatch: Dispatch) => Dispatch =
+  (store, dispatch) => (action) => {
+    const channel = addons.getChannel();
 
-  const previousState = store.getState();
-  const returnValue = dispatch(action);
-  const newState = store.getState();
-  const change = diff(previousState, newState) || {};
+    const previousState = store.getState();
+    const returnValue = dispatch(action);
+    const newState = store.getState();
+    const change = diff(previousState, newState) || {};
 
-  channel.emit(EVENTS.ACTION, {
-    previousState,
-    newState,
-    change,
-    action: isFunction(action) ? { type: '(thunk)' } : action,
-  });
+    channel.emit(EVENTS.ACTION, {
+      previousState,
+      newState,
+      change,
+      action: isFunction(action) ? { type: '(thunk)' } : action,
+    });
 
-  return returnValue;
-};
+    return returnValue;
+  };

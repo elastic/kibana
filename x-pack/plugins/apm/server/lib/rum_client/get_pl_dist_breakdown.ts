@@ -8,7 +8,7 @@
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   USER_AGENT_DEVICE,
@@ -43,12 +43,16 @@ export const getPageLoadDistBreakdown = async ({
   maxPercentile,
   breakdown,
   urlQuery,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   minPercentile: number;
   maxPercentile: number;
   breakdown: string;
   urlQuery?: string;
+  start: number;
+  end: number;
 }) => {
   // convert secs to micros
   const stepValues = getPLDChartSteps({
@@ -59,6 +63,8 @@ export const getPageLoadDistBreakdown = async ({
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
+    start,
+    end,
   });
 
   const params = mergeProjection(projection, {

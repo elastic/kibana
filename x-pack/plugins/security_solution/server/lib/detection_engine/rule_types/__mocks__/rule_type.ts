@@ -10,15 +10,20 @@ import { v4 } from 'uuid';
 
 import { Logger, SavedObject } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { mlPluginServerMock } from '../../../../../../ml/server/mocks';
 
 import type { IRuleDataClient } from '../../../../../../rule_registry/server';
+import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
+import { eventLogServiceMock } from '../../../../../../event_log/server/mocks';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
 import { listMock } from '../../../../../../lists/server/mocks';
-import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
 import { RuleParams } from '../../schemas/rule_schemas';
+// this is only used in tests
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createDefaultAlertExecutorOptions } from '../../../../../../rule_registry/server/utils/rule_executor_test_utils';
 
 export const createRuleTypeMocks = (
   ruleType: string = 'query',
@@ -29,12 +34,12 @@ export const createRuleTypeMocks = (
 
   const mockedConfig$ = of({} as ConfigType);
 
-  const loggerMock = ({
+  const loggerMock = {
     debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown) as Logger;
+  } as unknown as Logger;
 
   const alerting = {
     registerType: ({ executor }) => {
@@ -51,6 +56,7 @@ export const createRuleTypeMocks = (
     references: [],
     attributes: {
       actions: [],
+      alertTypeId: 'siem.signals',
       enabled: true,
       name: 'mock rule',
       tags: [],
@@ -81,26 +87,22 @@ export const createRuleTypeMocks = (
       config$: mockedConfig$,
       lists: listMock.createSetup(),
       logger: loggerMock,
-      ruleDataClient: ({
-        getReader: jest.fn(() => ({
-          search: jest.fn(),
-        })),
-        getWriter: jest.fn(() => ({
-          bulk: jest.fn(),
-        })),
-        isWriteEnabled: jest.fn(() => true),
-        indexName: '.alerts-security.alerts',
-      } as unknown) as IRuleDataClient,
-      ruleDataService: ruleRegistryMocks.createRuleDataPluginService(),
+      ml: mlPluginServerMock.createSetupContract(),
+      ruleDataClient: ruleRegistryMocks.createRuleDataClient(
+        '.alerts-security.alerts'
+      ) as IRuleDataClient,
+      eventLogService: eventLogServiceMock.create(),
     },
     services,
     scheduleActions,
     executor: async ({ params }: { params: Record<string, unknown> }) => {
       return alertExecutor({
+        ...createDefaultAlertExecutorOptions({
+          params,
+          alertId: v4(),
+          state: {},
+        }),
         services,
-        params,
-        alertId: v4(),
-        startedAt: new Date(),
       });
     },
   };
