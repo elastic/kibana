@@ -22,6 +22,9 @@ interface IBrowserAdvancedFieldsContextProvider {
 export const initialValues: IBrowserAdvancedFields = {
   [ConfigKeys.SCREENSHOTS]: ScreenshotOption.ON,
   [ConfigKeys.SYNTHETICS_ARGS]: [],
+  [ConfigKeys.JOURNEY_FILTERS_MATCH]: '',
+  [ConfigKeys.JOURNEY_FILTERS_TAGS]: [],
+  [ConfigKeys.IGNORE_HTTPS_ERRORS]: false,
 };
 
 const defaultContext: IBrowserAdvancedFieldsContext = {
