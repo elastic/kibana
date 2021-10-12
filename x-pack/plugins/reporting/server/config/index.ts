@@ -34,8 +34,8 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           }),
           message: i18n.translate('xpack.reporting.deprecations.reportingIndex.description', {
             defaultMessage:
-              `Multitenancy by changing "xpack.reporting.index" will not be supported in 8.0. ` +
-              `See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
+              `Multitenancy by changing "xpack.reporting.index" will not be supported in 8.0.` +
+              ` See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
           }),
           correctiveActions: {
             manualSteps: [
