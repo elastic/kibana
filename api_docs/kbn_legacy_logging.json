@@ -1,0 +1,584 @@
+{
+  "id": "@kbn/legacy-logging",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/legacy-logging",
+        "id": "def-server.attachMetaData",
+        "type": "Function",
+        "tags": [],
+        "label": "attachMetaData",
+        "description": [],
+        "signature": [
+          "(message: string, metadata?: Record<string, any>) => { [metadataSymbol]: { message: string; metadata: Record<string, any>; }; }"
+        ],
+        "path": "packages/kbn-legacy-logging/src/metadata.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.attachMetaData.$1",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-legacy-logging/src/metadata.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.attachMetaData.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "packages/kbn-legacy-logging/src/metadata.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/legacy-logging",
+        "id": "def-server.getLoggingConfiguration",
+        "type": "Function",
+        "tags": [],
+        "label": "getLoggingConfiguration",
+        "description": [
+          "\nReturns the `@hapi/good` plugin configuration to be used for the legacy logging"
+        ],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/legacy-logging",
+            "scope": "server",
+            "docId": "kibKbnLegacyLoggingPluginApi",
+            "section": "def-server.LegacyLoggingConfig",
+            "text": "LegacyLoggingConfig"
+          },
+          ", opsInterval: number) => { ops: { interval: number; }; includes: { request: string[]; response: string[]; }; reporters: { logReporter: ",
+          "LogInterceptor",
+          "[]; }; }"
+        ],
+        "path": "packages/kbn-legacy-logging/src/get_logging_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.getLoggingConfiguration.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/legacy-logging",
+                "scope": "server",
+                "docId": "kibKbnLegacyLoggingPluginApi",
+                "section": "def-server.LegacyLoggingConfig",
+                "text": "LegacyLoggingConfig"
+              }
+            ],
+            "path": "packages/kbn-legacy-logging/src/get_logging_config.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.getLoggingConfiguration.$2",
+            "type": "number",
+            "tags": [],
+            "label": "opsInterval",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-legacy-logging/src/get_logging_config.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/legacy-logging",
+        "id": "def-server.reconfigureLogging",
+        "type": "Function",
+        "tags": [],
+        "label": "reconfigureLogging",
+        "description": [],
+        "signature": [
+          "(server: ",
+          "Server",
+          ", config: ",
+          {
+            "pluginId": "@kbn/legacy-logging",
+            "scope": "server",
+            "docId": "kibKbnLegacyLoggingPluginApi",
+            "section": "def-server.LegacyLoggingConfig",
+            "text": "LegacyLoggingConfig"
+          },
+          ", opsInterval: number) => void"
+        ],
+        "path": "packages/kbn-legacy-logging/src/setup_logging.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.reconfigureLogging.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "server",
+            "description": [],
+            "signature": [
+              "Server"
+            ],
+            "path": "packages/kbn-legacy-logging/src/setup_logging.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.reconfigureLogging.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/legacy-logging",
+                "scope": "server",
+                "docId": "kibKbnLegacyLoggingPluginApi",
+                "section": "def-server.LegacyLoggingConfig",
+                "text": "LegacyLoggingConfig"
+              }
+            ],
+            "path": "packages/kbn-legacy-logging/src/setup_logging.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.reconfigureLogging.$3",
+            "type": "number",
+            "tags": [],
+            "label": "opsInterval",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-legacy-logging/src/setup_logging.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/legacy-logging",
+        "id": "def-server.setupLogging",
+        "type": "Function",
+        "tags": [],
+        "label": "setupLogging",
+        "description": [],
+        "signature": [
+          "(server: ",
+          "Server",
+          ", config: ",
+          {
+            "pluginId": "@kbn/legacy-logging",
+            "scope": "server",
+            "docId": "kibKbnLegacyLoggingPluginApi",
+            "section": "def-server.LegacyLoggingConfig",
+            "text": "LegacyLoggingConfig"
+          },
+          ", opsInterval: number) => Promise<void>"
+        ],
+        "path": "packages/kbn-legacy-logging/src/setup_logging.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.setupLogging.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "server",
+            "description": [],
+            "signature": [
+              "Server"
+            ],
+            "path": "packages/kbn-legacy-logging/src/setup_logging.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.setupLogging.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/legacy-logging",
+                "scope": "server",
+                "docId": "kibKbnLegacyLoggingPluginApi",
+                "section": "def-server.LegacyLoggingConfig",
+                "text": "LegacyLoggingConfig"
+              }
+            ],
+            "path": "packages/kbn-legacy-logging/src/setup_logging.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.setupLogging.$3",
+            "type": "number",
+            "tags": [],
+            "label": "opsInterval",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-legacy-logging/src/setup_logging.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/legacy-logging",
+        "id": "def-server.setupLoggingRotate",
+        "type": "Function",
+        "tags": [],
+        "label": "setupLoggingRotate",
+        "description": [],
+        "signature": [
+          "(server: ",
+          "Server",
+          ", config: ",
+          {
+            "pluginId": "@kbn/legacy-logging",
+            "scope": "server",
+            "docId": "kibKbnLegacyLoggingPluginApi",
+            "section": "def-server.LegacyLoggingConfig",
+            "text": "LegacyLoggingConfig"
+          },
+          ") => Promise<",
+          "LogRotator",
+          " | undefined>"
+        ],
+        "path": "packages/kbn-legacy-logging/src/rotate/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.setupLoggingRotate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "server",
+            "description": [],
+            "signature": [
+              "Server"
+            ],
+            "path": "packages/kbn-legacy-logging/src/rotate/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.setupLoggingRotate.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/legacy-logging",
+                "scope": "server",
+                "docId": "kibKbnLegacyLoggingPluginApi",
+                "section": "def-server.LegacyLoggingConfig",
+                "text": "LegacyLoggingConfig"
+              }
+            ],
+            "path": "packages/kbn-legacy-logging/src/rotate/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/legacy-logging",
+        "id": "def-server.LegacyLoggingConfig",
+        "type": "Interface",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "LegacyLoggingConfig",
+        "description": [],
+        "path": "packages/kbn-legacy-logging/src/schema.ts",
+        "deprecated": true,
+        "references": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.LegacyLoggingConfig.silent",
+            "type": "boolean",
+            "tags": [],
+            "label": "silent",
+            "description": [],
+            "path": "packages/kbn-legacy-logging/src/schema.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.LegacyLoggingConfig.quiet",
+            "type": "boolean",
+            "tags": [],
+            "label": "quiet",
+            "description": [],
+            "path": "packages/kbn-legacy-logging/src/schema.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.LegacyLoggingConfig.verbose",
+            "type": "boolean",
+            "tags": [],
+            "label": "verbose",
+            "description": [],
+            "path": "packages/kbn-legacy-logging/src/schema.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.LegacyLoggingConfig.events",
+            "type": "Object",
+            "tags": [],
+            "label": "events",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "packages/kbn-legacy-logging/src/schema.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.LegacyLoggingConfig.dest",
+            "type": "string",
+            "tags": [],
+            "label": "dest",
+            "description": [],
+            "path": "packages/kbn-legacy-logging/src/schema.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.LegacyLoggingConfig.filter",
+            "type": "Object",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "packages/kbn-legacy-logging/src/schema.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.LegacyLoggingConfig.json",
+            "type": "boolean",
+            "tags": [],
+            "label": "json",
+            "description": [],
+            "path": "packages/kbn-legacy-logging/src/schema.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.LegacyLoggingConfig.timezone",
+            "type": "string",
+            "tags": [],
+            "label": "timezone",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-legacy-logging/src/schema.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/legacy-logging",
+            "id": "def-server.LegacyLoggingConfig.rotate",
+            "type": "Object",
+            "tags": [],
+            "label": "rotate",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; everyBytes: number; keepFiles: number; pollingInterval: number; usePolling: boolean; pollingPolicyTestTimeout?: number | undefined; }"
+            ],
+            "path": "packages/kbn-legacy-logging/src/schema.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/legacy-logging",
+        "id": "def-server.legacyLoggingConfigSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "legacyLoggingConfigSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ silent: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<boolean>; quiet: ",
+          "ConditionalType",
+          "<true, boolean, boolean>; verbose: ",
+          "ConditionalType",
+          "<true, boolean, boolean>; events: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<Record<string, any>>; dest: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<string>; filter: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<Record<string, any>>; json: ",
+          "ConditionalType",
+          "<\"stdout\", boolean, boolean>; timezone: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; rotate: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<boolean>; everyBytes: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<number>; keepFiles: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<number>; pollingInterval: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<number>; usePolling: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<boolean>; }>; }>"
+        ],
+        "path": "packages/kbn-legacy-logging/src/schema.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

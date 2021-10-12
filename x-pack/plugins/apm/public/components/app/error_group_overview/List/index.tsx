@@ -48,7 +48,7 @@ const Culprit = euiStyled.div`
 `;
 
 type ErrorGroupItem =
-  APIReturnType<'GET /api/apm/services/{serviceName}/errors'>['errorGroups'][0];
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors'>['errorGroups'][0];
 
 interface Props {
   items: ErrorGroupItem[];

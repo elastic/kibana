@@ -15,7 +15,7 @@ import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
 const environmentsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/environments',
+  endpoint: 'GET /internal/apm/environments',
   params: t.type({
     query: t.intersection([
       t.partial({

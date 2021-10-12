@@ -5,27 +5,168 @@
  * 2.0.
  */
 
+import { service, timerange } from '@elastic/apm-generator';
 import expect from '@kbn/expect';
-import { first, last, mean } from 'lodash';
+import { first, last, mean, uniq } from 'lodash';
 import moment from 'moment';
+import { ENVIRONMENT_ALL } from '../../../../plugins/apm/common/environment_filter_values';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
-type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
+type ThroughputReturn = APIReturnType<'GET /internal/apm/services/{serviceName}/throughput'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
+  const traceData = getService('traceData');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
 
+  registry.when(
+    'Throughput with statically generated data',
+    { config: 'basic', archives: ['apm_8.0.0_empty'] },
+    () => {
+      const start = new Date('2021-01-01T00:00:00.000Z').getTime();
+      const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
+
+      const GO_PROD_RATE = 10;
+      const GO_DEV_RATE = 5;
+      const JAVA_PROD_RATE = 20;
+
+      before(async () => {
+        const serviceGoProdInstance = service('synth-go', 'production', 'go').instance(
+          'instance-a'
+        );
+        const serviceGoDevInstance = service('synth-go', 'development', 'go').instance(
+          'instance-b'
+        );
+        const serviceJavaInstance = service('synth-java', 'production', 'java').instance(
+          'instance-c'
+        );
+
+        await traceData.index([
+          ...timerange(start, end)
+            .interval('1s')
+            .rate(GO_PROD_RATE)
+            .flatMap((timestamp) =>
+              serviceGoProdInstance
+                .transaction('GET /api/product/list')
+                .duration(1000)
+                .timestamp(timestamp)
+                .serialize()
+            ),
+          ...timerange(start, end)
+            .interval('1s')
+            .rate(GO_DEV_RATE)
+            .flatMap((timestamp) =>
+              serviceGoDevInstance
+                .transaction('GET /api/product/:id')
+                .duration(1000)
+                .timestamp(timestamp)
+                .serialize()
+            ),
+          ...timerange(start, end)
+            .interval('1s')
+            .rate(JAVA_PROD_RATE)
+            .flatMap((timestamp) =>
+              serviceJavaInstance
+                .transaction('POST /api/product/buy')
+                .duration(1000)
+                .timestamp(timestamp)
+                .serialize()
+            ),
+        ]);
+      });
+
+      after(() => traceData.clean());
+
+      async function callApi(overrides?: {
+        start?: string;
+        end?: string;
+        transactionType?: string;
+        environment?: string;
+        kuery?: string;
+      }) {
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          params: {
+            path: {
+              serviceName: 'synth-go',
+            },
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              transactionType: 'request',
+              environment: 'production',
+              kuery: 'processor.event:transaction',
+              ...overrides,
+            },
+          },
+        });
+
+        return response.body;
+      }
+
+      describe('when calling it with the default parameters', () => {
+        let body: PromiseReturnType<typeof callApi>;
+
+        before(async () => {
+          body = await callApi();
+        });
+
+        it('returns the throughput in seconds', () => {
+          expect(body.throughputUnit).to.eql('second');
+        });
+
+        it('returns the expected throughput', () => {
+          const throughputValues = uniq(body.currentPeriod.map((coord) => coord.y));
+          expect(throughputValues).to.eql([GO_PROD_RATE]);
+        });
+      });
+
+      describe('when setting environment to all', () => {
+        let body: PromiseReturnType<typeof callApi>;
+
+        before(async () => {
+          body = await callApi({
+            environment: ENVIRONMENT_ALL.value,
+          });
+        });
+
+        it('returns data for all environments', () => {
+          const throughputValues = body.currentPeriod.map(({ y }) => y);
+          expect(uniq(throughputValues)).to.eql([GO_PROD_RATE + GO_DEV_RATE]);
+          expect(body.throughputUnit).to.eql('second');
+        });
+      });
+
+      describe('when defining a kuery', () => {
+        let body: PromiseReturnType<typeof callApi>;
+
+        before(async () => {
+          body = await callApi({
+            kuery: `processor.event:transaction and transaction.name:"GET /api/product/:id"`,
+            environment: ENVIRONMENT_ALL.value,
+          });
+        });
+
+        it('returns data that matches the kuery', () => {
+          const throughputValues = body.currentPeriod.map(({ y }) => y);
+          expect(uniq(throughputValues)).to.eql([GO_DEV_RATE]);
+          expect(body.throughputUnit).to.eql('second');
+        });
+      });
+    }
+  );
+
   registry.when('Throughput when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
       const response = await apmApiClient.readUser({
-        endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+        endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
         params: {
           path: {
             serviceName: 'opbeans-java',
@@ -54,7 +195,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('when querying without kql filter', () => {
         before(async () => {
           const response = await apmApiClient.readUser({
-            endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+            endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
             params: {
               path: {
                 serviceName: 'opbeans-java',
@@ -108,7 +249,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('with kql filter to force transaction-based UI', () => {
         before(async () => {
           const response = await apmApiClient.readUser({
-            endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+            endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
             params: {
               path: {
                 serviceName: 'opbeans-java',
@@ -144,7 +285,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       before(async () => {
         const response = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
           params: {
             path: {
               serviceName: 'opbeans-java',
