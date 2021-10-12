@@ -28,7 +28,7 @@ import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
 const hasFleetDataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fleet/has_data',
+  endpoint: 'GET /internal/apm/fleet/has_data',
   options: { tags: [] },
   handler: async ({ core, plugins }) => {
     const fleetPluginStart = await plugins.fleet?.start();
@@ -44,7 +44,7 @@ const hasFleetDataRoute = createApmServerRoute({
 });
 
 const fleetAgentsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fleet/agents',
+  endpoint: 'GET /internal/apm/fleet/agents',
   options: { tags: [] },
   handler: async ({ core, plugins }) => {
     const cloudSetup = plugins.cloud?.setup;
@@ -92,7 +92,7 @@ const fleetAgentsRoute = createApmServerRoute({
 });
 
 const saveApmServerSchemaRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/fleet/apm_server_schema',
+  endpoint: 'POST /internal/apm/fleet/apm_server_schema',
   options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     body: t.type({
@@ -113,7 +113,7 @@ const saveApmServerSchemaRoute = createApmServerRoute({
 });
 
 const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fleet/apm_server_schema/unsupported',
+  endpoint: 'GET /internal/apm/fleet/apm_server_schema/unsupported',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { context } = resources;
@@ -125,7 +125,7 @@ const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
 });
 
 const getMigrationCheckRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fleet/migration_check',
+  endpoint: 'GET /internal/apm/fleet/migration_check',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { plugins, context, config, request } = resources;
@@ -153,7 +153,7 @@ const getMigrationCheckRoute = createApmServerRoute({
 });
 
 const createCloudApmPackagePolicyRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/fleet/cloud_apm_package_policy',
+  endpoint: 'POST /internal/apm/fleet/cloud_apm_package_policy',
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources) => {
     const { plugins, context, config, request, logger } = resources;

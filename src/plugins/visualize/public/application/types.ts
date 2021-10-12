@@ -42,6 +42,7 @@ import type { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/p
 import type { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import type { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import type { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
+import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
 import type { DashboardStart } from '../../../dashboard/public';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../../usage_collection/public';
@@ -94,7 +95,6 @@ export interface VisualizeServices extends CoreStart {
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
   visualizations: VisualizationsStart;
   savedObjectsPublic: SavedObjectsStart;
-  savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];
   setActiveUrl: (newUrl: string) => void;
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
   restorePreviousUrl: () => void;
@@ -105,6 +105,7 @@ export interface VisualizeServices extends CoreStart {
   presentationUtil: PresentationUtilPluginStart;
   usageCollection?: UsageCollectionStart;
   getKibanaVersion: () => string;
+  spaces?: SpacesPluginStart;
 }
 
 export interface SavedVisInstance {

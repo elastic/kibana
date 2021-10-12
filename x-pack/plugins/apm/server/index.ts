@@ -14,6 +14,8 @@ import { maxSuggestions } from '../../observability/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 import { APMPlugin } from './plugin';
 
+// All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/master/docs/settings/apm-settings.asciidoc
+// and be included on cloud allow list unless there are specific reasons not to
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   serviceMapEnabled: schema.boolean({ defaultValue: true }),

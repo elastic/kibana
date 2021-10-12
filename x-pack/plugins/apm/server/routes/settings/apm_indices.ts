@@ -16,7 +16,7 @@ import { saveApmIndices } from '../../lib/settings/apm_indices/save_apm_indices'
 
 // get list of apm indices and values
 const apmIndexSettingsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/apm-index-settings',
+  endpoint: 'GET /internal/apm/settings/apm-index-settings',
   options: { tags: ['access:apm'] },
   handler: async ({ config, context }) => {
     const apmIndexSettings = await getApmIndexSettings({ config, context });
@@ -26,7 +26,7 @@ const apmIndexSettingsRoute = createApmServerRoute({
 
 // get apm indices configuration object
 const apmIndicesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/apm-indices',
+  endpoint: 'GET /internal/apm/settings/apm-indices',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { context, config } = resources;
@@ -39,7 +39,7 @@ const apmIndicesRoute = createApmServerRoute({
 
 // save ui indices
 const saveApmIndicesRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/settings/apm-indices/save',
+  endpoint: 'POST /internal/apm/settings/apm-indices/save',
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
