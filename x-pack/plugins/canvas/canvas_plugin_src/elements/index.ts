@@ -32,6 +32,7 @@ import { verticalBarChart } from './vert_bar_chart';
 import { verticalProgressBar } from './vertical_progress_bar';
 import { verticalProgressPill } from './vertical_progress_pill';
 import { tagCloud } from './tag_cloud';
+import { metricVis } from './metric_vis';
 
 import { SetupInitializer } from '../plugin';
 import { ElementFactory } from '../../types';
@@ -62,6 +63,7 @@ const elementSpecs = [
   verticalProgressBar,
   verticalProgressPill,
   tagCloud,
+  metricVis,
 ];
 
 const initializeElementFactories = [metricElementInitializer];
