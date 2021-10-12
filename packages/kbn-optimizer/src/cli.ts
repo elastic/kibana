@@ -78,8 +78,11 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         throw createFlagError('expected --no-inspect-workers to have no value');
       }
 
-      const maxWorkerCount = flags.workers ? Number.parseInt(String(flags.workers), 10) : undefined;
+      const maxWorkerCount =
+        !!flags['max-workers'] ||
+        (flags.workers ? Number.parseInt(String(flags.workers), 10) : undefined);
       if (
+        typeof maxWorkerCount !== 'boolean' &&
         maxWorkerCount !== undefined &&
         (!Number.isFinite(maxWorkerCount) || maxWorkerCount < 1)
       ) {
@@ -176,6 +179,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
           'dist',
           'cache',
           'profile',
+          'max-workers',
           'inspect-workers',
           'validate-limits',
           'update-limits',
@@ -194,6 +198,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         help: `
           --watch            run the optimizer in watch mode
           --workers          max number of workers to use
+          --max-workers      pass this flag to automatically max out the CPU with workers
           --no-progress      disable logging of progress information
           --oss              only build oss plugins
           --profile          profile the webpack builds and write stats.json files to build outputs

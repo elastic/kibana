@@ -32,11 +32,23 @@ export interface Limits {
   };
 }
 
-function pickMaxWorkerCount(dist: boolean) {
+function pickMaxWorkerCount(flag: Options['maxWorkerCount'], max: boolean): number {
+  if (process.env.KBN_OPTIMIZER_MAX_WORKERS) {
+    return parseInt(process.env.KBN_OPTIMIZER_MAX_WORKERS, 10);
+  }
+
+  if (typeof flag === 'number') {
+    return flag;
+  }
+
+  if (flag === true) {
+    return pickMaxWorkerCount(undefined, true);
+  }
+
   // don't break if cpus() returns nothing, or an empty array
   const cpuCount = Math.max(Os.cpus()?.length, 1);
   // if we're buiding the dist then we can use more of the system's resources to get things done a little quicker
-  const maxWorkers = dist ? cpuCount - 1 : Math.ceil(cpuCount / 3);
+  const maxWorkers = max ? cpuCount - 1 : Math.ceil(cpuCount / 3);
   // ensure we always have at least two workers
   return Math.max(maxWorkers, 2);
 }
@@ -53,8 +65,8 @@ interface Options {
   outputRoot?: string;
   /** enable to run the optimizer in watch mode */
   watch?: boolean;
-  /** the maximum number of workers that will be created */
-  maxWorkerCount?: number;
+  /** the maximum number of workers that will be created, or `true` to use the number of cpus-1 */
+  maxWorkerCount?: number | true;
   /** set to false to disabling writing/reading of caches */
   cache?: boolean;
   /** build assets suitable for use in the distributable */
@@ -175,9 +187,7 @@ export class OptimizerConfig {
       throw new TypeError('pluginPaths must all be absolute paths');
     }
 
-    const maxWorkerCount = process.env.KBN_OPTIMIZER_MAX_WORKERS
-      ? parseInt(process.env.KBN_OPTIMIZER_MAX_WORKERS, 10)
-      : options.maxWorkerCount ?? pickMaxWorkerCount(dist);
+    const maxWorkerCount = pickMaxWorkerCount(options.maxWorkerCount, dist);
     if (typeof maxWorkerCount !== 'number' || !Number.isFinite(maxWorkerCount)) {
       throw new TypeError('worker count must be a number');
     }
