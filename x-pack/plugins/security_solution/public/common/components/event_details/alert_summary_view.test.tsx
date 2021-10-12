@@ -113,10 +113,10 @@ describe('AlertSummaryView', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
-        if (item.category === 'signal' && item.field === 'signal.rule.name') {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.name') {
           return {
-            category: 'signal',
-            field: 'signal.rule.name',
+            category: 'kibana',
+            field: 'kibana.alert.rule.name',
             values: undefined,
             originalValue: undefined,
           };
@@ -131,6 +131,6 @@ describe('AlertSummaryView', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('event-field-signal.rule.name')).not.toBeInTheDocument();
+    expect(queryByTestId('event-field-kibana.alert.rule.name')).not.toBeInTheDocument();
   });
 });

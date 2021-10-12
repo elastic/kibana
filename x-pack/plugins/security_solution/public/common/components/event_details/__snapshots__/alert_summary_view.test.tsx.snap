@@ -138,7 +138,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-signal.status"
+                data-test-subj="event-field-kibana.alert.workflow_status"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -274,7 +274,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-signal.rule.name"
+                data-test-subj="event-field-kibana.alert.rule.name"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -291,7 +291,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.name. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.rule.name. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -304,9 +304,9 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.name"
-                    field="signal.rule.name"
-                    items="[object Object],[object Object]"
+                    data-test-subj="more-actions-kibana.alert.rule.name"
+                    field="kibana.alert.rule.name"
+                    items="[object Object]"
                     value="xxx"
                   >
                     Overflow button
@@ -340,7 +340,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-signal.rule.severity"
+                data-test-subj="event-field-kibana.alert.rule.severity"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -357,7 +357,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.severity. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.rule.severity. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -370,9 +370,9 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.severity"
-                    field="signal.rule.severity"
-                    items="[object Object],[object Object]"
+                    data-test-subj="more-actions-kibana.alert.rule.severity"
+                    field="kibana.alert.rule.severity"
+                    items="[object Object]"
                     value="low"
                   >
                     Overflow button
@@ -406,7 +406,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-signal.rule.risk_score"
+                data-test-subj="event-field-kibana.alert.rule.risk_score"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -423,7 +423,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.risk_score. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.rule.risk_score. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -436,9 +436,9 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.risk_score"
-                    field="signal.rule.risk_score"
-                    items="[object Object],[object Object]"
+                    data-test-subj="more-actions-kibana.alert.rule.risk_score"
+                    field="kibana.alert.rule.risk_score"
+                    items="[object Object]"
                     value="21"
                   >
                     Overflow button
@@ -800,7 +800,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-signal.status"
+                data-test-subj="event-field-kibana.alert.workflow_status"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -936,7 +936,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-signal.rule.name"
+                data-test-subj="event-field-kibana.alert.rule.name"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -953,7 +953,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.name. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.rule.name. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -966,9 +966,9 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.name"
-                    field="signal.rule.name"
-                    items="[object Object],[object Object]"
+                    data-test-subj="more-actions-kibana.alert.rule.name"
+                    field="kibana.alert.rule.name"
+                    items="[object Object]"
                     value="xxx"
                   >
                     Overflow button
@@ -1002,7 +1002,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-signal.rule.severity"
+                data-test-subj="event-field-kibana.alert.rule.severity"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -1019,7 +1019,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.severity. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.rule.severity. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -1032,9 +1032,9 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.severity"
-                    field="signal.rule.severity"
-                    items="[object Object],[object Object]"
+                    data-test-subj="more-actions-kibana.alert.rule.severity"
+                    field="kibana.alert.rule.severity"
+                    items="[object Object]"
                     value="low"
                   >
                     Overflow button
@@ -1068,7 +1068,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-signal.rule.risk_score"
+                data-test-subj="event-field-kibana.alert.rule.risk_score"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -1085,7 +1085,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.risk_score. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.rule.risk_score. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -1098,9 +1098,9 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.risk_score"
-                    field="signal.rule.risk_score"
-                    items="[object Object],[object Object]"
+                    data-test-subj="more-actions-kibana.alert.rule.risk_score"
+                    field="kibana.alert.rule.risk_score"
+                    items="[object Object]"
                     value="21"
                   >
                     Overflow button

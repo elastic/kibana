@@ -77,6 +77,9 @@ export const createMigration = async ({
                 }
 
                 // migrate status
+                if(ctx._source.signal?.status == "in-progress") {
+                  ctx._source.signal.status = "acknowledged";
+                }
                 if(ctx._source['kibana.alert.workflow_status'] == "in-progress") {
                   ctx._source['kibana.alert.workflow_status'] = "acknowledged";
                 }
