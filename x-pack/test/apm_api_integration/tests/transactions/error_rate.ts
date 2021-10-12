@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 type ErrorRate =
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/error_rate'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
@@ -30,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('handles the empty state', async () => {
       const response = await supertest.get(
         format({
-          pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+          pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
           query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
         })
       );
@@ -46,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('handles the empty state with comparison data', async () => {
       const response = await supertest.get(
         format({
-          pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+          pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
           query: {
             transactionType,
             start: moment(end).subtract(15, 'minutes').toISOString(),
@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           const response = await supertest.get(
             format({
-              pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+              pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
               query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
             })
           );
@@ -138,7 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           const response = await supertest.get(
             format({
-              pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+              pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
               query: {
                 transactionType,
                 start: moment(end).subtract(15, 'minutes').toISOString(),

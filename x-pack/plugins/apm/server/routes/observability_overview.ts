@@ -18,7 +18,7 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 import { createApmServerRoute } from './create_apm_server_route';
 
 const observabilityOverviewHasDataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/observability_overview/has_data',
+  endpoint: 'GET /internal/apm/observability_overview/has_data',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
@@ -27,7 +27,7 @@ const observabilityOverviewHasDataRoute = createApmServerRoute({
 });
 
 const observabilityOverviewRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/observability_overview',
+  endpoint: 'GET /internal/apm/observability_overview',
   params: t.type({
     query: t.intersection([
       rangeRt,

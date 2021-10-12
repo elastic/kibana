@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 type TransactionsGroupsDetailedStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');

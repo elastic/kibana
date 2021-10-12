@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { roundNumber } from '../../utils';
 
-type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
+type ThroughputReturn = APIReturnType<'GET /internal/apm/services/{serviceName}/throughput'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
