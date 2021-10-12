@@ -49,5 +49,5 @@ export function ContextAppRoute(props: ContextAppProps) {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp indexPatternId={indexPatternId} anchorId={id} indexPattern={indexPattern} />;
+  return <ContextApp anchorId={id} indexPattern={indexPattern} />;
 }

@@ -8,12 +8,9 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { setServices, getServices } from '../../../../kibana_services';
-import { SortDirection } from '../../../../../../data/public';
 import { createFilterManagerMock } from '../../../../../../data/public/query/filter_manager/filter_manager.mock';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../../common';
 import { DiscoverServices } from '../../../../build_services';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
-import { indexPatternsMock } from '../../../../__mocks__/index_patterns';
 import { FailureReason, LoadingStatus } from '../services/context_query_state';
 import { ContextAppFetchProps, useContextAppFetch } from './use_context_app_fetch';
 import {
@@ -21,6 +18,9 @@ import {
   mockPredecessorHits,
   mockSuccessorHits,
 } from '../__mocks__/use_context_app_fetch';
+import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
+import { createContextSearchSourceStub } from '../services/_stubs';
+import { IndexPattern } from '../../../../../../data_views/common';
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -28,20 +28,19 @@ jest.mock('../services/context', () => {
   const originalModule = jest.requireActual('../services/context');
   return {
     ...originalModule,
-    fetchContextProvider: () => ({
-      fetchSurroundingDocs: (type: string, indexPatternId: string) => {
-        if (!indexPatternId) {
-          throw new Error();
-        }
-        return type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits;
-      },
-    }),
+
+    fetchSurroundingDocs: (type: string, indexPattern: IndexPattern) => {
+      if (!indexPattern || !indexPattern.id) {
+        throw new Error();
+      }
+      return type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits;
+    },
   };
 });
 
 jest.mock('../services/anchor', () => ({
-  fetchAnchorProvider: () => (indexPatternId: string) => {
-    if (!indexPatternId) {
+  fetchAnchor: (anchorId: string, indexPattern: IndexPattern) => {
+    if (!indexPattern.id || !anchorId) {
       throw new Error();
     }
     return mockAnchorHit;
@@ -50,16 +49,16 @@ jest.mock('../services/anchor', () => ({
 
 const initDefaults = (tieBreakerFields: string[], indexPatternId = 'the-index-pattern-id') => {
   const dangerNotification = jest.fn();
+  const mockSearchSource = createContextSearchSourceStub('timestamp');
 
   setServices({
     data: {
       search: {
         searchSource: {
-          createEmpty: jest.fn(),
+          createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
         },
       },
     },
-    indexPatterns: indexPatternsMock,
     toastNotifications: { addDanger: dangerNotification },
     core: { notifications: { toasts: [] } },
     history: () => {},
@@ -77,10 +76,8 @@ const initDefaults = (tieBreakerFields: string[], indexPatternId = 'the-index-pa
     dangerNotification,
     props: {
       anchorId: 'mock_anchor_id',
-      indexPatternId,
-      indexPattern: indexPatternMock,
+      indexPattern: { ...indexPatternWithTimefieldMock, id: indexPatternId },
       appState: {
-        sort: [['order_date', SortDirection.desc]],
         predecessorCount: 2,
         successorCount: 2,
       },
