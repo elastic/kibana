@@ -7,7 +7,7 @@
 import React, { useContext } from 'react';
 import { Route, Redirect, useLocation } from 'react-router-dom';
 import { useClusters } from './hooks/use_clusters';
-import { GlobalStateContext } from './global_state_context';
+import { GlobalStateContext } from './contexts/global_state_context';
 import { getClusterFromClusters } from '../lib/get_cluster_from_clusters';
 import { LoadingPage } from './pages/loading_page';
 
