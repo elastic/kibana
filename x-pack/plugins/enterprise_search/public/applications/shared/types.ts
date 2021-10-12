@@ -55,4 +55,5 @@ export interface SingleUserRoleMapping<T> {
   invitation: Invitation | null;
   elasticsearchUser: ElasticsearchUser;
   roleMapping: T;
+  hasEnterpriseSearchRole?: boolean;
 }
