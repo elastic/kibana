@@ -11,11 +11,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../components';
-import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 export interface CategoryFacet {
   count: number;
-  id: IntegrationCategory | 'Updates available' | '' | string;
+  id: string;
   title: string;
 }
 
