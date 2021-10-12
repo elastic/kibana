@@ -9,7 +9,7 @@ import React from 'react';
 
 import { action } from '@storybook/addon-actions';
 
-import type { ListProps } from './package_list_grid';
+import type { Props } from './package_list_grid';
 import { PackageListGrid } from './package_list_grid';
 
 export default {
@@ -17,7 +17,7 @@ export default {
   title: 'Sections/EPM/Package List Grid',
 };
 
-type Args = Pick<ListProps, 'title' | 'isLoading' | 'showMissingIntegrationMessage'>;
+type Args = Pick<Props, 'title' | 'isLoading' | 'showMissingIntegrationMessage'>;
 
 const args: Args = {
   title: 'Installed integrations',
