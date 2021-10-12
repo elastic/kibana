@@ -18,7 +18,7 @@ let indexPatternsContract: DataViewsContract | null = null;
 export async function loadIndexPatterns(indexPatterns: DataViewsContract) {
   indexPatternsContract = indexPatterns;
   const dataViewsContract = getDataViews();
-  indexPatternCache = await dataViewsContract.find('*');
+  indexPatternCache = await dataViewsContract.find('*', 10000);
   return indexPatternCache;
 }
 
