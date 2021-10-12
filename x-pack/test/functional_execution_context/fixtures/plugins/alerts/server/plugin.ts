@@ -93,9 +93,14 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
       async (ctx, req, res) => {
+        const transaction = apmAgent.startTransaction();
+        const subscription = req.events.completed$.subscribe(() => {
+          transaction?.end();
+          subscription.unsubscribe();
+        });
         await ctx.core.elasticsearch.client.asInternalUser.ping();
         // eslint-disable-next-line no-console
-        console.log('>>> in handler', apmAgent.isStarted());
+        console.log('>>> in handler', apmAgent.isStarted(), apmAgent.currentTraceIds);
         return res.ok({
           body: {
             traceId: apmAgent.currentTraceIds['trace.id'],
