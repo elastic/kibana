@@ -83,3 +83,8 @@ function btoa(str: string) {
 function atob(str: string) {
   return Buffer.from(str, 'base64').toString('binary');
 }
+
+export function getCommand(command: string, args?: string) {
+  const isWindows = process.platform === 'win32';
+  return `${isWindows ? `bin\\${command}.bat` : `bin/${command}`}${args ? ` ${args}` : ''}`;
+}

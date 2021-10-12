@@ -19,7 +19,14 @@ import {
   EnrollResult,
 } from '../plugins/interactive_setup/server/elasticsearch_service';
 import { getDetailedErrorMessage } from '../plugins/interactive_setup/server/errors';
-import { promptToken, decodeEnrollmentToken, kibanaConfigWriter, elasticsearch } from './utils';
+import {
+  promptToken,
+  getCommand,
+  decodeEnrollmentToken,
+  kibanaConfigWriter,
+  elasticsearch,
+} from './utils';
+import { Logger } from '../cli_plugin/lib/logger';
 
 const program = new Command('bin/kibana-init');
 
@@ -28,31 +35,40 @@ program
   .description(
     'This command walks you through all required steps to securely connect Kibana with Elasticsearch'
   )
-  .option('-t, --token <token>', 'Elasticseach enrollment token');
+  .option('-t, --token <token>', 'Elasticsearch enrollment token')
+  .option('-s, --silent', 'Prevent all logging');
 
 program.parse(process.argv);
 
+interface InitOptions {
+  token?: string;
+  silent?: boolean;
+  quiet?: boolean;
+}
+
+const options = program.opts() as InitOptions;
 const spinner = ora();
-const options = program.opts();
+const logger = new Logger(options);
 
 async function initCommand() {
   const token = decodeEnrollmentToken(options.token ?? (await promptToken()));
   if (!token) {
-    console.log(chalk.red('Invalid enrollment token provided.'));
-    console.log();
-    console.log('To generate a new enrollment token run:');
-    console.log('  bin/elasticsearch-create-enrollment-token -s kibana');
-    return;
+    logger.error(chalk.red('Invalid enrollment token provided.'));
+    logger.error('');
+    logger.error('To generate a new enrollment token run:');
+    logger.error(`  ${getCommand('elasticsearch-create-enrollment-token', '-s kibana')}`);
+    process.exit(1);
   }
 
   if (!(await kibanaConfigWriter.isConfigWritable())) {
-    console.log(chalk.red('Kibana does not have enough permissions to write to the config file.'));
-    console.log();
-    console.log('To grant write access run:');
-    console.log(`  chmod +w ${getConfigPath()}`);
+    logger.error(chalk.red('Kibana does not have enough permissions to write to the config file.'));
+    logger.error('');
+    logger.error('To grant write access run:');
+    logger.error(`  chmod +w ${getConfigPath()}`);
+    process.exit(1);
   }
 
-  console.log();
+  logger.log('');
   spinner.start(chalk.dim('Configuring Kibana...'));
 
   let configToWrite: EnrollResult;
@@ -68,10 +84,10 @@ async function initCommand() {
         `${getDetailedErrorMessage(error)}`
       )}`
     );
-    console.log();
-    console.log('To generate a new enrollment token run:');
-    console.log('  bin/elasticsearch-create-enrollment-token -s kibana');
-    return;
+    logger.error('');
+    logger.error('To generate a new enrollment token run:');
+    logger.error(`  ${getCommand('elasticsearch-create-enrollment-token', '-s kibana')}`);
+    process.exit(1);
   }
 
   try {
@@ -82,14 +98,14 @@ async function initCommand() {
         `${getDetailedErrorMessage(error)}`
       )}`
     );
-    console.log(chalk.red(`${getDetailedErrorMessage(error)}`));
-    return;
+    logger.error(chalk.red(`${getDetailedErrorMessage(error)}`));
+    process.exit(1);
   }
 
   spinner.succeed(chalk.bold('Kibana configured successfully.'));
-  console.log();
-  console.log('To start Kibana run:');
-  console.log('  bin/kibana');
+  logger.log('');
+  logger.log('To start Kibana run:');
+  logger.log(`  ${getCommand('kibana')}`);
 }
 
 initCommand();
