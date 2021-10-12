@@ -12,6 +12,7 @@ import { indexOf } from 'lodash';
 import { connect, ConnectedProps } from 'react-redux';
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
+import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -63,6 +64,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   timelineQuery,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
+  const [routeProps] = useRouteSpy();
 
   const afterItemSelection = useCallback(() => {
     setPopover(false);
@@ -112,10 +114,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const refetchAll = useCallback(() => {
     if (timelineId === TimelineId.active) {
       refetchQuery([timelineQuery]);
+      if (routeProps.pageName === 'alerts') {
+        refetchQuery(globalQuery);
+      }
     } else {
       refetchQuery(globalQuery);
     }
-  }, [timelineId, globalQuery, timelineQuery]);
+  }, [timelineId, globalQuery, timelineQuery, routeProps]);
 
   const {
     exceptionModalType,
