@@ -38,6 +38,12 @@ describe('getRuleAlertSummaryRoute', () => {
     status: 'OK',
     errorMessages: [],
     instances: {},
+    executionDuration: {
+      average: 1,
+      max: 10,
+      min: 0,
+      values: [3, 5, 5],
+    },
   };
 
   it('gets rule alert summary', async () => {

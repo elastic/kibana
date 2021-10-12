@@ -32,6 +32,12 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "consumer": "alert-consumer",
         "enabled": false,
         "errorMessages": Array [],
+        "executionDuration": Object {
+          "average": 0,
+          "max": 0,
+          "min": 0,
+          "values": Array [],
+        },
         "id": "alert-123",
         "instances": Object {},
         "lastRun": undefined,
@@ -72,6 +78,12 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "consumer": "alert-consumer-2",
         "enabled": true,
         "errorMessages": Array [],
+        "executionDuration": Object {
+          "average": 0,
+          "max": 0,
+          "min": 0,
+          "values": Array [],
+        },
         "id": "alert-456",
         "instances": Object {},
         "lastRun": undefined,
@@ -572,7 +584,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       .map((ev) => ev?.event?.duration! / (1000 * 1000)) as number[];
 
     expect(executionDuration).toEqual({
-      average: mean(durations),
+      average: Math.round(mean(durations)),
       max: Math.max(...durations),
       min: Math.min(...durations),
       values: durations,

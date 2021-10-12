@@ -7,12 +7,32 @@
 
 import React, { useState } from 'react';
 import moment, { Duration } from 'moment';
+import { assign, fill } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiHealth, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiHealth,
+  EuiSpacer,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiStat,
+  EuiEmptyPrompt,
+  EuiIconTip,
+  EuiText,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
-import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerting/common';
+import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
+import {
+  ActionGroup,
+  AlertInstanceStatusValues,
+  parseDuration,
+} from '../../../../../../alerting/common';
 import {
   Alert,
   AlertInstanceSummary,
@@ -36,6 +56,21 @@ type AlertInstancesProps = {
   requestRefresh: () => Promise<void>;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
+
+function formatExecutionDuration(value: number | undefined) {
+  if (!value) {
+    return '00:00:00.000';
+  }
+
+  const duration = moment.duration(value);
+  const durationString = [duration.hours(), duration.minutes(), duration.seconds()]
+    .map((v: number) => padStart(`${v}`, 2, '0'))
+    .join(':');
+
+  // add millis
+  const millisString = padStart(`${duration.milliseconds()}`, 3, '0');
+  return `${durationString}.${millisString}`;
+}
 
 export const alertInstancesTableColumns = (
   onMuteAction: (instance: AlertInstanceListItem) => Promise<void>,
@@ -161,8 +196,142 @@ export function AlertInstances({
     requestRefresh();
   };
 
+  const ruleTypeTimeout: string | undefined = alertType.ruleTaskTimeout;
+  const ruleTypeTimeoutMillis: number | undefined = ruleTypeTimeout
+    ? parseDuration(ruleTypeTimeout)
+    : undefined;
+  const showDurationWarning: boolean = ruleTypeTimeoutMillis
+    ? alertInstanceSummary.executionDuration.average > ruleTypeTimeoutMillis
+    : false;
+
+  const paddedExecutionDurations = assign(
+    fill(new Array(50), 0),
+    alertInstanceSummary.executionDuration.values
+  );
+
   return (
     <>
+      <EuiHorizontalRule />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiPanel hasBorder={true}>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={8}>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiStat
+                      title={
+                        <EuiFlexGroup gutterSize="xs">
+                          {showDurationWarning && (
+                            <EuiFlexItem grow={false}>
+                              <EuiIconTip
+                                data-test-subj="ruleDurationWarning"
+                                anchorClassName="ruleDurationWarningIcon"
+                                type="alert"
+                                color="danger"
+                                content={i18n.translate(
+                                  'xpack.triggersActionsUI.sections.alertDetails.alertInstances.ruleTypeExcessDurationMessage',
+                                  {
+                                    defaultMessage: `Duration exceeds the rule's expected run time.`,
+                                  }
+                                )}
+                                position="top"
+                              />
+                            </EuiFlexItem>
+                          )}
+                          <EuiFlexItem grow={false}>
+                            {formatExecutionDuration(
+                              alertInstanceSummary.executionDuration.average
+                            )}
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      }
+                      description="Average duration"
+                      titleColor={`${showDurationWarning ? 'danger' : 'text'}`}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiStat
+                      title={formatExecutionDuration(alertInstanceSummary.executionDuration.max)}
+                      description="Max duration"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiStat
+                      title={formatExecutionDuration(alertInstanceSummary.executionDuration.min)}
+                      description="Min duration"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText textAlign="right">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.executionDurationNum"
+                      defaultMessage="Last 50 executions"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiHorizontalRule />
+            {alertInstanceSummary.executionDuration.values &&
+            alertInstanceSummary.executionDuration.values.length > 0 ? (
+              <>
+                <Chart size={{ height: 200 }}>
+                  <Settings
+                    theme={{
+                      lineSeriesStyle: {
+                        point: { visible: false },
+                        line: { stroke: '#DD0A73' },
+                      },
+                    }}
+                  />
+                  <BarSeries
+                    id="executionDuration"
+                    xScaleType="linear"
+                    yScaleType="linear"
+                    xAccessor={0}
+                    yAccessors={[1]}
+                    data={paddedExecutionDurations.map((val, ndx) => [ndx, val])}
+                  />
+                  <LineSeries
+                    id="rule_duration_avg"
+                    xScaleType="linear"
+                    yScaleType="linear"
+                    xAccessor={0}
+                    yAccessors={[1]}
+                    data={paddedExecutionDurations.map((val, ndx) => [
+                      ndx,
+                      alertInstanceSummary.executionDuration.average,
+                    ])}
+                    curve={CurveType.CURVE_NATURAL}
+                  />
+                  <Axis id="bottom-axis" position="bottom" />
+                  <Axis id="left-axis" position="left" tickFormat={(d) => d} />
+                </Chart>
+              </>
+            ) : (
+              <>
+                <EuiEmptyPrompt
+                  body={
+                    <>
+                      <p>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.executionDurationNoData"
+                          defaultMessage="There are no available executions for this rule."
+                        />
+                      </p>
+                    </>
+                  }
+                />
+              </>
+            )}
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="xl" />
       <input
         type="hidden"

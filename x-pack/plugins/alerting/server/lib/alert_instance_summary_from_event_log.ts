@@ -39,6 +39,12 @@ export function alertInstanceSummaryFromEventLog(
     lastRun: undefined,
     errorMessages: [],
     instances: {},
+    executionDuration: {
+      average: 0,
+      min: 0,
+      max: 0,
+      values: [],
+    },
   };
 
   const instances = new Map<string, AlertInstanceStatus>();
@@ -121,7 +127,7 @@ export function alertInstanceSummaryFromEventLog(
 
   if (eventDurations.length > 0) {
     alertInstanceSummary.executionDuration = {
-      average: mean(eventDurations),
+      average: Math.round(mean(eventDurations)),
       max: Math.max(...eventDurations),
       min: Math.min(...eventDurations),
       values: eventDurations,
