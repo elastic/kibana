@@ -14,7 +14,7 @@ import { GlobalStateContext } from '../../global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 // @ts-ignore
-import { Overview } from '../../../components/enterprise_search/overview';
+import { EnterpriseSearchOverview } from '../../../components/enterprise_search/overview';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const EntSearchOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
@@ -66,7 +66,7 @@ export const EntSearchOverviewPage: React.FC<ComponentProps> = ({ clusters }) =>
     if (overviewData === null) {
       return null;
     }
-    return <Overview {...overviewData} onBrush={onBrush} zoomInfo={zoomInfo} />;
+    return <EnterpriseSearchOverview {...overviewData} onBrush={onBrush} zoomInfo={zoomInfo} />;
   };
 
   return (

@@ -8,6 +8,7 @@
 import React, { PureComponent } from 'react';
 import {
   EuiPage,
+  EuiPanel,
   EuiPageBody,
   EuiPageContent,
   EuiSpacer,
@@ -17,11 +18,12 @@ import {
 } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Status } from './status';
 
-export class Overview extends PureComponent {
+export class EnterpriseSearchOverview extends PureComponent {
   render() {
-    const { metrics, ...props } = this.props;
-    const metricsToShow = [metrics.enterprise_search_heap_used];
+    const { metrics, stats, ...props } = this.props;
+    const metricsToShow = [metrics.app_search_total_engines];
 
     return (
       <EuiPage>
@@ -35,6 +37,12 @@ export class Overview extends PureComponent {
             </h1>
           </EuiScreenReaderOnly>
           <EuiSpacer size="m" />
+
+          <EuiPanel>
+            <Status stats={stats} />
+          </EuiPanel>
+          <EuiSpacer size="m" />
+
           <EuiPageContent>
             <EuiFlexGrid columns={2} gutterSize="s">
               {metricsToShow.map((metric, index) => (
