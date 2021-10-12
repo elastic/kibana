@@ -47,7 +47,7 @@ function GaugeVisualization(props) {
       const seriesDef = model.series.find((s) => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        const hasTextColorRules = model.gauge_color_rules.some(({ text }) => text);
+        const hasTextColorRules = model.gauge_color_rules?.some(({ text }) => text);
         newProps.formatter =
           seriesDef.formatter === DATA_FORMATTERS.DEFAULT
             ? createFieldFormatter(

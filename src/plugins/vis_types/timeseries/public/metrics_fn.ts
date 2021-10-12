@@ -23,7 +23,7 @@ interface Arguments {
 }
 
 export interface TimeseriesRenderValue {
-  visData: TimeseriesVisData | {};
+  visData: TimeseriesVisData | { isModelInvalid: boolean } | {};
   visParams: TimeseriesVisParams;
   syncColors: boolean;
 }

@@ -37,7 +37,12 @@ export const metricsRequestHandler = async ({
   const dataSearch = data.search;
   const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
 
-  if (visParams && visParams.id && !visParams.isModelInvalid) {
+  const { isModelInvalid } = visParams;
+  if (isModelInvalid) {
+    return { isModelInvalid };
+  }
+
+  if (visParams && visParams.id) {
     const untrackSearch =
       dataSearch.session.isCurrentSession(searchSessionId) &&
       dataSearch.session.trackSearch({

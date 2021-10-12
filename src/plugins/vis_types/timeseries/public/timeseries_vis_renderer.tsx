@@ -10,6 +10,7 @@ import React, { lazy } from 'react';
 import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient } from 'kibana/public';
 
@@ -37,6 +38,10 @@ const checkIfDataExists = (visData: TimeseriesVisData | {}, model: TimeseriesVis
   return false;
 };
 
+const invalidModelMessage = i18n.translate('visTypeTimeseries.timeseriesVisRenderer.invalidModel', {
+  defaultMessage: 'Configuration contains an error, please check the visualization settings.',
+});
+
 export const getTimeseriesVisRenderer: (deps: {
   uiSettings: IUiSettingsClient;
 }) => ExpressionRenderDefinition<TimeseriesRenderValue> = ({ uiSettings }) => ({
@@ -59,6 +64,7 @@ export const getTimeseriesVisRenderer: (deps: {
       palettes.getPalettes(),
       fetchIndexPattern(model.index_pattern, indexPatterns),
     ]);
+    const isModelInvalid = 'isModelInvalid' in visData && visData.isModelInvalid;
 
     render(
       <I18nProvider>
@@ -66,7 +72,7 @@ export const getTimeseriesVisRenderer: (deps: {
           data-test-subj="timeseriesVis"
           handlers={handlers}
           showNoResult={showNoResult}
-          error={get(visData, [model.id, 'error'])}
+          error={isModelInvalid ? invalidModelMessage : get(visData, [model.id, 'error'])}
         >
           <TimeseriesVisualization
             // it is mandatory to bind uiSettings because of "this" usage inside "get" method

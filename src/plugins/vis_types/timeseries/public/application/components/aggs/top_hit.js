@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useContext } from 'react';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
@@ -27,6 +27,9 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { PANEL_TYPES } from '../../../../common/enums';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
+import { checkIfNumericMetric } from '../lib/check_if_numeric_metric';
+import { last } from 'lodash';
+import { FormValidationContext } from '../../contexts/form_validation_context';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
@@ -94,6 +97,7 @@ const getOrderOptions = () => [
 
 const AGG_WITH_KEY = 'agg_with';
 const ORDER_DATE_RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
+const TOP_HIT_FIELD_KEY = 'top_hit field';
 
 const getModelDefaults = () => ({
   size: 1,
@@ -102,6 +106,7 @@ const getModelDefaults = () => ({
 });
 
 const TopHitAggUi = (props) => {
+  const updateControlValidity = useContext(FormValidationContext);
   const { fields, series, panel } = props;
   const model = useMemo(() => ({ ...getModelDefaults(), ...props.model }), [props.model]);
   const indexPattern = series.override_index_pattern
@@ -143,6 +148,16 @@ const TopHitAggUi = (props) => {
       });
     }
   }, [model, selectedAggWithOption, aggWithOptions, handleChange]);
+
+  useEffect(() => {
+    const isCurrentMetricEnabled = model.id === last(props.siblings).id;
+    const isValid =
+      isCurrentMetricEnabled && [PANEL_TYPES.GAUGE, PANEL_TYPES.TOP_N].includes(panel.type)
+        ? checkIfNumericMetric(model, fields, indexPattern)
+        : true;
+
+    updateControlValidity(TOP_HIT_FIELD_KEY, isValid);
+  }, [fields, indexPattern, model, panel.type, props.siblings, updateControlValidity]);
 
   return (
     <AggRow
