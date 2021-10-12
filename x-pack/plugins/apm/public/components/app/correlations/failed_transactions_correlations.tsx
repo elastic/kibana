@@ -116,7 +116,7 @@ export function FailedTransactionsCorrelations({
                   'xpack.apm.correlations.failedTransactions.correlationsTable.pValueDescription',
                   {
                     defaultMessage:
-                      'The chance of seeing at least this count of field name & field value for failed transactions given its prevalence in successful transactions.',
+                      'The chance of getting at least this amount of field name and value for failed transactions given its prevalence in successful transactions.',
                   }
                 )}
               >
