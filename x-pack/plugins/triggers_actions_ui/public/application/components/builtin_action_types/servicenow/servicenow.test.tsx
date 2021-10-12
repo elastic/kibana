@@ -43,6 +43,7 @@ describe('servicenow connector validation', () => {
         isPreconfigured: false,
         config: {
           apiUrl: 'https://dev94428.service-now.com/',
+          isLegacy: false,
         },
       } as ServiceNowActionConnector;
 
@@ -50,6 +51,7 @@ describe('servicenow connector validation', () => {
         config: {
           errors: {
             apiUrl: [],
+            isLegacy: [],
           },
         },
         secrets: {
@@ -77,6 +79,7 @@ describe('servicenow connector validation', () => {
         config: {
           errors: {
             apiUrl: ['URL is required.'],
+            isLegacy: [],
           },
         },
         secrets: {

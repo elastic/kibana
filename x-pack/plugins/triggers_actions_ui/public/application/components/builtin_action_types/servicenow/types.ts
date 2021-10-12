@@ -29,6 +29,7 @@ export interface ServiceNowSIRActionParams {
 
 export interface ServiceNowConfig {
   apiUrl: string;
+  isLegacy: boolean;
 }
 
 export interface ServiceNowSecrets {
@@ -44,3 +45,17 @@ export interface Choice {
 }
 
 export type Fields = Record<string, Choice[]>;
+export interface AppInfo {
+  id: string;
+  name: string;
+  scope: string;
+  version: string;
+}
+
+export interface RESTApiError {
+  error: {
+    message: string;
+    detail: string;
+  };
+  status: string;
+}

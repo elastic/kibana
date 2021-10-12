@@ -27,6 +27,7 @@ const validateConnector = async (
   const translations = await import('./translations');
   const configErrors = {
     apiUrl: new Array<string>(),
+    isLegacy: new Array<string>(),
   };
   const secretsErrors = {
     username: new Array<string>(),

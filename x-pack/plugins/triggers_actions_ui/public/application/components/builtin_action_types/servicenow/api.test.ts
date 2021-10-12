@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '../../../../../../../../src/core/public/mocks';
-import { getChoices } from './api';
+import { getChoices, getAppInfo } from './api';
 
 const choicesResponse = {
   status: 'ok',
@@ -44,10 +44,27 @@ const choicesResponse = {
   ],
 };
 
+const applicationInfoData = {
+  result: { name: 'Elastic', scope: 'x_elas2_inc_int', version: '1.0.0' },
+};
+
+const applicationInfoResponse = {
+  ok: true,
+  status: 200,
+  json: async () => applicationInfoData,
+};
+
 describe('ServiceNow API', () => {
   const http = httpServiceMock.createStartContract();
+  let fetchMock: jest.SpyInstance<Promise<unknown>>;
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeAll(() => {
+    fetchMock = jest.spyOn(window, 'fetch');
+  });
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
 
   describe('getChoices', () => {
     test('should call get choices API', async () => {
@@ -65,6 +82,98 @@ describe('ServiceNow API', () => {
         body: '{"params":{"subAction":"getChoices","subActionParams":{"fields":["priority"]}}}',
         signal: abortCtrl.signal,
       });
+    });
+  });
+
+  describe('getAppInfo', () => {
+    test('should call getAppInfo API for ITSM', async () => {
+      const abortCtrl = new AbortController();
+      fetchMock.mockResolvedValueOnce(applicationInfoResponse);
+
+      const res = await getAppInfo({
+        signal: abortCtrl.signal,
+        apiUrl: 'https://example.com',
+        username: 'test',
+        password: 'test',
+        actionTypeId: '.servicenow',
+      });
+
+      expect(res).toEqual(applicationInfoData.result);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://example.com/api/x_elas2_inc_int/elastic_api/health',
+        {
+          signal: abortCtrl.signal,
+          method: 'GET',
+          headers: { Authorization: 'Basic dGVzdDp0ZXN0' },
+        }
+      );
+    });
+
+    test('should call getAppInfo API correctly for SIR', async () => {
+      const abortCtrl = new AbortController();
+      fetchMock.mockResolvedValueOnce(applicationInfoResponse);
+
+      const res = await getAppInfo({
+        signal: abortCtrl.signal,
+        apiUrl: 'https://example.com',
+        username: 'test',
+        password: 'test',
+        actionTypeId: '.servicenow-sir',
+      });
+
+      expect(res).toEqual(applicationInfoData.result);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://example.com/api/x_elas2_sir_int/elastic_api/health',
+        {
+          signal: abortCtrl.signal,
+          method: 'GET',
+          headers: { Authorization: 'Basic dGVzdDp0ZXN0' },
+        }
+      );
+    });
+
+    it('returns an error when the response fails', async () => {
+      expect.assertions(1);
+
+      const abortCtrl = new AbortController();
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: async () => applicationInfoResponse.json,
+      });
+
+      await expect(() =>
+        getAppInfo({
+          signal: abortCtrl.signal,
+          apiUrl: 'https://example.com',
+          username: 'test',
+          password: 'test',
+          actionTypeId: '.servicenow',
+        })
+      ).rejects.toThrow('Received status:');
+    });
+
+    it('returns an error when parsing the json fails', async () => {
+      expect.assertions(1);
+
+      const abortCtrl = new AbortController();
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => {
+          throw new Error('bad');
+        },
+      });
+
+      await expect(() =>
+        getAppInfo({
+          signal: abortCtrl.signal,
+          apiUrl: 'https://example.com',
+          username: 'test',
+          password: 'test',
+          actionTypeId: '.servicenow',
+        })
+      ).rejects.toThrow('bad');
     });
   });
 });

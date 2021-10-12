@@ -6,14 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { ConnectorTypes } from '../../../common';
 import { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
-import { getConnectorIcon } from '../utils';
+import { getConnectorIcon, isLegacyConnector } from '../utils';
 
 export interface Props {
   connectors: ActionConnector[];
@@ -79,16 +79,28 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
           {
             value: connector.id,
             inputDisplay: (
-              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIconExtended
                     type={getConnectorIcon(triggersActionsUi, connector.actionTypeId)}
                     size={ICON_SIZE}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <span>{connector.name}</span>
                 </EuiFlexItem>
+                {isLegacyConnector(connector) && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      aria-label={i18n.DEPRECATED_TOOLTIP_TITLE}
+                      size={ICON_SIZE}
+                      type="alert"
+                      color="warning"
+                      title={i18n.DEPRECATED_TOOLTIP_TITLE}
+                      content={i18n.DEPRECATED_TOOLTIP_CONTENT}
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             ),
             'data-test-subj': `dropdown-connector-${connector.id}`,

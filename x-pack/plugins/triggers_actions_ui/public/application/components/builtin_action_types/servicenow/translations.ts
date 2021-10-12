@@ -10,7 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const API_URL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlTextFieldLabel',
   {
-    defaultMessage: 'URL',
+    defaultMessage: 'ServiceNow instance URL',
+  }
+);
+
+export const API_URL_HELPTEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlHelpText',
+  {
+    defaultMessage: 'Include the full URL',
   }
 );
 
@@ -53,7 +60,7 @@ export const REMEMBER_VALUES_LABEL = i18n.translate(
 export const REENTER_VALUES_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterValuesLabel',
   {
-    defaultMessage: 'Username and password are encrypted. Please reenter values for these fields.',
+    defaultMessage: 'You will need to re-authenticate each time you edit the connector',
   }
 );
 
@@ -95,14 +102,28 @@ export const TITLE_REQUIRED = i18n.translate(
 export const SOURCE_IP_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.sourceIPTitle',
   {
-    defaultMessage: 'Source IP',
+    defaultMessage: 'Source IPs',
+  }
+);
+
+export const SOURCE_IP_HELP_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.sourceIPHelpText',
+  {
+    defaultMessage: 'List of source IPs (comma, or pipe delimited)',
   }
 );
 
 export const DEST_IP_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.destinationIPTitle',
   {
-    defaultMessage: 'Destination IP',
+    defaultMessage: 'Destination IPs',
+  }
+);
+
+export const DEST_IP_HELP_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.destIPHelpText',
+  {
+    defaultMessage: 'List of destination IPs (comma, or pipe delimited)',
   }
 );
 
@@ -137,14 +158,28 @@ export const COMMENTS_LABEL = i18n.translate(
 export const MALWARE_URL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareURLTitle',
   {
-    defaultMessage: 'Malware URL',
+    defaultMessage: 'Malware URLs',
+  }
+);
+
+export const MALWARE_URL_HELP_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareURLHelpText',
+  {
+    defaultMessage: 'List of malware URLs (comma, or pipe delimited)',
   }
 );
 
 export const MALWARE_HASH_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareHashTitle',
   {
-    defaultMessage: 'Malware Hash',
+    defaultMessage: 'Malware Hashes',
+  }
+);
+
+export const MALWARE_HASH_HELP_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareHashHelpText',
+  {
+    defaultMessage: 'List of malware hashes (comma, or pipe delimited)',
   }
 );
 
@@ -194,5 +229,93 @@ export const PRIORITY_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.prioritySelectFieldLabel',
   {
     defaultMessage: 'Priority',
+  }
+);
+
+export const API_INFO_ERROR = (status: number) =>
+  i18n.translate('xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiInfoError', {
+    values: { status },
+    defaultMessage: 'Received status: {status} when attempting to get application information',
+  });
+
+export const INSTALL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.install',
+  {
+    defaultMessage: 'install',
+  }
+);
+
+export const INSTALLATION_CALLOUT_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutTitle',
+  {
+    defaultMessage:
+      'To use this connector, you must first install the Elastic App from the ServiceNow App Store',
+  }
+);
+
+export const MIGRATION_SUCCESS_TOAST_TITLE = (connectorName: string) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.migrationSuccessToastTitle',
+    {
+      defaultMessage: 'Migrated connector {connectorName}',
+      values: {
+        connectorName,
+      },
+    }
+  );
+
+export const MIGRATION_SUCCESS_TOAST_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutText',
+  {
+    defaultMessage: 'Connector has been successfully migrated.',
+  }
+);
+
+export const VISIT_SN_STORE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.visitSNStore',
+  {
+    defaultMessage: 'Visit ServiceNow app store',
+  }
+);
+
+export const SETUP_DEV_INSTANCE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.setupDevInstance',
+  {
+    defaultMessage: 'setup a developer instance',
+  }
+);
+
+export const SN_INSTANCE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.snInstanceLabel',
+  {
+    defaultMessage: 'ServiceNow instance',
+  }
+);
+
+export const UNKNOWN = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.unknown',
+  {
+    defaultMessage: 'UNKNOWN',
+  }
+);
+
+export const UPDATE_INCIDENT_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateIncidentCheckboxLabel',
+  {
+    defaultMessage: 'Update incident',
+  }
+);
+
+export const ON = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateIncidentOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const OFF = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateIncidentOff',
+  {
+    defaultMessage: 'Off',
   }
 );

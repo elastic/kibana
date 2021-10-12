@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import http from 'http';
+
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -13,11 +15,8 @@ import {
   pushCase,
   deleteAllCaseItems,
   createCaseWithConnector,
+  getServiceNowSimulationServer,
 } from '../../../../common/lib/utils';
-import {
-  ExternalServiceSimulator,
-  getExternalServiceSimulatorPath,
-} from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -31,17 +30,17 @@ import { secOnlyDefaultSpaceAuth } from '../../../utils';
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
   const es = getService('es');
 
   describe('push_case', () => {
     const actionsRemover = new ActionsRemover(supertest);
+    let serviceNowSimulatorURL: string = '';
+    let serviceNowServer: http.Server;
 
-    let servicenowSimulatorURL: string = '<could not determine kibana url>';
-    before(() => {
-      servicenowSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
-      );
+    before(async () => {
+      const { server, url } = await getServiceNowSimulationServer();
+      serviceNowServer = server;
+      serviceNowSimulatorURL = url;
     });
 
     afterEach(async () => {
@@ -49,12 +48,16 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
+    after(async () => {
+      serviceNowServer.close();
+    });
+
     const supertestWithoutAuth = getService('supertestWithoutAuth');
 
     it('should push a case that the user has permissions for', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
         supertest,
-        servicenowSimulatorURL,
+        serviceNowSimulatorURL,
         actionsRemover,
       });
 
@@ -69,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should not push a case that the user does not have permissions for', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
         supertest,
-        servicenowSimulatorURL,
+        serviceNowSimulatorURL,
         actionsRemover,
         createCaseReq: getPostCaseRequest({ owner: 'observabilityFixture' }),
       });
@@ -95,7 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
       } with role(s) ${user.roles.join()} - should NOT push a case`, async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           supertest,
-          servicenowSimulatorURL,
+          serviceNowSimulatorURL,
           actionsRemover,
         });
 
@@ -112,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should return a 404 when attempting to access a space', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
         supertest,
-        servicenowSimulatorURL,
+        serviceNowSimulatorURL,
         actionsRemover,
       });
 

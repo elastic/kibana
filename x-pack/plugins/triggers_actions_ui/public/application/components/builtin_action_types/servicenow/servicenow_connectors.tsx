@@ -5,162 +5,142 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import {
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiFieldPassword,
-  EuiSpacer,
-  EuiLink,
-  EuiTitle,
-} from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import { DeprecatedCallout } from './deprecated_callout';
+import { useGetAppInfo } from './use_get_app_info';
+import { ApplicationRequiredCallout } from './application_required_callout';
+import { isRESTApiError, isLegacyConnector } from './helpers';
+import { InstallationCallout } from './installation_callout';
+import { UpdateConnectorModal } from './update_connector_modal';
+import { updateActionConnector } from '../../../lib/action_connector_api';
+import { Credentials } from './credentials';
 
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowActionConnector>> =
-  ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
-    const { docLinks } = useKibana().services;
+  ({
+    action,
+    editActionSecrets,
+    editActionConfig,
+    errors,
+    consumer,
+    readOnly,
+    setCallbacks,
+    isEdit,
+  }) => {
+    const {
+      http,
+      notifications: { toasts },
+    } = useKibana().services;
     const { apiUrl } = action.config;
-
-    const isApiUrlInvalid: boolean =
-      errors.apiUrl !== undefined && errors.apiUrl.length > 0 && apiUrl !== undefined;
-
     const { username, password } = action.secrets;
+    const isOldConnector = isLegacyConnector(action);
 
-    const isUsernameInvalid: boolean =
-      errors.username !== undefined && errors.username.length > 0 && username !== undefined;
-    const isPasswordInvalid: boolean =
-      errors.password !== undefined && errors.password.length > 0 && password !== undefined;
+    const [showModal, setShowModal] = useState(false);
 
-    const handleOnChangeActionConfig = useCallback(
-      (key: string, value: string) => editActionConfig(key, value),
-      [editActionConfig]
+    const { fetchAppInfo, isLoading } = useGetAppInfo({
+      actionTypeId: action.actionTypeId,
+    });
+
+    const [applicationRequired, setApplicationRequired] = useState<boolean>(false);
+    const [applicationInfoErrorMsg, setApplicationInfoErrorMsg] = useState<string | null>(null);
+
+    const getApplicationInfo = useCallback(async () => {
+      setApplicationRequired(false);
+      setApplicationInfoErrorMsg(null);
+
+      try {
+        const res = await fetchAppInfo(action);
+        if (isRESTApiError(res)) {
+          throw new Error(res.error?.message ?? i18n.UNKNOWN);
+        }
+
+        return res;
+      } catch (e) {
+        setApplicationRequired(true);
+        setApplicationInfoErrorMsg(e.message);
+        // We need to throw here so the connector will be not be saved.
+        throw e;
+      }
+    }, [action, fetchAppInfo]);
+
+    const beforeActionConnectorSave = useCallback(async () => {
+      if (!isOldConnector) {
+        await getApplicationInfo();
+      }
+    }, [getApplicationInfo, isOldConnector]);
+
+    useEffect(
+      () => setCallbacks({ beforeActionConnectorSave }),
+      [beforeActionConnectorSave, setCallbacks]
     );
 
-    const handleOnChangeSecretConfig = useCallback(
-      (key: string, value: string) => editActionSecrets(key, value),
-      [editActionSecrets]
-    );
+    const onMigrateClick = useCallback(() => setShowModal(true), []);
+    const onModalCancel = useCallback(() => setShowModal(false), []);
+
+    const onModalConfirm = useCallback(async () => {
+      await getApplicationInfo();
+      await updateActionConnector({
+        http,
+        connector: {
+          name: action.name,
+          config: { apiUrl, isLegacy: false },
+          secrets: { username, password },
+        },
+        id: action.id,
+      });
+
+      editActionConfig('isLegacy', false);
+      setShowModal(false);
+
+      toasts.addSuccess({
+        title: i18n.MIGRATION_SUCCESS_TOAST_TITLE(action.name),
+        text: i18n.MIGRATION_SUCCESS_TOAST_TEXT,
+      });
+    }, [
+      getApplicationInfo,
+      http,
+      action.name,
+      action.id,
+      apiUrl,
+      username,
+      password,
+      editActionConfig,
+      toasts,
+    ]);
+
     return (
       <>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              id="apiUrl"
-              fullWidth
-              error={errors.apiUrl}
-              isInvalid={isApiUrlInvalid}
-              label={i18n.API_URL_LABEL}
-              helpText={
-                <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
-                    defaultMessage="Configure a Personal Developer Instance"
-                  />
-                </EuiLink>
-              }
-            >
-              <EuiFieldText
-                fullWidth
-                isInvalid={isApiUrlInvalid}
-                name="apiUrl"
-                readOnly={readOnly}
-                value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
-                data-test-subj="apiUrlFromInput"
-                onChange={(evt) => handleOnChangeActionConfig('apiUrl', evt.target.value)}
-                onBlur={() => {
-                  if (!apiUrl) {
-                    editActionConfig('apiUrl', '');
-                  }
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xxs">
-              <h4>{i18n.AUTHENTICATION_LABEL}</h4>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow fullWidth>
-              {getEncryptedFieldNotifyLabel(
-                !action.id,
-                2,
-                action.isMissingSecrets ?? false,
-                i18n.REENTER_VALUES_LABEL
-              )}
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              id="connector-servicenow-username"
-              fullWidth
-              error={errors.username}
-              isInvalid={isUsernameInvalid}
-              label={i18n.USERNAME_LABEL}
-            >
-              <EuiFieldText
-                fullWidth
-                isInvalid={isUsernameInvalid}
-                readOnly={readOnly}
-                name="connector-servicenow-username"
-                value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
-                data-test-subj="connector-servicenow-username-form-input"
-                onChange={(evt) => handleOnChangeSecretConfig('username', evt.target.value)}
-                onBlur={() => {
-                  if (!username) {
-                    editActionSecrets('username', '');
-                  }
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              id="connector-servicenow-password"
-              fullWidth
-              error={errors.password}
-              isInvalid={isPasswordInvalid}
-              label={i18n.PASSWORD_LABEL}
-            >
-              <EuiFieldPassword
-                fullWidth
-                readOnly={readOnly}
-                isInvalid={isPasswordInvalid}
-                name="connector-servicenow-password"
-                value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
-                data-test-subj="connector-servicenow-password-form-input"
-                onChange={(evt) => handleOnChangeSecretConfig('password', evt.target.value)}
-                onBlur={() => {
-                  if (!password) {
-                    editActionSecrets('password', '');
-                  }
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {showModal && (
+          <UpdateConnectorModal
+            action={action}
+            applicationInfoErrorMsg={applicationInfoErrorMsg}
+            errors={errors}
+            readOnly={readOnly}
+            isLoading={isLoading}
+            editActionSecrets={editActionSecrets}
+            editActionConfig={editActionConfig}
+            onConfirm={onModalConfirm}
+            onCancel={onModalCancel}
+          />
+        )}
+        {!isOldConnector && <InstallationCallout />}
+        {isOldConnector && <DeprecatedCallout onMigrate={onMigrateClick} />}
+        <Credentials
+          action={action}
+          errors={errors}
+          readOnly={readOnly}
+          isLoading={isLoading}
+          editActionSecrets={editActionSecrets}
+          editActionConfig={editActionConfig}
+        />
+        {applicationRequired && !isOldConnector && (
+          <ApplicationRequiredCallout message={applicationInfoErrorMsg} />
+        )}
       </>
     );
   };

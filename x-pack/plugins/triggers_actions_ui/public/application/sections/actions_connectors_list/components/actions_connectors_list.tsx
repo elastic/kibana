@@ -38,6 +38,7 @@ import {
   ActionConnectorTableItem,
   ActionTypeIndex,
   EditConectorTabs,
+  UserConfiguredActionConnector,
 } from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -45,6 +46,11 @@ import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
 import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
+import {
+  ENABLE_NEW_SN_ITSM_CONNECTOR,
+  ENABLE_NEW_SN_SIR_CONNECTOR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../actions/server/constants/connectors';
 
 const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
@@ -167,6 +173,14 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         const checkEnabledResult = checkActionTypeEnabled(
           actionTypesIndex && actionTypesIndex[item.actionTypeId]
         );
+        const itemConfig = (
+          item as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
+        ).config;
+        const showLegacyTooltip =
+          itemConfig?.isLegacy &&
+          // TODO: Remove when applications are certified
+          ((ENABLE_NEW_SN_ITSM_CONNECTOR && item.actionTypeId === '.servicenow') ||
+            (ENABLE_NEW_SN_SIR_CONNECTOR && item.actionTypeId === '.servicenow-sir'));
 
         const link = (
           <>
@@ -190,6 +204,23 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                 position="right"
               />
             ) : null}
+            {showLegacyTooltip && (
+              <EuiIconTip
+                aria-label="Warning"
+                size="m"
+                type="alert"
+                color="warning"
+                title={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.legacyConnectorTitle',
+                  { defaultMessage: 'Deprecated connector' }
+                )}
+                content={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isLegacyDescription',
+                  { defaultMessage: 'Please update your connector' }
+                )}
+                position="right"
+              />
+            )}
           </>
         );
 

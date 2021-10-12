@@ -33,6 +33,8 @@ describe('ServiceNowActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(
@@ -57,8 +59,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       name: 'servicenow',
       config: {
         apiUrl: 'https://test/',
-        incidentConfiguration: { mapping: [] },
-        isCaseOwned: true,
+        isLegacy: false,
       },
     } as ServiceNowActionConnector;
     const wrapper = mountWithIntl(
@@ -69,6 +70,8 @@ describe('ServiceNowActionConnectorFields renders', () => {
         editActionSecrets={() => {}}
         readOnly={false}
         consumer={'case'}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="apiUrlFromInput"]').length > 0).toBeTruthy();
@@ -91,6 +94,8 @@ describe('ServiceNowActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
@@ -112,6 +117,8 @@ describe('ServiceNowActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
@@ -138,6 +145,8 @@ describe('ServiceNowActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);

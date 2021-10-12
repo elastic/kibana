@@ -162,3 +162,17 @@ export const UPDATE_SELECTED_CONNECTOR = (connectorName: string): string =>
     values: { connectorName },
     defaultMessage: 'Update { connectorName }',
   });
+
+export const DEPRECATED_TOOLTIP_TITLE = i18n.translate(
+  'xpack.cases.configureCases.deprecatedTooltipTitle',
+  {
+    defaultMessage: 'Deprecated connector',
+  }
+);
+
+export const DEPRECATED_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.cases.configureCases.deprecatedTooltipContent',
+  {
+    defaultMessage: 'Please update your connector',
+  }
+);

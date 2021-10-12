@@ -25480,7 +25480,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.unableToGetChoicesMessage": "无法获取选项",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.urgencySelectFieldLabel": "紧急性",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.usernameTextFieldLabel": "用户名",
-    "xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel": "配置个人开发者实例",
     "xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.actionTypeTitle": "ServiceNow ITSM",
     "xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText": "在 ServiceNow ITSM 中创建事件。",
     "xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle": "ServiceNow SecOps",
