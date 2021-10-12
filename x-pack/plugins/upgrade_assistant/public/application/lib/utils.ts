@@ -44,7 +44,7 @@ export const getDeprecationsUpperLimit = (count: number) => {
  * between 10% and 95% of the overall progress depending on its completeness percentage.
  */
 export const getReindexProgressLabel = (
-  reindexingDocumentsProgress: number | null,
+  reindexTaskPercComplete: number | null,
   lastCompletedStep: ReindexStep | undefined
 ): string => {
   let percentsComplete = 0;
@@ -66,9 +66,7 @@ export const getReindexProgressLabel = (
     case ReindexStep.reindexStarted: {
       // step 3 started, 10-95% progress depending on progress of reindexing documents in ES
       percentsComplete =
-        reindexingDocumentsProgress !== null
-          ? 10 + Math.round(reindexingDocumentsProgress * 85)
-          : 10;
+        reindexTaskPercComplete !== null ? 10 + Math.round(reindexTaskPercComplete * 85) : 10;
       break;
     }
     case ReindexStep.reindexCompleted: {
