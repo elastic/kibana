@@ -617,7 +617,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 class ToolingLog {
   constructor(writerConfig) {
-    _defineProperty(this, "identWidth", 0);
+    _defineProperty(this, "indentWidth", 0);
 
     _defineProperty(this, "writers", void 0);
 
@@ -626,10 +626,40 @@ class ToolingLog {
     this.writers = writerConfig ? [new _tooling_log_text_writer.ToolingLogTextWriter(writerConfig)] : [];
     this.written$ = new Rx.Subject();
   }
+  /**
+   * Get the current indentation level of the ToolingLog
+   */
 
-  indent(delta = 0) {
-    this.identWidth = Math.max(this.identWidth + delta, 0);
-    return this.identWidth;
+
+  getIndent() {
+    return this.indentWidth;
+  }
+  /**
+   * Indent the output of the ToolingLog by some character (4 is a good choice usually).
+   *
+   * If provided, the `block` function will be executed and once it's promise is resolved
+   * or rejected the indentation will be reset to its original state.
+   *
+   * @param delta the number of spaces to increase/decrease the indentation
+   * @param block a function to run and reset any indentation changes after
+   */
+
+
+  indent(delta = 0, block) {
+    const originalWidth = this.indentWidth;
+    this.indentWidth = Math.max(this.indentWidth + delta, 0);
+
+    if (!block) {
+      return;
+    }
+
+    return (async () => {
+      try {
+        return await block();
+      } finally {
+        this.indentWidth = originalWidth;
+      }
+    })();
   }
 
   verbose(...args) {
@@ -675,7 +705,7 @@ class ToolingLog {
   sendToWriters(type, args) {
     const msg = {
       type,
-      indent: this.identWidth,
+      indent: this.indentWidth,
       args
     };
     let written = false;
