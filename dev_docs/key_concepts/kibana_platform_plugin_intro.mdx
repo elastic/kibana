@@ -33,7 +33,7 @@ At a super high-level, Kibana is composed of **plugins**, **core**, and **Kibana
 
 <DocAccordion buttonContent="(Internal only) FAQ: Should I put my code in a plugin or a package?" color="warning">
 <DocCallOut color="warning">
-This is a question developers will not have to ask themselves soon, thanks to the work the Operations team is doing on [Bazel](https://github.com/elastic/kibana/blob/master/legacy_rfcs/text/0015_bazel.md). When that work is complete, all code, including plugins, will reside in a package (though not necessarily the `packages` _folder_, it can be a package inside the `src/plugins` folder). 
+When the [Bazel migration](https://github.com/elastic/kibana/blob/master/legacy_rfcs/text/0015_bazel.md) is complete, all code, including plugins, will be a package. With that, packages won't be required to be in the `packages` directory and can be located to somewhere that makes more sense structurally.
 
 In the meantime, the following can be used to determine whether it makes sense to add code to a package inside the `packages` folder, or a plugin inside `src/plugins` or `x-pack/plugins`. 
 
