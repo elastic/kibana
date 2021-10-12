@@ -626,16 +626,46 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
  */
 class ToolingLog {
   constructor(writerConfig) {
-    (0, _defineProperty2.default)(this, "identWidth", 0);
+    (0, _defineProperty2.default)(this, "indentWidth", 0);
     (0, _defineProperty2.default)(this, "writers", void 0);
     (0, _defineProperty2.default)(this, "written$", void 0);
     this.writers = writerConfig ? [new _tooling_log_text_writer.ToolingLogTextWriter(writerConfig)] : [];
     this.written$ = new Rx.Subject();
   }
+  /**
+   * Get the current indentation level of the ToolingLog
+   */
 
-  indent(delta = 0) {
-    this.identWidth = Math.max(this.identWidth + delta, 0);
-    return this.identWidth;
+
+  getIndent() {
+    return this.indentWidth;
+  }
+  /**
+   * Indent the output of the ToolingLog by some character (4 is a good choice usually).
+   *
+   * If provided, the `block` function will be executed and once it's promise is resolved
+   * or rejected the indentation will be reset to its original state.
+   *
+   * @param delta the number of spaces to increase/decrease the indentation
+   * @param block a function to run and reset any indentation changes after
+   */
+
+
+  indent(delta = 0, block) {
+    const originalWidth = this.indentWidth;
+    this.indentWidth = Math.max(this.indentWidth + delta, 0);
+
+    if (!block) {
+      return;
+    }
+
+    return (async () => {
+      try {
+        return await block();
+      } finally {
+        this.indentWidth = originalWidth;
+      }
+    })();
   }
 
   verbose(...args) {
@@ -681,7 +711,7 @@ class ToolingLog {
   sendToWriters(type, args) {
     const msg = {
       type,
-      indent: this.identWidth,
+      indent: this.indentWidth,
       args
     };
     let written = false;
@@ -8965,6 +8995,8 @@ var _execa = _interopRequireDefault(__webpack_require__(134));
 
 var _axios = _interopRequireDefault(__webpack_require__(177));
 
+var _http = _interopRequireDefault(__webpack_require__(199));
+
 var _ci_stats_config = __webpack_require__(218);
 
 /*
@@ -8974,6 +9006,7 @@ var _ci_stats_config = __webpack_require__(218);
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+// @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
 
 class CiStatsReporter {
@@ -9173,7 +9206,8 @@ class CiStatsReporter {
           url: path,
           baseURL: BASE_URL,
           headers,
-          data: body
+          data: body,
+          adapter: _http.default
         });
         return true;
       } catch (error) {
