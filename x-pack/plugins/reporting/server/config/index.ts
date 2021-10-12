@@ -17,13 +17,9 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: { poll: true, roles: true },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
-    unused('capture.browser.chromium.maxScreenshotDimension'),
-    unused('capture.concurrency'),
-    unused('capture.settleTime'),
-    unused('capture.timeout'),
-    unused('poll.jobCompletionNotifier.intervalErrorMultiplier'),
-    unused('poll.jobsRefresh.intervalErrorMultiplier'),
-    unused('kibanaApp'),
+    unused('capture.browser.chromium.maxScreenshotDimension'), // unused since 7.8
+    unused('poll.jobCompletionNotifier.intervalErrorMultiplier'), // unused since 7.10
+    unused('poll.jobsRefresh.intervalErrorMultiplier'), // unused since 7.10
     (settings, fromPath, addDeprecation) => {
       const reporting = get(settings, fromPath);
       if (reporting?.index) {
