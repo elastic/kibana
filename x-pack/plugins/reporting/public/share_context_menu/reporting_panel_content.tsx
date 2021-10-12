@@ -34,7 +34,7 @@ export interface Props {
   requiresSavedState: boolean;
   layoutId: string | undefined;
   objectId?: string;
-  getJobParams: () => BaseParams;
+  getJobParams: (forShareUrl?: boolean) => Omit<BaseParams, 'browserTimezone' | 'version'>;
   options?: ReactElement<any> | null;
   isDirty?: boolean;
   onClose?: () => void;
@@ -68,7 +68,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private getAbsoluteReportGenerationUrl = (props: Props) => {
     const relativePath = this.props.apiClient.getReportingJobPath(
       props.reportType,
-      props.getJobParams()
+      props.getJobParams(true)
     );
     return url.resolve(window.location.href, relativePath);
   };
