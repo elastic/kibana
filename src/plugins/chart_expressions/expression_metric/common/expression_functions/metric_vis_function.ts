@@ -41,7 +41,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     palette: {
       types: ['palette'],
       help: i18n.translate('expressionMetricVis.function.palette.help', {
-        defaultMessage: '!!!! TODO add description',
+        defaultMessage: 'Provides colors for the values, based on the bounds.',
       }),
     },
     showLabels: {
@@ -56,7 +56,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       help: i18n.translate('expressionMetricVis.function.font.help', {
         defaultMessage: 'Font settings.',
       }),
-      default: `{font size=60}`,
+      default: `{font size=60 align="center"}`,
     },
     metric: {
       types: ['vis_dimension'],
