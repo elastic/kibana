@@ -12,9 +12,9 @@ import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
 import {
-  getESSystemIndicesUpgradeStatus,
+  getESSystemIndicesMigrationStatus,
   convertFeaturesToIndicesArray,
-} from '../lib/es_system_indices_upgrade';
+} from '../lib/es_system_indices_migration';
 
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient
@@ -23,7 +23,7 @@ export async function getESUpgradeStatus(
 
   const getCombinedDeprecations = async () => {
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
-    const systemIndices = await getESSystemIndicesUpgradeStatus(dataClient.asCurrentUser);
+    const systemIndices = await getESSystemIndicesMigrationStatus(dataClient.asCurrentUser);
     const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
 
     return Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {

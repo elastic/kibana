@@ -25,8 +25,9 @@ import { getBackupStep } from './backup_step';
 import { getFixIssuesStep } from './fix_issues_step';
 import { getFixLogsStep } from './fix_logs_step';
 import { getUpgradeStep } from './upgrade_step';
+import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 
-type OverviewStep = 'backup' | 'fix_issues' | 'fix_logs';
+type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'fix_logs';
 
 export const Overview: FunctionComponent = () => {
   const {
@@ -55,6 +56,7 @@ export const Overview: FunctionComponent = () => {
 
   const [completedStepsMap, setCompletedStepsMap] = useState({
     backup: false,
+    migrate_system_indices: false,
     fix_issues: false,
     fix_logs: false,
   });
@@ -112,6 +114,11 @@ export const Overview: FunctionComponent = () => {
               isComplete: isStepComplete('backup'),
               setIsComplete: setCompletedStep.bind(null, 'backup'),
             }),
+            getMigrateSystemIndicesStep({
+              nextMajor,
+              isComplete: isStepComplete('migrate_system_indices'),
+              setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
+            }),
             getFixIssuesStep({
               nextMajor,
               isComplete: isStepComplete('fix_issues'),
@@ -121,7 +128,7 @@ export const Overview: FunctionComponent = () => {
               isComplete: isStepComplete('fix_logs'),
               setIsComplete: setCompletedStep.bind(null, 'fix_logs'),
             }),
-            getUpgradeStep({ docLinks, nextMajor }),
+            getUpgradeStep({ nextMajor }),
           ]}
         />
       </EuiPageContent>
