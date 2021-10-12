@@ -10,10 +10,11 @@ import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
 import { createTelemetryEndpointTaskConfig } from './endpoint';
 import { createTelemetrySecurityListTaskConfig } from './security_lists';
 import { createTelemetryDetectionRuleListsTaskConfig } from './detection_rule';
-
-const MAX_SECURITY_LIST_TELEMETRY_BATCH = 100;
-const MAX_ENDPOINT_TELEMETRY_BATCH = 1_000;
-const MAX_DETECTION_RULE_TELEMETRY_BATCH = 1_000;
+import {
+  MAX_SECURITY_LIST_TELEMETRY_BATCH,
+  MAX_ENDPOINT_TELEMETRY_BATCH,
+  MAX_DETECTION_RULE_TELEMETRY_BATCH,
+} from '../constants';
 
 export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
   return [
