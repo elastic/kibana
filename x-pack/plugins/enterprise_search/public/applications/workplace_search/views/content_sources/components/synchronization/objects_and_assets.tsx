@@ -47,7 +47,7 @@ export const ObjectsAndAssets: React.FC = () => {
   const {
     setThumbnailsChecked,
     setContentExtractionChecked,
-    updateSyncSettings,
+    updateObjectsAndAssetsSettings,
     resetSyncSettings,
   } = useActions(SynchronizationLogic({ contentSource }));
 
@@ -61,7 +61,11 @@ export const ObjectsAndAssets: React.FC = () => {
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton fill onClick={updateSyncSettings} disabled={!hasUnsavedObjectsAndAssetsChanges}>
+        <EuiButton
+          fill
+          onClick={updateObjectsAndAssetsSettings}
+          disabled={!hasUnsavedObjectsAndAssetsChanges}
+        >
           {SAVE_BUTTON_LABEL}
         </EuiButton>
       </EuiFlexItem>
