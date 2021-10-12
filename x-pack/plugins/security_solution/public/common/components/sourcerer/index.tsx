@@ -155,19 +155,24 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
           }))
     );
 
-    const defaultSelectedOptions = useMemo(
-      () =>
+    const getDefaultSelectedOptionsByDataView = useCallback(
+      (id: string) =>
         isOnlyDetectionAlerts
           ? alertsOptions
           : getScopePatternListSelection(
-              kibanaDataViews.find((dataView) => dataView.id === dataViewId),
+              kibanaDataViews.find((dataView) => dataView.id === id),
               scopeId,
               signalIndexName
             ).map((indexSelected: string) => ({
               label: indexSelected,
               value: indexSelected,
             })),
-      [alertsOptions, dataViewId, isOnlyDetectionAlerts, kibanaDataViews, scopeId, signalIndexName]
+      [alertsOptions, isOnlyDetectionAlerts, kibanaDataViews, scopeId, signalIndexName]
+    );
+
+    const defaultSelectedOptions = useMemo(
+      () => getDefaultSelectedOptionsByDataView(dataViewId),
+      [dataViewId, getDefaultSelectedOptionsByDataView]
     );
 
     const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
@@ -205,15 +210,15 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
     const onChangeSuper = useCallback(
       (newSelectedOption) => {
         setDataViewId(newSelectedOption);
-        setSelectedOptions(defaultSelectedOptions);
+        setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedOption));
       },
-      [defaultSelectedOptions]
+      [getDefaultSelectedOptionsByDataView]
     );
 
     const resetDataSources = useCallback(() => {
       setDataViewId(defaultDataViewByPage);
-      setSelectedOptions(defaultSelectedOptions);
-    }, [defaultDataViewByPage, defaultSelectedOptions]);
+      setSelectedOptions(getDefaultSelectedOptionsByDataView(defaultDataViewByPage));
+    }, [defaultDataViewByPage, getDefaultSelectedOptionsByDataView]);
 
     const handleSaveIndices = useCallback(() => {
       onChangeDataView(

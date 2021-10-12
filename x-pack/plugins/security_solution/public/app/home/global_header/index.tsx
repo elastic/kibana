@@ -19,10 +19,11 @@ import { AppMountParameters } from '../../../../../../../src/core/public';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { ADD_DATA_PATH } from '../../../../common/constants';
+import { ADD_DATA_PATH, SecurityPageName } from '../../../../common/constants';
 import { isDetectionsPath } from '../../../../public/helpers';
 import { Sourcerer } from '../../../common/components/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add data',
@@ -41,8 +42,12 @@ export const GlobalHeader = React.memo(
       },
     } = useKibana().services;
     const { pathname } = useLocation();
-
-    const sourcererScope = SourcererScopeName.default;
+    const [{ pageName, detailName }] = useRouteSpy();
+    const isAlertsOrRulesDetailsPage =
+      pageName === SecurityPageName.alerts || (SecurityPageName.rules && detailName != null);
+    const sourcererScope = isAlertsOrRulesDetailsPage
+      ? SourcererScopeName.detections
+      : SourcererScopeName.default;
 
     useEffect(() => {
       setHeaderActionMenu((element) => {
