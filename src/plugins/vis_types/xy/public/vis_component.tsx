@@ -19,6 +19,7 @@ import {
   ScaleType,
   AccessorFn,
   Accessor,
+  XYBrushEvent,
 } from '@elastic/charts';
 
 import { compact } from 'lodash';
@@ -131,7 +132,10 @@ const VisComponent = (props: VisComponentProps) => {
     ): BrushEndListener | undefined => {
       if (xAccessor !== null && isInterval) {
         return (brushArea) => {
-          const event = getBrushFromChartBrushEventFn(visData, xAccessor)(brushArea);
+          const event = getBrushFromChartBrushEventFn(
+            visData,
+            xAccessor
+          )(brushArea as XYBrushEvent);
           props.fireEvent(event);
         };
       }

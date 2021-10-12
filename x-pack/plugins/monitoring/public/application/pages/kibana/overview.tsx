@@ -107,12 +107,7 @@ export const KibanaOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
   return (
-    <KibanaTemplate
-      data-test-subj="kibanaOverviewPage"
-      getPageData={getPageData}
-      title={title}
-      pageTitle={pageTitle}
-    >
+    <KibanaTemplate getPageData={getPageData} title={title} pageTitle={pageTitle}>
       <KibanaOverview data={data} />
     </KibanaTemplate>
   );
