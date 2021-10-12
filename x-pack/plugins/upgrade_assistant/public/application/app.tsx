@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent, EuiLoadingSpinner } from '@elastic/eui';
 import { ScopedHistory } from 'src/core/public';
 
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
@@ -125,7 +125,22 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 
   // This is a hack to avoid the app getting stuck in an infinite render loop,
   // as noted in api.ts.
-  api.useLoadClusterUpgradeStatus();
+  const { isLoading, isInitialRequest } = api.useLoadClusterUpgradeStatus();
+
+  // Prevent flicker of the underlying UI while we wait for the status to fetch.
+  if (isLoading && isInitialRequest) {
+    return (
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+      >
+        <EuiEmptyPrompt body={<EuiLoadingSpinner size="l" />} />
+      </EuiPageContent>
+    );
+    return;
+  }
 
   return (
     <Router history={history}>
