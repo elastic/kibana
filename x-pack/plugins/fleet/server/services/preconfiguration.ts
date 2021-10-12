@@ -95,9 +95,21 @@ export async function ensurePreconfiguredOutputs(
         data.hosts = outputService.getDefaultESHosts();
       }
 
-      if (!existingOutput) {
+      const isCreate = !existingOutput;
+      const isUpdateWithNewData =
+        existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
+      // If a default output already exists, delete it in favor of the preconfigured one
+      if (isCreate || isUpdateWithNewData) {
+        const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+
+        if (defaultOutputId && defaultOutputId !== output.id) {
+          await outputService.delete(soClient, defaultOutputId);
+        }
+      }
+
+      if (isCreate) {
         await outputService.create(soClient, data, { id, overwrite: true });
-      } else if (isPreconfiguredOutputDifferentFromCurrent(existingOutput, data)) {
+      } else if (isUpdateWithNewData) {
         await outputService.update(soClient, id, data);
         // Bump revision of all policies using that output
         if (outputData.is_default) {
