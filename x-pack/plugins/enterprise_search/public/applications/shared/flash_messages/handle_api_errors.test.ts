@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HttpResponse } from 'kibana/public';
 import '../../__mocks__/kea_logic/kibana_logic.mock';
 
 jest.mock('./set_message_helpers', () => ({
@@ -100,16 +101,17 @@ describe('toastAPIErrors', () => {
     toastAPIErrors(mockHttpError);
 
     expect(flashErrorToast).toHaveBeenNthCalledWith(1, 'Could not find X');
-    expect(flashErrorToast).toHaveBeenNthCalledWith(1, 'Could not find X');
-    expect(flashErrorToast).toHaveBeenNthCalledWith(1, 'Could not find X');
+    expect(flashErrorToast).toHaveBeenNthCalledWith(2, 'Could not find Y');
+    expect(flashErrorToast).toHaveBeenNthCalledWith(3, 'Something else bad happened');
   });
 
   it('displays a generic error message and re-throws non-API errors', () => {
-    try {
-      toastAPIErrors(Error('whatever') as any);
-    } catch (e) {
-      expect(flashErrorToast).toHaveBeenCalledWith(expect.any(String));
-    }
+    const error = Error('whatever') as any;
+
+    expect(() => {
+      toastAPIErrors(error);
+    }).toThrowError(error);
+    expect(flashErrorToast).toHaveBeenCalledWith(expect.any(String));
   });
 });
 
