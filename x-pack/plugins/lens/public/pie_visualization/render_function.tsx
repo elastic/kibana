@@ -92,7 +92,6 @@ export function PieComponent(
   }
 
   const fillLabel: Partial<PartitionFillLabel> = {
-    textInvertible: true,
     valueFont: {
       fontWeight: 700,
     },
