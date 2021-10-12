@@ -19413,7 +19413,6 @@
     "xpack.osquery.osquery_integration.fetchError": "提取 osquery 集成时出错",
     "xpack.osquery.osquery_policies.fetchError": "提取 osquery 策略时出错",
     "xpack.osquery.osquerySchemaLinkLabel": "Osquery 架构",
-    "xpack.osquery.packDetailsPage.kpis.policyLabelText": "策略",
     "xpack.osquery.packUploader.examplePacksLinkLabel": "示例包",
     "xpack.osquery.packUploader.initialPromptTextLabel": "选择或拖放 osquery 包配置文件",
     "xpack.osquery.packUploader.unsupportedFileTypeText": "文件类型 {fileType} 不受支持，请上传 {supportedFileTypes} 配置文件",

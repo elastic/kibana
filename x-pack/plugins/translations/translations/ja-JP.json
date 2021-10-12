@@ -19135,7 +19135,6 @@
     "xpack.osquery.osquery_integration.fetchError": "osquery統合の取得中にエラーが発生しました",
     "xpack.osquery.osquery_policies.fetchError": "osqueryポリシーの取得中にエラーが発生しました",
     "xpack.osquery.osquerySchemaLinkLabel": "Osqueryスキーマ",
-    "xpack.osquery.packDetailsPage.kpis.policyLabelText": "ポリシー",
     "xpack.osquery.packUploader.examplePacksLinkLabel": "パックの例",
     "xpack.osquery.packUploader.initialPromptTextLabel": "osqueryパック構成ファイルを選択するか、ドラッグします",
     "xpack.osquery.packUploader.unsupportedFileTypeText": "ファイルタイプ{fileType}はサポートされていません。{supportedFileTypes}構成ファイルをアップロードしてください",

@@ -183,6 +183,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
           <EuiFlexItem>
             <CommonUseField path="name" />
           </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup>
           <EuiFlexItem>
             <CommonUseField path="description" />
           </EuiFlexItem>

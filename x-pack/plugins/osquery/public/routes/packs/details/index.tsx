@@ -26,7 +26,6 @@ import { WithHeaderLayout } from '../../../components/layouts';
 import { usePack } from '../../../packs/use_pack';
 import { PackQueriesStatusTable } from '../../../packs/pack_queries_status_table';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { AgentsPolicyLink } from '../../../agent_policies/agents_policy_link';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 import { useAgentPolicyAgentIds } from '../../../agents/use_agent_policy_agent_ids';
 
@@ -110,7 +109,10 @@ const PackDetailsPageComponent = () => {
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription className="eui-textNoWrap">
-              {data?.policy_ids?.length}
+              {
+                // @ts-expect-error update types
+                data?.policy_ids?.length
+              }
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
