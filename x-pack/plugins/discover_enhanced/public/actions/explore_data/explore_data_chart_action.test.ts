@@ -234,10 +234,12 @@ describe('"Explore underlying data" panel action', () => {
               lte: to,
             },
           },
-          range: {
-            [timeFieldName]: {
-              gte: from,
-              lte: to,
+          query: {
+            range: {
+              [timeFieldName]: {
+                gte: from,
+                lte: to,
+              },
             },
           },
         },
