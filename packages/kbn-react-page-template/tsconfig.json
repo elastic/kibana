@@ -9,7 +9,8 @@
     "sourceRoot": "../../../../../packages/kbn-react-page-template/src",
     "types": [
       "jest",
-      "node"
+      "node",
+      "resize-observer-polyfill"
     ]
   },
   "include": [
