@@ -47,7 +47,7 @@ export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL = `${CUSTOM_SOURCE_DOCS_UR
 export const ENT_SEARCH_LICENSE_MANAGEMENT = `${docLinks.enterpriseSearchBase}/license-management.html`;
 export const SYNCHRONIZATION_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
 export const DIFFERENT_SYNC_TYPES_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#_indexing_schedule`;
-export const OBJECTS_AND_ASSETS_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html##workplace-search-customizing-indexing-rules`;
+export const OBJECTS_AND_ASSETS_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
 
 export const PERSONAL_PATH = '/p';
 
