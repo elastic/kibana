@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 
-import { AppWithRouter } from '../../../public/application/app';
+import { App } from '../../../public/application/app';
 import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
@@ -40,7 +40,7 @@ const createActions = (testBed: TestBed) => {
 };
 
 export const setupAppPage = async (overrides?: Record<string, unknown>): Promise<AppTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(AppWithRouter, overrides), testBedConfig);
+  const initTestBed = registerTestBed(WithAppDependencies(App, overrides), testBedConfig);
   const testBed = await initTestBed();
 
   return {

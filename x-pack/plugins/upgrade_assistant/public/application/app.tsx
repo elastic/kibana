@@ -118,7 +118,7 @@ const AppWithoutPolling: React.FunctionComponent = () => {
   );
 };
 
-export const App: React.FunctionComponent = () => {
+export const App = ({ history }: { history: ScopedHistory }) => {
   const {
     services: { api },
   } = useAppContext();
@@ -127,13 +127,9 @@ export const App: React.FunctionComponent = () => {
   // as noted in api.ts.
   api.useLoadClusterUpgradeStatus();
 
-  return <AppWithoutPolling />;
-};
-
-export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
   return (
     <Router history={history}>
-      <App />
+      <AppWithoutPolling />
     </Router>
   );
 };
@@ -150,7 +146,7 @@ export const RootComponent = (dependencies: AppDependencies) => {
         <i18n.Context>
           <AppContextProvider value={dependencies}>
             <GlobalFlyoutProvider>
-              <AppWithRouter history={history} />
+              <App history={history} />
             </GlobalFlyoutProvider>
           </AppContextProvider>
         </i18n.Context>
