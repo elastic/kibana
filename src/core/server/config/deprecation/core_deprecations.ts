@@ -16,6 +16,7 @@ const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDe
         'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
         'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
         'current behavior and silence this warning.',
+      level: 'warning',
       correctiveActions: {
         manualSteps: [
           `Set 'server.rewriteBasePath' in the config file, CLI flag, or environment variable (in Docker only).`,
