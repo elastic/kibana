@@ -90,7 +90,7 @@ export function injectEntityAndBoundaryIds(
 export function extractIndexAndBoundaryRefsFromGeoContainmentStackAlert(
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> {
-  if (doc.attributes.alertTypeId === GEO_CONTAINMENT_ID) {
+  if (doc.attributes.alertTypeId !== GEO_CONTAINMENT_ID) {
     return doc;
   }
 
