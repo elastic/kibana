@@ -626,16 +626,46 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
  */
 class ToolingLog {
   constructor(writerConfig) {
-    (0, _defineProperty2.default)(this, "identWidth", 0);
+    (0, _defineProperty2.default)(this, "indentWidth", 0);
     (0, _defineProperty2.default)(this, "writers", void 0);
     (0, _defineProperty2.default)(this, "written$", void 0);
     this.writers = writerConfig ? [new _tooling_log_text_writer.ToolingLogTextWriter(writerConfig)] : [];
     this.written$ = new Rx.Subject();
   }
+  /**
+   * Get the current indentation level of the ToolingLog
+   */
 
-  indent(delta = 0) {
-    this.identWidth = Math.max(this.identWidth + delta, 0);
-    return this.identWidth;
+
+  getIndent() {
+    return this.indentWidth;
+  }
+  /**
+   * Indent the output of the ToolingLog by some character (4 is a good choice usually).
+   *
+   * If provided, the `block` function will be executed and once it's promise is resolved
+   * or rejected the indentation will be reset to its original state.
+   *
+   * @param delta the number of spaces to increase/decrease the indentation
+   * @param block a function to run and reset any indentation changes after
+   */
+
+
+  indent(delta = 0, block) {
+    const originalWidth = this.indentWidth;
+    this.indentWidth = Math.max(this.indentWidth + delta, 0);
+
+    if (!block) {
+      return;
+    }
+
+    return (async () => {
+      try {
+        return await block();
+      } finally {
+        this.indentWidth = originalWidth;
+      }
+    })();
   }
 
   verbose(...args) {
@@ -681,7 +711,7 @@ class ToolingLog {
   sendToWriters(type, args) {
     const msg = {
       type,
-      indent: this.identWidth,
+      indent: this.indentWidth,
       args
     };
     let written = false;
@@ -8980,6 +9010,9 @@ var _ci_stats_config = __webpack_require__(218);
 const BASE_URL = 'https://ci-stats.kibana.dev';
 
 class CiStatsReporter {
+  /**
+   * Create a CiStatsReporter by inspecting the ENV for the necessary config
+   */
   static fromEnv(log) {
     return new CiStatsReporter((0, _ci_stats_config.parseConfig)(log), log);
   }
@@ -8988,10 +9021,21 @@ class CiStatsReporter {
     this.config = config;
     this.log = log;
   }
+  /**
+   * Determine if CI_STATS is explicitly disabled by the environment. To determine
+   * if the CiStatsReporter has enough information in the environment to send metrics
+   * for builds use #hasBuildConfig().
+   */
+
 
   isEnabled() {
     return process.env.CI_STATS_DISABLED !== 'true';
   }
+  /**
+   * Determines if the CiStatsReporter is disabled by the environment, or properly
+   * configured and able to send stats
+   */
+
 
   hasBuildConfig() {
     var _this$config, _this$config2;
@@ -9039,7 +9083,7 @@ class CiStatsReporter {
 
     const memUsage = process.memoryUsage();
     const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
-    const defaultMetadata = {
+    const defaultMeta = {
       kibanaUuid,
       isElasticCommitter,
       committerHash: email ? _crypto.default.createHash('sha256').update(email).digest('hex').substring(0, 20) : undefined,
@@ -9060,15 +9104,15 @@ class CiStatsReporter {
       osRelease: _os.default.release(),
       totalMem: _os.default.totalmem()
     };
-    this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
+    this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
     return await this.req({
       auth: !!buildId,
       path: '/v1/timings',
       body: {
         buildId,
         upstreamBranch,
-        timings,
-        defaultMetadata
+        defaultMeta,
+        timings
       },
       bodyDesc: timings.length === 1 ? `${timings.length} timing` : `${timings.length} timings`
     });
@@ -9079,7 +9123,7 @@ class CiStatsReporter {
    */
 
 
-  async metrics(metrics) {
+  async metrics(metrics, options) {
     var _this$config4;
 
     if (!this.hasBuildConfig()) {
@@ -9097,6 +9141,7 @@ class CiStatsReporter {
       path: '/v1/metrics',
       body: {
         buildId,
+        defaultMeta: options === null || options === void 0 ? void 0 : options.defaultMeta,
         metrics
       },
       bodyDesc: `metrics: ${metrics.map(({
