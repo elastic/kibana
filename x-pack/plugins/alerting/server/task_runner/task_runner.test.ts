@@ -338,6 +338,7 @@ describe('Task Runner', () => {
       {
         executionStatus: {
           error: null,
+          lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
           status: 'ok',
         },
@@ -4394,6 +4395,7 @@ describe('Task Runner', () => {
       {
         executionStatus: {
           error: null,
+          lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
           status: 'ok',
         },

@@ -81,6 +81,7 @@ describe('AlertExecutionStatus', () => {
       expect(alertExecutionStatusToRaw({ lastExecutionDate: date, status })).toMatchInlineSnapshot(`
         Object {
           "error": null,
+          "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
           "status": "ok",
         }
@@ -95,10 +96,23 @@ describe('AlertExecutionStatus', () => {
             "message": "wops",
             "reason": "decrypt",
           },
+          "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
           "status": "ok",
         }
       `);
+    });
+
+    test('status with a duration', () => {
+      expect(alertExecutionStatusToRaw({ lastExecutionDate: date, status, lastDuration: 1234 }))
+        .toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "lastDuration": 1234,
+        "lastExecutionDate": "2020-09-03T16:26:58.000Z",
+        "status": "ok",
+      }
+    `);
     });
   });
 
@@ -172,6 +186,41 @@ describe('AlertExecutionStatus', () => {
             "message": "wops",
             "reason": "execute",
           },
+          "lastExecutionDate": 2020-09-03T16:26:58.000Z,
+          "status": "active",
+        }
+      `);
+    });
+
+    test('valid status, date and duration', () => {
+      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+        status,
+        lastExecutionDate: date,
+        lastDuration: 1234,
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "lastDuration": 1234,
+          "lastExecutionDate": 2020-09-03T16:26:58.000Z,
+          "status": "active",
+        }
+      `);
+    });
+
+    test('valid status, date, error and duration', () => {
+      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+        status,
+        lastExecutionDate: date,
+        error,
+        lastDuration: 1234,
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "error": Object {
+            "message": "wops",
+            "reason": "execute",
+          },
+          "lastDuration": 1234,
           "lastExecutionDate": 2020-09-03T16:26:58.000Z,
           "status": "active",
         }

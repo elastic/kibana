@@ -49,6 +49,7 @@ describe('ruleTypesRoute', () => {
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
         isExportable: true,
+        ruleTaskTimeout: '10m',
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
@@ -76,6 +77,7 @@ describe('ruleTypesRoute', () => {
         minimum_license_required: 'basic',
         minimum_schedule_interval: '1m',
         is_exportable: true,
+        rule_task_timeout: '10m',
         recovery_action_group: RecoveredActionGroup,
         authorized_consumers: {},
         action_variables: {
@@ -118,6 +120,7 @@ describe('ruleTypesRoute', () => {
               "id": "recovered",
               "name": "Recovered",
             },
+            "rule_task_timeout": "10m",
           },
         ],
       }
