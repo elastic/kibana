@@ -6,10 +6,27 @@
  */
 
 import { EnterpriseSearchMetric } from './classes';
-import { LARGE_BYTES } from '../../../../common/formatting';
+import { LARGE_BYTES, SMALL_FLOAT } from '../../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 
 export const metrics = {
+  app_search_total_engines: new EnterpriseSearchMetric({
+    field: 'enterprisesearch.stats.product_usage.app_search.total_engines',
+    label: i18n.translate('xpack.monitoring.metrics.entSearch.app_search_engines', {
+      defaultMessage: 'App Search Engines',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.entSearch.app_search_engines.description',
+      {
+        defaultMessage:
+          'Current number of App Search engines within the Enterprise Search deployment.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    units: 'engines',
+    metricAgg: 'avg',
+  }),
+
   enterprise_search_heap_used: new EnterpriseSearchMetric({
     field: 'enterprisesearch.health.jvm.memory_usage.heap_used.bytes',
     metricAgg: 'max',
@@ -29,13 +46,10 @@ export const metrics = {
     label: i18n.translate('xpack.monitoring.metrics.entSearch.heap_committed', {
       defaultMessage: 'Heap Committed',
     }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.enterpriseSearch.heap_committed.description',
-      {
-        defaultMessage:
-          'The amount of memory JVM has allocated from the OS and is available to the application.',
-      }
-    ),
+    description: i18n.translate('xpack.monitoring.metrics.entSearch.heap_committed.description', {
+      defaultMessage:
+        'The amount of memory JVM has allocated from the OS and is available to the application.',
+    }),
     format: LARGE_BYTES,
     units: 'bytes',
   }),

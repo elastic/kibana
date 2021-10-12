@@ -6,3 +6,4 @@
  */
 
 export { getEnterpriseSearchForClusters } from './get_enterprise_search_for_clusters';
+export { getStats } from './get_stats';

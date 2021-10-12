@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export const metricSet = [
-  'enterprise_search_heap_used',
-  'enterprise_search_heap_committed',
-  'enterprise_search_heap_total',
-];
+export const metricSet = ['app_search_total_engines'];

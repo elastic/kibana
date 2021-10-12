@@ -11,6 +11,7 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
 import { INDEX_PATTERN_ENTERPRISE_SEARCH } from '../../../../../common/constants';
+import { getStats } from '../../../../lib/enterprise_search';
 
 export function entSearchOverviewRoute(server) {
   server.route({
@@ -32,6 +33,7 @@ export function entSearchOverviewRoute(server) {
     },
 
     async handler(req) {
+      const clusterUuid = req.params.clusterUuid;
       const entSearchIndexPattern = prefixIndexPattern(
         server.config(),
         INDEX_PATTERN_ENTERPRISE_SEARCH,
@@ -39,10 +41,14 @@ export function entSearchOverviewRoute(server) {
       );
 
       try {
-        const metrics = await getMetrics(req, entSearchIndexPattern, metricSet, [], {
-          skipClusterUuidFilter: true,
-        });
-        return { metrics };
+        const [stats, metrics] = await Promise.all([
+          getStats(req, entSearchIndexPattern, clusterUuid),
+          getMetrics(req, entSearchIndexPattern, metricSet, [], {
+            skipClusterUuidFilter: true,
+          }),
+        ]);
+
+        return { stats, metrics };
       } catch (err) {
         return handleError(err, req);
       }
