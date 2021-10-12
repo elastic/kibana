@@ -23,8 +23,31 @@ import { Status } from './status';
 export class EnterpriseSearchOverview extends PureComponent {
   render() {
     const { metrics, stats, ...props } = this.props;
-    const productUsageMetrics = [
+
+    const lowLevelUsageMetrics = [
+      metrics.enterprise_search_heap_used,
+      metrics.enterprise_search_heap_committed,
+      metrics.enterprise_search_threads_current,
+      metrics.enterprise_search_threads_rate,
+    ];
+
+    const networkMetrics = [
+      metrics.enterprise_search_http_connections_current,
+      metrics.enterprise_search_http_connections_rate,
+      metrics.enterprise_search_http_bytes_received_rate,
+      metrics.enterprise_search_http_bytes_sent_rate,
+      metrics.enterprise_search_http_2xx_rate,
+      metrics.enterprise_search_http_3xx_rate,
+      metrics.enterprise_search_http_4xx_rate,
+      metrics.enterprise_search_http_5xx_rate,
+    ];
+
+    const appSearchUsageMetrics = [
       metrics.app_search_total_engines,
+      metrics.crawler_workers_active,
+    ];
+
+    const workplaceSearchUsageMetrics = [
       metrics.workplace_search_total_org_sources,
       metrics.workplace_search_total_private_sources,
     ];
@@ -51,13 +74,83 @@ export class EnterpriseSearchOverview extends PureComponent {
             <EuiScreenReaderOnly>
               <h1>
                 <FormattedMessage
-                  id="xpack.monitoring.entSearch.overview.productUsage"
-                  defaultMessage="Product Usage Summary"
+                  id="xpack.monitoring.entSearch.overview.networkingSummary"
+                  defaultMessage="Network Traffic Summary"
+                />
+              </h1>
+            </EuiScreenReaderOnly>
+            <EuiSpacer size="m" />
+
+            <EuiFlexGrid columns={2} gutterSize="s">
+              {networkMetrics.map((metric, index) => (
+                <EuiFlexItem key={index}>
+                  {/* FIXME: Figure out if we can limit the values on the graph to positive only */}
+                  <MonitoringTimeseriesContainer series={metric} {...props} />
+                  <EuiSpacer />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGrid>
+          </EuiPageContent>
+
+          <EuiSpacer />
+
+          <EuiPageContent>
+            <EuiScreenReaderOnly>
+              <h1>
+                <FormattedMessage
+                  id="xpack.monitoring.entSearch.overview.lowLevelSummary"
+                  defaultMessage="Low Level Resource Usage Summary"
+                />
+              </h1>
+            </EuiScreenReaderOnly>
+            <EuiSpacer size="m" />
+
+            <EuiFlexGrid columns={2} gutterSize="s">
+              {lowLevelUsageMetrics.map((metric, index) => (
+                <EuiFlexItem key={index}>
+                  {/* FIXME: Figure out if we can limit the values on the graph to positive only */}
+                  <MonitoringTimeseriesContainer series={metric} {...props} />
+                  <EuiSpacer />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGrid>
+          </EuiPageContent>
+
+          <EuiSpacer />
+
+          <EuiPageContent>
+            <EuiScreenReaderOnly>
+              <h1>
+                <FormattedMessage
+                  id="xpack.monitoring.entSearch.overview.appSearchSummary"
+                  defaultMessage="App Search Summary"
                 />
               </h1>
             </EuiScreenReaderOnly>
             <EuiFlexGrid columns={2} gutterSize="s">
-              {productUsageMetrics.map((metric, index) => (
+              {appSearchUsageMetrics.map((metric, index) => (
+                <EuiFlexItem key={index}>
+                  {/* FIXME: Figure out if we can limit the values on the graph to positive only */}
+                  <MonitoringTimeseriesContainer series={metric} {...props} />
+                  <EuiSpacer />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGrid>
+          </EuiPageContent>
+
+          <EuiSpacer />
+
+          <EuiPageContent>
+            <EuiScreenReaderOnly>
+              <h1>
+                <FormattedMessage
+                  id="xpack.monitoring.entSearch.overview.workplaceSearchSummary"
+                  defaultMessage="Workplace Search Summary"
+                />
+              </h1>
+            </EuiScreenReaderOnly>
+            <EuiFlexGrid columns={2} gutterSize="s">
+              {workplaceSearchUsageMetrics.map((metric, index) => (
                 <EuiFlexItem key={index}>
                   {/* FIXME: Figure out if we can limit the values on the graph to positive only */}
                   <MonitoringTimeseriesContainer series={metric} {...props} />
