@@ -13,6 +13,8 @@ export const getDocLinks = () => {
       fleet: {
         learnMoreBlog:
           'https://www.elastic.co/blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic',
+        elasticStackGetStarted:
+          'https://www.elastic.co/guide/en/elastic-stack-get-started/current/get-started-elastic-stack.html',
       },
     },
   } as unknown as DocLinksStart;

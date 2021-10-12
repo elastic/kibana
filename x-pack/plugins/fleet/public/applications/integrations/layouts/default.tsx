@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
@@ -17,7 +17,7 @@ import type { EuiTheme } from 'src/plugins/kibana_react/common';
 import { useLink } from '../../../hooks';
 import type { Section } from '../sections';
 
-import { useLinks } from '../hooks';
+import { useLinks, useStartServices } from '../hooks';
 
 import { WithHeaderLayout } from './';
 
@@ -27,8 +27,14 @@ interface Props {
 }
 
 const Illustration = styled(EuiImage)`
-  margin-bottom: -68px;
-  width: 80%;
+  margin-bottom: -77px;
+  position: relative;
+  top: -16px;
+  width: 395px;
+`;
+
+const Hero = styled.div`
+  text-align: right;
 `;
 
 const HeroImage = memo(() => {
@@ -37,21 +43,24 @@ const HeroImage = memo(() => {
   const IS_DARK_THEME = theme.darkMode;
 
   return (
-    <Illustration
-      alt={i18n.translate('xpack.fleet.epm.illustrationAltText', {
-        defaultMessage: 'Illustration of an integration',
-      })}
-      url={
-        IS_DARK_THEME
-          ? toSharedAssets('illustration_integrations_darkmode.svg')
-          : toSharedAssets('illustration_integrations_lightmode.svg')
-      }
-    />
+    <Hero>
+      <Illustration
+        alt={i18n.translate('xpack.fleet.epm.illustrationAltText', {
+          defaultMessage: 'Illustration of an integration',
+        })}
+        url={
+          IS_DARK_THEME
+            ? toSharedAssets('illustration_integrations_darkmode.svg')
+            : toSharedAssets('illustration_integrations_lightmode.svg')
+        }
+      />
+    </Hero>
   );
 });
 
 export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, children }) => {
   const { getHref } = useLink();
+  const { docLinks } = useStartServices();
 
   return (
     <WithHeaderLayout
@@ -62,7 +71,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
             <h1>
               <FormattedMessage
                 id="xpack.fleet.integrationsHeaderTitle"
-                defaultMessage="Elastic Agent Integrations"
+                defaultMessage="Integrations"
               />
             </h1>
           </EuiText>
@@ -74,7 +83,16 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
               <p>
                 <FormattedMessage
                   id="xpack.fleet.epm.pageSubtitle"
-                  defaultMessage="Collect data from popular apps and services using Elastic Agent"
+                  defaultMessage="Collect data from popular applications and services.  To learn more about Integrations, view {link}"
+                  values={{
+                    link: (
+                      <EuiLink target="_blank" href={docLinks.links.fleet.elasticStackGetStarted}>
+                        {i18n.translate('xpack.fleet.epm.pageSubtitleLinkText', {
+                          defaultMessage: 'Getting started with Elastic Stack',
+                        })}
+                      </EuiLink>
+                    ),
+                  }}
                 />
               </p>
             </EuiText>
