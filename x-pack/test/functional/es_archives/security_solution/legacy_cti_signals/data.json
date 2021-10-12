@@ -190,7 +190,7 @@
             "event": {
               "category": "threat",
               "created": "2021-08-04T03:53:30.761Z",
-              "dataset": "threat.abuseurl",
+              "dataset": "ti_abusech.malware",
               "ingested": "2021-08-04T03:53:37.514040Z",
               "kind": "enrichment",
               "module": "threatintel",
@@ -434,7 +434,7 @@
             "event": {
               "category": "threat",
               "created": "2021-08-04T03:53:30.761Z",
-              "dataset": "threat.abuseurl",
+              "dataset": "ti_abusech.malware",
               "ingested": "2021-08-04T03:53:37.514040Z",
               "kind": "enrichment",
               "module": "threatintel",
