@@ -7,7 +7,11 @@
 
 import { HttpSetup } from 'src/core/public';
 
-import { ESUpgradeStatus, CloudBackupStatus } from '../../../common/types';
+import {
+  ESUpgradeStatus,
+  CloudBackupStatus,
+  SystemIndicesMigrationStatus,
+} from '../../../common/types';
 import {
   API_BASE_PATH,
   DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
@@ -56,6 +60,22 @@ export class ApiService {
       method: 'get',
       pollIntervalMs: CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
     });
+  }
+
+  public useLoadSystemIndicesMigrationStatus() {
+    return this.useRequest<SystemIndicesMigrationStatus>({
+      path: `${API_BASE_PATH}/system_indices_migration`,
+      method: 'get',
+    });
+  }
+
+  public async migrateSystemIndices() {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/system_indices_migration`,
+      method: 'post',
+    });
+
+    return result;
   }
 
   public useLoadEsDeprecations() {
