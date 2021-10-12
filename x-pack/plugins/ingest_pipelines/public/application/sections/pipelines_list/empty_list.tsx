@@ -85,9 +85,12 @@ export const EmptyList: FunctionComponent = () => {
                 key="emptyStateCreatePipelineDropdown"
                 onClick={() => setShowPopover((previousBool) => !previousBool)}
               >
-                {i18n.translate('xpack.ingestPipelines.list.table.emptyCreatePipelineDropdownLabel', {
-                  defaultMessage: 'Create pipeline',
-                })}
+                {i18n.translate(
+                  'xpack.ingestPipelines.list.table.emptyCreatePipelineDropdownLabel',
+                  {
+                    defaultMessage: 'Create pipeline',
+                  }
+                )}
               </EuiButton>
             }
             panelPaddingSize="none"
