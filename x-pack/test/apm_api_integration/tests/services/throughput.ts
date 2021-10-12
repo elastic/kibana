@@ -26,19 +26,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
   async function callApi(overrides?: {
-    start?: string;
-    end?: string;
-    transactionType?: string;
-    environment?: string;
-    kuery?: string;
-    comparisonStart?: string;
-    comparisonEnd?: string;
+    path?: {
+      serviceName?: string;
+    };
+    query?: {
+      start?: string;
+      end?: string;
+      transactionType?: string;
+      environment?: string;
+      kuery?: string;
+      comparisonStart?: string;
+      comparisonEnd?: string;
+    };
   }) {
     const response = await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
       params: {
         path: {
           serviceName: 'synth-go',
+          ...overrides?.path,
         },
         query: {
           start: new Date(start).toISOString(),
@@ -46,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           transactionType: 'request',
           environment: 'ENVIRONMENT_ALL',
           kuery: '',
-          ...overrides,
+          ...overrides?.query,
         },
       },
     });
@@ -123,8 +129,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           const [throughputMetricsResponse, throughputTransactionsResponse] = await Promise.all([
-            callApi({ kuery: 'processor.event : "metric"' }),
-            callApi({ kuery: 'processor.event : "transaction"' }),
+            callApi({ query: { kuery: 'processor.event : "metric"' } }),
+            callApi({ query: { kuery: 'processor.event : "transaction"' } }),
           ]);
           throughputMetrics = throughputMetricsResponse.body;
           throughputTransactions = throughputTransactionsResponse.body;
@@ -168,8 +174,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let throughput: ThroughputReturn;
 
       before(async () => {
-        const throughputMetricsResponse = await callApi({ environment: 'production' });
-        throughput = throughputMetricsResponse.body;
+        const throughputResponse = await callApi({ query: { environment: 'production' } });
+        throughput = throughputResponse.body;
       });
 
       it('returns some data', () => {
@@ -184,15 +190,37 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('when synth-java is selected', () => {
+      let throughput: ThroughputReturn;
+
+      before(async () => {
+        const throughputResponse = await callApi({ path: { serviceName: 'synth-java' } });
+        throughput = throughputResponse.body;
+      });
+
+      it('returns some data', () => {
+        expect(throughput.currentPeriod.length).to.be.greaterThan(0);
+        const hasData = throughput.currentPeriod.some(({ y }) => isFiniteNumber(y));
+        expect(hasData).to.equal(true);
+      });
+
+      it('returns throughput related to java agent', () => {
+        const throughputMean = meanBy(throughput.currentPeriod, 'y');
+        expect(roundNumber(throughputMean)).to.be.equal('1200');
+      });
+    });
+
     describe('time comparisons', () => {
       let throughputResponse: ThroughputReturn;
 
       before(async () => {
         const response = await callApi({
-          start: moment(end).subtract(15, 'minutes').toISOString(),
-          end: new Date(end).toISOString(),
-          comparisonStart: new Date(start).toISOString(),
-          comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+          query: {
+            start: moment(end).subtract(15, 'minutes').toISOString(),
+            end: new Date(end).toISOString(),
+            comparisonStart: new Date(start).toISOString(),
+            comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+          },
         });
         throughputResponse = response.body;
       });

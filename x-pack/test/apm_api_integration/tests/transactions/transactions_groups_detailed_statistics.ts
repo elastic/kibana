@@ -30,7 +30,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles the empty state', async () => {
         const response = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+          endpoint:
+            'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
           params: {
             path: {
               serviceName: 'opbeans-go',
@@ -62,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     withComparison?: boolean;
   }) {
     const response = await apmApiClient.readUser({
-      endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+      endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
       params: {
         path: {
           serviceName: 'opbeans-go',
