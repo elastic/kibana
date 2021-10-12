@@ -33,6 +33,8 @@ export const getXDomain = (params: Aspect['params']): DomainRange => {
 
   return {
     minInterval,
+    min: NaN,
+    max: NaN,
   };
 };
 
@@ -74,9 +76,9 @@ export const getAdjustedDomain = (
     };
   }
 
-  return 'interval' in params
-    ? {
-        minInterval: params.interval,
-      }
-    : {};
+  return {
+    minInterval: 'interval' in params ? params.interval : undefined,
+    min: NaN,
+    max: NaN,
+  };
 };

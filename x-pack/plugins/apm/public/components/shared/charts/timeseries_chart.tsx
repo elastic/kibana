@@ -20,6 +20,7 @@ import {
   ScaleType,
   Settings,
   YDomainRange,
+  XYBrushEvent,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -115,7 +116,9 @@ export function TimeseriesChart({
       <Chart ref={chartRef} id={id}>
         <Settings
           tooltip={{ stickTo: 'top' }}
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          onBrushEnd={(event) =>
+            onBrushEnd({ x: (event as XYBrushEvent).x, history })
+          }
           theme={{
             ...chartTheme,
             areaSeriesStyle: {

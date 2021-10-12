@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 
-import { XYBrushArea } from '@elastic/charts';
+import { XYBrushEvent } from '@elastic/charts';
 import { EuiPanel, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -48,7 +48,7 @@ export function TransactionDetailsTabs() {
     environment,
   });
 
-  const selectSampleFromChartSelection = (selection: XYBrushArea) => {
+  const selectSampleFromChartSelection = (selection: XYBrushEvent) => {
     if (selection !== undefined) {
       const { x } = selection;
       if (Array.isArray(x)) {
