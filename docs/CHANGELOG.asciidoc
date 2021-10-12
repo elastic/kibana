@@ -110,7 +110,7 @@ Fleet::
 * Fixes policy upgrades for packages with multiple policy templates {kibana-pull}114011[#114011]
 * Fixes Step 1 in policy editor not loading when agent policy already contains a limited integration {kibana-pull}113883[#113883]
 * Sets code editor height to solve an overlap in default policy settings {kibana-pull}113763[#113763]
-* Fixes some vars from preconfiguration not being added to package policies {kibana-pull}113204[#113204]
+* Fixes issue where some variables from `xpack.fleet.agentPolicies` were not added to package policies {kibana-pull}113204[#113204]
 Lens & Visualizations::
 * Updates the series and metrics IDs that are numbers to strings in *TSVB* {kibana-pull}113619[#113619]
 * Fixes infinite loop when loading rejected data view in *Lens* {kibana-pull}113375[#113375]
