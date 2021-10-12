@@ -18,12 +18,12 @@ import {
   EuiConfirmModal,
   EuiSpacer,
 } from '@elastic/eui';
-import { sumBy } from 'lodash';
 
 import type {
   GetAgentPoliciesResponse,
   PackageInfo,
   UpgradePackagePolicyDryRunResponse,
+  PackagePolicy,
 } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
@@ -109,10 +109,24 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   }, [packagePolicyIds]);
 
   const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
+
+  function isStringArray(arr: unknown | string[]): arr is string[] {
+    return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
+  }
+
   const agentCount = useMemo(
-    () => sumBy(agentPolicyData?.items, ({ agents }) => agents ?? 0),
-    [agentPolicyData]
+    () =>
+      agentPolicyData?.items.reduce((acc, item) => {
+        const existingPolicies = isStringArray(item?.package_policies)
+          ? (item?.package_policies as string[]).filter((p) => packagePolicyIds.includes(p))
+          : (item?.package_policies as PackagePolicy[]).filter((p) =>
+              packagePolicyIds.includes(p.id)
+            );
+        return (acc += existingPolicies.length > 0 && item?.agents ? item?.agents : 0);
+      }, 0),
+    [agentPolicyData, packagePolicyIds]
   );
+
   const conflictCount = useMemo(
     () => dryRunData?.filter((item) => item.hasErrors).length,
     [dryRunData]
