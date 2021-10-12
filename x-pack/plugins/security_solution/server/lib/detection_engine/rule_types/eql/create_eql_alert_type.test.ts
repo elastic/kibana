@@ -12,6 +12,7 @@ import { allowedExperimentalValues } from '../../../../../common/experimental_fe
 import { createEqlAlertType } from './create_eql_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { getEqlRuleParams } from '../../schemas/rule_schemas.mock';
+import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
 import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../../rule_execution_log/rule_execution_log_client');
@@ -23,15 +24,20 @@ describe('Event correlation alerts', () => {
       query: 'any where false',
     };
     const { services, dependencies, executor } = createRuleTypeMocks('eql', params);
-    const eqlAlertType = createEqlAlertType({
-      experimentalFeatures: allowedExperimentalValues,
+    const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
       lists: dependencies.lists,
       logger: dependencies.logger,
       config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
       eventLogService: dependencies.eventLogService,
-      version: '1.0.0',
     });
+    const eqlAlertType = securityRuleTypeWrapper(
+      createEqlAlertType({
+        experimentalFeatures: allowedExperimentalValues,
+        logger: dependencies.logger,
+        version: '1.0.0',
+      })
+    );
     dependencies.alerting.registerType(eqlAlertType);
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({

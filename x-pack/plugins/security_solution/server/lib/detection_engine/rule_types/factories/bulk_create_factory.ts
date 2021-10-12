@@ -16,7 +16,6 @@ import { BuildRuleMessage } from '../../signals/rule_messages';
 import { errorAggregator, makeFloatString } from '../../signals/utils';
 import { RefreshTypes } from '../../types';
 import { PersistenceAlertService } from '../../../../../../rule_registry/server';
-import { AlertInstanceContext } from '../../../../../../alerting/common';
 
 export interface GenericBulkCreateResponse<T> {
   success: boolean;
@@ -27,9 +26,9 @@ export interface GenericBulkCreateResponse<T> {
 }
 
 export const bulkCreateFactory =
-  <TContext extends AlertInstanceContext>(
+  (
     logger: Logger,
-    alertWithPersistence: PersistenceAlertService<TContext>,
+    alertWithPersistence: PersistenceAlertService,
     buildRuleMessage: BuildRuleMessage,
     refreshForBulkCreate: RefreshTypes
   ) =>
@@ -61,6 +60,19 @@ export const bulkCreateFactory =
         `individual bulk process time took: ${makeFloatString(end - start)} milliseconds`
       )
     );
+
+    if (response == null) {
+      return {
+        errors: [
+          'alertWithPersistence returned undefined response. Alerts as Data write flag may be disabled.',
+        ],
+        success: false,
+        bulkCreateDuration: makeFloatString(end - start),
+        createdItemsCount: 0,
+        createdItems: [],
+      };
+    }
+
     logger.debug(
       buildRuleMessage(`took property says bulk took: ${response.body.took} milliseconds`)
     );
