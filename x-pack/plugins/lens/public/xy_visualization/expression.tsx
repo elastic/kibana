@@ -25,9 +25,12 @@ import {
   LayoutDirection,
   ElementClickListener,
   BrushEndListener,
+  XYBrushEvent,
   CurveType,
   LegendPositionConfig,
   LabelOverflowConstraint,
+  DisplayValueStyle,
+  RecursivePartial,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import type {
@@ -59,7 +62,11 @@ import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axe
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
-import { ThresholdAnnotations } from './expression_thresholds';
+import {
+  computeChartMargins,
+  getThresholdRequiredPaddings,
+  ThresholdAnnotations,
+} from './expression_thresholds';
 
 declare global {
   interface Window {
@@ -113,6 +120,8 @@ export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   return intervalDuration.as('milliseconds');
 }
 
+const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
+
 export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginStart['theme'];
@@ -163,7 +172,9 @@ export const getXyChartRenderer = (dependencies: {
   },
 });
 
-function getValueLabelsStyling(isHorizontal: boolean) {
+function getValueLabelsStyling(isHorizontal: boolean): {
+  displayValue: RecursivePartial<DisplayValueStyle>;
+} {
   const VALUE_LABELS_MAX_FONTSIZE = 12;
   const VALUE_LABELS_MIN_FONTSIZE = 10;
   const VALUE_LABELS_VERTICAL_OFFSET = -10;
@@ -172,11 +183,9 @@ function getValueLabelsStyling(isHorizontal: boolean) {
   return {
     displayValue: {
       fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
-      fill: { textContrast: true, textInverted: false, textBorder: 0 },
+      fill: { textBorder: 0 },
       alignment: isHorizontal
-        ? {
-            vertical: VerticalAlignment.Middle,
-          }
+        ? { vertical: VerticalAlignment.Middle }
         : { horizontal: HorizontalAlignment.Center },
       offsetX: isHorizontal ? VALUE_LABELS_HORIZONTAL_OFFSET : 0,
       offsetY: isHorizontal ? 0 : VALUE_LABELS_VERTICAL_OFFSET,
@@ -191,20 +200,18 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 const MemoizedChart = React.memo(XYChart);
 
 export function XYChartReportable(props: XYChartRenderProps) {
-  const [state, setState] = useState({
-    isReady: false,
-  });
+  const [isReady, setIsReady] = useState(false);
 
   // It takes a cycle for the XY chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
-    setState({ isReady: true });
-  }, [setState]);
+    setIsReady(true);
+  }, [setIsReady]);
 
   return (
     <VisualizationContainer
       className="lnsXyExpression__container"
-      isReady={state.isReady}
+      isReady={isReady}
       reportTitle={props.args.title}
       reportDescription={props.args.description}
     >
@@ -316,6 +323,12 @@ export function XYChart({
     Boolean(isHistogramViz)
   );
 
+  const yAxesMap = {
+    left: yAxesConfiguration.find(({ groupId }) => groupId === 'left'),
+    right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
+  };
+  const thresholdPaddings = getThresholdRequiredPaddings(thresholdLayers, yAxesMap);
+
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
     groupId: string
@@ -332,23 +345,38 @@ export function XYChart({
     );
   };
 
-  const getYAxesStyle = (groupId: string) => {
+  const getYAxesStyle = (groupId: 'left' | 'right') => {
+    const tickVisible =
+      groupId === 'right'
+        ? tickLabelsVisibilitySettings?.yRight
+        : tickLabelsVisibilitySettings?.yLeft;
+
     const style = {
       tickLabel: {
-        visible:
-          groupId === 'right'
-            ? tickLabelsVisibilitySettings?.yRight
-            : tickLabelsVisibilitySettings?.yLeft,
+        visible: tickVisible,
         rotation:
           groupId === 'right'
             ? args.labelsOrientation?.yRight || 0
             : args.labelsOrientation?.yLeft || 0,
+        padding:
+          thresholdPaddings[groupId] != null
+            ? {
+                inner: thresholdPaddings[groupId],
+              }
+            : undefined,
       },
       axisTitle: {
         visible:
           groupId === 'right'
             ? axisTitlesVisibilitySettings?.yRight
             : axisTitlesVisibilitySettings?.yLeft,
+        // if labels are not visible add the padding to the title
+        padding:
+          !tickVisible && thresholdPaddings[groupId] != null
+            ? {
+                inner: thresholdPaddings[groupId],
+              }
+            : undefined,
       },
     };
     return style;
@@ -363,14 +391,49 @@ export function XYChart({
       })
     );
     const fit = !hasBarOrArea && extent.mode === 'dataBounds';
-    let min: undefined | number;
-    let max: undefined | number;
+    let min: number = NaN;
+    let max: number = NaN;
 
     if (extent.mode === 'custom') {
       const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
       if (!inclusiveZeroError && !boundaryError) {
-        min = extent.lowerBound;
-        max = extent.upperBound;
+        min = extent.lowerBound ?? NaN;
+        max = extent.upperBound ?? NaN;
+      }
+    } else {
+      const axisHasThreshold = thresholdLayers.some(({ yConfig }) =>
+        yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
+      );
+      if (!fit && axisHasThreshold) {
+        // Remove this once the chart will support automatic annotation fit for other type of charts
+        for (const series of axis.series) {
+          const table = data.tables[series.layer];
+          for (const row of table.rows) {
+            for (const column of table.columns) {
+              if (column.id === series.accessor) {
+                const value = row[column.id];
+                if (typeof value === 'number') {
+                  // keep the 0 in view
+                  max = Math.max(value, max || 0, 0);
+                  min = Math.min(value, min || 0, 0);
+                }
+              }
+            }
+          }
+        }
+        for (const { layerId, yConfig } of thresholdLayers) {
+          const table = data.tables[layerId];
+          for (const { axisMode, forAccessor } of yConfig || []) {
+            if (axis.groupId === axisMode) {
+              for (const row of table.rows) {
+                const value = row[forAccessor];
+                // keep the 0 in view
+                max = Math.max(value, max || 0, 0);
+                min = Math.min(value, min || 0, 0);
+              }
+            }
+          }
+        }
       }
     }
 
@@ -457,7 +520,7 @@ export function XYChart({
     onClickValue(context);
   };
 
-  const brushHandler: BrushEndListener = ({ x }) => {
+  const brushHandler = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
     }
@@ -512,6 +575,17 @@ export function XYChart({
           legend: {
             labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
           },
+          // if not title or labels are shown for axes, add some padding if required by threshold markers
+          chartMargins: {
+            ...chartTheme.chartPaddings,
+            ...computeChartMargins(
+              thresholdPaddings,
+              tickLabelsVisibilitySettings,
+              axisTitlesVisibilitySettings,
+              yAxesMap,
+              shouldRotate
+            ),
+          },
         }}
         baseTheme={chartBaseTheme}
         tooltip={{
@@ -521,7 +595,7 @@ export function XYChart({
         allowBrushingLastHistogramBucket={Boolean(isTimeViz)}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={interactive ? brushHandler : undefined}
+        onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={getLegendAction(
           filteredLayers,
@@ -547,9 +621,15 @@ export function XYChart({
           tickLabel: {
             visible: tickLabelsVisibilitySettings?.x,
             rotation: labelsOrientation?.x,
+            padding:
+              thresholdPaddings.bottom != null ? { inner: thresholdPaddings.bottom } : undefined,
           },
           axisTitle: {
             visible: axisTitlesVisibilitySettings.x,
+            padding:
+              !tickLabelsVisibilitySettings?.x && thresholdPaddings.bottom != null
+                ? { inner: thresholdPaddings.bottom }
+                : undefined,
           },
         }}
       />
@@ -570,7 +650,7 @@ export function XYChart({
             }}
             hide={filteredLayers[0].hide}
             tickFormat={(d) => axis.formatter?.convert(d) || ''}
-            style={getYAxesStyle(axis.groupId)}
+            style={getYAxesStyle(axis.groupId as 'left' | 'right')}
             domain={getYAxisDomain(axis)}
           />
         );
@@ -611,9 +691,6 @@ export function XYChart({
             : {};
 
           const table = data.tables[layerId];
-
-          const isPrimitive = (value: unknown): boolean =>
-            value != null && typeof value !== 'object';
 
           // what if row values are not primitive? That is the case of, for instance, Ranges
           // remaps them to their serialized version with the formatHint metadata
@@ -838,14 +915,19 @@ export function XYChart({
         <ThresholdAnnotations
           thresholdLayers={thresholdLayers}
           data={data}
-          colorAssignments={colorAssignments}
           syncColors={syncColors}
           paletteService={paletteService}
           formatters={{
-            left: yAxesConfiguration.find(({ groupId }) => groupId === 'left')?.formatter,
-            right: yAxesConfiguration.find(({ groupId }) => groupId === 'right')?.formatter,
+            left: yAxesMap.left?.formatter,
+            right: yAxesMap.right?.formatter,
             bottom: xAxisFormatter,
           }}
+          axesMap={{
+            left: Boolean(yAxesMap.left),
+            right: Boolean(yAxesMap.right),
+          }}
+          isHorizontal={shouldRotate}
+          thresholdPaddingMap={thresholdPaddings}
         />
       ) : null}
     </Chart>

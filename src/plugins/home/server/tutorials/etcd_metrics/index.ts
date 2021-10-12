@@ -56,5 +56,6 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['elastic_stack', 'datastore'],
   };
 }

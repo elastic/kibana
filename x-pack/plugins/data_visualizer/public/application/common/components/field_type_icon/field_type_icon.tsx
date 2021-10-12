@@ -6,91 +6,62 @@
  */
 
 import React, { FC } from 'react';
-
 import { EuiToken, EuiToolTip } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-
 import { getJobTypeAriaLabel } from '../../util/field_types_utils';
-import { JOB_FIELD_TYPES } from '../../../../../common';
 import type { JobFieldType } from '../../../../../common';
+import './_index.scss';
 
 interface FieldTypeIconProps {
   tooltipEnabled: boolean;
   type: JobFieldType;
-  fieldName?: string;
   needsAria: boolean;
 }
 
 interface FieldTypeIconContainerProps {
   ariaLabel: string | null;
   iconType: string;
-  color: string;
+  color?: string;
   needsAria: boolean;
   [key: string]: any;
 }
 
+// defaultIcon => a unknown datatype
+const defaultIcon = { iconType: 'questionInCircle', color: 'gray' };
+
+// Extended & modified version of src/plugins/kibana_react/public/field_icon/field_icon.tsx
+export const typeToEuiIconMap: Record<string, { iconType: string; color?: string }> = {
+  boolean: { iconType: 'tokenBoolean' },
+  // icon for an index pattern mapping conflict in discover
+  conflict: { iconType: 'alert', color: 'euiColorVis9' },
+  date: { iconType: 'tokenDate' },
+  date_range: { iconType: 'tokenDate' },
+  geo_point: { iconType: 'tokenGeo' },
+  geo_shape: { iconType: 'tokenGeo' },
+  ip: { iconType: 'tokenIP' },
+  ip_range: { iconType: 'tokenIP' },
+  // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
+  murmur3: { iconType: 'tokenFile' },
+  number: { iconType: 'tokenNumber' },
+  number_range: { iconType: 'tokenNumber' },
+  histogram: { iconType: 'tokenHistogram' },
+  _source: { iconType: 'editorCodeBlock', color: 'gray' },
+  string: { iconType: 'tokenString' },
+  text: { iconType: 'tokenString' },
+  keyword: { iconType: 'tokenKeyword' },
+  nested: { iconType: 'tokenNested' },
+};
+
 export const FieldTypeIcon: FC<FieldTypeIconProps> = ({
   tooltipEnabled = false,
   type,
-  fieldName,
   needsAria = true,
 }) => {
   const ariaLabel = getJobTypeAriaLabel(type);
-
-  let iconType = 'questionInCircle';
-  let color = 'euiColorVis6';
-
-  switch (type) {
-    // Set icon types and colors
-    case JOB_FIELD_TYPES.BOOLEAN:
-      iconType = 'tokenBoolean';
-      color = 'euiColorVis5';
-      break;
-    case JOB_FIELD_TYPES.DATE:
-      iconType = 'tokenDate';
-      color = 'euiColorVis7';
-      break;
-    case JOB_FIELD_TYPES.GEO_POINT:
-    case JOB_FIELD_TYPES.GEO_SHAPE:
-      iconType = 'tokenGeo';
-      color = 'euiColorVis8';
-      break;
-    case JOB_FIELD_TYPES.TEXT:
-      iconType = 'document';
-      color = 'euiColorVis9';
-      break;
-    case JOB_FIELD_TYPES.IP:
-      iconType = 'tokenIP';
-      color = 'euiColorVis3';
-      break;
-    case JOB_FIELD_TYPES.KEYWORD:
-      iconType = 'tokenText';
-      color = 'euiColorVis0';
-      break;
-    case JOB_FIELD_TYPES.NUMBER:
-      iconType = 'tokenNumber';
-      color = fieldName !== undefined ? 'euiColorVis1' : 'euiColorVis2';
-      break;
-    case JOB_FIELD_TYPES.HISTOGRAM:
-      iconType = 'tokenHistogram';
-      color = 'euiColorVis7';
-    case JOB_FIELD_TYPES.UNKNOWN:
-      // Use defaults
-      break;
-  }
-
-  const containerProps = {
-    ariaLabel,
-    iconType,
-    color,
-    needsAria,
-  };
+  const token = typeToEuiIconMap[type] || defaultIcon;
+  const containerProps = { ...token, ariaLabel, needsAria };
 
   if (tooltipEnabled === true) {
-    // wrap the inner component inside <span> because EuiToolTip doesn't seem
-    // to support having another component directly inside the tooltip anchor
-    // see https://github.com/elastic/eui/issues/839
     return (
       <EuiToolTip
         position="left"
@@ -98,6 +69,7 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({
           defaultMessage: '{type} type',
           values: { type },
         })}
+        anchorClassName="dvFieldTypeIcon__anchor"
       >
         <FieldTypeIconContainer {...containerProps} />
       </EuiToolTip>
@@ -122,12 +94,15 @@ const FieldTypeIconContainer: FC<FieldTypeIconContainerProps> = ({
   if (needsAria && ariaLabel) {
     wrapperProps['aria-label'] = ariaLabel;
   }
-
   return (
-    <span data-test-subj="fieldTypeIcon" {...rest}>
-      <span {...wrapperProps}>
-        <EuiToken iconType={iconType} shape="square" size="s" color={color} />
-      </span>
-    </span>
+    <EuiToken
+      iconType={iconType}
+      color={color}
+      shape="square"
+      size="s"
+      data-test-subj="fieldTypeIcon"
+      {...wrapperProps}
+      {...rest}
+    />
   );
 };

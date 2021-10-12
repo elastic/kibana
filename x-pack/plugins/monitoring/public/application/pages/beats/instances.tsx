@@ -9,27 +9,22 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ComponentProps } from '../../route_init';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTable } from '../../hooks/use_table';
 import { BeatsTemplate } from './beats_template';
 // @ts-ignore
 import { Listing } from '../../../components/beats/listing';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
+import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
-  const { getPaginationTableProps } = useTable('beats.instances');
+  const { updateTotalItemCount, getPaginationTableProps } = useTable('beats.instances');
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
@@ -66,7 +61,14 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
     });
 
     setData(response);
-  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
+    updateTotalItemCount(response.stats.total);
+  }, [
+    ccs,
+    clusterUuid,
+    services.data?.query.timefilter.timefilter,
+    services.http,
+    updateTotalItemCount,
+  ]);
 
   return (
     <BeatsTemplate
@@ -74,10 +76,10 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
       pageTitle={pageTitle}
       getPageData={getPageData}
       data-test-subj="beatsListingPage"
-      cluster={cluster}
     >
       <div data-test-subj="monitoringBeatsInstancesApp">
         <SetupModeRenderer
+          productName={BEATS_SYSTEM_ID}
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}

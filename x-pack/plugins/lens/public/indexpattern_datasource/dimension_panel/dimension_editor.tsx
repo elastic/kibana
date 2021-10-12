@@ -107,16 +107,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
   );
 
   const setStateWrapper = (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
+    options: { forceRender?: boolean } = {}
   ) => {
     const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
+    const isDimensionComplete = Boolean(hypotheticalLayer.columns[columnId]);
     setState(
       (prevState) => {
         const layer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
         return mergeLayer({ state: prevState, layerId, newLayer: layer });
       },
       {
-        isDimensionComplete: Boolean(hypotheticalLayer.columns[columnId]),
+        isDimensionComplete,
+        ...options,
       }
     );
   };
@@ -169,20 +172,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   ) => {
     if (temporaryStaticValue) {
       setTemporaryState('none');
-      if (typeof setter === 'function') {
-        return setState(
-          (prevState) => {
-            const layer = setter(addStaticValueColumn(prevState.layers[layerId]));
-            return mergeLayer({ state: prevState, layerId, newLayer: layer });
-          },
-          {
-            isDimensionComplete: true,
-            forceRender: true,
-          }
-        );
-      }
     }
-    return setStateWrapper(setter);
+    return setStateWrapper(setter, { forceRender: true });
   };
 
   const ParamEditor = getParamEditor(
@@ -314,7 +305,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               temporaryQuickFunction &&
               isQuickFunction(newLayer.columns[columnId].operationType)
             ) {
-              // Only switch the tab once the formula is fully removed
+              // Only switch the tab once the "non quick function" is fully removed
               setTemporaryState('none');
             }
             setStateWrapper(newLayer);
@@ -344,13 +335,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
               });
-              // );
             }
             if (
               temporaryQuickFunction &&
               isQuickFunction(newLayer.columns[columnId].operationType)
             ) {
-              // Only switch the tab once the formula is fully removed
+              // Only switch the tab once the "non quick function" is fully removed
               setTemporaryState('none');
             }
             setStateWrapper(newLayer);
@@ -422,7 +412,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           maxWidth={false}
         />
       </div>
-      <EuiSpacer size="s" />
+
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         {!incompleteInfo &&
         selectedColumn &&
@@ -508,6 +498,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
               }
               incompleteOperation={incompleteOperation}
               onChoose={(choice) => {
+                if (temporaryQuickFunction) {
+                  setTemporaryState('none');
+                }
                 setStateWrapper(
                   insertOrReplaceColumn({
                     layer: state.layers[layerId],
@@ -518,7 +511,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     visualizationGroups: dimensionGroups,
                     targetGroup: props.groupId,
                     incompleteParams,
-                  })
+                  }),
+                  { forceRender: temporaryQuickFunction }
                 );
               }}
             />
@@ -636,8 +630,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           />
         )}
       </div>
-
-      <EuiSpacer size="s" />
     </>
   );
 

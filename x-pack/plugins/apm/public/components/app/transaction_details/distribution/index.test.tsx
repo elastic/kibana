@@ -56,7 +56,11 @@ function Wrapper({
 
   history.replace({
     pathname: '/services/the-service-name/transactions/view',
-    search: fromQuery({ transactionName: 'the-transaction-name' }),
+    search: fromQuery({
+      transactionName: 'the-transaction-name',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+    }),
   });
 
   const mockPluginContext = merge({}, mockApmPluginContextValue, {

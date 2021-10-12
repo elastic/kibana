@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, CoreStart } from 'src/core/server';
 import {
   TutorialProvider,
   TutorialContextFactory,
@@ -15,23 +15,17 @@ import {
 import { TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
 import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
-import { Category, CATEGORY_DISPLAY } from '../../../../custom_integrations/common';
+import { IntegrationCategory } from '../../../../custom_integrations/common';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 
 function registerTutorialWithCustomIntegrations(
   customIntegrations: CustomIntegrationsPluginSetup,
   tutorial: TutorialSchema
 ) {
-  const allowedCategories: Category[] = (tutorial.integrationBrowserCategories ?? []).filter(
-    (category) => {
-      return CATEGORY_DISPLAY.hasOwnProperty(category);
-    }
-  ) as Category[];
-
   customIntegrations.registerCustomIntegration({
     id: tutorial.id,
     title: tutorial.name,
-    categories: allowedCategories,
+    categories: (tutorial.integrationBrowserCategories ?? []) as IntegrationCategory[],
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
     icons: tutorial.euiIconType
@@ -43,6 +37,32 @@ function registerTutorialWithCustomIntegrations(
         ]
       : [],
     shipper: 'tutorial',
+    isBeta: false,
+    eprOverlap: tutorial.eprPackageOverlap,
+  });
+}
+
+function registerBeatsTutorialsWithCustomIntegrations(
+  core: CoreStart,
+  customIntegrations: CustomIntegrationsPluginSetup,
+  tutorial: TutorialSchema
+) {
+  customIntegrations.registerCustomIntegration({
+    id: tutorial.name,
+    title: tutorial.name,
+    categories: tutorial.integrationBrowserCategories as IntegrationCategory[],
+    uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
+    description: tutorial.shortDescription,
+    icons: tutorial.euiIconType
+      ? [
+          {
+            type: tutorial.euiIconType.endsWith('svg') ? 'svg' : 'eui',
+            src: core.http.basePath.prepend(tutorial.euiIconType),
+          },
+        ]
+      : [],
+    shipper: 'beats',
+    eprOverlap: tutorial.moduleName,
     isBeta: false,
   });
 }
@@ -106,9 +126,16 @@ export class TutorialsRegistry {
     };
   }
 
-  public start() {
+  public start(core: CoreStart, customIntegrations?: CustomIntegrationsPluginSetup) {
     // pre-populate with built in tutorials
     this.tutorialProviders.push(...builtInTutorials);
+
+    if (customIntegrations) {
+      builtInTutorials.forEach((provider) => {
+        const tutorial = provider({});
+        registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
+      });
+    }
     return {};
   }
 }

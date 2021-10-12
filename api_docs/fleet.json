@@ -735,8 +735,56 @@
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
+                "section": "def-common.Installing",
+                "text": "Installing"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
                 "section": "def-common.NotInstalled",
                 "text": "NotInstalled"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.InstallFailed",
+                "text": "InstallFailed"
               },
               "<Merge<",
               {
@@ -783,8 +831,56 @@
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
+                "section": "def-common.Installing",
+                "text": "Installing"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
                 "section": "def-common.NotInstalled",
                 "text": "NotInstalled"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.InstallFailed",
+                "text": "InstallFailed"
               },
               "<Merge<",
               {
@@ -2053,40 +2149,6 @@
                 "type": "Object",
                 "tags": [],
                 "label": "{ policyId, tabId }",
-                "description": [],
-                "signature": [
-                  "DynamicPagePathValues"
-                ],
-                "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.pagePathGetters.add_integration_from_policy",
-            "type": "Function",
-            "tags": [],
-            "label": "add_integration_from_policy",
-            "description": [
-              "// TODO: This might need to be removed because we do not have a way to pick an integration in line anymore"
-            ],
-            "signature": [
-              "({ policyId }: ",
-              "DynamicPagePathValues",
-              ") => [string, string]"
-            ],
-            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "fleet",
-                "id": "def-public.pagePathGetters.add_integration_from_policy.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ policyId }",
                 "description": [],
                 "signature": [
                   "DynamicPagePathValues"
@@ -4522,7 +4584,7 @@
                 "signature": [
                   "Pick<",
                   "KibanaClient",
-                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                  ", \"get\" | \"delete\" | \"monitoring\" | \"security\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
                   "TransportRequestParams",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -4814,7 +4876,7 @@
                 "signature": [
                   "Pick<",
                   "KibanaClient",
-                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                  ", \"get\" | \"delete\" | \"monitoring\" | \"security\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
                   "TransportRequestParams",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -5018,7 +5080,13 @@
             "description": [],
             "signature": [
               "(options?: ",
-              "ListArtifactsProps",
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.ListArtifactsProps",
+                "text": "ListArtifactsProps"
+              },
               " | undefined) => Promise<",
               {
                 "pluginId": "fleet",
@@ -5048,7 +5116,13 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "ListArtifactsProps",
+                  {
+                    "pluginId": "fleet",
+                    "scope": "server",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-server.ListArtifactsProps",
+                    "text": "ListArtifactsProps"
+                  },
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
@@ -5451,6 +5525,20 @@
           "any"
         ],
         "path": "x-pack/plugins/fleet/server/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-server.ListArtifactsProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ListArtifactsProps",
+        "description": [],
+        "signature": [
+          "Pick<Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}>, \"page\" | \"perPage\" | \"sortOrder\" | \"kuery\"> & { sortField?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6320,8 +6408,56 @@
             "pluginId": "fleet",
             "scope": "common",
             "docId": "kibFleetPluginApi",
+            "section": "def-common.Installing",
+            "text": "Installing"
+          },
+          "<Merge<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.RegistryPackage",
+            "text": "RegistryPackage"
+          },
+          ", ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.EpmPackageAdditions",
+            "text": "EpmPackageAdditions"
+          },
+          ">> | ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
             "section": "def-common.NotInstalled",
             "text": "NotInstalled"
+          },
+          "<Merge<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.RegistryPackage",
+            "text": "RegistryPackage"
+          },
+          ", ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.EpmPackageAdditions",
+            "text": "EpmPackageAdditions"
+          },
+          ">> | ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.InstallFailed",
+            "text": "InstallFailed"
           },
           "<Merge<",
           {
@@ -6368,8 +6504,56 @@
             "pluginId": "fleet",
             "scope": "common",
             "docId": "kibFleetPluginApi",
+            "section": "def-common.Installing",
+            "text": "Installing"
+          },
+          "<Merge<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.ArchivePackage",
+            "text": "ArchivePackage"
+          },
+          ", ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.EpmPackageAdditions",
+            "text": "EpmPackageAdditions"
+          },
+          ">> | ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
             "section": "def-common.NotInstalled",
             "text": "NotInstalled"
+          },
+          "<Merge<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.ArchivePackage",
+            "text": "ArchivePackage"
+          },
+          ", ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.EpmPackageAdditions",
+            "text": "EpmPackageAdditions"
+          },
+          ">> | ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.InstallFailed",
+            "text": "InstallFailed"
           },
           "<Merge<",
           {
@@ -6395,7 +6579,7 @@
             "section": "def-common.RegistryPackage",
             "text": "RegistryPackage"
           },
-          ", \"type\" | \"description\" | \"title\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"icons\" | \"policy_templates\"> & { status: \"installed\"; savedObject: ",
+          ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"installed\"; savedObject: ",
           "SavedObject",
           "<",
           {
@@ -6413,7 +6597,33 @@
             "section": "def-common.RegistryPackage",
             "text": "RegistryPackage"
           },
-          ", \"type\" | \"description\" | \"title\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"icons\" | \"policy_templates\"> & { status: \"not_installed\"; } & { integration?: string | undefined; id: string; })) => boolean"
+          ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"installing\"; savedObject: ",
+          "SavedObject",
+          "<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.Installation",
+            "text": "Installation"
+          },
+          ">; } & { integration?: string | undefined; id: string; }) | (Pick<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.RegistryPackage",
+            "text": "RegistryPackage"
+          },
+          ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"not_installed\"; } & { integration?: string | undefined; id: string; }) | (Pick<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.RegistryPackage",
+            "text": "RegistryPackage"
+          },
+          ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"install_failed\"; } & { integration?: string | undefined; id: string; })) => boolean"
         ],
         "path": "x-pack/plugins/fleet/common/services/packages_with_integrations.ts",
         "deprecated": false,
@@ -6454,8 +6664,56 @@
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
+                "section": "def-common.Installing",
+                "text": "Installing"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
                 "section": "def-common.NotInstalled",
                 "text": "NotInstalled"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.InstallFailed",
+                "text": "InstallFailed"
               },
               "<Merge<",
               {
@@ -6502,8 +6760,56 @@
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
+                "section": "def-common.Installing",
+                "text": "Installing"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
                 "section": "def-common.NotInstalled",
                 "text": "NotInstalled"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.InstallFailed",
+                "text": "InstallFailed"
               },
               "<Merge<",
               {
@@ -6529,7 +6835,7 @@
                 "section": "def-common.RegistryPackage",
                 "text": "RegistryPackage"
               },
-              ", \"type\" | \"description\" | \"title\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"icons\" | \"policy_templates\"> & { status: \"installed\"; savedObject: ",
+              ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"installed\"; savedObject: ",
               "SavedObject",
               "<",
               {
@@ -6547,7 +6853,33 @@
                 "section": "def-common.RegistryPackage",
                 "text": "RegistryPackage"
               },
-              ", \"type\" | \"description\" | \"title\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"icons\" | \"policy_templates\"> & { status: \"not_installed\"; } & { integration?: string | undefined; id: string; })"
+              ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"installing\"; savedObject: ",
+              "SavedObject",
+              "<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.Installation",
+                "text": "Installation"
+              },
+              ">; } & { integration?: string | undefined; id: string; }) | (Pick<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"not_installed\"; } & { integration?: string | undefined; id: string; }) | (Pick<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"install_failed\"; } & { integration?: string | undefined; id: string; })"
             ],
             "path": "x-pack/plugins/fleet/common/services/packages_with_integrations.ts",
             "deprecated": false,
@@ -9025,6 +9357,19 @@
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.EpmPackageAdditions.keepPoliciesUpToDate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "keepPoliciesUpToDate",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -11034,8 +11379,56 @@
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
+                "section": "def-common.Installing",
+                "text": "Installing"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
                 "section": "def-common.NotInstalled",
                 "text": "NotInstalled"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.InstallFailed",
+                "text": "InstallFailed"
               },
               "<Merge<",
               {
@@ -11082,8 +11475,56 @@
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
+                "section": "def-common.Installing",
+                "text": "Installing"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
                 "section": "def-common.NotInstalled",
                 "text": "NotInstalled"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.InstallFailed",
+                "text": "InstallFailed"
               },
               "<Merge<",
               {
@@ -12051,7 +12492,7 @@
             "label": "install_status",
             "description": [],
             "signature": [
-              "\"installed\" | \"installing\""
+              "\"installed\" | \"installing\" | \"install_failed\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -12086,6 +12527,16 @@
             "signature": [
               "\"registry\" | \"upload\""
             ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.keep_policies_up_to_date",
+            "type": "boolean",
+            "tags": [],
+            "label": "keep_policies_up_to_date",
+            "description": [],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
           }
@@ -12218,6 +12669,131 @@
               "\"update\" | \"unknown\" | \"reinstall\" | \"reupdate\" | \"rollback\" | \"install\""
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.IntegrationCardItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntegrationCardItem",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.release",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "release",
+            "description": [],
+            "signature": [
+              "\"experimental\" | \"beta\" | \"ga\" | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.icons",
+            "type": "Array",
+            "tags": [],
+            "label": "icons",
+            "description": [],
+            "signature": [
+              "(",
+              {
+                "pluginId": "customIntegrations",
+                "scope": "common",
+                "docId": "kibCustomIntegrationsPluginApi",
+                "section": "def-common.CustomIntegrationIcon",
+                "text": "CustomIntegrationIcon"
+              },
+              " | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PackageSpecIcon",
+                "text": "PackageSpecIcon"
+              },
+              ")[]"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.integration",
+            "type": "string",
+            "tags": [],
+            "label": "integration",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
           }
         ],
@@ -13600,7 +14176,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"security\" | \"monitoring\" | \"cloud\" | \"kubernetes\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"languages\" | \"message_queue\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | undefined)[] | undefined"
+              "(\"custom\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | undefined)[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false
@@ -15025,7 +15601,7 @@
             "label": "[RegistryPolicyTemplateKeys.categories]",
             "description": [],
             "signature": [
-              "(\"custom\" | \"security\" | \"monitoring\" | \"cloud\" | \"kubernetes\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"languages\" | \"message_queue\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | undefined)[] | undefined"
+              "(\"custom\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | undefined)[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -15518,6 +16094,262 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.UpdatePackageRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdatePackageRequest",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.UpdatePackageRequest.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ pkgkey: string; }"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.UpdatePackageRequest.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "{ keepPoliciesUpToDate?: boolean | undefined; }"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.UpdatePackageResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdatePackageResponse",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.UpdatePackageResponse.response",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.Installed",
+                "text": "Installed"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.Installing",
+                "text": "Installing"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.NotInstalled",
+                "text": "NotInstalled"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.InstallFailed",
+                "text": "InstallFailed"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.Installed",
+                "text": "Installed"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.Installing",
+                "text": "Installing"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.NotInstalled",
+                "text": "NotInstalled"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.InstallFailed",
+                "text": "InstallFailed"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">>"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.UpgradePackagePolicyBaseResponse",
         "type": "Interface",
         "tags": [],
@@ -15814,6 +16646,20 @@
         "label": "AGENT_POLICY_API_ROOT",
         "description": [],
         "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.AGENT_POLICY_DEFAULT_MONITORING_DATASETS",
+        "type": "Array",
+        "tags": [],
+        "label": "AGENT_POLICY_DEFAULT_MONITORING_DATASETS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -16772,7 +17618,7 @@
         "label": "EpmPackageInstallStatus",
         "description": [],
         "signature": [
-          "\"installed\" | \"installing\""
+          "\"installed\" | \"installing\" | \"install_failed\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -17046,8 +17892,24 @@
             "pluginId": "fleet",
             "scope": "common",
             "docId": "kibFleetPluginApi",
+            "section": "def-common.Installing",
+            "text": "Installing"
+          },
+          "<T> | ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
             "section": "def-common.NotInstalled",
             "text": "NotInstalled"
+          },
+          "<T> | ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.InstallFailed",
+            "text": "InstallFailed"
           },
           "<T>"
         ],
@@ -17091,7 +17953,7 @@
         "label": "InstallationStatus",
         "description": [],
         "signature": [
-          "{ readonly Installed: \"installed\"; readonly NotInstalled: \"not_installed\"; }"
+          "{ readonly Installed: \"installed\"; readonly Installing: \"installing\"; readonly InstallFailed: \"install_failed\"; readonly NotInstalled: \"not_installed\"; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -17106,6 +17968,44 @@
         "description": [],
         "signature": [
           "T & { status: \"installed\"; savedObject: ",
+          "SavedObject",
+          "<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.Installation",
+            "text": "Installation"
+          },
+          ">; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.InstallFailed",
+        "type": "Type",
+        "tags": [],
+        "label": "InstallFailed",
+        "description": [],
+        "signature": [
+          "T & { status: \"install_failed\"; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.Installing",
+        "type": "Type",
+        "tags": [],
+        "label": "Installing",
+        "description": [],
+        "signature": [
+          "T & { status: \"installing\"; savedObject: ",
           "SavedObject",
           "<",
           {
@@ -17281,6 +18181,14 @@
             "text": "KibanaAssetParts"
           },
           "[]; ml_module: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.KibanaAssetParts",
+            "text": "KibanaAssetParts"
+          },
+          "[]; tag: ",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -17525,8 +18433,56 @@
             "pluginId": "fleet",
             "scope": "common",
             "docId": "kibFleetPluginApi",
+            "section": "def-common.Installing",
+            "text": "Installing"
+          },
+          "<Merge<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.RegistryPackage",
+            "text": "RegistryPackage"
+          },
+          ", ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.EpmPackageAdditions",
+            "text": "EpmPackageAdditions"
+          },
+          ">> | ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
             "section": "def-common.NotInstalled",
             "text": "NotInstalled"
+          },
+          "<Merge<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.RegistryPackage",
+            "text": "RegistryPackage"
+          },
+          ", ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.EpmPackageAdditions",
+            "text": "EpmPackageAdditions"
+          },
+          ">> | ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.InstallFailed",
+            "text": "InstallFailed"
           },
           "<Merge<",
           {
@@ -17573,8 +18529,56 @@
             "pluginId": "fleet",
             "scope": "common",
             "docId": "kibFleetPluginApi",
+            "section": "def-common.Installing",
+            "text": "Installing"
+          },
+          "<Merge<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.ArchivePackage",
+            "text": "ArchivePackage"
+          },
+          ", ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.EpmPackageAdditions",
+            "text": "EpmPackageAdditions"
+          },
+          ">> | ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
             "section": "def-common.NotInstalled",
             "text": "NotInstalled"
+          },
+          "<Merge<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.ArchivePackage",
+            "text": "ArchivePackage"
+          },
+          ", ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.EpmPackageAdditions",
+            "text": "EpmPackageAdditions"
+          },
+          ">> | ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.InstallFailed",
+            "text": "InstallFailed"
           },
           "<Merge<",
           {
@@ -17635,7 +18639,7 @@
             "section": "def-common.RegistryPackage",
             "text": "RegistryPackage"
           },
-          ", \"type\" | \"description\" | \"title\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"icons\" | \"policy_templates\"> & { status: \"installed\"; savedObject: ",
+          ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"installed\"; savedObject: ",
           "SavedObject",
           "<",
           {
@@ -17653,7 +18657,33 @@
             "section": "def-common.RegistryPackage",
             "text": "RegistryPackage"
           },
-          ", \"type\" | \"description\" | \"title\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"icons\" | \"policy_templates\"> & { status: \"not_installed\"; } & { integration?: string | undefined; id: string; })"
+          ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"installing\"; savedObject: ",
+          "SavedObject",
+          "<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.Installation",
+            "text": "Installation"
+          },
+          ">; } & { integration?: string | undefined; id: string; }) | (Pick<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.RegistryPackage",
+            "text": "RegistryPackage"
+          },
+          ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"not_installed\"; } & { integration?: string | undefined; id: string; }) | (Pick<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.RegistryPackage",
+            "text": "RegistryPackage"
+          },
+          ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\"> & { status: \"install_failed\"; } & { integration?: string | undefined; id: string; })"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -17807,6 +18837,22 @@
             "section": "def-common.PackageList",
             "text": "PackageList"
           },
+          "; installing: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.PackageList",
+            "text": "PackageList"
+          },
+          "; install_failed: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.PackageList",
+            "text": "PackageList"
+          },
           "; not_installed: ",
           {
             "pluginId": "fleet",
@@ -17829,7 +18875,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"custom\" | \"security\" | \"monitoring\" | \"cloud\" | \"kubernetes\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"languages\" | \"message_queue\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\""
+          "\"custom\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
         "deprecated": false,
@@ -18012,15 +19058,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"integration\" | undefined; description: string; title: string; name: string; version: string; path: string; download: string; internal?: boolean | undefined; data_streams?: ",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.RegistryDataStream",
-            "text": "RegistryDataStream"
-          },
-          "[] | undefined; release: \"experimental\" | \"beta\" | \"ga\"; icons?: (",
+          "{ type?: \"integration\" | undefined; title: string; description: string; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -18036,7 +19074,15 @@
             "section": "def-common.RegistryImage",
             "text": "RegistryImage"
           },
-          "[]) | undefined; policy_templates?: ",
+          "[]) | undefined; name: string; version: string; path: string; download: string; internal?: boolean | undefined; data_streams?: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.RegistryDataStream",
+            "text": "RegistryDataStream"
+          },
+          "[] | undefined; release: \"experimental\" | \"beta\" | \"ga\"; policy_templates?: ",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -18066,7 +19112,7 @@
             "section": "def-common.RegistryPackage",
             "text": "RegistryPackage"
           },
-          ", \"type\" | \"description\" | \"title\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"icons\" | \"policy_templates\">[]"
+          ", \"type\" | \"title\" | \"description\" | \"icons\" | \"name\" | \"version\" | \"path\" | \"download\" | \"internal\" | \"data_streams\" | \"release\" | \"policy_templates\">[]"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -20063,6 +21109,36 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getUpdatePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getUpdatePath",
+            "description": [],
+            "signature": [
+              "(pkgkey: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getUpdatePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pkgkey",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -20118,7 +21194,7 @@
         "label": "installationStatuses",
         "description": [],
         "signature": [
-          "{ readonly Installed: \"installed\"; readonly NotInstalled: \"not_installed\"; }"
+          "{ readonly Installed: \"installed\"; readonly Installing: \"installing\"; readonly InstallFailed: \"install_failed\"; readonly NotInstalled: \"not_installed\"; }"
         ],
         "path": "x-pack/plugins/fleet/common/constants/epm.ts",
         "deprecated": false,

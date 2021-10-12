@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 
+import { useKibana } from '../../../../../../index';
 import { useForm } from '../../../../shared_imports';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Field } from '../../../../types';
@@ -30,6 +31,9 @@ export const EditFieldContainer = React.memo(({ exitEdit }: Props) => {
   const { fields, documentFields } = useMappingsState();
   const dispatch = useDispatch();
   const { updateField, modal } = useUpdateField();
+  const {
+    services: { kibanaVersion },
+  } = useKibana();
 
   const { status, fieldToEdit } = documentFields;
   const isEditing = status === 'editingField';
@@ -73,6 +77,7 @@ export const EditFieldContainer = React.memo(({ exitEdit }: Props) => {
         allFields={fields.byId}
         exitEdit={exitEdit}
         updateField={updateField}
+        kibanaVersion={kibanaVersion.get()}
       />
       {renderModal()}
     </>

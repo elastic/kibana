@@ -137,11 +137,18 @@ jest.mock('./package_policy', () => ({
   ...jest.requireActual('./package_policy'),
   packagePolicyService: {
     getByIDs: jest.fn().mockReturnValue([]),
+    listIds: jest.fn().mockReturnValue({ items: [] }),
     create(soClient: any, esClient: any, newPackagePolicy: NewPackagePolicy) {
       return {
         id: 'mocked',
         version: 'mocked',
         ...newPackagePolicy,
+      };
+    },
+    get(soClient: any, id: string) {
+      return {
+        id: 'mocked',
+        version: 'mocked',
       };
     },
   },
@@ -496,6 +503,8 @@ describe('output preconfiguration', () => {
   beforeEach(() => {
     mockedOutputService.create.mockReset();
     mockedOutputService.update.mockReset();
+    mockedOutputService.delete.mockReset();
+    mockedOutputService.getDefaultOutputId.mockReset();
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
     mockedOutputService.bulkGet.mockImplementation(async (soClient, id): Promise<Output[]> => {
       return [
@@ -525,6 +534,26 @@ describe('output preconfiguration', () => {
       },
     ]);
 
+    expect(mockedOutputService.create).toBeCalled();
+    expect(mockedOutputService.update).not.toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+  });
+
+  it('should delete existing default output if a new preconfigured output is added', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    mockedOutputService.getDefaultOutputId.mockResolvedValue('default-output-123');
+    await ensurePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'non-existing-default-output-1',
+        name: 'Output 1',
+        type: 'elasticsearch',
+        is_default: true,
+        hosts: ['http://test.fr'],
+      },
+    ]);
+
+    expect(mockedOutputService.delete).toBeCalled();
     expect(mockedOutputService.create).toBeCalled();
     expect(mockedOutputService.update).not.toBeCalled();
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
@@ -560,6 +589,48 @@ describe('output preconfiguration', () => {
       },
     ]);
 
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+  });
+
+  it('should delete default output if preconfigured output exists and another default output exists', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
+    mockedOutputService.getDefaultOutputId.mockResolvedValue('default-123');
+    await ensurePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'existing-output-1',
+        is_default: true,
+        name: 'Output 1',
+        type: 'elasticsearch',
+        hosts: ['http://newhostichanged.co:9201'], // field that changed
+      },
+    ]);
+
+    expect(mockedOutputService.delete).toBeCalled();
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+  });
+
+  it('should not delete default output if preconfigured default output exists and changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
+    mockedOutputService.getDefaultOutputId.mockResolvedValue('existing-output-1');
+    await ensurePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'existing-output-1',
+        is_default: true,
+        name: 'Output 1',
+        type: 'elasticsearch',
+        hosts: ['http://newhostichanged.co:9201'], // field that changed
+      },
+    ]);
+
+    expect(mockedOutputService.delete).not.toBeCalled();
     expect(mockedOutputService.create).not.toBeCalled();
     expect(mockedOutputService.update).toBeCalled();
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();

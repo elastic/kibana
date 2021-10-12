@@ -565,7 +565,7 @@ export function DimensionEditor(
   }
 
   if (layer.layerType === 'threshold') {
-    return <ThresholdPanel {...props} />;
+    return <ThresholdPanel {...props} isHorizontal={isHorizontal} />;
   }
 
   return (

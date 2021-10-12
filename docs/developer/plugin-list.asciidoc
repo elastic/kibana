@@ -57,6 +57,12 @@ as uiSettings within the code.
 |The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
+|{kib-repo}blob/{branch}/src/plugins/data_views/README.mdx[dataViews]
+|The data views API provides a consistent method of structuring and formatting documents
+and field lists across the various Kibana apps. Its typically used in conjunction with
+<DocLink id="kibDevTutorialDataSearchAndSessions" section="high-level-search" text="SearchSource" /> for composing queries.
+
+
 |{kib-repo}blob/{branch}/src/plugins/dev_tools/README.md[devTools]
 |The ui/registry/dev_tools is removed in favor of the devTools plugin which exposes a register method in the setup contract.
 Registering app works mostly the same as registering apps in core.application.register.
@@ -86,6 +92,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 |{kib-repo}blob/{branch}/src/plugins/expression_metric/README.md[expressionMetric]
 |Expression Metric plugin adds a metric renderer and function to the expression plugin.
+
+
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_metric/README.md[expressionMetricVis]
+|Expression MetricVis plugin adds a metric renderer and function to the expression plugin. The renderer will display the metric chart.
 
 
 |{kib-repo}blob/{branch}/src/plugins/expression_repeat_image/README.md[expressionRepeatImage]
@@ -215,11 +225,6 @@ oss plugins.
 
 |{kib-repo}blob/{branch}/src/plugins/screenshot_mode/README.md[screenshotMode]
 |The service exposed by this plugin informs consumers whether they should optimize for non-interactivity. In this way plugins can avoid loading unnecessary code, data or other services.
-
-
-|{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
-|securityOss is responsible for educating users about Elastic's free security features,
-so they can properly protect the data within their clusters.
 
 
 |{kib-repo}blob/{branch}/src/plugins/share/README.md[share]
@@ -357,7 +362,8 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
-|Case management in Kibana
+|[![Issues][issues-shield]][issues-url]
+[![Pull Requests][pr-shield]][pr-url]
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
@@ -452,7 +458,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
-|The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest nodes. Please refer to the Elasticsearch documentation for more details.
+|The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]

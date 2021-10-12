@@ -22,7 +22,14 @@ export const getApplication = () => {
       action(`Navigate to: ${app}`);
     },
     getUrlForApp: (url: string) => url,
-    capabilities: {} as ApplicationStart['capabilities'],
+    capabilities: {
+      catalogue: {},
+      management: {},
+      navLinks: {},
+      fleet: {
+        write: true,
+      },
+    },
     applications$: of(applications),
   };
 

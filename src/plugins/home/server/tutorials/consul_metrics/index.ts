@@ -58,5 +58,6 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['security', 'network', 'web'],
   };
 }
