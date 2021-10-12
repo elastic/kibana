@@ -78,12 +78,9 @@ export async function runTests(options: RunTestsParams) {
     log.write('--- asserting that all tests belong to a ciGroup');
     for (const configPath of options.configs) {
       log.info('loading', configPath);
-      log.indent(4);
-      try {
+      await log.indent(4, async () => {
         await assertNoneExcluded({ configPath, options: { ...options, log } });
-      } finally {
-        log.indent(-4);
-      }
+      });
       continue;
     }
 
@@ -94,42 +91,41 @@ export async function runTests(options: RunTestsParams) {
   const configPathsWithTests: string[] = [];
   for (const configPath of options.configs) {
     log.info('testing', configPath);
-    log.indent(4);
-    try {
+    await log.indent(4, async () => {
       if (await hasTests({ configPath, options: { ...options, log } })) {
         configPathsWithTests.push(configPath);
       }
-    } finally {
-      log.indent(-4);
-    }
+    });
   }
 
   for (const configPath of configPathsWithTests) {
-    log.write(`--- Running ${relative(REPO_ROOT, configPath)}`);
+    await log.indent(0, async () => {
+      log.write(`--- Running ${relative(REPO_ROOT, configPath)}`);
 
-    await withProcRunner(log, async (procs) => {
-      const config = await readConfigFile(log, configPath);
+      await withProcRunner(log, async (procs) => {
+        const config = await readConfigFile(log, configPath);
 
-      let es;
-      try {
-        es = await runElasticsearch({ config, options: { ...options, log } });
-        await runKibanaServer({ procs, config, options });
-        await runFtr({ configPath, options: { ...options, log } });
-      } finally {
+        let es;
         try {
-          const delay = config.get('kbnTestServer.delayShutdown');
-          if (typeof delay === 'number') {
-            log.info('Delaying shutdown of Kibana for', delay, 'ms');
-            await new Promise((r) => setTimeout(r, delay));
-          }
-
-          await procs.stop('kibana');
+          es = await runElasticsearch({ config, options: { ...options, log } });
+          await runKibanaServer({ procs, config, options });
+          await runFtr({ configPath, options: { ...options, log } });
         } finally {
-          if (es) {
-            await es.cleanup();
+          try {
+            const delay = config.get('kbnTestServer.delayShutdown');
+            if (typeof delay === 'number') {
+              log.info('Delaying shutdown of Kibana for', delay, 'ms');
+              await new Promise((r) => setTimeout(r, delay));
+            }
+
+            await procs.stop('kibana');
+          } finally {
+            if (es) {
+              await es.cleanup();
+            }
           }
         }
-      }
+      });
     });
   }
 }
