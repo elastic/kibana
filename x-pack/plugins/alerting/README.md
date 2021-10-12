@@ -122,6 +122,8 @@ The following table describes the properties of the `options` object.
 |useSavedObjectReferences.extractReferences|(Optional) When developing a rule type, you can choose to implement hooks for extracting saved object references from rule parameters. This hook will be invoked when a rule is created or updated. Implementing this hook is optional, but if an extract hook is implemented, an inject hook must also be implemented.|Function
 |useSavedObjectReferences.injectReferences|(Optional) When developing a rule type, you can choose to implement hooks for injecting saved object references into rule parameters. This hook will be invoked when a rule is retrieved (get or find). Implementing this hook is optional, but if an inject hook is implemented, an extract hook must also be implemented.|Function
 |isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
+|defaultScheduleInterval|The default interval that will show up in the UI when creating a rule of this rule type.|boolean|
+|minimumScheduleInterval|The minimum interval that will be allowed for all rules of this rule type.|boolean|
 
 ### Executor
 

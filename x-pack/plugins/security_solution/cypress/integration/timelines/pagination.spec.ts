@@ -24,7 +24,7 @@ import { HOSTS_URL } from '../../urls/navigation';
 
 const defaultPageSize = 25;
 describe('Pagination', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
     openTimelineUsingToggle();
@@ -41,20 +41,13 @@ describe('Pagination', () => {
 
   it('should be able to change items count per page with the dropdown', () => {
     const itemsPerPage = 100;
-    cy.intercept('POST', '/internal/bsearch').as('refetch');
-
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE_BTN).first().click();
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE_OPTION(itemsPerPage)).click();
-    cy.wait('@refetch').its('response.statusCode').should('eq', 200);
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('contain.text', itemsPerPage);
   });
 
   it('should be able to go to next / previous page', () => {
-    cy.intercept('POST', '/internal/bsearch').as('refetch');
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_NEXT_PAGE}`).first().click();
-    cy.wait('@refetch').its('response.statusCode').should('eq', 200);
-
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_PREV_PAGE}`).first().click();
-    cy.wait('@refetch').its('response.statusCode').should('eq', 200);
   });
 });
