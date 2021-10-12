@@ -5,6 +5,8 @@
 # Import and load bazelrc common settings for ci env
 try-import %workspace%/src/dev/ci_setup/.bazelrc-ci.common
 
+common --define=VERBOSE_LOGS=1
+
 ## Cache action outputs on disk so they persist across output_base and bazel shutdown (eg. changing branches)
 common --disk_cache=~/.bazel-cache/disk-cache
 
@@ -15,7 +17,7 @@ common --repository_cache=~/.bazel-cache/repository-cache
 ## Remote settings including cache
 build --bes_results_url=https://app.buildbuddy.io/invocation/
 build --bes_backend=grpcs://cloud.buildbuddy.io
-build --remote_cache=grpcs://cloud.buildbuddy.io
+build --remote_cache=grpcs://127.0.0.2:8765
 build --remote_timeout=3600
 
 ## Metadata settings

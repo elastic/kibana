@@ -2,7 +2,7 @@
 # Settings in this file should be OS agnostic
 
 # Don't be spammy in the logs
-build --noshow_progress
+# build --noshow_progress
 
 # More details on failures
 build --verbose_failures=true
