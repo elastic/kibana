@@ -37,12 +37,20 @@ export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
   } = params;
 
   // converts string based start/end to epochmillis
-  const decodedRange = pipe(
-    rangeRt.decode({ start, end }),
-    getOrElse<t.Errors, { start: number; end: number }>((errors) => {
-      throw new Error(failure(errors).join('\n'));
-    })
-  );
+  let decodedRange: { start: number; end: number };
+
+  if (typeof start === 'string' && typeof end === 'string') {
+    decodedRange = pipe(
+      rangeRt.decode({ start, end }),
+      getOrElse<t.Errors, { start: number; end: number }>((errors) => {
+        throw new Error(failure(errors).join('\n'));
+      })
+    );
+  } else if (typeof start === 'number' && typeof end === 'number') {
+    decodedRange = { start, end };
+  } else {
+    decodedRange = { start: 0, end: 0 };
+  }
 
   const correlationFilters = getCorrelationsFilters({
     environment,

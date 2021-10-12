@@ -37,8 +37,8 @@ export interface SearchStrategyClientParams {
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
-  start?: string;
-  end?: string;
+  start?: string | number;
+  end?: string | number;
 }
 
 export interface SearchStrategyServerParams {
