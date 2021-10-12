@@ -9,6 +9,7 @@ import { allowedExperimentalValues } from '../../../../../common/experimental_fe
 import { createThresholdAlertType } from './create_threshold_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { getThresholdRuleParams } from '../../schemas/rule_schemas.mock';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../../rule_execution_log/rule_execution_log_client');
 
@@ -20,10 +21,9 @@ describe('Threshold Alerts', () => {
       experimentalFeatures: allowedExperimentalValues,
       lists: dependencies.lists,
       logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
+      config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
+      eventLogService: dependencies.eventLogService,
       version: '1.0.0',
     });
     dependencies.alerting.registerType(thresholdAlertTpe);
