@@ -80,7 +80,6 @@ pageLoadAssetSize:
   usageCollection: 39762
   visDefaultEditor: 50178
   visTypeMarkdown: 30896
-  visTypeMetric: 42790
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
@@ -115,4 +114,6 @@ pageLoadAssetSize:
   expressions: 239290
   securitySolution: 231753
   customIntegrations: 28810
+  expressionMetricVis: 23121
+  visTypeMetric: 23332
   dataViews: 42000
