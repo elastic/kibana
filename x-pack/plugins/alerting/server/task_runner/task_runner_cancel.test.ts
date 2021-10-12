@@ -296,6 +296,7 @@ describe('Task Runner Cancel', () => {
             message: `rule execution cancelled due to timeout: "test1"`,
             reason: 'timeout',
           },
+          lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
           status: 'error',
         },

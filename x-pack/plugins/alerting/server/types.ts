@@ -158,6 +158,8 @@ export interface AlertType<
     injectReferences: (params: ExtractedParams, references: SavedObjectReference[]) => Params;
   };
   isExportable: boolean;
+  defaultScheduleInterval?: string;
+  minimumScheduleInterval?: string;
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
 }
@@ -185,6 +187,7 @@ export interface AlertMeta extends SavedObjectAttributes {
 export interface RawAlertExecutionStatus extends SavedObjectAttributes {
   status: AlertExecutionStatuses;
   lastExecutionDate: string;
+  lastDuration?: number;
   error: null | {
     reason: AlertExecutionStatusErrorReasons;
     message: string;

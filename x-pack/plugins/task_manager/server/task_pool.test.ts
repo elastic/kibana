@@ -357,6 +357,27 @@ describe('TaskPool', () => {
     );
   });
 
+  test('only allows one task with the same id in the task pool', async () => {
+    const logger = loggingSystemMock.create().get();
+    const pool = new TaskPool({
+      maxWorkers$: of(1),
+      logger,
+    });
+
+    const shouldRun = mockRun();
+    const shouldNotRun = mockRun();
+
+    const taskId = uuid.v4();
+    const task1 = mockTask({ id: taskId, run: shouldRun });
+    const task2 = mockTask({ id: taskId, run: shouldNotRun });
+
+    await pool.run([task1]);
+    await pool.run([task2]);
+
+    expect(shouldRun).toHaveBeenCalledTimes(1);
+    expect(shouldNotRun).not.toHaveBeenCalled();
+  });
+
   function mockRun() {
     return jest.fn(async () => {
       await sleep(0);
@@ -367,6 +388,7 @@ describe('TaskPool', () => {
   function mockTask(overrides = {}) {
     return {
       isExpired: false,
+      taskUuid: uuid.v4(),
       id: uuid.v4(),
       cancel: async () => undefined,
       markTaskAsRunning: jest.fn(async () => true),

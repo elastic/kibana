@@ -116,7 +116,14 @@ export class TaskPool {
         tasksToRun
           .filter((taskRunner) => !this.tasksInPool.has(taskRunner.id))
           .map(async (taskRunner) => {
-            this.tasksInPool.set(taskRunner.id, taskRunner);
+            // We use taskRunner.taskUuid instead of taskRunner.id as key for the task pool map because
+            // task cancellation is a non-blocking procedure. We calculate the expiration and immediately remove
+            // the task from the task pool. There is a race condition that can occur when a recurring tasks's schedule
+            // matches its timeout value. A new instance of the task can be claimed and added to the task pool before
+            // the cancel function (meant for the previous instance of the task) is actually called. This means the wrong
+            // task instance is cancelled. We introduce the taskUuid to differentiate between these overlapping instances and
+            // ensure that the correct task instance is cancelled.
+            this.tasksInPool.set(taskRunner.taskUuid, taskRunner);
             return taskRunner
               .markTaskAsRunning()
               .then((hasTaskBeenMarkAsRunning: boolean) =>
@@ -170,12 +177,12 @@ export class TaskPool {
         }
       })
       .then(() => {
-        this.tasksInPool.delete(taskRunner.id);
+        this.tasksInPool.delete(taskRunner.taskUuid);
       });
   }
 
   private handleFailureOfMarkAsRunning(task: TaskRunner, err: Error) {
-    this.tasksInPool.delete(task.id);
+    this.tasksInPool.delete(task.taskUuid);
     this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message}`);
   }
 
@@ -203,7 +210,7 @@ export class TaskPool {
   private async cancelTask(task: TaskRunner) {
     try {
       this.logger.debug(`Cancelling task ${task.toString()}.`);
-      this.tasksInPool.delete(task.id);
+      this.tasksInPool.delete(task.taskUuid);
       await task.cancel();
     } catch (err) {
       this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
