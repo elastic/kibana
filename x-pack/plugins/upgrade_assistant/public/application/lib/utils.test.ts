@@ -6,7 +6,8 @@
  */
 
 import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
-import { validateRegExpString, getDeprecationsUpperLimit } from './utils';
+import { getDeprecationsUpperLimit, getReindexProgressLabel, validateRegExpString } from './utils';
+import { ReindexStep } from '../../../common/types';
 
 describe('validRegExpString', () => {
   it('correctly returns false for invalid strings', () => {
@@ -33,5 +34,35 @@ describe('getDeprecationsUpperLimit', () => {
     expect(getDeprecationsUpperLimit(DEPRECATION_WARNING_UPPER_LIMIT)).toBe(
       DEPRECATION_WARNING_UPPER_LIMIT.toString()
     );
+  });
+});
+
+describe('getReindexProgressLabel', () => {
+  it('returns 0% when the reindex task has just been created', () => {
+    expect(getReindexProgressLabel(null, ReindexStep.created)).toBe('0%');
+  });
+
+  it('returns 5% when the index has been made read-only', () => {
+    expect(getReindexProgressLabel(null, ReindexStep.readonly)).toBe('5%');
+  });
+
+  it('returns 10% when the reindexing documents has started, but the progress is null', () => {
+    expect(getReindexProgressLabel(null, ReindexStep.reindexStarted)).toBe('10%');
+  });
+
+  it('returns 10% when the reindexing documents has started, but the progress is 0', () => {
+    expect(getReindexProgressLabel(0, ReindexStep.reindexStarted)).toBe('10%');
+  });
+
+  it('returns 53% when the reindexing documents progress is 0.5', () => {
+    expect(getReindexProgressLabel(0.5, ReindexStep.reindexStarted)).toBe('53%');
+  });
+
+  it('returns 95% when the reindexing documents progress is 1', () => {
+    expect(getReindexProgressLabel(1, ReindexStep.reindexStarted)).toBe('95%');
+  });
+
+  it('returns 100% when alias has been switched', () => {
+    expect(getReindexProgressLabel(null, ReindexStep.aliasCreated)).toBe('100%');
   });
 });

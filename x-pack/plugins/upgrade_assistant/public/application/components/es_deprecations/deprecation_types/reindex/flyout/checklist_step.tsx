@@ -16,7 +16,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -144,14 +143,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           </p>
         </EuiCallOut>
         <EuiSpacer />
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
-              defaultMessage="Reindexing process"
-            />
-          </h3>
-        </EuiTitle>
         <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

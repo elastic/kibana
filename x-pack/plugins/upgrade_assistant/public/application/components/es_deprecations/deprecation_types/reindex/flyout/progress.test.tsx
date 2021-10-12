@@ -29,45 +29,69 @@ describe('ReindexProgress', () => {
     );
 
     expect(wrapper).toMatchInlineSnapshot(`
-<StepProgress
-  steps={
-    Array [
-      Object {
-        "status": "inProgress",
-        "title": <FormattedMessage
-          defaultMessage="Setting old index to read-only"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
-          values={Object {}}
-        />,
-      },
-      Object {
-        "status": "incomplete",
-        "title": <FormattedMessage
-          defaultMessage="Creating new index"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
-          values={Object {}}
-        />,
-      },
-      Object {
-        "status": "incomplete",
-        "title": <FormattedMessage
-          defaultMessage="Reindexing documents"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
-          values={Object {}}
-        />,
-      },
-      Object {
-        "status": "incomplete",
-        "title": <FormattedMessage
-          defaultMessage="Swapping original index with alias"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
-          values={Object {}}
-        />,
-      },
-    ]
-  }
-/>
-`);
+      <Fragment>
+        <EuiTitle
+          data-test-subj="reindexChecklistTitle"
+          size="xs"
+        >
+          <h3>
+            <FormattedMessage
+              defaultMessage="Reindexing in progress… {percents}"
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingInProgressTitle"
+              values={
+                Object {
+                  "percents": "0%",
+                }
+              }
+            />
+          </h3>
+        </EuiTitle>
+        <StepProgress
+          steps={
+            Array [
+              Object {
+                "status": "inProgress",
+                "title": <FormattedMessage
+                  defaultMessage="Setting old index to read-only"
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
+                  values={Object {}}
+                />,
+              },
+              Object {
+                "status": "incomplete",
+                "title": <FormattedMessage
+                  defaultMessage="Creating new index"
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
+                  values={Object {}}
+                />,
+              },
+              Object {
+                "status": "incomplete",
+                "title": <EuiFlexGroup
+                  alignItems="center"
+                >
+                  <EuiFlexItem>
+                    <FormattedMessage
+                      defaultMessage="Reindexing documents"
+                      id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
+                      values={Object {}}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>,
+              },
+              Object {
+                "status": "incomplete",
+                "title": <FormattedMessage
+                  defaultMessage="Swapping original index with alias"
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
+                  values={Object {}}
+                />,
+              },
+            ]
+          }
+        />
+      </Fragment>
+    `);
   });
 
   it('displays errors in the step that failed', () => {
@@ -84,30 +108,9 @@ describe('ReindexProgress', () => {
         cancelReindex={jest.fn()}
       />
     );
-
-    const aliasStep = wrapper.props().steps[3];
+    const aliasStep = (wrapper.find('StepProgress').props() as any).steps[3];
     expect(aliasStep.children.props.errorMessage).toEqual(
       `This is an error that happened on alias switch`
     );
-  });
-
-  it('shows reindexing document progress bar', () => {
-    const wrapper = shallow(
-      <ReindexProgress
-        reindexState={
-          {
-            lastCompletedStep: ReindexStep.reindexStarted,
-            status: ReindexStatus.inProgress,
-            reindexTaskPercComplete: 0.25,
-            errorMessage: null,
-          } as ReindexState
-        }
-        cancelReindex={jest.fn()}
-      />
-    );
-
-    const reindexStep = wrapper.props().steps[2];
-    expect(reindexStep.children.type.name).toEqual('ReindexProgressBar');
-    expect(reindexStep.children.props.reindexState.reindexTaskPercComplete).toEqual(0.25);
   });
 });
