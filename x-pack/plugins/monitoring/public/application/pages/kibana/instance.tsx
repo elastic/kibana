@@ -164,13 +164,8 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
   }, [ccs, clusterUuid, instance, services.data?.query.timefilter.timefilter, services.http]);
 
   return (
-    <PageTemplate
-      title={title}
-      pageTitle={pageTitle}
-      getPageData={getPageData}
-      data-test-subj="kibanaInstancePage"
-    >
-      <div data-test-subj="monitoringKibanaInstanceApp">
+    <PageTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
+      <div data-test-subj="kibanaInstancePage">
         <KibanaInstance data={data} alerts={alerts} />
       </div>
     </PageTemplate>
