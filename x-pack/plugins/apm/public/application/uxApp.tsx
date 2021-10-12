@@ -34,10 +34,12 @@ import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
 import { redirectTo } from '../components/routing/redirect_to';
-import { useBreadcrumbs } from '../../../observability/public';
+import {
+  InspectorContextProvider,
+  useBreadcrumbs,
+} from '../../../observability/public';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
-import { InspectorContextProvider } from '../context/inspector/inspector_context';
 
 export const uxRoutes: APMRouteDefinition[] = [
   {

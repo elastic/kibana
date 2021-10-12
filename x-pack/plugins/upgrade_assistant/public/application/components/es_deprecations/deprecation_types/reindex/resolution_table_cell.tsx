@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { ReindexStatus } from '../../../../../../common/types';
+import { getReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
 import { useReindexContext } from './context';
 
@@ -99,7 +100,13 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
             <EuiLoadingSpinner size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexInProgressText}</EuiText>
+            <EuiText size="s">
+              {i18nTexts.reindexInProgressText}{' '}
+              {getReindexProgressLabel(
+                reindexState.reindexTaskPercComplete,
+                reindexState.lastCompletedStep
+              )}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );

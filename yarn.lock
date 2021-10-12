@@ -2302,10 +2302,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@34.2.1":
-  version "34.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-34.2.1.tgz#90ac2a32cb47b371f5d814c9181e59aa3d55c029"
-  integrity sha512-C4qERgrcobaTDH2QLmdog0sM5FhWQot6QdsDTFASsSuWtj+a5Ujvex1tlBgiwcuIDP/1OY/tvWhiod8YhmAomg==
+"@elastic/charts@37.0.0":
+  version "37.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-37.0.0.tgz#a94526461c404b449953cca4fe34f8bf3620413e"
+  integrity sha512-Pfm58/voERWVPJlxy13DphwgRoBGYhnSyz65kdsPg6lYGxN5ngWvuTuJ3477fyApYV01Pz4Ckt9yj1BSQue80Q==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -2313,7 +2313,6 @@
     d3-array "^1.2.4"
     d3-cloud "^1.2.5"
     d3-collection "^1.0.7"
-    d3-color "^1.4.0"
     d3-interpolate "^1.4.0"
     d3-scale "^1.0.7"
     d3-shape "^1.3.4"
@@ -2950,10 +2949,10 @@
     "@hapi/validate" "1.x.x"
     "@hapi/wreck" "17.x.x"
 
-"@hapi/hapi@^20.2.0":
-  version "20.2.0"
-  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-20.2.0.tgz#bf0eca9cc591e83f3d72d06a998d31be35d044a1"
-  integrity sha512-yPH/z8KvlSLV8lI4EuId9z595fKKk5n6YA7H9UddWYWsBXMcnCyoFmHtYq0PCV4sNgKLD6QW9e27R9V9Z9aqqw==
+"@hapi/hapi@^20.2.1":
+  version "20.2.1"
+  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-20.2.1.tgz#7482bc28757cb4671623a61bdb5ce920bffc8a2f"
+  integrity sha512-OXAU+yWLwkMfPFic+KITo+XPp6Oxpgc9WUH+pxXWcTIuvWbgco5TC/jS8UDvz+NFF5IzRgF2CL6UV/KLdQYUSQ==
   dependencies:
     "@hapi/accept" "^5.0.1"
     "@hapi/ammo" "^5.0.1"
@@ -2983,10 +2982,15 @@
     "@hapi/hoek" "9.x.x"
     "@hapi/validate" "1.x.x"
 
-"@hapi/hoek@9.x.x", "@hapi/hoek@^9.0.0", "@hapi/hoek@^9.0.4", "@hapi/hoek@^9.2.0":
+"@hapi/hoek@9.x.x", "@hapi/hoek@^9.0.0", "@hapi/hoek@^9.0.4":
   version "9.2.0"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.0.tgz#f3933a44e365864f4dad5db94158106d511e8131"
   integrity sha512-sqKVVVOe5ivCaXDWivIJYVSaEgdQK9ul7a4Kity5Iw7u9+wBAPbX1RMSnLLmp7O4Vzj0WOWwMAJsTL00xwaNug==
+
+"@hapi/hoek@^9.2.1":
+  version "9.2.1"
+  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.1.tgz#9551142a1980503752536b5050fd99f4a7f13b17"
+  integrity sha512-gfta+H8aziZsm8pZa0vj04KO6biEiisppNgA1kbJvFrrWu9Vm7eaUEy76DIxsuTaWvti5fkJVhllWc6ZTE+Mdw==
 
 "@hapi/inert@^6.0.4":
   version "6.0.4"
@@ -11970,7 +11974,7 @@ d3-collection@1, d3-collection@^1.0.3, d3-collection@^1.0.7:
   resolved "https://registry.yarnpkg.com/d3-collection/-/d3-collection-1.0.7.tgz#349bd2aa9977db071091c13144d5e4f16b5b310e"
   integrity sha512-ii0/r5f4sjKNTfh84Di+DpztYwqKhEyUlKoPrzUFfeSkWxjW49xU2QzO9qrPrNkpdI0XJkfzvmTu8V2Zylln6A==
 
-d3-color@1, "d3-color@1 - 2", d3-color@^1.0.3, d3-color@^1.4.0:
+d3-color@1, "d3-color@1 - 2", d3-color@^1.0.3:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-1.4.1.tgz#c52002bf8846ada4424d55d97982fef26eb3bc8a"
   integrity sha512-p2sTHSLCJI2QKunbGb7ocOh7DgTAn8IrLx21QRc/BSnodXM4sv6aLQlnfpvehFMLZEfBc6g9pH9SWQccFYfJ9Q==

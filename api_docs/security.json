@@ -737,7 +737,7 @@
         "tags": [],
         "label": "AuditEvent",
         "description": [
-          "\nAudit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.9/index.html\n\nIf you add additional fields to the schema ensure you update the Kibana Filebeat module:\nhttps://github.com/elastic/beats/tree/master/filebeat/module/kibana\n"
+          "\nAudit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.12/index.html\n\nIf you add additional fields to the schema ensure you update the Kibana Filebeat module:\nhttps://github.com/elastic/beats/tree/master/filebeat/module/kibana\n"
         ],
         "signature": [
           {
@@ -748,7 +748,13 @@
             "text": "AuditEvent"
           },
           " extends ",
-          "LogMeta"
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.LogMeta",
+            "text": "LogMeta"
+          }
         ],
         "path": "x-pack/plugins/security/server/audit/audit_events.ts",
         "deprecated": false,
@@ -1766,6 +1772,21 @@
               "section": "def-server.AuditServiceSetup",
               "text": "AuditServiceSetup"
             }
+          ],
+          "path": "x-pack/plugins/security/server/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-server.SecurityPluginSetup.privilegeDeprecationsService",
+          "type": "Object",
+          "tags": [],
+          "label": "privilegeDeprecationsService",
+          "description": [
+            "\nExposes services to access kibana roles per feature id with the GetDeprecationsContext"
+          ],
+          "signature": [
+            "PrivilegeDeprecationsService"
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
           "deprecated": false
