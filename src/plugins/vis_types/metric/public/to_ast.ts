@@ -73,7 +73,10 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
   metricVis.addArgument(
     'font',
     buildExpression(
-      `font family="${inter.value}" weight="bold" ${style ? `size=${style.fontSize}` : ''}`
+      `font family="${inter.value}" 
+        weight="bold"
+        align="center"
+        ${style ? `size=${style.fontSize}` : ''}`
     )
   );
 
