@@ -148,6 +148,8 @@ export interface IndexingSchedule extends SyncIndexItem<string> {
   blockedWindows?: BlockedWindow[];
 }
 
+export type TimeUnit = 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years';
+
 export type SyncJobType = 'full' | 'incremental' | 'delete' | 'permissions';
 
 export const DAYS_OF_WEEK_VALUES = [

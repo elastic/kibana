@@ -705,20 +705,6 @@ export const BLOCKED_EMPTY_STATE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const SYNC_ENABLED_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.syncEnabledMessage',
-  {
-    defaultMessage: 'Source synchronization enabled.',
-  }
-);
-
-export const SYNC_DISABLED_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.syncDisabledMessage',
-  {
-    defaultMessage: 'Source synchronization disabled.',
-  }
-);
-
 export const SYNC_SETTINGS_UPDATED_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.syncSettingsUpdatedMessage',
   {

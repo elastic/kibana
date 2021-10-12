@@ -24,31 +24,30 @@ import {
 import { SourceLogic } from '../../source_logic';
 
 import { FrequencyItem } from './frequency_item';
+import { SynchronizationLogic } from './synchronization_logic';
 
 export const SyncFrequency: React.FC = () => {
+  const { contentSource } = useValues(SourceLogic);
   const {
-    contentSource: {
-      indexing: {
-        schedule: {
-          full: fullDuration,
-          incremental: incrementalDuration,
-          delete: deleteDuration,
-          permissions: permissionsDuration,
-          estimates: {
-            full: fullEstimate,
-            incremental: incrementalEstimate,
-            delete: deleteEstimate,
-            permissions: permissionsEstimate,
-          },
-        },
+    schedule: {
+      full: fullDuration,
+      incremental: incrementalDuration,
+      delete: deleteDuration,
+      permissions: permissionsDuration,
+      estimates: {
+        full: fullEstimate,
+        incremental: incrementalEstimate,
+        delete: deleteEstimate,
+        permissions: permissionsEstimate,
       },
     },
-  } = useValues(SourceLogic);
+  } = useValues(SynchronizationLogic({ contentSource }));
 
   return (
     <>
       <EuiSpacer />
       <FrequencyItem
+        type="full"
         label={FULL_SYNC_LABEL}
         description={FULL_SYNC_DESCRIPTION}
         duration={fullDuration}
@@ -56,6 +55,7 @@ export const SyncFrequency: React.FC = () => {
       />
       <EuiHorizontalRule />
       <FrequencyItem
+        type="incremental"
         label={INCREMENTAL_SYNC_LABEL}
         description={INCREMENTAL_SYNC_DESCRIPTION}
         duration={incrementalDuration}
@@ -63,6 +63,7 @@ export const SyncFrequency: React.FC = () => {
       />
       <EuiHorizontalRule />
       <FrequencyItem
+        type="delete"
         label={DELETION_SYNC_LABEL}
         description={DELETION_SYNC_DESCRIPTION}
         duration={deleteDuration}
@@ -72,6 +73,7 @@ export const SyncFrequency: React.FC = () => {
         <>
           <EuiHorizontalRule />
           <FrequencyItem
+            type="permissions"
             label={PERMISSIONS_SYNC_LABEL}
             description={PERMISSIONS_SYNC_DESCRIPTION}
             duration={permissionsDuration}
