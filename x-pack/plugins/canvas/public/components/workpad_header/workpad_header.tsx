@@ -57,7 +57,6 @@ const mergeProps = (
   ...stateProps,
   ...dispatchProps,
   ...ownProps,
-  // Moved this section out of the main component to enable stories
   renderEmbedPanel: (onClose: () => void) => <AddEmbeddablePanel onClose={onClose} />,
   addElement: dispatchProps.addElement(stateProps.pageId),
   elements: elementsRegistry.toJS(),
