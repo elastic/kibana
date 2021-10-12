@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import {
-  Logger,
-  CoreSetup,
-  SavedObjectsBulkGetObject,
-  SavedObjectsBaseOptions,
-} from 'kibana/server';
+import { Logger, CoreSetup } from 'kibana/server';
 import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../task_manager/server';
-import { ActionResult, PreConfiguredAction } from '../types';
+import { PreConfiguredAction } from '../types';
 import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
@@ -83,22 +78,12 @@ export function telemetryTaskRunner(
           },
         ]) => client.asInternalUser
       );
-    const actionsBulkGet = (
-      objects?: SavedObjectsBulkGetObject[],
-      options?: SavedObjectsBaseOptions
-    ) => {
-      return core
-        .getStartServices()
-        .then(([{ savedObjects }]) =>
-          savedObjects.createInternalRepository(['action']).bulkGet<ActionResult>(objects, options)
-        );
-    };
     return {
       async run() {
         const esClient = await getEsClient();
         return Promise.all([
           getTotalCount(esClient, kibanaIndex, preconfiguredActions),
-          getInUseTotalCount(esClient, actionsBulkGet, kibanaIndex),
+          getInUseTotalCount(esClient, kibanaIndex),
         ])
           .then(([totalAggegations, totalInUse]) => {
             return {

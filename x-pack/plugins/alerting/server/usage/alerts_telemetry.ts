@@ -10,10 +10,11 @@ import { AlertsUsage } from './types';
 
 const alertTypeMetric = {
   scripted_metric: {
-    init_script: 'state.types = [:]',
+    init_script: 'state.ruleTypes = [:]; state.namespaces = [:]',
     map_script: `
       String alertType = doc['alert.alertTypeId'].value;
-      state.types.put(alertType, state.types.containsKey(alertType) ? state.types.get(alertType) + 1 : 1);
+      String namespace = doc['namespaces'].value;
+      state.ruleTypes.put(alertType, state.ruleTypes.containsKey(alertType) ? state.ruleTypes.get(alertType) + 1 : 1);
     `,
     // Combine script is executed per cluster, but we already have a key-value pair per cluster.
     // Despite docs that say this is optional, this script can't be blank.
@@ -40,7 +41,12 @@ export async function getTotalCountAggregations(
 ): Promise<
   Pick<
     AlertsUsage,
-    'count_total' | 'count_by_type' | 'throttle_time' | 'schedule_time' | 'connectors_per_alert'
+    | 'count_total'
+    | 'count_by_type'
+    | 'throttle_time'
+    | 'schedule_time'
+    | 'connectors_per_alert'
+    | 'count_active_by_namespace'
   >
 > {
   const throttleTimeMetric = {
@@ -247,7 +253,7 @@ export async function getTotalCountAggregations(
   });
 
   const aggregations = results.aggregations as {
-    byAlertTypeId: { value: { types: Record<string, string> } };
+    byAlertTypeId: { value: { ruleTypes: Record<string, string> } };
     throttleTime: { value: { min: number; max: number; totalCount: number; totalSum: number } };
     intervalTime: { value: { min: number; max: number; totalCount: number; totalSum: number } };
     connectorsAgg: {
@@ -257,20 +263,20 @@ export async function getTotalCountAggregations(
     };
   };
 
-  const totalAlertsCount = Object.keys(aggregations.byAlertTypeId.value.types).reduce(
+  const totalAlertsCount = Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
     (total: number, key: string) =>
-      parseInt(aggregations.byAlertTypeId.value.types[key], 10) + total,
+      parseInt(aggregations.byAlertTypeId.value.ruleTypes[key], 10) + total,
     0
   );
 
   return {
     count_total: totalAlertsCount,
-    count_by_type: Object.keys(aggregations.byAlertTypeId.value.types).reduce(
+    count_by_type: Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
       // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.types[key],
+        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.ruleTypes[key],
       }),
       {}
     ),
@@ -300,6 +306,7 @@ export async function getTotalCountAggregations(
           : 0,
       max: aggregations.connectorsAgg.connectors.value.max,
     },
+    count_active_by_namespace: {},
   };
 }
 
@@ -319,21 +326,32 @@ export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaIn
   });
 
   const aggregations = searchResult.aggregations as {
-    byAlertTypeId: { value: { types: Record<string, string> } };
+    byAlertTypeId: {
+      value: { ruleTypes: Record<string, string>; namespaces: Record<string, string> };
+    };
   };
 
   return {
-    countTotal: Object.keys(aggregations.byAlertTypeId.value.types).reduce(
+    countTotal: Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
       (total: number, key: string) =>
-        parseInt(aggregations.byAlertTypeId.value.types[key], 10) + total,
+        parseInt(aggregations.byAlertTypeId.value.ruleTypes[key], 10) + total,
       0
     ),
-    countByType: Object.keys(aggregations.byAlertTypeId.value.types).reduce(
+    countByType: Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
       // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.types[key],
+        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.ruleTypes[key],
+      }),
+      {}
+    ),
+    countByNamespace: Object.keys(aggregations.byAlertTypeId.value.namespaces).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, key: string) => ({
+        ...obj,
+        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.namespaces[key],
       }),
       {}
     ),

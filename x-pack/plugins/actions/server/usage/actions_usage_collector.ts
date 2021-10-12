@@ -32,10 +32,12 @@ const byServiceProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_active_em
   {
     DYNAMIC_KEY: { type: 'long' },
     // Known services:
-    exchange: { type: 'long' },
+    exchange_server: { type: 'long' },
     gmail: { type: 'long' },
     outlook365: { type: 'long' },
-    __swimlane: { type: 'long' },
+    elastic_cloud: { type: 'long' },
+    other: { type: 'long' },
+    ses: { type: 'long' },
   };
 
 const byNamespaceSchema: MakeSchemaFrom<ActionsUsage>['count_active_by_namespace'] = {

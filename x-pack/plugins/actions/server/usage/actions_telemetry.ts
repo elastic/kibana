@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  SavedObjectsBaseOptions,
-  SavedObjectsBulkGetObject,
-  SavedObjectsBulkResponse,
-} from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { ActionResult, PreConfiguredAction } from '../types';
 
@@ -86,10 +81,6 @@ export async function getTotalCount(
 
 export async function getInUseTotalCount(
   esClient: ElasticsearchClient,
-  actionsBulkGet: (
-    objects?: SavedObjectsBulkGetObject[] | undefined,
-    options?: SavedObjectsBaseOptions | undefined
-  ) => Promise<SavedObjectsBulkResponse<ActionResult<Record<string, unknown>>>>,
   kibanaIndex: string
 ): Promise<{
   countTotal: number;
@@ -261,15 +252,37 @@ export async function getInUseTotalCount(
   const preconfiguredActionsAggs =
     // @ts-expect-error aggegation type is not specified
     actionResults.aggregations.preconfigured_actions?.preconfiguredActionRefIds.value;
-  const bulkFilter = Object.entries(aggs.connectorIds).map(([key]) => ({
-    id: key,
-    type: 'action',
-    fields: ['id', 'actionTypeId', 'namespaces', 'config'],
-  }));
-  const actions = await actionsBulkGet(bulkFilter);
-  const countByActionTypeId = actions.saved_objects.reduce(
+
+  const {
+    body: { hits: actions },
+  } = await esClient.search<{
+    action: ActionResult;
+    namespaces: string[];
+  }>({
+    index: kibanaIndex,
+    _source_includes: ['action', 'namespaces'],
+    body: {
+      query: {
+        bool: {
+          must: [
+            {
+              term: { type: 'action' },
+            },
+            {
+              terms: {
+                _id: Object.entries(aggs.connectorIds).map(([key]) => `action:${key}`),
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  const countByActionTypeId = actions.hits.reduce(
     (actionTypeCount: Record<string, number>, action) => {
-      const alertTypeId = replaceFirstAndLastDotSymbols(action.attributes.actionTypeId);
+      const actionSource = action._source!;
+      const alertTypeId = replaceFirstAndLastDotSymbols(actionSource.action.actionTypeId);
       const currentCount =
         actionTypeCount[alertTypeId] !== undefined ? actionTypeCount[alertTypeId] : 0;
       actionTypeCount[alertTypeId] = currentCount + 1;
@@ -278,23 +291,21 @@ export async function getInUseTotalCount(
     {}
   );
 
-  const countByNamespace = actions.saved_objects.reduce(
-    (namespaceCount: Record<string, number>, action) => {
-      action.namespaces?.forEach((namespace) => {
-        const namespaceCl = replaceFirstAndLastDotSymbols(namespace);
-        const currentCount =
-          namespaceCount[namespaceCl] !== undefined ? namespaceCount[namespaceCl] : 0;
-        namespaceCount[namespaceCl] = currentCount + 1;
-      });
-      return namespaceCount;
-    },
-    {}
-  );
+  const countByNamespace = actions.hits.reduce((namespaceCount: Record<string, number>, action) => {
+    const actionSource = action._source!;
+    actionSource.namespaces.forEach((namespace) => {
+      const namespaceCl = replaceFirstAndLastDotSymbols(namespace);
+      const currentCount =
+        namespaceCount[namespaceCl] !== undefined ? namespaceCount[namespaceCl] : 0;
+      namespaceCount[namespaceCl] = currentCount + 1;
+    });
+    return namespaceCount;
+  }, {});
 
-  const countEmailByService = actions.saved_objects
-    .filter((action) => action.attributes.actionTypeId === '.email')
+  const countEmailByService = actions.hits
+    .filter((action) => action._source!.action.actionTypeId === '.email')
     .reduce((emailServiceCount: Record<string, number>, action) => {
-      const service = (action.attributes.config?.service ?? 'other') as string;
+      const service = (action._source!.action.config?.service ?? 'other') as string;
       const currentCount =
         emailServiceCount[service] !== undefined ? emailServiceCount[service] : 0;
       emailServiceCount[service] = currentCount + 1;
