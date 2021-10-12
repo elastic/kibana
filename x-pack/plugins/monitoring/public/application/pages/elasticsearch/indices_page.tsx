@@ -9,13 +9,16 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ElasticsearchIndices } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import { useLocalStorage } from '../../hooks/use_local_storage';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { ELASTICSEARCH_SYSTEM_ID, RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
 
 export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -31,6 +34,7 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
     'showSystemIndices',
     false
   );
+  const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.indices.routeTitle', {
     defaultMessage: 'Elasticsearch - Indices',
@@ -48,26 +52,38 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices`;
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      query: {
-        show_system_indices: showSystemIndices,
-      },
-      body: JSON.stringify({
-        ccs,
-        timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
+    if (services.http?.fetch && clusterUuid) {
+      const response = await services.http?.fetch(url, {
+        method: 'POST',
+        query: {
+          show_system_indices: showSystemIndices,
         },
-      }),
-    });
-    setData(response);
+        body: JSON.stringify({
+          ccs,
+          timeRange: {
+            min: bounds.min.toISOString(),
+            max: bounds.max.toISOString(),
+          },
+        }),
+      });
+      setData(response);
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        clusterUuid,
+        alertTypeIds: [RULE_LARGE_SHARD_SIZE],
+        timeRange: {
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
+        },
+      });
+      setAlerts(alertsResponse);
+    }
   }, [
-    ccs,
-    showSystemIndices,
-    clusterUuid,
     services.data?.query.timefilter.timefilter,
     services.http,
+    clusterUuid,
+    showSystemIndices,
+    ccs,
   ]);
 
   return (
@@ -80,13 +96,14 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
     >
       <div data-test-subj="elasticsearchIndicesListingPage">
         <SetupModeRenderer
+          productName={ELASTICSEARCH_SYSTEM_ID}
           render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
               <ElasticsearchIndices
                 clusterStatus={data.clusterStatus}
                 indices={data.indices}
-                alerts={{}}
+                alerts={alerts}
                 showSystemIndices={showSystemIndices}
                 toggleShowSystemIndices={toggleShowSystemIndices}
                 {...getPaginationTableProps()}
