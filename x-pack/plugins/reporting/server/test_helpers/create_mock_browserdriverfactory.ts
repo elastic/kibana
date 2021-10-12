@@ -114,7 +114,6 @@ export const createMockBrowserDriverFactory = async (
       autoDownload: false,
     },
     networkPolicy: { enabled: true, rules: [] },
-    viewport: { width: 800, height: 600 },
     loadDelay: moment.duration(2, 's'),
     zoom: 2,
     maxAttempts: 1,

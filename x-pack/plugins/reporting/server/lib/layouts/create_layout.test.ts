@@ -67,6 +67,10 @@ describe('Create Layout', () => {
           "timefilterDurationAttribute": "data-shared-timefilter-duration",
         },
         "useReportingBranding": true,
+        "viewport": Object {
+          "height": 1200,
+          "width": 1950,
+        },
       }
     `);
   });
