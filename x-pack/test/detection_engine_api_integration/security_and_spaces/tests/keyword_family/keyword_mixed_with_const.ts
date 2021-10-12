@@ -29,11 +29,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  interface EventModule {
-    module: string;
-    dataset: string;
-  }
-
   describe('Rule detects against a keyword and constant_keyword of event.dataset', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_keyword_family/const_keyword');
@@ -78,9 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 8, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits
-          .map((hit) => (hit._source?.event as EventModule).dataset)
-          .sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.['event.dataset']).sort();
         expect(hits).to.eql([
           'dataset_name_1',
           'dataset_name_1',
@@ -118,9 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 8, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits
-          .map((hit) => (hit._source?.event as EventModule).dataset)
-          .sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.['event.dataset']).sort();
         expect(hits).to.eql([
           'dataset_name_1',
           'dataset_name_1',
