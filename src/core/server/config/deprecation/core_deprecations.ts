@@ -185,11 +185,15 @@ const removeFromConfigStep = (setting: string) => {
   });
 };
 
-const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const opsLoggingEventDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.events?.ops) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
       title: i18n.translate('core.deprecations.loggingEventsOps.deprecationTitle', {
         defaultMessage: `Setting "logging.events.ops" is deprecated`,
       }),
@@ -197,8 +201,7 @@ const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDe
         defaultMessage:
           '"logging.events.ops" has been deprecated and will be removed ' +
           'in 8.0. To access ops data moving forward, please enable debug logs for the ' +
-          '"metrics.ops" context in your logging configuration. For more details, see ' +
-          'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+          '"metrics.ops" context in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -212,11 +215,15 @@ const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDe
   }
 };
 
-const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const requestLoggingEventDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.events?.request) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
       title: i18n.translate('core.deprecations.loggingEventsRequest.deprecationTitle', {
         defaultMessage: `Setting "logging.events.request" is deprecated`,
       }),
@@ -224,8 +231,7 @@ const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, a
         defaultMessage:
           '"logging.events.request" has been deprecated and will be removed ' +
           'in 8.0. To access request data moving forward, please enable debug logs for the ' +
-          '"http.server.response" context in your logging configuration. For more details, see ' +
-          'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+          '"http.server.response" context in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -239,11 +245,15 @@ const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, a
   }
 };
 
-const responseLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const responseLoggingEventDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.events?.response) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
       title: i18n.translate('core.deprecations.loggingEventsResponse.deprecationTitle', {
         defaultMessage: `Setting "logging.events.response" is deprecated`,
       }),
@@ -251,8 +261,7 @@ const responseLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, 
         defaultMessage:
           '"logging.events.response" has been deprecated and will be removed ' +
           'in 8.0. To access response data moving forward, please enable debug logs for the ' +
-          '"http.server.response" context in your logging configuration. For more details, see ' +
-          'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+          '"http.server.response" context in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -266,11 +275,15 @@ const responseLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, 
   }
 };
 
-const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const timezoneLoggingDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.timezone) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingtimezone',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingtimezone`,
       title: i18n.translate('core.deprecations.loggingTimezone.deprecationTitle', {
         defaultMessage: `Setting "logging.timezone" is deprecated`,
       }),
@@ -278,8 +291,7 @@ const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDe
         defaultMessage:
           '"logging.timezone" has been deprecated and will be removed ' +
           'in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern ' +
-          'in your logging configuration. For more details, see ' +
-          'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+          'in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -293,11 +305,15 @@ const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDe
   }
 };
 
-const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const destLoggingDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.dest) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingdest',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingdest`,
       title: i18n.translate('core.deprecations.loggingDest.deprecationTitle', {
         defaultMessage: `Setting "logging.dest" is deprecated`,
       }),
@@ -305,8 +321,7 @@ const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprec
         defaultMessage:
           '"logging.dest" has been deprecated and will be removed ' +
           'in 8.0. To set the destination moving forward, you can use the "console" appender ' +
-          'in your logging configuration or define a custom one. For more details, see ' +
-          'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+          'in your logging configuration or define a custom one.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -320,11 +335,15 @@ const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprec
   }
 };
 
-const quietLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const quietLoggingDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.quiet) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingquiet',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingquiet`,
       title: i18n.translate('core.deprecations.loggingQuiet.deprecationTitle', {
         defaultMessage: `Setting "logging.quiet" is deprecated`,
       }),
@@ -345,11 +364,15 @@ const quietLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDepre
   }
 };
 
-const silentLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const silentLoggingDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.silent) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingsilent',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingsilent`,
       title: i18n.translate('core.deprecations.loggingSilent.deprecationTitle', {
         defaultMessage: `Setting "logging.silent" is deprecated`,
       }),
@@ -370,11 +393,15 @@ const silentLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDepr
   }
 };
 
-const verboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const verboseLoggingDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.verbose) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingverbose',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingverbose`,
       title: i18n.translate('core.deprecations.loggingVerbose.deprecationTitle', {
         defaultMessage: `Setting "logging.verbose" is deprecated`,
       }),
@@ -395,15 +422,19 @@ const verboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDep
   }
 };
 
-const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const jsonLoggingDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   // We silence the deprecation warning when running in development mode because
   // the dev CLI code in src/dev/cli_dev_mode/using_server_process.ts manually
   // specifies `--logging.json=false`. Since it's executed in a child process, the
   // ` legacyLoggingConfigSchema` returns `true` for the TTY check on `process.stdout.isTTY`
   if (settings.logging?.json && settings.env !== 'development') {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx`,
       title: i18n.translate('core.deprecations.loggingJson.deprecationTitle', {
         defaultMessage: `Setting "logging.json" is deprecated`,
       }),
@@ -412,9 +443,7 @@ const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprec
           '"logging.json" has been deprecated and will be removed ' +
           'in 8.0. To specify log message format moving forward, ' +
           'you can configure the "appender.layout" property for every custom appender in your logging configuration. ' +
-          'There is currently no default layout for custom appenders and each one must be declared explicitly. ' +
-          'For more details, see ' +
-          'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+          'There is currently no default layout for custom appenders and each one must be declared explicitly.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -428,11 +457,15 @@ const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprec
   }
 };
 
-const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const logRotateDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.rotate) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#rolling-file-appender`,
       title: i18n.translate('core.deprecations.loggingRotate.deprecationTitle', {
         defaultMessage: `Setting "logging.rotate" is deprecated`,
       }),
@@ -440,8 +473,7 @@ const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecat
         defaultMessage:
           '"logging.rotate" and sub-options have been deprecated and will be removed in 8.0. ' +
           'Moving forward, you can enable log rotation using the "rolling-file" appender for a logger ' +
-          'in your logging configuration. For more details, see ' +
-          'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender',
+          'in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -455,11 +487,15 @@ const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecat
   }
 };
 
-const logEventsLogDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const logEventsLogDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.events?.log) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
       title: i18n.translate('core.deprecations.loggingEventsLog.deprecationTitle', {
         defaultMessage: `Setting "logging.events.log" is deprecated`,
       }),
@@ -480,11 +516,15 @@ const logEventsLogDeprecation: ConfigDeprecation = (settings, fromPath, addDepre
   }
 };
 
-const logEventsErrorDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const logEventsErrorDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.events?.error) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
       title: i18n.translate('core.deprecations.loggingEventsError.deprecationTitle', {
         defaultMessage: `Setting "logging.events.error" is deprecated`,
       }),
@@ -505,11 +545,15 @@ const logEventsErrorDeprecation: ConfigDeprecation = (settings, fromPath, addDep
   }
 };
 
-const logFilterDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+const logFilterDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
   if (settings.logging?.filter) {
     addDeprecation({
-      documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingfilter',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingfilter`,
       title: i18n.translate('core.deprecations.loggingFilter.deprecationTitle', {
         defaultMessage: `Setting "logging.filter" is deprecated`,
       }),
