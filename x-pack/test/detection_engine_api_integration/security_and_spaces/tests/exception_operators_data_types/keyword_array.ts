@@ -343,7 +343,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql([[]]);
+        expect(hits).to.eql([]);
       });
     });
 
@@ -522,7 +522,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql([[]]);
+        expect(hits).to.eql([]);
       });
     });
 

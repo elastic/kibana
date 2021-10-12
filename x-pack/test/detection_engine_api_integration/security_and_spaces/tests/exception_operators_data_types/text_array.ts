@@ -340,7 +340,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.text).sort();
-        expect(hits).to.eql([[]]);
+        expect(hits).to.eql([]);
       });
     });
 
@@ -518,7 +518,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.text).sort();
-        expect(hits).to.eql([[]]);
+        expect(hits).to.eql([]);
       });
     });
 
