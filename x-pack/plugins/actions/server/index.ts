@@ -123,13 +123,13 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       if (actions?.hasOwnProperty('proxyRejectUnauthorizedCertificates')) {
         addDeprecation({
           message:
-            `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.proxyVerificationMode" instead, ` +
+            `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.ssl.proxyVerificationMode" instead, ` +
             `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
             `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
           correctiveActions: {
             manualSteps: [
               `Remove "xpack.actions.proxyRejectUnauthorizedCertificates" from your kibana configs.`,
-              `Use "xpack.actions.proxyVerificationMode" ` +
+              `Use "xpack.actions.ssl.proxyVerificationMode" ` +
                 `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
                 `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
             ],

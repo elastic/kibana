@@ -54,7 +54,7 @@ describe('index', () => {
         '"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.verificationMode" instead, with the setting "verificationMode:full" eql to "rejectUnauthorized:true", and "verificationMode:none" eql to "rejectUnauthorized:false".'
       );
       expect(messages[2]).toBe(
-        '"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.proxyVerificationMode" instead, with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".'
+        '"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.ssl.proxyVerificationMode" instead, with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".'
       );
     });
   });
