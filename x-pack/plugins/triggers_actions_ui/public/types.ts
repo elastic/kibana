@@ -197,6 +197,7 @@ export interface AlertType<
     | 'minimumLicenseRequired'
     | 'recoveryActionGroup'
     | 'defaultActionGroupId'
+    | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'minimumScheduleInterval'
   > {
@@ -211,7 +212,7 @@ export type AlertUpdates = Omit<Alert, 'id' | 'executionStatus'>;
 
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
-  tagsText: string;
+  index: number;
   actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
