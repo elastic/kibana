@@ -22,7 +22,6 @@ import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data
 import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
 import { ExpressionsStart } from '../../../plugins/expressions/public';
 import { UiActionsStart } from '../../../plugins/ui_actions/public';
-import { SavedVisualizationsLoader } from './saved_visualizations';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 
@@ -53,9 +52,6 @@ export const [getUsageCollector, setUsageCollector] =
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
 
 export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UiActions');
-
-export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] =
-  createGetterSetter<SavedVisualizationsLoader>('SavedVisualisationsLoader');
 
 export const [getAggs, setAggs] =
   createGetterSetter<DataPublicPluginStart['search']['aggs']>('AggConfigs');
