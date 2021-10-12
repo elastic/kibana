@@ -18,8 +18,8 @@ export const getSnapshotSearchWildcard = ({
   match,
   operator,
 }: SearchParams): string => {
-  // add * wildcard if the operator is NOT for exact match
-  value = operator === 'exact' ? value : `${value}*`;
+  // if the operator is NOT for exact match, convert to *value* wildcard that matches any substring
+  value = operator === 'exact' ? value : `*${value}*`;
 
   // ES API new "-"("except") wildcard removes matching items from a list of already selected items
   // To find all items not containing the search value, use "*,-{searchValue}"

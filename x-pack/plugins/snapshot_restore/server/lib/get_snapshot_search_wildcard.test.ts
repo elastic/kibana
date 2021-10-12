@@ -22,7 +22,7 @@ describe('getSnapshotSearchWildcard', () => {
   it('partial match search converts to a wildcard with *', () => {
     const searchParams = { field: 'snapshot', value: 'testSearch', operator: 'eq', match: 'must' };
     const wildcard = getSnapshotSearchWildcard(searchParams);
-    expect(wildcard).toEqual('testSearch*');
+    expect(wildcard).toEqual('*testSearch*');
   });
 
   it('excluding search converts to "all, except" wildcard (exact match)', () => {
@@ -44,7 +44,7 @@ describe('getSnapshotSearchWildcard', () => {
       match: 'must_not',
     };
     const wildcard = getSnapshotSearchWildcard(searchParams);
-    expect(wildcard).toEqual('*,-testSearch*');
+    expect(wildcard).toEqual('*,-*testSearch*');
   });
 
   it('excluding search for policy name converts to "all,_none, except" wildcard', () => {

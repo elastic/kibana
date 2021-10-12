@@ -12,14 +12,21 @@ import { registerEsHelpers, SlmPolicy } from './lib';
 import { SnapshotDetails } from '../../../../../plugins/snapshot_restore/common/types';
 
 const REPO_NAME_1 = 'test_repo_1';
-const REPO_NAME_2 = 'test_repo_2';
+const REPO_NAME_2 = 'test_another_repo_2';
 const REPO_PATH_1 = '/tmp/repo_1';
 const REPO_PATH_2 = '/tmp/repo_2';
+// SLM policies to test policyName filter
 const POLICY_NAME_1 = 'test_policy_1';
-const POLICY_NAME_2 = 'test_policy_2';
+const POLICY_NAME_2 = 'test_another_policy_2';
+const POLICY_SNAPSHOT_NAME_1 = 'backup_snapshot';
+const POLICY_SNAPSHOT_NAME_2 = 'a_snapshot';
+// snapshots created without SLM policies
 const BATCH_SIZE_1 = 3;
 const BATCH_SIZE_2 = 5;
-const SNAPSHOT_COUNT = 10;
+const BATCH_SNAPSHOT_NAME_1 = 'another_snapshot';
+const BATCH_SNAPSHOT_NAME_2 = 'xyz_another_snapshot';
+// total count consists of both batches' sizes + 2 snapshots created by 2 SLM policies (one each)
+const SNAPSHOT_COUNT = BATCH_SIZE_1 + BATCH_SIZE_2 + 2;
 // API defaults used in the UI
 const PAGE_INDEX = 0;
 const PAGE_SIZE = 20;
@@ -59,13 +66,13 @@ const getApiPath = ({
 };
 const getPolicyBody = (policy: Partial<SlmPolicy>): SlmPolicy => {
   return {
-    policyName: 'test_policy',
-    name: 'test_snapshot',
+    policyName: 'default_policy',
+    name: 'default_snapshot',
     schedule: '0 30 1 * * ?',
-    repository: 'test_repo',
+    repository: 'default_repo',
     isManagedPolicy: false,
     config: {
-      indices: ['my_index'],
+      indices: ['default_index'],
       ignoreUnavailable: true,
     },
     ...policy,
@@ -87,10 +94,21 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Snapshots', function () {
     this.tags(['skipCloud']); // file system repositories are not supported in cloud
 
+    // names of snapshots created by SLM policies have random suffixes, save full names for tests
     let snapshotName1: string;
     let snapshotName2: string;
 
     before(async () => {
+      /*
+       * This setup creates following repos, SLM policies and snapshots:
+       * Repo 1 "test_repo_1" with 5 snapshots
+       * "backup_snapshot..." (created by SLM policy "test_policy_1")
+       * "a_snapshot..." (created by SLM policy "test_another_policy_2")
+       * "another_snapshot_0" to "another_snapshot_2" (no SLM policy)
+       *
+       * Repo 2 "test_another_repo_2" with 5 snapshots
+       * "xyz_another_snapshot_0" to "xyz_another_snapshot_4" (no SLM policy)
+       */
       try {
         await createRepository(REPO_NAME_1, REPO_PATH_1);
         await createRepository(REPO_NAME_2, REPO_PATH_2);
@@ -98,15 +116,15 @@ export default function ({ getService }: FtrProviderContext) {
           getPolicyBody({
             policyName: POLICY_NAME_1,
             repository: REPO_NAME_1,
-            name: 'backup_snapshot',
+            name: POLICY_SNAPSHOT_NAME_1,
           }),
           true
         );
         await createPolicy(
           getPolicyBody({
             policyName: POLICY_NAME_2,
-            repository: REPO_NAME_2,
-            name: 'a_snapshot',
+            repository: REPO_NAME_1,
+            name: POLICY_SNAPSHOT_NAME_2,
           }),
           true
         );
@@ -115,10 +133,10 @@ export default function ({ getService }: FtrProviderContext) {
         await new Promise((resolve) => setTimeout(resolve, 2000));
         ({ snapshot_name: snapshotName2 } = await executePolicy(POLICY_NAME_2));
         for (let i = 0; i < BATCH_SIZE_1; i++) {
-          await createSnapshot(`another_snapshot_${i}`, REPO_NAME_1);
+          await createSnapshot(`${BATCH_SNAPSHOT_NAME_1}_${i}`, REPO_NAME_1);
         }
         for (let i = 0; i < BATCH_SIZE_2; i++) {
-          await createSnapshot(`xyz_snapshot_${i}`, REPO_NAME_2);
+          await createSnapshot(`${BATCH_SNAPSHOT_NAME_2}_${i}`, REPO_NAME_2);
         }
       } catch (err) {
         // eslint-disable-next-line no-console
@@ -200,7 +218,13 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .set('kbn-xsrf', 'xxx')
           .send();
+
+        /*
+         * snapshots name in asc order:
+         * "a_snapshot...", "another_snapshot...", "backup_snapshot...", "xyz_another_snapshot..."
+         */
         const snapshotName = snapshots[0].snapshot;
+        // snapshotName2 is "a_snapshot..."
         expect(snapshotName).to.eql(snapshotName2);
       });
 
@@ -216,8 +240,12 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .set('kbn-xsrf', 'xxx')
           .send();
+        /*
+         * snapshots name in desc order:
+         * "xyz_another_snapshot...", "backup_snapshot...", "another_snapshot...", "a_snapshot..."
+         */
         const snapshotName = snapshots[0].snapshot;
-        expect(snapshotName).to.eql('xyz_snapshot_4');
+        expect(snapshotName).to.eql('xyz_another_snapshot_4');
       });
 
       it('sorts by repository name (asc)', async () => {
@@ -232,8 +260,9 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .set('kbn-xsrf', 'xxx')
           .send();
-        const snapshotName = snapshots[0].repository;
-        expect(snapshotName).to.eql(REPO_NAME_1);
+        // repositories in asc order: "test_another_repo_2", "test_repo_1"
+        const repositoryName = snapshots[0].repository;
+        expect(repositoryName).to.eql(REPO_NAME_2); // "test_another_repo_2"
       });
 
       it('sorts by repository name (desc)', async () => {
@@ -248,8 +277,9 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .set('kbn-xsrf', 'xxx')
           .send();
-        const snapshotName = snapshots[0].repository;
-        expect(snapshotName).to.eql(REPO_NAME_2);
+        // repositories in desc order: "test_repo_1", "test_another_repo_2"
+        const repositoryName = snapshots[0].repository;
+        expect(repositoryName).to.eql(REPO_NAME_1); // "test_repo_1"
       });
 
       it('sorts by startTimeInMillis (asc)', async () => {
@@ -283,7 +313,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send();
         const snapshotName = snapshots[0].snapshot;
         // the last snapshot that was created during this test setup
-        expect(snapshotName).to.eql('xyz_snapshot_4');
+        expect(snapshotName).to.eql('xyz_another_snapshot_4');
       });
 
       // these properties are only tested as being accepted by the API
@@ -320,7 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('search', () => {
       describe('snapshot name', () => {
         it('exact match', async () => {
-          // list snapshots with the name "a_snapshot_2"
+          // list snapshots with the name "another_snapshot_2"
           const searchField = 'snapshot';
           const searchValue = 'another_snapshot_2';
           const searchMatch = 'must';
@@ -344,9 +374,9 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('partial match', async () => {
-          // list snapshots with the name starting with "xyz"
+          // list snapshots with the name containing with "another"
           const searchField = 'snapshot';
-          const searchValue = 'xyz';
+          const searchValue = 'another';
           const searchMatch = 'must';
           const searchOperator = 'eq';
           const {
@@ -363,16 +393,18 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'xxx')
             .send();
 
-          expect(snapshots.length).to.eql(BATCH_SIZE_2);
-          snapshots.forEach((snapshot: SnapshotDetails) => {
-            expect(snapshot.snapshot).to.contain('xyz');
-          });
+          // both batches created snapshots containing "another" in the name
+          expect(snapshots.length).to.eql(BATCH_SIZE_1 + BATCH_SIZE_2);
+          const snapshotNamesContainSearch = snapshots.every((snapshot: SnapshotDetails) =>
+            snapshot.snapshot.includes('another')
+          );
+          expect(snapshotNamesContainSearch).to.eql(true);
         });
 
         it('excluding search with exact match', async () => {
-          // list snapshots with the name not "xyz_snapshot_0f"
+          // list snapshots with the name not "another_snapshot_2"
           const searchField = 'snapshot';
-          const searchValue = 'xyz_snapshot_0';
+          const searchValue = 'another_snapshot_2';
           const searchMatch = 'must_not';
           const searchOperator = 'exact';
           const {
@@ -390,15 +422,16 @@ export default function ({ getService }: FtrProviderContext) {
             .send();
 
           expect(snapshots.length).to.eql(SNAPSHOT_COUNT - 1);
-          snapshots.forEach((snapshot: SnapshotDetails) => {
-            expect(snapshot.snapshot).to.not.eql('xyz_snapshot_0');
-          });
+          const snapshotIsExcluded = snapshots.every(
+            (snapshot: SnapshotDetails) => snapshot.snapshot !== 'another_snapshot_2'
+          );
+          expect(snapshotIsExcluded).to.eql(true);
         });
 
         it('excluding search with partial match', async () => {
-          // list snapshots with the name not starting with "xyz"
+          // list snapshots with the name not starting with "another"
           const searchField = 'snapshot';
-          const searchValue = 'xyz';
+          const searchValue = 'another';
           const searchMatch = 'must_not';
           const searchOperator = 'eq';
           const {
@@ -415,10 +448,12 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'xxx')
             .send();
 
-          expect(snapshots.length).to.eql(SNAPSHOT_COUNT - BATCH_SIZE_2);
-          snapshots.forEach((snapshot: SnapshotDetails) => {
-            expect(snapshot.snapshot).to.not.contain('xyz');
-          });
+          // both batches created snapshots with names containing "another"
+          expect(snapshots.length).to.eql(SNAPSHOT_COUNT - BATCH_SIZE_1 - BATCH_SIZE_2);
+          const snapshotsAreExcluded = snapshots.every(
+            (snapshot: SnapshotDetails) => !snapshot.snapshot.includes('another')
+          );
+          expect(snapshotsAreExcluded).to.eql(true);
         });
       });
 
@@ -466,16 +501,19 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'xxx')
             .send();
 
-          expect(snapshots.length).to.eql(1 + BATCH_SIZE_1);
-          snapshots.forEach((snapshot: SnapshotDetails) => {
-            expect(snapshot.repository).to.eql(REPO_NAME_1);
-          });
+          // repo 1 contains snapshots from batch 1 and 2 snapshots created by 2 SLM policies
+          expect(snapshots.length).to.eql(BATCH_SIZE_1 + 2);
+          const repositoryNameMatches = snapshots.every(
+            (snapshot: SnapshotDetails) => snapshot.repository === REPO_NAME_1
+          );
+          expect(repositoryNameMatches).to.eql(true);
         });
 
         it('partial match', async () => {
-          // list snapshots from repository with the name starting with "test"
+          // list snapshots from repository with the name containing "another"
+          // i.e. snapshots from repo 2
           const searchField = 'repository';
-          const searchValue = 'test';
+          const searchValue = 'another';
           const searchMatch = 'must';
           const searchOperator = 'eq';
           const {
@@ -492,7 +530,12 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'xxx')
             .send();
 
-          expect(snapshots.length).to.eql(SNAPSHOT_COUNT);
+          // repo 2 only contains snapshots created by batch 2
+          expect(snapshots.length).to.eql(BATCH_SIZE_2);
+          const repositoryNameMatches = snapshots.every((snapshot: SnapshotDetails) =>
+            snapshot.repository.includes('another')
+          );
+          expect(repositoryNameMatches).to.eql(true);
         });
 
         it('excluding search with exact match', async () => {
@@ -515,14 +558,16 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'xxx')
             .send();
 
-          expect(snapshots.length).to.eql(BATCH_SIZE_2 + 1);
-          snapshots.forEach((snapshot: SnapshotDetails) => {
-            expect(snapshot.repository).to.not.eql(REPO_NAME_1);
-          });
+          // snapshots not in repo 1 are only snapshots created in batch 2
+          expect(snapshots.length).to.eql(BATCH_SIZE_2);
+          const repositoryNameMatches = snapshots.every(
+            (snapshot: SnapshotDetails) => snapshot.repository !== REPO_NAME_1
+          );
+          expect(repositoryNameMatches).to.eql(true);
         });
 
         it('excluding search with partial match', async () => {
-          // list snapshots from repository with the name not starting with "test"
+          // list snapshots from repository with the name not containing "test"
           const searchField = 'repository';
           const searchValue = 'test';
           const searchMatch = 'must_not';
@@ -594,9 +639,9 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('partial match', async () => {
-          // list snapshots created by the policy with the name starting with "test"
+          // list snapshots created by the policy with the name containing "another"
           const searchField = 'policyName';
-          const searchValue = 'test';
+          const searchValue = 'another';
           const searchMatch = 'must';
           const searchOperator = 'eq';
           const {
@@ -613,16 +658,18 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'xxx')
             .send();
 
-          expect(snapshots.length).to.eql(2);
-          snapshots.forEach((snapshot: SnapshotDetails) => {
-            expect(snapshot.policyName).to.contain('test');
-          });
+          // 1 snapshot was created by the policy "test_another_policy_2"
+          expect(snapshots.length).to.eql(1);
+          const policyNameMatches = snapshots.every((snapshot: SnapshotDetails) =>
+            snapshot.policyName!.includes('another')
+          );
+          expect(policyNameMatches).to.eql(true);
         });
 
         it('excluding search with exact match', async () => {
-          // list snapshots created by the policy with the name not "test_policy_2"
+          // list snapshots created by the policy with the name not "test_policy_1"
           const searchField = 'policyName';
-          const searchValue = POLICY_NAME_2;
+          const searchValue = POLICY_NAME_1;
           const searchMatch = 'must_not';
           const searchOperator = 'exact';
           const {
@@ -639,16 +686,19 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'xxx')
             .send();
 
+          // only 1 snapshot was created by policy 1
+          // search results should also contain snapshots without SLM policy
           expect(snapshots.length).to.eql(SNAPSHOT_COUNT - 1);
-          snapshots.forEach((snapshot: SnapshotDetails) => {
-            expect(snapshot.repository).to.not.eql(POLICY_NAME_2);
-          });
+          const snapshotsExcluded = snapshots.every(
+            (snapshot: SnapshotDetails) => (snapshot.policyName ?? '') !== POLICY_NAME_1
+          );
+          expect(snapshotsExcluded).to.eql(true);
         });
 
         it('excluding search with partial match', async () => {
-          // list snapshots created by the policy with the name not starting with "test"
+          // list snapshots created by the policy with the name not containing "another"
           const searchField = 'policyName';
-          const searchValue = 'test';
+          const searchValue = 'another';
           const searchMatch = 'must_not';
           const searchOperator = 'eq';
           const {
@@ -665,11 +715,13 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'xxx')
             .send();
 
-          expect(snapshots.length).to.eql(SNAPSHOT_COUNT - 2);
-          snapshots.forEach((snapshot: SnapshotDetails) => {
-            // policy name might be null if the snapshot was created not by a policy
-            expect(snapshot.policyName ?? '').to.not.contain('test');
-          });
+          // only 1 snapshot was created by SLM policy containing "another" in the name
+          // search results should also contain snapshots without SLM policy
+          expect(snapshots.length).to.eql(SNAPSHOT_COUNT - 1);
+          const snapshotsExcluded = snapshots.every(
+            (snapshot: SnapshotDetails) => !(snapshot.policyName ?? '').includes('another')
+          );
+          expect(snapshotsExcluded).to.eql(true);
         });
       });
     });
