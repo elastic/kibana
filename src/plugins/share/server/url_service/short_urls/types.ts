@@ -7,6 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from 'kibana/server';
 import { ShortUrlData } from '../../../common/url_service/short_urls/types';
 
 /**
@@ -17,20 +18,32 @@ export interface ShortUrlStorage {
    * Create and store a new short URL entry.
    */
   create<P extends SerializableRecord = SerializableRecord>(
-    data: Omit<ShortUrlData<P>, 'id'>
+    data: Omit<ShortUrlData<P>, 'id'>,
+    options?: { references?: SavedObjectReference[] }
   ): Promise<ShortUrlData<P>>;
+
+  /**
+   * Update an existing short URL entry.
+   */
+  update<P extends SerializableRecord = SerializableRecord>(
+    id: string,
+    data: Partial<Omit<ShortUrlData<P>, 'id'>>,
+    options?: { references?: SavedObjectReference[] }
+  ): Promise<void>;
 
   /**
    * Fetch a short URL entry by ID.
    */
-  getById<P extends SerializableRecord = SerializableRecord>(id: string): Promise<ShortUrlData<P>>;
+  getById<P extends SerializableRecord = SerializableRecord>(
+    id: string
+  ): Promise<ShortUrlRecord<P>>;
 
   /**
    * Fetch a short URL entry by slug.
    */
   getBySlug<P extends SerializableRecord = SerializableRecord>(
     slug: string
-  ): Promise<ShortUrlData<P>>;
+  ): Promise<ShortUrlRecord<P>>;
 
   /**
    * Checks if a short URL exists by slug.
@@ -41,4 +54,9 @@ export interface ShortUrlStorage {
    * Delete an existing short URL entry.
    */
   delete(id: string): Promise<void>;
+}
+
+export interface ShortUrlRecord<LocatorParams extends SerializableRecord = SerializableRecord> {
+  data: ShortUrlData<LocatorParams>;
+  references: SavedObjectReference[];
 }
