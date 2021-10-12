@@ -59,6 +59,7 @@ export function getStateDefaults({
   }
   if (savedSearch.hideChart) {
     defaultState.hideChart = savedSearch.hideChart;
+    storage.set(CHART_HIDDEN_KEY, savedSearch.hideChart);
   }
 
   return defaultState;

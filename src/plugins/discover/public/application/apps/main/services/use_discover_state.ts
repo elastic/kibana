@@ -104,8 +104,10 @@ export function useDiscoverState({
 
   useEffect(() => {
     const chartHidden = Boolean(storage.get(CHART_HIDDEN_KEY));
-    setState({ hideChart: chartHidden });
-  }, [storage]);
+    const nextState = { ...state };
+    nextState.hideChart = chartHidden;
+    setState(nextState);
+  }, []);
 
   /**
    * Track state changes that should trigger a fetch
