@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { partition } from 'lodash';
 import { layerTypes } from '../../common';
 import type { XYLayerConfig, YConfig } from '../../common/expressions';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
@@ -91,12 +92,16 @@ export function getStaticValue(
 
   // filter and organize data dimensions into threshold groups
   // now pick the columnId in the active data
-  const { dataLayers: filteredLayers, accessors } = getAccessorCriteriaForGroup(
-    groupId,
-    dataLayers,
-    activeData
-  );
-  if (groupId === 'x' && filteredLayers.length && !filteredLayers.some(layerHasNumberHistogram)) {
+  const {
+    dataLayers: filteredLayers,
+    untouchedDataLayers,
+    accessors,
+  } = getAccessorCriteriaForGroup(groupId, dataLayers, activeData);
+  if (
+    groupId === 'x' &&
+    filteredLayers.length &&
+    !untouchedDataLayers.some(layerHasNumberHistogram)
+  ) {
     return fallbackValue;
   }
   return (
@@ -117,33 +122,104 @@ function getAccessorCriteriaForGroup(
   switch (groupId) {
     case 'x': {
       const filteredDataLayers = dataLayers.filter(({ xAccessor }) => xAccessor);
+      // need to reshape the dataLayers to match the other accessors format
       return {
-        dataLayers: filteredDataLayers,
+        dataLayers: filteredDataLayers.map(({ accessors, xAccessor, ...rest }) => ({
+          ...rest,
+          accessors: [xAccessor] as string[],
+        })),
+        // need the untouched ones for some checks later on
+        untouchedDataLayers: filteredDataLayers,
         accessors: filteredDataLayers.map(({ xAccessor }) => xAccessor) as string[],
       };
     }
     case 'yLeft': {
       const { left } = groupAxesByType(dataLayers, activeData);
       const leftIds = new Set(left.map(({ layer }) => layer));
+      const filteredDataLayers = dataLayers.filter(({ layerId }) => leftIds.has(layerId));
       return {
-        dataLayers: dataLayers.filter(({ layerId }) => leftIds.has(layerId)),
+        dataLayers: filteredDataLayers,
+        untouchedDataLayers: filteredDataLayers,
         accessors: left.map(({ accessor }) => accessor),
       };
     }
     case 'yRight': {
       const { right } = groupAxesByType(dataLayers, activeData);
       const rightIds = new Set(right.map(({ layer }) => layer));
+      const filteredDataLayers = dataLayers.filter(({ layerId }) => rightIds.has(layerId));
       return {
-        dataLayers: dataLayers.filter(({ layerId }) => rightIds.has(layerId)),
+        dataLayers: filteredDataLayers,
+        untouchedDataLayers: filteredDataLayers,
         accessors: right.map(({ accessor }) => accessor),
       };
     }
   }
 }
 
-// For testing
-export function computeStaticValueForGroup(
-  dataLayers: XYLayerConfig[],
+export function computeOverallDataDomain(
+  dataLayers: Array<Pick<XYLayerConfig, 'seriesType' | 'accessors' | 'xAccessor' | 'layerId'>>,
+  accessorIds: string[],
+  activeData: NonNullable<FramePublicAPI['activeData']>
+) {
+  const accessorMap = new Set(accessorIds);
+  let min: number | undefined;
+  let max: number | undefined;
+  const [stacked, unstacked] = partition(dataLayers, ({ seriesType }) =>
+    isStackedChart(seriesType)
+  );
+  for (const { layerId, accessors } of unstacked) {
+    const table = activeData[layerId];
+    if (table) {
+      for (const accessor of accessors) {
+        if (accessorMap.has(accessor)) {
+          for (const row of table.rows) {
+            const value = row[accessor];
+            if (typeof value === 'number') {
+              // when not stacked, do not keep the 0
+              max = max != null ? Math.max(value, max) : value;
+              min = min != null ? Math.min(value, min) : value;
+            }
+          }
+        }
+      }
+    }
+  }
+  // stacked can span multiple layers, so compute an overall max/min by bucket
+  const stackedResults: Record<string, number> = {};
+  for (const { layerId, accessors, xAccessor } of stacked) {
+    const table = activeData[layerId];
+    if (table) {
+      for (const accessor of accessors) {
+        if (accessorMap.has(accessor)) {
+          for (const row of table.rows) {
+            const value = row[accessor];
+            // start with a shared bucket
+            let bucket = 'shared';
+            // but if there's an xAccessor use it as new bucket system
+            if (xAccessor) {
+              bucket = row[xAccessor];
+            }
+            if (typeof value === 'number') {
+              stackedResults[bucket] = stackedResults[bucket] ?? 0;
+              stackedResults[bucket] += value;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (const value of Object.values(stackedResults)) {
+    // for stacked extents keep 0 in view
+    max = Math.max(value, max || 0, 0);
+    min = Math.min(value, min || 0, 0);
+  }
+
+  return { min, max };
+}
+
+function computeStaticValueForGroup(
+  dataLayers: Array<Pick<XYLayerConfig, 'seriesType' | 'accessors' | 'xAccessor' | 'layerId'>>,
   accessorIds: string[],
   activeData: NonNullable<FramePublicAPI['activeData']>,
   minZeroOrNegativeBase: boolean = true
@@ -155,46 +231,12 @@ export function computeStaticValueForGroup(
       return defaultThresholdFactor;
     }
 
-    const accessorMap = new Set(accessorIds);
-    const tableIds = Object.keys(activeData)
-      .map((key) => ({
-        tableId: key,
-        accessors: activeData[key].columns.filter(({ id }) => accessorMap.has(id)),
-      }))
-      .filter(({ accessors }) => accessors.length);
+    const { min, max } = computeOverallDataDomain(dataLayers, accessorIds, activeData);
 
-    // Compute the max and min bounds here for all involved layers
-    // * for stacked series type compute the sum of it
-    // * for no stacked series just check min/max
-    // Collect the results at the end
-    let columnMax = -Infinity;
-    let columnMin = Infinity;
-    for (const { tableId, accessors } of tableIds) {
-      const layer = dataLayers.find(({ layerId }) => layerId === tableId);
-      if (layer) {
-        let tableMax = -Infinity;
-        let tableMin = Infinity;
-        const isStacked = isStackedChart(layer.seriesType);
-        for (const row of activeData[tableId].rows) {
-          if (!isStacked) {
-            for (const { id } of accessors) {
-              tableMax = Math.max(row[id], tableMax);
-              tableMin = Math.min(row[id], tableMin);
-            }
-          } else {
-            const value = accessors.reduce((v, { id }) => v + (row[id] || 0), 0);
-            tableMax = Math.max(value, tableMax);
-            tableMin = Math.min(value, tableMin);
-          }
-        }
-        columnMax = Math.max(tableMax, columnMax);
-        columnMin = Math.min(tableMin, columnMin);
-      }
-    }
-    if (isFinite(columnMin) && isFinite(columnMax)) {
+    if (min != null && max != null && isFinite(min) && isFinite(max)) {
       // Custom axis bounds can go below 0, so consider also lower values than 0
-      const finalMinValue = minZeroOrNegativeBase ? Math.min(0, columnMin) : columnMin;
-      const interval = columnMax - finalMinValue;
+      const finalMinValue = minZeroOrNegativeBase ? Math.min(0, min) : min;
+      const interval = max - finalMinValue;
       return Number((finalMinValue + interval * defaultThresholdFactor).toFixed(2));
     }
   }

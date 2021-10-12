@@ -7,26 +7,26 @@
 
 import { XYLayerConfig } from '../../common/expressions';
 import { FramePublicAPI } from '../types';
-import { computeStaticValueForGroup, getStaticValue } from './threshold_helpers';
+import { computeOverallDataDomain, getStaticValue } from './threshold_helpers';
+
+function getActiveData(json: Array<{ id: string; rows: Array<Record<string, number | null>> }>) {
+  return json.reduce((memo, { id, rows }) => {
+    const columns = Object.keys(rows[0]).map((columnId) => ({
+      id: columnId,
+      name: columnId,
+      meta: { type: 'number' as const },
+    }));
+    memo[id] = {
+      type: 'datatable' as const,
+      columns,
+      rows,
+    };
+    return memo;
+  }, {} as NonNullable<FramePublicAPI['activeData']>);
+}
 
 describe('threshold helpers', () => {
   describe('getStaticValue', () => {
-    function getActiveData(json: Array<{ id: string; rows: Array<Record<string, number>> }>) {
-      return json.reduce((memo, { id, rows }) => {
-        const columns = Object.keys(rows[0]).map((columnId) => ({
-          id: columnId,
-          name: columnId,
-          meta: { type: 'number' as const },
-        }));
-        memo[id] = {
-          type: 'datatable' as const,
-          columns,
-          rows,
-        };
-        return memo;
-      }, {} as NonNullable<FramePublicAPI['activeData']>);
-    }
-
     const hasDateHistogram = () => false;
     const hasAllNumberHistogram = () => true;
 
@@ -282,7 +282,7 @@ describe('threshold helpers', () => {
               {
                 id: 'id-a',
                 rows: Array(3)
-                  .fill({ a: 100 })
+                  .fill(1)
                   .map((_, i) => ({ a: i % 2 ? 33 : 50 })),
               },
             ]),
@@ -291,175 +291,279 @@ describe('threshold helpers', () => {
         )
       ).toBe(45.75); // 33 (min) + (50 - 33) * 3/4
     });
+  });
 
-    describe('computeStaticValueForGroup', () => {
-      it('should compute the correct value for a single stacked series', () => {
-        for (const seriesType of ['bar_stacked', 'bar_horizontal_stacked', 'area_stacked'])
-          expect(
-            computeStaticValueForGroup(
-              [{ layerId: 'id-a', seriesType } as XYLayerConfig],
-              ['a', 'b', 'c'],
-              getActiveData([{ id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) }])
-            )
-          ).toBe(225);
-      });
+  describe('computeOverallDataDomain', () => {
+    it('should compute the correct value for a single layer with stacked series', () => {
+      for (const seriesType of ['bar_stacked', 'bar_horizontal_stacked', 'area_stacked'])
+        expect(
+          computeOverallDataDomain(
+            [{ layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] } as XYLayerConfig],
+            ['a', 'b', 'c'],
+            getActiveData([
+              {
+                id: 'id-a',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({
+                    a: i === 0 ? 25 : null,
+                    b: i === 1 ? 50 : null,
+                    c: i === 2 ? 75 : null,
+                  })),
+              },
+            ])
+          )
+        ).toEqual({ min: 0, max: 150 }); // there's just one series with 150, so the lowerbound fallbacks to 0
+    });
 
-      it("should return 0.75 if there's at least one percentage series", () => {
-        for (const seriesType of [
-          'bar_percentage_stacked',
-          'bar_horizontal_percentage_stacked',
-          'area_percentage_stacked',
-        ])
-          expect(
-            computeStaticValueForGroup(
-              [{ layerId: 'id-a', seriesType } as XYLayerConfig],
-              ['a', 'b', 'c'],
-              getActiveData([{ id: 'id-a', rows: Array(3).fill({ a: 0.5, b: 0.25, c: 0.25 }) }])
-            )
-          ).toBe(0.75);
-      });
+    it('should work for percentage series', () => {
+      for (const seriesType of [
+        'bar_percentage_stacked',
+        'bar_horizontal_percentage_stacked',
+        'area_percentage_stacked',
+      ])
+        expect(
+          computeOverallDataDomain(
+            [{ layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] } as XYLayerConfig],
+            ['a', 'b', 'c'],
+            getActiveData([
+              {
+                id: 'id-a',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({
+                    a: i === 0 ? 0.25 : null,
+                    b: i === 1 ? 0.25 : null,
+                    c: i === 2 ? 0.25 : null,
+                  })),
+              },
+            ])
+          )
+        ).toEqual({ min: 0, max: 0.75 });
+    });
 
-      it('should compute the correct value for multiple stacked series', () => {
-        for (const seriesType of ['bar_stacked', 'bar_horizontal_stacked', 'area_stacked'])
+    it('should compute the correct value for multiple layers with stacked series', () => {
+      for (const seriesType of ['bar_stacked', 'bar_horizontal_stacked', 'area_stacked']) {
+        expect(
+          computeOverallDataDomain(
+            [
+              { layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] },
+              { layerId: 'id-b', seriesType, accessors: ['d', 'e', 'f'] },
+            ] as XYLayerConfig[],
+            ['a', 'b', 'c', 'd', 'e', 'f'],
+            getActiveData([
+              { id: 'id-a', rows: [{ a: 25, b: 100, c: 100 }] },
+              { id: 'id-b', rows: [{ d: 50, e: 50, f: 50 }] },
+            ])
+          )
+        ).toEqual({ min: 0, max: 375 });
+        // same as before but spread on 3 rows with nulls
+        expect(
+          computeOverallDataDomain(
+            [
+              { layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] },
+              { layerId: 'id-b', seriesType, accessors: ['d', 'e', 'f'] },
+            ] as XYLayerConfig[],
+            ['a', 'b', 'c', 'd', 'e', 'f'],
+            getActiveData([
+              {
+                id: 'id-a',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({
+                    a: i === 0 ? 25 : null,
+                    b: i === 1 ? 100 : null,
+                    c: i === 2 ? 100 : null,
+                  })),
+              },
+              {
+                id: 'id-b',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({
+                    d: i === 0 ? 50 : null,
+                    e: i === 1 ? 50 : null,
+                    f: i === 2 ? 50 : null,
+                  })),
+              },
+            ])
+          )
+        ).toEqual({ min: 0, max: 375 });
+      }
+    });
+
+    it('should compute the correct value for multiple layers with non-stacked series', () => {
+      for (const seriesType of ['bar', 'bar_horizontal', 'line', 'area'])
+        expect(
+          computeOverallDataDomain(
+            [
+              { layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] },
+              { layerId: 'id-b', seriesType, accessors: ['d', 'e', 'f'] },
+            ] as XYLayerConfig[],
+            ['a', 'b', 'c', 'd', 'e', 'f'],
+            getActiveData([
+              { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
+              { id: 'id-b', rows: Array(3).fill({ d: 50, e: 50, f: 50 }) },
+            ])
+          )
+        ).toEqual({ min: 50, max: 100 });
+    });
+
+    it('should compute the correct value for mixed series (stacked + non-stacked)', () => {
+      for (const nonStackedSeries of ['bar', 'bar_horizontal', 'line', 'area']) {
+        for (const stackedSeries of ['bar_stacked', 'bar_horizontal_stacked', 'area_stacked']) {
           expect(
-            computeStaticValueForGroup(
+            computeOverallDataDomain(
               [
-                { layerId: 'id-a', seriesType },
-                { layerId: 'id-b', seriesType },
+                { layerId: 'id-a', seriesType: nonStackedSeries, accessors: ['a', 'b', 'c'] },
+                { layerId: 'id-b', seriesType: stackedSeries, accessors: ['d', 'e', 'f'] },
               ] as XYLayerConfig[],
-              ['a', 'b', 'c'],
+              ['a', 'b', 'c', 'd', 'e', 'f'],
               getActiveData([
-                { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
-                { id: 'id-b', rows: Array(3).fill({ a: 50, b: 50, c: 50 }) },
+                { id: 'id-a', rows: [{ a: 100, b: 100, c: 100 }] },
+                { id: 'id-b', rows: [{ d: 50, e: 50, f: 50 }] },
               ])
             )
-          ).toBe(225);
-      });
-
-      it('should compute the correct value for multiple non-stacked series', () => {
-        for (const seriesType of ['bar', 'bar_horizontal', 'line', 'area'])
-          expect(
-            computeStaticValueForGroup(
-              [
-                { layerId: 'id-a', seriesType },
-                { layerId: 'id-b', seriesType },
-              ] as XYLayerConfig[],
-              ['a', 'b', 'c'],
-              getActiveData([
-                { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
-                { id: 'id-b', rows: Array(3).fill({ a: 50, b: 50, c: 50 }) },
-              ])
-            )
-          ).toBe(75);
-      });
-
-      it('should compute the correct value for mixed series (stacked + non-stacked)', () => {
-        for (const nonStackedSeries of ['bar', 'bar_horizontal', 'line', 'area']) {
-          for (const stackedSeries of ['bar_stacked', 'bar_horizontal_stacked', 'area_stacked']) {
-            expect(
-              computeStaticValueForGroup(
-                [
-                  { layerId: 'id-a', seriesType: nonStackedSeries },
-                  { layerId: 'id-b', seriesType: stackedSeries },
-                ] as XYLayerConfig[],
-                ['a', 'b', 'c'],
-                getActiveData([
-                  { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
-                  { id: 'id-b', rows: Array(3).fill({ a: 50, b: 50, c: 50 }) },
-                ])
-              )
-            ).toBe((3 * 150) / 4); // 50 stacked 3 times * 3/4
-          }
+          ).toEqual({
+            min: 0, // min is 0 as there is at least one stacked series
+            max: 150, // max is id-b layer accessor sum
+          });
         }
-      });
+      }
+    });
 
-      it('should compute the result not taking into consideration zero-based intervals', () => {
-        // stacked
+    it('should compute the correct value for a histogram stacked chart', () => {
+      for (const seriesType of ['bar_stacked', 'bar_horizontal_stacked', 'area_stacked'])
         expect(
-          computeStaticValueForGroup(
-            [{ layerId: 'id-a', seriesType: 'area_stacked' }] as XYLayerConfig[],
-            ['a', 'b', 'c'],
+          computeOverallDataDomain(
+            [
+              { layerId: 'id-a', seriesType, xAccessor: 'c', accessors: ['a', 'b'] },
+              { layerId: 'id-b', seriesType, xAccessor: 'f', accessors: ['d', 'e'] },
+            ] as XYLayerConfig[],
+            ['a', 'b', 'd', 'e'],
             getActiveData([
               {
                 id: 'id-a',
                 rows: Array(3)
                   .fill(1)
-                  .map((_, i) => ({ a: i % 2 ? 33 : 50, b: 100, c: 100 })),
+                  .map((_, i) => ({ a: 50 * i, b: 100 * i, c: i })),
               },
-            ]),
-            false
+              {
+                id: 'id-b',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({ d: 25 * (i + 1), e: i % 2 ? 100 : null, f: i })),
+              },
+            ])
           )
-        ).toBe(245.75);
-        // non stacked
+        ).toEqual({ min: 0, max: 375 });
+    });
+
+    it('should compute the correct value for a histogram non-stacked chart', () => {
+      for (const seriesType of ['bar', 'bar_horizontal', 'line', 'area'])
         expect(
-          computeStaticValueForGroup(
-            [{ layerId: 'id-a', seriesType: 'area' }] as XYLayerConfig[],
-            ['a', 'b', 'c'],
+          computeOverallDataDomain(
+            [
+              { layerId: 'id-a', seriesType, xAccessor: 'c', accessors: ['a', 'b'] },
+              { layerId: 'id-b', seriesType, xAccessor: 'f', accessors: ['d', 'e'] },
+            ] as XYLayerConfig[],
+            ['a', 'b', 'd', 'e'],
             getActiveData([
               {
                 id: 'id-a',
                 rows: Array(3)
                   .fill(1)
-                  .map((_, i) => ({ a: i % 2 ? 33 : 50, b: 100, c: 100 })),
+                  .map((_, i) => ({ a: 50 * i, b: 100 * i, c: i })),
               },
-            ]),
-            false
+              {
+                id: 'id-b',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({ d: 25 * (i + 1), e: i % 2 ? 100 : null, f: i })),
+              },
+            ])
           )
-        ).toBe(83.25);
-      });
+        ).toEqual({ min: 0, max: 200 });
+    });
 
-      it('should compute the result taking into consideration negative-based intervals too', () => {
-        // stacked
-        expect(
-          computeStaticValueForGroup(
-            [{ layerId: 'id-a', seriesType: 'area_stacked' } as XYLayerConfig],
-            ['a', 'b', 'c'],
-            getActiveData([{ id: 'id-a', rows: Array(3).fill({ a: -100, b: 200, c: 100 }) }])
-          )
-        ).toBe(150); // 3/4 * 200
-        // non stacked
-        expect(
-          computeStaticValueForGroup(
-            [{ layerId: 'id-a', seriesType: 'area' } as XYLayerConfig],
-            ['a', 'b', 'c'],
-            getActiveData([{ id: 'id-a', rows: Array(3).fill({ a: -100, b: 200, c: 100 }) }])
-          )
-        ).toBe(125); // (3/4 * 300) - 100
-      });
+    it('should compute the result taking into consideration negative-based intervals too', () => {
+      // stacked
+      expect(
+        computeOverallDataDomain(
+          [
+            {
+              layerId: 'id-a',
+              seriesType: 'area_stacked',
+              accessors: ['a', 'b', 'c'],
+            } as XYLayerConfig,
+          ],
+          ['a', 'b', 'c'],
+          getActiveData([
+            {
+              id: 'id-a',
+              rows: Array(3)
+                .fill(1)
+                .map((_, i) => ({
+                  a: i === 0 ? -100 : null,
+                  b: i === 1 ? 200 : null,
+                  c: i === 2 ? 100 : null,
+                })),
+            },
+          ])
+        )
+      ).toEqual({ min: 0, max: 200 }); // it is stacked, so max is the sum and 0 is the fallback
+      expect(
+        computeOverallDataDomain(
+          [{ layerId: 'id-a', seriesType: 'area', accessors: ['a', 'b', 'c'] } as XYLayerConfig],
+          ['a', 'b', 'c'],
+          getActiveData([
+            {
+              id: 'id-a',
+              rows: Array(3)
+                .fill(1)
+                .map((_, i) => ({
+                  a: i === 0 ? -100 : null,
+                  b: i === 1 ? 200 : null,
+                  c: i === 2 ? 100 : null,
+                })),
+            },
+          ])
+        )
+      ).toEqual({ min: -100, max: 200 });
+    });
 
-      it('should return no result if no layers or accessors are passed', () => {
-        expect(
-          computeStaticValueForGroup(
-            [],
-            ['a', 'b', 'c'],
-            getActiveData([{ id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) }])
-          )
-        ).toBe(undefined);
-      });
+    it('should return no result if no layers or accessors are passed', () => {
+      expect(
+        computeOverallDataDomain(
+          [],
+          ['a', 'b', 'c'],
+          getActiveData([{ id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) }])
+        )
+      ).toEqual({ min: undefined, max: undefined });
+    });
 
-      it('should return no result if data or table is not available', () => {
-        expect(
-          computeStaticValueForGroup(
-            [
-              { layerId: 'id-a', seriesType: 'area' },
-              { layerId: 'id-b', seriesType: 'line' },
-            ] as XYLayerConfig[],
-            ['a', 'b'],
-            getActiveData([{ id: 'id-c', rows: Array(3).fill({ a: 100, b: 100 }) }])
-          )
-        ).toBe(undefined);
+    it('should return no result if data or table is not available', () => {
+      expect(
+        computeOverallDataDomain(
+          [
+            { layerId: 'id-a', seriesType: 'area', accessors: ['a', 'b', 'c'] },
+            { layerId: 'id-b', seriesType: 'line', accessors: ['d', 'e', 'f'] },
+          ] as XYLayerConfig[],
+          ['a', 'b'],
+          getActiveData([{ id: 'id-c', rows: [{ a: 100, b: 100 }] }]) // mind the layer id here
+        )
+      ).toEqual({ min: undefined, max: undefined });
 
-        expect(
-          computeStaticValueForGroup(
-            [
-              { layerId: 'id-a', seriesType: 'bar' },
-              { layerId: 'id-b', seriesType: 'bar_stacked' },
-            ] as XYLayerConfig[],
-            ['a', 'b'],
-            getActiveData([])
-          )
-        ).toBe(undefined);
-      });
+      expect(
+        computeOverallDataDomain(
+          [
+            { layerId: 'id-a', seriesType: 'bar', accessors: ['a', 'b', 'c'] },
+            { layerId: 'id-b', seriesType: 'bar_stacked' },
+          ] as XYLayerConfig[],
+          ['a', 'b'],
+          getActiveData([])
+        )
+      ).toEqual({ min: undefined, max: undefined });
     });
   });
 });
