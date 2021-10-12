@@ -617,6 +617,9 @@ export interface DocLinksStart {
             readonly detectionsReq: string;
             readonly networkMap: string;
         };
+        readonly securitySolution: {
+            readonly trustedApps: string;
+        };
         readonly query: {
             readonly eql: string;
             readonly kueryQuerySyntax: string;
