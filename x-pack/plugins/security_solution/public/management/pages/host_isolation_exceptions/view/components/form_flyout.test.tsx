@@ -142,6 +142,25 @@ describe('When on the host isolation exceptions flyout form', () => {
         renderResult = render();
         await waiter;
       });
+
+      it('should show a warning toast if the item fails to load', () => {
+        renderResult = render();
+        act(() => {
+          mockedContext.store.dispatch({
+            type: 'hostIsolationExceptionsFormEntryChanged',
+            payload: undefined,
+          });
+
+          mockedContext.store.dispatch({
+            type: 'hostIsolationExceptionsFormStateChanged',
+            payload: {
+              type: 'FailedResourceState',
+              error: new Error('mocked error'),
+            },
+          });
+        });
+        expect(mockedContext.coreStart.notifications.toasts.addWarning).toHaveBeenCalled();
+      });
     });
 
     describe('with loaded data', () => {
