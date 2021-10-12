@@ -8,7 +8,8 @@
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { esQuery, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
+import { esQuery, Query } from '../../../../../../../src/plugins/data/public';
 
 type ParsedQuery = ReturnType<typeof esQuery.buildEsQuery>;
 
@@ -33,7 +34,7 @@ const initialLogFilterState: ILogFilterState = {
 
 const validationDebounceTimeout = 1000; // milliseconds
 
-export const useLogFilterState = ({ indexPattern }: { indexPattern: IIndexPattern }) => {
+export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase }) => {
   const [logFilterState, setLogFilterState] = useState<ILogFilterState>(initialLogFilterState);
 
   const parseQuery = useCallback(
