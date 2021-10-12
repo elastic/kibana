@@ -233,6 +233,9 @@ export class DocLinksService {
           networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
           troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
         },
+        securitySolution: {
+          trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
+        },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
           kueryQuerySyntax: `${KIBANA_DOCS}kuery-query.html`,
@@ -476,6 +479,7 @@ export class DocLinksService {
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
+          learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -640,6 +644,9 @@ export interface DocLinksStart {
       readonly networkMap: string;
       readonly troubleshootGaps: string;
     };
+    readonly securitySolution: {
+      readonly trustedApps: string;
+    };
     readonly query: {
       readonly eql: string;
       readonly kueryQuerySyntax: string;
@@ -730,6 +737,7 @@ export interface DocLinksStart {
       datastreamsNamingScheme: string;
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
+      learnMoreBlog: string;
     }>;
     readonly ecs: {
       readonly guide: string;
