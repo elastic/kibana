@@ -13,10 +13,20 @@ import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../
 import { defaultIngestErrorHandler, GenerateServiceTokenError } from '../../errors';
 
 export const getCheckPermissionsHandler: RequestHandler = async (context, request, response) => {
+  const missingSecurityBody: CheckPermissionsResponse = {
+    success: false,
+    error: 'MISSING_SECURITY',
+  };
   const body: CheckPermissionsResponse = { success: true };
   try {
     const security = await appContextService.getSecurity();
     const user = security.authc.getCurrentUser(request);
+
+    if (!user) {
+      return response.ok({
+        body: missingSecurityBody,
+      });
+    }
 
     if (!user?.roles.includes('superuser')) {
       body.success = false;
@@ -28,10 +38,8 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
 
     return response.ok({ body: { success: true } });
   } catch (e) {
-    body.success = false;
-    body.error = 'MISSING_SECURITY';
     return response.ok({
-      body,
+      body: missingSecurityBody,
     });
   }
 };
