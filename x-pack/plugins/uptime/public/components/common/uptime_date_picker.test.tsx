@@ -12,7 +12,8 @@ import { createMemoryHistory } from 'history';
 import { render } from '../../lib/helper/rtl_helpers';
 import { fireEvent } from '@testing-library/dom';
 
-describe('UptimeDatePicker component', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/114396
+describe.skip('UptimeDatePicker component', () => {
   it('renders properly with mock data', async () => {
     const { findByText } = render(<UptimeDatePicker />);
     expect(await findByText('Last 15 minutes')).toBeInTheDocument();
