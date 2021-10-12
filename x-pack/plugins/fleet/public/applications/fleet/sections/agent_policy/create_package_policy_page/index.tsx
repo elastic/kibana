@@ -19,14 +19,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiLink,
   EuiErrorBoundary,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { ApplicationStart } from 'kibana/public';
 import { safeLoad } from 'js-yaml';
 
-import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type {
   AgentPolicy,
   NewPackagePolicy,
