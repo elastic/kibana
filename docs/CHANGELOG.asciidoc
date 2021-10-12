@@ -107,7 +107,7 @@ Discover::
 Elastic Security::
 For the Elastic Security 7.15.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
-* Fixes Policy Upgrades for packages with multiple policy templates {kibana-pull}114011[#114011]
+* Fixes policy upgrades for packages with multiple policy templates {kibana-pull}114011[#114011]
 * Fixes Step 1 in policy editor not loading when agent policy already contains a limited integration {kibana-pull}113883[#113883]
 * Set code editor height to solve an overlap in default policy settings {kibana-pull}113763[#113763]
 * Fixes some vars from preconfiguration not being added to package policies {kibana-pull}113204[#113204]
