@@ -9,7 +9,7 @@ import { callApmApi } from '../services/rest/createCallApmApi';
 export async function hasFleetApmIntegrations() {
   try {
     const { hasData = false } = await callApmApi({
-      endpoint: 'GET /api/apm/fleet/has_data',
+      endpoint: 'GET /internal/apm/fleet/has_data',
       signal: null,
     });
     return hasData;

@@ -14,7 +14,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
-  // @ts-ignore
   EuiSearchBar,
   EuiText,
 } from '@elastic/eui';
@@ -29,7 +28,7 @@ import type { IntegrationCardItem } from '../../../../../../common/types/models'
 
 import { PackageCard } from './package_card';
 
-export interface ListProps {
+export interface Props {
   isLoading?: boolean;
   controls?: ReactNode;
   title: string;
@@ -38,6 +37,7 @@ export interface ListProps {
   setSelectedCategory: (category: string) => void;
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
+  callout?: JSX.Element | null;
 }
 
 export function PackageListGrid({
@@ -49,7 +49,8 @@ export function PackageListGrid({
   onSearchChange,
   setSelectedCategory,
   showMissingIntegrationMessage = false,
-}: ListProps) {
+  callout,
+}: Props) {
   const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
 
@@ -105,6 +106,12 @@ export function PackageListGrid({
           }}
           onChange={onQueryChange}
         />
+        {callout ? (
+          <>
+            <EuiSpacer />
+            {callout}
+          </>
+        ) : null}
         <EuiSpacer />
         {gridContent}
         {showMissingIntegrationMessage && (
