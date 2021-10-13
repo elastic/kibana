@@ -354,7 +354,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]
-|Local setup documentation
+|undefined
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
