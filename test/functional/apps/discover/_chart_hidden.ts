@@ -54,7 +54,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('persists hidden chart option on the saved search ', async function () {
-      await PageObjects.discover.saveSearch('chart hidden yyy');
+      const savedSearchTitle = 'chart hidden';
+      await PageObjects.discover.saveSearch(savedSearchTitle);
 
       await PageObjects.discover.toggleChartVisibility();
       expect(await PageObjects.discover.isChartVisible()).to.be(true);
@@ -64,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.discover.isChartVisible()).to.be(true);
 
-      await PageObjects.discover.loadSavedSearch('chart hidden yyy');
+      await PageObjects.discover.loadSavedSearch(savedSearchTitle);
       expect(await PageObjects.discover.isChartVisible()).to.be(false);
     });
   });
