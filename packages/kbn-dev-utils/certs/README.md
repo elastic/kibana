@@ -30,6 +30,8 @@ The password used for both of these is "storepass". Other copies are also provid
 
 [Elasticsearch cert-util](https://www.elastic.co/guide/en/elasticsearch/reference/current/certutil.html) and [OpenSSL](https://www.openssl.org/) were used to generate these certificates. The following commands were used from the root directory of Elasticsearch:
 
+__IMPORTANT:__ CA keystore (ca.p12) is not checked in intentionally, talk to @elastic/kibana-security if you need it to sign new certificates.
+
 ```
 # Generate the PKCS #12 keystore for a CA, valid for 50 years
 bin/elasticsearch-certutil ca --out ca.p12 -days 18250 --pass castorepass
