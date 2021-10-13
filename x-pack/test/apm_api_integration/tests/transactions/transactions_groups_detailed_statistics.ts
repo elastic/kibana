@@ -9,9 +9,11 @@ import expect from '@kbn/expect';
 import { first, isEmpty, last, meanBy } from 'lodash';
 import moment from 'moment';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
+import { asPercent } from '../../../../plugins/apm/common/utils/formatters';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
+import { roundNumber } from '../../utils';
 
 type TransactionsGroupsDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
@@ -76,22 +78,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('data is loaded', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
     describe('transactions groups detailed stats', () => {
+      const GO_PROD_RATE = 75;
+      const GO_PROD_ERROR_RATE = 25;
       before(async () => {
-        const GO_PROD_RATE = 10;
-
         const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
           'instance-a'
         );
 
+        const transactionName = 'GET /api/product/list';
+
         await traceData.index([
           ...timerange(start, end)
-            .interval('1s')
+            .interval('1m')
             .rate(GO_PROD_RATE)
             .flatMap((timestamp) =>
               serviceGoProdInstance
-                .transaction('GET /api/product/list')
+                .transaction(transactionName)
+                .timestamp(timestamp)
+                .duration(1000)
+                .success()
+                .serialize()
+            ),
+          ...timerange(start, end)
+            .interval('1m')
+            .rate(GO_PROD_ERROR_RATE)
+            .flatMap((timestamp) =>
+              serviceGoProdInstance
+                .transaction(transactionName)
                 .duration(1000)
                 .timestamp(timestamp)
+                .failure()
                 .serialize()
             ),
         ]);
@@ -121,12 +137,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const transactionsCurrentPeriod =
             transactionsStatistics.currentPeriod[transactionNames[0]];
           const metricsCurrentPeriod = metricsStatistics.currentPeriod[transactionNames[0]];
-
           const transactionsLatencyMean = meanBy(transactionsCurrentPeriod.latency, 'y');
           const metricsLatencyMean = meanBy(metricsCurrentPeriod.latency, 'y');
-          expect(transactionsLatencyMean).to.equal(metricsLatencyMean);
-          expectSnapshot(transactionsLatencyMean).toMatchInline(`1000000`);
-          expectSnapshot(metricsLatencyMean).toMatchInline(`1000000`);
+          [transactionsLatencyMean, metricsLatencyMean].forEach((value) =>
+            expect(value).to.be.equal(1000000)
+          );
         });
 
         it('has same error rate mean value for metrics and transactions data', () => {
@@ -136,20 +151,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const transactionsErrorRateMean = meanBy(transactionsCurrentPeriod.errorRate, 'y');
           const metricsErrorRateMean = meanBy(metricsCurrentPeriod.errorRate, 'y');
-          expect(transactionsErrorRateMean).to.equal(metricsErrorRateMean);
-          expectSnapshot(transactionsErrorRateMean).toMatchInline(`0`);
-          expectSnapshot(metricsErrorRateMean).toMatchInline(`0`);
+          [transactionsErrorRateMean, metricsErrorRateMean].forEach((value) =>
+            expect(asPercent(value, 1)).to.be.equal(`${GO_PROD_ERROR_RATE}%`)
+          );
         });
 
         it('has same throughput mean value for metrics and transactions data', () => {
           const transactionsCurrentPeriod =
             transactionsStatistics.currentPeriod[transactionNames[0]];
           const metricsCurrentPeriod = metricsStatistics.currentPeriod[transactionNames[0]];
-          const transactionsThroughputMean = meanBy(transactionsCurrentPeriod.throughput, 'y');
-          const metricsThroughputMean = meanBy(metricsCurrentPeriod.throughput, 'y');
-          expect(transactionsThroughputMean).to.equal(metricsThroughputMean);
-          expectSnapshot(transactionsThroughputMean).toMatchInline(`600`);
-          expectSnapshot(metricsThroughputMean).toMatchInline(`600`);
+          const transactionsThroughputMean = roundNumber(
+            meanBy(transactionsCurrentPeriod.throughput, 'y')
+          );
+          const metricsThroughputMean = roundNumber(meanBy(metricsCurrentPeriod.throughput, 'y'));
+          [transactionsThroughputMean, metricsThroughputMean].forEach((value) =>
+            expect(value).to.be.equal(roundNumber(GO_PROD_RATE + GO_PROD_ERROR_RATE))
+          );
         });
 
         it('has same impact value for metrics and transactions data', () => {
@@ -159,9 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const transactionsImpact = transactionsCurrentPeriod.impact;
           const metricsImpact = metricsCurrentPeriod.impact;
-          expect(transactionsImpact).to.equal(metricsImpact);
-          expectSnapshot(transactionsImpact).toMatchInline(`100`);
-          expectSnapshot(metricsImpact).toMatchInline(`100`);
+          [transactionsImpact, metricsImpact].forEach((value) => expect(value).to.be.equal(100));
         });
       });
 
@@ -170,10 +185,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           transactionsStatistics = await callApi({
             query: {
-              start: moment(end).subtract(15, 'minutes').toISOString(),
+              start: moment(end).subtract(7, 'minutes').toISOString(),
               end: new Date(end).toISOString(),
               comparisonStart: new Date(start).toISOString(),
-              comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+              comparisonEnd: moment(start).add(7, 'minutes').toISOString(),
             },
           });
         });

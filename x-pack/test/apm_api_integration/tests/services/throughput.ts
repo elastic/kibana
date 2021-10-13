@@ -56,7 +56,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       },
     });
-
     return response;
   }
 
@@ -71,11 +70,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('data is loaded', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
     describe('Throughput chart api', () => {
-      before(async () => {
-        const GO_PROD_RATE = 10;
-        const GO_DEV_RATE = 5;
-        const JAVA_PROD_RATE = 20;
+      const GO_PROD_RATE = 50;
+      const GO_DEV_RATE = 5;
+      const JAVA_PROD_RATE = 45;
 
+      before(async () => {
         const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
           'instance-a'
         );
@@ -89,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         await traceData.index([
           ...timerange(start, end)
-            .interval('1s')
+            .interval('1m')
             .rate(GO_PROD_RATE)
             .flatMap((timestamp) =>
               serviceGoProdInstance
@@ -99,7 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .serialize()
             ),
           ...timerange(start, end)
-            .interval('1s')
+            .interval('1m')
             .rate(GO_DEV_RATE)
             .flatMap((timestamp) =>
               serviceGoDevInstance
@@ -109,7 +108,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .serialize()
             ),
           ...timerange(start, end)
-            .interval('1s')
+            .interval('1m')
             .rate(JAVA_PROD_RATE)
             .flatMap((timestamp) =>
               serviceJavaInstance
@@ -151,7 +150,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('has same mean value for metrics and transactions data', () => {
           const transactionsMean = meanBy(throughputTransactions.currentPeriod, 'y');
           const metricsMean = meanBy(throughputMetrics.currentPeriod, 'y');
-          [transactionsMean, metricsMean].every((value) => roundNumber(value) === '900.0');
+          [transactionsMean, metricsMean].forEach((value) =>
+            expect(roundNumber(value)).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE))
+          );
         });
 
         it('has a bucket size of 10 seconds for transactions data', () => {
@@ -168,106 +169,115 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(timeIntervalAsMinutes).to.equal(1);
         });
       });
-    });
 
-    describe('switch environment', () => {
-      let throughput: ThroughputReturn;
+      describe('switch environment', () => {
+        let throughput: ThroughputReturn;
 
-      before(async () => {
-        const throughputResponse = await callApi({ query: { environment: 'production' } });
-        throughput = throughputResponse.body;
-      });
-
-      it('returns some data', () => {
-        expect(throughput.currentPeriod.length).to.be.greaterThan(0);
-        const hasData = throughput.currentPeriod.some(({ y }) => isFiniteNumber(y));
-        expect(hasData).to.equal(true);
-      });
-
-      it('returns throughput related to production environment', () => {
-        const throughputMean = meanBy(throughput.currentPeriod, 'y');
-        expect(roundNumber(throughputMean)).to.be.equal('600.0');
-      });
-    });
-
-    describe('when synth-java is selected', () => {
-      let throughput: ThroughputReturn;
-
-      before(async () => {
-        const throughputResponse = await callApi({ path: { serviceName: 'synth-java' } });
-        throughput = throughputResponse.body;
-      });
-
-      it('returns some data', () => {
-        expect(throughput.currentPeriod.length).to.be.greaterThan(0);
-        const hasData = throughput.currentPeriod.some(({ y }) => isFiniteNumber(y));
-        expect(hasData).to.equal(true);
-      });
-
-      it('returns throughput related to java agent', () => {
-        const throughputMean = meanBy(throughput.currentPeriod, 'y');
-        expect(roundNumber(throughputMean)).to.be.equal('1200');
-      });
-    });
-
-    describe('time comparisons', () => {
-      let throughputResponse: ThroughputReturn;
-
-      before(async () => {
-        const response = await callApi({
-          query: {
-            start: moment(end).subtract(15, 'minutes').toISOString(),
-            end: new Date(end).toISOString(),
-            comparisonStart: new Date(start).toISOString(),
-            comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
-          },
+        before(async () => {
+          const throughputResponse = await callApi({ query: { environment: 'production' } });
+          throughput = throughputResponse.body;
         });
-        throughputResponse = response.body;
+
+        it('returns some data', () => {
+          expect(throughput.currentPeriod.length).to.be.greaterThan(0);
+          const hasData = throughput.currentPeriod.some(({ y }) => isFiniteNumber(y));
+          expect(hasData).to.equal(true);
+        });
+
+        it('returns throughput related to production environment', () => {
+          const throughputMean = meanBy(throughput.currentPeriod, 'y');
+          expect(roundNumber(throughputMean)).to.be.equal(roundNumber(GO_PROD_RATE));
+        });
       });
 
-      it('returns some data', () => {
-        expect(throughputResponse.currentPeriod.length).to.be.greaterThan(0);
-        expect(throughputResponse.previousPeriod.length).to.be.greaterThan(0);
+      describe('when synth-java is selected', () => {
+        let throughput: ThroughputReturn;
 
-        const hasCurrentPeriodData = throughputResponse.currentPeriod.some(({ y }) =>
-          isFiniteNumber(y)
-        );
-        const hasPreivousPeriodData = throughputResponse.previousPeriod.some(({ y }) =>
-          isFiniteNumber(y)
-        );
+        before(async () => {
+          const throughputResponse = await callApi({ path: { serviceName: 'synth-java' } });
+          throughput = throughputResponse.body;
+        });
 
-        expect(hasCurrentPeriodData).to.equal(true);
-        expect(hasPreivousPeriodData).to.equal(true);
+        it('returns some data', () => {
+          expect(throughput.currentPeriod.length).to.be.greaterThan(0);
+          const hasData = throughput.currentPeriod.some(({ y }) => isFiniteNumber(y));
+          expect(hasData).to.equal(true);
+        });
+
+        it('returns throughput related to java agent', () => {
+          const throughputMean = meanBy(throughput.currentPeriod, 'y');
+          expect(roundNumber(throughputMean)).to.be.equal(roundNumber(JAVA_PROD_RATE));
+        });
       });
 
-      it('has same start time for both periods', () => {
-        expect(new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()).to.equal(
-          new Date(first(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
-        );
-      });
+      describe('time comparisons', () => {
+        let throughputResponse: ThroughputReturn;
 
-      it('has same end time for both periods', () => {
-        expect(new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()).to.equal(
-          new Date(last(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
-        );
-      });
+        before(async () => {
+          const response = await callApi({
+            query: {
+              start: moment(end).subtract(7, 'minutes').toISOString(),
+              end: new Date(end).toISOString(),
+              comparisonStart: new Date(start).toISOString(),
+              comparisonEnd: moment(start).add(7, 'minutes').toISOString(),
+            },
+          });
+          throughputResponse = response.body;
+        });
 
-      it('returns same number of buckets for both periods', () => {
-        expect(throughputResponse.currentPeriod.length).to.be(
-          throughputResponse.previousPeriod.length
-        );
-      });
+        it('returns some data', () => {
+          expect(throughputResponse.currentPeriod.length).to.be.greaterThan(0);
+          expect(throughputResponse.previousPeriod.length).to.be.greaterThan(0);
 
-      it('has same mean value for both periods', () => {
-        const currentPeriodMean = meanBy(
-          throughputResponse.currentPeriod.filter((item) => isFiniteNumber(item.y) && item.y > 0),
-          'y'
-        );
-        const previousPeriodMean = meanBy(
-          throughputResponse.previousPeriod.filter((item) => isFiniteNumber(item.y) && item.y > 0),
-          'y'
-        );
-        [currentPeriodMean, previousPeriodMean].every((value) => roundNumber(value) === '900.0');
+          const hasCurrentPeriodData = throughputResponse.currentPeriod.some(({ y }) =>
+            isFiniteNumber(y)
+          );
+          const hasPreivousPeriodData = throughputResponse.previousPeriod.some(({ y }) =>
+            isFiniteNumber(y)
+          );
+
+          expect(hasCurrentPeriodData).to.equal(true);
+          expect(hasPreivousPeriodData).to.equal(true);
+        });
+
+        it('has same start time for both periods', () => {
+          expect(
+            new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
+          ).to.equal(new Date(first(throughputResponse.previousPeriod)?.x ?? NaN).toISOString());
+        });
+
+        it('has same end time for both periods', () => {
+          expect(new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()).to.equal(
+            new Date(last(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
+          );
+        });
+
+        it('returns same number of buckets for both periods', () => {
+          expect(throughputResponse.currentPeriod.length).to.be(
+            throughputResponse.previousPeriod.length
+          );
+        });
+
+        it('has same mean value for both periods', () => {
+          const currentPeriodMean = meanBy(
+            throughputResponse.currentPeriod.filter((item) => isFiniteNumber(item.y) && item.y > 0),
+            'y'
+          );
+          const previousPeriodMean = meanBy(
+            throughputResponse.previousPeriod.filter(
+              (item) => isFiniteNumber(item.y) && item.y > 0
+            ),
+            'y'
+          );
+          const currentPeriod = throughputResponse.currentPeriod;
+          const bucketSize = currentPeriod[1].x - currentPeriod[0].x;
+          const durationAsMinutes = bucketSize / 1000 / 60;
+          [currentPeriodMean, previousPeriodMean].every((value) =>
+            expect(roundNumber(value)).to.be.equal(
+              roundNumber((GO_PROD_RATE + GO_DEV_RATE) / durationAsMinutes)
+            )
+          );
+        });
       });
     });
   });

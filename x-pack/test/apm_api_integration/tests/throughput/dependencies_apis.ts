@@ -91,21 +91,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: ['apm_8.0.0_empty'] },
     () => {
       describe('when data is loaded', () => {
+        const GO_PROD_RATE = 75;
+        const JAVA_PROD_RATE = 25;
         before(async () => {
-          const GO_PROD_RATE = 10;
-          const JAVA_PROD_RATE = 20;
-
           const serviceGoProdInstance = service('synth-go', 'production', 'go').instance(
             'instance-a'
           );
-
           const serviceJavaInstance = service('synth-java', 'development', 'java').instance(
             'instance-c'
           );
 
           await traceData.index([
             ...timerange(start, end)
-              .interval('1s')
+              .interval('1m')
               .rate(GO_PROD_RATE)
               .flatMap((timestamp) =>
                 serviceGoProdInstance
@@ -136,7 +134,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .serialize()
               ),
             ...timerange(start, end)
-              .interval('1s')
+              .interval('1m')
               .rate(JAVA_PROD_RATE)
               .flatMap((timestamp) =>
                 serviceJavaInstance
@@ -171,8 +169,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           it('returns elasticsearch and postgresql as dependencies', () => {
             const { topBackends } = throughputValues;
             const topBackendsAsObj = Object.fromEntries(topBackends);
-            expect(topBackendsAsObj.elasticsearch).to.equal('1800');
-            expect(topBackendsAsObj.postgresql).to.equal('600.0');
+            expect(topBackendsAsObj.elasticsearch).to.equal(
+              roundNumber(JAVA_PROD_RATE + GO_PROD_RATE)
+            );
+            expect(topBackendsAsObj.postgresql).to.equal(roundNumber(GO_PROD_RATE));
           });
         });
 
@@ -186,7 +186,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               const { topBackends, backendThroughputChartMean } = throughputValues;
               const topBackendsAsObj = Object.fromEntries(topBackends);
               const elasticsearchDependency = topBackendsAsObj.elasticsearch;
-              expect(elasticsearchDependency).to.equal(backendThroughputChartMean);
+              [elasticsearchDependency, backendThroughputChartMean].forEach((value) =>
+                expect(value).to.be.equal(roundNumber(JAVA_PROD_RATE + GO_PROD_RATE))
+              );
             });
 
             it('matches throughput values between upstream services and top dependency', () => {
@@ -196,7 +198,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               const upstreamServiceThroughputSum = roundNumber(
                 sumBy(upstreamServicesThroughput, 'throughput')
               );
-              expect(elasticsearchDependency).to.be.equal(upstreamServiceThroughputSum);
+              [elasticsearchDependency, upstreamServiceThroughputSum].forEach((value) =>
+                expect(value).to.be.equal(roundNumber(JAVA_PROD_RATE + GO_PROD_RATE))
+              );
             });
           });
           describe('postgresql dependency', () => {
@@ -208,7 +212,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               const { topBackends, backendThroughputChartMean } = throughputValues;
               const topBackendsAsObj = Object.fromEntries(topBackends);
               const postgresqlDependency = topBackendsAsObj.postgresql;
-              expect(postgresqlDependency).to.equal(backendThroughputChartMean);
+              [postgresqlDependency, backendThroughputChartMean].forEach((value) =>
+                expect(value).to.be.equal(roundNumber(GO_PROD_RATE))
+              );
             });
 
             it('matches throughput values between upstream services and top dependency', () => {
@@ -218,7 +224,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               const upstreamServiceThroughputSum = roundNumber(
                 sumBy(upstreamServicesThroughput, 'throughput')
               );
-              expect(postgresqlDependency).to.be.equal(upstreamServiceThroughputSum);
+              [postgresqlDependency, upstreamServiceThroughputSum].forEach((value) =>
+                expect(value).to.be.equal(roundNumber(GO_PROD_RATE))
+              );
             });
           });
         });

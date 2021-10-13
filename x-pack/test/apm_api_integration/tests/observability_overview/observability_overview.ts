@@ -46,9 +46,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       }),
     ]);
-    const serviceInventoryThroughputSum = sumBy(
-      serviceInventoryAPIResponse.body.items,
-      'throughput'
+    const serviceInventoryThroughputSum = roundNumber(
+      sumBy(serviceInventoryAPIResponse.body.items, 'throughput')
     );
 
     return {
@@ -86,11 +85,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('data is loaded', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
     describe('Observability overview api ', () => {
+      const GO_PROD_RATE = 50;
+      const GO_DEV_RATE = 5;
+      const JAVA_PROD_RATE = 45;
       before(async () => {
-        const GO_PROD_RATE = 10;
-        const GO_DEV_RATE = 5;
-        const JAVA_PROD_RATE = 20;
-
         const serviceGoProdInstance = service('synth-go', 'production', 'go').instance(
           'instance-a'
         );
@@ -103,7 +101,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         await traceData.index([
           ...timerange(start, end)
-            .interval('1s')
+            .interval('1m')
             .rate(GO_PROD_RATE)
             .flatMap((timestamp) =>
               serviceGoProdInstance
@@ -113,7 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .serialize()
             ),
           ...timerange(start, end)
-            .interval('1s')
+            .interval('1m')
             .rate(GO_DEV_RATE)
             .flatMap((timestamp) =>
               serviceGoDevInstance
@@ -123,7 +121,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .serialize()
             ),
           ...timerange(start, end)
-            .interval('1s')
+            .interval('1m')
             .rate(JAVA_PROD_RATE)
             .flatMap((timestamp) =>
               serviceJavaInstance
@@ -145,25 +143,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns same number of service as shown on service inventory API', () => {
           const { serviceInventoryCount, observabilityOverview } = throughputValues;
-          expect(serviceInventoryCount).to.equal(observabilityOverview.serviceCount);
+          [serviceInventoryCount, observabilityOverview.serviceCount].forEach((value) =>
+            expect(value).to.be.equal(2)
+          );
         });
 
         it('returns same throughput value on service inventory and obs throughput count', () => {
           const { serviceInventoryThroughputSum, observabilityOverview } = throughputValues;
-          const obsThroughputCount = observabilityOverview.transactionPerMinute.value;
-          [serviceInventoryThroughputSum, obsThroughputCount].every(
-            (value) => roundNumber(value) === '2100'
+          const obsThroughputCount = roundNumber(observabilityOverview.transactionPerMinute.value);
+          [serviceInventoryThroughputSum, obsThroughputCount].forEach((value) =>
+            expect(value).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE + JAVA_PROD_RATE))
           );
         });
 
         it('returns same throughput value on service inventory and obs mean throughput timeseries', () => {
           const { serviceInventoryThroughputSum, observabilityOverview } = throughputValues;
-          const obsThroughputMean = meanBy(
-            observabilityOverview.transactionPerMinute.timeseries,
-            'y'
+          const obsThroughputMean = roundNumber(
+            meanBy(observabilityOverview.transactionPerMinute.timeseries, 'y')
           );
-          [serviceInventoryThroughputSum, obsThroughputMean].every(
-            (value) => roundNumber(value) === '2100'
+          [serviceInventoryThroughputSum, obsThroughputMean].forEach((value) =>
+            expect(value).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE + JAVA_PROD_RATE))
           );
         });
       });

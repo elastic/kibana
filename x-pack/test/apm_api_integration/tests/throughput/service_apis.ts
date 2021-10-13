@@ -77,21 +77,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         },
       }),
-      // TODO: not using it for now since the instance name is empty for metric documents
-      // apmApiClient.readUser({
-      //   endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics`,
-      //   params: {
-      //     path: { serviceName },
-      //     query: {
-      //       ...commonQuery,
-      //       numBuckets: 20,
-      //       kuery: `processor.event : "${processorEvent}"`,
-      //       transactionType: 'request',
-      //       latencyAggregationType: 'avg' as LatencyAggregationType,
-      //       serviceNodeIds: JSON.stringify(['instance-a', 'instance-b']),
-      //     },
-      //   },
-      // }),
     ]);
 
     const serviceInventoryThroughput = serviceInventoryAPIResponse.body.items[0].throughput;
@@ -108,13 +93,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       'throughput'
     );
 
-    // TODO: not using it for now since the instance name is empty for metric documents
-    // const serviceInstancesDetailedThroughputSum = sum(
-    //   Object.values(serviceInstancesDetailedAPIResponse.body.currentPeriod).map(({ throughput }) =>
-    //     meanBy(throughput, 'y')
-    //   )
-    // );
-
     return {
       serviceInventoryThroughput,
       throughputChartApiMean,
@@ -128,9 +106,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Services APIs', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
     describe('when data is loaded ', () => {
+      const GO_PROD_RATE = 80;
+      const GO_DEV_RATE = 20;
       before(async () => {
-        const GO_PROD_RATE = 10;
-        const GO_DEV_RATE = 5;
         const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
           'instance-a'
         );
@@ -139,7 +117,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
         await traceData.index([
           ...timerange(start, end)
-            .interval('1s')
+            .interval('1m')
             .rate(GO_PROD_RATE)
             .flatMap((timestamp) =>
               serviceGoProdInstance
@@ -149,7 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .serialize()
             ),
           ...timerange(start, end)
-            .interval('1s')
+            .interval('1m')
             .rate(GO_DEV_RATE)
             .flatMap((timestamp) =>
               serviceGoDevInstance
@@ -171,51 +149,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]);
         });
 
-        describe('Transaction-based throughput', () => {
-          it('returns same throughput value', () => {
-            Object.values(throughputTransactionValues).every(
-              (value) => roundNumber(value) === '900.0'
-            );
-          });
-        });
-
-        describe('Metric-based throughput', () => {
-          it('returns same throughput value', () => {
-            Object.values(throughputMetricValues).every((value) => roundNumber(value) === '900.0');
-          });
-        });
-
-        describe('Compare Transaction-based and Metric-based throughput', () => {
-          it('returns same throughput value on service inventory api', () => {
-            expect(roundNumber(throughputMetricValues.serviceInventoryThroughput)).to.be(
-              roundNumber(throughputTransactionValues.serviceInventoryThroughput)
-            );
-          });
-
-          it('returns same throughput value on throughput chart api', () => {
-            expect(roundNumber(throughputMetricValues.throughputChartApiMean)).to.be(
-              roundNumber(throughputTransactionValues.throughputChartApiMean)
-            );
-          });
-
-          it('returns same throughput value on transactions group api', () => {
-            expect(roundNumber(throughputMetricValues.transactionsGroupThroughputSum)).to.be(
-              roundNumber(throughputTransactionValues.transactionsGroupThroughputSum)
-            );
-          });
-
-          it('returns same throughput value on service instances api', () => {
-            expect(roundNumber(throughputMetricValues.serviceInstancesThroughputSum)).to.be(
-              roundNumber(throughputTransactionValues.serviceInstancesThroughputSum)
-            );
-          });
-
-          // TODO: not using it for now since the instance name is empty for metric documents
-          // it('returns same throughput value on service instances detailed api', () => {
-          //   expect(roundNumber(throughputMetricValues.serviceInstancesDetailedThroughputSum)).to.be(
-          //     roundNumber(throughputTransactionValues.serviceInstancesDetailedThroughputSum)
-          //   );
-          // });
+        it('returns same throughput value for Transaction-based and Metric-based data', () => {
+          [
+            ...Object.values(throughputTransactionValues),
+            ...Object.values(throughputMetricValues),
+          ].forEach((value) =>
+            expect(roundNumber(value)).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE))
+          );
         });
       });
     });
