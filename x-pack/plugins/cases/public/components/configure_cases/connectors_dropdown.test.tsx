@@ -190,12 +190,13 @@ describe('ConnectorsDropdown', () => {
             >
               <span>
                 My Connector
+                 (deprecated)
               </span>
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
             >
-              <EuiIconTip
+              <Styled(EuiIconTip)
                 aria-label="Deprecated connector"
                 color="warning"
                 content="Please update your connector"

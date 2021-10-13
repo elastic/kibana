@@ -92,7 +92,10 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <span>{connector.name}</span>
+                  <span>
+                    {connector.name}
+                    {isLegacyConnector(connector) && ` (${i18n.DEPRECATED_TOOLTIP_TEXT})`}
+                  </span>
                 </EuiFlexItem>
                 {isLegacyConnector(connector) && (
                   <EuiFlexItem grow={false}>
