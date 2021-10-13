@@ -9,7 +9,7 @@ import {
   Filter,
   IndexPattern,
   IndexPatternsContract,
-  ISearchSource
+  ISearchSource,
 } from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { convertIsoToMillis, extractNanos } from './utils/date_conversion';
