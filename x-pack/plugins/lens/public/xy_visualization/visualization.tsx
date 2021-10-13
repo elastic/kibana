@@ -372,6 +372,18 @@ export const getXyVisualization = ({
       };
     }
 
+    // Check locally first, but also multiple layers can stack for percentage charts
+    const hasOnlyOneAccessor =
+      layer.accessors.length < 2 &&
+      getLayersByType(state, layerTypes.DATA).filter(
+        // check that the other layers are compatible with this one
+        (dataLayer) =>
+          dataLayer.seriesType === layer.seriesType &&
+          Boolean(dataLayer.xAccessor) === Boolean(layer.xAccessor) &&
+          Boolean(dataLayer.splitAccessor) === Boolean(layer.splitAccessor) &&
+          dataLayer.accessors.length
+      ).length < 2;
+
     return {
       groups: [
         {
@@ -411,7 +423,7 @@ export const getXyVisualization = ({
           filterOperations: isBucketed,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
-          required: layer.seriesType.includes('percentage'),
+          required: layer.seriesType.includes('percentage') && hasOnlyOneAccessor,
           enableDimensionEditor: true,
         },
       ],
