@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export const ENDPOINT_ACTIONS_INDEX = '.logs-endpoint.actions-default';
-export const ENDPOINT_ACTION_RESPONSES_INDEX = '.logs-endpoint.action.responses-default';
+/** endpoint data streams that are used for host isolation  */
+/** for index patterns `.logs-endpoint.actions-* and .logs-endpoint.action.responses-*`*/
+export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
+export const ENDPOINT_ACTIONS_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;
+export const ENDPOINT_ACTION_RESPONSES_DS = '.logs-endpoint.action.responses';
+export const ENDPOINT_ACTION_RESPONSES_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;
 
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
