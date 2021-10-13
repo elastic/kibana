@@ -222,7 +222,7 @@ export const totalLinuxEvents = (state: PolicyDetailsState): number => {
   return 0;
 };
 
-/** Returns the number of selected liinux eventing configurations */
+/** Returns the number of selected linux eventing configurations */
 export const selectedLinuxEvents = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {

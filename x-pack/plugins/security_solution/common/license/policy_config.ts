@@ -126,7 +126,7 @@ function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: IL
     (policy.mac.popup.memory_protection.message !== '' &&
       policy.mac.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage) ||
     (policy.linux.popup.memory_protection.message !== '' &&
-      policy.iinux.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage)
+      policy.linux.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage)
   ) {
     return false;
   }
