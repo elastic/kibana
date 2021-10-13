@@ -8,6 +8,11 @@
 
 import type { ToolingLog } from '../tooling_log';
 
+/**
+ * Information about how CiStatsReporter should talk to the ci-stats service. Normally
+ * it is read from a JSON environment variable using the `parseConfig()` function
+ * exported by this module.
+ */
 export interface Config {
   /** ApiToken necessary for writing build data to ci-stats service */
   apiToken: string;
