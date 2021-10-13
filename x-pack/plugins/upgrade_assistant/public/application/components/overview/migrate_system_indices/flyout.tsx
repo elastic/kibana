@@ -85,7 +85,7 @@ const i18nTexts = {
 };
 
 const renderMigrationStatus = (status: MIGRATION_STATUS) => {
-  if (status === 'NO_UPGRADE_NEEDED') {
+  if (status === 'NO_MIGRATION_NEEDED') {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -100,7 +100,7 @@ const renderMigrationStatus = (status: MIGRATION_STATUS) => {
     );
   }
 
-  if (status === 'UPGRADE_NEEDED') {
+  if (status === 'MIGRATION_NEEDED') {
     return (
       <EuiText size="s" data-test-subj="featureUpgradeNeeded">
         <p>{i18nTexts.needsMigrationLabel}</p>

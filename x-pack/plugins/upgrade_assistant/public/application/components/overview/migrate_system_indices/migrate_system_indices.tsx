@@ -83,7 +83,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
     useMigrateSystemIndices();
 
   useEffect(() => {
-    setIsComplete(migrationStatus.data?.migration_status === 'NO_UPGRADE_NEEDED');
+    setIsComplete(migrationStatus.data?.migration_status === 'NO_MIGRATION_NEEDED');
     // Depending upon setIsComplete would create an infinite loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [migrationStatus.data?.migration_status]);
@@ -111,7 +111,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
     );
   }
 
-  if (migrationStatus.data?.migration_status === 'NO_UPGRADE_NEEDED') {
+  if (migrationStatus.data?.migration_status === 'NO_MIGRATION_NEEDED') {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="noMigrationNeededSection">
         <EuiFlexItem grow={false}>

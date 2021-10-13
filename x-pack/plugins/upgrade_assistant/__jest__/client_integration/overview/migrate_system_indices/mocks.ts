@@ -8,7 +8,7 @@
 import { SystemIndicesMigrationStatus } from '../../../../common/types';
 
 export const systemIndicesMigrationStatus: SystemIndicesMigrationStatus = {
-  migration_status: 'UPGRADE_NEEDED',
+  migration_status: 'MIGRATION_NEEDED',
   features: [
     {
       feature_name: 'security',
@@ -35,7 +35,7 @@ export const systemIndicesMigrationStatus: SystemIndicesMigrationStatus = {
     {
       feature_name: 'kibana',
       minimum_index_version: '7.1.3',
-      migration_status: 'UPGRADE_NEEDED',
+      migration_status: 'MIGRATION_NEEDED',
       indices: [
         {
           index: '.kibana',
@@ -46,7 +46,7 @@ export const systemIndicesMigrationStatus: SystemIndicesMigrationStatus = {
     {
       feature_name: 'logstash',
       minimum_index_version: '7.1.4',
-      migration_status: 'NO_UPGRADE_NEEDED',
+      migration_status: 'NO_MIGRATION_NEEDED',
       indices: [
         {
           index: '.logstash-config',

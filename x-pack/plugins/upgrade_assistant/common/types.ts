@@ -254,7 +254,7 @@ export interface DeprecationLoggingStatus {
   isDeprecationLoggingEnabled: boolean;
 }
 
-export type MIGRATION_STATUS = 'UPGRADE_NEEDED' | 'NO_UPGRADE_NEEDED' | 'IN_PROGRESS' | 'ERROR';
+export type MIGRATION_STATUS = 'MIGRATION_NEEDED' | 'NO_MIGRATION_NEEDED' | 'IN_PROGRESS' | 'ERROR';
 export interface SystemIndicesMigrationFeature {
   id?: string;
   feature_name: string;
