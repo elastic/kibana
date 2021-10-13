@@ -224,7 +224,9 @@ export class TaskManagerRunner implements TaskRunner {
       // which it was last updated
       // this allows us to catch tasks that remain in Pending/Finalizing without being
       // cleaned up
-      isReadyToRun(this.instance) ? this.instance.task.startedAt : this.instance.timestamp,
+      isReadyToRun(this.instance) && this.instance.task.startedAt
+        ? this.instance.task.startedAt
+        : this.instance.timestamp,
       this.definition.timeout
     )!;
   }
@@ -495,10 +497,12 @@ export class TaskManagerRunner implements TaskRunner {
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
       mapOk(
         ({ runAt, schedule: reschedule, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
+          const { timestamp } = this.instance;
           const { startedAt, schedule } = this.instance.task;
           return asOk({
             runAt:
-              runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!,
+              runAt ||
+              intervalFromDate(startedAt ?? timestamp, reschedule?.interval ?? schedule?.interval)!,
             state,
             schedule: reschedule ?? schedule,
             attempts,
