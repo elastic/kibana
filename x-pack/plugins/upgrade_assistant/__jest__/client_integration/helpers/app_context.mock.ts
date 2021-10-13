@@ -80,4 +80,7 @@ export const getAppContextMock = () => ({
       isCloudEnabled: false,
     },
   },
+  clusterUpgradeState: 'isPreparingForUpgrade',
+  isClusterUpgradeStateError: () => {},
+  handleClusterUpgradeStateError: () => {},
 });
