@@ -15,7 +15,7 @@ export default function (providerContext: FtrProviderContext) {
    * There are a few features that are only currently supported for the Endpoint
    * package due to security concerns.
    */
-  describe('Endpoint package', () => {
+  describe('Install endpoint package', () => {
     const { getService } = providerContext;
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
@@ -32,11 +32,10 @@ export default function (providerContext: FtrProviderContext) {
         id: 'endpoint.metadata_current-default',
         dest: 'metrics-endpoint.metadata_current_default',
       },
-      // This is currently not working due to a permission fix needed on kibana_system
-      // {
-      //   id: 'endpoint.metadata_united-default',
-      //   dest: '.metrics-endpoint.metadata_united_default',
-      // },
+      {
+        id: 'endpoint.metadata_united-default',
+        dest: '.metrics-endpoint.metadata_united_default',
+      },
     ];
 
     before(async () => {
