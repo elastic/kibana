@@ -59,7 +59,7 @@ import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_w
 import { CorrelationsProgressControls } from './progress_controls';
 import { CorrelationsContextPopover } from './context_popover';
 import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
-import { IndexPatternField } from '../../../../../../../src/plugins/data/common';
+import { OnAddFilter } from './context_popover/top_values';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -80,11 +80,11 @@ export function FailedTransactionsCorrelations({
     }
   );
 
-  const fieldStats: Map<string, FieldStats> | undefined = useMemo(() => {
-    return response.fieldStats?.reduce((map, field) => {
-      map.set(field.fieldName, field);
-      return map;
-    }, new Map<string, FieldStats>());
+  const fieldStats: Record<string, FieldStats> | undefined = useMemo(() => {
+    return response.fieldStats?.reduce((obj, field) => {
+      obj[field.fieldName] = field;
+      return obj;
+    }, {} as Record<string, FieldStats>);
   }, [response?.fieldStats]);
 
   const progressNormalized = progress.loaded / progress.total;
@@ -101,23 +101,19 @@ export function FailedTransactionsCorrelations({
 
   const history = useHistory();
 
-  const onAddFilter = useCallback(
-    (
-      field: IndexPatternField | string,
-      value: string | number,
-      type: '+' | '-'
-    ) => {
-      if (type === '+') {
+  const onAddFilter = useCallback<OnAddFilter>(
+    ({ fieldName, fieldValue, include }) => {
+      if (include) {
         push(history, {
           query: {
-            kuery: `${field}:"${value}"`,
+            kuery: `${fieldName}:"${fieldValue}"`,
           },
         });
         trackApmEvent({ metric: 'correlations_term_include_filter' });
       } else {
         push(history, {
           query: {
-            kuery: `not ${field}:"${value}"`,
+            kuery: `not ${fieldName}:"${fieldValue}"`,
           },
         });
         trackApmEvent({ metric: 'correlations_term_exclude_filter' });
@@ -266,7 +262,7 @@ export function FailedTransactionsCorrelations({
             <CorrelationsContextPopover
               fieldName={fieldName}
               fieldValue={fieldValue}
-              stats={fieldStats?.get(fieldName)}
+              stats={fieldStats ? fieldStats[fieldName] : undefined}
               onAddFilter={onAddFilter}
             />
           </>
@@ -297,8 +293,15 @@ export function FailedTransactionsCorrelations({
             ),
             icon: 'plusInCircle',
             type: 'icon',
-            onClick: (term: FailedTransactionsCorrelation) =>
-              onAddFilter(term.fieldName, term.fieldValue, '+'),
+            onClick: ({
+              fieldName,
+              fieldValue,
+            }: FailedTransactionsCorrelation) =>
+              onAddFilter({
+                fieldName,
+                fieldValue,
+                include: true,
+              }),
           },
           {
             name: i18n.translate(
@@ -311,8 +314,15 @@ export function FailedTransactionsCorrelations({
             ),
             icon: 'minusInCircle',
             type: 'icon',
-            onClick: (term: FailedTransactionsCorrelation) =>
-              onAddFilter(term.fieldName, term.fieldValue, '-'),
+            onClick: ({
+              fieldName,
+              fieldValue,
+            }: FailedTransactionsCorrelation) =>
+              onAddFilter({
+                fieldName,
+                fieldValue,
+                include: true,
+              }),
           },
         ],
       },

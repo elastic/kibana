@@ -23,8 +23,7 @@ import {
   FieldStats,
   isTopValuesStats,
 } from '../../../../../common/search_strategies/field_stats_types';
-import { TopValues } from './top_values';
-import { IndexPatternField } from '../../../../../../../../src/plugins/data/common';
+import { OnAddFilter, TopValues } from './top_values';
 import { useTheme } from '../../../../hooks/use_theme';
 
 export function CorrelationsContextPopover({
@@ -36,11 +35,7 @@ export function CorrelationsContextPopover({
   fieldName: string;
   fieldValue: string | number;
   stats?: FieldStats;
-  onAddFilter: (
-    field: IndexPatternField | string,
-    value: string,
-    type: '+' | '-'
-  ) => void;
+  onAddFilter: OnAddFilter;
 }) {
   const [infoIsOpen, setInfoOpen] = useState(false);
   const theme = useTheme();

@@ -19,14 +19,16 @@ import { TopValuesStats } from '../../../../../common/search_strategies/field_st
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 
+export type OnAddFilter = ({
+  fieldName: string,
+  fieldValue: string,
+  include: boolean,
+}) => void;
+
 interface Props {
   stats: TopValuesStats;
   compressed?: boolean;
-  onAddFilter?: (
-    field: IndexPatternField | string,
-    value: string,
-    type: '+' | '-'
-  ) => void;
+  onAddFilter?: OnAddFilter;
   fieldValue?: string | number;
 }
 
@@ -91,13 +93,14 @@ export function TopValues({ stats, onAddFilter, fieldValue }: Props) {
                       iconSize="s"
                       iconType="plusInCircle"
                       onClick={() => {
-                        onAddFilter(
+                        onAddFilter({
                           fieldName,
-                          typeof value.key === 'number'
-                            ? value.key.toString()
-                            : value.key,
-                          '+'
-                        );
+                          fieldValue:
+                            typeof value.key === 'number'
+                              ? value.key.toString()
+                              : value.key,
+                          include: true,
+                        });
                       }}
                       aria-label={i18n.translate(
                         'xpack.apm.correlations.fieldContextPopover.addFilterAriaLabel',
@@ -120,13 +123,14 @@ export function TopValues({ stats, onAddFilter, fieldValue }: Props) {
                       iconSize="s"
                       iconType="minusInCircle"
                       onClick={() => {
-                        onAddFilter(
+                        onAddFilter({
                           fieldName,
-                          typeof value.key === 'number'
-                            ? value.key.toString()
-                            : value.key,
-                          '-'
-                        );
+                          fieldValue:
+                            typeof value.key === 'number'
+                              ? value.key.toString()
+                              : value.key,
+                          include: false,
+                        });
                       }}
                       aria-label={i18n.translate(
                         'xpack.apm.correlations.fieldContextPopover.removeFilterAriaLabel',

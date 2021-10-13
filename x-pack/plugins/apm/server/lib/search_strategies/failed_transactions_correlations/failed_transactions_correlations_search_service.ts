@@ -155,7 +155,7 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
                   const significantCorrelations = result.value.filter(
                     (record) =>
                       record &&
-                      typeof record.pValue === 'number' &&
+                      record.pValue !== undefined &&
                       record.pValue < ERROR_CORRELATION_THRESHOLD
                   );
 
