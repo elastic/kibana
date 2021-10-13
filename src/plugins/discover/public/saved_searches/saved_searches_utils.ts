@@ -41,6 +41,8 @@ export const fromSavedSearchAttributes = (
   description: attributes.description,
   grid: attributes.grid,
   hideChart: attributes.hideChart,
+  viewMode: attributes.viewMode,
+  hideAggregatedPreview: attributes.hideAggregatedPreview,
 });
 
 export const toSavedSearchAttributes = (
@@ -54,4 +56,6 @@ export const toSavedSearchAttributes = (
   description: savedSearch.description ?? '',
   grid: savedSearch.grid ?? {},
   hideChart: savedSearch.hideChart ?? false,
+  viewMode: savedSearch.viewMode,
+  hideAggregatedPreview: savedSearch.hideAggregatedPreview,
 });

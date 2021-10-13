@@ -44,4 +44,6 @@ export interface SavedSearch {
     aliasTargetId?: string;
     errorJSON?: string;
   };
+  viewMode?: VIEW_MODE;
+  hideAggregatedPreview?: boolean;
 }
