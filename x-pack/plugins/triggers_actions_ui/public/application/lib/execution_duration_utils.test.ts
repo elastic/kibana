@@ -9,7 +9,7 @@ import { formatMillisForDisplay } from './execution_duration_utils';
 
 describe('formatMillisForDisplay', () => {
   it('should return 0 for undefined', () => {
-    expect(formatMillisForDisplay(undefined)).toEqual('00:00:00.00');
+    expect(formatMillisForDisplay(undefined)).toEqual('00:00:00.000');
   });
 
   it('should correctly format millisecond duration in milliseconds', () => {

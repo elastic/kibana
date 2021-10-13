@@ -12,7 +12,7 @@ import { parseDuration } from '../../../../alerting/common';
 
 export function formatMillisForDisplay(value: number | undefined) {
   if (!value) {
-    return '00:00:00.00';
+    return '00:00:00.000';
   }
 
   const duration = moment.duration(value);
