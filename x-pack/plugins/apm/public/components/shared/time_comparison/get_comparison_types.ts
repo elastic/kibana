@@ -23,7 +23,6 @@ export function getComparisonTypes({
     start: momentStart,
     end: momentEnd,
     unitOfTime: 'days',
-    precise: true,
   });
 
   // Less than or equals to one day
