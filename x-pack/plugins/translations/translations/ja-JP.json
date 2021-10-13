@@ -4927,8 +4927,6 @@
     "expressionMetricVis.function.metric.help": "メトリックディメンションの構成です。",
     "expressionMetricVis.function.percentageMode.help": "百分率モードでメトリックを表示します。colorRange を設定する必要があります。",
     "expressionMetricVis.function.showLabels.help": "メトリック値の下にラベルを表示します。",
-    "expressionMetricVis.function.subText.help": "メトリックの下に表示するカスタムテキスト",
-    "expressionMetricVis.function.useRanges.help": "有効な色範囲です。",
     "visTypePie.advancedSettings.visualization.legacyPieChartsLibrary.deprecation": "Visualizeの円グラフのレガシーグラフライブラリは廃止予定であり、8.0以降ではサポートされません。",
     "visTypePie.advancedSettings.visualization.legacyPieChartsLibrary.description": "Visualizeで円グラフのレガシーグラフライブラリを有効にします。",
     "visTypePie.advancedSettings.visualization.legacyPieChartsLibrary.name": "円グラフのレガシーグラフライブラリ",
