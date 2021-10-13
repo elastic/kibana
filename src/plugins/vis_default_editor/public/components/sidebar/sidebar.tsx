@@ -26,7 +26,7 @@ import {
 } from 'src/plugins/visualizations/public';
 import type { Schema } from 'src/plugins/visualizations/public';
 import { TimeRange } from 'src/plugins/data/public';
-import { SavedObject } from 'src/plugins/saved_objects/public';
+import { SavedSearch } from 'src/plugins/discover/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
@@ -42,7 +42,7 @@ interface DefaultEditorSideBarProps {
   vis: Vis;
   isLinkedSearch: boolean;
   eventEmitter: EventEmitter;
-  savedSearch?: SavedObject;
+  savedSearch?: SavedSearch;
   timeRange: TimeRange;
 }
 
