@@ -81,93 +81,86 @@ describe('getSummaryStatus', () => {
   });
 
   describe('summary', () => {
-    describe('when a single service is at highest level', () => {
-      it('returns all information about that single service', () => {
-        expect(
-          getSummaryStatus(
-            Object.entries({
-              s1: degraded,
-              s2: {
-                level: ServiceStatusLevels.unavailable,
-                summary: 'Lorem ipsum',
-                meta: {
-                  custom: { data: 'here' },
-                },
+    it('returns correct summary when a single service is affected', () => {
+      expect(
+        getSummaryStatus(
+          Object.entries({
+            s1: degraded,
+            s2: {
+              level: ServiceStatusLevels.unavailable,
+              summary: 'Lorem ipsum',
+              meta: {
+                custom: { data: 'here' },
               },
-            })
-          )
-        ).toEqual({
-          level: ServiceStatusLevels.unavailable,
-          summary: '[s2]: Lorem ipsum',
-          detail: 'See the status page for more information',
-          meta: {
-            affectedServices: ['s2'],
-          },
-        });
-      });
-
-      it('allows the single service to override the detail and documentationUrl fields', () => {
-        expect(
-          getSummaryStatus(
-            Object.entries({
-              s1: degraded,
-              s2: {
-                level: ServiceStatusLevels.unavailable,
-                summary: 'Lorem ipsum',
-                detail: 'Vivamus pulvinar sem ac luctus ultrices.',
-                documentationUrl: 'http://helpmenow.com/problem1',
-                meta: {
-                  custom: { data: 'here' },
-                },
-              },
-            })
-          )
-        ).toEqual({
-          level: ServiceStatusLevels.unavailable,
-          summary: '[s2]: Lorem ipsum',
-          detail: 'Vivamus pulvinar sem ac luctus ultrices.',
-          documentationUrl: 'http://helpmenow.com/problem1',
-          meta: {
-            affectedServices: ['s2'],
-          },
-        });
+            },
+          })
+        )
+      ).toEqual({
+        level: ServiceStatusLevels.unavailable,
+        summary: '1 service is unavailable: s2',
+        detail: 'See the status page for more information',
+        meta: {
+          affectedServices: ['s2'],
+        },
       });
     });
 
-    describe('when multiple services is at highest level', () => {
-      it('returns aggregated information about the affected services', () => {
-        expect(
-          getSummaryStatus(
-            Object.entries({
-              s1: degraded,
-              s2: {
-                level: ServiceStatusLevels.unavailable,
-                summary: 'Lorem ipsum',
-                detail: 'Vivamus pulvinar sem ac luctus ultrices.',
-                documentationUrl: 'http://helpmenow.com/problem1',
-                meta: {
-                  custom: { data: 'here' },
-                },
+    it('returns correct summary when multiple services are affected', () => {
+      expect(
+        getSummaryStatus(
+          Object.entries({
+            s1: degraded,
+            s2: {
+              level: ServiceStatusLevels.unavailable,
+              summary: 'Lorem ipsum',
+              detail: 'Vivamus pulvinar sem ac luctus ultrices.',
+              documentationUrl: 'http://helpmenow.com/problem1',
+              meta: {
+                custom: { data: 'here' },
               },
-              s3: {
-                level: ServiceStatusLevels.unavailable,
-                summary: 'Proin mattis',
-                detail: 'Nunc quis nulla at mi lobortis pretium.',
-                documentationUrl: 'http://helpmenow.com/problem2',
-                meta: {
-                  other: { data: 'over there' },
-                },
+            },
+            s3: {
+              level: ServiceStatusLevels.unavailable,
+              summary: 'Proin mattis',
+              detail: 'Nunc quis nulla at mi lobortis pretium.',
+              documentationUrl: 'http://helpmenow.com/problem2',
+              meta: {
+                other: { data: 'over there' },
               },
-            })
-          )
-        ).toEqual({
-          level: ServiceStatusLevels.unavailable,
-          summary: '[2] services are unavailable',
-          detail: 'See the status page for more information',
-          meta: {
-            affectedServices: ['s2', 's3'],
-          },
-        });
+            },
+          })
+        )
+      ).toEqual({
+        level: ServiceStatusLevels.unavailable,
+        summary: '2 services are unavailable: s2, s3',
+        detail: 'See the status page for more information',
+        meta: {
+          affectedServices: ['s2', 's3'],
+        },
+      });
+    });
+
+    it('returns correct summary more than `maxServices` services are affected', () => {
+      expect(
+        getSummaryStatus(
+          Object.entries({
+            s1: degraded,
+            s2: available,
+            s3: degraded,
+            s4: degraded,
+            s5: degraded,
+            s6: available,
+            s7: degraded,
+          }),
+          { maxServices: 3 }
+        )
+      ).toEqual({
+        level: ServiceStatusLevels.degraded,
+        summary: '5 services are degraded: s1, s3, s4 and 2 other(s)',
+        detail: 'See the status page for more information',
+        meta: {
+          affectedServices: ['s1', 's3', 's4', 's5', 's7'],
+        },
       });
     });
   });
