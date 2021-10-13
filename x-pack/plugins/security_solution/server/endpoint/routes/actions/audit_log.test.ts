@@ -191,8 +191,8 @@ describe('Action Log API', () => {
 
       expect(response.ok).toBeCalled();
       expect(responseBody.data).toHaveLength(3);
-      expect(responseBody.data.filter((e) => e.type === 'response')).toHaveLength(1);
-      expect(responseBody.data.filter((e) => e.type === 'action')).toHaveLength(2);
+      expect(responseBody.data.filter((e) => e.type === 'fleetResponse')).toHaveLength(1);
+      expect(responseBody.data.filter((e) => e.type === 'fleetAction')).toHaveLength(2);
     });
 
     it('should throw errors when no results for some agentID', async () => {

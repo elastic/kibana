@@ -87,8 +87,24 @@ export interface EndpointActionResponse {
   action_data: EndpointActionData;
 }
 
-export interface ActivityLogAction {
+export interface EndpointLogAction {
   type: 'action';
+  item: {
+    id: string;
+    data: LogsEndpointAction;
+  };
+}
+
+export interface EndpointLogActionResponse {
+  type: 'response';
+  item: {
+    id: string;
+    data: LogsEndpointActionResponse;
+  };
+}
+
+export interface ActivityLogAction {
+  type: 'fleetAction';
   item: {
     // document _id
     id: string;
@@ -97,7 +113,7 @@ export interface ActivityLogAction {
   };
 }
 export interface ActivityLogActionResponse {
-  type: 'response';
+  type: 'fleetResponse';
   item: {
     // document id
     id: string;

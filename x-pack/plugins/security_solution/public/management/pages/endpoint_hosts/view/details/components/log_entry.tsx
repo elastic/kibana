@@ -42,7 +42,7 @@ const useLogEntryUIProps = (
     let displayResponseEvent: boolean = true;
     let username: EuiCommentProps['username'] = '';
 
-    if (logEntry.type === 'action') {
+    if (logEntry.type === 'fleetAction') {
       avatarSize = 'm';
       commentType = 'regular';
       commentText = logEntry.item.data.data.comment?.trim() ?? '';
@@ -59,7 +59,7 @@ const useLogEntryUIProps = (
           displayComment = true;
         }
       }
-    } else if (logEntry.type === 'response') {
+    } else if (logEntry.type === 'fleetResponse') {
       isResponseEvent = true;
       if (logEntry.item.data.action_data.command === 'isolate') {
         isIsolateAction = true;

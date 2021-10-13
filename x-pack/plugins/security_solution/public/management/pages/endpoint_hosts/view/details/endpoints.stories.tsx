@@ -26,7 +26,7 @@ export const dummyEndpointActivityLog = (
     endDate: moment().toString(),
     data: [
       {
-        type: 'action',
+        type: 'fleetAction',
         item: {
           id: '',
           data: {
@@ -44,7 +44,7 @@ export const dummyEndpointActivityLog = (
         },
       },
       {
-        type: 'action',
+        type: 'fleetAction',
         item: {
           id: '',
           data: {
@@ -63,7 +63,7 @@ export const dummyEndpointActivityLog = (
         },
       },
       {
-        type: 'action',
+        type: 'fleetAction',
         item: {
           id: '',
           data: {
@@ -82,7 +82,7 @@ export const dummyEndpointActivityLog = (
         },
       },
       {
-        type: 'action',
+        type: 'fleetAction',
         item: {
           id: '',
           data: {

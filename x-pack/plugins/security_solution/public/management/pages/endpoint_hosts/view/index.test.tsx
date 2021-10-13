@@ -851,21 +851,21 @@ describe('when on the endpoint list page', () => {
           endDate: 'now',
           data: [
             {
-              type: 'response',
+              type: 'fleetResponse',
               item: {
                 id: 'some_id_0',
                 data: responseData,
               },
             },
             {
-              type: 'action',
+              type: 'fleetAction',
               item: {
                 id: 'some_id_1',
                 data: actionData,
               },
             },
             {
-              type: 'action',
+              type: 'fleetAction',
               item: {
                 id: 'some_id_3',
                 data: isolatedActionData,

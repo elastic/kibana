@@ -155,13 +155,13 @@ const getActivityLog = async ({
 
   const responses = responsesResult?.body?.hits?.hits?.length
     ? responsesResult?.body?.hits?.hits?.map((e) => ({
-        type: 'response',
+        type: 'fleetResponse',
         item: { id: e._id, data: e._source },
       }))
     : [];
   const actions = actionsResult?.body?.hits?.hits?.length
     ? actionsResult?.body?.hits?.hits?.map((e) => ({
-        type: 'action',
+        type: 'fleetAction',
         item: { id: e._id, data: e._source },
       }))
     : [];
