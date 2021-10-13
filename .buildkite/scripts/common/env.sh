@@ -36,8 +36,14 @@ export ELASTIC_APM_ENVIRONMENT=ci
 export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
 
 if is_pr; then
-  export ELASTIC_APM_ACTIVE=true
-  export ELASTIC_APM_DISABLE_SEND=true
+  if [[ "${GITHUB_PR_LABELS:-}" == *"ci:collect-apm"* ]]; then
+    export ELASTIC_APM_ACTIVE=true
+    export ELASTIC_APM_DISABLE_SEND=false
+  else
+    export ELASTIC_APM_ACTIVE=true
+    export ELASTIC_APM_DISABLE_SEND=true
+  fi
+
   export CHECKS_REPORTER_ACTIVE=true
 
   # These can be removed once we're not supporting Jenkins and Buildkite at the same time

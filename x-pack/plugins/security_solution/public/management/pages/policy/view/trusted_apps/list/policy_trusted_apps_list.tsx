@@ -19,6 +19,7 @@ import {
   doesPolicyHaveTrustedApps,
   getCurrentArtifactsLocation,
   getPolicyTrustedAppList,
+  getPolicyTrustedAppListError,
   getPolicyTrustedAppsListPagination,
   getTrustedAppsAllPoliciesById,
   isPolicyTrustedAppListLoading,
@@ -31,12 +32,17 @@ import {
   getTrustedAppsListPath,
 } from '../../../../../common/routing';
 import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
-import { useAppUrl } from '../../../../../../common/lib/kibana';
+import { useAppUrl, useToasts } from '../../../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../../../common/constants';
 import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
+import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+
+const DATA_TEST_SUBJ = 'policyTrustedAppsGrid';
 
 export const PolicyTrustedAppsList = memo(() => {
+  const getTestId = useTestIdGenerator(DATA_TEST_SUBJ);
+  const toasts = useToasts();
   const history = useHistory();
   const { getAppUrl } = useAppUrl();
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
@@ -47,10 +53,9 @@ export const PolicyTrustedAppsList = memo(() => {
   const pagination = usePolicyDetailsSelector(getPolicyTrustedAppsListPagination);
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const allPoliciesById = usePolicyDetailsSelector(getTrustedAppsAllPoliciesById);
+  const trustedAppsApiError = usePolicyDetailsSelector(getPolicyTrustedAppListError);
 
   const [isCardExpanded, setCardExpanded] = useState<Record<string, boolean>>({});
-
-  // TODO:PT show load errors if any
 
   const handlePageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
     ({ pageIndex, pageSize }) => {
@@ -135,6 +140,7 @@ export const PolicyTrustedAppsList = memo(() => {
             href: getAppUrl({ appId: APP_ID, path: viewUrlPath }),
             navigateAppId: APP_ID,
             navigateOptions: { path: viewUrlPath },
+            'data-test-subj': getTestId('viewFullDetailsAction'),
           },
         ],
         policies: assignedPoliciesMenuItems,
@@ -144,7 +150,7 @@ export const PolicyTrustedAppsList = memo(() => {
     }
 
     return newCardProps;
-  }, [allPoliciesById, getAppUrl, isCardExpanded, trustedAppItems]);
+  }, [allPoliciesById, getAppUrl, getTestId, isCardExpanded, trustedAppItems]);
 
   const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
     (item) => {
@@ -152,6 +158,17 @@ export const PolicyTrustedAppsList = memo(() => {
     },
     [cardProps]
   );
+
+  // if an error occurred while loading the data, show toast
+  useEffect(() => {
+    if (trustedAppsApiError) {
+      toasts.addError(trustedAppsApiError as unknown as Error, {
+        title: i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.list.apiError', {
+          defaultMessage: 'Error while retrieving list of trusted applications',
+        }),
+      });
+    }
+  }, [toasts, trustedAppsApiError]);
 
   // Anytime a new set of data (trusted apps) is retrieved, reset the card expand state
   useEffect(() => {
@@ -161,7 +178,11 @@ export const PolicyTrustedAppsList = memo(() => {
   if (hasTrustedApps.loading || isTrustedAppExistsCheckLoading) {
     return (
       <EuiPageTemplate template="centeredContent">
-        <EuiLoadingSpinner className="essentialAnimation" size="xl" />
+        <EuiLoadingSpinner
+          className="essentialAnimation"
+          size="xl"
+          data-test-subj={DATA_TEST_SUBJ}
+        />
       </EuiPageTemplate>
     );
   }
@@ -180,8 +201,9 @@ export const PolicyTrustedAppsList = memo(() => {
         onExpandCollapse={handleExpandCollapse}
         cardComponentProps={provideCardProps}
         loading={isLoading}
+        error={trustedAppsApiError?.message}
         pagination={pagination as Pagination}
-        data-test-subj="policyTrustedAppsGrid"
+        data-test-subj={DATA_TEST_SUBJ}
       />
     </>
   );
