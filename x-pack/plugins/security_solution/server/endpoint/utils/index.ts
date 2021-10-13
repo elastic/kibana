@@ -7,3 +7,4 @@
 
 export * from './fleet_agent_status_to_endpoint_host_status';
 export * from './wrap_errors';
+export * from './yes_no_data_stream';
