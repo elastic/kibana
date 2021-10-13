@@ -6,7 +6,10 @@
  */
 
 import { HttpSetup } from 'kibana/public';
+import { ActionTypeExecutorResult } from '../../../../../../actions/common';
 import { BASE_ACTION_API_PATH } from '../../../constants';
+import { rewriteResponseToCamelCase } from '../rewrite_response_body';
+import { Fields, Issue, Issues, IssueTypes } from '../types';
 
 export async function getIssueTypes({
   http,
@@ -16,16 +19,15 @@ export async function getIssueTypes({
   http: HttpSetup;
   signal: AbortSignal;
   connectorId: string;
-}): Promise<Record<string, any>> {
-  return await http.post(
-    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
-    {
+}): Promise<ActionTypeExecutorResult<IssueTypes>> {
+  return await http
+    .post(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`, {
       body: JSON.stringify({
         params: { subAction: 'issueTypes', subActionParams: {} },
       }),
       signal,
-    }
-  );
+    })
+    .then((res) => rewriteResponseToCamelCase(res));
 }
 
 export async function getFieldsByIssueType({
@@ -38,16 +40,15 @@ export async function getFieldsByIssueType({
   signal: AbortSignal;
   connectorId: string;
   id: string;
-}): Promise<Record<string, any>> {
-  return await http.post(
-    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
-    {
+}): Promise<ActionTypeExecutorResult<Fields>> {
+  return await http
+    .post(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`, {
       body: JSON.stringify({
         params: { subAction: 'fieldsByIssueType', subActionParams: { id } },
       }),
       signal,
-    }
-  );
+    })
+    .then((res) => rewriteResponseToCamelCase(res));
 }
 
 export async function getIssues({
@@ -60,16 +61,15 @@ export async function getIssues({
   signal: AbortSignal;
   connectorId: string;
   title: string;
-}): Promise<Record<string, any>> {
-  return await http.post(
-    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
-    {
+}): Promise<ActionTypeExecutorResult<Issues>> {
+  return await http
+    .post(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`, {
       body: JSON.stringify({
         params: { subAction: 'issues', subActionParams: { title } },
       }),
       signal,
-    }
-  );
+    })
+    .then((res) => rewriteResponseToCamelCase(res));
 }
 
 export async function getIssue({
@@ -82,14 +82,13 @@ export async function getIssue({
   signal: AbortSignal;
   connectorId: string;
   id: string;
-}): Promise<Record<string, any>> {
-  return await http.post(
-    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
-    {
+}): Promise<ActionTypeExecutorResult<Issue>> {
+  return await http
+    .post(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`, {
       body: JSON.stringify({
         params: { subAction: 'issue', subActionParams: { id } },
       }),
       signal,
-    }
-  );
+    })
+    .then((res) => rewriteResponseToCamelCase(res));
 }
