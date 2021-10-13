@@ -112,6 +112,7 @@ const HostDetailsLinkComponent: React.FC<{
   );
   return isButton ? (
     <GenericLinkButton
+      Component={Component}
       dataTestSubj="data-grid-host-details"
       href={href}
       iconType="expand"
@@ -196,6 +197,7 @@ const NetworkDetailsLinkComponent: React.FC<{
 
   return isButton ? (
     <GenericLinkButton
+      Component={Component}
       dataTestSubj="data-grid-network-details"
       onClick={onClick ?? goToNetworkDetails}
       href={href}
