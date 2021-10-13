@@ -63,6 +63,7 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
 
     async clickNameCol() {
       await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_NAME_COL}"] > button`);
+      await find.byCssSelector('.euiBasicTable-loading');
       await this.waitForTableToFinishLoading();
     }
 
