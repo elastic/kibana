@@ -49,9 +49,11 @@ const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
     name: 'sum',
     isFullReference: false,
   },
+  math: {
+    name: 'formula',
+    isFullReference: true,
+  },
 };
-//  THINGS TO ADD
-// - formula
 
 export const triggerVisualizeToLensActions = async (model: Panel) => {
   const { dataViews } = getDataStart();
@@ -111,6 +113,29 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
           params: { percentile: percentile.value },
         });
       });
+    } else if (aggregation === 'math') {
+      let finalScript = layer.metrics[metricIdx].script;
+      const variables = layer.metrics[metricIdx].variables;
+      if (!variables) {
+        return null;
+      }
+      // create the script
+      for (let layerMetricIdx = 0; layerMetricIdx < layer.metrics.length - 1; layerMetricIdx++) {
+        const currentMetric = layer.metrics[layerMetricIdx];
+        finalScript = finalScript?.replace(
+          `params.${variables[layerMetricIdx].name}`,
+          `${LENS_METRIC_TYPES[currentMetric.type].name}(${currentMetric.field})`
+        );
+      }
+      metricsArray = [
+        {
+          agg: 'formula',
+          isFullReference: true,
+          color: layer.color,
+          fieldName: 'document',
+          params: { formula: finalScript },
+        },
+      ];
     } else {
       // construct metrics from the last series.metric item
       metricsArray = [
