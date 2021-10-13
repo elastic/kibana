@@ -6,17 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { MaybePromise } from '@kbn/utility-types';
 import type { SavedObjectsClientContract } from '../saved_objects/types';
 import type { IScopedClusterClient } from '../elasticsearch';
-
-type MaybePromise<T> = T | Promise<T>;
-
-/**
- * @internal
- */
-export interface DomainDeprecationDetails extends DeprecationsDetails {
-  domainId: string;
-}
 
 /**
  * @public
@@ -80,6 +72,13 @@ export interface DeprecationsDetails {
      */
     manualSteps: string[];
   };
+}
+
+/**
+ * @internal
+ */
+export interface DomainDeprecationDetails extends DeprecationsDetails {
+  domainId: string;
 }
 
 /**

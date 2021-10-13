@@ -73,6 +73,7 @@ describe('DeprecationsService', () => {
           'testDomain',
           [
             {
+              configPath: 'test',
               message: 'testMessage',
               documentationUrl: 'testDocUrl',
               correctiveActions: {
@@ -124,6 +125,7 @@ describe('DeprecationsService', () => {
           'testDomain',
           [
             {
+              configPath: 'test',
               message: 'testMessage',
               level: 'warning',
               correctiveActions: {

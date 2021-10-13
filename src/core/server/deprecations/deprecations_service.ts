@@ -9,6 +9,7 @@
 import { DeprecationsFactory } from './deprecations_factory';
 import { DomainDeprecationDetails, RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
+// import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
 
 import { CoreContext } from '../core_context';
 import { CoreService } from '../../types';

@@ -32,7 +32,7 @@ export interface DeprecatedConfigDetails {
    * - critical: needs to be addressed before upgrade.
    */
   level?: 'warning' | 'critical';
-  /** (optional) set false to prevent the config service from logging the deprecation message. */
+  /** (optional) set to `true` to prevent the config service from logging the deprecation message. */
   silent?: boolean;
   /** (optional) link to the documentation for more details on the deprecation. */
   documentationUrl?: string;
