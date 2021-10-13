@@ -615,7 +615,7 @@ describe('deprecations', () => {
       `);
     });
 
-    test('happy path with multiple siem roles', async () => {
+    test('getDeprecations handles multiple roles and filters out any that do not grant access to Cases', async () => {
       getKibanaRolesByFeatureId.mockResolvedValue({
         roles: [
           {
