@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSuperSelect } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import {
@@ -24,7 +25,14 @@ interface Props {
 }
 
 export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
-  const { setSeries } = useSeriesStorage();
+  const { setSeries, allSeries } = useSeriesStorage();
+
+  const indexOfSeriesWithBreakdown = allSeries.findIndex((seriesT) => {
+    return Boolean(seriesT.breakdown);
+  });
+  const currentSeriesHasBreakdown = indexOfSeriesWithBreakdown === seriesId;
+  const anySeriesHasBreakdown = indexOfSeriesWithBreakdown !== -1;
+  const differentSeriesHasBreakdown = anySeriesHasBreakdown && !currentSeriesHasBreakdown;
 
   const selectedBreakdown = series.breakdown;
   const NO_BREAKDOWN = 'no_breakdown';
@@ -77,13 +85,28 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
     valueOfSelected = LABEL_FIELDS_BREAKDOWN;
   }
 
+  function Select() {
+    return (
+      <EuiSuperSelect
+        options={options}
+        valueOfSelected={valueOfSelected}
+        onChange={(value) => onOptionChange(value)}
+        data-test-subj={'seriesBreakdown'}
+        disabled={differentSeriesHasBreakdown}
+      />
+    );
+  }
+
   return (
-    <EuiSuperSelect
-      options={options}
-      valueOfSelected={valueOfSelected}
-      onChange={(value) => onOptionChange(value)}
-      data-test-subj={'seriesBreakdown'}
-    />
+    <Wrapper>
+      {differentSeriesHasBreakdown ? (
+        <EuiToolTip content={BREAKDOWN_WARNING} position="top">
+          <Select />
+        </EuiToolTip>
+      ) : (
+        <Select />
+      )}
+    </Wrapper>
   );
 }
 
@@ -93,3 +116,13 @@ export const NO_BREAK_DOWN_LABEL = i18n.translate(
     defaultMessage: 'No breakdown',
   }
 );
+
+export const BREAKDOWN_WARNING = i18n.translate('xpack.observability.exp.breakDownFilter.warning', {
+  defaultMessage: 'Breakdowns can be applied to only one series at a time.',
+});
+
+const Wrapper = styled.span`
+  .euiToolTipAnchor {
+    width: 100%;
+  }
+`;

@@ -303,6 +303,24 @@ describe('Lens Attribute', () => {
     });
   });
 
+  it('should hide y axis when there are multiple series', function () {
+    const lensAttrWithMultiSeries = new LensAttributes([layerConfig, layerConfig]).getJSON() as any;
+    expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
+      x: true,
+      yLeft: false,
+      yRight: false,
+    });
+  });
+
+  it('should show y axis when there is a single series', function () {
+    const lensAttrWithMultiSeries = new LensAttributes([layerConfig]).getJSON() as any;
+    expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
+      x: true,
+      yLeft: true,
+      yRight: true,
+    });
+  });
+
   it('should return first layer', function () {
     expect(lnsAttr.getLayers()).toEqual({
       layer0: {
