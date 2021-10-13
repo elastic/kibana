@@ -167,6 +167,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./transactions/error_rate'));
     });
 
+    describe('transactions/latency_overall_distribution', function () {
+      loadTestFile(require.resolve('./transactions/latency_overall_distribution'));
+    });
+
     describe('transactions/latency', function () {
       loadTestFile(require.resolve('./transactions/latency'));
     });
