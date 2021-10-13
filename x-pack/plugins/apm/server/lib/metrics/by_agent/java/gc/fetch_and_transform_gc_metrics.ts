@@ -85,7 +85,7 @@ export async function fetchAndTransformGcMetrics({
               date_histogram: getMetricsDateHistogramParams({
                 start,
                 end,
-                metricsInterval: config['xpack.apm.metricsInterval'],
+                metricsInterval: config.metricsInterval,
               }),
               aggs: {
                 // get the max value
