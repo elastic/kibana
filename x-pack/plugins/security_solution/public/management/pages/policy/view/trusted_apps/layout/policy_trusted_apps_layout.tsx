@@ -25,6 +25,7 @@ import {
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
 import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
@@ -33,6 +34,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const navigateCallback = usePolicyDetailsNavigateCallback();
   const hasAssignedTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
+  const { isPlatinumPlus } = useEndpointPrivileges();
 
   const showListFlyout = location.show === 'list';
 
@@ -88,7 +90,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
               </h2>
             </EuiTitle>
           </EuiPageHeaderSection>
-          <EuiPageHeaderSection>{assignTrustedAppButton}</EuiPageHeaderSection>
+          <EuiPageHeaderSection>{isPlatinumPlus && assignTrustedAppButton}</EuiPageHeaderSection>
         </EuiPageHeader>
       ) : null}
       <EuiPageContent
@@ -114,7 +116,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
           <PolicyTrustedAppsList />
         )}
       </EuiPageContent>
-      {showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
+      {isPlatinumPlus && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
     </div>
   ) : null;
 });

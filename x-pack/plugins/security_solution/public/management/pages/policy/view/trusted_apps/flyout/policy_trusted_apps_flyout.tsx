@@ -209,7 +209,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             title={
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.noAssignable"
-                defaultMessage="There are no assignable Trused Apps to assign to this policy"
+                defaultMessage="There are no trusted applications that can be assigned to this policy."
               />
             }
           />
@@ -241,7 +241,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.confirm"
-                defaultMessage="Assing to {policyName}"
+                defaultMessage="Assign to {policyName}"
                 values={{
                   policyName,
                 }}
