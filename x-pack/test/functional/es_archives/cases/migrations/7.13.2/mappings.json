@@ -260,22 +260,22 @@
         },
         "apm-indices": {
           "properties": {
-            "errors": {
+            "error": {
               "type": "keyword"
             },
-            "metrics": {
+            "metric": {
               "type": "keyword"
             },
             "onboarding": {
               "type": "keyword"
             },
-            "sourcemaps": {
+            "sourcemap": {
               "type": "keyword"
             },
-            "spans": {
+            "span": {
               "type": "keyword"
             },
-            "transactions": {
+            "transaction": {
               "type": "keyword"
             }
           }
