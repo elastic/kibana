@@ -15509,6 +15509,12 @@ exports.parseConfig = parseConfig;
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+/**
+ * Information about how CiStatsReporter should talk to the ci-stats service. Normally
+ * it is read from a JSON environment variable using the `parseConfig()` function
+ * exported by this module.
+ */
 function validateConfig(log, config) {
   const validApiToken = typeof config.apiToken === 'string' && config.apiToken.length !== 0;
 
