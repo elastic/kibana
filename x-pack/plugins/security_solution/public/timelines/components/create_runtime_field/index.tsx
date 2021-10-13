@@ -58,9 +58,9 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       onClickParam();
     }, [indexPatternFieldEditor, dataView, selectedDataViewId, onClickParam]);
 
-    // if (!indexPatternFieldEditor?.userPermissions.editIndexPattern()) {
-    //   return null;
-    // }
+    if (!indexPatternFieldEditor?.userPermissions.editIndexPattern()) {
+      return null;
+    }
 
     return (
       <>
