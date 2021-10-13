@@ -45,7 +45,7 @@ import {
   getScopedHistory,
   syncHistoryLocations,
 } from './kibana_services';
-import { createSavedSearchesLoader } from './saved_searches';
+import { __LEGACY } from './saved_searches';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 import {
@@ -61,6 +61,7 @@ import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
 import { DeferredSpinner } from './shared';
 import { ViewSavedSearchAction } from './application/embeddable/view_saved_search_action';
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -120,7 +121,9 @@ export interface DiscoverSetup {
 }
 
 export interface DiscoverStart {
-  savedSearchLoader: SavedObjectLoader;
+  __LEGACY: {
+    savedSearchLoader: SavedObjectLoader;
+  };
 
   /**
    * @deprecated Use URL locator instead. URL generator will be removed.
@@ -189,6 +192,7 @@ export interface DiscoverStartPlugins {
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -411,10 +415,12 @@ export class DiscoverPlugin
     return {
       urlGenerator: this.urlGenerator,
       locator: this.locator,
-      savedSearchLoader: createSavedSearchesLoader({
-        savedObjectsClient: core.savedObjects.client,
-        savedObjects: plugins.savedObjects,
-      }),
+      __LEGACY: {
+        savedSearchLoader: __LEGACY.createSavedSearchesLoader({
+          savedObjectsClient: core.savedObjects.client,
+          savedObjects: plugins.savedObjects,
+        }),
+      },
     };
   }
 

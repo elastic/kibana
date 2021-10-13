@@ -31,10 +31,11 @@ export function getStateDefaults({
   data: DataPublicPluginStart;
   savedSearch: SavedSearch;
 }) {
-  const searchSource = savedSearch.searchSource;
-  const indexPattern = savedSearch.searchSource.getField('index');
+  const { searchSource } = savedSearch;
+  const indexPattern = searchSource.getField('index');
+
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-  const sort = getSortArray(savedSearch.sort, indexPattern!);
+  const sort = getSortArray(savedSearch.sort ?? [], indexPattern!);
   const columns = getDefaultColumns(savedSearch, config);
 
   const defaultState = {
@@ -43,7 +44,7 @@ export function getStateDefaults({
       ? getDefaultSort(indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
       : sort,
     columns,
-    index: indexPattern!.id,
+    index: indexPattern?.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')),
     hideChart: undefined,

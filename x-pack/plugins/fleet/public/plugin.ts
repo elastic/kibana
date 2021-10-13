@@ -21,6 +21,8 @@ import type {
   CustomIntegrationsSetup,
 } from 'src/plugins/custom_integrations/public';
 
+import type { SharePluginStart } from 'src/plugins/share/public';
+
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
 
 import type {
@@ -81,10 +83,12 @@ export interface FleetStartDeps {
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
+  share: SharePluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, FleetStartDeps {
   storage: Storage;
+  share: SharePluginStart;
   cloud?: CloudSetup;
 }
 
@@ -134,6 +138,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
+          cloud: deps.cloud,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
