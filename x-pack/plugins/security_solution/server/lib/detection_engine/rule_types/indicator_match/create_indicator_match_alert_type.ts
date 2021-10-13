@@ -9,23 +9,15 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { CreateRuleOptions, SecurityAlertType } from '../types';
 
-export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) => {
-  const { experimentalFeatures, lists, logger, config, ruleDataClient, version, eventLogService } =
-    createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    config,
-    ruleDataClient,
-    eventLogService,
-  });
-  return createSecurityRuleType<ThreatRuleParams, {}, PersistenceServices, {}>({
+export const createIndicatorMatchAlertType = (
+  createOptions: CreateRuleOptions
+): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
+  const { experimentalFeatures, logger, version } = createOptions;
+  return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
     validate: {
@@ -88,5 +80,5 @@ export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) 
       });
       return { ...result, state };
     },
-  });
+  };
 };

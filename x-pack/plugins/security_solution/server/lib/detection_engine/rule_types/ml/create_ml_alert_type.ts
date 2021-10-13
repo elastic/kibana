@@ -9,22 +9,15 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { machineLearningRuleParams, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { mlExecutor } from '../../signals/executors/ml';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { CreateRuleOptions, SecurityAlertType } from '../types';
 
-export const createMlAlertType = (createOptions: CreateRuleOptions) => {
-  const { lists, logger, config, ml, ruleDataClient, eventLogService } = createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    config,
-    ruleDataClient,
-    eventLogService,
-  });
-  return createSecurityRuleType<MachineLearningRuleParams, {}, PersistenceServices, {}>({
+export const createMlAlertType = (
+  createOptions: CreateRuleOptions
+): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
+  const { logger, ml } = createOptions;
+  return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
     validate: {
@@ -83,5 +76,5 @@ export const createMlAlertType = (createOptions: CreateRuleOptions) => {
       });
       return { ...result, state };
     },
-  });
+  };
 };

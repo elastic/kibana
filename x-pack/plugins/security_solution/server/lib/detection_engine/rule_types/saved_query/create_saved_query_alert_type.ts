@@ -8,23 +8,15 @@
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
-import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { savedQueryRuleParams, SavedQueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { CreateRuleOptions, SecurityAlertType } from '../types';
 
-export const createSavedQueryAlertType = (createOptions: CreateRuleOptions) => {
-  const { experimentalFeatures, lists, logger, config, ruleDataClient, version, eventLogService } =
-    createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    config,
-    ruleDataClient,
-    eventLogService,
-  });
-  return createSecurityRuleType<SavedQueryRuleParams, {}, PersistenceServices, {}>({
+export const createSavedQueryAlertType = (
+  createOptions: CreateRuleOptions
+): SecurityAlertType<SavedQueryRuleParams, {}, {}, 'default'> => {
+  const { experimentalFeatures, logger, version } = createOptions;
+  return {
     id: SAVED_QUERY_RULE_TYPE_ID,
     name: 'Saved Query Rule',
     validate: {
@@ -87,5 +79,5 @@ export const createSavedQueryAlertType = (createOptions: CreateRuleOptions) => {
       });
       return { ...result, state };
     },
-  });
+  };
 };

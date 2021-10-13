@@ -101,12 +101,12 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 import { RulesClient, PartialAlert } from '../../../../../alerting/server';
-import { Alert, SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedAlert } from '../../../../../alerting/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
-export type RuleAlertType = Alert<RuleParams>;
+export type RuleAlertType = SanitizedAlert<RuleParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {

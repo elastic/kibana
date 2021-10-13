@@ -17,6 +17,7 @@ import {
   ScaleType,
   Settings,
   TickFormatter,
+  XYBrushEvent,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -96,7 +97,9 @@ export function BreakdownChart({
       <Chart ref={chartRef}>
         <Settings
           tooltip={{ stickTo: 'top' }}
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          onBrushEnd={(event) =>
+            onBrushEnd({ x: (event as XYBrushEvent).x, history })
+          }
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}

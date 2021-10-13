@@ -9,24 +9,16 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { thresholdExecutor } from '../../signals/executors/threshold';
 import { ThresholdAlertState } from '../../signals/types';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { CreateRuleOptions, SecurityAlertType } from '../types';
 
-export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
-  const { experimentalFeatures, lists, logger, config, ruleDataClient, version, eventLogService } =
-    createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    config,
-    ruleDataClient,
-    eventLogService,
-  });
-  return createSecurityRuleType<ThresholdRuleParams, {}, PersistenceServices, ThresholdAlertState>({
+export const createThresholdAlertType = (
+  createOptions: CreateRuleOptions
+): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState, {}, 'default'> => {
+  const { experimentalFeatures, logger, version } = createOptions;
+  return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
     validate: {
@@ -64,8 +56,6 @@ export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
         state,
       } = execOptions;
 
-      // console.log(JSON.stringify(state));
-
       const result = await thresholdExecutor({
         buildRuleMessage,
         bulkCreate,
@@ -83,5 +73,5 @@ export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
 
       return result;
     },
-  });
+  };
 };
