@@ -33,7 +33,7 @@ export const querySignalsRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (_, request, response) => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { query, aggs, _source, track_total_hits, size } = request.body;
       const siemResponse = buildSiemResponse(response);

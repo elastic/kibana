@@ -26,6 +26,10 @@ import {
   getEqlRuleForSignalTesting,
 } from '../../utils';
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -64,6 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['timestamp_in_seconds']);
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
+          await sleep(5000);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const hits = signalsOpen.hits.hits
@@ -79,6 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
+          await sleep(5000);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const hits = signalsOpen.hits.hits
@@ -93,6 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getEqlRuleForSignalTesting(['timestamp_in_seconds']);
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
+          await sleep(5000);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const hits = signalsOpen.hits.hits
@@ -108,6 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
+          await sleep(5000);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const hits = signalsOpen.hits.hits
@@ -169,6 +177,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { id } = await createRule(supertest, rule);
 
           await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+          await sleep(5000);
           await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id], 3);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -183,6 +192,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { id } = await createRule(supertest, rule);
 
           await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+          await sleep(5000);
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -199,6 +209,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { id } = await createRule(supertest, rule);
 
           await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+          await sleep(5000);
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id, id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -221,6 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { id } = await createRule(supertest, rule);
 
           await waitForRuleSuccessOrStatus(supertest, id);
+          await sleep(5000);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id, id]);
           const hits = signalsResponse.hits.hits
@@ -237,6 +249,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { id } = await createRule(supertest, rule);
 
           await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+          await sleep(5000);
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -286,6 +299,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+          await sleep(5000);
           await waitForSignalsToBePresent(supertest, 200, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id], 200);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);

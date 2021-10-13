@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should not give errors when querying and the signals index does exist and is empty', async () => {
+      it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
         await createSignalsIndex(supertest);
         const { body } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should not give errors when querying and the signals index does exist and is empty', async () => {
+        it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
           await createSignalsIndex(supertest);
           const { body } = await supertest
             .post(ALERTS_AS_DATA_FIND_URL)

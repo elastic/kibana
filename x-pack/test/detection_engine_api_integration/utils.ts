@@ -1094,10 +1094,15 @@ export const waitForSignalsToBePresent = async (
   numberOfSignals = 1,
   signalIds: string[]
 ): Promise<void> => {
-  await waitFor(async () => {
-    const signalsOpen = await getSignalsByIds(supertest, signalIds, numberOfSignals);
-    return signalsOpen.hits.hits.length >= numberOfSignals;
-  }, 'waitForSignalsToBePresent');
+  await waitFor(
+    async () => {
+      const signalsOpen = await getSignalsByIds(supertest, signalIds, numberOfSignals);
+      return signalsOpen.hits.hits.length >= numberOfSignals;
+    },
+    'waitForSignalsToBePresent',
+    20000,
+    250 // Wait 250ms between tries
+  );
 };
 
 /**

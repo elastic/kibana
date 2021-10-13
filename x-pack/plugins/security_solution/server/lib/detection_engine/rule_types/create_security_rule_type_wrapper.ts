@@ -6,13 +6,10 @@
  */
 
 import { isEmpty } from 'lodash';
-import { flow } from 'fp-ts/lib/function';
-import { Either, chain, fold, tryCatch } from 'fp-ts/lib/Either';
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
-import { toError } from '@kbn/securitysolution-list-api';
 
 import { createPersistenceRuleTypeWrapper } from '../../../../../rule_registry/server';
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
@@ -141,43 +138,25 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               }),
             ]);
 
-            fold<Error, Promise<boolean>, void>(
-              async (error: Error) => logger.error(buildRuleMessage(error.message)),
-              async (status: Promise<boolean>) => (wroteWarningStatus = await status)
-            )(
-              flow(
-                () =>
-                  tryCatch(
-                    () =>
-                      hasReadIndexPrivileges({
-                        ...basicLogArguments,
-                        privileges,
-                        logger,
-                        buildRuleMessage,
-                        ruleStatusClient,
-                      }),
-                    toError
-                  ),
-                chain((wroteStatus: unknown) =>
-                  tryCatch(
-                    () =>
-                      hasTimestampFields({
-                        ...basicLogArguments,
-                        timestampField: hasTimestampOverride
-                          ? (timestampOverride as string)
-                          : '@timestamp',
-                        ruleName: name,
-                        timestampFieldCapsResponse: timestampFieldCaps,
-                        inputIndices,
-                        ruleStatusClient,
-                        logger,
-                        buildRuleMessage,
-                      }),
-                    toError
-                  )
-                )
-              )() as Either<Error, Promise<boolean>>
-            );
+            wroteWarningStatus = await hasReadIndexPrivileges({
+              ...basicLogArguments,
+              privileges,
+              logger,
+              buildRuleMessage,
+              ruleStatusClient,
+            });
+
+            if (!wroteWarningStatus) {
+              wroteWarningStatus = await hasTimestampFields({
+                ...basicLogArguments,
+                timestampField: hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
+                timestampFieldCapsResponse: timestampFieldCaps,
+                inputIndices,
+                ruleStatusClient,
+                logger,
+                buildRuleMessage,
+              });
+            }
           }
         } catch (exc) {
           logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));

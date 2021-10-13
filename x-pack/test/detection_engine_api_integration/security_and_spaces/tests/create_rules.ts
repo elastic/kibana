@@ -29,10 +29,14 @@ import {
   // waitForSignalsToBePresent,
   // waitForAlertToComplete,
   getRuleForSignalTesting,
+  getRuleForSignalTestingWithTimestampOverride,
+  waitForAlertToComplete,
+  waitForSignalsToBePresent,
   // getRuleForSignalTestingWithTimestampOverride,
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
 // import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
 
 // eslint-disable-next-line import/no-default-export
@@ -301,7 +305,6 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      /*
       it('should create a single rule which has a timestamp override for an index pattern that does not exist and write a partial failure status', async () => {
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data
@@ -356,7 +359,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(statusBody[bodyId].current_status.status).to.eql('partial failure');
       });
-    */
     });
   });
 };
