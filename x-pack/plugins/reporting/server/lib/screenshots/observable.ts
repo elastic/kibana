@@ -28,11 +28,9 @@ export function getScreenshots$(
 ): Rx.Observable<ScreenshotResults[]> {
   const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
   const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
-
-  const viewport = opts.layout.getBrowserViewport();
   const { browserTimezone, logger } = opts;
 
-  return browserDriverFactory.createPage({ viewport, browserTimezone }, logger).pipe(
+  return browserDriverFactory.createPage({ browserTimezone }, logger).pipe(
     mergeMap(({ driver, exit$ }) => {
       apmCreatePage?.end();
       exit$.subscribe({ error: () => apmTrans?.end() });
