@@ -41,8 +41,8 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
               }),
               i18n.translate('xpack.reporting.deprecations.reportingIndex.manualStepTwo', {
                 defaultMessage:
-                  `You can manually re-index the documents in custom reporting indices into the default` +
-                  ` ".reporting-*" indices if you need continued access to reports that were in a custom index.`,
+                  `Reindex reports stored in a custom reporting index into the default ".reporting-*"` +
+                  ` indices or regenerate the reports to be able to access them in 8.0.`,
               }),
             ],
           },
