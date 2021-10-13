@@ -7,6 +7,13 @@
 
 import type { ApplicationStart } from 'kibana/public';
 
+export type OnSaveQueryParamKeys = 'showAddAgentHelp' | 'openEnrollmentFlyout';
+export type OnSaveQueryParamOpts =
+  | {
+      renameKey?: string; // override param name
+      policyIdAsValue?: boolean; // use policyId as param value instead of true
+    }
+  | boolean;
 /**
  * Supported routing state for the create package policy page routes
  */
@@ -17,6 +24,10 @@ export interface CreatePackagePolicyRouteState {
   onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
   /** Url to be used on cancel links */
   onCancelUrl?: string;
+  /** supported query params for onSaveNavigateTo path */
+  onSaveQueryParams?: {
+    [key in OnSaveQueryParamKeys]?: OnSaveQueryParamOpts;
+  };
 }
 
 /**
