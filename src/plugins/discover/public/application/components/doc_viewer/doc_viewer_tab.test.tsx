@@ -10,6 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { DocViewerTab } from './doc_viewer_tab';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { indexPatternMock } from '../../../__mocks__/index_pattern';
 
 describe('DocViewerTab', () => {
   test('changing columns triggers an update', () => {
@@ -21,6 +22,7 @@ describe('DocViewerTab', () => {
       renderProps: {
         hit: {} as ElasticSearchHit,
         columns: ['test'],
+        indexPattern: indexPatternMock,
       },
     };
 
@@ -31,6 +33,7 @@ describe('DocViewerTab', () => {
       renderProps: {
         hit: {} as ElasticSearchHit,
         columns: ['test2'],
+        indexPattern: indexPatternMock,
       },
     };
 
