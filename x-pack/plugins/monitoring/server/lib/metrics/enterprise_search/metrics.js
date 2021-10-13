@@ -34,7 +34,7 @@ export const metrics = {
   workplace_search_total_org_sources: new EnterpriseSearchMetric({
     field: 'enterprisesearch.stats.product_usage.workplace_search.total_org_sources',
     metricAgg: 'avg',
-    title: i18n.translate('xpack.monitoring.metrics.entSearch.workplace_search_org_sources', {
+    title: i18n.translate('xpack.monitoring.metrics.entSearch.workplace_search_content_sources', {
       defaultMessage: 'Workpace Search Content Sources',
     }),
     label: i18n.translate('xpack.monitoring.metrics.entSearch.workplace_search_org_sources', {
@@ -71,7 +71,7 @@ export const metrics = {
   enterprise_search_heap_total: new EnterpriseSearchMetric({
     field: 'enterprisesearch.health.jvm.memory_usage.heap_max.bytes',
     metricAgg: 'max',
-    title: i18n.translate('xpack.monitoring.metrics.entSearch.heap_total', {
+    title: i18n.translate('xpack.monitoring.metrics.entSearch.jvm_heap_usage', {
       defaultMessage: 'JVM Heap Usage',
     }),
     label: i18n.translate('xpack.monitoring.metrics.entSearch.heap_total', {
@@ -144,7 +144,7 @@ export const metrics = {
   crawler_workers_total: new EnterpriseSearchMetric({
     field: 'enterprisesearch.health.crawler.workers.pool_size',
     metricAgg: 'max',
-    title: i18n.translate('xpack.monitoring.metrics.entSearch.total_crawler_workers', {
+    title: i18n.translate('xpack.monitoring.metrics.entSearch.crawler_workers', {
       defaultMessage: 'Crawler Workers',
     }),
     label: i18n.translate('xpack.monitoring.metrics.entSearch.total_crawler_workers', {
@@ -230,7 +230,7 @@ export const metrics = {
     field: 'enterprisesearch.stats.http.network.received.bytes',
     metricAgg: 'max',
     derivative: true,
-    title: i18n.translate('xpack.monitoring.metrics.entSearch.http_bytes_received.rate', {
+    title: i18n.translate('xpack.monitoring.metrics.entSearch.http_traffic', {
       defaultMessage: 'HTTP Traffic',
     }),
     label: i18n.translate('xpack.monitoring.metrics.entSearch.http_bytes_received.rate', {
