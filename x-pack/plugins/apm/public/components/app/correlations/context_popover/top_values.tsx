@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TopValuesStats } from '../../../../../common/search_strategies/field_stats_types';
+import { FieldStats } from '../../../../../common/search_strategies/field_stats_types';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 
@@ -29,7 +29,7 @@ export type OnAddFilter = ({
 }) => void;
 
 interface Props {
-  stats: TopValuesStats;
+  stats: FieldStats;
   compressed?: boolean;
   onAddFilter?: OnAddFilter;
   fieldValue?: string | number;
@@ -38,6 +38,8 @@ interface Props {
 export function TopValues({ stats, onAddFilter, fieldValue }: Props) {
   const { topValues, topValuesSampleSize, count, fieldName } = stats;
   const theme = useTheme();
+
+  if (!Array.isArray(topValues) || topValues.length === 0) return null;
 
   const progressBarMax = topValuesSampleSize ?? count;
   return (

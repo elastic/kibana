@@ -7,7 +7,6 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { SearchStrategyParams } from './types';
-import { isPopulatedObject } from '../utils/object_utils';
 
 export interface FieldStatsCommonRequestParams extends SearchStrategyParams {
   samplerShardSize: number;
@@ -36,10 +35,6 @@ export interface TopValuesStats {
   isTopValuesSampled?: boolean;
   topValuesSamplerShardSize?: number;
 }
-
-export const isTopValuesStats = (arg: unknown): arg is TopValuesStats => {
-  return isPopulatedObject(arg, ['topValues', 'topValuesSampleSize']);
-};
 
 export interface NumericFieldStats extends TopValuesStats {
   min: number;

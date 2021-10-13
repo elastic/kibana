@@ -185,7 +185,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               <CorrelationsContextPopover
                 fieldName={fieldName}
                 fieldValue={fieldValue}
-                stats={fieldStats ? fieldStats[fieldName] : undefined}
+                topValueStats={fieldStats ? fieldStats[fieldName] : undefined}
                 onAddFilter={onAddFilter}
               />
             </>
