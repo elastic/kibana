@@ -731,9 +731,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
       />
       {TabContent}
 
-      {!isFullscreen && !currentFieldIsInvalid && temporaryState === 'none' && (
+      {!isFullscreen && !currentFieldIsInvalid && (
         <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
-          {!incompleteInfo && selectedColumn && (
+          {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
             <LabelInput
               value={selectedColumn.label}
               onChange={(value) => {
@@ -756,7 +756,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           )}
 
-          {!isFullscreen && !incompleteInfo && !hideGrouping && (
+          {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
             <BucketNestingEditor
               layer={state.layers[props.layerId]}
               columnId={props.columnId}
