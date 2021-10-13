@@ -8,10 +8,14 @@
 import expect from '@kbn/expect';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { NAME } from '../../../../plugins/lists/common/constants.mock';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-import { binaryToString, deleteAllExceptions } from '../../utils';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import {
+  removeExceptionListServerGeneratedProperties,
+  removeExceptionListItemServerGeneratedProperties,
+  binaryToString,
+  deleteAllExceptions,
+} from '../../utils';
 import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
 
@@ -20,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe.only('export_exception_list_route', () => {
+  describe('export_exception_list_route', () => {
     describe('exporting exception lists', () => {
       afterEach(async () => {
         await deleteAllExceptions(es);
@@ -41,12 +45,41 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getCreateExceptionListItemMinimalSchemaMock())
           .expect(200);
 
-        console.log('-----------------', { body });
         await supertest
-          .post(`${EXCEPTION_LIST_URL}/_export?list_id=${body.list_id}`)
+          .post(
+            `${EXCEPTION_LIST_URL}/_export?id=${body.id}&list_id=${body.list_id}&namespace_type=single`
+          )
           .set('kbn-xsrf', 'true')
-          .expect('Content-Disposition', `attachment; filename="${NAME}"`)
+          .expect('Content-Disposition', `attachment; filename="${body.list_id}"`)
           .expect(200);
+      });
+
+      it('should return 404 if given ids that do not exist', async () => {
+        // create an exception list
+        await supertest
+          .post(EXCEPTION_LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListMinimalSchemaMock())
+          .expect(200);
+
+        // create an exception list item
+        await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListItemMinimalSchemaMock())
+          .expect(200);
+
+        const { body: exportBody } = await supertest
+          .post(
+            `${EXCEPTION_LIST_URL}/_export?id=not_exist&list_id=not_exist&namespace_type=single`
+          )
+          .set('kbn-xsrf', 'true')
+          .expect(400);
+
+        expect(exportBody).to.eql({
+          message: 'exception list with list_id: not_exist does not exist',
+          status_code: 400,
+        });
       });
 
       it('should export a single list with a list id', async () => {
@@ -56,19 +89,30 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getCreateExceptionListMinimalSchemaMock())
           .expect(200);
 
-        await supertest
-          .post(EXCEPTION_LIST_URL)
+        const { body: itemBody } = await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateExceptionListItemMinimalSchemaMock())
           .expect(200);
 
         const { body: exportResult } = await supertest
-          .post(`${EXCEPTION_LIST_URL}/_export?list_id=${body.list_id}`)
+          .post(
+            `${EXCEPTION_LIST_URL}/_export?id=${body.id}&list_id=${body.list_id}&namespace_type=single`
+          )
           .set('kbn-xsrf', 'true')
           .expect(200)
           .parse(binaryToString);
 
-        expect(exportResult.toString()).to.eql('127.0.0.1\n');
+        const exportedItemsToArray = exportResult.toString().split('\n');
+        const list = JSON.parse(exportedItemsToArray[0]);
+        const item = JSON.parse(exportedItemsToArray[1]);
+
+        expect(removeExceptionListServerGeneratedProperties(list)).to.eql(
+          removeExceptionListServerGeneratedProperties(body)
+        );
+        expect(removeExceptionListItemServerGeneratedProperties(item)).to.eql(
+          removeExceptionListItemServerGeneratedProperties(itemBody)
+        );
       });
 
       it('should export two list items with a list id', async () => {
@@ -79,29 +123,32 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         await supertest
-          .post(EXCEPTION_LIST_URL)
+          .post(EXCEPTION_LIST_ITEM_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateExceptionListItemMinimalSchemaMock())
           .expect(200);
 
-        const secondList: CreateExceptionListItemSchema = {
+        const secondExceptionListItem: CreateExceptionListItemSchema = {
           ...getCreateExceptionListItemMinimalSchemaMock(),
-          item_id: 'list-item-2',
+          item_id: 'some-list-item-id-2',
         };
         await supertest
-          .post(EXCEPTION_LIST_URL)
+          .post(EXCEPTION_LIST_ITEM_URL)
           .set('kbn-xsrf', 'true')
-          .send(secondList)
+          .send(secondExceptionListItem)
           .expect(200);
 
         const { body: exportResult } = await supertest
-          .post(`${EXCEPTION_LIST_URL}/_export?list_id=${body.list_id}`)
+          .post(
+            `${EXCEPTION_LIST_URL}/_export?id=${body.id}&list_id=${body.list_id}&namespace_type=single`
+          )
           .set('kbn-xsrf', 'true')
           .expect(200)
           .parse(binaryToString);
+
         const bodyString = exportResult.toString();
-        expect(bodyString.includes('127.0.0.1')).to.be(true);
-        expect(bodyString.includes('127.0.0.2')).to.be(true);
+        expect(bodyString.includes('some-list-item-id-2')).to.be(true);
+        expect(bodyString.includes('some-list-item-id')).to.be(true);
       });
     });
   });

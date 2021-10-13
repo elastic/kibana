@@ -27,7 +27,7 @@ export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      console.log('HERE', { request: request.query });
+
       try {
         const { id, list_id: listId, namespace_type: namespaceType } = request.query;
         const exceptionLists = getExceptionListClient(context);
@@ -39,7 +39,7 @@ export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
 
         if (exceptionList == null) {
           return siemResponse.error({
-            body: `list_id: ${listId} does not exist`,
+            body: `exception list with list_id: ${listId} does not exist`,
             statusCode: 400,
           });
         } else {
@@ -53,6 +53,7 @@ export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
             sortOrder: 'desc',
           });
           const exceptionItems = listItems?.data ?? [];
+
           const { exportData } = getExport([exceptionList, ...exceptionItems]);
           const { exportDetails } = getExportDetails(exceptionItems);
 
