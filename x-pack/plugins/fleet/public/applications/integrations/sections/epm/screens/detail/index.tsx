@@ -537,7 +537,7 @@ export function Detail() {
         Follow the {guideLink} to enable security."
           values={{
             guideLink: (
-              <a href="/app/fleet">
+              <a href={services.http.basePath.prepend('/app/fleet')}>
                 <FormattedMessage
                   id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescriptionGuideLink"
                   defaultMessage="steps in this guide"
