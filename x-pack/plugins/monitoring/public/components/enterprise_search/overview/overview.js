@@ -31,10 +31,10 @@ export class EnterpriseSearchOverview extends PureComponent {
     ];
 
     const networkMetrics = [
-      metrics.enterprise_search_http_connections_current,
-      metrics.enterprise_search_http_connections_rate,
       metrics.enterprise_search_http_traffic,
       metrics.enterprise_search_http_responses,
+      metrics.enterprise_search_http_connections_current,
+      metrics.enterprise_search_http_connections_rate,
     ];
 
     const appSearchUsageMetrics = [metrics.app_search_total_engines, metrics.crawler_workers];

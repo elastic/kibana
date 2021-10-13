@@ -68,15 +68,21 @@ export const metrics = {
     units: '',
   }),
 
-  enterprise_search_heap_used: new EnterpriseSearchMetric({
-    field: 'enterprisesearch.health.jvm.memory_usage.heap_used.bytes',
+  enterprise_search_heap_total: new EnterpriseSearchMetric({
+    field: 'enterprisesearch.health.jvm.memory_usage.heap_max.bytes',
     metricAgg: 'max',
-    label: i18n.translate('xpack.monitoring.metrics.entSearch.heap_used', {
-      defaultMessage: 'Heap Used',
+    title: i18n.translate('xpack.monitoring.metrics.entSearch.heap_total', {
+      defaultMessage: 'JVM Heap Usage',
     }),
-    description: i18n.translate('xpack.monitoring.metrics.entSearch.heap_used.description', {
-      defaultMessage: 'Current amount of JVM Heam memory used by the application.',
+    label: i18n.translate('xpack.monitoring.metrics.entSearch.heap_total', {
+      defaultMessage: 'Total',
     }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.enterpriseSearch.heap_total.description',
+      {
+        defaultMessage: 'Maximum amount of JVM heap memory available to the application.',
+      }
+    ),
     format: LARGE_BYTES,
     units: 'bytes',
   }),
@@ -85,7 +91,7 @@ export const metrics = {
     field: 'enterprisesearch.health.jvm.memory_usage.heap_committed.bytes',
     metricAgg: 'max',
     label: i18n.translate('xpack.monitoring.metrics.entSearch.heap_committed', {
-      defaultMessage: 'Heap Committed',
+      defaultMessage: 'Committed',
     }),
     description: i18n.translate('xpack.monitoring.metrics.entSearch.heap_committed.description', {
       defaultMessage:
@@ -95,18 +101,15 @@ export const metrics = {
     units: 'bytes',
   }),
 
-  enterprise_search_heap_total: new EnterpriseSearchMetric({
-    field: 'enterprisesearch.health.jvm.memory_usage.heap_max.bytes',
+  enterprise_search_heap_used: new EnterpriseSearchMetric({
+    field: 'enterprisesearch.health.jvm.memory_usage.heap_used.bytes',
     metricAgg: 'max',
-    label: i18n.translate('xpack.monitoring.metrics.entSearch.heap_total', {
-      defaultMessage: 'Heap Total',
+    label: i18n.translate('xpack.monitoring.metrics.entSearch.heap_used', {
+      defaultMessage: 'Used',
     }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.enterpriseSearch.heap_total.description',
-      {
-        defaultMessage: 'Maximum amount of JVM heap memory available to the application.',
-      }
-    ),
+    description: i18n.translate('xpack.monitoring.metrics.entSearch.heap_used.description', {
+      defaultMessage: 'Current amount of JVM Heam memory used by the application.',
+    }),
     format: LARGE_BYTES,
     units: 'bytes',
   }),
