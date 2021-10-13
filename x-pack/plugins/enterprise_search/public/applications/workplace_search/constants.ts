@@ -289,7 +289,7 @@ export const SOURCE_OBJ_TYPES = {
     defaultMessage: 'Campaigns',
   }),
   CASES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.cases', {
-    defaultMessage: 'Cases',
+    defaultMessage: 'Cases (including feeds and comments)',
   }),
   USERS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.users', {
     defaultMessage: 'Users',
