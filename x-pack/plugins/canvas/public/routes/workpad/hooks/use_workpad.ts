@@ -33,7 +33,9 @@ export const useWorkpad = (
   const storedWorkpad = useSelector(getWorkpad);
   const [error, setError] = useState<string | Error | undefined>(undefined);
 
-  const [resolveOutcome, setResolveOutcome] = useState<string | undefined>(undefined);
+  const [resolveInfo, setResolveInfo] = useState<
+    { aliasId: string | undefined; outcome: string } | undefined
+  >(undefined);
 
   useEffect(() => {
     (async () => {
@@ -44,7 +46,7 @@ export const useWorkpad = (
           workpad: { assets, ...workpad },
         } = await workpadService.resolve(workpadId);
 
-        setResolveOutcome(outcome);
+        setResolveInfo({ aliasId, outcome });
 
         if (outcome === 'conflict') {
           workpad.aliasId = aliasId;
@@ -61,12 +63,14 @@ export const useWorkpad = (
 
   useEffect(() => {
     (async () => {
-      const aliasId = storedWorkpad?.aliasId;
-      if (resolveOutcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
+      if (!resolveInfo) return;
+
+      const { aliasId, outcome } = resolveInfo;
+      if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
         platformService.redirectLegacyUrl(`#${getRedirectPath(aliasId)}`, getWorkpadLabel());
       }
     })();
-  }, [storedWorkpad, resolveOutcome, getRedirectPath, platformService]);
+  }, [storedWorkpad, resolveInfo, getRedirectPath, platformService]);
 
   return [storedWorkpad.id === workpadId ? storedWorkpad : undefined, error];
 };
