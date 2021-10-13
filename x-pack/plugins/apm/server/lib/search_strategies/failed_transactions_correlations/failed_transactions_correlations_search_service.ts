@@ -197,9 +197,12 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
           `Identified ${fieldsToSample.size} fields to sample for field statistics.`
         );
 
-        const { stats: fieldStats } = await fetchFieldsStats(esClient, params, [
-          ...fieldsToSample,
-        ]);
+        const { stats: fieldStats } = await fetchFieldsStats(
+          esClient,
+          params,
+          [...fieldsToSample],
+          [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }]
+        );
 
         addLogMessage(
           `Retrieved field statistics for ${fieldStats.length} fields out of ${fieldsToSample.size} fields.`

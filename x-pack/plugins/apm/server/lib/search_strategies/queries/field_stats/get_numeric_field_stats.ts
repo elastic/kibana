@@ -24,9 +24,10 @@ const PERCENTILES = [50];
 
 export const getNumericFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
-  fieldName: string
+  fieldName: string,
+  termFilters?: FieldValuePair[]
 ) => {
-  const query = getQueryWithParams({ params });
+  const query = getQueryWithParams({ params, termFilters });
   const size = 0;
 
   const { index, samplerShardSize } = params;
@@ -76,11 +77,13 @@ export const getNumericFieldStatsRequest = (
 export const fetchNumericFieldStats = async (
   esClient: ElasticsearchClient,
   params: FieldStatsCommonRequestParams,
-  field: FieldValuePair
+  field: FieldValuePair,
+  termFilters?: FieldValuePair[]
 ): Promise<NumericFieldStats> => {
   const request: SearchRequest = getNumericFieldStatsRequest(
     params,
-    field.fieldName
+    field.fieldName,
+    termFilters
   );
   const { body } = await esClient.search(request);
 
@@ -94,10 +97,10 @@ export const fetchNumericFieldStats = async (
       };
     };
   };
-  const docCount = aggregations?.sample.sampled_field_stats.doc_count;
+  const docCount = aggregations?.sample.sampled_field_stats?.doc_count ?? 0;
   const fieldStatsResp =
-    aggregations?.sample.sampled_field_stats.actual_stats ?? {};
-  const topValues = aggregations?.sample.sampled_top.buckets ?? [];
+    aggregations?.sample.sampled_field_stats?.actual_stats ?? {};
+  const topValues = aggregations?.sample.sampled_top?.buckets ?? [];
 
   const stats: NumericFieldStats = {
     fieldName: field.fieldName,
@@ -108,7 +111,7 @@ export const fetchNumericFieldStats = async (
     topValues,
     topValuesSampleSize: topValues.reduce(
       (acc: number, curr: TopValueBucket) => acc + curr.doc_count,
-      aggregations.sample.sampled_top.sum_other_doc_count ?? 0
+      aggregations.sample.sampled_top?.sum_other_doc_count ?? 0
     ),
   };
 

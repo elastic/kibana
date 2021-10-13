@@ -52,23 +52,23 @@ export const getExpectedQuery = (aggs: any) => {
 describe('field_stats', () => {
   describe('getNumericFieldStatsRequest', () => {
     it('returns request with filter, percentiles, and top terms aggregations ', () => {
-      const req = getNumericFieldStatsRequest(params, 'url.path', 'url.path_1');
+      const req = getNumericFieldStatsRequest(params, 'url.path');
 
       const expectedAggs = {
         sample: {
           aggs: {
-            'url.path_1_field_stats': {
+            sampled_field_stats: {
               aggs: { actual_stats: { stats: { field: 'url.path' } } },
               filter: { exists: { field: 'url.path' } },
             },
-            'url.path_1_percentiles': {
+            sampled_percentiles: {
               percentiles: {
                 field: 'url.path',
                 keyed: false,
                 percents: [50],
               },
             },
-            'url.path_1_top': {
+            sampled_top: {
               terms: {
                 field: 'url.path',
                 order: { _count: 'desc' },
@@ -84,13 +84,13 @@ describe('field_stats', () => {
   });
   describe('getKeywordFieldStatsRequest', () => {
     it('returns request with top terms sampler aggregation ', () => {
-      const req = getKeywordFieldStatsRequest(params, 'url.path', 'url.path_1');
+      const req = getKeywordFieldStatsRequest(params, 'url.path');
 
       const expectedAggs = {
         sample: {
           sampler: { shard_size: 5000 },
           aggs: {
-            'url.path_1_top': {
+            sampled_top: {
               terms: { field: 'url.path', size: 10, order: { _count: 'desc' } },
             },
           },
@@ -101,16 +101,16 @@ describe('field_stats', () => {
   });
   describe('getBooleanFieldStatsRequest', () => {
     it('returns request with top terms sampler aggregation ', () => {
-      const req = getBooleanFieldStatsRequest(params, 'url.path', 'url.path_1');
+      const req = getBooleanFieldStatsRequest(params, 'url.path');
 
       const expectedAggs = {
         sample: {
           sampler: { shard_size: 5000 },
           aggs: {
-            'url.path_1_value_count': {
+            sampled_value_count: {
               filter: { exists: { field: 'url.path' } },
             },
-            'url.path_1_values': { terms: { field: 'url.path', size: 2 } },
+            sampled_values: { terms: { field: 'url.path', size: 2 } },
           },
         },
       };
@@ -143,7 +143,7 @@ describe('field_stats', () => {
         } => {
           return {
             body: {
-              aggs: {},
+              aggregations: { sample: {} },
             } as unknown as estypes.SearchResponse,
           };
         }

@@ -20,9 +20,10 @@ import {
 
 export const getKeywordFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
-  fieldName: string
+  fieldName: string,
+  termFilters?: FieldValuePair[]
 ): SearchRequest => {
-  const query = getQueryWithParams({ params });
+  const query = getQueryWithParams({ params, termFilters });
 
   const { index, samplerShardSize } = params;
 
@@ -56,23 +57,29 @@ export const getKeywordFieldStatsRequest = (
 export const fetchKeywordFieldStats = async (
   esClient: ElasticsearchClient,
   params: FieldStatsCommonRequestParams,
-  field: FieldValuePair
+  field: FieldValuePair,
+  termFilters?: FieldValuePair[]
 ): Promise<KeywordFieldStats> => {
-  const request = getKeywordFieldStatsRequest(params, field.fieldName);
+  const request = getKeywordFieldStatsRequest(
+    params,
+    field.fieldName,
+    termFilters
+  );
   const { body } = await esClient.search(request);
   const aggregations = body.aggregations as {
     sample: {
       sampled_top: estypes.AggregationsTermsAggregate<TopValueBucket>;
     };
   };
-  const topValues: TopValueBucket[] = aggregations?.sample.sampled_top.buckets;
+  const topValues: TopValueBucket[] =
+    aggregations?.sample.sampled_top?.buckets ?? [];
 
   const stats = {
     fieldName: field.fieldName,
     topValues,
     topValuesSampleSize: topValues.reduce(
       (acc, curr) => acc + curr.doc_count,
-      aggregations.sample.sampled_top.sum_other_doc_count ?? 0
+      aggregations.sample.sampled_top?.sum_other_doc_count ?? 0
     ),
   };
 

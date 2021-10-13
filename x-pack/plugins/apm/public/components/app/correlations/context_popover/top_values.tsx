@@ -14,15 +14,18 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternField } from '../../../../../../../../src/plugins/data/common';
 import { TopValuesStats } from '../../../../../common/search_strategies/field_stats_types';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 
 export type OnAddFilter = ({
-  fieldName: string,
-  fieldValue: string,
-  include: boolean,
+  fieldName,
+  fieldValue,
+  include,
+}: {
+  fieldName: string;
+  fieldValue: string | number;
+  include: boolean;
 }) => void;
 
 interface Props {

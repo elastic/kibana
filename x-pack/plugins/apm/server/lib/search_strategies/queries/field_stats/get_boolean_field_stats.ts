@@ -20,9 +20,10 @@ import { getQueryWithParams } from '../get_query_with_params';
 
 export const getBooleanFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
-  fieldName: string
+  fieldName: string,
+  termFilters?: FieldValuePair[]
 ): SearchRequest => {
-  const query = getQueryWithParams({ params });
+  const query = getQueryWithParams({ params, termFilters });
 
   const { index, samplerShardSize } = params;
 
@@ -56,9 +57,14 @@ export const getBooleanFieldStatsRequest = (
 export const fetchBooleanFieldStats = async (
   esClient: ElasticsearchClient,
   params: FieldStatsCommonRequestParams,
-  field: FieldValuePair
+  field: FieldValuePair,
+  termFilters?: FieldValuePair[]
 ): Promise<BooleanFieldStats> => {
-  const request = getBooleanFieldStatsRequest(params, field.fieldName);
+  const request = getBooleanFieldStatsRequest(
+    params,
+    field.fieldName,
+    termFilters
+  );
   const { body } = await esClient.search(request);
   const aggregations = body.aggregations as {
     sample: {
@@ -73,7 +79,7 @@ export const fetchBooleanFieldStats = async (
   };
 
   const valueBuckets: TopValueBucket[] =
-    aggregations?.sample.sampled_values.buckets;
+    aggregations?.sample.sampled_values?.buckets ?? [];
   valueBuckets.forEach((bucket) => {
     stats[`${bucket.key.toString()}Count`] = bucket.doc_count;
   });

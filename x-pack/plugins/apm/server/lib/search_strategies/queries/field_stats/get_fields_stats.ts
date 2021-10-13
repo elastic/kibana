@@ -24,7 +24,8 @@ import { fetchBooleanFieldStats } from './get_boolean_field_stats';
 export const fetchFieldsStats = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
-  fieldsToSample: string[]
+  fieldsToSample: string[],
+  termFilters?: FieldValuePair[]
 ): Promise<{ stats: FieldStats[]; errors: any[] }> => {
   const stats: FieldStats[] = [];
   const errors: any[] = [];
@@ -49,7 +50,12 @@ export const fetchFieldsStats = async (
         switch (ft) {
           case ES_FIELD_TYPES.KEYWORD:
           case ES_FIELD_TYPES.IP:
-            return fetchKeywordFieldStats(esClient, fieldStatsParams, field);
+            return fetchKeywordFieldStats(
+              esClient,
+              fieldStatsParams,
+              field,
+              termFilters
+            );
             break;
 
           case 'numeric':
@@ -63,11 +69,21 @@ export const fetchFieldsStats = async (
           case ES_FIELD_TYPES.SHORT:
           case ES_FIELD_TYPES.UNSIGNED_LONG:
           case ES_FIELD_TYPES.BYTE:
-            return fetchNumericFieldStats(esClient, fieldStatsParams, field);
+            return fetchNumericFieldStats(
+              esClient,
+              fieldStatsParams,
+              field,
+              termFilters
+            );
 
             break;
           case ES_FIELD_TYPES.BOOLEAN:
-            return fetchBooleanFieldStats(esClient, fieldStatsParams, field);
+            return fetchBooleanFieldStats(
+              esClient,
+              fieldStatsParams,
+              field,
+              termFilters
+            );
 
           default:
             return;
