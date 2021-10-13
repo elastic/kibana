@@ -37,15 +37,26 @@ import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../store/sourcerer/helpers';
+import {
+  mockBrowserFields,
+  mockDocValueFields,
+  mockIndexFields,
+  mockRuntimeMappings,
+} from '../containers/source/mock';
 
 export const mockSourcererState = {
   ...initialSourcererState,
   signalIndexName: `${DEFAULT_SIGNALS_INDEX}-spacename`,
   defaultDataView: {
     ...initialSourcererState.defaultDataView,
+    browserFields: mockBrowserFields,
+    docValueFields: mockDocValueFields,
     id: DEFAULT_DATA_VIEW_ID,
-    title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`].join(','),
+    indexFields: mockIndexFields,
+    loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
+    runtimeMappings: mockRuntimeMappings,
+    title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`].join(','),
   },
 };
 

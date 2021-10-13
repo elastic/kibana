@@ -48,7 +48,6 @@ export const SummaryViewComponent: React.FC<{
   summaryRows: SummaryRow[];
   dataTestSubj?: string;
 }> = ({ summaryColumns, summaryRows, dataTestSubj = 'summary-view', title }) => {
-  console.log('summaryRows', JSON.stringify(summaryRows, null, 2));
   return (
     <>
       {title && (

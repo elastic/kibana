@@ -60,14 +60,13 @@ export interface SelectedDataView {
   selectedPatterns: string[];
 }
 
-const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
+export const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
 // tested via containers/source/index.test.tsx
 export const getSelectedDataViewSelector = () => {
   const getScopeSelector = scopeIdSelector();
   const getDefaultDataViewSelector = defaultDataViewSelector();
   const getKibanaDataViewsSelector = kibanaDataViewsSelector();
   const getSignalIndexNameSelector = signalIndexNameSelector();
-
   return (
     state: State,
     scopeId: SourcererScopeName = SourcererScopeName.default
@@ -87,10 +86,9 @@ export const getSelectedDataViewSelector = () => {
     const patternList = theDataView != null ? theDataView.title.split(',') : [];
 
     const getSelectedPatterns = memoizeOne((patterns: string[]): string[] =>
-      (patterns.some((index) => index === 'logs-*')
+      patterns.some((index) => index === 'logs-*')
         ? [...patterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
         : patterns
-      ).sort()
     );
     const getDataView = memoizeOne(
       (title: string, indexFields: FieldSpec[]) => ({

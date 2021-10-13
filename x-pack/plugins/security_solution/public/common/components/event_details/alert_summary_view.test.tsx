@@ -64,7 +64,7 @@ describe('AlertSummaryView', () => {
       expect(queryByTestId('summary-view-guide')).not.toBeInTheDocument();
     });
   });
-  test.only('Memory event code renders additional summary rows', () => {
+  test('Memory event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {

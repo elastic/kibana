@@ -64,6 +64,7 @@ describe('helpers', () => {
           id: '@timestamp',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           name: '@timestamp',
+          readFromDocValues: true,
           searchable: true,
           type: 'date',
           initialWidth: 190,
