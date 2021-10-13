@@ -12,6 +12,7 @@ import {
   ESSearchResponse,
 } from '../../../../../src/core/types/elasticsearch';
 import { UxUIFilters } from '../../typings/ui_filters';
+import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
 
 interface Options {
   mockResponse?: (
@@ -26,16 +27,7 @@ interface MockSetup {
   internalClient: any;
   config: APMConfig;
   uiFilters: UxUIFilters;
-  indices: {
-    sourcemaps: string;
-    errors: string;
-    onboarding: string;
-    spans: string;
-    transactions: string;
-    metrics: string;
-    apmAgentConfigurationIndex: string;
-    apmCustomLinkIndex: string;
-  };
+  indices: ApmIndicesConfig;
 }
 
 export async function inspectSearchParams(
@@ -59,13 +51,15 @@ export async function inspectSearchParams(
   let response;
   let error;
 
-  const mockApmIndices = {
-    sourcemaps: 'myIndex',
-    errors: 'myIndex',
+  const mockApmIndices: {
+    [Property in keyof APMConfig['indices']]: string;
+  } = {
+    sourcemap: 'myIndex',
+    error: 'myIndex',
     onboarding: 'myIndex',
-    spans: 'myIndex',
-    transactions: 'myIndex',
-    metrics: 'myIndex',
+    span: 'myIndex',
+    transaction: 'myIndex',
+    metric: 'myIndex',
   };
   const mockSetup = {
     apmEventClient: { search: spy } as any,

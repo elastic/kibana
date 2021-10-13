@@ -119,8 +119,8 @@ export function registerTransactionDurationAlertType({
         SearchAggregatedTransactionSetting.never;
 
       const index = searchAggregatedTransactions
-        ? indices.metrics
-        : indices.transactions;
+        ? indices.metric
+        : indices.transaction;
 
       const field = getTransactionDurationFieldForAggregatedTransactions(
         searchAggregatedTransactions

@@ -30,14 +30,14 @@ import {
 
 const APM_INDEX_LABELS = [
   {
-    configurationName: 'sourcemaps',
+    configurationName: 'sourcemap',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.sourcemapIndicesLabel',
       { defaultMessage: 'Sourcemap Indices' }
     ),
   },
   {
-    configurationName: 'errors',
+    configurationName: 'error',
     label: i18n.translate('xpack.apm.settings.apmIndices.errorIndicesLabel', {
       defaultMessage: 'Error Indices',
     }),
@@ -50,20 +50,20 @@ const APM_INDEX_LABELS = [
     ),
   },
   {
-    configurationName: 'spans',
+    configurationName: 'span',
     label: i18n.translate('xpack.apm.settings.apmIndices.spanIndicesLabel', {
       defaultMessage: 'Span Indices',
     }),
   },
   {
-    configurationName: 'transactions',
+    configurationName: 'transaction',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.transactionIndicesLabel',
       { defaultMessage: 'Transaction Indices' }
     ),
   },
   {
-    configurationName: 'metrics',
+    configurationName: 'metric',
     label: i18n.translate('xpack.apm.settings.apmIndices.metricsIndicesLabel', {
       defaultMessage: 'Metrics Indices',
     }),

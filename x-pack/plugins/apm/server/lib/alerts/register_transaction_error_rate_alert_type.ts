@@ -114,8 +114,8 @@ export function registerTransactionErrorRateAlertType({
           SearchAggregatedTransactionSetting.never;
 
         const index = searchAggregatedTransactions
-          ? indices.metrics
-          : indices.transactions;
+          ? indices.metric
+          : indices.transaction;
 
         const searchParams = {
           index,

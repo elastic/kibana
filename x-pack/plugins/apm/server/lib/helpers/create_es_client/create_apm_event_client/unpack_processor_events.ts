@@ -16,12 +16,12 @@ import { APMEventESSearchRequest, APMEventESTermsEnumRequest } from '.';
 import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
 
 const processorEventIndexMap = {
-  [ProcessorEvent.transaction]: 'transactions',
-  [ProcessorEvent.span]: 'spans',
-  [ProcessorEvent.metric]: 'metrics',
-  [ProcessorEvent.error]: 'errors',
+  [ProcessorEvent.transaction]: 'transaction',
+  [ProcessorEvent.span]: 'span',
+  [ProcessorEvent.metric]: 'metric',
+  [ProcessorEvent.error]: 'error',
   // TODO: should have its own config setting
-  [ProcessorEvent.profile]: 'transactions',
+  [ProcessorEvent.profile]: 'transaction',
 } as const;
 
 export function unpackProcessorEvents(

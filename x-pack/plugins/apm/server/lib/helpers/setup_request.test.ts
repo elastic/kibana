@@ -10,17 +10,20 @@ import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 
 jest.mock('../settings/apm_indices/get_apm_indices', () => ({
-  getApmIndices: async () => ({
-    sourcemaps: 'apm-*',
-    errors: 'apm-*',
-    onboarding: 'apm-*',
-    spans: 'apm-*',
-    transactions: 'apm-*',
-    metrics: 'apm-*',
-    apmAgentConfigurationIndex: 'apm-*',
-  }),
+  getApmIndices: async () =>
+    ({
+      sourcemap: 'apm-*',
+      error: 'apm-*',
+      onboarding: 'apm-*',
+      span: 'apm-*',
+      transaction: 'apm-*',
+      metric: 'apm-*',
+      apmAgentConfigurationIndex: 'apm-*',
+    } as PromiseReturnType<typeof getApmIndices>),
 }));
 
 jest.mock('../index_pattern/get_dynamic_index_pattern', () => ({

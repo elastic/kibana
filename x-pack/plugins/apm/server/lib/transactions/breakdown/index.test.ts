@@ -11,14 +11,15 @@ import noDataResponse from './mock_responses/no_data.json';
 import dataResponse from './mock_responses/data.json';
 import { APMConfig } from '../../..';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 
-const mockIndices = {
-  sourcemaps: 'myIndex',
-  errors: 'myIndex',
+const mockIndices: ApmIndicesConfig = {
+  sourcemap: 'myIndex',
+  error: 'myIndex',
   onboarding: 'myIndex',
-  spans: 'myIndex',
-  transactions: 'myIndex',
-  metrics: 'myIndex',
+  span: 'myIndex',
+  transaction: 'myIndex',
+  metric: 'myIndex',
   apmAgentConfigurationIndex: 'myIndex',
   apmCustomLinkIndex: 'myIndex',
 };

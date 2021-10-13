@@ -24,11 +24,11 @@ function getMockSavedObjectsClient(existingIndexPatternTitle: string) {
 
 const setup = {
   indices: {
-    transactions: 'apm-*-transaction-*',
-    spans: 'apm-*-span-*',
-    errors: 'apm-*-error-*',
-    metrics: 'apm-*-metrics-*',
-  },
+    transaction: 'apm-*-transaction-*',
+    span: 'apm-*-span-*',
+    error: 'apm-*-error-*',
+    metric: 'apm-*-metrics-*',
+  } as APMConfig['indices'],
 } as unknown as Setup;
 
 describe('createStaticIndexPattern', () => {

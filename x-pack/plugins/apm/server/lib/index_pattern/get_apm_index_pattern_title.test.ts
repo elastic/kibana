@@ -11,10 +11,10 @@ import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 describe('getApmIndexPatternTitle', () => {
   it('returns an index pattern title by combining existing indicies', () => {
     const title = getApmIndexPatternTitle({
-      transactions: 'apm-*-transaction-*',
-      spans: 'apm-*-span-*',
-      errors: 'apm-*-error-*',
-      metrics: 'apm-*-metrics-*',
+      transaction: 'apm-*-transaction-*',
+      span: 'apm-*-span-*',
+      error: 'apm-*-error-*',
+      metric: 'apm-*-metrics-*',
     } as ApmIndicesConfig);
     expect(title).toBe(
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
@@ -23,10 +23,10 @@ describe('getApmIndexPatternTitle', () => {
 
   it('removes duplicates', () => {
     const title = getApmIndexPatternTitle({
-      transactions: 'apm-*',
-      spans: 'apm-*',
-      errors: 'apm-*',
-      metrics: 'apm-*',
+      transaction: 'apm-*',
+      span: 'apm-*',
+      error: 'apm-*',
+      metric: 'apm-*',
     } as ApmIndicesConfig);
     expect(title).toBe('apm-*');
   });

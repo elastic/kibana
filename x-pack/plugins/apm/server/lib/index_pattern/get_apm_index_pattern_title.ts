@@ -10,9 +10,9 @@ import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 export function getApmIndexPatternTitle(apmIndicesConfig: ApmIndicesConfig) {
   return uniq([
-    apmIndicesConfig.transactions,
-    apmIndicesConfig.spans,
-    apmIndicesConfig.errors,
-    apmIndicesConfig.metrics,
+    apmIndicesConfig.transaction,
+    apmIndicesConfig.span,
+    apmIndicesConfig.error,
+    apmIndicesConfig.metric,
   ]).join(',');
 }

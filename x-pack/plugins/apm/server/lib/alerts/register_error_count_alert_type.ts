@@ -99,7 +99,7 @@ export function registerErrorCountAlertType({
         });
 
         const searchParams = {
-          index: indices.errors,
+          index: indices.error,
           size: 0,
           body: {
             query: {

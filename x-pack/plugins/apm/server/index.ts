@@ -49,11 +49,11 @@ const configSchema = schema.object({
     }),
   }),
   indices: schema.object({
-    transactions: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
-    spans: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
-    errors: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
-    metrics: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
-    sourcemaps: schema.string({ defaultValue: 'apm-*' }),
+    transaction: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
+    span: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
+    error: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
+    metric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
+    sourcemap: schema.string({ defaultValue: 'apm-*' }),
     onboarding: schema.string({ defaultValue: 'apm-*' }),
   }),
 });
@@ -69,12 +69,12 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     deprecate('enabled', '8.0.0'),
     renameFromRoot(
       'apm_oss.transactionIndices',
-      'xpack.apm.indices.transactions'
+      'xpack.apm.indices.transaction'
     ),
-    renameFromRoot('apm_oss.spanIndices', 'xpack.apm.indices.spans'),
-    renameFromRoot('apm_oss.errorIndices', 'xpack.apm.indices.errors'),
-    renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.indices.metrics'),
-    renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.indices.sourcemaps'),
+    renameFromRoot('apm_oss.spanIndices', 'xpack.apm.indices.span'),
+    renameFromRoot('apm_oss.errorIndices', 'xpack.apm.indices.error'),
+    renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.indices.metric'),
+    renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.indices.sourcemap'),
     renameFromRoot('apm_oss.onboardingIndices', 'xpack.apm.indices.onboarding'),
     deprecateFromRoot('apm_oss.enabled', '8.0.0'),
     unusedFromRoot('apm_oss.fleetMode'),
@@ -97,6 +97,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
 };
 
 export type APMConfig = TypeOf<typeof configSchema>;
+export type ApmIndicesConfigName = keyof APMConfig['indices'];
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);

@@ -8,21 +8,23 @@
 import { SavedObjectsType } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
+import { ApmIndicesConfigName } from '..';
+
+const properties: { [Property in ApmIndicesConfigName]: { type: 'keyword' } } =
+  {
+    sourcemap: { type: 'keyword' },
+    error: { type: 'keyword' },
+    onboarding: { type: 'keyword' },
+    span: { type: 'keyword' },
+    transaction: { type: 'keyword' },
+    metric: { type: 'keyword' },
+  };
 
 export const apmIndices: SavedObjectsType = {
   name: 'apm-indices',
   hidden: false,
   namespaceType: 'agnostic',
-  mappings: {
-    properties: {
-      sourcemaps: { type: 'keyword' },
-      errors: { type: 'keyword' },
-      onboarding: { type: 'keyword' },
-      spans: { type: 'keyword' },
-      transactions: { type: 'keyword' },
-      metrics: { type: 'keyword' },
-    },
-  },
+  mappings: { properties },
   management: {
     importableAndExportable: true,
     icon: 'apmApp',

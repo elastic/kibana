@@ -231,9 +231,9 @@ export function onPremInstructions({
           ),
           esHitsCheck: {
             index: [
-              apmConfig.indices.errors,
-              apmConfig.indices.transactions,
-              apmConfig.indices.metrics,
+              apmConfig.indices.error,
+              apmConfig.indices.transaction,
+              apmConfig.indices.metric,
             ],
             query: {
               bool: {

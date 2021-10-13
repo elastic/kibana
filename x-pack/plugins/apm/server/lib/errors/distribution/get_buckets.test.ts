@@ -43,12 +43,12 @@ describe('get buckets', () => {
           }
         ) as APMConfig,
         indices: {
-          sourcemaps: 'apm-*',
-          errors: 'apm-*',
+          sourcemap: 'apm-*',
+          error: 'apm-*',
           onboarding: 'apm-*',
-          spans: 'apm-*',
-          transactions: 'apm-*',
-          metrics: 'apm-*',
+          span: 'apm-*',
+          transaction: 'apm-*',
+          metric: 'apm-*',
           apmAgentConfigurationIndex: '.apm-agent-configuration',
           apmCustomLinkIndex: '.apm-custom-link',
         },

@@ -34,12 +34,12 @@ async function getApmIndicesSavedObject(
 
 export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
   return {
-    sourcemaps: config.indices.sourcemaps,
-    errors: config.indices.errors,
+    sourcemap: config.indices.sourcemap,
+    error: config.indices.error,
     onboarding: config.indices.onboarding,
-    spans: config.indices.spans,
-    transactions: config.indices.transactions,
-    metrics: config.indices.metrics,
+    span: config.indices.span,
+    transaction: config.indices.transaction,
+    metric: config.indices.metric,
     // system indices, not configurable
     apmAgentConfigurationIndex: '.apm-agent-configuration',
     apmCustomLinkIndex: '.apm-custom-link',

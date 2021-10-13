@@ -18,8 +18,8 @@ export const createRuleTypeMocks = () => {
 
   const mockedConfig$ = of({
     indices: {
-      errors: 'apm-*',
-      transactions: 'apm-*',
+      error: 'apm-*',
+      transaction: 'apm-*',
     },
   } as APMConfig);
 

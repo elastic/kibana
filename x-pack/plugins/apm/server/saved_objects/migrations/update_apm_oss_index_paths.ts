@@ -6,12 +6,12 @@
  */
 
 const apmIndexConfigs = [
-  ['sourcemaps', 'apm_oss.sourcemapIndices'],
-  ['errors', 'apm_oss.errorIndices'],
+  ['sourcemap', 'apm_oss.sourcemapIndices'],
+  ['error', 'apm_oss.errorIndices'],
   ['onboarding', 'apm_oss.onboardingIndices'],
-  ['spans', 'apm_oss.spanIndices'],
-  ['transactions', 'apm_oss.transactionIndices'],
-  ['metrics', 'apm_oss.metricsIndices'],
+  ['span', 'apm_oss.spanIndices'],
+  ['transaction', 'apm_oss.transactionIndices'],
+  ['metric', 'apm_oss.metricsIndices'],
 ] as const;
 
 type ApmIndexConfigs = typeof apmIndexConfigs[number][0];
