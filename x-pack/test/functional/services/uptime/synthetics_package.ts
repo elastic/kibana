@@ -154,14 +154,13 @@ export function SyntheticsPackageProvider({ getService }: FtrProviderContext) {
      * @param name
      */
     async getPackagePolicyIdByName(name: string) {
-      const {
-        body: packagePoliciesResponse,
-      }: { body: GetPackagePoliciesResponse } = await supertest
-        .get(INGEST_API_PACKAGE_POLICIES)
-        .set('kbn-xsrf', 'xxx')
-        .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
-        .send()
-        .expect(200);
+      const { body: packagePoliciesResponse }: { body: GetPackagePoliciesResponse } =
+        await supertest
+          .get(INGEST_API_PACKAGE_POLICIES)
+          .set('kbn-xsrf', 'xxx')
+          .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
+          .send()
+          .expect(200);
       const packagePolicyList: GetPackagePoliciesResponse['items'] = packagePoliciesResponse.items;
 
       if (packagePolicyList.length > 1) {

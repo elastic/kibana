@@ -11,6 +11,7 @@ import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 export interface EventLoopDelaysUsageReport {
   daily: Array<{
     processId: number;
+    instanceUuid: string;
     lastUpdatedAt: string;
     fromTimestamp: string;
     min: number;
@@ -35,6 +36,12 @@ export const eventLoopDelaysUsageSchema: MakeSchemaFrom<EventLoopDelaysUsageRepo
         type: 'long',
         _meta: {
           description: 'The process id of the monitored kibana instance.',
+        },
+      },
+      instanceUuid: {
+        type: 'keyword',
+        _meta: {
+          description: 'The uuid of the kibana instance.',
         },
       },
       fromTimestamp: {

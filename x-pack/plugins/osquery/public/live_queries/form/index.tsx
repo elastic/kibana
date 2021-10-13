@@ -143,9 +143,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     return 'incomplete';
   }, [agentSelected, isError, isLoading, isSuccess, form]);
 
-  const resultsStatus = useMemo(() => (queryStatus === 'complete' ? 'incomplete' : 'disabled'), [
-    queryStatus,
-  ]);
+  const resultsStatus = useMemo(
+    () => (queryStatus === 'complete' ? 'incomplete' : 'disabled'),
+    [queryStatus]
+  );
 
   const queryComponentProps = useMemo(
     () => ({

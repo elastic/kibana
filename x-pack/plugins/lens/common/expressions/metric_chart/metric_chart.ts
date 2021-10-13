@@ -50,8 +50,7 @@ export const metricChart: ExpressionFunctionDefinition<
       types: ['string'],
       options: ['reduced', 'full'],
       default: 'full',
-      help:
-        'The display mode of the chart - reduced will only show the metric itself without min size',
+      help: 'The display mode of the chart - reduced will only show the metric itself without min size',
     },
   },
   inputTypes: ['lens_multitable'],

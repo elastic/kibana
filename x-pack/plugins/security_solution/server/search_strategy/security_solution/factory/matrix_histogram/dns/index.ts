@@ -7,10 +7,11 @@
 
 import { buildDnsHistogramQuery } from './query.dns_histogram.dsl';
 import { getDnsParsedData } from './helpers';
+import { MatrixHistogramTypeToAggName } from '../../../../../../common';
 
 export const dnsMatrixHistogramConfig = {
   buildDsl: buildDnsHistogramQuery,
-  aggName: 'aggregations.dns_name_query_count.buckets',
+  aggName: MatrixHistogramTypeToAggName.dns,
   parseKey: 'dns_question_name.buckets',
   parser: getDnsParsedData,
 };

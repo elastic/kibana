@@ -37,7 +37,7 @@ export function ServiceOverviewDependenciesTable({
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/*');
+  } = useApmParams('/services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -59,7 +59,7 @@ export function ServiceOverviewDependenciesTable({
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
+        endpoint: 'GET /internal/apm/services/{serviceName}/dependencies',
         params: {
           path: { serviceName },
           query: { start, end, environment, numBuckets: 20, offset },

@@ -31,7 +31,7 @@ export function createInventoryMetricAlertType(): ObservabilityRuleTypeModel<Inv
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/infrastructure-threshold-alert.html`;
+      return `${docLinks.links.observability.infrastructureThreshold}`;
     },
     alertParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,

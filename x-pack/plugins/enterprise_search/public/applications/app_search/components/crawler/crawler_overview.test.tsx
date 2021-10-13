@@ -28,7 +28,7 @@ import {
   CrawlerPolicies,
   CrawlerRules,
   CrawlerStatus,
-  CrawlRequestFromServer,
+  CrawlEventFromServer,
 } from './types';
 
 const domains: CrawlerDomainFromServer[] = [
@@ -65,9 +65,10 @@ const domains: CrawlerDomainFromServer[] = [
   },
 ];
 
-const crawlRequests: CrawlRequestFromServer[] = [
+const events: CrawlEventFromServer[] = [
   {
     id: 'a',
+    stage: 'crawl',
     status: CrawlerStatus.Canceled,
     created_at: 'Mon, 31 Aug 2020 11:00:00 +0000',
     began_at: 'Mon, 31 Aug 2020 12:00:00 +0000',
@@ -75,6 +76,7 @@ const crawlRequests: CrawlRequestFromServer[] = [
   },
   {
     id: 'b',
+    stage: 'crawl',
     status: CrawlerStatus.Success,
     created_at: 'Mon, 31 Aug 2020 14:00:00 +0000',
     began_at: 'Mon, 31 Aug 2020 15:00:00 +0000',
@@ -86,7 +88,8 @@ describe('CrawlerOverview', () => {
   const mockValues = {
     dataLoading: false,
     domains,
-    crawlRequests,
+    events,
+    mostRecentCrawlRequest: null,
   };
 
   beforeEach(() => {
@@ -118,7 +121,7 @@ describe('CrawlerOverview', () => {
   });
 
   it('hides the domain and crawl request tables when there are no domains, and no crawl requests', () => {
-    setMockValues({ ...mockValues, domains: [], crawlRequests: [] });
+    setMockValues({ ...mockValues, domains: [], events: [] });
 
     const wrapper = shallow(<CrawlerOverview />);
 
@@ -130,7 +133,7 @@ describe('CrawlerOverview', () => {
   });
 
   it('shows the domain and the crawl request tables when there are domains, but no crawl requests', () => {
-    setMockValues({ ...mockValues, crawlRequests: [] });
+    setMockValues({ ...mockValues, events: [] });
 
     const wrapper = shallow(<CrawlerOverview />);
 

@@ -88,12 +88,12 @@ describe('vega_map_view/map_service_settings', () => {
     });
 
     test('getAttributionsForTmsService method should return attributes in a correct form', () => {
-      const tmsService = ({
+      const tmsService = {
         getAttributions: jest.fn(() => [
           { url: 'https://fist_attr.com', label: 'fist_attr' },
           { url: 'https://second_attr.com', label: 'second_attr' },
         ]),
-      } as unknown) as TMSService;
+      } as unknown as TMSService;
 
       expect(getAttributionsForTmsService(tmsService)).toMatchInlineSnapshot(`
         Array [

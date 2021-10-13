@@ -8,13 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect, useState } from 'react';
+import { DataViewBase } from '@kbn/es-query';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../../../../components/autocomplete_field';
-import {
-  esKuery,
-  IIndexPattern,
-  QuerySuggestion,
-} from '../../../../../../../../src/plugins/data/public';
+import { esKuery, QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
 
 type LoadSuggestionsFn = (
   e: string,
@@ -25,7 +22,7 @@ type LoadSuggestionsFn = (
 export type CurryLoadSuggestionsType = (loadSuggestions: LoadSuggestionsFn) => LoadSuggestionsFn;
 
 interface Props {
-  derivedIndexPattern: IIndexPattern;
+  derivedIndexPattern: DataViewBase;
   onSubmit: (query: string) => void;
   onChange?: (query: string) => void;
   value?: string | null;
@@ -99,5 +96,7 @@ export const MetricsExplorerKueryBar = ({
   );
 };
 
-const defaultCurryLoadSuggestions: CurryLoadSuggestionsType = (loadSuggestions) => (...args) =>
-  loadSuggestions(...args);
+const defaultCurryLoadSuggestions: CurryLoadSuggestionsType =
+  (loadSuggestions) =>
+  (...args) =>
+    loadSuggestions(...args);

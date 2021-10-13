@@ -33,7 +33,6 @@ import {
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
   StylePropertyOptions,
-  LayerDescriptor,
   Timeslice,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
@@ -60,6 +59,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
   });
   clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
   clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
+  clusterSourceDescriptor.applyForceRefresh = documentSource.getApplyForceRefresh();
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,
@@ -178,7 +178,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     mapColors: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = VectorLayer.createDescriptor(options, mapColors);
-    layerDescriptor.type = BlendedVectorLayer.type;
+    layerDescriptor.type = LAYER_TYPE.BLENDED_VECTOR;
     return layerDescriptor;
   }
 
@@ -255,7 +255,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return false;
   }
 
-  async cloneDescriptor(): Promise<LayerDescriptor> {
+  async cloneDescriptor(): Promise<VectorLayerDescriptor> {
     const clonedDescriptor = await super.cloneDescriptor();
 
     // Use super getDisplayName instead of instance getDisplayName to avoid getting 'Clustered Clone of Clustered'
@@ -290,16 +290,18 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
-    const searchFilters: VectorSourceRequestMeta = await this._getSearchFilters(
+    const requestMeta: VectorSourceRequestMeta = await this._getVectorSourceRequestMeta(
+      syncContext.isForceRefresh,
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()
     );
     const source = this.getSource();
-    const canSkipFetch = await canSkipSourceUpdate({
+
+    const canSkipSourceFetch = await canSkipSourceUpdate({
       source,
       prevDataRequest: this.getDataRequest(dataRequestId),
-      nextMeta: searchFilters,
+      nextRequestMeta: requestMeta,
       extentAware: source.isFilterByMapBounds(),
       getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
         return this._getUpdateDueToTimesliceFromSourceRequestMeta(source, timeslice);
@@ -308,7 +310,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
 
     let activeSource;
     let activeStyle;
-    if (canSkipFetch) {
+    if (canSkipSourceFetch) {
       // Even when source fetch is skipped, need to call super._syncData to sync StyleMeta and formatters
       if (this._isClustered) {
         activeSource = this._clusterSource;
@@ -320,12 +322,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     } else {
       let isSyncClustered;
       try {
-        syncContext.startLoading(dataRequestId, requestToken, searchFilters);
+        syncContext.startLoading(dataRequestId, requestToken, requestMeta);
         isSyncClustered = !(await this._documentSource.canLoadAllDocuments(
-          searchFilters,
+          requestMeta,
           syncContext.registerCancelCallback.bind(null, requestToken)
         ));
-        syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, searchFilters);
+        syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, requestMeta);
       } catch (error) {
         if (!(error instanceof DataRequestAbortError) || !isSearchSourceAbortError(error)) {
           syncContext.onLoadError(dataRequestId, requestToken, error.message);

@@ -12,9 +12,6 @@ import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('tagcloud.enabled', 'vis_type_tagcloud.enabled'),
-  ],
 };
 
 export const plugin = () => ({

@@ -47,7 +47,8 @@ export interface EncryptedSavedObjectsPluginStart {
  */
 export class EncryptedSavedObjectsPlugin
   implements
-    Plugin<EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart, PluginsSetup> {
+    Plugin<EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart, PluginsSetup>
+{
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
 

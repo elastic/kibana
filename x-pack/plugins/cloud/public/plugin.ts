@@ -12,8 +12,11 @@ import {
   PluginInitializerContext,
   HttpStart,
   IBasePath,
+  ApplicationStart,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
+import { Subscription } from 'rxjs';
+import { mapKeys, snakeCase } from 'lodash';
 import type {
   AuthenticatedUser,
   SecurityPluginSetup,
@@ -58,9 +61,15 @@ export interface CloudSetup {
   isCloudEnabled: boolean;
 }
 
+interface SetupFullstoryDeps extends CloudSetupDependencies {
+  application?: Promise<ApplicationStart>;
+  basePath: IBasePath;
+}
+
 export class CloudPlugin implements Plugin<CloudSetup> {
   private config!: CloudConfigType;
   private isCloudEnabled: boolean;
+  private appSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
@@ -68,7 +77,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
-    this.setupFullstory({ basePath: core.http.basePath, security }).catch((e) =>
+    const application = core.getStartServices().then(([coreStart]) => {
+      return coreStart.application;
+    });
+    this.setupFullstory({ basePath: core.http.basePath, security, application }).catch((e) =>
       // eslint-disable-next-line no-console
       console.debug(`Error setting up FullStory: ${e.toString()}`)
     );
@@ -138,6 +150,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       .catch(() => setLinks(true));
   }
 
+  public stop() {
+    this.appSubscription?.unsubscribe();
+  }
+
   /**
    * Determines if the current user should see links back to Cloud.
    * This isn't a true authorization check, but rather a heuristic to
@@ -164,10 +180,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     return user?.roles.includes('superuser') ?? true;
   }
 
-  private async setupFullstory({
-    basePath,
-    security,
-  }: CloudSetupDependencies & { basePath: IBasePath }) {
+  private async setupFullstory({ basePath, security, application }: SetupFullstoryDeps) {
     const { enabled, org_id: orgId } = this.config.full_story;
     if (!enabled || !orgId) {
       return; // do not load any fullstory code in the browser if not enabled
@@ -198,7 +211,35 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       if (userId) {
         // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
         const hashedId = sha256(userId.toString());
-        fullStory.identify(hashedId);
+        application
+          ?.then(async () => {
+            const appStart = await application;
+            this.appSubscription = appStart.currentAppId$.subscribe((appId) => {
+              // Update the current application every time it changes
+              fullStory.setUserVars({
+                app_id_str: appId ?? 'unknown',
+              });
+            });
+          })
+          .catch((e) => {
+            // eslint-disable-next-line no-console
+            console.error(
+              `[cloud.full_story] Could not retrieve application service due to error: ${e.toString()}`,
+              e
+            );
+          });
+        const kibanaVer = this.initializerContext.env.packageInfo.version;
+        // TODO: use semver instead
+        const parsedVer = (kibanaVer.indexOf('.') > -1 ? kibanaVer.split('.') : []).map((s) =>
+          parseInt(s, 10)
+        );
+        // `str` suffix is required for evn vars, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
+        fullStory.identify(hashedId, {
+          version_str: kibanaVer,
+          version_major_int: parsedVer[0] ?? -1,
+          version_minor_int: parsedVer[1] ?? -1,
+          version_patch_int: parsedVer[2] ?? -1,
+        });
       }
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -208,10 +249,17 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       );
     }
 
+    // Get performance information from the browser (non standard property
+    const memoryInfo = mapKeys(
+      // @ts-expect-error
+      window.performance.memory || {},
+      (_, key) => `${snakeCase(key)}_int`
+    );
     // Record an event that Kibana was opened so we can easily search for sessions that use Kibana
     fullStory.event('Loaded Kibana', {
       // `str` suffix is required, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
       kibana_version_str: this.initializerContext.env.packageInfo.version,
+      ...memoryInfo,
     });
   }
 }

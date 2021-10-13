@@ -27,10 +27,10 @@ const LeftColumn = styled(EuiFlexItem)`
 `;
 
 export const OverviewPage: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
-  const screenshots = useMemo(() => integrationInfo?.screenshots || packageInfo.screenshots || [], [
-    integrationInfo,
-    packageInfo.screenshots,
-  ]);
+  const screenshots = useMemo(
+    () => integrationInfo?.screenshots || packageInfo.screenshots || [],
+    [integrationInfo, packageInfo.screenshots]
+  );
 
   return (
     <EuiFlexGroup alignItems="flexStart">

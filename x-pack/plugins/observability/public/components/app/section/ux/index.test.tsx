@@ -37,13 +37,13 @@ describe('UXSection', () => {
       },
     } as HasDataContextValue);
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-      core: ({
+      core: {
         uiSettings: { get: jest.fn() },
         http: { basePath: { prepend: jest.fn() } },
-      } as unknown) as CoreStart,
+      } as unknown as CoreStart,
       appMountParameters: {} as AppMountParameters,
       config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
-      plugins: ({
+      plugins: {
         data: {
           query: {
             timefilter: {
@@ -56,7 +56,7 @@ describe('UXSection', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPublicPluginsStart,
+      } as unknown as ObservabilityPublicPluginsStart,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       ObservabilityPageTemplate: KibanaPageTemplate,
     }));

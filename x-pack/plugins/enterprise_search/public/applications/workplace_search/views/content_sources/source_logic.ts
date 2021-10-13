@@ -19,11 +19,11 @@ import {
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { AppLogic } from '../../app_logic';
-import { PERSONAL_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
+import { PRIVATE_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
 
 export interface SourceActions {
-  onInitializeSource(contentSource: ContentSourceFullData): ContentSourceFullData;
+  setContentSource(contentSource: ContentSourceFullData): ContentSourceFullData;
   onUpdateSourceName(name: string): string;
   setSearchResults(searchResultsResponse: SearchResultsResponse): SearchResultsResponse;
   initializeFederatedSummary(sourceId: string): { sourceId: string };
@@ -73,7 +73,7 @@ interface SourceUpdatePayload {
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
   path: ['enterprise_search', 'workplace_search', 'source_logic'],
   actions: {
-    onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
+    setContentSource: (contentSource: ContentSourceFullData) => contentSource,
     onUpdateSourceName: (name: string) => name,
     onUpdateSummary: (summary: object[]) => summary,
     setSearchResults: (searchResultsResponse: SearchResultsResponse) => searchResultsResponse,
@@ -93,7 +93,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     contentSource: [
       {} as ContentSourceFullData,
       {
-        onInitializeSource: (_, contentSource) => contentSource,
+        setContentSource: (_, contentSource) => contentSource,
         onUpdateSourceName: (contentSource, name) => ({
           ...contentSource,
           name,
@@ -108,7 +108,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     dataLoading: [
       true,
       {
-        onInitializeSource: () => false,
+        setContentSource: () => false,
         resetSourceState: () => true,
       },
     ],
@@ -158,7 +158,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       try {
         const response = await HttpLogic.values.http.get(route);
-        actions.onInitializeSource(response);
+        actions.setContentSource(response);
         if (response.isFederatedSource) {
           actions.initializeFederatedSummary(sourceId);
         }
@@ -169,7 +169,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         }
       } catch (e) {
         if (e?.response?.status === 404) {
-          const redirect = isOrganization ? SOURCES_PATH : PERSONAL_SOURCES_PATH;
+          const redirect = isOrganization ? SOURCES_PATH : PRIVATE_SOURCES_PATH;
           KibanaLogic.values.navigateToUrl(redirect);
           setErrorMessage(
             i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.notFoundErrorMessage', {

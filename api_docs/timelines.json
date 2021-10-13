@@ -1657,10 +1657,18 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; filters?: ",
-          "Filter",
-          "[] | undefined; title: string; id: string; sort: ",
+          "IFieldSubTypeMultiOptional",
+          " | ",
+          "IFieldSubTypeNestedOptional",
+          " | undefined; type?: string | undefined; })[]; id: string; title: string; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; sort: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1697,7 +1705,9 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
+          "IFieldSubTypeMultiOptional",
+          " | ",
+          "IFieldSubTypeNestedOptional",
           " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; unit?: ((n: number) => React.ReactNode) | undefined; dataProviders: ",
           {
             "pluginId": "timelines",
@@ -1714,15 +1724,15 @@
             "section": "def-common.RowRendererId",
             "text": "RowRendererId"
           },
-          "[]; expandedDetail: ",
+          "[]; expandedDetail: Partial<Record<string, ",
           {
             "pluginId": "timelines",
             "scope": "common",
             "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineExpandedDetail",
-            "text": "TimelineExpandedDetail"
+            "section": "def-common.TimelineExpandedDetailType",
+            "text": "TimelineExpandedDetailType"
           },
-          "; footerText?: React.ReactNode; graphEventId?: string | undefined; kqlQuery: { filterQuery: ",
+          ">>; footerText?: React.ReactNode; graphEventId?: string | undefined; kqlQuery: { filterQuery: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1803,6 +1813,20 @@
           "x-pack/plugins/timelines/public/store/t_grid/selectors"
         ],
         "path": "x-pack/plugins/timelines/public/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.TimelineContext",
+        "type": "Object",
+        "tags": [],
+        "label": "TimelineContext",
+        "description": [],
+        "signature": [
+          "React.Context<{ timelineId: string | null; }>"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/t_grid/shared/index.tsx",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -5550,12 +5574,15 @@
           {
             "parentPluginId": "timelines",
             "id": "def-common.BrowserField.subType",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "subType",
             "description": [],
             "signature": [
-              "{ [key: string]: unknown; nested?: { path: string; } | undefined; } | undefined"
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
+              " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
@@ -6121,7 +6148,9 @@
                         "text": "ColumnHeaderType"
                       },
                       "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-                      "IFieldSubType",
+                      "IFieldSubTypeMultiOptional",
+                      " | ",
+                      "IFieldSubTypeNestedOptional",
                       " | undefined; type?: string | undefined; }"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
@@ -8380,12 +8409,14 @@
           {
             "parentPluginId": "timelines",
             "id": "def-common.IndexField.subType",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "subType",
             "description": [],
             "signature": [
-              "IFieldSubType",
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
@@ -9669,7 +9700,7 @@
             "label": "currentStatus",
             "description": [],
             "signature": [
-              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\" | undefined"
+              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\" | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -10143,7 +10174,13 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
@@ -10400,7 +10437,13 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
@@ -11217,14 +11260,15 @@
             "label": "expandedDetail",
             "description": [],
             "signature": [
+              "Partial<Record<string, ",
               {
                 "pluginId": "timelines",
                 "scope": "common",
                 "docId": "kibTimelinesPluginApi",
-                "section": "def-common.TimelineExpandedDetail",
-                "text": "TimelineExpandedDetail"
+                "section": "def-common.TimelineExpandedDetailType",
+                "text": "TimelineExpandedDetailType"
               },
-              " | undefined"
+              ">> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
             "deprecated": false
@@ -11237,7 +11281,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
@@ -11453,7 +11503,13 @@
             "description": [],
             "signature": [
               "string | ",
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | ",
               "ESRangeQuery",
               " | ",
@@ -12353,7 +12409,7 @@
         "label": "AlertStatus",
         "description": [],
         "signature": [
-          "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+          "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
@@ -12367,7 +12423,7 @@
         "label": "AlertWorkflowStatus",
         "description": [],
         "signature": [
-          "\"open\" | \"closed\" | \"acknowledged\""
+          "\"open\" | \"acknowledged\" | \"closed\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
@@ -12648,7 +12704,9 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
+          "IFieldSubTypeMultiOptional",
+          " | ",
+          "IFieldSubTypeNestedOptional",
           " | undefined; type?: string | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
@@ -13534,7 +13592,13 @@
         "description": [],
         "signature": [
           "(status: ",
-          "STATUS_VALUES",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "server",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-server.STATUS_VALUES",
+            "text": "STATUS_VALUES"
+          },
           ", error: Error) => void"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
@@ -13549,7 +13613,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -13579,7 +13643,13 @@
         "description": [],
         "signature": [
           "(updated: number, conflicts: number, status: ",
-          "STATUS_VALUES",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "server",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-server.STATUS_VALUES",
+            "text": "STATUS_VALUES"
+          },
           ") => void"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
@@ -13614,7 +13684,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -14189,7 +14259,7 @@
           "\nA `TGridCellAction` function accepts `data`, where each row of data is\nrepresented as a `TimelineNonEcsData[]`. For example, `data[0]` would\ncontain a `TimelineNonEcsData[]` with the first row of data.\n\nA `TGridCellAction` returns a function that has access to all the\n`EuiDataGridColumnCellActionProps`, _plus_ access to `data`,\n which enables code like the following example to be written:\n\nExample:\n```\n({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {\n  const value = getMappedNonEcsValue({\n    data: data[rowIndex], // access a specific row's values\n    fieldName: columnId,\n  });\n\n  return (\n    <Component onClick={() => alert(`row ${rowIndex} col ${columnId} has value ${value}`)} iconType=\"heart\">\n      {'Love it'}\n     </Component>\n  );\n};\n```"
         ],
         "signature": [
-          "({ browserFields, data, timelineId, pageSize, }: { browserFields: Readonly<Record<string, Partial<",
+          "({ browserFields, data, globalFilters, pageSize, timelineId, }: { browserFields: Readonly<Record<string, Partial<",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -14205,7 +14275,15 @@
             "section": "def-common.TimelineNonEcsData",
             "text": "TimelineNonEcsData"
           },
-          "[][]; timelineId: string; pageSize: number; }) => (props: ",
+          "[][]; globalFilters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; pageSize: number; timelineId: string; }) => (props: ",
           "EuiDataGridColumnCellActionProps",
           ") => React.ReactNode"
         ],
@@ -14237,7 +14315,15 @@
                 "section": "def-common.TimelineNonEcsData",
                 "text": "TimelineNonEcsData"
               },
-              "[][]; timelineId: string; pageSize: number; }"
+              "[][]; globalFilters?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined; pageSize: number; timelineId: string; }"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
             "deprecated": false
@@ -14281,17 +14367,9 @@
         "label": "TimelineExpandedDetail",
         "description": [],
         "signature": [
-          "{ query?: Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
+          "{ [x: string]: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
           "Ecs",
-          " | undefined; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; graph?: Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
-          "Ecs",
-          " | undefined; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; notes?: Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
-          "Ecs",
-          " | undefined; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; pinned?: Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
-          "Ecs",
-          " | undefined; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; eql?: Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
-          "Ecs",
-          " | undefined; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; }"
+          " | undefined; } | undefined; } | Partial<Record<any, never>> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
@@ -14305,9 +14383,9 @@
         "label": "TimelineExpandedDetailType",
         "description": [],
         "signature": [
-          "Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
+          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
           "Ecs",
-          " | undefined; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; }"
+          " | undefined; } | undefined; } | Partial<Record<any, never>> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
@@ -14321,9 +14399,9 @@
         "label": "TimelineExpandedEventType",
         "description": [],
         "signature": [
-          "Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
+          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
           "Ecs",
-          " | undefined; } | undefined; }"
+          " | undefined; } | undefined; } | Partial<Record<any, never>>"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
@@ -14337,7 +14415,7 @@
         "label": "TimelineExpandedHostType",
         "description": [],
         "signature": [
-          "Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; }"
+          "Partial<Record<any, never>> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
@@ -14351,7 +14429,7 @@
         "label": "TimelineExpandedNetworkType",
         "description": [],
         "signature": [
-          "Record<any, never> | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; }"
+          "Partial<Record<any, never>> | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
@@ -14792,7 +14870,9 @@
         "label": "ToggleDetailPanel",
         "description": [],
         "signature": [
-          "(Record<any, never> & { tabType?: ",
+          "({ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } & { tabType?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -14800,9 +14880,7 @@
             "section": "def-common.TimelineTabs",
             "text": "TimelineTabs"
           },
-          " | undefined; timelineId: string; }) | ({ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
-          "Ecs",
-          " | undefined; } | undefined; } & { tabType?: ",
+          " | undefined; timelineId: string; }) | (Partial<Record<any, never>> & { tabType?: ",
           {
             "pluginId": "timelines",
             "scope": "common",

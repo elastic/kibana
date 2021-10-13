@@ -25,19 +25,22 @@ export class DocLinksService {
     const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
     const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
     const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
+    const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
+    const STACK_GETTING_STARTED = `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-get-started/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
         settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
+        elasticStackGetStarted: `${STACK_GETTING_STARTED}get-started-elastic-stack.html`,
         apm: {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
           customLinks: `${KIBANA_DOCS}custom-links.html`,
-          droppedTransactionSpans: `${APM_DOCS}get-started/${DOC_LINK_VERSION}/transaction-spans.html#dropped-spans`,
-          upgrading: `${APM_DOCS}server/${DOC_LINK_VERSION}/upgrading.html`,
-          metaData: `${APM_DOCS}get-started/${DOC_LINK_VERSION}/metadata.html`,
+          droppedTransactionSpans: `${APM_DOCS}get-started/master/transaction-spans.html#dropped-spans`,
+          upgrading: `${APM_DOCS}server/master/upgrading.html`,
+          metaData: `${APM_DOCS}get-started/master/metadata.html`,
         },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
@@ -159,6 +162,17 @@ export class DocLinksService {
           docsBase: `${ELASTICSEARCH_DOCS}`,
           asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
           dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
+          deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
+          ilm: `${ELASTICSEARCH_DOCS}index-lifecycle-management.html`,
+          ilmForceMerge: `${ELASTICSEARCH_DOCS}ilm-forcemerge.html`,
+          ilmFreeze: `${ELASTICSEARCH_DOCS}ilm-freeze.html`,
+          ilmPhaseTransitions: `${ELASTICSEARCH_DOCS}ilm-index-lifecycle.html#ilm-phase-transitions`,
+          ilmReadOnly: `${ELASTICSEARCH_DOCS}ilm-readonly.html`,
+          ilmRollover: `${ELASTICSEARCH_DOCS}ilm-rollover.html`,
+          ilmSearchableSnapshot: `${ELASTICSEARCH_DOCS}ilm-searchable-snapshot.html`,
+          ilmSetPriority: `${ELASTICSEARCH_DOCS}ilm-set-priority.html`,
+          ilmShrink: `${ELASTICSEARCH_DOCS}ilm-shrink.html`,
+          ilmWaitForSnapshot: `${ELASTICSEARCH_DOCS}ilm-wait-for-snapshot.html`,
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
           indexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#index-modules-settings`,
           indexTemplates: `${ELASTICSEARCH_DOCS}index-templates.html`,
@@ -199,25 +213,30 @@ export class DocLinksService {
           mappingStore: `${ELASTICSEARCH_DOCS}mapping-store.html`,
           mappingTermVector: `${ELASTICSEARCH_DOCS}term-vector.html`,
           mappingTypesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
+          migrateIndexAllocationFilters: `${ELASTICSEARCH_DOCS}migrate-index-allocation-filters.html`,
           nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
-          remoteClusters: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html`,
-          remoteClustersProxy: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#proxy-mode`,
-          remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#remote-cluster-proxy-settings`,
+          releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
+          remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
+          remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
+          remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
           scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
+          setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
+          shardAllocationSettings: `${ELASTICSEARCH_DOCS}modules-cluster.html#cluster-shard-allocation-settings`,
           transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
-          deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
-          setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
-          releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
         },
         siem: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
-          gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
-          privileges: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/sec-requirements.html`,
-          ml: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/machine-learning.html`,
-          ruleChangeLog: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/prebuilt-rules-changelog.html`,
-          detectionsReq: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/detections-permissions-section.html`,
-          networkMap: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/conf-map-ui.html`,
+          guide: `${SECURITY_SOLUTION_DOCS}index.html`,
+          gettingStarted: `${SECURITY_SOLUTION_DOCS}index.html`,
+          privileges: `${SECURITY_SOLUTION_DOCS}sec-requirements.html`,
+          ml: `${SECURITY_SOLUTION_DOCS}machine-learning.html`,
+          ruleChangeLog: `${SECURITY_SOLUTION_DOCS}prebuilt-rules-changelog.html`,
+          detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
+          networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
+          troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
+        },
+        securitySolution: {
+          trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
         },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -241,6 +260,7 @@ export class DocLinksService {
           kibanaSearchSettings: `${KIBANA_DOCS}advanced-options.html#kibana-search-settings`,
           visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
           timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
+          savedObjectsApiList: `${KIBANA_DOCS}saved-objects-api.html#saved-objects-api`,
         },
         ml: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/index.html`,
@@ -270,10 +290,11 @@ export class DocLinksService {
         },
         transforms: {
           guide: `${ELASTICSEARCH_DOCS}transforms.html`,
+          // TODO add valid docs URL
+          alertingRules: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-alerts.html`,
         },
         visualize: {
           guide: `${KIBANA_DOCS}dashboard.html`,
-          timelionDeprecation: `${KIBANA_DOCS}timelion.html`,
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
           lensPanels: `${KIBANA_DOCS}lens.html`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
@@ -282,6 +303,9 @@ export class DocLinksService {
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
+          infrastructureThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/infrastructure-threshold-alert.html`,
+          logsThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/logs-threshold-alert.html`,
+          metricsThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/metrics-threshold-alert.html`,
           monitorStatus: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-status-alert.html`,
           monitorUptime: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
           tlsCertificate: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/tls-certificate-alert.html`,
@@ -293,6 +317,8 @@ export class DocLinksService {
           apmRules: `${KIBANA_DOCS}apm-alerts.html`,
           emailAction: `${KIBANA_DOCS}email-action-type.html`,
           emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
+          emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
+          emailExchangeClientIdConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-tenant-id`,
           generalSettings: `${KIBANA_DOCS}alert-action-settings-kb.html#general-alert-action-settings`,
           indexAction: `${KIBANA_DOCS}index-action-type.html`,
           esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,
@@ -331,11 +357,15 @@ export class DocLinksService {
           elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
           elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}configuring-stack-security.html`,
           indicesPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-indices`,
-          kibanaTLS: `${KIBANA_DOCS}configuring-tls.html`,
+          kibanaTLS: `${ELASTICSEARCH_DOCS}security-basic-setup.html#encrypt-internode-communication`,
           kibanaPrivileges: `${KIBANA_DOCS}kibana-privileges.html`,
           mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
           mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
           runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
+        },
+        spaces: {
+          kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
+          kibanaDisableLegacyUrlAliasesApi: `${KIBANA_DOCS}spaces-api-disable-legacy-url-aliases.html`,
         },
         watcher: {
           jiraAction: `${ELASTICSEARCH_DOCS}actions-jira.html`,
@@ -385,7 +415,7 @@ export class DocLinksService {
         },
         snapshotRestore: {
           guide: `${KIBANA_DOCS}snapshot-repositories.html`,
-          changeIndexSettings: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html#change-index-settings-during-restore`,
+          changeIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
           registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-filesystem-repository`,
@@ -393,6 +423,7 @@ export class DocLinksService {
           registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
           restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
           restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
+          searchableSnapshotSharedCache: `${ELASTICSEARCH_DOCS}searchable-snapshots.html#searchable-snapshots-shared-cache`,
         },
         ingest: {
           append: `${ELASTICSEARCH_DOCS}append-processor.html`,
@@ -410,6 +441,7 @@ export class DocLinksService {
           fail: `${ELASTICSEARCH_DOCS}fail-processor.html`,
           foreach: `${ELASTICSEARCH_DOCS}foreach-processor.html`,
           geoIp: `${ELASTICSEARCH_DOCS}geoip-processor.html`,
+          geoMatch: `${ELASTICSEARCH_DOCS}geo-match-enrich-policy-type.html`,
           grok: `${ELASTICSEARCH_DOCS}grok-processor.html`,
           gsub: `${ELASTICSEARCH_DOCS}gsub-processor.html`,
           htmlString: `${ELASTICSEARCH_DOCS}htmlstrip-processor.html`,
@@ -449,9 +481,24 @@ export class DocLinksService {
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
+          learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
+          apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
+        },
+        clients: {
+          /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
+          goOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/overview.html`,
+          javaIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/index.html`,
+          jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/introduction.html`,
+          netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
+          perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/${DOC_LINK_VERSION}/index.html`,
+          phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/index.html`,
+          pythonGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
+          rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
+          rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/index.html`,
         },
       },
     });
@@ -464,6 +511,7 @@ export interface DocLinksStart {
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
     readonly settings: string;
+    readonly elasticStackGetStarted: string;
     readonly apm: {
       readonly kibanaSettings: string;
       readonly supportedServiceMaps: string;
@@ -598,6 +646,10 @@ export interface DocLinksStart {
       readonly ruleChangeLog: string;
       readonly detectionsReq: string;
       readonly networkMap: string;
+      readonly troubleshootGaps: string;
+    };
+    readonly securitySolution: {
+      readonly trustedApps: string;
     };
     readonly query: {
       readonly eql: string;
@@ -645,6 +697,9 @@ export interface DocLinksStart {
     }>;
     readonly observability: Readonly<{
       guide: string;
+      infrastructureThreshold: string;
+      logsThreshold: string;
+      metricsThreshold: string;
       monitorStatus: string;
       monitorUptime: string;
       tlsCertificate: string;
@@ -665,6 +720,10 @@ export interface DocLinksStart {
       mappingRolesFieldRules: string;
       runAsPrivilege: string;
     }>;
+    readonly spaces: Readonly<{
+      kibanaLegacyUrlAliases: string;
+      kibanaDisableLegacyUrlAliasesApi: string;
+    }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
     readonly plugins: Record<string, string>;
@@ -682,9 +741,23 @@ export interface DocLinksStart {
       datastreamsNamingScheme: string;
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
+      learnMoreBlog: string;
+      apiKeysLearnMore: string;
     }>;
     readonly ecs: {
       readonly guide: string;
+    };
+    readonly clients: {
+      readonly guide: string;
+      readonly goOverview: string;
+      readonly javaIndex: string;
+      readonly jsIntro: string;
+      readonly netGuide: string;
+      readonly perlGuide: string;
+      readonly phpGuide: string;
+      readonly pythonGuide: string;
+      readonly rubyOverview: string;
+      readonly rustGuide: string;
     };
   };
 }

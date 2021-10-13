@@ -49,11 +49,10 @@ export const InspectPanel = ({
   const onRequestClick = () => setSelectedTabId('request');
   const onResponseClick = () => setSelectedTabId('response');
 
-  const editorContent = useMemo(() => (selectedTabId === 'request' ? lastRequest : lastResponse), [
-    lastRequest,
-    lastResponse,
-    selectedTabId,
-  ]);
+  const editorContent = useMemo(
+    () => (selectedTabId === 'request' ? lastRequest : lastResponse),
+    [lastRequest, lastResponse, selectedTabId]
+  );
 
   if (showInspect) {
     return (

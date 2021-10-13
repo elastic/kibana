@@ -264,9 +264,10 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     [onChangeCombo, indexesPatternOptions, renderOption, selectedOptions]
   );
 
-  const filterOptions = useMemo(() => getEventTypeOptions(filterEventType !== 'custom'), [
-    filterEventType,
-  ]);
+  const filterOptions = useMemo(
+    () => getEventTypeOptions(filterEventType !== 'custom'),
+    [filterEventType]
+  );
 
   const filter = useMemo(
     () => (

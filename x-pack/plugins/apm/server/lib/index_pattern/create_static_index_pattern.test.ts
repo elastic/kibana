@@ -5,39 +5,38 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 import { createStaticIndexPattern } from './create_static_index_pattern';
 import { Setup } from '../helpers/setup_request';
-import * as HistoricalAgentData from '../services/get_services/has_historical_agent_data';
+import * as HistoricalAgentData from '../../routes/historical_data/has_historical_agent_data';
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { APMConfig } from '../..';
 
 function getMockSavedObjectsClient(existingIndexPatternTitle: string) {
-  return ({
+  return {
     get: jest.fn(() => ({
       attributes: {
         title: existingIndexPatternTitle,
       },
     })),
     create: jest.fn(),
-  } as unknown) as InternalSavedObjectsClient;
+  } as unknown as InternalSavedObjectsClient;
 }
 
-const setup = ({
+const setup = {
   indices: {
-    'apm_oss.transactionIndices': 'apm-*-transaction-*',
-    'apm_oss.spanIndices': 'apm-*-span-*',
-    'apm_oss.errorIndices': 'apm-*-error-*',
-    'apm_oss.metricsIndices': 'apm-*-metrics-*',
-  },
-} as unknown) as Setup;
+    transaction: 'apm-*-transaction-*',
+    span: 'apm-*-span-*',
+    error: 'apm-*-error-*',
+    metric: 'apm-*-metrics-*',
+  } as APMConfig['indices'],
+} as unknown as Setup;
 
 describe('createStaticIndexPattern', () => {
   it(`should not create index pattern if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
     await createStaticIndexPattern({
       setup,
-      config: { 'xpack.apm.autocreateApmIndexPattern': false } as APMConfig,
+      config: { autocreateApmIndexPattern: false } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -54,7 +53,7 @@ describe('createStaticIndexPattern', () => {
 
     await createStaticIndexPattern({
       setup,
-      config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -71,7 +70,7 @@ describe('createStaticIndexPattern', () => {
 
     await createStaticIndexPattern({
       setup,
-      config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -91,9 +90,7 @@ describe('createStaticIndexPattern', () => {
 
     await createStaticIndexPattern({
       setup,
-      config: {
-        'xpack.apm.autocreateApmIndexPattern': true,
-      } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -120,9 +117,7 @@ describe('createStaticIndexPattern', () => {
 
     await createStaticIndexPattern({
       setup,
-      config: {
-        'xpack.apm.autocreateApmIndexPattern': true,
-      } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });

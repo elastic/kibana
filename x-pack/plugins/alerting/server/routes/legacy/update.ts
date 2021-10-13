@@ -6,12 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
 import { handleDisabledApiKeysError } from './../lib/error_handler';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import {
   AlertNotifyWhenType,
   LEGACY_BASE_ALERT_API_PATH,
@@ -42,7 +44,11 @@ const bodySchema = schema.object({
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
-export const updateAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const updateAlertRoute = (
+  router: AlertingRouter,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) => {
   router.put(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}`,
@@ -57,6 +63,7 @@ export const updateAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
+        trackLegacyRouteUsage('update', usageCounter);
         const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
         const { name, actions, params, schedule, tags, throttle, notifyWhen } = req.body;

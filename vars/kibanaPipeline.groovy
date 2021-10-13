@@ -351,7 +351,7 @@ def runErrorReporter(workspaces) {
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun} ${globs}
+      node scripts/report_failed_tests --no-index-errors ${dryRun} ${globs}
     """,
     "Report failed tests, if necessary"
   )

@@ -36,14 +36,14 @@ describe('transaction chart helper', () => {
     });
 
     it('returns zero for invalid y coordinate', () => {
-      const timeSeries = ([
+      const timeSeries = [
         { data: [{ x: 1 }, { x: 2 }, { x: 3, y: -1 }] },
-      ] as unknown) as Array<TimeSeries<Coordinate>>;
+      ] as unknown as Array<TimeSeries<Coordinate>>;
       expect(getMaxY(timeSeries)).toEqual(0);
     });
 
     it('returns the max y coordinate', () => {
-      const timeSeries = ([
+      const timeSeries = [
         {
           data: [
             { x: 1, y: 10 },
@@ -51,7 +51,7 @@ describe('transaction chart helper', () => {
             { x: 3, y: 1 },
           ],
         },
-      ] as unknown) as Array<TimeSeries<Coordinate>>;
+      ] as unknown as Array<TimeSeries<Coordinate>>;
       expect(getMaxY(timeSeries)).toEqual(10);
     });
   });

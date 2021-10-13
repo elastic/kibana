@@ -11,6 +11,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
 import { ClientOptions } from '@elastic/elasticsearch';
 import { ConfigDeprecation } from '@kbn/config';
+import { ConfigDeprecationContext } from '@kbn/config';
 import { ConfigDeprecationFactory } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
@@ -71,12 +72,11 @@ export interface AppCategory {
 
 // Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "LegacyAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "RewriteAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "RollingFileAppenderConfig" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig | RewriteAppenderConfig | RollingFileAppenderConfig;
+export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | RewriteAppenderConfig | RollingFileAppenderConfig;
 
 // @public @deprecated
 export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
@@ -246,6 +246,8 @@ export const config: {
 };
 
 export { ConfigDeprecation }
+
+export { ConfigDeprecationContext }
 
 export { ConfigDeprecationFactory }
 
@@ -548,6 +550,20 @@ export interface CoreUsageStats {
     // (undocumented)
     'apiCalls.savedObjectsBulkGet.total'?: number;
     // (undocumented)
+    'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkResolve.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkResolve.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkResolve.total'?: number;
+    // (undocumented)
     'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no'?: number;
     // (undocumented)
     'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes'?: number;
@@ -738,8 +754,6 @@ export class CspConfig implements ICspConfig {
     // (undocumented)
     readonly header: string;
     // (undocumented)
-    readonly rules: string[];
-    // (undocumented)
     readonly strict: boolean;
     // (undocumented)
     readonly warnLegacyBrowsers: boolean;
@@ -787,11 +801,8 @@ export interface DeprecationsClient {
     getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
 }
 
-// Warning: (ae-missing-release-tag) "DeprecationsDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface DeprecationsDetails {
-    // (undocumented)
     correctiveActions: {
         api?: {
             path: string;
@@ -799,15 +810,14 @@ export interface DeprecationsDetails {
             body?: {
                 [key: string]: any;
             };
+            omitContextFromBody?: boolean;
         };
         manualSteps: string[];
     };
     deprecationType?: 'config' | 'feature';
-    // (undocumented)
     documentationUrl?: string;
     level: 'warning' | 'critical' | 'fetch_error';
     message: string;
-    // (undocumented)
     requireRestart?: boolean;
     title: string;
 }
@@ -938,6 +948,16 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
+// Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class EventLoopDelaysMonitor {
+    constructor();
+    collect(): IntervalHistogram;
+    reset(): void;
+    stop(): void;
+}
+
 // @public (undocumented)
 export interface ExecutionContextSetup {
     withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
@@ -960,8 +980,6 @@ export type GetAuthState = <T = unknown>(request: KibanaRequest) => {
     state: T;
 };
 
-// Warning: (ae-missing-release-tag) "GetDeprecationsContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface GetDeprecationsContext {
     // (undocumented)
@@ -1115,7 +1133,6 @@ export type IContextProvider<Context extends RequestHandlerContext, ContextName 
 export interface ICspConfig {
     readonly disableEmbedding: boolean;
     readonly header: string;
-    readonly rules: string[];
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
 }
@@ -1169,6 +1186,31 @@ export interface IKibanaSocket {
         rejectUnauthorized?: boolean;
         requestCert?: boolean;
     }): Promise<void>;
+}
+
+// @public
+export interface IntervalHistogram {
+    // (undocumented)
+    exceeds: number;
+    // (undocumented)
+    fromTimestamp: string;
+    // (undocumented)
+    lastUpdatedAt: string;
+    // (undocumented)
+    max: number;
+    // (undocumented)
+    mean: number;
+    // (undocumented)
+    min: number;
+    // (undocumented)
+    percentiles: {
+        50: number;
+        75: number;
+        95: number;
+        99: number;
+    };
+    // (undocumented)
+    stddev: number;
 }
 
 // @public (undocumented)
@@ -1456,7 +1498,9 @@ export interface OpsMetrics {
     collected_at: Date;
     concurrent_connections: OpsServerMetrics['concurrent_connections'];
     os: OpsOsMetrics;
+    // @deprecated
     process: OpsProcessMetrics;
+    processes: OpsProcessMetrics[];
     requests: OpsServerMetrics['requests'];
     response_times: OpsServerMetrics['response_times'];
 }
@@ -1497,6 +1541,7 @@ export interface OpsOsMetrics {
 // @public
 export interface OpsProcessMetrics {
     event_loop_delay: number;
+    event_loop_delay_histogram: IntervalHistogram;
     memory: {
         heap: {
             total_in_bytes: number;
@@ -1648,8 +1693,6 @@ export type RedirectResponseOptions = HttpResponseOptions & {
     };
 };
 
-// Warning: (ae-missing-release-tag) "RegisterDeprecationsConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface RegisterDeprecationsConfig {
     // Warning: (ae-forgotten-export) The symbol "MaybePromise" needs to be exported by the entry point index.d.ts
@@ -1919,6 +1962,20 @@ export interface SavedObjectsBulkGetObject {
 }
 
 // @public (undocumented)
+export interface SavedObjectsBulkResolveObject {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkResolveResponse<T = unknown> {
+    // (undocumented)
+    resolved_objects: Array<SavedObjectsResolveResponse<T>>;
+}
+
+// @public (undocumented)
 export interface SavedObjectsBulkResponse<T = unknown> {
     // (undocumented)
     saved_objects: Array<SavedObject<T>>;
@@ -1973,6 +2030,7 @@ export class SavedObjectsClient {
     constructor(repository: ISavedObjectsRepository);
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkResolve<T = unknown>(objects: SavedObjectsBulkResolveObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResolveResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
@@ -2571,6 +2629,7 @@ export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBase
 export class SavedObjectsRepository {
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkResolve<T = unknown>(objects: SavedObjectsBulkResolveObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResolveResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
@@ -2671,6 +2730,7 @@ export interface SavedObjectsType<Attributes = any> {
 // @public
 export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
     defaultSearchField?: string;
+    displayName?: string;
     getEditUrl?: (savedObject: SavedObject<Attributes>) => string;
     getInAppUrl?: (savedObject: SavedObject<Attributes>) => {
         path: string;
@@ -2683,6 +2743,7 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
     isExportable?: SavedObjectsExportablePredicate<Attributes>;
     onExport?: SavedObjectsExportTransform<Attributes>;
     onImport?: SavedObjectsImportHook<Attributes>;
+    visibleInManagement?: boolean;
 }
 
 // @public
@@ -2974,7 +3035,7 @@ export const validBodyOutput: readonly ["data", "stream"];
 // Warnings were encountered during analysis:
 //
 // src/core/server/elasticsearch/client/types.ts:94:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
-// src/core/server/http/router/response.ts:301:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
+// src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:380:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts

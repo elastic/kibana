@@ -38,7 +38,7 @@ describe('datatable cell renderer', () => {
     },
     { columns: [], sortingColumnId: '', sortingDirection: 'none' },
     DataContext,
-    ({ get: jest.fn() } as unknown) as IUiSettingsClient
+    { get: jest.fn() } as unknown as IUiSettingsClient
   );
 
   it('renders formatted value', () => {
@@ -98,7 +98,7 @@ describe('datatable cell renderer', () => {
         },
         columnConfig,
         DataContext,
-        ({ get: jest.fn() } as unknown) as IUiSettingsClient
+        { get: jest.fn() } as unknown as IUiSettingsClient
       );
     }
     function getColumnConfiguration(): DatatableArgs {

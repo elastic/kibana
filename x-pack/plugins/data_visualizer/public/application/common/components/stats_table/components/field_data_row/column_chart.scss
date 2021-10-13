@@ -1,19 +1,22 @@
 .dataGridChart__histogram {
   width: 100%;
-  height: $euiSizeXL + $euiSizeXXL;
+}
+
+.dataGridChart__column-chart {
+  width: 100%;
 }
 
 .dataGridChart__legend {
   @include euiTextTruncate;
-  @include euiFontSizeXS;
 
   color: $euiColorMediumShade;
   display: block;
   overflow-x: hidden;
-  margin: $euiSizeXS 0 0 0;
   font-style: italic;
   font-weight: normal;
   text-align: left;
+  line-height: 1.1;
+  font-size: #{$euiFontSizeL / 2}; // 10px
 }
 
 .dataGridChart__legend--numeric {
@@ -21,9 +24,7 @@
 }
 
 .dataGridChart__legendBoolean {
-  width: 100%;
-  min-width: $euiButtonMinWidth;
-  td { text-align: center }
+  width: #{$euiSizeXS * 2.5} // 10px
 }
 
 /* Override to align column header to bottom of cell when no chart is available */

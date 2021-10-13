@@ -32,6 +32,12 @@ export const SavedNoteRuntimeType = runtimeTypes.intersection([
 export interface SavedNote extends runtimeTypes.TypeOf<typeof SavedNoteRuntimeType> {}
 
 /**
+ * This type represents a note type stored in a saved object that does not include any fields that reference
+ * other saved objects.
+ */
+export type NoteWithoutExternalRefs = Omit<SavedNote, 'timelineId'>;
+
+/**
  * Note Saved object type with metadata
  */
 

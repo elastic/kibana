@@ -65,7 +65,7 @@ describe('visualize url generator', () => {
       },
     ];
     const location = await locator.getLocation({
-      initialLayers: (initialLayers as unknown) as LayerDescriptor[] & SerializableRecord,
+      initialLayers: initialLayers as unknown as LayerDescriptor[] & SerializableRecord,
     });
 
     expect(location).toMatchObject({

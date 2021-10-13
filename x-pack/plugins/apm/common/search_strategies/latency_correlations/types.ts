@@ -27,10 +27,13 @@ export interface LatencyCorrelationSearchServiceProgress {
   loadedHistograms: number;
 }
 
-export interface LatencyCorrelationsParams extends SearchStrategyClientParams {
+export interface LatencyCorrelationsParams {
   percentileThreshold: number;
   analyzeCorrelations: boolean;
 }
+
+export type LatencyCorrelationsRequestParams = LatencyCorrelationsParams &
+  SearchStrategyClientParams;
 
 export interface LatencyCorrelationsRawResponse extends RawResponseBase {
   log: string[];

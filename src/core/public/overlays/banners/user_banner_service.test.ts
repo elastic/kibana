@@ -72,7 +72,7 @@ describe('OverlayBannersService', () => {
     startService();
     expect(banners.replace).toHaveBeenCalledTimes(0);
 
-    const update$ = (uiSettings.getUpdate$() as any) as Subject<{
+    const update$ = uiSettings.getUpdate$() as any as Subject<{
       key: string;
     }>;
 
@@ -87,7 +87,7 @@ describe('OverlayBannersService', () => {
 
   it('removes banner when changed to empty string', () => {
     startService('remove me!');
-    const update$ = (uiSettings.getUpdate$() as any) as Subject<{
+    const update$ = uiSettings.getUpdate$() as any as Subject<{
       key: string;
     }>;
 
@@ -98,7 +98,7 @@ describe('OverlayBannersService', () => {
 
   it('removes banner when changed to undefined', () => {
     startService('remove me!');
-    const update$ = (uiSettings.getUpdate$() as any) as Subject<{
+    const update$ = uiSettings.getUpdate$() as any as Subject<{
       key: string;
     }>;
 
@@ -111,7 +111,7 @@ describe('OverlayBannersService', () => {
     startService('initial banner!');
     expect(banners.replace).toHaveBeenCalledTimes(1);
 
-    const update$ = (uiSettings.getUpdate$() as any) as Subject<{
+    const update$ = uiSettings.getUpdate$() as any as Subject<{
       key: string;
     }>;
 

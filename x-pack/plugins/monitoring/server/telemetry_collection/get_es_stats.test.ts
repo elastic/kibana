@@ -15,7 +15,7 @@ import {
 
 describe('get_es_stats', () => {
   const searchMock = sinon.stub();
-  const client = ({ search: searchMock } as unknown) as ElasticsearchClient;
+  const client = { search: searchMock } as unknown as ElasticsearchClient;
   const body = {
     hits: {
       hits: [

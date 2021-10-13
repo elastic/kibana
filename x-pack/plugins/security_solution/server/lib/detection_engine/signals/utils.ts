@@ -12,7 +12,7 @@ import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
 import type { estypes } from '@elastic/elasticsearch';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
@@ -62,6 +62,14 @@ import {
 import { WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import {
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SIGNALS_ID,
+  THRESHOLD_RULE_TYPE_ID,
+} from '../../../../common/constants';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -91,9 +99,20 @@ export const hasReadIndexPrivileges = async (args: {
   buildRuleMessage: BuildRuleMessage;
   ruleStatusClient: IRuleExecutionLogClient;
   ruleId: string;
+  ruleName: string;
+  ruleType: string;
   spaceId: string;
 }): Promise<boolean> => {
-  const { privileges, logger, buildRuleMessage, ruleStatusClient, ruleId, spaceId } = args;
+  const {
+    privileges,
+    logger,
+    buildRuleMessage,
+    ruleStatusClient,
+    ruleId,
+    ruleName,
+    ruleType,
+    spaceId,
+  } = args;
 
   const indexNames = Object.keys(privileges.index);
   const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
@@ -111,6 +130,8 @@ export const hasReadIndexPrivileges = async (args: {
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
+      ruleName,
+      ruleType,
       spaceId,
       newStatus: RuleExecutionStatus['partial failure'],
     });
@@ -128,6 +149,8 @@ export const hasReadIndexPrivileges = async (args: {
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
+      ruleName,
+      ruleType,
       spaceId,
       newStatus: RuleExecutionStatus['partial failure'],
     });
@@ -148,6 +171,7 @@ export const hasTimestampFields = async (args: {
   ruleStatusClient: IRuleExecutionLogClient;
   ruleId: string;
   spaceId: string;
+  ruleType: string;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
 }): Promise<boolean> => {
@@ -159,6 +183,7 @@ export const hasTimestampFields = async (args: {
     inputIndices,
     ruleStatusClient,
     ruleId,
+    ruleType,
     spaceId,
     logger,
     buildRuleMessage,
@@ -176,6 +201,8 @@ export const hasTimestampFields = async (args: {
     await ruleStatusClient.logStatusChange({
       message: errorString.trimEnd(),
       ruleId,
+      ruleName,
+      ruleType,
       spaceId,
       newStatus: RuleExecutionStatus['partial failure'],
     });
@@ -202,6 +229,8 @@ export const hasTimestampFields = async (args: {
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
+      ruleName,
+      ruleType,
       spaceId,
       newStatus: RuleExecutionStatus['partial failure'],
     });
@@ -394,9 +423,7 @@ export const wrapSignal = (signal: SignalHit, index: string): WrappedSignalHit =
   return {
     _id: generateSignalId(signal.signal),
     _index: index,
-    _source: {
-      ...signal,
-    },
+    _source: signal,
   };
 };
 
@@ -990,12 +1017,29 @@ export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert =>
   return (event as WrappedRACAlert)?._source?.[ALERT_INSTANCE_ID] != null;
 };
 
+export const racFieldMappings: Record<string, string> = {
+  'signal.rule.id': ALERT_RULE_UUID,
+};
+
 export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
   if (isWrappedRACAlert(event)) {
-    return event._source, field.replace('signal', 'kibana.alert') as T; // TODO: handle special cases
+    const mappedField = racFieldMappings[field] ?? field.replace('signal', 'kibana.alert');
+    return get(event._source, mappedField) as T;
   } else if (isWrappedSignalHit(event)) {
     return get(event._source, field) as T;
   } else if (isWrappedEventHit(event)) {
     return get(event._source, field) as T;
   }
+};
+
+/**
+ * Maps legacy rule types to RAC rule type IDs.
+ */
+export const ruleTypeMappings = {
+  eql: EQL_RULE_TYPE_ID,
+  machine_learning: ML_RULE_TYPE_ID,
+  query: QUERY_RULE_TYPE_ID,
+  saved_query: SIGNALS_ID,
+  threat_match: INDICATOR_RULE_TYPE_ID,
+  threshold: THRESHOLD_RULE_TYPE_ID,
 };

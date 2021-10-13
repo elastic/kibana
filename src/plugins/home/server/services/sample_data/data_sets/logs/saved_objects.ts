@@ -396,20 +396,17 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name:
-          '30326cdb-4ddd-49eb-a4f1-b555caa21d7c:control_30326cdb-4ddd-49eb-a4f1-b555caa21d7c_0_index_pattern',
+        name: '30326cdb-4ddd-49eb-a4f1-b555caa21d7c:control_30326cdb-4ddd-49eb-a4f1-b555caa21d7c_0_index_pattern',
         type: 'index-pattern',
       },
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name:
-          '30326cdb-4ddd-49eb-a4f1-b555caa21d7c:control_30326cdb-4ddd-49eb-a4f1-b555caa21d7c_1_index_pattern',
+        name: '30326cdb-4ddd-49eb-a4f1-b555caa21d7c:control_30326cdb-4ddd-49eb-a4f1-b555caa21d7c_1_index_pattern',
         type: 'index-pattern',
       },
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name:
-          '30326cdb-4ddd-49eb-a4f1-b555caa21d7c:control_30326cdb-4ddd-49eb-a4f1-b555caa21d7c_2_index_pattern',
+        name: '30326cdb-4ddd-49eb-a4f1-b555caa21d7c:control_30326cdb-4ddd-49eb-a4f1-b555caa21d7c_2_index_pattern',
         type: 'index-pattern',
       },
       {
@@ -419,8 +416,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name:
-          'bb94016e-f4a6-49ca-87a9-296a2869d570:indexpattern-datasource-layer-483defd2-775b-4a62-bdef-496c819bb8ed',
+        name: 'bb94016e-f4a6-49ca-87a9-296a2869d570:indexpattern-datasource-layer-483defd2-775b-4a62-bdef-496c819bb8ed',
         type: 'index-pattern',
       },
       {
@@ -430,8 +426,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name:
-          '01d8e435-91c0-484f-a11e-856747050b0a:indexpattern-datasource-layer-f3793bb7-3971-4753-866d-4008e77a9f9a',
+        name: '01d8e435-91c0-484f-a11e-856747050b0a:indexpattern-datasource-layer-f3793bb7-3971-4753-866d-4008e77a9f9a',
         type: 'index-pattern',
       },
       {
@@ -441,8 +436,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name:
-          '8c1456d4-1993-4ba2-b701-04aca02c9fef:indexpattern-datasource-layer-f3793bb7-3971-4753-866d-4008e77a9f9a',
+        name: '8c1456d4-1993-4ba2-b701-04aca02c9fef:indexpattern-datasource-layer-f3793bb7-3971-4753-866d-4008e77a9f9a',
         type: 'index-pattern',
       },
       {
@@ -457,8 +451,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name:
-          '1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b:indexpattern-datasource-layer-c35dc8ee-50d1-4ef7-8b4b-9c21a7e7d3b0',
+        name: '1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b:indexpattern-datasource-layer-c35dc8ee-50d1-4ef7-8b4b-9c21a7e7d3b0',
         type: 'index-pattern',
       },
       {

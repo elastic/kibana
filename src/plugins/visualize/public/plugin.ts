@@ -44,6 +44,7 @@ import type { EmbeddableStart } from '../../embeddable/public';
 import type { DashboardStart } from '../../dashboard/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../usage_collection/public';
+import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 
 import { setVisEditorsRegistry, setUISettings, setUsageCollector } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
@@ -61,6 +62,7 @@ export interface VisualizePluginStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   usageCollection?: UsageCollectionStart;
+  spaces?: SpacesApi;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -81,7 +83,8 @@ export class VisualizePlugin
       void,
       VisualizePluginSetupDependencies,
       VisualizePluginStartDependencies
-    > {
+    >
+{
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
@@ -161,7 +164,7 @@ export class VisualizePlugin
         pluginsStart.data.indexPatterns.clearCache();
         // make sure a default index pattern exists
         // if not, the page will be redirected to management and visualize won't be rendered
-        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
+        await pluginsStart.data.indexPatterns.ensureDefaultDataView();
 
         appMounted();
 
@@ -191,7 +194,6 @@ export class VisualizePlugin
           data: pluginsStart.data,
           localStorage: new Storage(localStorage),
           navigation: pluginsStart.navigation,
-          savedVisualizations: pluginsStart.visualizations.savedVisualizationsLoader,
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
@@ -211,6 +213,7 @@ export class VisualizePlugin
           presentationUtil: pluginsStart.presentationUtil,
           usageCollection: pluginsStart.usageCollection,
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
+          spaces: pluginsStart.spaces,
         };
 
         params.element.classList.add('visAppWrapper');

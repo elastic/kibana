@@ -144,9 +144,7 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
     <StyledEuiComment
       type={(commentType ?? 'regular') as EuiCommentProps['type']}
       username={username}
-      timestamp={FormattedRelativePreferenceDate({
-        value: logEntry.item.data['@timestamp'],
-      })}
+      timestamp={<FormattedRelativePreferenceDate value={logEntry.item.data['@timestamp']} />}
       event={<b>{displayResponseEvent ? responseEventTitle : actionEventTitle}</b>}
       timelineIcon={
         <LogEntryTimelineIcon {...{ avatarSize, iconType, isResponseEvent, isSuccessful }} />

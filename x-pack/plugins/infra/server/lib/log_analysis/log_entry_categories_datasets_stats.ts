@@ -34,16 +34,17 @@ export async function getLatestLogEntriesCategoriesDatasetsStats(
   let afterLatestBatchKey: CompositeDatasetKey | undefined;
 
   while (true) {
-    const latestLogEntryCategoriesDatasetsStatsResponse = await context.infra.mlSystem.mlAnomalySearch(
-      createLatestLogEntryCategoriesDatasetsStatsQuery(
-        jobIds,
-        startTime,
-        endTime,
-        COMPOSITE_AGGREGATION_BATCH_SIZE,
-        afterLatestBatchKey
-      ),
-      jobIds
-    );
+    const latestLogEntryCategoriesDatasetsStatsResponse =
+      await context.infra.mlSystem.mlAnomalySearch(
+        createLatestLogEntryCategoriesDatasetsStatsQuery(
+          jobIds,
+          startTime,
+          endTime,
+          COMPOSITE_AGGREGATION_BATCH_SIZE,
+          afterLatestBatchKey
+        ),
+        jobIds
+      );
 
     const { after_key: afterKey, buckets: latestBatchBuckets = [] } =
       decodeOrThrow(latestLogEntryCategoriesDatasetsStatsResponseRT)(

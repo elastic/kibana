@@ -23,7 +23,7 @@ export function mockHandlerArguments(
 ): [ActionsRequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   const listTypes = jest.fn(() => listTypesRes);
   return [
-    ({
+    {
       actions: {
         listTypes,
         getActionsClient() {
@@ -38,7 +38,7 @@ export function mockHandlerArguments(
           );
         },
       },
-    } as unknown) as ActionsRequestHandlerContext,
+    } as unknown as ActionsRequestHandlerContext,
     req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
@@ -53,5 +53,5 @@ export const mockResponseFactory = (resToMock: Array<MethodKeysOf<KibanaResponse
       });
     }
   });
-  return (factory as unknown) as KibanaResponseFactory;
+  return factory as unknown as KibanaResponseFactory;
 };

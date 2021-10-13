@@ -11,7 +11,7 @@ import { Field, SplitField, Aggregation } from '../../../../../../common/types/f
 import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { isSparseDataJob } from './util/general';
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 
@@ -26,11 +26,7 @@ export class RareJobCreator extends JobCreator {
   private _rareAgg: Aggregation;
   private _freqRareAgg: Aggregation;
 
-  constructor(
-    indexPattern: IndexPattern,
-    savedSearch: SavedSearchSavedObject | null,
-    query: object
-  ) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.RARE;
     this._wizardInitialized$.next(true);

@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-export function getSavedObjectLabel(type: string) {
-  switch (type) {
-    case 'index-pattern':
-    case 'index-patterns':
-    case 'indexPatterns':
-      return 'index patterns';
-    default:
-      return type;
-  }
+import type { SavedObjectManagementTypeInfo } from '../../common/types';
+
+/**
+ * Returns the label to be used for given saved object type.
+ */
+export function getSavedObjectLabel(type: string, types: SavedObjectManagementTypeInfo[]) {
+  const typeInfo = types.find((t) => t.name === type);
+  return typeInfo?.displayName ?? type;
 }

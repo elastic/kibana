@@ -58,7 +58,8 @@ export const isPathValid = ({
 
 const doesPathMatchRegex = ({ os, value }: { os: OperatingSystem; value: string }): boolean => {
   if (os === OperatingSystem.WINDOWS) {
-    const filePathRegex = /^[a-z]:(?:|\\\\[^<>:"'/\\|?*]+\\[^<>:"'/\\|?*]+|%\w+%|)[\\](?:[^<>:"'/\\|?*]+[\\/])*([^<>:"'/\\|?*])+$/i;
+    const filePathRegex =
+      /^[a-z]:(?:|\\\\[^<>:"'/\\|?*]+\\[^<>:"'/\\|?*]+|%\w+%|)[\\](?:[^<>:"'/\\|?*]+[\\/])*([^<>:"'/\\|?*])+$/i;
     return filePathRegex.test(value);
   }
   return /^(\/|(\/[\w\-]+)+|\/[\w\-]+\.[\w]+|(\/[\w-]+)+\/[\w\-]+\.[\w]+)$/i.test(value);

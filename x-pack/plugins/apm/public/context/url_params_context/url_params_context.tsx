@@ -55,14 +55,8 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
   ({ location, children }) => {
     const refUrlParams = useRef(resolveUrlParams(location, {}));
 
-    const {
-      start,
-      end,
-      rangeFrom,
-      rangeTo,
-      exactStart,
-      exactEnd,
-    } = refUrlParams.current;
+    const { start, end, rangeFrom, rangeTo, exactStart, exactEnd } =
+      refUrlParams.current;
 
     // Counter to force an update in useFetcher when the refresh button is clicked.
     const [rangeId, setRangeId] = useState(0);

@@ -162,7 +162,7 @@ Once your services and providers are defined, and you have at least one set of f
 import { pluginServices } from './services';
 import { registry } from './services/kibana';
 
-  public async start(
+  public start(
     coreStart: CoreStart,
     startPlugins: StartDeps
   ): Promise<PresentationUtilPluginStart> {

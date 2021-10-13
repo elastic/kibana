@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { updateAlertRoute } from './update';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
@@ -13,10 +14,15 @@ import { mockHandlerArguments } from './../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 import { AlertNotifyWhenType } from '../../../common';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
+}));
+
+jest.mock('../../lib/track_legacy_route_usage', () => ({
+  trackLegacyRouteUsage: jest.fn(),
 }));
 
 beforeEach(() => {
@@ -233,5 +239,20 @@ describe('updateAlertRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  it('should track every call', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    updateAlertRoute(router, licenseState, mockUsageCounter);
+    const [, handler] = router.put.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
+      'ok',
+    ]);
+    await handler(context, req, res);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('update', mockUsageCounter);
   });
 });

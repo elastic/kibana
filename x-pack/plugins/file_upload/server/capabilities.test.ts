@@ -61,7 +61,7 @@ describe('setupCapabilities', () => {
     const security = securityMock.createStart();
     security.authz.mode.useRbacForRequest.mockReturnValue(true);
     coreSetup.getStartServices.mockResolvedValue([
-      (undefined as unknown) as CoreStart,
+      undefined as unknown as CoreStart,
       { security },
       undefined,
     ]);
@@ -104,7 +104,7 @@ describe('setupCapabilities', () => {
     const mockCheckPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: false });
     security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(mockCheckPrivileges);
     coreSetup.getStartServices.mockResolvedValue([
-      (undefined as unknown) as CoreStart,
+      undefined as unknown as CoreStart,
       { security },
       undefined,
     ]);
@@ -146,7 +146,7 @@ describe('setupCapabilities', () => {
     const mockCheckPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
     security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(mockCheckPrivileges);
     coreSetup.getStartServices.mockResolvedValue([
-      (undefined as unknown) as CoreStart,
+      undefined as unknown as CoreStart,
       { security },
       undefined,
     ]);
@@ -192,7 +192,7 @@ describe('setupCapabilities', () => {
       .mockRejectedValue(new Error('this should not have been called'));
     security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(mockCheckPrivileges);
     coreSetup.getStartServices.mockResolvedValue([
-      (undefined as unknown) as CoreStart,
+      undefined as unknown as CoreStart,
       { security },
       undefined,
     ]);
@@ -229,7 +229,7 @@ describe('setupCapabilities', () => {
     const security = securityMock.createStart();
     security.authz.mode.useRbacForRequest.mockReturnValue(false);
     coreSetup.getStartServices.mockResolvedValue([
-      (undefined as unknown) as CoreStart,
+      undefined as unknown as CoreStart,
       { security },
       undefined,
     ]);

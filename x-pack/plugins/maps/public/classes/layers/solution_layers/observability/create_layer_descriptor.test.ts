@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { emsWorldLayerId } from '../../../../../common';
+import { emsWorldLayerId } from '../../../../../common/constants';
 
 jest.mock('../../../../kibana_services', () => {
   return {
@@ -61,6 +61,7 @@ describe('createLayerDescriptor', () => {
                 type: 'avg',
               },
             ],
+            applyForceRefresh: true,
             term: 'client.geo.country_iso_code',
             type: 'ES_TERM_SOURCE',
             whereQuery: {
@@ -201,6 +202,7 @@ describe('createLayerDescriptor', () => {
         ],
         requestType: 'heatmap',
         resolution: 'MOST_FINE',
+        applyForceRefresh: true,
         type: 'ES_GEO_GRID',
       },
       style: {
@@ -245,6 +247,7 @@ describe('createLayerDescriptor', () => {
         ],
         requestType: 'point',
         resolution: 'MOST_FINE',
+        applyForceRefresh: true,
         type: 'ES_GEO_GRID',
       },
       style: {

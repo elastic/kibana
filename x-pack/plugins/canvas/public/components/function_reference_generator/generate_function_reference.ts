@@ -156,7 +156,7 @@ ${examplesBlock}
 *Returns:* ${output ? wrapInBackTicks(output) : 'Depends on your input and arguments'}\n\n`;
 };
 
-const getArgsTable = (args: { [key: string]: ExpressionFunctionParameter }) => {
+const getArgsTable = (args: { [key: string]: ExpressionFunctionParameter<any> }) => {
   if (!args || Object.keys(args).length === 0) {
     return 'None';
   }

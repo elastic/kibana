@@ -11,9 +11,9 @@ import { SearchSessionStatus } from '../../../../../../src/plugins/data/common';
 import moment from 'moment';
 
 describe('getSessionStatus', () => {
-  const mockConfig = ({
+  const mockConfig = {
     notTouchedInProgressTimeout: moment.duration(1, 'm'),
-  } as unknown) as SearchSessionsConfig;
+  } as unknown as SearchSessionsConfig;
   test("returns an in_progress status if there's nothing inside the session", () => {
     const session: any = {
       idMapping: {},

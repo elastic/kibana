@@ -15,14 +15,10 @@ import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
+import { StringFormat } from '../../../../../../field_formats/common';
 
 interface StringFormatEditorFormatParams {
   transform: string;
-}
-
-interface TransformOptions {
-  kind: string;
-  text: string;
 }
 
 export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFormatParams> {
@@ -40,7 +36,7 @@ export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFo
   };
 
   render() {
-    const { format, formatParams } = this.props;
+    const { formatParams, format } = this.props;
     const { error, samples } = this.state;
 
     return (
@@ -58,9 +54,9 @@ export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFo
           <EuiSelect
             data-test-subj="stringEditorTransform"
             defaultValue={formatParams.transform}
-            options={(format.type.transformOptions || []).map((option: TransformOptions) => {
+            options={((format.type as typeof StringFormat).transformOptions || []).map((option) => {
               return {
-                value: option.kind,
+                value: option.kind as string,
                 text: option.text,
               };
             })}

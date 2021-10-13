@@ -257,12 +257,13 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
 
   const [
     {
+      name: queryName,
       package: { version: integrationPackageVersion } = { version: undefined },
       policy_id: policyId,
     },
   ] = useFormData({
     form,
-    watch: ['package', 'policy_id'],
+    watch: ['name', 'package', 'policy_id'],
   });
 
   const currentPolicy = useMemo(() => {
@@ -280,9 +281,14 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     };
   }, [agentPoliciesById, policyId]);
 
-  const handleNameChange = useCallback((newName: string) => setFieldValue('name', newName), [
-    setFieldValue,
-  ]);
+  const handleNameChange = useCallback(
+    (newName: string) => {
+      if (queryName === '') {
+        setFieldValue('name', newName);
+      }
+    },
+    [setFieldValue, queryName]
+  );
 
   const handleSaveClick = useCallback(() => {
     if (currentPolicy.agentCount) {
@@ -290,13 +296,19 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
       return;
     }
 
-    submit();
-  }, [currentPolicy.agentCount, submit]);
+    submit().catch((error) => {
+      form.reset({ resetValues: false });
+      setErrorToast(error, { title: error.name, toastMessage: error.message });
+    });
+  }, [currentPolicy.agentCount, submit, form, setErrorToast]);
 
   const handleConfirmConfirmationClick = useCallback(() => {
-    submit();
+    submit().catch((error) => {
+      form.reset({ resetValues: false });
+      setErrorToast(error, { title: error.name, toastMessage: error.message });
+    });
     setShowConfirmationModal(false);
-  }, [submit]);
+  }, [submit, form, setErrorToast]);
 
   return (
     <>

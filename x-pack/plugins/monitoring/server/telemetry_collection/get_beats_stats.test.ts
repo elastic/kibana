@@ -25,7 +25,7 @@ describe('Get Beats Stats', () => {
     const start = new Date().toISOString();
     const end = new Date().toISOString();
     const searchMock = sinon.stub();
-    const callCluster = ({ search: searchMock } as unknown) as ElasticsearchClient;
+    const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
 
     beforeEach(() => {
       const getStub = { get: sinon.stub() };

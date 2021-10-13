@@ -75,22 +75,15 @@ interface Props {
 }
 
 export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
-  const [isRuntimeMappingsEditorEnabled, setIsRuntimeMappingsEditorEnabled] = useState<boolean>(
-    false
-  );
-  const [
-    isRuntimeMappingsEditorSwitchModalVisible,
-    setRuntimeMappingsEditorSwitchModalVisible,
-  ] = useState<boolean>(false);
+  const [isRuntimeMappingsEditorEnabled, setIsRuntimeMappingsEditorEnabled] =
+    useState<boolean>(false);
+  const [isRuntimeMappingsEditorSwitchModalVisible, setRuntimeMappingsEditorSwitchModalVisible] =
+    useState<boolean>(false);
 
-  const [
-    isRuntimeMappingsEditorApplyButtonEnabled,
-    setIsRuntimeMappingsEditorApplyButtonEnabled,
-  ] = useState<boolean>(false);
-  const [
-    advancedEditorRuntimeMappingsLastApplied,
-    setAdvancedEditorRuntimeMappingsLastApplied,
-  ] = useState<string>();
+  const [isRuntimeMappingsEditorApplyButtonEnabled, setIsRuntimeMappingsEditorApplyButtonEnabled] =
+    useState<boolean>(false);
+  const [advancedEditorRuntimeMappingsLastApplied, setAdvancedEditorRuntimeMappingsLastApplied] =
+    useState<string>();
 
   const { setFormState } = actions;
   const { jobType, previousRuntimeMapping, runtimeMappings } = state.form;

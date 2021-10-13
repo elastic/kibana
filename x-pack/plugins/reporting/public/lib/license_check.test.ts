@@ -43,7 +43,7 @@ describe('License check', () => {
   });
 
   it('shows and enables links if state is not known', () => {
-    expect(checkLicense(({ state: 'PONYFOO' } as unknown) as LicenseCheck)).toEqual({
+    expect(checkLicense({ state: 'PONYFOO' } as unknown as LicenseCheck)).toEqual({
       enableLinks: true,
       showLinks: true,
       message: '',

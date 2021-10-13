@@ -265,7 +265,7 @@ export const createMockVisData = (): Datatable => {
 };
 
 export const createMockPieParams = (): PieVisParams => {
-  return ({
+  return {
     addLegend: true,
     addTooltip: true,
     isDonut: true,
@@ -326,5 +326,5 @@ export const createMockPieParams = (): PieVisParams => {
         },
       ],
     },
-  } as unknown) as PieVisParams;
+  } as unknown as PieVisParams;
 };

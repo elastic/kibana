@@ -26,12 +26,8 @@ import { SourceLogic } from './source_logic';
 
 describe('SourceLogic', () => {
   const { http } = mockHttpValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    flashSuccessToast,
-    setErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast, setErrorMessage } =
+    mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount, getListeners } = new LogicMounter(SourceLogic);
 
@@ -62,8 +58,8 @@ describe('SourceLogic', () => {
   });
 
   describe('actions', () => {
-    it('onInitializeSource', () => {
-      SourceLogic.actions.onInitializeSource(contentSource);
+    it('setContentSource', () => {
+      SourceLogic.actions.setContentSource(contentSource);
 
       expect(SourceLogic.values.contentSource).toEqual(contentSource);
       expect(SourceLogic.values.dataLoading).toEqual(false);
@@ -71,7 +67,7 @@ describe('SourceLogic', () => {
 
     it('onUpdateSourceName', () => {
       const NAME = 'foo';
-      SourceLogic.actions.onInitializeSource(contentSource);
+      SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.onUpdateSourceName(NAME);
 
       expect(SourceLogic.values.contentSource).toEqual({
@@ -92,7 +88,7 @@ describe('SourceLogic', () => {
     it('setContentFilterValue', () => {
       const VALUE = 'bar';
       SourceLogic.actions.setSearchResults(searchServerResponse);
-      SourceLogic.actions.onInitializeSource(contentSource);
+      SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.setContentFilterValue(VALUE);
 
       expect(SourceLogic.values.contentMeta).toEqual({
@@ -131,7 +127,7 @@ describe('SourceLogic', () => {
   describe('listeners', () => {
     describe('initializeSource', () => {
       it('calls API and sets values (org)', async () => {
-        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'onInitializeSource');
+        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
         const promise = Promise.resolve(contentSource);
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
@@ -144,7 +140,7 @@ describe('SourceLogic', () => {
       it('calls API and sets values (account)', async () => {
         AppLogic.values.isOrganization = false;
 
-        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'onInitializeSource');
+        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
         const promise = Promise.resolve(contentSource);
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
@@ -202,7 +198,7 @@ describe('SourceLogic', () => {
             AppLogic.values.isOrganization = false;
             http.get.mockReturnValue(mock404);
 
-            SourceLogic.actions.initializeSource('404ing_personal_source');
+            SourceLogic.actions.initializeSource('404ing_private_source');
             await expectedAsyncError(mock404);
 
             expect(navigateToUrl).toHaveBeenCalledWith('/p/sources');

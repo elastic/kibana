@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from 'src/core/types';
-import { SavedObjectsNamespaceType } from 'src/core/public';
+import type { SavedObject } from 'src/core/types';
+import type { SavedObjectsNamespaceType } from 'src/core/public';
 
 /**
  * The metadata injected into a {@link SavedObject | saved object} when returning
@@ -51,4 +51,11 @@ export interface SavedObjectInvalidRelation {
 export interface SavedObjectGetRelationshipsResponse {
   relations: SavedObjectRelation[];
   invalidRelations: SavedObjectInvalidRelation[];
+}
+
+export interface SavedObjectManagementTypeInfo {
+  name: string;
+  namespaceType: SavedObjectsNamespaceType;
+  hidden: boolean;
+  displayName: string;
 }

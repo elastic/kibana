@@ -59,30 +59,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show correct chart', async function () {
       const expectedChartValues = [
-        37,
-        202,
-        740,
-        1437,
-        1371,
-        751,
-        188,
-        31,
-        42,
-        202,
-        683,
-        1361,
-        1415,
-        707,
-        177,
-        27,
-        32,
-        175,
-        707,
-        1408,
-        1355,
-        726,
-        201,
-        29,
+        37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683, 1361, 1415, 707, 177, 27, 32, 175,
+        707, 1408, 1355, 726, 201, 29,
       ];
 
       // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?

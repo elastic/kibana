@@ -28,8 +28,7 @@ describe('ToastNotificationText', () => {
   test('should render the text within a modal', () => {
     const props = {
       overlays: {} as CoreStart['overlays'],
-      text:
-        'a text message that is longer than 140 characters. a text message that is longer than 140 characters. a text message that is longer than 140 characters. ',
+      text: 'a text message that is longer than 140 characters. a text message that is longer than 140 characters. a text message that is longer than 140 characters. ',
     };
     const { container } = render(<ToastNotificationText {...props} />);
     expect(container.textContent).toBe(

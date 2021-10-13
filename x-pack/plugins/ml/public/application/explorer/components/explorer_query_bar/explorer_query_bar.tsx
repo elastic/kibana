@@ -10,7 +10,7 @@ import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { Query, QueryStringInput } from '../../../../../../../../src/plugins/data/public';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
 import { explorerService } from '../../explorer_dashboard_service';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
@@ -24,7 +24,7 @@ export function getKqlQueryValues({
 }: {
   inputString: string | { [key: string]: any };
   queryLanguage: string;
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
 }): { clearSettings: boolean; settings: any } {
   let influencersFilterQuery: InfluencersFilterQuery = {};
   const filteredFields: string[] = [];
@@ -89,7 +89,7 @@ function getInitSearchInputState({
 interface ExplorerQueryBarProps {
   filterActive: boolean;
   filterPlaceHolder: string;
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   queryString?: string;
   updateLanguage: (language: string) => void;
 }

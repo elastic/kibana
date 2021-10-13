@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { IKibanaSearchRequest } from '../../../../../src/plugins/data/common';
 
 import type { LatencyCorrelationsParams } from '../../../../plugins/apm/common/search_strategies/latency_correlations/types';
+import type { SearchStrategyClientParams } from '../../../../plugins/apm/common/search_strategies/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -21,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const getRequestBody = () => {
-    const request: IKibanaSearchRequest<LatencyCorrelationsParams> = {
+    const request: IKibanaSearchRequest<LatencyCorrelationsParams & SearchStrategyClientParams> = {
       params: {
         environment: 'ENVIRONMENT_ALL',
         start: '2020',
@@ -138,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Correlations latency_ml with data and opbeans-node args',
+    'correlations latency with data and opbeans-node args',
     { config: 'trial', archives: ['8.0.0'] },
     () => {
       // putting this into a single `it` because the responses depend on each other

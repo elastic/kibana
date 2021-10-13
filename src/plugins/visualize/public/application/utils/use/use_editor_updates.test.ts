@@ -55,14 +55,14 @@ describe('useEditorUpdates', () => {
 
   beforeEach(() => {
     unsubscribeStateUpdatesMock = jest.fn();
-    appState = ({
+    appState = {
       getState: jest.fn(() => visualizeAppStateStub),
       subscribe: jest.fn(() => unsubscribeStateUpdatesMock),
       transitions: {
         set: jest.fn(),
       },
-    } as unknown) as VisualizeAppStateContainer;
-    savedVisInstance = ({
+    } as unknown as VisualizeAppStateContainer;
+    savedVisInstance = {
       vis: {
         uiState: {
           on: jest.fn(),
@@ -80,7 +80,7 @@ describe('useEditorUpdates', () => {
         reload: jest.fn(),
       },
       savedVis: {},
-    } as unknown) as SavedVisInstance;
+    } as unknown as SavedVisInstance;
     visEditorController = {
       render: jest.fn(),
       destroy: jest.fn(),

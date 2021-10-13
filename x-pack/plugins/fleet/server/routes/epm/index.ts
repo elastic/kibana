@@ -18,7 +18,9 @@ import {
   DeletePackageRequestSchema,
   BulkUpgradePackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
+  UpdatePackageRequestSchema,
 } from '../../types';
+import { enforceSuperUser } from '../security';
 
 import {
   getCategoriesHandler,
@@ -31,6 +33,7 @@ import {
   deletePackageHandler,
   bulkInstallPackagesFromRegistryHandler,
   getStatsHandler,
+  updatePackageHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -58,7 +61,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getLimitedListHandler
   );
@@ -67,7 +70,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: EPM_API_ROUTES.STATS_PATTERN,
       validate: GetStatsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getStatsHandler
   );
@@ -90,13 +93,22 @@ export const registerRoutes = (router: IRouter) => {
     getInfoHandler
   );
 
+  router.put(
+    {
+      path: EPM_API_ROUTES.INFO_PATTERN,
+      validate: UpdatePackageRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    enforceSuperUser(updatePackageHandler)
+  );
+
   router.post(
     {
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
       validate: InstallPackageFromRegistryRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    installPackageFromRegistryHandler
+    enforceSuperUser(installPackageFromRegistryHandler)
   );
 
   router.post(
@@ -105,7 +117,7 @@ export const registerRoutes = (router: IRouter) => {
       validate: BulkUpgradePackagesFromRegistryRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    bulkInstallPackagesFromRegistryHandler
+    enforceSuperUser(bulkInstallPackagesFromRegistryHandler)
   );
 
   router.post(
@@ -121,7 +133,7 @@ export const registerRoutes = (router: IRouter) => {
         },
       },
     },
-    installPackageByUploadHandler
+    enforceSuperUser(installPackageByUploadHandler)
   );
 
   router.delete(
@@ -130,6 +142,6 @@ export const registerRoutes = (router: IRouter) => {
       validate: DeletePackageRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    deletePackageHandler
+    enforceSuperUser(deletePackageHandler)
   );
 };

@@ -18,7 +18,6 @@ import {
   getReportingUsageCollector,
   registerReportingUsageCollector,
 } from './reporting_usage_collector';
-import { ReportingUsageType, SearchResponse } from './types';
 
 const exportTypesRegistry = getExportTypesRegistry();
 
@@ -38,22 +37,24 @@ function getMockUsageCollection() {
   };
 }
 
-const getLicenseMock = (licenseType = 'platinum') => () => {
-  return Promise.resolve({
-    isAvailable: () => true,
-    license: { getType: () => licenseType },
-  } as FeaturesAvailability);
-};
+const getLicenseMock =
+  (licenseType = 'platinum') =>
+  () => {
+    return Promise.resolve({
+      isAvailable: () => true,
+      license: { getType: () => licenseType },
+    } as FeaturesAvailability);
+  };
 
 function getPluginsMock(
   { license, usageCollection = getMockUsageCollection() } = { license: 'platinum' }
 ) {
-  return ({
+  return {
     licensing: { license$: Rx.of(getLicenseMock(license)) },
     usageCollection,
     elasticsearch: {},
     security: {},
-  } as unknown) as ReportingSetupDeps & { usageCollection: UsageCollectionSetup };
+  } as unknown as ReportingSetupDeps & { usageCollection: UsageCollectionSetup };
 }
 
 const getResponseMock = (base = {}) => base;
@@ -188,7 +189,7 @@ describe('data modeling', () => {
   beforeAll(async () => {
     mockCore = await createMockReportingCore(createMockConfigSchema());
   });
-  test('with normal looking usage data', async () => {
+  test('with usage data from the reporting/archived_reports es archive', async () => {
     const plugins = getPluginsMock();
     const collector = getReportingUsageCollector(
       mockCore,
@@ -200,39 +201,37 @@ describe('data modeling', () => {
       }
     );
     collectorFetchContext = getMockFetchClients(
-      getResponseMock(
-      {
+      getResponseMock({
         aggregations: {
           ranges: {
+            meta: {},
             buckets: {
               all: {
-                doc_count: 12,
-                jobTypes: { buckets: [ { doc_count: 9, key: 'printable_pdf' }, { doc_count: 3, key: 'PNG' }, ], },
-                layoutTypes: { doc_count: 9, pdf: { buckets: [{ doc_count: 9, key: 'preserve_layout' }] }, },
-                objectTypes: { doc_count: 9, pdf: { buckets: [ { doc_count: 6, key: 'canvas workpad' }, { doc_count: 3, key: 'visualization' }, ], }, },
-                statusByApp: { buckets: [ { doc_count: 10, jobTypes: { buckets: [ { appNames: { buckets: [ { doc_count: 6, key: 'canvas workpad' }, { doc_count: 3, key: 'visualization' }, ], }, doc_count: 9, key: 'printable_pdf', }, { appNames: { buckets: [{ doc_count: 1, key: 'visualization' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed', }, { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'failed', }, ], },
-                statusTypes: { buckets: [ { doc_count: 10, key: 'completed' }, { doc_count: 1, key: 'completed_with_warnings' }, { doc_count: 1, key: 'failed' }, ], },
+                doc_count: 11,
+                layoutTypes: { doc_count: 6, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'preserve_layout', doc_count: 5 }, { key: 'print', doc_count: 1 }, ] } },
+                statusByApp: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'completed', doc_count: 6, jobTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'csv_searchsource', doc_count: 3, appNames: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'search', doc_count: 3 }, ] } }, { key: 'printable_pdf', doc_count: 2, appNames: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'dashboard', doc_count: 2 }, ] } }, { key: 'csv', doc_count: 1, appNames: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'search', doc_count: 1 }, ] } }, ] } }, { key: 'completed_with_warnings', doc_count: 2, jobTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'PNG', doc_count: 1, appNames: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'dashboard', doc_count: 1 }, ] } }, { key: 'printable_pdf', doc_count: 1, appNames: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'dashboard', doc_count: 1 }, ] } }, ] } }, { key: 'failed', doc_count: 2, jobTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'dashboard', doc_count: 2 }, ] } }, ] } }, { key: 'pending', doc_count: 1, jobTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'printable_pdf', doc_count: 1, appNames: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'dashboard', doc_count: 1 }, ] } }, ] } }, ] },
+                objectTypes: { doc_count: 6, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'dashboard', doc_count: 6 }, ] } },
+                statusTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'completed', doc_count: 6 }, { key: 'completed_with_warnings', doc_count: 2 }, { key: 'failed', doc_count: 2 }, { key: 'pending', doc_count: 1 }, ] },
+                jobTypes: { meta: {}, doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'printable_pdf', doc_count: 6, isDeprecated: { meta: {}, doc_count: 0 }, sizeMax: { value: 1713303.0 }, sizeAvg: { value: 957215.0 }, sizeMin: { value: 43226.0 } }, { key: 'csv_searchsource', doc_count: 3, isDeprecated: { meta: {}, doc_count: 0 }, sizeMax: { value: 7557.0 }, sizeAvg: { value: 3684.6666666666665 }, sizeMin: { value: 204.0 } }, { key: 'PNG', doc_count: 1, isDeprecated: { meta: {}, doc_count: 0 }, sizeMax: { value: 37748.0 }, sizeAvg: { value: 37748.0 }, sizeMin: { value: 37748.0 } }, { key: 'csv', doc_count: 1, isDeprecated: { meta: {}, doc_count: 0 }, sizeMax: { value: 231.0 }, sizeAvg: { value: 231.0 }, sizeMin: { value: 231.0 } }, ] },
+                sizeMax: { value: 1713303.0 },
+                sizeMin: { value: 204.0 },
+                sizeAvg: { value: 365084.75 },
               },
               last7Days: {
-                doc_count: 1,
-                jobTypes: { buckets: [{ doc_count: 1, key: 'PNG' }] },
-                layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
-                objectTypes: { doc_count: 0, pdf: { buckets: [] } },
-                statusByApp: { buckets: [ { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, ], },
-                statusTypes: { buckets: [{ doc_count: 1, key: 'completed_with_warnings' }] },
-              },
-              lastDay: {
-                doc_count: 1,
-                jobTypes: { buckets: [{ doc_count: 1, key: 'PNG' }] },
-                layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
-                objectTypes: { doc_count: 0, pdf: { buckets: [] } },
-                statusByApp: { buckets: [ { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, ], },
-                statusTypes: { buckets: [{ doc_count: 1, key: 'completed_with_warnings' }] },
+                doc_count: 0,
+                layoutTypes: { doc_count: 0, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] } },
+                statusByApp: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+                objectTypes: { doc_count: 0, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] } },
+                statusTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+                jobTypes: { meta: {}, doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+                sizeMax: { value: null },
+                sizeMin: { value: null },
+                sizeAvg: { value: null },
               },
             },
-          },
+          }, // prettier-ignore
         },
-      } as SearchResponse) // prettier-ignore
+      })
     );
     const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
@@ -256,121 +255,21 @@ describe('data modeling', () => {
             buckets: {
               all: {
                 doc_count: 9,
-                layoutTypes: {
-                  doc_count: 0,
-                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-                },
-                statusByApp: {
-                  doc_count_error_upper_bound: 0,
-                  sum_other_doc_count: 0,
-                  buckets: [
-                    {
-                      key: 'completed',
-                      doc_count: 9,
-                      jobTypes: {
-                        doc_count_error_upper_bound: 0,
-                        sum_other_doc_count: 0,
-                        buckets: [
-                          {
-                            key: 'csv_searchsource',
-                            doc_count: 5,
-                            appNames: {
-                              doc_count_error_upper_bound: 0,
-                              sum_other_doc_count: 0,
-                              buckets: [{ key: 'search', doc_count: 5 }],
-                            },
-                          },
-                          {
-                            key: 'csv',
-                            doc_count: 4,
-                            appNames: {
-                              doc_count_error_upper_bound: 0,
-                              sum_other_doc_count: 0,
-                              buckets: [{ key: 'search', doc_count: 4 }],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-                objectTypes: {
-                  doc_count: 0,
-                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-                },
-                statusTypes: {
-                  doc_count_error_upper_bound: 0,
-                  sum_other_doc_count: 0,
-                  buckets: [{ key: 'completed', doc_count: 9 }],
-                },
-                jobTypes: {
-                  doc_count_error_upper_bound: 0,
-                  sum_other_doc_count: 0,
-                  buckets: [
-                    { key: 'csv_searchsource', doc_count: 5, isDeprecated: { doc_count: 0 } },
-                    { key: 'csv', doc_count: 4, isDeprecated: { doc_count: 4 } },
-                  ],
-                },
+                layoutTypes: { doc_count: 0, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] } },
+                statusByApp: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'completed', doc_count: 9, jobTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'csv_searchsource', doc_count: 5, appNames: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'search', doc_count: 5 }] } }, { key: 'csv', doc_count: 4, appNames: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'search', doc_count: 4 }] } }, ] } }, ] },
+                objectTypes: { doc_count: 0, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] } },
+                statusTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'completed', doc_count: 9 }] },
+                jobTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'csv_searchsource', doc_count: 5, isDeprecated: { doc_count: 0 } }, { key: 'csv', doc_count: 4, isDeprecated: { doc_count: 4 } }, ] },
               },
               last7Days: {
                 doc_count: 9,
-                layoutTypes: {
-                  doc_count: 0,
-                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-                },
-                statusByApp: {
-                  doc_count_error_upper_bound: 0,
-                  sum_other_doc_count: 0,
-                  buckets: [
-                    {
-                      key: 'completed',
-                      doc_count: 9,
-                      jobTypes: {
-                        doc_count_error_upper_bound: 0,
-                        sum_other_doc_count: 0,
-                        buckets: [
-                          {
-                            key: 'csv_searchsource',
-                            doc_count: 5,
-                            appNames: {
-                              doc_count_error_upper_bound: 0,
-                              sum_other_doc_count: 0,
-                              buckets: [{ key: 'search', doc_count: 5 }],
-                            },
-                          },
-                          {
-                            key: 'csv',
-                            doc_count: 4,
-                            appNames: {
-                              doc_count_error_upper_bound: 0,
-                              sum_other_doc_count: 0,
-                              buckets: [{ key: 'search', doc_count: 4 }],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-                objectTypes: {
-                  doc_count: 0,
-                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-                },
-                statusTypes: {
-                  doc_count_error_upper_bound: 0,
-                  sum_other_doc_count: 0,
-                  buckets: [{ key: 'completed', doc_count: 9 }],
-                },
-                jobTypes: {
-                  doc_count_error_upper_bound: 0,
-                  sum_other_doc_count: 0,
-                  buckets: [
-                    { key: 'csv_searchsource', doc_count: 5, isDeprecated: { doc_count: 0 } },
-                    { key: 'csv', doc_count: 4, isDeprecated: { doc_count: 4 } },
-                  ],
-                },
+                layoutTypes: { doc_count: 0, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] } },
+                statusByApp: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'completed', doc_count: 9, jobTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'csv_searchsource', doc_count: 5, appNames: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'search', doc_count: 5 }] } }, { key: 'csv', doc_count: 4, appNames: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'search', doc_count: 4 }] } }, ] } }, ] },
+                objectTypes: { doc_count: 0, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] } },
+                statusTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'completed', doc_count: 9 }] },
+                jobTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'csv_searchsource', doc_count: 5, isDeprecated: { doc_count: 0 } }, { key: 'csv', doc_count: 4, isDeprecated: { doc_count: 4 } }, ] },
               },
-            },
+            }, // prettier-ignore
           },
         },
       })
@@ -391,39 +290,30 @@ describe('data modeling', () => {
       }
     );
     collectorFetchContext = getMockFetchClients(
-      getResponseMock(
-      {
+      getResponseMock({
         aggregations: {
           ranges: {
             buckets: {
               all: {
                 doc_count: 4,
-                layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
-                statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
-                objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
+                layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] } },
+                statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ] } }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] } }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ] } }, ] },
+                objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ] } },
                 statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
-                jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
+                jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ] },
               },
               last7Days: {
                 doc_count: 4,
-                layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
-                statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
-                objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
+                layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] } },
+                statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ] } }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] } }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ] } }, ] },
+                objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ] } },
                 statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
-                jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
+                jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ] },
               },
-              lastDay: {
-                doc_count: 4,
-                layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
-                statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
-                objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
-                statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
-                jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
-              },
-            },
+            }, // prettier-ignore
           },
         },
-      } as SearchResponse) // prettier-ignore
+      })
     );
     const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
@@ -443,9 +333,9 @@ describe('data modeling', () => {
 
     collectorFetchContext = getMockFetchClients(
       getResponseMock({
-      aggregations: {
-        ranges: {
-          buckets: {
+        aggregations: {
+          ranges: {
+            buckets: {
             all: {
               doc_count: 0,
               jobTypes: { buckets: [] },
@@ -453,6 +343,9 @@ describe('data modeling', () => {
               objectTypes: { doc_count: 0, pdf: { buckets: [] } },
               statusByApp: { buckets: [] },
               statusTypes: { buckets: [] },
+              sizeMax: { value: null},
+              sizeMin: { value: null },
+              sizeAvg: { value: null},
             },
             last7Days: {
               doc_count: 0,
@@ -461,177 +354,18 @@ describe('data modeling', () => {
               objectTypes: { doc_count: 0, pdf: { buckets: [] } },
               statusByApp: { buckets: [] },
               statusTypes: { buckets: [] },
+              sizeMax: { value: null},
+              sizeMin: { value: null },
+              sizeAvg: { value: null},
+
             },
-            lastDay: {
-              doc_count: 0,
-              jobTypes: { buckets: [] },
-              layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
-              objectTypes: { doc_count: 0, pdf: { buckets: [] } },
-              statusByApp: { buckets: [] },
-              statusTypes: { buckets: [] },
-            },
+          }, // prettier-ignore
           },
         },
-      },
-    } as SearchResponse) // prettier-ignore
+      })
     );
     const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
-  });
-
-  test('Cast various example data to the TypeScript definition', () => {
-    const check = (obj: ReportingUsageType) => {
-      return typeof obj;
-    };
-
-    // just check that the example objects can be cast to ReportingUsageType
-    check({
-      PNG: { available: true, total: 7 },
-      PNGV2: { available: true, total: 7 },
-      _all: 21,
-      available: true,
-      browser_type: 'chromium',
-      csv: { available: true, total: 4 },
-      csv_searchsource: { available: true, total: 4 },
-      enabled: true,
-      last7Days: {
-        PNG: { available: true, total: 0 },
-        PNGV2: { available: true, total: 0 },
-        _all: 0,
-        csv: { available: true, total: 0 },
-        csv_searchsource: { available: true, total: 0 },
-        printable_pdf: {
-          app: { dashboard: 0, visualization: 0 },
-          available: true,
-          layout: { preserve_layout: 0, print: 0 },
-          total: 0,
-        },
-        printable_pdf_v2: {
-          app: { dashboard: 0, visualization: 0 },
-          available: true,
-          layout: { preserve_layout: 0, print: 0 },
-          total: 0,
-        },
-        status: { completed: 0, failed: 0 },
-        statuses: {},
-      },
-      printable_pdf: {
-        app: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
-        available: true,
-        layout: { preserve_layout: 7, print: 3 },
-        total: 10,
-      },
-      printable_pdf_v2: {
-        app: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
-        available: true,
-        layout: { preserve_layout: 7, print: 3 },
-        total: 10,
-      },
-      status: { completed: 21, failed: 0 },
-      statuses: {
-        completed: {
-          PNG: { dashboard: 3, visualization: 4 },
-          PNGV2: { dashboard: 3, visualization: 4 },
-          csv: {},
-          printable_pdf: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
-          printable_pdf_v2: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
-        },
-      },
-    });
-    check({
-      PNG: { available: true, total: 3 },
-      PNGV2: { available: true, total: 3 },
-      _all: 4,
-      available: true,
-      browser_type: 'chromium',
-      csv: { available: true, total: 0 },
-      csv_searchsource: { available: true, total: 0 },
-      enabled: true,
-      last7Days: {
-        PNG: { available: true, total: 3 },
-        PNGV2: { available: true, total: 3 },
-        _all: 4,
-        csv: { available: true, total: 0 },
-        csv_searchsource: { available: true, total: 0 },
-        printable_pdf: {
-          app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
-          available: true,
-          layout: { preserve_layout: 1, print: 0 },
-          total: 1,
-        },
-        printable_pdf_v2: {
-          app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
-          available: true,
-          layout: { preserve_layout: 1, print: 0 },
-          total: 1,
-        },
-        status: { completed: 4, failed: 0 },
-        statuses: {
-          completed: { PNG: { visualization: 3 }, printable_pdf: { 'canvas workpad': 1 } },
-        },
-      },
-      printable_pdf: {
-        app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
-        available: true,
-        layout: { preserve_layout: 1, print: 0 },
-        total: 1,
-      },
-      printable_pdf_v2: {
-        app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
-        available: true,
-        layout: { preserve_layout: 1, print: 0 },
-        total: 1,
-      },
-      status: { completed: 4, failed: 0 },
-      statuses: {
-        completed: { PNG: { visualization: 3 }, printable_pdf: { 'canvas workpad': 1 } },
-      },
-    });
-    check({
-      available: true,
-      browser_type: 'chromium',
-      enabled: true,
-      last7Days: {
-        _all: 0,
-        status: { completed: 0, failed: 0 },
-        statuses: {},
-        printable_pdf: {
-          available: true,
-          total: 0,
-          app: { dashboard: 0, visualization: 0 },
-          layout: { preserve_layout: 0, print: 0 },
-        },
-        printable_pdf_v2: {
-          available: true,
-          total: 0,
-          app: { dashboard: 0, visualization: 0 },
-          layout: { preserve_layout: 0, print: 0 },
-        },
-        csv: { available: true, total: 0 },
-        csv_searchsource: { available: true, total: 0 },
-        PNG: { available: true, total: 0 },
-        PNGV2: { available: true, total: 0 },
-      },
-      _all: 0,
-      status: { completed: 0, failed: 0 },
-      statuses: {},
-      printable_pdf: {
-        available: true,
-        total: 0,
-        app: { dashboard: 0, visualization: 0 },
-        layout: { preserve_layout: 0, print: 0 },
-      },
-      printable_pdf_v2: {
-        available: true,
-        total: 0,
-        app: { dashboard: 0, visualization: 0 },
-        layout: { preserve_layout: 0, print: 0 },
-      },
-      csv: { available: true, total: 0 },
-      csv_searchsource: { available: true, total: 0 },
-      PNG: { available: true, total: 0 },
-      PNGV2: { available: true, total: 0 },
-    });
   });
 });
 

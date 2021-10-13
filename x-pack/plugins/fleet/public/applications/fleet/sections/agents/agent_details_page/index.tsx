@@ -254,7 +254,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       <WithHeaderLayout
         leftColumn={headerLeftContent}
         rightColumn={headerRightContent}
-        tabs={(headerTabs as unknown) as EuiTabProps[]}
+        tabs={headerTabs as unknown as EuiTabProps[]}
       >
         {isLoading && isInitialRequest ? (
           <Loading />

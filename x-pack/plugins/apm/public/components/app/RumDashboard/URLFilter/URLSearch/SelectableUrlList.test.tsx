@@ -12,6 +12,7 @@ import {
   waitForElementToBeRemoved,
   screen,
 } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { createMemoryHistory } from 'history';
 import * as fetcherHook from '../../../../../hooks/use_fetcher';
 import { SelectableUrlList } from './SelectableUrlList';
@@ -32,35 +33,39 @@ describe('SelectableUrlList', () => {
   function WrappedComponent() {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     return (
-      <SelectableUrlList
-        initialValue={'blog'}
-        loading={false}
-        data={{ items: [], total: 0 }}
-        onChange={jest.fn()}
-        searchValue={'blog'}
-        onInputChange={jest.fn()}
-        onTermChange={jest.fn()}
-        popoverIsOpen={Boolean(isPopoverOpen)}
-        setPopoverIsOpen={setIsPopoverOpen}
-        onApply={jest.fn()}
-      />
+      <IntlProvider locale="en">
+        <SelectableUrlList
+          initialValue={'blog'}
+          loading={false}
+          data={{ items: [], total: 0 }}
+          onChange={jest.fn()}
+          searchValue={'blog'}
+          onInputChange={jest.fn()}
+          onTermChange={jest.fn()}
+          popoverIsOpen={Boolean(isPopoverOpen)}
+          setPopoverIsOpen={setIsPopoverOpen}
+          onApply={jest.fn()}
+        />
+      </IntlProvider>
     );
   }
 
   it('it uses search term value from url', () => {
     const { getByDisplayValue } = render(
-      <SelectableUrlList
-        initialValue={'blog'}
-        loading={false}
-        data={{ items: [], total: 0 }}
-        onChange={jest.fn()}
-        searchValue={'blog'}
-        onInputChange={jest.fn()}
-        onTermChange={jest.fn()}
-        popoverIsOpen={false}
-        setPopoverIsOpen={jest.fn()}
-        onApply={jest.fn()}
-      />,
+      <IntlProvider locale="en">
+        <SelectableUrlList
+          initialValue={'blog'}
+          loading={false}
+          data={{ items: [], total: 0 }}
+          onChange={jest.fn()}
+          searchValue={'blog'}
+          onInputChange={jest.fn()}
+          onTermChange={jest.fn()}
+          popoverIsOpen={false}
+          setPopoverIsOpen={jest.fn()}
+          onApply={jest.fn()}
+        />
+      </IntlProvider>,
       { customHistory }
     );
     expect(getByDisplayValue('blog')).toBeInTheDocument();
@@ -68,18 +73,20 @@ describe('SelectableUrlList', () => {
 
   it('maintains focus on search input field', () => {
     const { getByLabelText } = render(
-      <SelectableUrlList
-        initialValue={'blog'}
-        loading={false}
-        data={{ items: [], total: 0 }}
-        onChange={jest.fn()}
-        searchValue={'blog'}
-        onInputChange={jest.fn()}
-        onTermChange={jest.fn()}
-        popoverIsOpen={false}
-        setPopoverIsOpen={jest.fn()}
-        onApply={jest.fn()}
-      />,
+      <IntlProvider locale="en">
+        <SelectableUrlList
+          initialValue={'blog'}
+          loading={false}
+          data={{ items: [], total: 0 }}
+          onChange={jest.fn()}
+          searchValue={'blog'}
+          onInputChange={jest.fn()}
+          onTermChange={jest.fn()}
+          popoverIsOpen={false}
+          setPopoverIsOpen={jest.fn()}
+          onApply={jest.fn()}
+        />
+      </IntlProvider>,
       { customHistory }
     );
 
@@ -90,11 +97,10 @@ describe('SelectableUrlList', () => {
   });
 
   it('hides popover on escape', async () => {
-    const {
-      getByText,
-      getByLabelText,
-      queryByText,
-    } = render(<WrappedComponent />, { customHistory });
+    const { getByText, getByLabelText, queryByText } = render(
+      <WrappedComponent />,
+      { customHistory }
+    );
 
     const input = getByLabelText(I18LABELS.filterByUrl);
     fireEvent.click(input);

@@ -55,10 +55,8 @@ export const useHostsKpiHosts = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    hostsKpiHostsRequest,
-    setHostsKpiHostsRequest,
-  ] = useState<HostsKpiHostsRequestOptions | null>(null);
+  const [hostsKpiHostsRequest, setHostsKpiHostsRequest] =
+    useState<HostsKpiHostsRequestOptions | null>(null);
   const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [hostsKpiHostsResponse, setHostsKpiHostsResponse] = useState<HostsKpiHostsArgs>({

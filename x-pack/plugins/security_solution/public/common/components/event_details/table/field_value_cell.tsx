@@ -19,6 +19,7 @@ export interface FieldValueCellProps {
   eventId: string;
   fieldFromBrowserField?: BrowserField;
   getLinkValue?: (field: string) => string | null;
+  isDraggable?: boolean;
   linkValue?: string | null | undefined;
   values: string[] | null | undefined;
 }
@@ -30,11 +31,12 @@ export const FieldValueCell = React.memo(
     eventId,
     fieldFromBrowserField,
     getLinkValue,
+    isDraggable = false,
     linkValue,
     values,
   }: FieldValueCellProps) => {
     return (
-      <div>
+      <div data-test-subj={`event-field-${data.field}`}>
         {values != null &&
           values.map((value, i) => {
             if (fieldFromBrowserField == null) {
@@ -55,7 +57,7 @@ export const FieldValueCell = React.memo(
                     fieldFormat={data.format}
                     fieldName={data.field}
                     fieldType={data.type}
-                    isDraggable={false}
+                    isDraggable={isDraggable}
                     isObjectArray={data.isObjectArray}
                     value={value}
                     linkValue={(getLinkValue && getLinkValue(data.field)) ?? linkValue}

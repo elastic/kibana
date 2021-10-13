@@ -9,34 +9,36 @@ import { AlertInstanceContext, AlertTypeParams, AlertTypeState } from '../../../
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertTypeWithExecutor } from '../types';
 
-export const withRuleDataClientFactory = (ruleDataClient: IRuleDataClient) => <
-  TState extends AlertTypeState,
-  TParams extends AlertTypeParams,
-  TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends Record<string, any> = {}
->(
-  type: AlertTypeWithExecutor<
+export const withRuleDataClientFactory =
+  (ruleDataClient: IRuleDataClient) =>
+  <
+    TState extends AlertTypeState,
+    TParams extends AlertTypeParams,
+    TAlertInstanceContext extends AlertInstanceContext,
+    TServices extends Record<string, any> = {}
+  >(
+    type: AlertTypeWithExecutor<
+      TState,
+      TParams,
+      TAlertInstanceContext,
+      TServices & { ruleDataClient: IRuleDataClient }
+    >
+  ): AlertTypeWithExecutor<
     TState,
     TParams,
     TAlertInstanceContext,
     TServices & { ruleDataClient: IRuleDataClient }
-  >
-): AlertTypeWithExecutor<
-  TState,
-  TParams,
-  TAlertInstanceContext,
-  TServices & { ruleDataClient: IRuleDataClient }
-> => {
-  return {
-    ...type,
-    executor: (options) => {
-      return type.executor({
-        ...options,
-        services: {
-          ...options.services,
-          ruleDataClient,
-        },
-      });
-    },
+  > => {
+    return {
+      ...type,
+      executor: (options) => {
+        return type.executor({
+          ...options,
+          services: {
+            ...options.services,
+            ruleDataClient,
+          },
+        });
+      },
+    };
   };
-};

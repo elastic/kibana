@@ -58,6 +58,8 @@ import {
   tags,
   interval,
   enabled,
+  outcome,
+  alias_target_id,
   updated_at,
   updated_by,
   created_at,
@@ -68,6 +70,7 @@ import {
   last_success_message,
   last_failure_at,
   last_failure_message,
+  namespace,
 } from '../common/schemas';
 
 export const createSchema = <
@@ -149,12 +152,15 @@ const baseParams = {
     building_block_type,
     note,
     license,
+    outcome,
+    alias_target_id,
     output_index,
     timeline_id,
     timeline_title,
     meta,
     rule_name_override,
     timestamp_override,
+    namespace,
   },
   defaultable: {
     tags,

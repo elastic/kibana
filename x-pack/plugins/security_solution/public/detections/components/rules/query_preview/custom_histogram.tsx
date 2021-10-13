@@ -48,10 +48,10 @@ export const PreviewCustomQueryHistogram = ({
     }
   }, [setQuery, inspect, isLoading, isInitializing, refetch]);
 
-  const barConfig = useMemo((): ChartSeriesConfigs => getHistogramConfig(to, from, true), [
-    from,
-    to,
-  ]);
+  const barConfig = useMemo(
+    (): ChartSeriesConfigs => getHistogramConfig(to, from, true),
+    [from, to]
+  );
 
   const subtitle = useMemo(
     (): string =>

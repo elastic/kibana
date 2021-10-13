@@ -25,23 +25,23 @@ import { healthRoute } from './health';
 import { RouteOptions } from '..';
 
 export function defineLegacyRoutes(opts: RouteOptions) {
-  const { router, licenseState, encryptedSavedObjects } = opts;
+  const { router, licenseState, encryptedSavedObjects, usageCounter } = opts;
 
   createAlertRoute(opts);
-  aggregateAlertRoute(router, licenseState);
-  deleteAlertRoute(router, licenseState);
-  findAlertRoute(router, licenseState);
-  getAlertRoute(router, licenseState);
-  getAlertStateRoute(router, licenseState);
-  getAlertInstanceSummaryRoute(router, licenseState);
-  listAlertTypesRoute(router, licenseState);
-  updateAlertRoute(router, licenseState);
-  enableAlertRoute(router, licenseState);
-  disableAlertRoute(router, licenseState);
-  updateApiKeyRoute(router, licenseState);
-  muteAllAlertRoute(router, licenseState);
-  unmuteAllAlertRoute(router, licenseState);
-  muteAlertInstanceRoute(router, licenseState);
-  unmuteAlertInstanceRoute(router, licenseState);
-  healthRoute(router, licenseState, encryptedSavedObjects);
+  aggregateAlertRoute(router, licenseState, usageCounter);
+  deleteAlertRoute(router, licenseState, usageCounter);
+  findAlertRoute(router, licenseState, usageCounter);
+  getAlertRoute(router, licenseState, usageCounter);
+  getAlertStateRoute(router, licenseState, usageCounter);
+  getAlertInstanceSummaryRoute(router, licenseState, usageCounter);
+  listAlertTypesRoute(router, licenseState, usageCounter);
+  updateAlertRoute(router, licenseState, usageCounter);
+  enableAlertRoute(router, licenseState, usageCounter);
+  disableAlertRoute(router, licenseState, usageCounter);
+  updateApiKeyRoute(router, licenseState, usageCounter);
+  muteAllAlertRoute(router, licenseState, usageCounter);
+  unmuteAllAlertRoute(router, licenseState, usageCounter);
+  muteAlertInstanceRoute(router, licenseState, usageCounter);
+  unmuteAlertInstanceRoute(router, licenseState, usageCounter);
+  healthRoute(router, licenseState, encryptedSavedObjects, usageCounter);
 }

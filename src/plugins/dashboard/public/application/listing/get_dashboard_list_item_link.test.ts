@@ -15,11 +15,11 @@ import { GLOBAL_STATE_STORAGE_KEY } from '../../url_generator';
 
 const DASHBOARD_ID = '13823000-99b9-11ea-9eb6-d9e8adceb647';
 
-const application = ({
+const application = {
   getUrlForApp: jest.fn((appId: string, options?: { path?: string; absolute?: boolean }) => {
     return `/app/${appId}${options?.path}`;
   }),
-} as unknown) as ApplicationStart;
+} as unknown as ApplicationStart;
 
 const history = createHashHistory();
 const kbnUrlStateStorage = createKbnUrlStateStorage({

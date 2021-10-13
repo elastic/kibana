@@ -99,8 +99,12 @@ describe('correlations', () => {
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
         },
-        fieldName: 'actualFieldName',
-        fieldValue: 'actualFieldValue',
+        termFilters: [
+          {
+            fieldName: 'actualFieldName',
+            fieldValue: 'actualFieldValue',
+          },
+        ],
       });
       expect(query).toEqual({
         bool: {

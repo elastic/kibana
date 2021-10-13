@@ -47,6 +47,7 @@ export const createEndpointArtifactClientMock = (
       const response = await endpointArtifactClient.createArtifact(...args);
       return response;
     }),
+    listArtifacts: jest.fn((...args) => endpointArtifactClientMocked.listArtifacts(...args)),
     getArtifact: jest.fn((...args) => endpointArtifactClientMocked.getArtifact(...args)),
     deleteArtifact: jest.fn((...args) => endpointArtifactClientMocked.deleteArtifact(...args)),
     _esClient: esClient,

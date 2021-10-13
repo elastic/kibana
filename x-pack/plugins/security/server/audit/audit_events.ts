@@ -10,7 +10,7 @@ import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from 'src/
 import type { AuthenticationResult } from '../authentication/authentication_result';
 
 /**
- * Audit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.9/index.html
+ * Audit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.12/index.html
  *
  * If you add additional fields to the schema ensure you update the Kibana Filebeat module:
  * https://github.com/elastic/beats/tree/master/filebeat/module/kibana

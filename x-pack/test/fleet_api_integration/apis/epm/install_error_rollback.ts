@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -29,6 +30,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('package installation error handling and rollback', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     beforeEach(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });

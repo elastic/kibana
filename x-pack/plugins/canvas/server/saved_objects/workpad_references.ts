@@ -6,14 +6,15 @@
  */
 
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import { PersistableStateService } from '../../../../../src/plugins/kibana_utils/common';
 import { SavedObjectReference } from '../../../../../src/core/server';
 import { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
 
-import { ExpressionsServerSetup } from '../../../../../src/plugins/expressions/server';
+import type { ExpressionAstExpression } from '../../../../../src/plugins/expressions';
 
 export const extractReferences = (
   workpad: WorkpadAttributes,
-  expressions: ExpressionsServerSetup
+  expressions: PersistableStateService<ExpressionAstExpression>
 ): { workpad: WorkpadAttributes; references: SavedObjectReference[] } => {
   // We need to find every element in the workpad and extract references
   const references: SavedObjectReference[] = [];
@@ -42,7 +43,7 @@ export const extractReferences = (
 export const injectReferences = (
   workpad: WorkpadAttributes,
   references: SavedObjectReference[],
-  expressions: ExpressionsServerSetup
+  expressions: PersistableStateService<ExpressionAstExpression>
 ) => {
   const pages = workpad.pages.map((page) => {
     const elements = page.elements.map((element) => {

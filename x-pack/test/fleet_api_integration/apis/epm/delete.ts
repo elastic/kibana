@@ -7,11 +7,14 @@
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const requiredPackage = 'system-0.13.3';
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const requiredPackage = 'elastic_agent-0.0.7';
 
   const installPackage = async (pkgkey: string) => {
     await supertest
@@ -29,6 +32,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('delete and force delete scenarios', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     before(async () => {
       await installPackage(requiredPackage);
     });
@@ -49,6 +53,14 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
+    });
+
+    it('should return 403 for read-only users', async () => {
+      await supertestWithoutAuth
+        .delete(`/api/fleet/epm/packages/${requiredPackage}`)
+        .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(403);
     });
   });
 }

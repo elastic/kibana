@@ -23,14 +23,14 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../Links/apm/transaction_overview_link';
-import { TableFetchWrapper } from '../table_fetch_wrapper';
 import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
 import { ElasticDocsLink } from '../Links/ElasticDocsLink';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
-type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+type ApiResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 interface InitialState {
   requestId: string;
@@ -116,7 +116,7 @@ export function TransactionsTable({
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics',
+          'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -189,7 +189,7 @@ export function TransactionsTable({
       ) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+            'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -302,47 +302,52 @@ export function TransactionsTable({
       )}
       <EuiFlexItem>
         <EuiFlexItem>
-          <TableFetchWrapper status={status}>
-            <OverviewTableContainer
-              fixedHeight={fixedHeight}
-              isEmptyAndNotInitiated={
-                transactionGroupsTotalItems === 0 && isNotInitiated
+          <OverviewTableContainer
+            fixedHeight={fixedHeight}
+            isEmptyAndNotInitiated={
+              transactionGroupsTotalItems === 0 && isNotInitiated
+            }
+          >
+            <EuiBasicTable
+              noItemsMessage={
+                isLoading
+                  ? i18n.translate('xpack.apm.transactionsTable.loading', {
+                      defaultMessage: 'Loading...',
+                    })
+                  : i18n.translate('xpack.apm.transactionsTable.noResults', {
+                      defaultMessage: 'No transaction groups found',
+                    })
               }
-            >
-              <EuiBasicTable
-                noItemsMessage={
-                  isLoading
-                    ? i18n.translate('xpack.apm.transactionsTable.loading', {
-                        defaultMessage: 'Loading...',
-                      })
-                    : i18n.translate('xpack.apm.transactionsTable.noResults', {
-                        defaultMessage: 'No transaction groups found',
-                      })
-                }
-                loading={isLoading}
-                items={transactionGroups}
-                columns={columns}
-                pagination={pagination}
-                sorting={{ sort: { field, direction } }}
-                onChange={(newTableOptions: {
-                  page?: {
-                    index: number;
-                  };
-                  sort?: { field: string; direction: SortDirection };
-                }) => {
-                  setTableOptions({
-                    pageIndex: newTableOptions.page?.index ?? 0,
-                    sort: newTableOptions.sort
-                      ? {
-                          field: newTableOptions.sort.field as SortField,
-                          direction: newTableOptions.sort.direction,
-                        }
-                      : DEFAULT_SORT,
-                  });
-                }}
-              />
-            </OverviewTableContainer>
-          </TableFetchWrapper>
+              loading={isLoading}
+              error={
+                status === FETCH_STATUS.FAILURE
+                  ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
+                      defaultMessage: 'Failed to fetch',
+                    })
+                  : ''
+              }
+              items={transactionGroups}
+              columns={columns}
+              pagination={pagination}
+              sorting={{ sort: { field, direction } }}
+              onChange={(newTableOptions: {
+                page?: {
+                  index: number;
+                };
+                sort?: { field: string; direction: SortDirection };
+              }) => {
+                setTableOptions({
+                  pageIndex: newTableOptions.page?.index ?? 0,
+                  sort: newTableOptions.sort
+                    ? {
+                        field: newTableOptions.sort.field as SortField,
+                        direction: newTableOptions.sort.direction,
+                      }
+                    : DEFAULT_SORT,
+                });
+              }}
+            />
+          </OverviewTableContainer>
         </EuiFlexItem>
       </EuiFlexItem>
     </EuiFlexGroup>

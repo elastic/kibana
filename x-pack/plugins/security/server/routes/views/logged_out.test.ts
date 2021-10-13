@@ -25,12 +25,10 @@ describe('LoggedOut view routes', () => {
 
     defineLoggedOutRoutes(routeParamsMock);
 
-    const [
-      loggedOutRouteConfig,
-      loggedOutRouteHandler,
-    ] = routeParamsMock.httpResources.register.mock.calls.find(
-      ([{ path }]) => path === '/security/logged_out'
-    )!;
+    const [loggedOutRouteConfig, loggedOutRouteHandler] =
+      routeParamsMock.httpResources.register.mock.calls.find(
+        ([{ path }]) => path === '/security/logged_out'
+      )!;
 
     routeConfig = loggedOutRouteConfig;
     routeHandler = loggedOutRouteHandler;

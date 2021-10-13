@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { MappingErrorPage } from './mapping_error';
 export { MonitorPage } from './monitor';
 export { StepDetailPage } from './synthetics/step_detail_page';
 export { SettingsPage } from './settings';

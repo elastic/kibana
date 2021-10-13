@@ -10,19 +10,19 @@ import { ValidationFunc } from '../../hook_form_lib';
 import { isLowerCaseString } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 
-export const lowerCaseStringField = (message: string) => (
-  ...args: Parameters<ValidationFunc>
-): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-  const [{ value }] = args;
+export const lowerCaseStringField =
+  (message: string) =>
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value }] = args;
 
-  if (typeof value !== 'string') {
-    return;
-  }
+    if (typeof value !== 'string') {
+      return;
+    }
 
-  if (!isLowerCaseString(value)) {
-    return {
-      code: 'ERR_LOWERCASE_STRING',
-      message,
-    };
-  }
-};
+    if (!isLowerCaseString(value)) {
+      return {
+        code: 'ERR_LOWERCASE_STRING',
+        message,
+      };
+    }
+  };

@@ -50,10 +50,12 @@ export const fetchTransactionDurationFractions = async (
     );
   }
 
-  const buckets = (resp.body.aggregations
-    .latency_ranges as estypes.AggregationsMultiBucketAggregate<{
-    doc_count: number;
-  }>)?.buckets;
+  const buckets = (
+    resp.body.aggregations
+      .latency_ranges as estypes.AggregationsMultiBucketAggregate<{
+      doc_count: number;
+    }>
+  )?.buckets;
 
   const totalDocCount = buckets.reduce((acc, bucket) => {
     return acc + bucket.doc_count;

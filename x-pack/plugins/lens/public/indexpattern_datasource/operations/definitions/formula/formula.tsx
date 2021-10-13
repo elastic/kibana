@@ -35,130 +35,128 @@ export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternCol
   };
 }
 
-export const formulaOperation: OperationDefinition<
-  FormulaIndexPatternColumn,
-  'managedReference'
-> = {
-  type: 'formula',
-  displayName: defaultLabel,
-  getDefaultLabel: (column, indexPattern) => column.params.formula ?? defaultLabel,
-  input: 'managedReference',
-  hidden: true,
-  getDisabledStatus(indexPattern: IndexPattern) {
-    return undefined;
-  },
-  getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap) {
-    const column = layer.columns[columnId] as FormulaIndexPatternColumn;
-    if (!column.params.formula || !operationDefinitionMap) {
-      return;
-    }
+export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'managedReference'> =
+  {
+    type: 'formula',
+    displayName: defaultLabel,
+    getDefaultLabel: (column, indexPattern) => column.params.formula ?? defaultLabel,
+    input: 'managedReference',
+    hidden: true,
+    getDisabledStatus(indexPattern: IndexPattern) {
+      return undefined;
+    },
+    getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap) {
+      const column = layer.columns[columnId] as FormulaIndexPatternColumn;
+      if (!column.params.formula || !operationDefinitionMap) {
+        return;
+      }
 
-    const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
-    const { root, error } = tryToParse(column.params.formula, visibleOperationsMap);
-    if (error || root == null) {
-      return error?.message ? [error.message] : [];
-    }
+      const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
+      const { root, error } = tryToParse(column.params.formula, visibleOperationsMap);
+      if (error || root == null) {
+        return error?.message ? [error.message] : [];
+      }
 
-    const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap);
+      const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap);
 
-    if (errors.length) {
-      return errors.map(({ message }) => message);
-    }
+      if (errors.length) {
+        return errors.map(({ message }) => message);
+      }
 
-    const managedColumns = getManagedColumnsFrom(columnId, layer.columns);
-    const innerErrors = managedColumns
-      .flatMap(([id, col]) => {
-        const def = visibleOperationsMap[col.operationType];
-        if (def?.getErrorMessage) {
-          const messages = def.getErrorMessage(layer, id, indexPattern, visibleOperationsMap);
-          return messages ? { message: messages.join(', ') } : [];
-        }
-        return [];
-      })
-      .filter((marker) => marker);
+      const managedColumns = getManagedColumnsFrom(columnId, layer.columns);
+      const innerErrors = managedColumns
+        .flatMap(([id, col]) => {
+          const def = visibleOperationsMap[col.operationType];
+          if (def?.getErrorMessage) {
+            const messages = def.getErrorMessage(layer, id, indexPattern, visibleOperationsMap);
+            return messages ? { message: messages.join(', ') } : [];
+          }
+          return [];
+        })
+        .filter((marker) => marker);
 
-    return innerErrors.length ? innerErrors.map(({ message }) => message) : undefined;
-  },
-  getPossibleOperation() {
-    return {
-      dataType: 'number',
-      isBucketed: false,
-      scale: 'ratio',
-    };
-  },
-  toExpression: (layer, columnId) => {
-    const currentColumn = layer.columns[columnId] as FormulaIndexPatternColumn;
-    const params = currentColumn.params;
-    // TODO: improve this logic
-    const useDisplayLabel = currentColumn.label !== defaultLabel;
-    const label = !params?.isFormulaBroken
-      ? useDisplayLabel
-        ? currentColumn.label
-        : params?.formula ?? defaultLabel
-      : defaultLabel;
+      return innerErrors.length ? innerErrors.map(({ message }) => message) : undefined;
+    },
+    getPossibleOperation() {
+      return {
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      };
+    },
+    toExpression: (layer, columnId) => {
+      const currentColumn = layer.columns[columnId] as FormulaIndexPatternColumn;
+      const params = currentColumn.params;
+      // TODO: improve this logic
+      const useDisplayLabel = currentColumn.label !== defaultLabel;
+      const label = !params?.isFormulaBroken
+        ? useDisplayLabel
+          ? currentColumn.label
+          : params?.formula ?? defaultLabel
+        : defaultLabel;
 
-    return [
-      {
-        type: 'function',
-        function: currentColumn.references.length ? 'mathColumn' : 'mapColumn',
-        arguments: {
-          id: [columnId],
-          name: [label || defaultLabel],
-          expression: [currentColumn.references.length ? `"${currentColumn.references[0]}"` : ''],
+      return [
+        {
+          type: 'function',
+          function: currentColumn.references.length ? 'mathColumn' : 'mapColumn',
+          arguments: {
+            id: [columnId],
+            name: [label || defaultLabel],
+            expression: [currentColumn.references.length ? `"${currentColumn.references[0]}"` : ''],
+          },
         },
-      },
-    ];
-  },
-  buildColumn({ previousColumn, layer, indexPattern }, _, operationDefinitionMap) {
-    let previousFormula = '';
-    if (previousColumn) {
-      previousFormula = generateFormula(
-        previousColumn,
-        layer,
-        previousFormula,
+      ];
+    },
+    buildColumn({ previousColumn, layer, indexPattern }, _, operationDefinitionMap) {
+      let previousFormula = '';
+      if (previousColumn) {
+        previousFormula = generateFormula(
+          previousColumn,
+          layer,
+          previousFormula,
+          operationDefinitionMap
+        );
+      }
+      // carry over the format settings from previous operation for seamless transfer
+      // NOTE: this works only for non-default formatters set in Lens
+      let prevFormat = {};
+      if (previousColumn?.params && 'format' in previousColumn.params) {
+        prevFormat = { format: previousColumn.params.format };
+      }
+      return {
+        label: previousFormula || defaultLabel,
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: previousFormula
+          ? { formula: previousFormula, isFormulaBroken: false, ...prevFormat }
+          : { ...prevFormat },
+        references: [],
+      };
+    },
+    isTransferable: () => {
+      return true;
+    },
+    createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
+      const currentColumn = layer.columns[sourceId] as FormulaIndexPatternColumn;
+      const tempLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          [targetId]: { ...currentColumn },
+        },
+      };
+      const { newLayer } = regenerateLayerFromAst(
+        currentColumn.params.formula ?? '',
+        tempLayer,
+        targetId,
+        currentColumn,
+        indexPattern,
         operationDefinitionMap
       );
-    }
-    // carry over the format settings from previous operation for seamless transfer
-    // NOTE: this works only for non-default formatters set in Lens
-    let prevFormat = {};
-    if (previousColumn?.params && 'format' in previousColumn.params) {
-      prevFormat = { format: previousColumn.params.format };
-    }
-    return {
-      label: previousFormula || defaultLabel,
-      dataType: 'number',
-      operationType: 'formula',
-      isBucketed: false,
-      scale: 'ratio',
-      params: previousFormula
-        ? { formula: previousFormula, isFormulaBroken: false, ...prevFormat }
-        : { ...prevFormat },
-      references: [],
-    };
-  },
-  isTransferable: () => {
-    return true;
-  },
-  createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
-    const currentColumn = layer.columns[sourceId] as FormulaIndexPatternColumn;
-    const tempLayer = {
-      ...layer,
-      columns: {
-        ...layer.columns,
-        [targetId]: { ...currentColumn },
-      },
-    };
-    const { newLayer } = regenerateLayerFromAst(
-      currentColumn.params.formula ?? '',
-      tempLayer,
-      targetId,
-      currentColumn,
-      indexPattern,
-      operationDefinitionMap
-    );
-    return newLayer;
-  },
+      return newLayer;
+    },
 
-  paramEditor: WrappedFormulaEditor,
-};
+    paramEditor: WrappedFormulaEditor,
+  };

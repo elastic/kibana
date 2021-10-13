@@ -11,52 +11,62 @@ import {
   AvailableTotal,
   ByAppCounts,
   JobTypes,
+  LayoutCounts,
   RangeStats,
   ReportingUsageType,
+  SizePercentiles,
 } from './types';
 
 const appCountsSchema: MakeSchemaFrom<AppCounts> = {
+  search: { type: 'long' },
   'canvas workpad': { type: 'long' },
   dashboard: { type: 'long' },
   visualization: { type: 'long' },
 };
 
+const layoutCountsSchema: MakeSchemaFrom<LayoutCounts> = {
+  canvas: { type: 'long' },
+  print: { type: 'long' },
+  preserve_layout: { type: 'long' },
+};
+
 const byAppCountsSchema: MakeSchemaFrom<ByAppCounts> = {
   csv: appCountsSchema,
   csv_searchsource: appCountsSchema,
+  csv_searchsource_immediate: appCountsSchema,
   PNG: appCountsSchema,
   PNGV2: appCountsSchema,
   printable_pdf: appCountsSchema,
   printable_pdf_v2: appCountsSchema,
 };
 
+const sizesSchema: MakeSchemaFrom<SizePercentiles> = {
+  '1.0': { type: 'long' },
+  '5.0': { type: 'long' },
+  '25.0': { type: 'long' },
+  '50.0': { type: 'long' },
+  '75.0': { type: 'long' },
+  '95.0': { type: 'long' },
+  '99.0': { type: 'long' },
+};
+
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
   deprecated: { type: 'long' },
+  sizes: sizesSchema,
+  app: appCountsSchema,
+  layout: layoutCountsSchema,
 };
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
   csv: availableTotalSchema,
   csv_searchsource: availableTotalSchema,
+  csv_searchsource_immediate: availableTotalSchema,
   PNG: availableTotalSchema,
   PNGV2: availableTotalSchema,
-  printable_pdf: {
-    ...availableTotalSchema,
-    app: appCountsSchema,
-    layout: {
-      print: { type: 'long' },
-      preserve_layout: { type: 'long' },
-    },
-  },
-  printable_pdf_v2: {
-    ...availableTotalSchema,
-    app: appCountsSchema,
-    layout: {
-      print: { type: 'long' },
-      preserve_layout: { type: 'long' },
-    },
-  },
+  printable_pdf: availableTotalSchema,
+  printable_pdf_v2: availableTotalSchema,
 };
 
 const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
@@ -76,6 +86,7 @@ const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
     pending: byAppCountsSchema,
     processing: byAppCountsSchema,
   },
+  output_size: sizesSchema,
 };
 
 export const reportingSchema: MakeSchemaFrom<ReportingUsageType> = {

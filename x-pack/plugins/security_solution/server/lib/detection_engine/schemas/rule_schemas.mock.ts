@@ -36,6 +36,7 @@ const getBaseRuleParams = (): BaseRuleParams => {
     riskScoreMapping: [],
     ruleNameOverride: undefined,
     maxSignals: 10000,
+    namespace: undefined,
     note: '# Investigative notes',
     timelineId: 'some-timeline-id',
     timelineTitle: 'some-timeline-title',

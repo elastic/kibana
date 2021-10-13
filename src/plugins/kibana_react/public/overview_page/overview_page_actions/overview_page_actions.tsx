@@ -31,10 +31,8 @@ export const overviewPageActions = ({
   showDevToolsLink,
   showManagementLink,
 }: Props) => {
-  const {
-    management: isManagementEnabled,
-    dev_tools: isDevToolsEnabled,
-  } = application.capabilities.navLinks;
+  const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
+    application.capabilities.navLinks;
 
   const actionAddData = (
     <RedirectAppLinks application={application}>

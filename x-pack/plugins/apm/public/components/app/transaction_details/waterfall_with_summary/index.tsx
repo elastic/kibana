@@ -45,7 +45,7 @@ export function WaterfallWithSummary({
 
   const {
     query: { environment },
-  } = useApmParams('/services/:serviceName/transactions/view');
+  } = useApmParams('/services/{serviceName}/transactions/view');
 
   useEffect(() => {
     setSampleActivePage(0);

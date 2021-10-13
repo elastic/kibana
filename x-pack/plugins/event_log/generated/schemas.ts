@@ -116,6 +116,28 @@ export const EventSchema = schema.maybe(
             status: ecsString(),
           })
         ),
+        alert: schema.maybe(
+          schema.object({
+            rule: schema.maybe(
+              schema.object({
+                execution: schema.maybe(
+                  schema.object({
+                    uuid: ecsString(),
+                    status: ecsString(),
+                    status_order: ecsNumber(),
+                    metrics: schema.maybe(
+                      schema.object({
+                        total_indexing_duration_ms: ecsNumber(),
+                        total_search_duration_ms: ecsNumber(),
+                        execution_gap_duration_s: ecsNumber(),
+                      })
+                    ),
+                  })
+                ),
+              })
+            ),
+          })
+        ),
         saved_objects: schema.maybe(
           schema.arrayOf(
             schema.object({
@@ -127,6 +149,7 @@ export const EventSchema = schema.maybe(
             })
           )
         ),
+        space_ids: ecsStringMulti(),
         version: ecsVersion(),
       })
     ),
@@ -149,15 +172,15 @@ function ecsDate() {
   return schema.maybe(schema.string({ validate: validateDate }));
 }
 
-function ecsVersion() {
-  return schema.maybe(schema.string({ validate: validateVersion }));
-}
-
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 function validateDate(isoDate: string) {
   if (ISO_DATE_PATTERN.test(isoDate)) return;
   return 'string is not a valid ISO date: ' + isoDate;
+}
+
+function ecsVersion() {
+  return schema.maybe(schema.string({ validate: validateVersion }));
 }
 
 function validateVersion(version: string) {

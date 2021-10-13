@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { IKibanaSearchRequest } from '../../../../../src/plugins/data/common';
 
 import type { FailedTransactionsCorrelationsParams } from '../../../../plugins/apm/common/search_strategies/failed_transactions_correlations/types';
+import type { SearchStrategyClientParams } from '../../../../plugins/apm/common/search_strategies/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -21,12 +22,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const getRequestBody = () => {
-    const request: IKibanaSearchRequest<FailedTransactionsCorrelationsParams> = {
+    const request: IKibanaSearchRequest<
+      FailedTransactionsCorrelationsParams & SearchStrategyClientParams
+    > = {
       params: {
         environment: 'ENVIRONMENT_ALL',
         start: '2020',
         end: '2021',
         kuery: '',
+        percentileThreshold: 95,
       },
     };
 
@@ -210,8 +214,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const { rawResponse: finalRawResponse } = followUpResult;
 
       expect(typeof finalRawResponse?.took).to.be('number');
-      expect(finalRawResponse?.percentileThresholdValue).to.be(undefined);
-      expect(finalRawResponse?.overallHistogram).to.be(undefined);
+      expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
+      expect(finalRawResponse?.errorHistogram.length).to.be(101);
+      expect(finalRawResponse?.overallHistogram.length).to.be(101);
 
       expect(finalRawResponse?.failedTransactionsCorrelations.length).to.eql(
         30,
@@ -219,6 +224,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
+        'Fetched 95th percentile value of 1309695.875 based on 1244 documents.',
         'Identified 68 fieldCandidates.',
         'Identified correlations for 68 fields out of 68 candidates.',
         'Identified 30 significant correlations relating to failed transactions.',

@@ -11,8 +11,9 @@ import { EndpointError } from '../errors';
  * Will wrap the given Error with `EndpointError`, which will help getting a good picture of where in
  * our code the error originated (better stack trace).
  */
-export const wrapErrorIfNeeded = (error: Error): EndpointError =>
-  error instanceof EndpointError ? error : new EndpointError(error.message, error);
+export const wrapErrorIfNeeded = <E extends EndpointError = EndpointError>(error: Error): E => {
+  return (error instanceof EndpointError ? error : new EndpointError(error.message, error)) as E;
+};
 
 /**
  * used as the callback to `Promise#catch()` to ensure errors

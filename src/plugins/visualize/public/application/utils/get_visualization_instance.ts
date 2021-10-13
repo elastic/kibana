@@ -14,10 +14,13 @@ import {
   VisualizeInput,
 } from 'src/plugins/visualizations/public';
 import { SearchSourceFields } from 'src/plugins/data/public';
-import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
-import { createSavedSearchesLoader } from '../../../../discover/public';
+import {
+  getSavedSearch,
+  SavedSearch,
+  throwErrorOnSavedSearchUrlConflict,
+} from '../../../../discover/public';
 import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '../../../../kibana_utils/common';
 import { VisualizeServices } from '../types';
 
@@ -33,12 +36,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const {
-    data,
-    createVisEmbeddableFromObject,
-    savedObjects,
-    savedObjectsPublic,
-  } = visualizeServices;
+  const { data, createVisEmbeddableFromObject, savedObjects, spaces } = visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     id: '',
     timeRange: data.query.timefilter.timefilter.getTime(),
@@ -49,18 +47,21 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   embeddableHandler.getOutput$().subscribe((output) => {
     if (output.error && !isErrorRelatedToRuntimeFields(output.error)) {
       data.search.showError(
-        ((output.error as unknown) as ExpressionValueError['error']).original || output.error
+        (output.error as unknown as ExpressionValueError['error']).original || output.error
       );
     }
   });
 
-  let savedSearch: SavedObject | undefined;
+  let savedSearch: SavedSearch | undefined;
 
   if (vis.data.savedSearchId) {
-    savedSearch = await createSavedSearchesLoader({
+    savedSearch = await getSavedSearch(vis.data.savedSearchId, {
+      search: data.search,
       savedObjectsClient: savedObjects.client,
-      savedObjects: savedObjectsPublic,
-    }).get(vis.data.savedSearchId);
+      spaces,
+    });
+
+    await throwErrorOnSavedSearchUrlConflict(savedSearch);
   }
 
   return { savedSearch, embeddableHandler };
@@ -70,14 +71,15 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { visualizations, savedVisualizations } = visualizeServices;
+  const { visualizations } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
 
   /**
    * A saved vis is needed even in by value mode to support 'save to library' which converts the 'by value'
    * state of the visualization, into a new saved object.
    */
-  const savedVis: VisSavedObject = await savedVisualizations.get();
+  const savedVis: VisSavedObject = await visualizations.getSavedVisualization();
+
   if (visState.uiState && Object.keys(visState.uiState).length !== 0) {
     savedVis.uiStateJSON = JSON.stringify(visState.uiState);
   }
@@ -111,8 +113,8 @@ export const getVisualizationInstance = async (
    */
   opts?: Record<string, unknown> | string
 ) => {
-  const { visualizations, savedVisualizations } = visualizeServices;
-  const savedVis: VisSavedObject = await savedVisualizations.get(opts);
+  const { visualizations } = visualizeServices;
+  const savedVis: VisSavedObject = await visualizations.getSavedVisualization(opts);
 
   if (typeof opts !== 'string') {
     savedVis.searchSourceFields = { index: opts?.indexPattern } as SearchSourceFields;

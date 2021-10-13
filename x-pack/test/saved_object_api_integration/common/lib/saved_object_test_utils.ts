@@ -118,17 +118,18 @@ const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 const isNamespaceAgnostic = (type: string) => type === 'globaltype';
 const isMultiNamespace = (type: string) => type === 'sharedtype' || type === 'sharecapabletype';
 export const expectResponses = {
-  forbiddenTypes: (action: string) => (
-    typeOrTypes: string | string[]
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const uniqueSorted = uniq(types).sort();
-    expect(response.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to ${action} ${uniqueSorted.join()}`,
-    });
-  },
+  forbiddenTypes:
+    (action: string) =>
+    (typeOrTypes: string | string[]): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
+      const uniqueSorted = uniq(types).sort();
+      expect(response.body).to.eql({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: `Unable to ${action} ${uniqueSorted.join()}`,
+      });
+    },
   forbiddenSpaces: (response: Record<string, any>) => {
     expect(response.body).to.eql({
       statusCode: 403,

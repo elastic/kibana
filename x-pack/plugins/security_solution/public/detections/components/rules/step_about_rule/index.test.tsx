@@ -10,7 +10,7 @@ import { mount, shallow } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
 import { act } from '@testing-library/react';
 
-import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
+import { stubIndexPattern } from 'src/plugins/data/common/stubs';
 import { StepAboutRule } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
@@ -35,7 +35,7 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name, @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     EuiFieldText: (props: any) => {
       const { isInvalid, isLoading, fullWidth, inputRef, isDisabled, ...validInputProps } = props;
       return <input {...validInputProps} />;

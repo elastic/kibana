@@ -55,11 +55,10 @@ export interface ICluster {
   getHostUrls: () => string[];
 }
 
-export type EsTestCluster<
-  Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions
-> = Options['nodes'] extends TestEsClusterNodesOptions[]
-  ? ICluster
-  : ICluster & { getUrl: () => string }; // Only allow use of `getUrl` if `nodes` option isn't provided.
+export type EsTestCluster<Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions> =
+  Options['nodes'] extends TestEsClusterNodesOptions[]
+    ? ICluster
+    : ICluster & { getUrl: () => string }; // Only allow use of `getUrl` if `nodes` option isn't provided.
 
 export interface CreateTestEsClusterOptions {
   basePath?: string;

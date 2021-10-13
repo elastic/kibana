@@ -12,11 +12,13 @@ import { shallow, mount, ReactWrapper } from 'enzyme';
 import { I18nProvider, __IntlProvider } from '@kbn/i18n/react';
 
 // Use fake component to extract `intl` property to use in tests.
-const { intl } = (mount(
-  <I18nProvider>
-    <br />
-  </I18nProvider>
-).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>)
+const { intl } = (
+  mount(
+    <I18nProvider>
+      <br />
+    </I18nProvider>
+  ).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>
+)
   .instance()
   .getChildContext();
 

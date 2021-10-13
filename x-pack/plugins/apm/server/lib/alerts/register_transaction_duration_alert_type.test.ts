@@ -12,12 +12,8 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 
 describe('registerTransactionDurationAlertType', () => {
   it('sends alert when value is greater than threashold', async () => {
-    const {
-      services,
-      dependencies,
-      executor,
-      scheduleActions,
-    } = createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } =
+      createRuleTypeMocks();
 
     registerTransactionDurationAlertType(dependencies);
 
@@ -59,7 +55,7 @@ describe('registerTransactionDurationAlertType', () => {
       transactionType: 'request',
       serviceName: 'opbeans-java',
       environment: 'Not defined',
-      threshold: 3000,
+      threshold: 3000000,
       triggerValue: '5,500 ms',
       interval: `5m`,
     });

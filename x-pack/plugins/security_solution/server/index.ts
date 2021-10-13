@@ -20,7 +20,8 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     enableExperimental: true,
   },
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ deprecate, renameFromRoot }) => [
+    deprecate('enabled', '8.0.0'),
     renameFromRoot('xpack.siem.enabled', 'xpack.securitySolution.enabled'),
     renameFromRoot(
       'xpack.siem.maxRuleImportExportSize',

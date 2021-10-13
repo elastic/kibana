@@ -38,10 +38,8 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
 
         const alerts = AlertsFactory.getAll();
         if (alerts.length) {
-          const {
-            isSufficientlySecure,
-            hasPermanentEncryptionKey,
-          } = await AlertingSecurity.getSecurityHealth(context, npRoute.encryptedSavedObjects);
+          const { isSufficientlySecure, hasPermanentEncryptionKey } =
+            await AlertingSecurity.getSecurityHealth(context, npRoute.encryptedSavedObjects);
 
           if (!isSufficientlySecure || !hasPermanentEncryptionKey) {
             server.log.info(

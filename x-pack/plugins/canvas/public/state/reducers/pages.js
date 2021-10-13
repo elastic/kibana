@@ -123,7 +123,7 @@ export const pagesReducer = handleActions(
           newState = addPage(newState);
         }
 
-        if (wasOnlyPage) {
+        if (wasOnlyPage || curIndex === 0) {
           newState = set(newState, 'page', 0);
           gotoPage(1);
         } else if (wasSelected || delIndex < curIndex) {

@@ -188,9 +188,11 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onCreateOption: (a: string) => void;
-    }).onCreateOption('127.0.0.1');
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onCreateOption: (a: string) => void;
+      }
+    ).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith('127.0.0.1');
   });
@@ -216,9 +218,11 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'value 1' }]);
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'value 1' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith('value 1');
   });
@@ -243,9 +247,11 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
     act(() => {
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onSearchChange: (a: string) => void;
-      }).onSearchChange('value 1');
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onSearchChange: (a: string) => void;
+        }
+      ).onSearchChange('value 1');
     });
 
     expect(useFieldValueAutocomplete).toHaveBeenCalledWith({
@@ -331,9 +337,11 @@ describe('AutocompleteFieldMatchComponent', () => {
         />
       );
 
-      ((wrapper.find(EuiSuperSelect).props() as unknown) as {
-        onChange: (a: string) => void;
-      }).onChange('true');
+      (
+        wrapper.find(EuiSuperSelect).props() as unknown as {
+          onChange: (a: string) => void;
+        }
+      ).onChange('true');
 
       expect(mockOnChange).toHaveBeenCalledWith('true');
     });
@@ -359,9 +367,11 @@ describe('AutocompleteFieldMatchComponent', () => {
         />
       );
 
-      ((wrapper.find(EuiSuperSelect).props() as unknown) as {
-        onChange: (a: string) => void;
-      }).onChange('false');
+      (
+        wrapper.find(EuiSuperSelect).props() as unknown as {
+          onChange: (a: string) => void;
+        }
+      ).onChange('false');
 
       expect(mockOnChange).toHaveBeenCalledWith('false');
     });

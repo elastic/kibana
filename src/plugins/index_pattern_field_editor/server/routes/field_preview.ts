@@ -54,7 +54,7 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
           body,
         });
 
-        const fieldValue = (response.body.result as any[]) as HttpResponsePayload;
+        const fieldValue = response.body.result as any[] as HttpResponsePayload;
 
         return res.ok({ body: { values: fieldValue } });
       } catch (error) {

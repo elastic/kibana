@@ -6,15 +6,13 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { NumericField } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../form';
-import { ROLLOVER_FORM_PATHS } from '../../../../constants';
-import { UnitField } from './unit_field';
-
-import { maxSizeStoredUnits } from '../constants';
+import { byteSizeUnits, ROLLOVER_FORM_PATHS } from '../../../../constants';
+import { i18nTexts } from '../../../../i18n_texts';
+import { UnitField } from '../../shared_fields/unit_field';
 
 export const MaxPrimaryShardSizeField: FunctionComponent = () => {
   return (
@@ -30,15 +28,10 @@ export const MaxPrimaryShardSizeField: FunctionComponent = () => {
               append: (
                 <UnitField
                   path="_meta.hot.customRollover.maxPrimaryShardSizeUnit"
-                  options={maxSizeStoredUnits}
+                  options={byteSizeUnits}
                   euiFieldProps={{
                     'data-test-subj': 'hot-selectedMaxPrimaryShardSizeUnits',
-                    'aria-label': i18n.translate(
-                      'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardSizeAriaLabel',
-                      {
-                        defaultMessage: 'Maximum primary shard size units',
-                      }
-                    ),
+                    'aria-label': i18nTexts.editPolicy.maxPrimaryShardSizeUnitsLabel,
                   }}
                 />
               ),

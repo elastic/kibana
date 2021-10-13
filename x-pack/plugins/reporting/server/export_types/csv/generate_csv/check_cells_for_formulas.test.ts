@@ -87,7 +87,7 @@ describe(`Check CSV Injected values`, () => {
           {
             _doc: 'foo-bar',
             // need to assert non-string values still return false
-            value: (nonRow as unknown) as string,
+            value: nonRow as unknown as string,
             title: 'nice',
           },
           ['_doc', 'value', 'title']

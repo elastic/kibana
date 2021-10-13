@@ -49,6 +49,8 @@ describe('action_connector_form', () => {
         dispatch={() => {}}
         errors={{ name: [] }}
         actionTypeRegistry={actionTypeRegistry}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     const connectorNameField = wrapper?.find('[data-test-subj="nameInput"]');

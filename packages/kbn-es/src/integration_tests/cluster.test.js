@@ -8,9 +8,11 @@
 
 const {
   ToolingLog,
+  ToolingLogCollectingWriter,
   ES_P12_PATH,
   ES_P12_PASSWORD,
   createAnyInstanceSerializer,
+  createStripAnsiSerializer,
 } = require('@kbn/dev-utils');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
@@ -18,6 +20,7 @@ const { installSource, installSnapshot, installArchive } = require('../install')
 const { extractConfigFiles } = require('../utils/extract_config_files');
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
+expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 jest.mock('../install', () => ({
   installSource: jest.fn(),
@@ -31,6 +34,8 @@ jest.mock('../utils/extract_config_files', () => ({
 }));
 
 const log = new ToolingLog();
+const logWriter = new ToolingLogCollectingWriter();
+log.setWriters([logWriter]);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -76,6 +81,8 @@ const initialEnv = { ...process.env };
 beforeEach(() => {
   jest.resetAllMocks();
   extractConfigFiles.mockImplementation((config) => config);
+  log.indent(-log.getIndent());
+  logWriter.messages.length = 0;
 });
 
 afterEach(() => {
@@ -107,11 +114,21 @@ describe('#installSource()', () => {
     installSource.mockResolvedValue({});
     const cluster = new Cluster({ log });
     await cluster.installSource({ foo: 'bar' });
-    expect(installSource).toHaveBeenCalledTimes(1);
-    expect(installSource).toHaveBeenCalledWith({
-      log,
-      foo: 'bar',
-    });
+    expect(installSource.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "foo": "bar",
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+        " info source[@kbn/es Cluster] Installing from source",
+      ]
+    `);
   });
 
   it('rejects if installSource() rejects', async () => {
@@ -146,11 +163,21 @@ describe('#installSnapshot()', () => {
     installSnapshot.mockResolvedValue({});
     const cluster = new Cluster({ log });
     await cluster.installSnapshot({ foo: 'bar' });
-    expect(installSnapshot).toHaveBeenCalledTimes(1);
-    expect(installSnapshot).toHaveBeenCalledWith({
-      log,
-      foo: 'bar',
-    });
+    expect(installSnapshot.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "foo": "bar",
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+        " info source[@kbn/es Cluster] Installing from snapshot",
+      ]
+    `);
   });
 
   it('rejects if installSnapshot() rejects', async () => {
@@ -185,11 +212,22 @@ describe('#installArchive(path)', () => {
     installArchive.mockResolvedValue({});
     const cluster = new Cluster({ log });
     await cluster.installArchive('path', { foo: 'bar' });
-    expect(installArchive).toHaveBeenCalledTimes(1);
-    expect(installArchive).toHaveBeenCalledWith('path', {
-      log,
-      foo: 'bar',
-    });
+    expect(installArchive.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "path",
+          Object {
+            "foo": "bar",
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+        " info source[@kbn/es Cluster] Installing from an archive",
+      ]
+    `);
   });
 
   it('rejects if installArchive() rejects', async () => {
@@ -368,7 +406,7 @@ describe('#run()', () => {
     const cluster = new Cluster({ log });
     await cluster.run();
 
-    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toEqual('-Xms1g -Xmx1g');
+    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(`"-Xms1536m -Xmx1536m"`);
   });
 
   it('allows Java heap to be overwritten', async () => {
@@ -378,7 +416,7 @@ describe('#run()', () => {
     const cluster = new Cluster({ log });
     await cluster.run();
 
-    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toEqual('-Xms5g -Xmx5g');
+    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(`"-Xms5g -Xmx5g"`);
   });
 });
 

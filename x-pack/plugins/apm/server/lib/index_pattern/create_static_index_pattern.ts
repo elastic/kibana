@@ -8,7 +8,7 @@
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
 import apmIndexPattern from '../../tutorial/index_pattern.json';
-import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
+import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client.js';
@@ -34,7 +34,7 @@ export async function createStaticIndexPattern({
 }): Promise<boolean> {
   return withApmSpan('create_static_index_pattern', async () => {
     // don't autocreate APM index pattern if it's been disabled via the config
-    if (!config['xpack.apm.autocreateApmIndexPattern']) {
+    if (!config.autocreateApmIndexPattern) {
       return false;
     }
 
@@ -91,10 +91,11 @@ async function getForceOverwrite({
 }) {
   if (!overwrite) {
     try {
-      const existingIndexPattern = await savedObjectsClient.get<ApmIndexPatternAttributes>(
-        'index-pattern',
-        APM_STATIC_INDEX_PATTERN_ID
-      );
+      const existingIndexPattern =
+        await savedObjectsClient.get<ApmIndexPatternAttributes>(
+          'index-pattern',
+          APM_STATIC_INDEX_PATTERN_ID
+        );
 
       // if the existing index pattern does not matches the new one, force an update
       return existingIndexPattern.attributes.title !== apmIndexPatternTitle;

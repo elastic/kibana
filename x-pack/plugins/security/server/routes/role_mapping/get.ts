@@ -28,9 +28,10 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
       const expectSingleEntity = typeof request.params.name === 'string';
 
       try {
-        const roleMappingsResponse = await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping(
-          { name: request.params.name }
-        );
+        const roleMappingsResponse =
+          await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping({
+            name: request.params.name,
+          });
 
         const mappings = Object.entries(roleMappingsResponse.body).map(([name, mapping]) => {
           return {

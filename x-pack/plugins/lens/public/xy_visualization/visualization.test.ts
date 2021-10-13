@@ -15,6 +15,7 @@ import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { Datatable } from 'src/plugins/expressions';
 
 function exampleState(): State {
   return {
@@ -216,8 +217,8 @@ describe('xy_visualization', () => {
   });
 
   describe('#getSupportedLayers', () => {
-    it('should return a single layer type', () => {
-      expect(xyVisualization.getSupportedLayers()).toHaveLength(1);
+    it('should return a double layer types', () => {
+      expect(xyVisualization.getSupportedLayers()).toHaveLength(2);
     });
 
     it('should return the icon for the visualization type', () => {
@@ -315,6 +316,39 @@ describe('xy_visualization', () => {
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
+      });
+    });
+
+    it('should add a dimension to a threshold layer', () => {
+      expect(
+        xyVisualization.setDimension({
+          frame,
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'threshold',
+                layerType: layerTypes.THRESHOLD,
+                seriesType: 'line',
+                accessors: [],
+              },
+            ],
+          },
+          layerId: 'threshold',
+          groupId: 'xThreshold',
+          columnId: 'newCol',
+        }).layers[0]
+      ).toEqual({
+        layerId: 'threshold',
+        layerType: layerTypes.THRESHOLD,
+        seriesType: 'line',
+        accessors: ['newCol'],
+        yConfig: [
+          {
+            axisMode: 'bottom',
+            forAccessor: 'newCol',
+          },
+        ],
       });
     });
   });
@@ -502,6 +536,300 @@ describe('xy_visualization', () => {
         { ...exampleOperation, dataType: 'date' },
       ];
       expect(ops.filter(filterOperations).map((x) => x.dataType)).toEqual(['number']);
+    });
+
+    describe('thresholds', () => {
+      beforeEach(() => {
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+          threshold: mockDatasource.publicAPIMock,
+        };
+      });
+
+      function getStateWithBaseThreshold(): State {
+        return {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+              accessors: ['a'],
+            },
+            {
+              layerId: 'threshold',
+              layerType: layerTypes.THRESHOLD,
+              seriesType: 'line',
+              accessors: [],
+              yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
+            },
+          ],
+        };
+      }
+
+      it('should support static value', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = undefined;
+
+        expect(
+          xyVisualization.getConfiguration({
+            state: getStateWithBaseThreshold(),
+            frame,
+            layerId: 'threshold',
+          }).supportStaticValue
+        ).toBeTruthy();
+      });
+
+      it('should return no threshold groups for a empty data layer', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = undefined;
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should return a group for the vertical left axis', () => {
+        const options = xyVisualization.getConfiguration({
+          state: getStateWithBaseThreshold(),
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(1);
+        expect(options[0].groupId).toBe('yThresholdLeft');
+      });
+
+      it('should return a group for the vertical right axis', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].yConfig = [{ axisMode: 'right', forAccessor: 'a' }];
+        state.layers[1].yConfig![0].axisMode = 'right';
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(1);
+        expect(options[0].groupId).toBe('yThresholdRight');
+      });
+
+      it('should compute no groups for thresholds when the only data accessor available is a date histogram', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = []; // empty the configuration
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should mark horizontal group is invalid when xAccessor is changed to a date histogram', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig![0].axisMode = 'bottom';
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options[0]).toEqual(
+          expect.objectContaining({
+            invalid: true,
+            groupId: 'xThreshold',
+          })
+        );
+      });
+
+      it('should return groups in a specific order (left, right, bottom)', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'c';
+        state.layers[0].accessors = ['a', 'b'];
+        // invert them on purpose
+        state.layers[0].yConfig = [
+          { axisMode: 'right', forAccessor: 'b' },
+          { axisMode: 'left', forAccessor: 'a' },
+        ];
+        state.layers[1].yConfig = [
+          { forAccessor: 'c', axisMode: 'bottom' },
+          { forAccessor: 'b', axisMode: 'right' },
+          { forAccessor: 'a', axisMode: 'left' },
+        ];
+        // set the xAccessor as number histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'c') {
+            return {
+              dataType: 'number',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'histogram',
+            };
+          }
+          return null;
+        });
+
+        const [left, right, bottom] = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(left.groupId).toBe('yThresholdLeft');
+        expect(right.groupId).toBe('yThresholdRight');
+        expect(bottom.groupId).toBe('xThreshold');
+      });
+
+      it('should ignore terms operation for xAccessor', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = []; // empty the configuration
+        // set the xAccessor as top values
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'string',
+              isBucketed: true,
+              scale: 'ordinal',
+              label: 'top values',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should mark horizontal group is invalid when accessor is changed to a terms operation', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig![0].axisMode = 'bottom';
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'string',
+              isBucketed: true,
+              scale: 'ordinal',
+              label: 'top values',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options[0]).toEqual(
+          expect.objectContaining({
+            invalid: true,
+            groupId: 'xThreshold',
+          })
+        );
+      });
+
+      it('differ vertical axis if the formatters are not compatibles between each other', () => {
+        const tables: Record<string, Datatable> = {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [
+              {
+                id: 'xAccessorId',
+                name: 'horizontal axis',
+                meta: {
+                  type: 'date',
+                  params: { params: { id: 'date', params: { pattern: 'HH:mm' } } },
+                },
+              },
+              {
+                id: 'yAccessorId',
+                name: 'left axis',
+                meta: {
+                  type: 'number',
+                  params: { id: 'number' },
+                },
+              },
+              {
+                id: 'yAccessorId2',
+                name: 'right axis',
+                meta: {
+                  type: 'number',
+                  params: { id: 'bytes' },
+                },
+              },
+            ],
+          },
+        };
+
+        const state = getStateWithBaseThreshold();
+        state.layers[0].accessors = ['yAccessorId', 'yAccessorId2'];
+        state.layers[1].yConfig = []; // empty the configuration
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame: { ...frame, activeData: tables },
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ groupId: 'yThresholdLeft' }),
+            expect.objectContaining({ groupId: 'yThresholdRight' }),
+          ])
+        );
+      });
     });
 
     describe('color assignment', () => {
@@ -926,18 +1254,18 @@ describe('xy_visualization', () => {
       };
       datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
         id === 'a'
-          ? (({
+          ? ({
               dataType: 'date',
               scale: 'interval',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
         id === 'e'
-          ? (({
+          ? ({
               dataType: 'number',
               scale: 'interval',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       expect(
@@ -982,18 +1310,18 @@ describe('xy_visualization', () => {
       };
       datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
         id === 'a'
-          ? (({
+          ? ({
               dataType: 'date',
               scale: 'interval',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
         id === 'e'
-          ? (({
+          ? ({
               dataType: 'string',
               scale: 'ordinal',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       expect(

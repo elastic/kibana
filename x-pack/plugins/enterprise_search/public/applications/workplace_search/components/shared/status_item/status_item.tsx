@@ -11,7 +11,6 @@ import {
   EuiCopy,
   EuiButton,
   EuiButtonIcon,
-  EuiToolTip,
   EuiSpacer,
   EuiCodeBlock,
   EuiPopover,
@@ -30,19 +29,17 @@ export const StatusItem: React.FC<StatusItemProps> = ({ details }) => {
   const closePopover = () => setIsPopoverOpen(false);
   const formattedDetails = details.join('\n');
 
-  const tooltipPopoverTrigger = (
-    <EuiToolTip position="top" content={STATUS_POPOVER_TOOLTIP}>
-      <EuiButtonIcon
-        onClick={onButtonClick}
-        color="text"
-        iconType="questionInCircle"
-        aria-label={STATUS_POPOVER_TOOLTIP}
-      />
-    </EuiToolTip>
+  const popoverTrigger = (
+    <EuiButtonIcon
+      onClick={onButtonClick}
+      color="text"
+      iconType="questionInCircle"
+      aria-label={STATUS_POPOVER_TOOLTIP}
+    />
   );
 
   const infoPopover = (
-    <EuiPopover button={tooltipPopoverTrigger} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover button={popoverTrigger} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiCodeBlock
         language="bash"
         fontSize="m"

@@ -21,7 +21,7 @@ import {
   createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
   caseConnectorMappingsSavedObjectType,
-  caseSavedObjectType,
+  createCaseSavedObjectType,
   caseUserActionSavedObjectType,
   subCaseSavedObjectType,
 } from './saved_object_types';
@@ -94,7 +94,7 @@ export class CasePlugin {
     );
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
-    core.savedObjects.registerType(caseSavedObjectType);
+    core.savedObjects.registerType(createCaseSavedObjectType(core, this.log));
     core.savedObjects.registerType(caseUserActionSavedObjectType);
 
     this.log.debug(

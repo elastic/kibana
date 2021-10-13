@@ -96,7 +96,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     updateDateRange,
     titleSize = 'm',
   }) => {
-    const { to, from, deleteQuery, setQuery } = useGlobalTime();
+    const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
@@ -247,10 +247,10 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       }
     }, [showLinkToAlerts, goToDetectionEngine, formatUrl]);
 
-    const titleText = useMemo(() => (onlyField == null ? title : i18n.TOP(onlyField)), [
-      onlyField,
-      title,
-    ]);
+    const titleText = useMemo(
+      () => (onlyField == null ? title : i18n.TOP(onlyField)),
+      [onlyField, title]
+    );
 
     return (
       <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>

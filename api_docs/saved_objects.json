@@ -561,14 +561,6 @@
         "deprecated": true,
         "references": [
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
-          },
-          {
             "plugin": "discover",
             "path": "src/plugins/discover/public/saved_searches/saved_searches.ts"
           },
@@ -583,6 +575,14 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/plugin.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
           },
           {
             "plugin": "visualizations",
@@ -655,38 +655,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/services/service_registry.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/services/service_registry.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx"
-          },
-          {
-            "plugin": "timelion",
-            "path": "src/plugins/timelion/public/services/saved_sheets.ts"
-          },
-          {
-            "plugin": "timelion",
-            "path": "src/plugins/timelion/public/services/saved_sheets.ts"
           }
         ],
         "children": [
@@ -766,7 +734,7 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
@@ -1104,20 +1072,20 @@
             "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
-          },
-          {
             "plugin": "presentationUtil",
             "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
           {
             "plugin": "presentationUtil",
             "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
           },
           {
             "plugin": "dashboard",
@@ -1251,9 +1219,9 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
+          ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
-          ", \"savedObjectsClient\" | \"overlays\">) => Promise<true>"
+          ", \"overlays\" | \"savedObjectsClient\">) => Promise<true>"
         ],
         "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
         "deprecated": false,
@@ -1274,7 +1242,7 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
+              ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
@@ -1318,7 +1286,7 @@
             "signature": [
               "Pick<",
               "SavedObjectKibanaServices",
-              ", \"savedObjectsClient\" | \"overlays\">"
+              ", \"overlays\" | \"savedObjectsClient\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
@@ -1519,7 +1487,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">; overlays: ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"bulkUpdate\">; overlays: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1719,7 +1687,15 @@
                     "section": "def-public.SavedObjectsBatchResponse",
                     "text": "SavedObjectsBatchResponse"
                   },
-                  "<unknown>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
+                  "<unknown>>; bulkResolve: <T = unknown>(objects?: { id: string; type: string; }[]) => Promise<{ resolved_objects: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.ResolvedSimpleSavedObject",
+                    "text": "ResolvedSimpleSavedObject"
+                  },
+                  "<T>[]; }>; resolve: <T = unknown>(type: string, id: string) => Promise<",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -2127,14 +2103,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/types.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/types.ts"
-          },
-          {
             "plugin": "discover",
             "path": "src/plugins/discover/public/saved_searches/_saved_search.ts"
           },
@@ -2518,9 +2486,9 @@
             "signature": [
               "((id?: string | undefined) => Promise<",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -2953,9 +2921,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -3860,10 +3828,6 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-            },
-            {
-              "plugin": "timelion",
-              "path": "src/plugins/timelion/public/services/_saved_sheet.ts"
             }
           ]
         },

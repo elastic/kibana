@@ -46,7 +46,7 @@ export function ServiceOverview() {
       rangeTo,
       transactionType: transactionTypeFromUrl,
     },
-  } = useApmParams('/services/:serviceName/overview');
+  } = useApmParams('/services/{serviceName}/overview');
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
@@ -73,7 +73,7 @@ export function ServiceOverview() {
   const isIosAgent = isIosAgentName(agentName);
 
   const router = useApmRouter();
-  const dependenciesLink = router.link('/services/:serviceName/dependencies', {
+  const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
     path: {
       serviceName,
     },
@@ -163,7 +163,7 @@ export function ServiceOverview() {
                 <TransactionBreakdownChart
                   showAnnotations={false}
                   environment={environment}
-                  kuery={environment}
+                  kuery={kuery}
                 />
               </EuiFlexItem>
               {!isRumAgent && (

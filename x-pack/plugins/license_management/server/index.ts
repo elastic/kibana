@@ -17,4 +17,5 @@ export const config: PluginConfigDescriptor<LicenseManagementConfig> = {
   exposeToBrowser: {
     ui: true,
   },
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };
