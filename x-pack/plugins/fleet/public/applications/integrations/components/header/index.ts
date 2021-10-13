@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
-import { XpackLegacyPlugin } from './plugin';
-
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new XpackLegacyPlugin(initializerContext);
+export { IntegrationsHeader } from './header';

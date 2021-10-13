@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('Settings', () => {
-    loadTestFile(require.resolve('./settings'));
-  });
-}
+export { CurationChangesPanel } from './curation_changes_panel';
+export { IgnoredSuggestionsPanel } from './ignored_suggestions_panel';
+export { RejectedCurationsPanel } from './rejected_curations_panel';
