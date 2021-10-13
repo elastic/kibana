@@ -34,7 +34,7 @@ export async function createStaticDataView({
 }): Promise<boolean> {
   return withApmSpan('create_static_data_view', async () => {
     // don't autocreate APM data view if it's been disabled via the config
-    if (!config['xpack.apm.autocreateApmIndexPattern']) {
+    if (!config.autocreateApmIndexPattern) {
       return false;
     }
 

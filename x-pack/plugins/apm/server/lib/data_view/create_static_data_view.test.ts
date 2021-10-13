@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 import { createStaticDataView } from './create_static_data_view';
 import { Setup } from '../helpers/setup_request';
 import * as HistoricalAgentData from '../../routes/historical_data/has_historical_agent_data';
@@ -25,11 +24,11 @@ function getMockSavedObjectsClient(existingDataViewTitle: string) {
 
 const setup = {
   indices: {
-    'apm_oss.transactionIndices': 'apm-*-transaction-*',
-    'apm_oss.spanIndices': 'apm-*-span-*',
-    'apm_oss.errorIndices': 'apm-*-error-*',
-    'apm_oss.metricsIndices': 'apm-*-metrics-*',
-  },
+    transaction: 'apm-*-transaction-*',
+    span: 'apm-*-span-*',
+    error: 'apm-*-error-*',
+    metric: 'apm-*-metrics-*',
+  } as APMConfig['indices'],
 } as unknown as Setup;
 
 describe('createStaticDataView', () => {
@@ -37,7 +36,7 @@ describe('createStaticDataView', () => {
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
     await createStaticDataView({
       setup,
-      config: { 'xpack.apm.autocreateApmIndexPattern': false } as APMConfig,
+      config: { autocreateApmIndexPattern: false } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -54,7 +53,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -71,7 +70,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -91,9 +90,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: {
-        'xpack.apm.autocreateApmIndexPattern': true,
-      } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -120,9 +117,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: {
-        'xpack.apm.autocreateApmIndexPattern': true,
-      } as APMConfig,
+      config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
