@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
                 '__internal_rule_id:82747bb8-bae0-4b59-8119-7f65ac564e14',
                 '__internal_immutable:false',
               ],
-              alertTypeId: 'siem.signals',
+              alertTypeId: 'siem.queryRule',
               consumer: 'siem',
               params: {
                 author: [],
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
                 from: 'now-3615s',
                 immutable: false,
                 license: '',
-                outputIndex: '.siem-signals-devin-hurley-714-space',
+                outputIndex: '',
                 meta: {
                   from: '1h',
                   kibana_siem_app_url: 'http://0.0.0.0:5601/s/714-space/app/security',
