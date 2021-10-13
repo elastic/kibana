@@ -8,21 +8,21 @@ if [[ "$(buildkite-agent meta-data get bootstrap_available --default '')" == "tr
   echo "--- Download and extract bootstrap archive"
   buildkite-agent artifact download "bootstrap.tar" "$WORKSPACE"
   tar -xf "$WORKSPACE/bootstrap.tar"
-else
-  echo "--- yarn install and bootstrap"
-  retry 2 15 yarn kbn bootstrap
+fi
 
-  ###
-  ### upload ts-refs-cache artifacts as quickly as possible so they are available for download
-  ###
-  if [[ "${BUILD_TS_REFS_CACHE_CAPTURE:-}" == "true" ]]; then
-    echo "--- Upload ts-refs-cache"
-    cd "$KIBANA_DIR/target/ts_refs_cache"
-    gsutil cp "*.zip" 'gs://kibana-ci-ts-refs-cache/'
-    cd "$KIBANA_DIR"
-  fi
+echo "--- yarn install and bootstrap"
+retry 2 15 yarn kbn bootstrap
 
-  if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
-    verify_no_git_changes 'yarn kbn bootstrap'
-  fi
+###
+### upload ts-refs-cache artifacts as quickly as possible so they are available for download
+###
+if [[ "${BUILD_TS_REFS_CACHE_CAPTURE:-}" == "true" ]]; then
+  echo "--- Upload ts-refs-cache"
+  cd "$KIBANA_DIR/target/ts_refs_cache"
+  gsutil cp "*.zip" 'gs://kibana-ci-ts-refs-cache/'
+  cd "$KIBANA_DIR"
+fi
+
+if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
+  verify_no_git_changes 'yarn kbn bootstrap'
 fi
