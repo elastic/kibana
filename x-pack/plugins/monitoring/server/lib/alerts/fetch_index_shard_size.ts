@@ -11,12 +11,8 @@ import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../comm
 import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
 import { Globals } from '../../static_globals';
 
-interface SourceNode {
-  name: string;
-  uuid: string;
-}
 type TopHitType = ElasticsearchResponseHit & {
-  _source: { index_stats?: Partial<ElasticsearchIndexStats>; source_node?: SourceNode };
+  _source: { index_stats?: Partial<ElasticsearchIndexStats> };
 };
 
 const memoizedIndexPatterns = (globPatterns: string) => {
