@@ -10944,7 +10944,6 @@
     "xpack.fleet.preconfiguration.missingIDError": "{agentPolicyName}には「id」フィールドがありません。ポリシーのis_defaultまたはis_default_fleet_serverに設定されている場合をのぞき、「id」は必須です。",
     "xpack.fleet.preconfiguration.packageMissingError": "{agentPolicyName}を追加できませんでした。{pkgName}がインストールされていません。{pkgName}を`{packagesConfigValue}`に追加するか、{packagePolicyName}から削除してください。",
     "xpack.fleet.preconfiguration.policyDeleted": "構成済みのポリシー{id}が削除されました。作成をスキップしています",
-    "xpack.fleet.securityRequiredErrorTitle": "セキュリティが有効ではありません",
     "xpack.fleet.serverError.agentPolicyDoesNotExist": "エージェントポリシー{agentPolicyId}が存在しません",
     "xpack.fleet.serverError.enrollmentKeyDuplicate": "エージェントポリシーの{agentPolicyId}登録キー{providedKeyName}はすでに存在します",
     "xpack.fleet.serverError.returnedIncorrectKey": "find enrollmentKeyByIdで正しくないキーが返されました",

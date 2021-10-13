@@ -11058,7 +11058,6 @@
     "xpack.fleet.preconfiguration.missingIDError": "{agentPolicyName} 缺失 `id` 字段。`id` 是必需的，但标记为 is_default 或 is_default_fleet_server 的策略除外。",
     "xpack.fleet.preconfiguration.packageMissingError": "{agentPolicyName} 无法添加。{pkgName} 未安装，请将 {pkgName} 添加到 `{packagesConfigValue}` 或将其从 {packagePolicyName} 中移除。",
     "xpack.fleet.preconfiguration.policyDeleted": "预配置的策略 {id} 已删除；将跳过创建",
-    "xpack.fleet.securityRequiredErrorTitle": "安全性未启用",
     "xpack.fleet.serverError.agentPolicyDoesNotExist": "代理策略 {agentPolicyId} 不存在",
     "xpack.fleet.serverError.enrollmentKeyDuplicate": "称作 {providedKeyName} 的注册密钥对于代理策略 {agentPolicyId} 已存在",
     "xpack.fleet.serverError.returnedIncorrectKey": "find enrollmentKeyById 返回错误的密钥",
