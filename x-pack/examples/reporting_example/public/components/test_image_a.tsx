@@ -17,6 +17,7 @@ export const TestImageA: FunctionComponent<Props> = ({
 }) => {
   return (
     <img
+      data-shared-item
       width={width}
       height={height}
       src={`data:image/jpeg;base64, ${testImage}`}

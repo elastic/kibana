@@ -124,7 +124,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     };
   };
 
-  const getCatptureTestPNGJobParams = (): JobParamsPNGV2 => {
+  const getCaptureTestPNGJobParams = (): JobParamsPNGV2 => {
     return {
       version: '8.0.0',
       layout: {
@@ -135,6 +135,25 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
         version: '0.5.0',
         params: { captureTest: 'A' } as MyForwardableState,
       },
+      objectType: 'develeloperExample',
+      title: 'Reporting Developer Example',
+      browserTimezone: moment.tz.guess(),
+    };
+  };
+
+  const getCaptureTestPDFJobParams = (): JobParamsPDFV2 => {
+    return {
+      version: '8.0.0',
+      layout: {
+        id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+      },
+      locatorParams: [
+        {
+          id: REPORTING_EXAMPLE_LOCATOR_ID,
+          version: '0.5.0',
+          params: { captureTest: 'A' } as MyForwardableState,
+        },
+      ],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
       browserTimezone: moment.tz.guess(),
@@ -164,7 +183,26 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 8,
       initialFocusedItemIndex: 0,
       title: 'Capture test',
-      items: [{ name: 'Capture test A', icon: 'document', panel: 9 }],
+      items: [
+        {
+          name: 'Capture test A - PNG',
+          icon: 'document',
+          panel: 9,
+          'data-test-subj': 'captureTestPNG',
+        },
+        {
+          name: 'Capture test A - PDF',
+          icon: 'document',
+          panel: 10,
+          'data-test-subj': 'captureTestPDF',
+        },
+        {
+          name: 'Capture test A - PDF print optimized',
+          icon: 'document',
+          panel: 11,
+          'data-test-subj': 'captureTestPDFPrint',
+        },
+      ],
     },
     {
       id: 7,
@@ -215,10 +253,31 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     },
     {
       id: 9,
-      title: 'Print optimised PNG',
+      title: 'Test A',
       content: (
         <reporting.components.ReportingPanelPNGV2
-          getJobParams={getCatptureTestPNGJobParams}
+          getJobParams={getCaptureTestPNGJobParams}
+          onClose={closePopover}
+        />
+      ),
+    },
+    {
+      id: 10,
+      title: 'Test A',
+      content: (
+        <reporting.components.ReportingPanelPDFV2
+          getJobParams={getCaptureTestPDFJobParams}
+          onClose={closePopover}
+        />
+      ),
+    },
+    {
+      id: 11,
+      title: 'Test A',
+      content: (
+        <reporting.components.ReportingPanelPDFV2
+          layoutOption="print"
+          getJobParams={getCaptureTestPDFJobParams}
           onClose={closePopover}
         />
       ),

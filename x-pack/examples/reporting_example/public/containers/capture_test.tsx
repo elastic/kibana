@@ -46,10 +46,10 @@ const tabs: Array<EuiTabbedContentTab & { id: MyForwardableState['captureTest'] 
     name: 'Test A',
     content: (
       <ItemsContainer count="4">
-        <TestImageA data-shared-item />
-        <TestImageA data-shared-item />
-        <TestImageA data-shared-item />
-        <TestImageA data-shared-item />
+        <TestImageA />
+        <TestImageA />
+        <TestImageA />
+        <TestImageA />
       </ItemsContainer>
     ),
   },
