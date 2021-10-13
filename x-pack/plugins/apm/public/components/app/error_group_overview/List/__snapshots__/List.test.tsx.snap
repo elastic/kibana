@@ -151,7 +151,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_handled_3"
             role="columnheader"
-            scope="col"
             style={
               Object {
                 "width": undefined,
@@ -447,7 +446,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_handled_3"
             role="columnheader"
-            scope="col"
             style={
               Object {
                 "width": undefined,
@@ -1265,6 +1263,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <nav
+          aria-label="Pagination for table: "
           className="euiPagination"
         >
           <button
@@ -1284,6 +1283,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             />
           </button>
           <ul
+            aria-label="Pagination for table: "
             className="euiPagination__list"
           >
             <li

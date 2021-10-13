@@ -86,7 +86,6 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             class="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_title_0"
             role="columnheader"
-            scope="col"
             style="width: 220px;"
           >
             <span
@@ -101,7 +100,6 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             class="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_description_1"
             role="columnheader"
-            scope="col"
           >
             <span
               class="euiTableCellContent"
@@ -748,7 +746,6 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_title_0"
             role="columnheader"
-            scope="col"
             style="width: 220px;"
           >
             <span
@@ -763,7 +760,6 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_description_1"
             role="columnheader"
-            scope="col"
           >
             <span
               class="euiTableCellContent"
