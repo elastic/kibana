@@ -87,7 +87,7 @@ async function getUsersDeprecations(
     {
       title: i18n.translate('xpack.security.deprecations.kibanaUser.deprecationTitle', {
         defaultMessage:
-          'The "{userRoleName}" role is deprecated in favor of "{adminRoleName}" role',
+          'The "{userRoleName}" role is deprecated. Use "{adminRoleName}" role instead.',
         values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
       }),
       message: i18n.translate('xpack.security.deprecations.kibanaUser.usersDeprecationMessage', {
@@ -156,7 +156,7 @@ async function getRoleMappingsDeprecations(
     {
       title: i18n.translate('xpack.security.deprecations.kibanaUser.deprecationTitle', {
         defaultMessage:
-          'The "{userRoleName}" role is deprecated in favor of "{adminRoleName}" role',
+          'The "{userRoleName}" role is deprecated. Use "{adminRoleName}" role instead.',
         values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
       }),
       message: i18n.translate(
@@ -196,7 +196,7 @@ async function getRoleMappingsDeprecations(
 
 function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsDetails[] {
   const title = i18n.translate('xpack.security.deprecations.kibanaUser.deprecationTitle', {
-    defaultMessage: 'The "{userRoleName}" role is deprecated in favor of "{adminRoleName}" role',
+    defaultMessage: 'The "{userRoleName}" role is deprecated. Use "{adminRoleName}" role instead.',
     values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
   });
 
