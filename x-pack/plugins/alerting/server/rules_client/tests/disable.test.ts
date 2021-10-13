@@ -18,6 +18,8 @@ import { InvalidatePendingApiKey } from '../../types';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { eventLoggerMock } from '../../../../event_log/server/event_logger.mock';
+import { TaskStatus } from '../../../../task_manager/server';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -26,6 +28,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const eventLogger = eventLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -44,6 +47,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  eventLogger,
 };
 
 beforeEach(() => {
@@ -215,6 +219,122 @@ describe('disable()', () => {
     expect(
       (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
     ).toBe('123');
+  });
+
+  test('disables the rule with calling event log to "recover" the alert instances from the task state', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '123',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
+    });
+    const scheduledTaskId = 'task-123';
+    taskManager.get.mockResolvedValue({
+      id: scheduledTaskId,
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {
+        alertInstances: {
+          '1': {
+            meta: {
+              lastScheduledActions: {
+                group: 'default',
+                subgroup: 'newSubgroup',
+                date: new Date().toISOString(),
+              },
+            },
+            state: { bar: false },
+          },
+        },
+      },
+      params: {},
+      ownerId: null,
+    });
+    await rulesClient.disable({ id: '1' });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        consumer: 'myApp',
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        enabled: false,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+        scheduledTaskId: null,
+        apiKey: null,
+        apiKeyOwner: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      {
+        version: '123',
+      }
+    );
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
+    expect(
+      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
+    ).toBe('123');
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "@timestamp": "1970-01-01T00:00:00.000Z",
+        "event": Object {
+          "action": "execute-start",
+          "category": Array [
+            "alerts",
+          ],
+          "kind": "alert",
+        },
+        "kibana": Object {
+          "saved_objects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "rel": "primary",
+              "type": "alert",
+              "type_id": "test",
+            },
+          ],
+          "task": Object {
+            "schedule_delay": 0,
+            "scheduled": "1970-01-01T00:00:00.000Z",
+          },
+        },
+        "message": "alert execution start: \\"1\\"",
+        "rule": Object {
+          "category": "test",
+          "id": "1",
+          "license": "basic",
+          "ruleset": "alerts",
+        },
+      }
+    `);
   });
 
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {

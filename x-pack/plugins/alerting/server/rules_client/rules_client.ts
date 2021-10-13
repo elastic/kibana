@@ -39,8 +39,6 @@ import {
   SanitizedAlertWithLegacyId,
   PartialAlertWithLegacyId,
   RawAlertInstance,
-  AlertInstanceState,
-  AlertType,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -63,10 +61,9 @@ import {
   AlertingAuthorizationFilterType,
   AlertingAuthorizationFilterOpts,
 } from '../authorization';
-import { IEventLogClient, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { IEvent, IEventLogClient, IEventLogger } from '../../../event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
-import { IEvent } from '../../../event_log/server';
 import { AuditLogger } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
@@ -78,6 +75,7 @@ import { mapSortField } from './lib';
 import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
 import { AlertInstance } from '../alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -519,9 +517,9 @@ export class RulesClient {
       entity: AlertingAuthorizationEntity.Rule,
     });
 
-    // default duration of instance summary is 60 * alert interval
+    // default duration of instance summary is 60 * alert interval, but no longer than 5 mins
     const dateNow = new Date();
-    const durationMillis = parseDuration(alert.schedule.interval) * 360;
+    const durationMillis = parseDuration(alert.schedule.interval) * 60;
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
     const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
 
@@ -1210,7 +1208,7 @@ export class RulesClient {
 
     const { state } = taskInstanceToAlertTaskInstance(
       await this.taskManager.get(attributes.scheduledTaskId!),
-      (attributes as unknown) as SanitizedAlert
+      attributes as unknown as SanitizedAlert
     );
 
     const recoveredAlertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(
@@ -1225,18 +1223,26 @@ export class RulesClient {
       const inststate = recoveredAlertInstances[instanceId].getState();
       const message = `instance '${instanceId}' has recovered`;
 
-      this.logInstanceEvent(
-        id,
-        attributes.name,
-        this.ruleTypeRegistry.get(attributes.alertTypeId),
+      const event = createAlertEventLogRecordObject({
+        ruleId: id,
+        ruleName: attributes.name,
+        ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
         instanceId,
-        EVENT_LOG_ACTIONS.recoveredInstance,
+        action: EVENT_LOG_ACTIONS.recoveredInstance,
         message,
-        inststate,
-        actionGroup,
-        actionSubgroup,
-        this.namespace
-      );
+        state: inststate,
+        group: actionGroup,
+        subgroup: actionSubgroup,
+        namespace: this.namespace,
+        savedObjects: [
+          {
+            id,
+            type: 'alert',
+            typeId: attributes.alertTypeId,
+          },
+        ],
+      });
+      this.eventLogger!.logEvent(event);
     }
 
     try {
@@ -1296,55 +1302,6 @@ export class RulesClient {
           : null,
       ]);
     }
-  }
-
-  private async logInstanceEvent(
-    ruleId: string,
-    ruleName: string,
-    ruleType: AlertType,
-    instanceId: string,
-    action: string,
-    message: string,
-    state: AlertInstanceState,
-    group?: string,
-    subgroup?: string,
-    namespace?: string
-  ) {
-    const event: IEvent = {
-      event: {
-        action,
-        kind: 'alert',
-        category: [ruleType.producer],
-        ...(state?.start ? { start: state.start as string } : {}),
-        ...(state?.end ? { end: state.end as string } : {}),
-        ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
-      },
-      kibana: {
-        alerting: {
-          instance_id: instanceId,
-          ...(group ? { action_group_id: group } : {}),
-          ...(subgroup ? { action_subgroup: subgroup } : {}),
-        },
-        saved_objects: [
-          {
-            rel: SAVED_OBJECT_REL_PRIMARY,
-            type: 'alert',
-            id: ruleId,
-            type_id: ruleType.id,
-            namespace,
-          },
-        ],
-      },
-      message,
-      rule: {
-        id: ruleId,
-        license: ruleType.minimumLicenseRequired,
-        category: ruleType.id,
-        ruleset: ruleType.producer,
-        name: ruleName,
-      },
-    };
-    this.eventLogger!.logEvent(event);
   }
 
   public async muteAll({ id }: { id: string }): Promise<void> {
