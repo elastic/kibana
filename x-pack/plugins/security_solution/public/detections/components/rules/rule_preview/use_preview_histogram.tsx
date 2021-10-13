@@ -26,7 +26,9 @@ export const usePreviewHistogram = ({ previewId, startDate, endDate }: PreviewHi
 
   const [spaceId, setSpaceId] = useState('');
   useEffect(() => {
-    spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
   }, [spaces]);
 
   const [filterQuery] = convertToBuildEsQuery({
