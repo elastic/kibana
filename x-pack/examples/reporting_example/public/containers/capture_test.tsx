@@ -17,7 +17,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
+  EuiPageHeader,
   EuiPageBody,
+  EuiPageContent,
   EuiPageContentBody,
 } from '@elastic/eui';
 
@@ -40,8 +42,8 @@ const ItemsContainer: FunctionComponent<{ count: string }> = ({ count, children 
 
 const tabs: Array<EuiTabbedContentTab & { id: MyForwardableState['captureTest'] }> = [
   {
-    id: 'printOptimized',
-    name: 'PDF print-optimized',
+    id: 'A',
+    name: 'Test A',
     content: (
       <ItemsContainer count="4">
         <TestImageA data-shared-item />
@@ -60,25 +62,29 @@ export const CaptureTest: FunctionComponent = () => {
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageContentBody>
-          <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="arrowLeft"
-                href={history.createHref(parsePath(ROUTES.main))}
-              >
-                Back to main
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-          <EuiTabbedContent
-            tabs={tabs}
-            initialSelectedTab={
-              tabToRender ? tabs.find((tab) => tab.id === tabToRender) : undefined
-            }
-          />
-        </EuiPageContentBody>
+        <EuiPageContent>
+          <EuiPageHeader>
+            <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="arrowLeft"
+                  href={history.createHref(parsePath(ROUTES.main))}
+                >
+                  Back to main
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageHeader>
+          <EuiPageContentBody>
+            <EuiSpacer />
+            <EuiTabbedContent
+              tabs={tabs}
+              initialSelectedTab={
+                tabToRender ? tabs.find((tab) => tab.id === tabToRender) : undefined
+              }
+            />
+          </EuiPageContentBody>
+        </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );

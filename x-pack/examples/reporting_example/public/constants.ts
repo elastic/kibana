@@ -6,6 +6,6 @@
  */
 
 export const ROUTES = {
-  captureTest: '/capture_test',
+  captureTest: '/captureTest',
   main: '/',
 };

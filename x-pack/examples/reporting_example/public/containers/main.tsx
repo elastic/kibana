@@ -42,6 +42,7 @@ import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';
+import type { MyForwardableState } from '../types';
 
 interface ReportingExampleAppProps {
   basename: string;
@@ -123,6 +124,23 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     };
   };
 
+  const getCatptureTestPNGJobParams = (): JobParamsPNGV2 => {
+    return {
+      version: '8.0.0',
+      layout: {
+        id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+      },
+      locatorParams: {
+        id: REPORTING_EXAMPLE_LOCATOR_ID,
+        version: '0.5.0',
+        params: { captureTest: 'A' } as MyForwardableState,
+      },
+      objectType: 'develeloperExample',
+      title: 'Reporting Developer Example',
+      browserTimezone: moment.tz.guess(),
+    };
+  };
+
   const panels: EuiContextMenuProps['panels'] = [
     {
       id: 0,
@@ -146,7 +164,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 8,
       initialFocusedItemIndex: 0,
       title: 'Capture test',
-      items: [{ name: 'Print optimised PDF', icon: 'document', panel: 9 }],
+      items: [{ name: 'Capture test A', icon: 'document', panel: 9 }],
     },
     {
       id: 7,
@@ -200,7 +218,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       title: 'Print optimised PNG',
       content: (
         <reporting.components.ReportingPanelPNGV2
-          getJobParams={getPNGJobParamsDefaultV2} // TODO: Get the correct params here!
+          getJobParams={getCatptureTestPNGJobParams}
           onClose={closePopover}
         />
       ),
