@@ -12,8 +12,8 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 // @ts-ignore
 import { Listing } from '../../../components/cluster/listing';
 import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
-import { GlobalStateContext } from '../../global_state_context';
-import { ExternalConfigContext } from '../../external_config_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { ComponentProps } from '../../route_init';
 import { useTable } from '../../hooks/use_table';
 import { PageTemplate, TabMenuItem } from '../page_template';
@@ -69,23 +69,19 @@ export const ClusterListing: React.FC<ComponentProps> = () => {
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    try {
-      if (services.http?.fetch) {
-        const response = await fetchClusters({
-          fetch: services.http.fetch,
-          timeRange: {
-            min: bounds.min.toISOString(),
-            max: bounds.max.toISOString(),
-          },
-          ccs: globalState.ccs,
-          codePaths: ['all'],
-        });
-        setClusters(response);
-      }
-    } catch (err) {
-      // TODO: handle errors
+    if (services.http?.fetch) {
+      const response = await fetchClusters({
+        fetch: services.http.fetch,
+        timeRange: {
+          min: bounds.min.toISOString(),
+          max: bounds.max.toISOString(),
+        },
+        ccs: globalState.ccs,
+        codePaths: ['all'],
+      });
+      setClusters(response);
     }
-  }, [globalState, services.data?.query.timefilter.timefilter, services.http]);
+  }, [globalState.ccs, services.data?.query.timefilter.timefilter, services.http]);
 
   if (globalState.save && clusters.length === 1) {
     globalState.cluster_uuid = clusters[0].cluster_uuid;
