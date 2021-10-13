@@ -11,6 +11,7 @@ export const DEFAULT_PAGELOAD_SELECTOR = `.${APP_WRAPPER_CLASS}`;
 export const CONTEXT_GETNUMBEROFITEMS = 'GetNumberOfItems';
 export const CONTEXT_INJECTCSS = 'InjectCss';
 export const CONTEXT_WAITFORRENDER = 'WaitForRender';
+export const CONTEXT_GETRENDERERRORS = 'GetVisualisationsRenderErrors';
 export const CONTEXT_GETTIMERANGE = 'GetTimeRange';
 export const CONTEXT_ELEMENTATTRIBUTES = 'ElementPositionAndAttributes';
 export const CONTEXT_WAITFORELEMENTSTOBEINDOM = 'WaitForElementsToBeInDOM';
