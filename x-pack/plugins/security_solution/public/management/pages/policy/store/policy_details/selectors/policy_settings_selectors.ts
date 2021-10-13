@@ -154,6 +154,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         events: mac.events,
         malware: mac.malware,
         behavior_protection: mac.behavior_protection,
+        memory_protection: mac.memory_protection,
         popup: mac.popup,
       },
       linux: {
@@ -161,6 +162,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         events: linux.events,
         malware: linux.malware,
         behavior_protection: linux.behavior_protection,
+        memory_protection: linux.memory_protection,
         popup: linux.popup,
       },
     };

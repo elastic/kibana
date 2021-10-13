@@ -75,12 +75,20 @@ export const policyFactory = (): PolicyConfig => {
         mode: ProtectionModes.prevent,
         supported: true,
       },
+      memory_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
       popup: {
         malware: {
           message: '',
           enabled: true,
         },
         behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
           message: '',
           enabled: true,
         },
@@ -102,12 +110,20 @@ export const policyFactory = (): PolicyConfig => {
         mode: ProtectionModes.prevent,
         supported: true,
       },
+      memory_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
       popup: {
         malware: {
           message: '',
           enabled: true,
         },
         behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
           message: '',
           enabled: true,
         },
@@ -229,11 +245,19 @@ export const policyFactoryWithSupportedFeatures = (
         ...policy.windows.behavior_protection,
         supported: true,
       },
+      memory_protection: {
+        ...policy.mac.memory_protection,
+        supported: true,
+      },
     },
     linux: {
       ...policy.linux,
       behavior_protection: {
         ...policy.windows.behavior_protection,
+        supported: true,
+      },
+      memory_protection: {
+        ...policy.linux.memory_protection,
         supported: true,
       },
     },
