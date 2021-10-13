@@ -72,11 +72,7 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   };
 
   return (
-    <BeatsTemplate
-      title={title}
-      pageTitle={pageTitle}
-      getPageData={getPageData}
-    >
+    <BeatsTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
       <div>{renderOverview(data)}</div>
     </BeatsTemplate>
   );
