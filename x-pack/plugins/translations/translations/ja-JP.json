@@ -10743,7 +10743,6 @@
     "xpack.fleet.epm.packageDetailsNav.packageCustomLinkText": "高度な設定",
     "xpack.fleet.epm.packageDetailsNav.packagePoliciesLinkText": "ポリシー",
     "xpack.fleet.epm.packageDetailsNav.settingsLinkText": "設定",
-    "xpack.fleet.epm.pageSubtitle": "Elasticエージェントを使用して一般的なアプリやサービスからデータを収集します",
     "xpack.fleet.epm.releaseBadge.betaDescription": "この統合は本番環境用ではありません。",
     "xpack.fleet.epm.releaseBadge.betaLabel": "ベータ",
     "xpack.fleet.epm.releaseBadge.experimentalDescription": "この統合は、急に変更されたり、将来のリリースで削除されたりする可能性があります。",
