@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchResponse } from '../../../../../../node_modules/x-pack/plugins/monitoring/common/types/es';
+import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest, Cluster } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import { EnterpriseSearchMetric } from '../metrics';
-import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import {
   entSearchAggFilterPath,
   entSearchAggResponseHandler,

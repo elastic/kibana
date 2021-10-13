@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { ElasticsearchResponse } from '../../../../../../node_modules/x-pack/plugins/monitoring/common/types/es';
+import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createEnterpriseSearchQuery } from './create_enterprise_search_query';

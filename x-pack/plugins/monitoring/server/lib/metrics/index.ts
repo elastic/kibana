@@ -13,7 +13,6 @@ export { ApmMetric, ApmClusterMetric, ApmMetricFields } from './apm/classes';
 // @ts-ignore
 export { LogstashClusterMetric, LogstashMetric } from './logstash/classes';
 export { BeatsClusterMetric, BeatsMetric, BeatsMetricFields } from './beats/classes';
-// @ts-ignore
 export { EnterpriseSearchMetric, EnterpriseSearchMetricFields } from './enterprise_search/classes';
 // @ts-ignore
 export { metrics } from './metrics';

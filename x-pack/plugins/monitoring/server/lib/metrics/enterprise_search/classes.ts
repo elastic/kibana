@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+// @ts-ignore
 import { Metric } from '../classes';
 
 export class EnterpriseSearchMetric extends Metric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -23,3 +25,7 @@ export class EnterpriseSearchMetric extends Metric {
     };
   }
 }
+
+export type EnterpriseSearchMetricFields = ReturnType<
+  typeof EnterpriseSearchMetric.getMetricFields
+>;
