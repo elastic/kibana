@@ -56,7 +56,7 @@ export async function hasRumData({
 
     const response = await apmEventClient.search('has_rum_data', params);
     return {
-      indices: setup.indices['apm_oss.transactionIndices']!,
+      indices: setup.indices.transaction,
       hasData: response.hits.total.value > 0,
       serviceName:
         response.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
@@ -65,7 +65,7 @@ export async function hasRumData({
     return {
       hasData: false,
       serviceName: undefined,
-      indices: setup.indices['apm_oss.transactionIndices']!,
+      indices: setup.indices.transaction,
     };
   }
 }

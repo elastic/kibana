@@ -17,10 +17,10 @@ export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<any>;
 
   const mockedConfig$ = of({
-    /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.errorIndices': 'apm-*',
-    'apm_oss.transactionIndices': 'apm-*',
-    /* eslint-enable @typescript-eslint/naming-convention */
+    indices: {
+      error: 'apm-*',
+      transaction: 'apm-*',
+    },
   } as APMConfig);
 
   const loggerMock = {

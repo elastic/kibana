@@ -60,13 +60,11 @@ export async function getTraceSampleIds({
   query.bool.filter.push(...environmentQuery(environment));
 
   const fingerprintBucketSize = serviceName
-    ? config['xpack.apm.serviceMapFingerprintBucketSize']
-    : config['xpack.apm.serviceMapFingerprintGlobalBucketSize'];
-
+    ? config.serviceMapFingerprintBucketSize
+    : config.serviceMapFingerprintGlobalBucketSize;
   const traceIdBucketSize = serviceName
-    ? config['xpack.apm.serviceMapTraceIdBucketSize']
-    : config['xpack.apm.serviceMapTraceIdGlobalBucketSize'];
-
+    ? config.serviceMapTraceIdBucketSize
+    : config.serviceMapTraceIdGlobalBucketSize;
   const samplerShardSize = traceIdBucketSize * 10;
 
   const params = {
@@ -137,8 +135,7 @@ export async function getTraceSampleIds({
       'get_trace_sample_ids',
       params
     );
-    // make sure at least one trace per composite/connection bucket
-    // is queried
+    // make sure at least one trace per composite/connection bucket is queried
     const traceIdsWithPriority =
       tracesSampleResponse.aggregations?.connections.buckets.flatMap((bucket) =>
         bucket.sample.trace_ids.buckets.map((sampleDocBucket, index) => ({

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { combineLatest } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
@@ -19,8 +18,7 @@ import { isEmpty, mapValues } from 'lodash';
 import { SavedObjectsClient } from '../../../../src/core/server';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
-import { APMConfig, APMXPackConfig, APM_SERVER_FEATURE_ID } from '.';
-import { mergeConfigs } from './index';
+import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
@@ -73,29 +71,23 @@ export class APMPlugin
     plugins: Omit<APMPluginSetupDependencies, 'core'>
   ) {
     this.logger = this.initContext.logger.get();
-    const config$ = this.initContext.config.create<APMXPackConfig>();
-    const mergedConfig$ = combineLatest(plugins.apmOss.config$, config$).pipe(
-      map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
-    );
+    const config$ = this.initContext.config.create<APMConfig>();
 
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
 
-    const currentConfig = mergeConfigs(
-      plugins.apmOss.config,
-      this.initContext.config.get<APMXPackConfig>()
-    );
+    const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
 
     if (
       plugins.taskManager &&
       plugins.usageCollection &&
-      currentConfig['xpack.apm.telemetryCollectionEnabled']
+      currentConfig.telemetryCollectionEnabled
     ) {
       createApmTelemetry({
         core,
-        config$: mergedConfig$,
+        config$,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
@@ -156,7 +148,7 @@ export class APMPlugin
     const boundGetApmIndices = async () =>
       getApmIndices({
         savedObjectsClient: await getInternalSavedObjectsClient(core),
-        config: await mergedConfig$.pipe(take(1)).toPromise(),
+        config: await config$.pipe(take(1)).toPromise(),
       });
 
     boundGetApmIndices().then((indices) => {
@@ -193,7 +185,7 @@ export class APMPlugin
         ruleDataClient,
         alerting: plugins.alerting,
         ml: plugins.ml,
-        config$: mergedConfig$,
+        config$,
         logger: this.logger!.get('rule'),
       });
     }
@@ -231,7 +223,7 @@ export class APMPlugin
     });
 
     return {
-      config$: mergedConfig$,
+      config$,
       getApmIndices: boundGetApmIndices,
       createApmEventClient: async ({
         request,
