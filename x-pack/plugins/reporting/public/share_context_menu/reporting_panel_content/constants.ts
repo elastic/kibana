@@ -8,6 +8,6 @@
 /**
  * Based on {@link URL_MAX_LENGTH} exported from core/public.
  */
-const CHROMIUM_MAX_URL_LENGTH = 25000;
+const CHROMIUM_MAX_URL_LENGTH = 25 * 1000;
 
 export const getMaxUrlLength = () => CHROMIUM_MAX_URL_LENGTH;
