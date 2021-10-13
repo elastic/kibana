@@ -89,7 +89,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             ['execute', { gte: 4 }],
             ['execute-timeout', { gte: 1 }],
             ['new-instance', { equal: 1 }],
-            ['active-instance', { equal: 2 }],
+            ['active-instance', { gte: 2 }],
           ]),
         });
       });
