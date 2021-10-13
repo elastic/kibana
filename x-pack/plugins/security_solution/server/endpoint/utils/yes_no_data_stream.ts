@@ -32,3 +32,28 @@ export const doLogsEndpointActionDsExists = async ({
     return false;
   }
 };
+
+export const doesLogsEndpointActionsIndexExist = async ({
+  context,
+  logger,
+  indexName,
+}: {
+  context: SecuritySolutionRequestHandlerContext;
+  logger: Logger;
+  indexName: string;
+}): Promise<boolean> => {
+  try {
+    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const doesIndexExist = await esClient.indices.exists({
+      index: indexName,
+    });
+    return doesIndexExist.statusCode === 404 ? false : true;
+  } catch (error) {
+    const errorType = error?.type ?? '';
+    if (errorType !== 'index_not_found_exception') {
+      logger.error(error);
+      throw error;
+    }
+    return false;
+  }
+};

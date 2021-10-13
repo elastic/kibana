@@ -6,7 +6,9 @@
  */
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
+import { SearchRequest } from 'src/plugins/data/public';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
+import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
   ActivityLog,
@@ -14,7 +16,7 @@ import {
   EndpointActionResponse,
   EndpointPendingActions,
 } from '../../../common/endpoint/types';
-import { catchAndWrapError } from '../utils';
+import { catchAndWrapError, doesLogsEndpointActionsIndexExist } from '../utils';
 import { EndpointMetadataService } from './metadata';
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
@@ -38,9 +40,9 @@ export const getAuditLogResponse = async ({
 }): Promise<ActivityLog> => {
   const size = Math.floor(pageSize / 2);
   const from = page <= 1 ? 0 : page * size - size + 1;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   const data = await getActivityLog({
-    esClient,
+    context,
     from,
     size,
     startDate,
@@ -59,7 +61,7 @@ export const getAuditLogResponse = async ({
 };
 
 const getActivityLog = async ({
-  esClient,
+  context,
   size,
   from,
   startDate,
@@ -67,7 +69,7 @@ const getActivityLog = async ({
   elasticAgentId,
   logger,
 }: {
-  esClient: ElasticsearchClient;
+  context: SecuritySolutionRequestHandlerContext;
   elasticAgentId: string;
   size: number;
   from: number;
@@ -75,6 +77,14 @@ const getActivityLog = async ({
   endDate: string;
   logger: Logger;
 }) => {
+  const responseIndices = [AGENT_ACTIONS_RESULTS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX];
+  const hasLogsEndpointActionsIndex = await doesLogsEndpointActionsIndexExist({
+    context,
+    logger,
+    indexName: ENDPOINT_ACTION_RESPONSES_INDEX,
+  });
+
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const options = {
     headers: {
       'X-elastic-product-origin': 'fleet',
@@ -97,29 +107,28 @@ const getActivityLog = async ({
       { term: { type: 'INPUT_ACTION' } },
     ];
     const actionsFilters = [...baseActionFilters, ...dateFilters];
-    actionsResult = await esClient.search(
-      {
-        index: AGENT_ACTIONS_INDEX,
-        size,
-        from,
-        body: {
-          query: {
-            bool: {
-              // @ts-ignore
-              filter: actionsFilters,
+
+    const actionsSearchQuery: SearchRequest = {
+      index: AGENT_ACTIONS_INDEX,
+      size,
+      from,
+      body: {
+        query: {
+          bool: {
+            // @ts-ignore
+            filter: actionsFilters,
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-        },
+        ],
       },
-      options
-    );
+    };
+    actionsResult = await esClient.search(actionsSearchQuery, options);
     const actionIds = actionsResult?.body?.hits?.hits?.map(
       (e) => (e._source as EndpointAction).action_id
     );
@@ -130,20 +139,19 @@ const getActivityLog = async ({
       { terms: { action_id: actionIds } },
     ];
     const responsesFilters = [...baseResponsesFilter, ...dateFilters];
-    responsesResult = await esClient.search(
-      {
-        index: AGENT_ACTIONS_RESULTS_INDEX,
-        size: 1000,
-        body: {
-          query: {
-            bool: {
-              filter: responsesFilters,
-            },
+    const responsesSearchQuery: SearchRequest = {
+      index: hasLogsEndpointActionsIndex ? responseIndices : AGENT_ACTIONS_RESULTS_INDEX,
+      size: 1000,
+      body: {
+        query: {
+          bool: {
+            filter: responsesFilters,
           },
         },
       },
-      options
-    );
+    };
+
+    responsesResult = await esClient.search(responsesSearchQuery, options);
   } catch (error) {
     logger.error(error);
     throw error;
@@ -153,11 +161,16 @@ const getActivityLog = async ({
     throw new Error(`Error fetching actions log for agent_id ${elasticAgentId}`);
   }
 
+  const logsEndpointResponsesRegex = new RegExp(
+    `(^\.ds-\.logs-endpoint\.action\.responses-default-).+`
+  );
   const responses = responsesResult?.body?.hits?.hits?.length
-    ? responsesResult?.body?.hits?.hits?.map((e) => ({
-        type: 'fleetResponse',
-        item: { id: e._id, data: e._source },
-      }))
+    ? responsesResult?.body?.hits?.hits?.map((e) => {
+        return {
+          type: logsEndpointResponsesRegex.test(e._index) ? 'response' : 'fleetResponse',
+          item: { id: e._id, data: e._source },
+        };
+      })
     : [];
   const actions = actionsResult?.body?.hits?.hits?.length
     ? actionsResult?.body?.hits?.hits?.map((e) => ({
