@@ -32,6 +32,21 @@ const fields: Array<{
   { label: i18n.MESSAGE_KEY, fieldKey: 'message_key' },
 ];
 
+const additionalInformation = JSON.stringify({
+  alert: {
+    id: '{{alert.id}}',
+    actionGroup: '{{alert.actionGroup}}',
+    actionSubgroup: '{{alert.actionSubgroup}}',
+    actionGroupName: '{{alert.actionGroupName}}',
+  },
+  rule: {
+    id: '{{rule.id}}',
+    name: '{{rule.name}}',
+    type: '{{rule.type}}',
+  },
+  date: '{{date}}',
+});
+
 const ServiceNowITOMParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowITOMActionParams>
 > = ({ actionConnector, actionParams, editAction, index, messageVariables, errors }) => {
@@ -67,7 +82,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
   useEffect(() => {
     if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
       actionConnectorRef.current = actionConnector.id;
-      editAction('subActionParams', {}, index);
+      editAction('subActionParams', { additional_info: additionalInformation }, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
@@ -78,7 +93,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
     }
 
     if (!actionParams.subActionParams) {
-      editAction('subActionParams', {}, index);
+      editAction('subActionParams', { additional_info: additionalInformation }, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams]);
