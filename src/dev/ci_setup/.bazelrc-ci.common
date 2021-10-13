@@ -9,3 +9,5 @@ build --verbose_failures=true
 
 ## Avoid to keep connections to build event backend connections alive across builds
 build --keep_backend_build_event_connections_alive=false
+
+startup --output_base=.bazel

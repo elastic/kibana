@@ -86,3 +86,4 @@ report.asciidoc
 /bazel
 /bazel-*
 .bazelrc.user
+/.bazel
