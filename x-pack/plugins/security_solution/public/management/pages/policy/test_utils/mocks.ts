@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HttpFetchOptionsWithPath } from 'kibana/public';
 import {
   composeHttpHandlerMocks,
   httpHandlerMockFactory,
@@ -71,7 +72,7 @@ export const getAPIError = () => ({
 });
 
 type PolicyDetailsTrustedAppsHttpMocksInterface = ResponseProvidersInterface<{
-  policyTrustedAppsList: () => GetTrustedAppsListResponse;
+  policyTrustedAppsList: (options: HttpFetchOptionsWithPath) => GetTrustedAppsListResponse;
 }>;
 
 /**
