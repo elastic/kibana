@@ -126,7 +126,7 @@ Breaking changes can prevent your application from optimal operation and perform
 [[bug-fixes-and-enhancements-6.8.20]]
 === Bug fixes and enhancements
 
-There are no user-facing changes in the 6.8.20 release.
+* Routine dependency upgrades {kibana-pull}113388[#113388]
 
 [[release-notes-6.8.19]]
 == {kib} 6.8.19
