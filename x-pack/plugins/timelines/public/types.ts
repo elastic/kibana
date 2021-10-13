@@ -41,10 +41,6 @@ export interface TimelinesUIStart {
     props: UseDraggableKeyboardWrapperProps
   ) => UseDraggableKeyboardWrapper;
   setTGridEmbeddedStore: (store: Store) => void;
-  // getAddToCaseAction: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
-  // getAddToCasePopover: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
-  // getAddToExistingCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
-  // getAddToNewCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
 }
 
 export interface TimelinesStartPlugins {
