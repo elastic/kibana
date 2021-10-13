@@ -1914,7 +1914,7 @@ describe('successful migrations', () => {
       });
     });
 
-    test('extracts references from geo-containment alerts', () => {
+    test('geo-containment alert migration extracts boundary and index references', () => {
       const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
       const alert = {
         ...getMockData({
@@ -1940,6 +1940,68 @@ describe('successful migrations', () => {
 
       expect(migratedAlert.attributes.params.indexId).toEqual(undefined);
       expect(migratedAlert.attributes.params.boundaryIndexId).toEqual(undefined);
+    });
+
+    test('geo-containment alert migration should preserve foreign references', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: '.geo-containment',
+          params: {
+            indexId: 'foo',
+            boundaryIndexId: 'bar',
+          },
+        }),
+        references: [
+          {
+            name: 'foreign-name',
+            id: '999',
+            type: 'foreign-name',
+          },
+        ],
+      };
+
+      const migratedAlert = migration7160(alert, migrationContext);
+
+      expect(migratedAlert.references).toEqual([
+        {
+          name: 'foreign-name',
+          id: '999',
+          type: 'foreign-name',
+        },
+        { id: 'foo', name: 'tracked_index_foo', type: 'index-pattern' },
+        { id: 'bar', name: 'boundary_index_bar', type: 'index-pattern' },
+      ]);
+
+      expect(migratedAlert.attributes.params).toEqual({
+        boundaryIndexRefName: 'boundary_index_bar',
+        indexRefName: 'tracked_index_foo',
+      });
+
+      expect(migratedAlert.attributes.params.indexId).toEqual(undefined);
+      expect(migratedAlert.attributes.params.boundaryIndexId).toEqual(undefined);
+    });
+
+    test('geo-containment alert migration ignores other alert-types', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: '.foo',
+          references: [
+            {
+              name: 'foreign-name',
+              id: '999',
+              type: 'foreign-name',
+            },
+          ],
+        }),
+      };
+
+      const migratedAlert = migration7160(alert, migrationContext);
+
+      expect(typeof migratedAlert.attributes.legacyId).toEqual('string'); // introduced by setLegacyId migration
+      delete migratedAlert.attributes.legacyId;
+      expect(migratedAlert).toEqual(alert);
     });
   });
 

@@ -83,6 +83,6 @@ export function extractRefsFromGeoContainmentAlert(
       ...doc.attributes,
       params: newParams as SavedObjectAttributes,
     },
-    references,
+    references: [...(doc.references || []), ...references],
   };
 }

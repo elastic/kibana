@@ -60,8 +60,18 @@ describe('alertType', () => {
         },
         [
           {
+            id: 'foreign',
+            name: 'foobar',
+            type: 'foreign',
+          },
+          {
             id: 'foobar',
             name: 'tracked_index_foobar',
+            type: 'index-pattern',
+          },
+          {
+            id: 'foreignToo',
+            name: 'boundary_index_shouldbeignored',
             type: 'index-pattern',
           },
           {
