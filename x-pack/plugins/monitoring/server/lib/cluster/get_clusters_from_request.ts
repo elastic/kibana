@@ -76,10 +76,10 @@ export async function getClustersFromRequest(
 
   if (!clusterUuid && !isStandaloneCluster) {
     const indexPatternsToCheckForNonClusters = [
-      lsIndexPattern, 
-      beatsIndexPattern, 
+      lsIndexPattern,
+      beatsIndexPattern,
       apmIndexPattern,
-      enterpriseSearchIndexPattern
+      enterpriseSearchIndexPattern,
     ];
 
     if (await hasStandaloneClusters(req, indexPatternsToCheckForNonClusters)) {
@@ -253,7 +253,7 @@ export async function getClustersFromRequest(
     );
     if (clusterIndex >= 0) {
       Reflect.set(clusters[clusterIndex], 'enterpriseSearch', {
-        ...entSearch
+        ...entSearch,
       });
     }
   });

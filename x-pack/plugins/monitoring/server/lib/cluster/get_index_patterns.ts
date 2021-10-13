@@ -28,7 +28,11 @@ export function getIndexPatterns(
   const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
   const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
   const alertsIndex = prefixIndexPattern(config, INDEX_ALERTS, ccs);
-  const enterpriseSearchIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ENTERPRISE_SEARCH, ccs);
+  const enterpriseSearchIndexPattern = prefixIndexPattern(
+    config,
+    INDEX_PATTERN_ENTERPRISE_SEARCH,
+    ccs
+  );
   const indexPatterns = {
     esIndexPattern,
     kbnIndexPattern,
