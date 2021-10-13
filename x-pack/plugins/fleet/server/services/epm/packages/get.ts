@@ -53,7 +53,6 @@ export async function getPackages(
   });
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
-
   // filter out any internal packages
   const savedObjectsVisible = packageSavedObjects.saved_objects.filter(
     (o) => !o.attributes.internal
