@@ -8,7 +8,6 @@
 import { layerTypes } from '../../common';
 import { Visualization, VisualizationMap } from '../types';
 
-
 export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualization> {
   return {
     id,
