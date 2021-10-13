@@ -10,12 +10,13 @@ const Path = require('path');
 
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { REPO_ROOT } = require('@kbn/utils');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 
 const UiSharedDepsSrc = require('./src');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
+
+const REPO_ROOT = Path.resolve(__dirname, '..', '..');
 
 module.exports = {
   node: {

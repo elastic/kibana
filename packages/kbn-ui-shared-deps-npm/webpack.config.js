@@ -11,12 +11,12 @@ const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const { REPO_ROOT } = require('@kbn/utils');
-
 const UiSharedDepsNpm = require('./src/index');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
+
+const REPO_ROOT = Path.resolve(__dirname, '..', '..');
 
 module.exports = (_, argv) => {
   const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
@@ -40,7 +40,6 @@ module.exports = (_, argv) => {
 
         // modules from npm
         '@elastic/charts',
-        '@elastic/datemath',
         '@elastic/eui',
         '@elastic/eui/dist/eui_charts_theme',
         '@elastic/eui/lib/services',
