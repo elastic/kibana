@@ -27,6 +27,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
+jest.mock('@kbn/monaco');
+
 const defaultValidation = centralValidation[DataStream.HTTP];
 
 const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
