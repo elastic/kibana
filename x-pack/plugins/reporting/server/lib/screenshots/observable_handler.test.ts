@@ -44,10 +44,7 @@ describe('ScreenshotObservableHandler', () => {
 
     const reporting = await createMockReportingCore(createMockConfigSchema());
     const driverFactory = await createMockBrowserDriverFactory(reporting, logger);
-    ({ driver } = await driverFactory
-      .createPage({ viewport: { width: 800, height: 600 } }, logger)
-      .pipe(first())
-      .toPromise());
+    ({ driver } = await driverFactory.createPage({}, logger).pipe(first()).toPromise());
 
     conditionalHeaders = {
       headers: { testHeader: 'testHeadValue' },
@@ -68,9 +65,5 @@ describe('ScreenshotObservableHandler', () => {
   });
 
   // TODO: test ScreenshotObservableHandler.waitUntil
-  // TODO: test ScreenshotObservableHandler.openUrl
-  // TODO: test ScreenshotObservableHandler.waitForElements
-  // TODO: test ScreenshotObservableHandler.completeRender
-  // TODO: test ScreenshotObservableHandler.getScreenshot
   // TODO: test ScreenshotObservableHandler.checkPageIsOpen
 });
