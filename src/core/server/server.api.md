@@ -790,6 +790,7 @@ export interface DeprecationsDetails {
             body?: {
                 [key: string]: any;
             };
+            omitContextFromBody?: boolean;
         };
         manualSteps: string[];
     };

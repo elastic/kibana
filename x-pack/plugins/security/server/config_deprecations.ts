@@ -10,6 +10,7 @@ import type { ConfigDeprecationProvider } from 'src/core/server';
 
 export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   rename,
+  renameFromRoot,
   unused,
 }) => [
   rename('sessionTimeout', 'session.idleTimeout'),
@@ -21,10 +22,15 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   rename('audit.appender.strategy.kind', 'audit.appender.strategy.type'),
   rename('audit.appender.path', 'audit.appender.fileName'),
 
+  renameFromRoot(
+    'security.showInsecureClusterWarning',
+    'xpack.security.showInsecureClusterWarning'
+  ),
+
   unused('authorization.legacyFallback.enabled'),
   unused('authc.saml.maxRedirectURLSize'),
   // Deprecation warning for the legacy audit logger.
-  (settings, fromPath, addDeprecation) => {
+  (settings, fromPath, addDeprecation, { branch }) => {
     const auditLoggingEnabled = settings?.xpack?.security?.audit?.enabled ?? false;
     const legacyAuditLoggerEnabled = !settings?.xpack?.security?.audit?.appender;
     if (auditLoggingEnabled && legacyAuditLoggerEnabled) {
@@ -36,8 +42,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage:
             'The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.',
         }),
-        documentationUrl:
-          'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#audit-logging-settings',
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#audit-logging-settings`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.auditLogger.manualStepOneMessage', {
@@ -135,7 +140,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       });
     }
   },
-  (settings, fromPath, addDeprecation) => {
+  (settings, fromPath, addDeprecation, { branch }) => {
     if ('enabled' in (settings?.xpack?.security || {})) {
       addDeprecation({
         title: i18n.translate('xpack.security.deprecations.enabledTitle', {
@@ -145,8 +150,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage:
             'Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.',
         }),
-        documentationUrl:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/current/secure-cluster.html',
+        documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${branch}/secure-cluster.html`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.enabled.manualStepOneMessage', {
@@ -162,7 +166,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     }
   },
   // Default values for session expiration timeouts.
-  (settings, fromPath, addDeprecation) => {
+  (settings, fromPath, addDeprecation, { branch }) => {
     if (settings?.xpack?.security?.session?.idleTimeout === undefined) {
       addDeprecation({
         level: 'warning',
@@ -172,8 +176,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
         message: i18n.translate('xpack.security.deprecations.idleTimeoutMessage', {
           defaultMessage: 'The session idle timeout will default to 1 hour in 8.0.',
         }),
-        documentationUrl:
-          'https://www.elastic.co/guide/en/kibana/current/xpack-security-session-management.html#session-idle-timeout',
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/xpack-security-session-management.html#session-idle-timeout`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.idleTimeout.manualStepOneMessage', {
@@ -196,8 +199,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
         message: i18n.translate('xpack.security.deprecations.lifespanMessage', {
           defaultMessage: 'The session lifespan will default to 30 days in 8.0.',
         }),
-        documentationUrl:
-          'https://www.elastic.co/guide/en/kibana/current/xpack-security-session-management.html#session-lifespan',
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/xpack-security-session-management.html#session-lifespan`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.lifespan.manualStepOneMessage', {

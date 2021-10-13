@@ -63,6 +63,7 @@ describe('config schema', () => {
         "session": Object {
           "cleanupInterval": "PT1H",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -113,6 +114,7 @@ describe('config schema', () => {
         "session": Object {
           "cleanupInterval": "PT1H",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -162,6 +164,7 @@ describe('config schema', () => {
         "session": Object {
           "cleanupInterval": "PT1H",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
   });
