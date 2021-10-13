@@ -9,8 +9,9 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
+import memoizeOne from 'memoize-one';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererDataView, SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ALERTS_PATH, RULES_PATH, UEBA_PATH } from '../../../../common/constants';
@@ -20,6 +21,8 @@ import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
+import { EXCLUDE_ELASTIC_CLOUD_INDEX } from '../../store/sourcerer/selectors';
+import { FieldSpec } from '../../../../../../../src/plugins/data_views/common';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -230,12 +233,72 @@ export const useInitSourcerer = (
   ]);
 };
 
-export const useSourcererDataView = (scope: SourcererScopeName = SourcererScopeName.default) => {
-  const dataViewBySourcererScope = useMemo(
-    () => sourcererSelectors.getSelectedDataViewSelector(),
+export const useSourcererDataView = (
+  sourcererScope: SourcererScopeName = SourcererScopeName.default
+) => {
+  const {
+    defaultDataViewSelector,
+    kibanaDataViewsSelector,
+    scopeIdSelector,
+    signalIndexNameSelector,
+  } = useMemo(
+    () => ({
+      scopeIdSelector: sourcererSelectors.scopeIdSelector(),
+      defaultDataViewSelector: sourcererSelectors.defaultDataViewSelector(),
+      kibanaDataViewsSelector: sourcererSelectors.kibanaDataViewsSelector(),
+      signalIndexNameSelector: sourcererSelectors.signalIndexNameSelector(),
+    }),
     []
   );
-  return useDeepEqualSelector((state) => dataViewBySourcererScope(state, scope));
+  const {
+    sourcererScope: { selectedDataViewId, selectedPatterns: scopeSelectedPatterns, loading },
+    defaultDataView,
+    kibanaDataViews,
+    signalIndexName,
+  } = useDeepEqualSelector((state) => ({
+    defaultDataView: defaultDataViewSelector(state),
+    kibanaDataViews: kibanaDataViewsSelector(state),
+    signalIndexName: signalIndexNameSelector(state),
+    sourcererScope: scopeIdSelector(state, sourcererScope),
+  }));
+
+  const theDataView: SourcererDataView = useMemo(
+    () => kibanaDataViews.find((dataView) => dataView.id === selectedDataViewId) ?? defaultDataView,
+    [selectedDataViewId, defaultDataView, kibanaDataViews]
+  );
+
+  const selectedPatterns = useMemo(
+    () =>
+      scopeSelectedPatterns.some((index) => index === 'logs-*')
+        ? [...scopeSelectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
+        : scopeSelectedPatterns,
+    [scopeSelectedPatterns]
+  );
+
+  return useMemo(
+    () => ({
+      browserFields: theDataView.browserFields,
+      dataViewId: theDataView.id,
+      docValueFields: theDataView.docValueFields,
+      indexPattern: {
+        fields: theDataView.indexFields,
+        title: selectedPatterns.join(','),
+      },
+      indicesExist:
+        sourcererScope === SourcererScopeName.detections
+          ? theDataView.patternList.includes(`${signalIndexName}`)
+          : sourcererScope === SourcererScopeName.default
+          ? theDataView.patternList.filter((i) => i !== signalIndexName).length > 0
+          : theDataView.patternList.length > 0,
+      loading,
+      runtimeMappings: theDataView.runtimeMappings,
+      // all patterns in DATA_VIEW
+      patternList: theDataView.title.split(','),
+      // selected patterns in DATA_VIEW
+      selectedPatterns,
+    }),
+    [loading, selectedPatterns, signalIndexName, sourcererScope, theDataView]
+  );
 };
 
 export const getScopeFromPath = (
