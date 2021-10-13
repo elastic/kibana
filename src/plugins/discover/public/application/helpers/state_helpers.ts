@@ -26,12 +26,12 @@ export function handleSourceColumnState<TState extends { columns?: string[] }>(
   const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING);
 
   if (useNewFieldsApi) {
-    // if fields API is used, filter out the default column
-    let cleanedColumns = state.columns.filter((column) => column !== '_source' && column !== '');
+    // if fields API is used, filter out the source column
+    let cleanedColumns = state.columns.filter((column) => column !== '_source');
     if (cleanedColumns.length === 0 && !isEqual(defaultColumns, ['_source'])) {
       cleanedColumns = defaultColumns;
       // defaultColumns could still contain _source
-      cleanedColumns = cleanedColumns.filter((column) => column !== '_source' && column !== '');
+      cleanedColumns = cleanedColumns.filter((column) => column !== '_source');
     }
     return {
       ...state,
@@ -40,9 +40,13 @@ export function handleSourceColumnState<TState extends { columns?: string[] }>(
   } else if (state.columns.length === 0) {
     // if _source fetching is used and there are no column, switch back to default columns
     // this can happen if the fields API was previously used
+    const columns = defaultColumns;
+    if (columns.length === 0) {
+      columns.push('_source');
+    }
     return {
       ...state,
-      columns: [...defaultColumns],
+      columns: [...columns],
     };
   }
 
