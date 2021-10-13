@@ -250,8 +250,9 @@ export function Detail() {
 
       let redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
         CreatePackagePolicyRouteState['onCancelNavigateTo'];
-
+      let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
       if (agentPolicyIdFromContext) {
+        // fleet policy details
         redirectToPath = [
           PLUGIN_ID,
           {
@@ -260,7 +261,13 @@ export function Detail() {
             })[1],
           },
         ];
+
+        onSaveQueryParams = {
+          showAddAgentHelp: true,
+          openEnrollmentFlyout: true,
+        };
       } else {
+        // integrations policies
         redirectToPath = [
           INTEGRATIONS_PLUGIN_ID,
           {
@@ -269,10 +276,16 @@ export function Detail() {
             })[1],
           },
         ];
+
+        onSaveQueryParams = {
+          showAddAgentHelp: { renameKey: 'showAddAgentHelpForPolicyId', policyIdAsValue: true },
+          openEnrollmentFlyout: { renameKey: 'addAgentToPolicyId', policyIdAsValue: true },
+        };
       }
 
       const redirectBackRouteState: CreatePackagePolicyRouteState = {
         onSaveNavigateTo: redirectToPath,
+        onSaveQueryParams,
         onCancelNavigateTo: [
           INTEGRATIONS_PLUGIN_ID,
           {

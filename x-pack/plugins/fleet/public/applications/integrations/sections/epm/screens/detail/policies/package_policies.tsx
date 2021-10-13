@@ -41,6 +41,8 @@ import {
   PackagePolicyActionsMenu,
 } from '../../../../../components';
 
+import { packagePolicyRouteService } from '../../../../../services';
+
 import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
@@ -134,6 +136,9 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     return newPolicies;
   }, [data?.items, updatableIntegrations]);
 
+  const showAddAgentHelpForPackagePolicyId = packageAndAgentPolicies.find(
+    ({ agentPolicy }) => agentPolicy.id === showAddAgentHelpForPolicyId
+  )?.packagePolicy?.id;
   // Handle the "add agent" link displayed in post-installation toast notifications in the case
   // where a user is clicking the link while on the package policies listing page
   useEffect(() => {
@@ -292,13 +297,13 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentCount', {
           defaultMessage: 'Agents',
         }),
-        render({ agentPolicy }: InMemoryPackagePolicyAndAgentPolicy) {
+        render({ agentPolicy, packagePolicy }: InMemoryPackagePolicyAndAgentPolicy) {
           return (
             <PackagePolicyAgentsCell
               agentPolicyId={agentPolicy.id}
               agentCount={agentPolicy.agents}
               onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
-              hasHelpPopover={showAddAgentHelpForPolicyId === agentPolicy.id}
+              hasHelpPopover={showAddAgentHelpForPackagePolicyId === packagePolicy.id}
             />
           );
         },
@@ -326,7 +331,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
     ],
-    [getHref, showAddAgentHelpForPolicyId, viewDataStep]
+    [getHref, showAddAgentHelpForPackagePolicyId, viewDataStep]
   );
 
   const noItemsMessage = useMemo(() => {

@@ -30,6 +30,7 @@ import type {
   NewPackagePolicy,
   PackagePolicy,
   CreatePackagePolicyRouteState,
+  OnSaveQueryParamKeys,
 } from '../../../types';
 import {
   useLink,
@@ -52,6 +53,7 @@ import { CreatePackagePolicyPageLayout, PostInstallAddAgentModal } from './compo
 import type { EditPackagePolicyFrom, PackagePolicyFormState } from './types';
 import type { PackagePolicyValidationResults } from './services';
 import { validatePackagePolicy, validationHasErrors } from './services';
+import { appendOnSaveQueryParamsToPath } from './utils';
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
@@ -274,22 +276,29 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     };
   }, []);
 
-  const navigateAddAgent = (policy?: PackagePolicy) => {
-    alert('this is when we will navigate to add agent');
-    onSaveNavigate(policy);
-  };
-  const navigateTourTooltip = (policy?: PackagePolicy) => {
-    alert('this is when we will navigate with a tour tooltip');
-    onSaveNavigate(policy);
-  };
+  const navigateAddAgent = (policy?: PackagePolicy) =>
+    onSaveNavigate(policy, ['openEnrollmentFlyout']);
+
+  const navigateAddAgentHelp = (policy?: PackagePolicy) =>
+    onSaveNavigate(policy, ['showAddAgentHelp']);
 
   const onSaveNavigate = useCallback(
-    (policy?: PackagePolicy) => {
+    (policy?: PackagePolicy, paramsToApply: OnSaveQueryParamKeys[] = []) => {
       if (doOnSaveNavigation.current) {
-        // when navigating from integration ["integrations",{"path":"/detail/system-1.4.0/policies"}]
-        // when navigating from policy ["fleet",{"path":"/policies/c2eca570-2ac7-11ec-b125-9be2578ed7b9"}]
         if (routeState && routeState.onSaveNavigateTo && policy) {
-          handleNavigateTo(routeState.onSaveNavigateTo);
+          const [appId, options] = routeState.onSaveNavigateTo;
+
+          if (options?.path) {
+            const pathWithQueryString = appendOnSaveQueryParamsToPath({
+              path: options.path,
+              policy,
+              mappingOptions: routeState.onSaveQueryParams,
+              paramsToApply,
+            });
+            handleNavigateTo([appId, { ...options, path: pathWithQueryString }]);
+          } else {
+            handleNavigateTo(routeState.onSaveNavigateTo);
+          }
         } else {
           history.push(getPath('policy_details', { policyId: agentPolicy!.id }));
         }
@@ -491,7 +500,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             packageInfo={packageInfo}
             agentPolicy={agentPolicy}
             onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-            onCancel={() => navigateTourTooltip(savedPackagePolicy)}
+            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
           />
         )}
         {packageInfo && (
