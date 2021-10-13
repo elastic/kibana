@@ -7,17 +7,11 @@
 
 import { from, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import {
-  fieldList,
-  FieldSpec,
-  IIndexPattern,
-  IndexPattern,
-  IndexPatternsContract,
-  RuntimeField,
-} from 'src/plugins/data/common';
+import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
+import { fieldList, FieldSpec, RuntimeField } from '../../../../../src/plugins/data/common';
 
 type IndexPatternMock = Pick<
-  IndexPattern,
+  DataView,
   | 'fields'
   | 'getComputedFields'
   | 'getFieldByName'
@@ -27,7 +21,7 @@ type IndexPatternMock = Pick<
   | 'title'
   | 'type'
 >;
-type IndexPatternMockSpec = Pick<IIndexPattern, 'id' | 'title' | 'type' | 'timeFieldName'> & {
+type IndexPatternMockSpec = Pick<DataView, 'id' | 'title' | 'type' | 'timeFieldName'> & {
   fields: FieldSpec[];
 };
 
@@ -71,8 +65,8 @@ export const createIndexPatternsMock = (
   asyncDelay: number,
   indexPatterns: IndexPatternMock[]
 ): {
-  getIdsWithTitle: IndexPatternsContract['getIdsWithTitle'];
-  get: (...args: Parameters<IndexPatternsContract['get']>) => Promise<IndexPatternMock>;
+  getIdsWithTitle: DataViewsContract['getIdsWithTitle'];
+  get: (...args: Parameters<DataViewsContract['get']>) => Promise<IndexPatternMock>;
 } => {
   return {
     async getIdsWithTitle(_refresh?: boolean) {

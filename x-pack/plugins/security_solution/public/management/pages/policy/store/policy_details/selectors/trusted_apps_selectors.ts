@@ -7,6 +7,7 @@
 
 import { createSelector } from 'reselect';
 import { Pagination } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import {
   PolicyArtifactsState,
   PolicyAssignedTrustedApps,
@@ -30,14 +31,16 @@ import {
   LoadedResourceState,
 } from '../../../../../state';
 import { getCurrentArtifactsLocation } from './policy_common_selectors';
+import { ServerApiError } from '../../../../../../common/types';
 
 export const doesPolicyHaveTrustedApps = (
   state: PolicyDetailsState
 ): { loading: boolean; hasTrustedApps: boolean } => {
-  // TODO: implement empty state (task #1645)
   return {
-    loading: false,
-    hasTrustedApps: true,
+    loading: isLoadingResourceState(state.artifacts.assignedList),
+    hasTrustedApps: isLoadedResourceState(state.artifacts.assignedList)
+      ? !isEmpty(state.artifacts.assignedList.data.artifacts.data)
+      : false,
   };
 };
 
@@ -105,6 +108,24 @@ export const getUpdateArtifacts = (
     : undefined;
 };
 
+/**
+ * Returns does any TA exists
+ */
+export const getDoesTrustedAppExists = (state: Immutable<PolicyDetailsState>): boolean => {
+  return (
+    isLoadedResourceState(state.artifacts.doesAnyTrustedAppExists) &&
+    state.artifacts.doesAnyTrustedAppExists.data
+  );
+};
+
+/**
+ * Returns does any TA exists loading
+ */
+export const doesTrustedAppExistsLoading = (state: Immutable<PolicyDetailsState>): boolean => {
+  return isLoadingResourceState(state.artifacts.doesAnyTrustedAppExists);
+};
+
+/** Returns a boolean of whether the user is on the policy details page or not */
 export const getCurrentPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
   PolicyArtifactsState['assignedList']
 > = (state) => {
@@ -181,3 +202,43 @@ export const getTrustedAppsAllPoliciesById: PolicyDetailsSelector<
     return mapById;
   }, {}) as Immutable<Record<string, Immutable<PolicyData>>>;
 });
+
+export const getDoesAnyTrustedAppExists: PolicyDetailsSelector<
+  PolicyDetailsState['artifacts']['doesAnyTrustedAppExists']
+> = (state) => state.artifacts.doesAnyTrustedAppExists;
+
+export const getDoesAnyTrustedAppExistsIsLoading: PolicyDetailsSelector<boolean> = createSelector(
+  getDoesAnyTrustedAppExists,
+  (doesAnyTrustedAppExists) => {
+    return isLoadingResourceState(doesAnyTrustedAppExists);
+  }
+);
+
+export const getPolicyTrustedAppListError: PolicyDetailsSelector<
+  Immutable<ServerApiError> | undefined
+> = createSelector(getCurrentPolicyAssignedTrustedAppsState, (currentAssignedTrustedAppsState) => {
+  if (isFailedResourceState(currentAssignedTrustedAppsState)) {
+    return currentAssignedTrustedAppsState.error;
+  }
+});
+
+export const getCurrentTrustedAppsRemoveListState: PolicyDetailsSelector<
+  PolicyArtifactsState['removeList']
+> = (state) => state.artifacts.removeList;
+
+export const getTrustedAppsIsRemoving: PolicyDetailsSelector<boolean> = createSelector(
+  getCurrentTrustedAppsRemoveListState,
+  (removeListState) => isLoadingResourceState(removeListState)
+);
+
+export const getTrustedAppsRemovalError: PolicyDetailsSelector<ServerApiError | undefined> =
+  createSelector(getCurrentTrustedAppsRemoveListState, (removeListState) => {
+    if (isFailedResourceState(removeListState)) {
+      return removeListState.error;
+    }
+  });
+
+export const getTrustedAppsWasRemoveSuccessful: PolicyDetailsSelector<boolean> = createSelector(
+  getCurrentTrustedAppsRemoveListState,
+  (removeListState) => isLoadedResourceState(removeListState)
+);

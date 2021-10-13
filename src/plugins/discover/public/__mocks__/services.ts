@@ -16,7 +16,6 @@ import {
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
-import { savedSearchMock } from './saved_search';
 import { UI_SETTINGS } from '../../../data/common';
 import { TopNavMenu } from '../../../navigation/public';
 import { FORMATS_UI_SETTINGS } from 'src/plugins/field_formats/common';
@@ -78,7 +77,6 @@ export const discoverServiceMock = {
       editIndexPattern: jest.fn(),
     },
   },
-  getSavedSearchById: (id?: string) => Promise.resolve(savedSearchMock),
   navigation: {
     ui: { TopNavMenu },
   },
