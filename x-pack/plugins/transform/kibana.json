@@ -10,11 +10,15 @@
     "management",
     "features",
     "savedObjects",
-    "share"
+    "share",
+    "triggersActionsUi",
+    "fieldFormats"
   ],
   "optionalPlugins": [
     "security",
-    "usageCollection"
+    "usageCollection",
+    "spaces",
+    "alerting"
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [
@@ -23,6 +27,9 @@
     "kibanaUtils",
     "kibanaReact",
     "ml"
+  ],
+  "extraPublicDirs": [
+    "common"
   ],
   "owner": {
     "name": "Machine Learning UI",

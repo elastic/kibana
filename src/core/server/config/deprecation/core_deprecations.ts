@@ -8,19 +8,6 @@
 
 import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
-const kibanaPathConf: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
-  if (process.env?.KIBANA_PATH_CONF) {
-    addDeprecation({
-      message: `Environment variable "KIBANA_PATH_CONF" is deprecated. It has been replaced with "KBN_PATH_CONF" pointing to a config folder`,
-      correctiveActions: {
-        manualSteps: [
-          'Use "KBN_PATH_CONF" instead of "KIBANA_PATH_CONF" to point to a config folder.',
-        ],
-      },
-    });
-  }
-};
-
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (settings.server?.basePath && !settings.server?.rewriteBasePath) {
     addDeprecation({
@@ -29,6 +16,7 @@ const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDe
         'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
         'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
         'current behavior and silence this warning.',
+      level: 'warning',
       correctiveActions: {
         manualSteps: [
           `Set 'server.rewriteBasePath' in the config file, CLI flag, or environment variable (in Docker only).`,
@@ -44,6 +32,7 @@ const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, addDeprecati
   if (typeof corsSettings === 'boolean') {
     addDeprecation({
       message: '"server.cors" is deprecated and has been replaced by "server.cors.enabled"',
+      level: 'warning',
       correctiveActions: {
         manualSteps: [
           `Replace "server.cors: ${corsSettings}" with "server.cors.enabled: ${corsSettings}"`,
@@ -57,68 +46,7 @@ const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, addDeprecati
   }
 };
 
-const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
-  const NONCE_STRING = `{nonce}`;
-  // Policies that should include the 'self' source
-  const SELF_POLICIES = Object.freeze(['script-src', 'style-src']);
-  const SELF_STRING = `'self'`;
-
-  const rules: string[] = settings.csp?.rules;
-  if (rules) {
-    const parsed = new Map(
-      rules.map((ruleStr) => {
-        const parts = ruleStr.split(/\s+/);
-        return [parts[0], parts.slice(1)];
-      })
-    );
-
-    return {
-      set: [
-        {
-          path: 'csp.rules',
-          value: [...parsed].map(([policy, sourceList]) => {
-            if (sourceList.find((source) => source.includes(NONCE_STRING))) {
-              addDeprecation({
-                message: `csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in ${policy}`,
-                correctiveActions: {
-                  manualSteps: [`Replace {nonce} syntax with 'self' in ${policy}`],
-                },
-              });
-              sourceList = sourceList.filter((source) => !source.includes(NONCE_STRING));
-
-              // Add 'self' if not present
-              if (!sourceList.find((source) => source.includes(SELF_STRING))) {
-                sourceList.push(SELF_STRING);
-              }
-            }
-
-            if (
-              SELF_POLICIES.includes(policy) &&
-              !sourceList.find((source) => source.includes(SELF_STRING))
-            ) {
-              addDeprecation({
-                message: `csp.rules must contain the 'self' source. Automatically adding to ${policy}.`,
-                correctiveActions: {
-                  manualSteps: [`Add 'self' source to ${policy}.`],
-                },
-              });
-              sourceList.push(SELF_STRING);
-            }
-
-            return `${policy} ${sourceList.join(' ')}`.trim();
-          }),
-        },
-      ],
-    };
-  }
-};
-
-export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
-  rename('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
-  rename('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
-  rename('server.xsrf.whitelist', 'server.xsrf.allowlist'),
+export const coreDeprecationProvider: ConfigDeprecationProvider = () => [
   rewriteCorsSettings,
-  kibanaPathConf,
   rewriteBasePathDeprecation,
-  cspRulesDeprecation,
 ];

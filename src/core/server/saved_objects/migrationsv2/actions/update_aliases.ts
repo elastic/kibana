@@ -68,7 +68,7 @@ export const updateAliases =
         // The only impact for using `updateAliases` to mark the version index
         // as ready is that it could take longer for other Kibana instances to
         // see that the version index is ready so they are more likely to
-        // perform unecessary duplicate work.
+        // perform unnecessary duplicate work.
         return Either.right('update_aliases_succeeded' as const);
       })
       .catch((err: EsErrors.ElasticsearchClientError) => {

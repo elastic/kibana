@@ -96,6 +96,7 @@ export type {
   ConfigPath,
   ConfigService,
   ConfigDeprecation,
+  ConfigDeprecationContext,
   ConfigDeprecationProvider,
   ConfigDeprecationFactory,
   AddConfigDeprecation,

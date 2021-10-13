@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles the empty state', async () => {
         const response = await apmApiClient.readUser({
-          endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
+          endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,
           params: {
             path: { serviceName: 'opbeans-java' },
             query: {
@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: {
         status: number;
-        body: APIReturnType<'GET /api/apm/services/{serviceName}/dependencies'>;
+        body: APIReturnType<'GET /internal/apm/services/{serviceName}/dependencies'>;
       };
 
       const indices = {
@@ -212,7 +212,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         response = await apmApiClient.readUser({
-          endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
+          endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,
           params: {
             path: { serviceName: 'opbeans-java' },
             query: {
@@ -309,12 +309,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: {
         status: number;
-        body: APIReturnType<'GET /api/apm/services/{serviceName}/dependencies'>;
+        body: APIReturnType<'GET /internal/apm/services/{serviceName}/dependencies'>;
       };
 
       before(async () => {
         response = await apmApiClient.readUser({
-          endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
+          endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,
           params: {
             path: { serviceName: 'opbeans-python' },
             query: {

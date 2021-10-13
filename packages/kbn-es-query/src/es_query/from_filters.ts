@@ -35,12 +35,7 @@ const filterNegate = (reverse: boolean) => (filter: Filter) => {
  * @return {Object} the query version of that filter
  */
 const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContainer => {
-  if (filter.query) {
-    return filter.query as estypes.QueryDslQueryContainer;
-  }
-
-  // TODO: investigate what's going on here! What does this mean for filters that don't have a query!
-  return filter as estypes.QueryDslQueryContainer;
+  return filter.query || filter;
 };
 
 /**

@@ -6,13 +6,9 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { HostMetadata } from '../types';
-import {
-  EndpointActionGenerator,
-  LogsEndpointAction,
-  LogsEndpointActionResponse,
-} from '../data_generators/endpoint_action_generator';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
+import { HostMetadata, LogsEndpointAction, LogsEndpointActionResponse } from '../types';
+import { EndpointActionGenerator } from '../data_generators/endpoint_action_generator';
 import { wrapErrorAndRejectPromise } from './utils';
 import { ENDPOINT_ACTIONS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX } from '../constants';
 
@@ -49,7 +45,7 @@ export const indexEndpointActionsForHost = async (
   for (let i = 0; i < total; i++) {
     // create an action
     const action = endpointActionGenerator.generate({
-      EndpointAction: {
+      EndpointActions: {
         data: { comment: 'data generator: this host is same as bad' },
       },
     });
@@ -66,9 +62,9 @@ export const indexEndpointActionsForHost = async (
     // Create an action response for the above
     const actionResponse = endpointActionGenerator.generateResponse({
       agent: { id: agentId },
-      EndpointAction: {
-        action_id: action.EndpointAction.action_id,
-        data: action.EndpointAction.data,
+      EndpointActions: {
+        action_id: action.EndpointActions.action_id,
+        data: action.EndpointActions.data,
       },
     });
 
@@ -173,7 +169,7 @@ export const deleteIndexedEndpointActions = async (
                 {
                   terms: {
                     action_id: indexedData.endpointActions.map(
-                      (action) => action.EndpointAction.action_id
+                      (action) => action.EndpointActions.action_id
                     ),
                   },
                 },
@@ -197,7 +193,7 @@ export const deleteIndexedEndpointActions = async (
                 {
                   terms: {
                     action_id: indexedData.endpointActionResponses.map(
-                      (action) => action.EndpointAction.action_id
+                      (action) => action.EndpointActions.action_id
                     ),
                   },
                 },

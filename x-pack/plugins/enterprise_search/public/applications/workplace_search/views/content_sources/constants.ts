@@ -306,20 +306,6 @@ export const SOURCE_CONFIG_TITLE = i18n.translate(
   }
 );
 
-export const SYNC_MANAGEMENT_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementTitle',
-  {
-    defaultMessage: 'Sync management',
-  }
-);
-
-export const SYNC_MANAGEMENT_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementDescription',
-  {
-    defaultMessage: 'Enable and disable extraction of specific content for this source.',
-  }
-);
-
 export const SYNC_MANAGEMENT_SYNCHRONIZE_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementSynchronizeLabel',
   {
@@ -344,7 +330,7 @@ export const SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL = i18n.translate(
 export const SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementContentExtractionLabel',
   {
-    defaultMessage: 'Sync all text and content',
+    defaultMessage: 'Sync full-text from files',
   }
 );
 
@@ -541,11 +527,11 @@ export const SOURCE_OVERVIEW_TITLE = i18n.translate(
   }
 );
 
-export const SOURCE_SYNCRONIZATION_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationDescription',
+export const SOURCE_SYNCHRONIZATION_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationDescription',
   {
     defaultMessage:
-      'DO NOT TRANSLATE, temporary placeholder: Sync chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+      'Synchronization provides control over data being indexed from the content source. Enable synchronization of data from the content source to Workplace Search.',
   }
 );
 
@@ -553,7 +539,7 @@ export const SOURCE_FREQUENCY_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceFrequencyDescription',
   {
     defaultMessage:
-      'DO NOT TRANSLATE, temporary placeholder: Frequency chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+      'Schedule the frequency of data synchronization between Workplace search and the content source. Indexing schedules that occur less frequently lower the burden on third-party servers, while more frequent will ensure your data is up-to-date.',
   }
 );
 
@@ -561,28 +547,35 @@ export const SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsDescription',
   {
     defaultMessage:
-      'DO NOT TRANSLATE, temporary placeholder: Objects chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+      'Customize the indexing rules that determine what data is synchronized from this content source to Workplace Search.',
   }
 );
 
-export const SOURCE_SYNCRONIZATION_TOGGLE_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationToggleLabel',
+export const SOURCE_OBJECTS_AND_ASSETS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsLabel',
+  {
+    defaultMessage: 'Object and details to include in search results',
+  }
+);
+
+export const SOURCE_SYNCHRONIZATION_TOGGLE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationToggleLabel',
   {
     defaultMessage: 'Synchronize this source',
   }
 );
 
-export const SOURCE_SYNCRONIZATION_TOGGLE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationToggleDescription',
+export const SOURCE_SYNCHRONIZATION_TOGGLE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationToggleDescription',
   {
     defaultMessage: 'Source content will automatically be kept in sync.',
   }
 );
 
-export const SOURCE_SYNCRONIZATION_FREQUENCY_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationFrequencyTitle',
+export const SOURCE_SYNCHRONIZATION_FREQUENCY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationFrequencyTitle',
   {
-    defaultMessage: 'Syncronization frequency',
+    defaultMessage: 'Synchronization frequency',
   }
 );
 
@@ -621,24 +614,17 @@ export const SYNCHRONIZATION_DISABLED_DESCRIPTION = i18n.translate(
   }
 );
 
-export const DIFFERENT_SYNC_TYPES_LINK_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.differentSyncTypesLinkLabel',
+export const SYNC_FREQUENCY_LINK_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncFrequencyLinkLabel',
   {
-    defaultMessage: 'Learn more about different sync types',
+    defaultMessage: 'Learn more about synchronization frequency',
   }
 );
 
-export const SYNC_BEST_PRACTICES_LINK_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.syncBestPracticesLinkLabel',
+export const OBJECTS_AND_ASSETS_LINK_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.objectsAndAssetsLinkLabel',
   {
-    defaultMessage: 'Learn more about sync best practices',
-  }
-);
-
-export const SYNC_OBJECTS_TYPES_LINK_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.syncObjectsTypesLinkLabel',
-  {
-    defaultMessage: 'Learn more about sync objects types',
+    defaultMessage: 'Learn more about Objects and assets',
   }
 );
 
@@ -711,3 +697,28 @@ export const BLOCKED_EMPTY_STATE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Add a blocked time window to only perform syncs at the right time.',
   }
 );
+
+export const SYNC_SETTINGS_UPDATED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncSettingsUpdatedMessage',
+  {
+    defaultMessage: 'Source synchronization settings updated.',
+  }
+);
+
+export const SYNC_UNSAVED_CHANGES_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncUnsavedChangesMessage',
+  {
+    defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
+  }
+);
+
+export const NEXT_SYNC_RUNNING_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.nextSyncRunningMessage',
+  {
+    defaultMessage: 'as soon as the currently running job finishes',
+  }
+);
+
+export const UTC_TITLE = i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.utcTitle', {
+  defaultMessage: 'All times are in UTC',
+});

@@ -6,6 +6,9 @@
  */
 
 import { omit } from 'lodash';
+import getPort from 'get-port';
+import http from 'http';
+
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/transport';
@@ -59,6 +62,7 @@ import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { ESCasesConfigureAttributes } from '../../../../plugins/cases/server/services/configure/types';
 import { ESCaseAttributes } from '../../../../plugins/cases/server/services/cases/types';
+import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -672,13 +676,13 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
 export const createCaseWithConnector = async ({
   supertest,
   configureReq = {},
-  servicenowSimulatorURL,
+  serviceNowSimulatorURL,
   actionsRemover,
   auth = { user: superUser, space: null },
   createCaseReq = getPostCaseRequest(),
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
-  servicenowSimulatorURL: string;
+  serviceNowSimulatorURL: string;
   actionsRemover: ActionsRemover;
   configureReq?: Record<string, unknown>;
   auth?: { user: User; space: string | null };
@@ -691,7 +695,7 @@ export const createCaseWithConnector = async ({
     supertest,
     req: {
       ...getServiceNowConnector(),
-      config: { apiUrl: servicenowSimulatorURL },
+      config: { apiUrl: serviceNowSimulatorURL },
     },
     auth,
   });
@@ -1239,4 +1243,18 @@ export const getAlertsAttachedToCase = async ({
     .expect(expectedHttpCode);
 
   return theCase;
+};
+
+export const getServiceNowSimulationServer = async (): Promise<{
+  server: http.Server;
+  url: string;
+}> => {
+  const server = await getServiceNowServer();
+  const port = await getPort({ port: getPort.makeRange(9000, 9100) });
+  if (!server.listening) {
+    server.listen(port);
+  }
+  const url = `http://localhost:${port}`;
+
+  return { server, url };
 };

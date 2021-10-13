@@ -11,6 +11,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
 import { ClientOptions } from '@elastic/elasticsearch';
 import { ConfigDeprecation } from '@kbn/config';
+import { ConfigDeprecationContext } from '@kbn/config';
 import { ConfigDeprecationFactory } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
@@ -245,6 +246,8 @@ export const config: {
 };
 
 export { ConfigDeprecation }
+
+export { ConfigDeprecationContext }
 
 export { ConfigDeprecationFactory }
 
@@ -751,8 +754,6 @@ export class CspConfig implements ICspConfig {
     // (undocumented)
     readonly header: string;
     // (undocumented)
-    readonly rules: string[];
-    // (undocumented)
     readonly strict: boolean;
     // (undocumented)
     readonly warnLegacyBrowsers: boolean;
@@ -800,11 +801,8 @@ export interface DeprecationsClient {
     getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
 }
 
-// Warning: (ae-missing-release-tag) "DeprecationsDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface DeprecationsDetails {
-    // (undocumented)
     correctiveActions: {
         api?: {
             path: string;
@@ -812,15 +810,14 @@ export interface DeprecationsDetails {
             body?: {
                 [key: string]: any;
             };
+            omitContextFromBody?: boolean;
         };
         manualSteps: string[];
     };
     deprecationType?: 'config' | 'feature';
-    // (undocumented)
     documentationUrl?: string;
     level: 'warning' | 'critical' | 'fetch_error';
     message: string;
-    // (undocumented)
     requireRestart?: boolean;
     title: string;
 }
@@ -983,8 +980,6 @@ export type GetAuthState = <T = unknown>(request: KibanaRequest) => {
     state: T;
 };
 
-// Warning: (ae-missing-release-tag) "GetDeprecationsContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface GetDeprecationsContext {
     // (undocumented)
@@ -1138,7 +1133,6 @@ export type IContextProvider<Context extends RequestHandlerContext, ContextName 
 export interface ICspConfig {
     readonly disableEmbedding: boolean;
     readonly header: string;
-    readonly rules: string[];
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
 }
@@ -1699,8 +1693,6 @@ export type RedirectResponseOptions = HttpResponseOptions & {
     };
 };
 
-// Warning: (ae-missing-release-tag) "RegisterDeprecationsConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface RegisterDeprecationsConfig {
     // Warning: (ae-forgotten-export) The symbol "MaybePromise" needs to be exported by the entry point index.d.ts
