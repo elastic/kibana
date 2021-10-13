@@ -25,8 +25,7 @@ export class EnterpriseSearchOverview extends PureComponent {
     const { metrics, stats, ...props } = this.props;
 
     const lowLevelUsageMetrics = [
-      metrics.enterprise_search_heap_used,
-      metrics.enterprise_search_heap_committed,
+      metrics.enterprise_search_heap,
       metrics.enterprise_search_threads_current,
       metrics.enterprise_search_threads_rate,
     ];
@@ -34,23 +33,13 @@ export class EnterpriseSearchOverview extends PureComponent {
     const networkMetrics = [
       metrics.enterprise_search_http_connections_current,
       metrics.enterprise_search_http_connections_rate,
-      metrics.enterprise_search_http_bytes_received_rate,
-      metrics.enterprise_search_http_bytes_sent_rate,
-      metrics.enterprise_search_http_2xx_rate,
-      metrics.enterprise_search_http_3xx_rate,
-      metrics.enterprise_search_http_4xx_rate,
-      metrics.enterprise_search_http_5xx_rate,
+      metrics.enterprise_search_http_traffic,
+      metrics.enterprise_search_http_responses,
     ];
 
-    const appSearchUsageMetrics = [
-      metrics.app_search_total_engines,
-      metrics.crawler_workers_active,
-    ];
+    const appSearchUsageMetrics = [metrics.app_search_total_engines, metrics.crawler_workers];
 
-    const workplaceSearchUsageMetrics = [
-      metrics.workplace_search_total_org_sources,
-      metrics.workplace_search_total_private_sources,
-    ];
+    const workplaceSearchUsageMetrics = [metrics.workplace_search_total_sources];
 
     return (
       <EuiPage>

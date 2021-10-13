@@ -34,8 +34,11 @@ export const metrics = {
   workplace_search_total_org_sources: new EnterpriseSearchMetric({
     field: 'enterprisesearch.stats.product_usage.workplace_search.total_org_sources',
     metricAgg: 'avg',
+    title: i18n.translate('xpack.monitoring.metrics.entSearch.workplace_search_org_sources', {
+      defaultMessage: 'Workpace Search Content Sources',
+    }),
     label: i18n.translate('xpack.monitoring.metrics.entSearch.workplace_search_org_sources', {
-      defaultMessage: 'Workpace Search Org Sources',
+      defaultMessage: 'Org Sources',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.entSearch.workplace_search_org_sources.description',
@@ -52,7 +55,7 @@ export const metrics = {
     field: 'enterprisesearch.stats.product_usage.workplace_search.total_private_sources',
     metricAgg: 'avg',
     label: i18n.translate('xpack.monitoring.metrics.entSearch.workplace_search_private_sources', {
-      defaultMessage: 'Workpace Search Private Sources',
+      defaultMessage: 'Private Sources',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.entSearch.workplace_search_private_sources.description',
@@ -135,11 +138,31 @@ export const metrics = {
     units: perSecondUnitLabel,
   }),
 
+  crawler_workers_total: new EnterpriseSearchMetric({
+    field: 'enterprisesearch.health.crawler.workers.pool_size',
+    metricAgg: 'max',
+    title: i18n.translate('xpack.monitoring.metrics.entSearch.total_crawler_workers', {
+      defaultMessage: 'Crawler Workers',
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.entSearch.total_crawler_workers', {
+      defaultMessage: 'Total',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.entSearch.total_crawler_workers.description',
+      {
+        defaultMessage:
+          'The number of crawler workers configured across all instances of App Search.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    units: '',
+  }),
+
   crawler_workers_active: new EnterpriseSearchMetric({
     field: 'enterprisesearch.health.crawler.workers.active',
     metricAgg: 'max',
     label: i18n.translate('xpack.monitoring.metrics.entSearch.active_crawler_workers', {
-      defaultMessage: 'Active Crawler Workers',
+      defaultMessage: 'Active',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.entSearch.active_crawler_workers.description',
@@ -204,8 +227,11 @@ export const metrics = {
     field: 'enterprisesearch.stats.http.network.received.bytes',
     metricAgg: 'max',
     derivative: true,
+    title: i18n.translate('xpack.monitoring.metrics.entSearch.http_bytes_received.rate', {
+      defaultMessage: 'HTTP Traffic',
+    }),
     label: i18n.translate('xpack.monitoring.metrics.entSearch.http_bytes_received.rate', {
-      defaultMessage: 'Incoming HTTP Traffic',
+      defaultMessage: 'Received',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.entSearch.http_bytes_received.rate.description',
@@ -238,7 +264,7 @@ export const metrics = {
     metricAgg: 'max',
     derivative: true,
     label: i18n.translate('xpack.monitoring.metrics.entSearch.http_bytes_sent.rate', {
-      defaultMessage: 'Outgoing HTTP Traffic',
+      defaultMessage: 'Sent',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.entSearch.http_bytes_sent.rate.description',
@@ -250,13 +276,26 @@ export const metrics = {
     units: perSecondUnitLabel,
   }),
 
+  enterprise_search_http_1xx_rate: new EnterpriseSearchMetric({
+    field: 'enterprisesearch.stats.http.responses.1xx',
+    metricAgg: 'max',
+    derivative: true,
+    title: i18n.translate('xpack.monitoring.metrics.entSearch.http_response_rate', {
+      defaultMessage: 'HTTP Responses',
+    }),
+    label: '1xx',
+    description: i18n.translate('xpack.monitoring.metrics.entSearch.http_1xx.rate.description', {
+      defaultMessage: 'Outgoing HTTP 1xx responses across all instances in the deployment.',
+    }),
+    format: LARGE_FLOAT,
+    units: perSecondUnitLabel,
+  }),
+
   enterprise_search_http_2xx_rate: new EnterpriseSearchMetric({
     field: 'enterprisesearch.stats.http.responses.2xx',
     metricAgg: 'max',
     derivative: true,
-    label: i18n.translate('xpack.monitoring.metrics.entSearch.http_2xx.rate', {
-      defaultMessage: 'HTTP 2xx Responses',
-    }),
+    label: '2xx',
     description: i18n.translate('xpack.monitoring.metrics.entSearch.http_2xx.rate.description', {
       defaultMessage: 'Outgoing HTTP 2xx responses across all instances in the deployment.',
     }),
@@ -268,9 +307,7 @@ export const metrics = {
     field: 'enterprisesearch.stats.http.responses.3xx',
     metricAgg: 'max',
     derivative: true,
-    label: i18n.translate('xpack.monitoring.metrics.entSearch.http_3xx.rate', {
-      defaultMessage: 'HTTP 3xx Responses',
-    }),
+    label: '3xx',
     description: i18n.translate('xpack.monitoring.metrics.entSearch.http_3xx.rate.description', {
       defaultMessage: 'Outgoing HTTP 3xx responses across all instances in the deployment.',
     }),
@@ -282,9 +319,7 @@ export const metrics = {
     field: 'enterprisesearch.stats.http.responses.4xx',
     metricAgg: 'max',
     derivative: true,
-    label: i18n.translate('xpack.monitoring.metrics.entSearch.http_4xx.rate', {
-      defaultMessage: 'HTTP 4xx Responses',
-    }),
+    label: '4xx',
     description: i18n.translate('xpack.monitoring.metrics.entSearch.http_4xx.rate.description', {
       defaultMessage: 'Outgoing HTTP 4xx responses across all instances in the deployment.',
     }),
@@ -296,9 +331,7 @@ export const metrics = {
     field: 'enterprisesearch.stats.http.responses.5xx',
     metricAgg: 'max',
     derivative: true,
-    label: i18n.translate('xpack.monitoring.metrics.entSearch.http_5xx.rate', {
-      defaultMessage: 'HTTP 5xx Responses',
-    }),
+    label: '5xx',
     description: i18n.translate('xpack.monitoring.metrics.entSearch.http_5xx.rate.description', {
       defaultMessage: 'Outgoing HTTP 5xx responses across all instances in the deployment.',
     }),
