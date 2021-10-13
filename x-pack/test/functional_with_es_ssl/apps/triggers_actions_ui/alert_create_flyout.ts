@@ -156,9 +156,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResultsAfterSave).to.eql([
         {
           name: alertName,
-          tagsText: '',
+          tags: '',
           alertType: 'Index threshold',
-          interval: '1m',
+          interval: '1 min',
+          duration: '00:00:00.000',
         },
       ]);
 
@@ -277,7 +278,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
-      await testSubjects.waitForDeleted('testQuerySuccess');
+      // await testSubjects.waitForDeleted('testQuerySuccess');
 
       // Invalid query
       await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
