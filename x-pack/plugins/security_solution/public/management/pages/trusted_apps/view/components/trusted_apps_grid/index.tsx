@@ -138,6 +138,7 @@ export const TrustedAppsGrid = memo(() => {
       cachedCardProps[trustedApp.id] = {
         item: trustedApp,
         policies,
+        hideComments: true,
         'data-test-subj': 'trustedAppCard',
         actions: [
           {
