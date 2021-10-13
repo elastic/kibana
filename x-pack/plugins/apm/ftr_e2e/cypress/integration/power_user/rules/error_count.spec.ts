@@ -67,7 +67,6 @@ describe('Rules', () => {
         cy.wait('@list rules API call', { timeout: 30000 });
 
         // Create a rule
-        cy.contains('button', 'Create rule');
         cy.contains('button', 'Create rule').click();
 
         cy.get('[name=name]').type(ruleName);
