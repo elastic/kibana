@@ -124,6 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         it('when moving to empty workspace, preserves time range, cleans filters and query', async () => {
           await testSubjects.click('breadcrumb first');
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           await PageObjects.visualize.clickNewVisualization();
           await PageObjects.visualize.waitForGroupsSelectPage();
@@ -148,6 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         it('when moving to existing workspace, preserves time range and loads filters and query', async () => {
           await testSubjects.click('breadcrumb first');
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await listingTable.searchForItemWithName('lnsTableVis');
           await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
 
