@@ -18,7 +18,7 @@ import {
   // @ts-ignore
   getMakiIconId,
   // @ts-ignore
-  CUSTOM_ICON_PREFIX,
+  CUSTOM_ICON_PREFIX_SDF,
   // @ts-ignore
 } from '../symbol_utils';
 import { IconStaticOptions } from '../../../../../common/descriptor_types';
@@ -26,7 +26,7 @@ import { IconStaticOptions } from '../../../../../common/descriptor_types';
 export class StaticIconProperty extends StaticStyleProperty<IconStaticOptions> {
   syncIconWithMb(symbolLayerId: string, mbMap: MbMap, iconPixelSize: number) {
     const { value: symbolId, svg } = this._options;
-    if (symbolId.startsWith(CUSTOM_ICON_PREFIX) && svg) {
+    if (symbolId.startsWith(CUSTOM_ICON_PREFIX_SDF) && svg) {
       this._customIconCheck(mbMap).then(() =>
         mbMap.setLayoutProperty(symbolLayerId, 'icon-image', symbolId)
       );

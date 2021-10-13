@@ -14,7 +14,7 @@ import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
 
-export const CUSTOM_ICON_PREFIX = '__kbn__custom_icon__';
+export const CUSTOM_ICON_PREFIX_SDF = '__kbn__custom_icon_sdf__';
 export const LARGE_MAKI_ICON_SIZE = 15;
 const LARGE_MAKI_ICON_SIZE_AS_STRING = LARGE_MAKI_ICON_SIZE.toString();
 export const SMALL_MAKI_ICON_SIZE = 11;
@@ -72,7 +72,7 @@ export function getMakiSymbolAnchor(symbolId) {
 }
 
 export function getCustomIconId() {
-  return `${CUSTOM_ICON_PREFIX}${uuid()}`;
+  return `${CUSTOM_ICON_PREFIX_SDF}${uuid()}`;
 }
 
 export async function createSdfIcon(svgString) {

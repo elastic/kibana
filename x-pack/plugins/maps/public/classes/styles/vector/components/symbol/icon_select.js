@@ -31,7 +31,7 @@ export class IconSelect extends Component {
     isModalVisible: false,
   };
 
-  _handleSave = (name, description, image) => {
+  _handleSave = (name, image) => {
     const symbolId = getCustomIconId();
     const icons = [
       ...this.props.customIcons,

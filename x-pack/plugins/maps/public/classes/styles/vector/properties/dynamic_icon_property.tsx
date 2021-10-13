@@ -11,7 +11,7 @@ import { EuiTextColor } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 // @ts-expect-error
-import { createSdfIcon, CUSTOM_ICON_PREFIX, getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
+import { createSdfIcon, CUSTOM_ICON_PREFIX_SDF, getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
 import { LegendProps } from './style_property';
@@ -50,7 +50,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
   async _syncCustomIconsWithMb(mbMap: MbMap) {
     if (this._options.useCustomIconMap && this._options.customIconStops) {
       await Promise.all(this._options.customIconStops.map(({ icon, svg }) => {
-        if (icon.startsWith(CUSTOM_ICON_PREFIX) && svg) {
+        if (icon.startsWith(CUSTOM_ICON_PREFIX_SDF) && svg) {
           this._customIconCheck(icon, svg, mbMap)
         }
       }));
@@ -99,7 +99,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     const mbStops = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      if (style.startsWith(CUSTOM_ICON_PREFIX)) {
+      if (style.startsWith(CUSTOM_ICON_PREFIX_SDF)) {
         mbStops.push(style);
       } else {
         mbStops.push(getMakiIconId(style, iconPixelSize));
@@ -109,7 +109,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (fallbackSymbol) {
       const { icon } = fallbackSymbol;
       mbStops.push(
-        icon.startsWith(CUSTOM_ICON_PREFIX) ? icon : getMakiIconId(icon, iconPixelSize)
+        icon.startsWith(CUSTOM_ICON_PREFIX_SDF) ? icon : getMakiIconId(icon, iconPixelSize)
       ); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
@@ -126,7 +126,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     const mbStops = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      if (!style.startsWith(CUSTOM_ICON_PREFIX)) {
+      if (!style.startsWith(CUSTOM_ICON_PREFIX_SDF)) {
         // then use maki anchor
         mbStops.push(getMakiSymbolAnchor(style));
       }
@@ -134,7 +134,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
 
     const { icon } = fallbackSymbol;
 
-    if (icon && !icon.startsWith(CUSTOM_ICON_PREFIX)) {
+    if (icon && !icon.startsWith(CUSTOM_ICON_PREFIX_SDF)) {
       mbStops.push(getMakiSymbolAnchor(icon)); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
