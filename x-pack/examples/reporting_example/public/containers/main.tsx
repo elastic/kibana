@@ -146,6 +146,11 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       version: '8.0.0',
       layout: {
         id: print ? constants.LAYOUT_TYPES.PRINT : constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+        dimensions: {
+          // Magic numbers based on height of components not rendered on this screen :(
+          height: 2400,
+          width: 1822,
+        },
       },
       locatorParams: [
         {
