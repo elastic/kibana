@@ -8,11 +8,11 @@
 import { useCallback, useState, useEffect } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 
-import { SystemIndicesFlyout, SystemIndicesFlyoutProps } from './flyout';
-import { useAppContext } from '../../../app_context';
-import type { ResponseError } from '../../../lib/api';
-import { GlobalFlyout } from '../../../../shared_imports';
 import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../../common/constants';
+import type { ResponseError } from '../../../../../common/types';
+import { GlobalFlyout } from '../../../../shared_imports';
+import { useAppContext } from '../../../app_context';
+import { SystemIndicesFlyout, SystemIndicesFlyoutProps } from './flyout';
 
 const FLYOUT_ID = 'migrateSystemIndicesFlyout';
 const { useGlobalFlyout } = GlobalFlyout;
