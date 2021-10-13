@@ -698,6 +698,18 @@ export class LensAttributes {
 
     const query = this.layerConfigs[0].seriesConfig.query;
 
+    const layerFilters: string[] = [];
+
+    this.layerConfigs.forEach((layerConfig) => {
+      layerFilters.push(`(${this.getLayerFilters(layerConfig, this.layerConfigs.length)})`);
+    });
+
+    const layerFiltersStr = layerFilters.join(' or ');
+
+    if (query && layerFiltersStr) {
+      query.query = `${query.query} or ${layerFiltersStr}`;
+    }
+
     return {
       title: 'Prefilled from exploratory view app',
       description: String(refresh),
@@ -721,7 +733,7 @@ export class LensAttributes {
           },
         },
         visualization: this.visualization,
-        query: query || { query: '', language: 'kuery' },
+        query: query || { query: layerFiltersStr, language: 'kuery' },
         filters: [],
       },
     };

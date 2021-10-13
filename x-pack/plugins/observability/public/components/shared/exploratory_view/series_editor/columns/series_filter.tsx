@@ -13,7 +13,7 @@ import { FieldLabels, LABEL_FIELDS_FILTER } from '../../configurations/constants
 import { SelectedFilters } from './selected_filters';
 import { LabelsFieldFilter } from '../components/labels_filter';
 import { URLSearch } from '../../components/url_search/url_search';
-import { TRANSACTION_URL, URL_FULL } from '../../configurations/constants/elasticsearch_fieldnames';
+import { TRANSACTION_URL } from '../../configurations/constants/elasticsearch_fieldnames';
 
 interface Props {
   seriesId: number;

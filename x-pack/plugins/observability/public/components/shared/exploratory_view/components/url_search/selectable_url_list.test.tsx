@@ -10,8 +10,8 @@ import { fireEvent, waitFor, waitForElementToBeRemoved, screen } from '@testing-
 import { createMemoryHistory } from 'history';
 import * as fetcherHook from '../../../../../hooks/use_fetcher';
 import { SelectableUrlList } from './selectable_url_list';
-import { render } from '../../utils/test_helper';
-import { I18LABELS } from '../../translations';
+import { I18LABELS } from './translations';
+import { render } from '../../rtl_helpers';
 
 describe('SelectableUrlList', () => {
   jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
@@ -31,13 +31,13 @@ describe('SelectableUrlList', () => {
         initialValue={'blog'}
         loading={false}
         data={{ items: [], total: 0 }}
-        onChange={jest.fn()}
+        onSelectionChange={jest.fn()}
         searchValue={'blog'}
         onInputChange={jest.fn()}
-        onTermChange={jest.fn()}
         popoverIsOpen={Boolean(isPopoverOpen)}
         setPopoverIsOpen={setIsPopoverOpen}
-        onApply={jest.fn()}
+        onSelectionApply={jest.fn()}
+        hasChanged={() => true}
       />
     );
   }
@@ -48,15 +48,15 @@ describe('SelectableUrlList', () => {
         initialValue={'blog'}
         loading={false}
         data={{ items: [], total: 0 }}
-        onChange={jest.fn()}
+        onSelectionChange={jest.fn()}
         searchValue={'blog'}
         onInputChange={jest.fn()}
-        onTermChange={jest.fn()}
         popoverIsOpen={false}
         setPopoverIsOpen={jest.fn()}
-        onApply={jest.fn()}
+        onSelectionApply={jest.fn()}
+        hasChanged={() => true}
       />,
-      { customHistory }
+      { history: customHistory }
     );
     expect(getByDisplayValue('blog')).toBeInTheDocument();
   });
@@ -67,15 +67,15 @@ describe('SelectableUrlList', () => {
         initialValue={'blog'}
         loading={false}
         data={{ items: [], total: 0 }}
-        onChange={jest.fn()}
+        onSelectionChange={jest.fn()}
         searchValue={'blog'}
         onInputChange={jest.fn()}
-        onTermChange={jest.fn()}
         popoverIsOpen={false}
         setPopoverIsOpen={jest.fn()}
-        onApply={jest.fn()}
+        onSelectionApply={jest.fn()}
+        hasChanged={() => true}
       />,
-      { customHistory }
+      { history: customHistory }
     );
 
     const input = getByLabelText(I18LABELS.filterByUrl);
@@ -86,7 +86,7 @@ describe('SelectableUrlList', () => {
 
   it('hides popover on escape', async () => {
     const { getByText, getByLabelText, queryByText } = render(<WrappedComponent />, {
-      customHistory,
+      history: customHistory,
     });
 
     const input = getByLabelText(I18LABELS.filterByUrl);
@@ -95,7 +95,6 @@ describe('SelectableUrlList', () => {
     // wait for title of popover to be present
     await waitFor(() => {
       expect(getByText(I18LABELS.getSearchResultsLabel(0))).toBeInTheDocument();
-      screen.debug();
     });
 
     // escape key
