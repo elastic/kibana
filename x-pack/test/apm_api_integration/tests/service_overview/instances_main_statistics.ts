@@ -29,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
           const response = await apmApiClient.readUser({
-            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
+            endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
               query: {
@@ -58,12 +58,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('fetching java data', () => {
         let response: {
-          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
+          body: APIReturnType<`GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
         };
 
         beforeEach(async () => {
           response = await apmApiClient.readUser({
-            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
+            endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
               query: {
@@ -129,12 +129,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('fetching non-java data', () => {
         let response: {
-          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
+          body: APIReturnType<`GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
         };
 
         beforeEach(async () => {
           response = await apmApiClient.readUser({
-            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
+            endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-ruby' },
               query: {
@@ -197,12 +197,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('fetching java data', () => {
         let response: {
-          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
+          body: APIReturnType<`GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
         };
 
         beforeEach(async () => {
           response = await apmApiClient.readUser({
-            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
+            endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
               query: {
