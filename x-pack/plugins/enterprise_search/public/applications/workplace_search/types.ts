@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
-
 import { RoleMapping } from '../shared/types';
 
 export * from '../../../common/types/workplace_search';
@@ -166,8 +164,8 @@ export type DayOfWeek = typeof DAYS_OF_WEEK_VALUES[number];
 export interface BlockedWindow {
   jobType: SyncJobType;
   day: DayOfWeek | 'all';
-  start: Moment;
-  end: Moment;
+  start: string;
+  end: string;
 }
 
 export interface IndexingConfig {
