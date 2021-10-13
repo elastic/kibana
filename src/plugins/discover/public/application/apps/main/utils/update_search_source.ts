@@ -8,7 +8,7 @@
 
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import { IndexPattern, ISearchSource } from '../../../../../../data/common';
-import { SortOrder } from '../../../../saved_searches/types';
+import type { SortOrder } from '../../../../saved_searches';
 import { DiscoverServices } from '../../../../build_services';
 import { getSortForSearchSource } from '../components/doc_table';
 
