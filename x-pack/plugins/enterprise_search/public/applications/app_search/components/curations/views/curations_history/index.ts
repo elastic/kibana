@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('xpack_legacy', () => {
-    loadTestFile(require.resolve('./settings'));
-  });
-}
+export { CurationsHistory } from './curations_history';
