@@ -6,7 +6,6 @@
  */
 
 import { MiddlewareAPI } from '@reduxjs/toolkit';
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { setState, initEmpty, LensStoreDeps } from '..';
@@ -180,7 +179,7 @@ export function loadInitial(
             .then((result) => {
               store.dispatch(
                 setState({
-                  ...emptyState,
+                  isSaveable: true,
                   filters: doc.state.filters,
                   sharingSavedObjectProps,
                   query: doc.state.query,
@@ -191,7 +190,7 @@ export function loadInitial(
                     currentSessionId
                       ? currentSessionId
                       : data.search.session.start(),
-                  ...(!isEqual(lens.persistedDoc, doc) ? { persistedDoc: doc } : null),
+                  persistedDoc: doc,
                   activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                   visualization: {
                     activeId: doc.visualizationType,
