@@ -216,7 +216,7 @@ export class InspectorService extends FtrService {
     );
 
     if (selectedOption.length !== 1) {
-      return false;
+      return 'Combobox has multiple options';
     }
 
     return selectedOption[0];
