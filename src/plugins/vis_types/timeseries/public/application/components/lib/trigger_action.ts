@@ -51,7 +51,6 @@ const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
   },
 };
 //  THINGS TO ADD
-//  - multiple metrics
 // - formula
 
 export const triggerVisualizeToLensActions = async (model: Panel) => {
@@ -60,6 +59,7 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
     const layer = model.series[layerIdx];
+    if (layer.hidden) continue;
     let indexPatternId =
       model.index_pattern && !isStringTypeIndexPattern(model.index_pattern)
         ? model.index_pattern.id
@@ -87,8 +87,9 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
         indexPatternId = defaultIndex?.id ?? '';
       }
     }
-    const aggregation = layer.metrics[0].type;
-    const fieldName = layer.metrics[0].field;
+    const metricIdx = layer.metrics.length - 1;
+    const aggregation = layer.metrics[metricIdx].type;
+    const fieldName = layer.metrics[metricIdx].field;
     // translate to Lens seriesType
     const chartType = layer.chart_type === 'line' && layer.fill !== '0' ? 'area' : layer.chart_type;
     // find supported aggregations
@@ -97,26 +98,44 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
       return null;
     }
 
+    // handle multiple metrics
+    let metricsArray: VisualizeEditorContext['metrics'] = [];
+
+    if (aggregation === 'percentile' && layer.metrics[metricIdx].percentiles) {
+      layer.metrics[metricIdx].percentiles?.forEach((percentile) => {
+        metricsArray.push({
+          agg: 'percentile',
+          isFullReference: false,
+          color: percentile.color,
+          fieldName: fieldName ?? 'document',
+          params: { percentile: percentile.value },
+        });
+      });
+    } else {
+      // construct metrics from the last series.metric item
+      metricsArray = [
+        {
+          agg: aggregationMap.name,
+          isFullReference: aggregationMap.isFullReference,
+          color: layer.color,
+          fieldName: aggregation !== 'count' && fieldName ? fieldName : 'document',
+        },
+      ];
+    }
+
     const triggerOptions: VisualizeEditorContext = {
       indexPatternId,
-      agg: aggregationMap.name,
-      isFullReference: aggregationMap.isFullReference,
-      fieldName: aggregation !== 'count' && fieldName ? fieldName : 'document',
       timeFieldName: timeField,
-      color: layer.color,
       chartType: layer.stacked === 'none' ? chartType : `${chartType}_stacked`,
       splitField: layer.terms_field ?? undefined,
       splitMode: layer.split_mode !== 'everything' ? layer.split_mode : undefined,
       splitFilters: layer.split_filters ?? undefined,
       palette: (layer.palette as PaletteOutput) ?? undefined,
+      ...(layer.split_mode === 'terms' && {
+        termsParams: { size: layer.terms_size ?? 10, otherBucket: false },
+      }),
+      metrics: [...metricsArray],
     };
-
-    if (aggregation === 'percentile' && layer.metrics[0].percentiles) {
-      triggerOptions.params = { percentile: layer.metrics[0]?.percentiles[0]?.value };
-    }
-    if (layer.split_mode === 'terms') {
-      triggerOptions.params = { size: layer.terms_size ?? 10, otherBucket: false };
-    }
     options[layerIdx] = triggerOptions;
   }
   return options;

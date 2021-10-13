@@ -40,7 +40,7 @@ import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
-  getDatasourceSuggestionsForTSVBCharts,
+  getDatasourceSuggestionsForVisualizeCharts,
 } from './indexpattern_suggestions';
 
 import { isDraggedField, normalizeOperationDataType } from './utils';
@@ -441,7 +441,7 @@ export function getIndexPatternDatasource({
     },
     getDatasourceSuggestionsFromCurrentState,
     getDatasourceSuggestionsForVisualizeField,
-    getDatasourceSuggestionsForTSVBCharts,
+    getDatasourceSuggestionsForVisualizeCharts,
 
     getErrorMessages(state) {
       if (!state) {

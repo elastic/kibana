@@ -25,8 +25,6 @@ import {
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
 import { LayerType, layerTypes } from '../../../common';
-import { SeriesType } from '../../../common/expressions';
-
 import { getLayerType } from './config_panel/add_layer';
 import {
   LensDispatch,
@@ -109,7 +107,7 @@ export function getSuggestions({
     if (visualizeTriggerFieldContext) {
       // used for navigating from VizEditor to Lens
       if (Array.isArray(visualizeTriggerFieldContext)) {
-        dataSourceSuggestions = datasource.getDatasourceSuggestionsForTSVBCharts(
+        dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeCharts(
           datasourceState,
           visualizeTriggerFieldContext
         );
@@ -211,53 +209,41 @@ export function getVisualizeFieldSuggestions({
       (s) => s.visualizationId === activeVisualization?.id
     ) as SuggestionMultipleLayers[];
 
-    let suggestion = allSuggestions[0];
-    const initialSuggestionLayers = suggestion.visualizationState.layers;
-    if (activeVisualization.updateConfiguration) {
-      const visState = activeVisualization.updateConfiguration({
-        prevState: suggestion.visualizationState,
-        layerId: initialSuggestionLayers[0].layerId as string,
-        seriesType: visualizeTriggerFieldContext[0].chartType as SeriesType,
-        palette: visualizeTriggerFieldContext[0].palette,
-        color: visualizeTriggerFieldContext[0].color,
-      }) as StateWithLayers;
+    const visualizationStateLayers = [];
+    let datasourceStateLayers = {};
 
-      suggestion = {
-        ...suggestion,
-        visualizationState: visState,
-      };
-    }
-    const initialLayersModified = suggestion.visualizationState.layers;
-
-    for (let suggestionIdx = 1; suggestionIdx < allSuggestions.length; suggestionIdx++) {
+    for (let suggestionIdx = 0; suggestionIdx < allSuggestions.length; suggestionIdx++) {
       const currentSuggestion = allSuggestions[suggestionIdx];
       const currentSuggestionsLayers = currentSuggestion.visualizationState.layers;
-      if (activeVisualization.updateConfiguration) {
-        const currentState = activeVisualization.updateConfiguration({
+      if (activeVisualization.updateLayersConfigurationFromContext) {
+        const updatedSuggestionState = activeVisualization.updateLayersConfigurationFromContext({
           prevState: currentSuggestion.visualizationState,
           layerId: currentSuggestionsLayers[0].layerId as string,
-          seriesType: visualizeTriggerFieldContext[suggestionIdx].chartType as SeriesType,
-          palette: visualizeTriggerFieldContext[suggestionIdx].palette,
-          color: visualizeTriggerFieldContext[suggestionIdx].color,
+          context: visualizeTriggerFieldContext[suggestionIdx],
         }) as StateWithLayers;
 
-        initialLayersModified.push(...currentState.layers);
+        visualizationStateLayers.push(...updatedSuggestionState.layers);
+        datasourceStateLayers = {
+          ...datasourceStateLayers,
+          ...currentSuggestion.datasourceState.layers,
+        };
       }
-      suggestion = {
-        ...suggestion,
-        datasourceState: {
-          ...suggestion.datasourceState,
-          layers: {
-            ...suggestion.datasourceState.layers,
-            ...currentSuggestion.datasourceState.layers,
-          },
-        },
-        visualizationState: {
-          ...suggestion.visualizationState,
-          layers: initialLayersModified,
-        },
-      };
     }
+    let suggestion = allSuggestions[0];
+    suggestion = {
+      ...suggestion,
+      datasourceState: {
+        ...suggestion.datasourceState,
+        layers: {
+          ...suggestion.datasourceState.layers,
+          ...datasourceStateLayers,
+        },
+      },
+      visualizationState: {
+        ...suggestion.visualizationState,
+        layers: visualizationStateLayers,
+      },
+    };
     return suggestion;
   }
 

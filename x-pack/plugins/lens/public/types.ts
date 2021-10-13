@@ -40,7 +40,6 @@ import {
   LENS_TOGGLE_ACTION,
 } from './datatable_visualization/components/constants';
 import type { LensInspector } from './lens_inspector_service';
-import { SeriesType } from '../common/expressions';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -241,7 +240,7 @@ export interface Datasource<T = unknown, P = unknown> {
     field: unknown,
     filterFn: (layerId: string) => boolean
   ) => Array<DatasourceSuggestion<T>>;
-  getDatasourceSuggestionsForTSVBCharts: (
+  getDatasourceSuggestionsForVisualizeCharts: (
     state: T,
     context: VisualizeEditorContext[]
   ) => Array<DatasourceSuggestion<T>>;
@@ -496,12 +495,10 @@ interface VisualizationDimensionChangeProps<T> {
   frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
 }
 
-interface VisualizationConfigurationChangeProps<T> {
+interface VisualizationConfigurationFromContextChangeProps<T> {
   layerId: string;
-  seriesType?: SeriesType;
-  color?: string;
   prevState: T;
-  palette?: PaletteOutput;
+  context: VisualizeEditorContext;
 }
 
 /**
@@ -720,7 +717,9 @@ export interface Visualization<T = unknown> {
   /**
    * Update the configuration for the visualization. This is used to update the state
    */
-  updateConfiguration?: (props: VisualizationConfigurationChangeProps<T>) => T;
+  updateLayersConfigurationFromContext?: (
+    props: VisualizationConfigurationFromContextChangeProps<T>
+  ) => T;
   /**
    * Additional editor that gets rendered inside the dimension popover.
    * This can be used to configure dimension-specific options

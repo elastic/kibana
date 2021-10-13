@@ -470,25 +470,26 @@ export const getXyVisualization = ({
     };
   },
 
-  updateConfiguration({ prevState, layerId, seriesType, palette, color }) {
+  updateLayersConfigurationFromContext({ prevState, layerId, context }) {
+    const { chartType, palette, metrics } = context;
+
     const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
       return prevState;
     }
-    const newLayer = { ...foundLayer };
-    if (seriesType) {
-      newLayer.seriesType = seriesType;
-    }
-    if (palette) {
-      newLayer.palette = palette;
-    }
+    const yConfig = metrics.map((metric, idx) => {
+      return {
+        color: metric.color,
+        forAccessor: foundLayer.accessors[idx],
+      };
+    });
+    const newLayer = {
+      ...foundLayer,
+      ...(chartType && { seriesType: chartType as SeriesType }),
+      ...(palette && { palette }),
+      yConfig,
+    };
 
-    newLayer.yConfig = [
-      {
-        color,
-        forAccessor: newLayer.accessors[0],
-      },
-    ];
     const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
 
     return {

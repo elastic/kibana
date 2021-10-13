@@ -24,6 +24,7 @@ import {
   getReferencedColumnIds,
   getSplitByTermsLayer,
   getSplitByFiltersLayer,
+  computeLayer,
 } from './operations';
 import { hasField } from './utils';
 import type {
@@ -131,7 +132,7 @@ export function getDatasourceSuggestionsForField(
 }
 
 // Called when the user navigates from TSVB to Lens
-export function getDatasourceSuggestionsForTSVBCharts(
+export function getDatasourceSuggestionsForVisualizeCharts(
   state: IndexPatternPrivateState,
   context: VisualizeEditorContext[]
 ): IndexPatternSuggestion[] {
@@ -140,10 +141,10 @@ export function getDatasourceSuggestionsForTSVBCharts(
     (id) => state.layers[id].indexPatternId === context[0].indexPatternId
   );
   if (layerIds.length !== 0) return [];
-  return getEmptyLayersSuggestionsForTSVBCharts(state, context);
+  return getEmptyLayersSuggestionsForVisualizeCharts(state, context);
 }
 
-function getEmptyLayersSuggestionsForTSVBCharts(
+function getEmptyLayersSuggestionsForVisualizeCharts(
   state: IndexPatternPrivateState,
   context: VisualizeEditorContext[]
 ): IndexPatternSuggestion[] {
@@ -153,11 +154,10 @@ function getEmptyLayersSuggestionsForTSVBCharts(
     const indexPattern = state.indexPatterns[layer.indexPatternId];
     if (!indexPattern) return [];
 
-    const field = indexPattern.getFieldByName(layer.fieldName) || documentField;
     const newId = generateId();
     let newLayer: IndexPatternLayer | undefined;
     if (indexPattern.timeFieldName) {
-      newLayer = createNewLayerWithMetricAggregatioFromVizEditor(indexPattern, field, layer);
+      newLayer = createNewLayerWithMetricAggregationFromVizEditor(indexPattern, layer);
     }
     if (newLayer) {
       suggestions.push(
@@ -173,34 +173,26 @@ function getEmptyLayersSuggestionsForTSVBCharts(
   return suggestions;
 }
 
-function createNewLayerWithMetricAggregatioFromVizEditor(
+function createNewLayerWithMetricAggregationFromVizEditor(
   indexPattern: IndexPattern,
-  field: IndexPatternField,
   layer: VisualizeEditorContext
 ): IndexPatternLayer | undefined {
-  const { agg, isFullReference, timeFieldName, params, splitMode, splitFilters } = layer;
-
+  const { timeFieldName, splitMode, splitFilters, metrics } = layer;
   const dateField = indexPattern.getFieldByName(timeFieldName!);
   const splitField = layer.splitField ? indexPattern.getFieldByName(layer.splitField) : null;
   // generate the layer for split by terms
   if (splitMode === 'terms' && splitField) {
-    return getSplitByTermsLayer(indexPattern, field, splitField, dateField, layer);
+    return getSplitByTermsLayer(indexPattern, splitField, dateField, layer);
     // generate the layer for split by filters
   } else if (splitMode === 'filters' && splitFilters && splitFilters.length) {
-    return getSplitByFiltersLayer(indexPattern, field, dateField, layer);
+    return getSplitByFiltersLayer(indexPattern, dateField, layer);
   } else {
+    const copyMetricsArray = [...metrics];
+    const computedLayer = computeLayer(metrics.length === 1, copyMetricsArray, indexPattern);
+
     return insertNewColumn({
       op: 'date_histogram',
-      layer: insertNewColumn({
-        op: agg as OperationType,
-        layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
-        columnId: generateId(),
-        field: !isFullReference ? field : undefined,
-        columnParams: params ?? undefined,
-        incompleteFieldName: isFullReference ? field.name : undefined,
-        indexPattern,
-        visualizationGroups: [],
-      }),
+      layer: computedLayer,
       columnId: generateId(),
       field: dateField,
       indexPattern,
@@ -435,7 +427,6 @@ export function getDatasourceSuggestionsFromCurrentState(
   filterLayers: (layerId: string) => boolean = () => true
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
   const layers = Object.entries(state.layers || {}).filter(([layerId]) => filterLayers(layerId));
-  // console.dir(state.layers);
 
   if (layers.length > 1) {
     // Return suggestions that reduce the data to each layer individually

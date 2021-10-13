@@ -27,19 +27,24 @@ interface SplitFilters {
   label?: string;
 }
 
-export interface VisualizeEditorContext {
+interface Metric {
   agg: string;
   fieldName: string;
+  params?: Record<string, unknown>;
+  isFullReference: boolean;
+  color?: string;
+}
+
+export interface VisualizeEditorContext {
   indexPatternId: string;
   timeFieldName?: string;
-  isFullReference: boolean;
   chartType?: string;
-  color?: string;
-  params?: Record<string, unknown>;
+  termsParams?: Record<string, unknown>;
   splitField?: string;
   splitMode?: string;
   splitFilters?: SplitFilters[];
   palette?: PaletteOutput;
+  metrics: Metric[];
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
