@@ -13,7 +13,6 @@ import { securityMock } from '../../../../../security/public/mocks';
 import { appRoutesService } from '../../../../../fleet/common';
 import { AuthenticatedUser } from '../../../../../security/common';
 import { licenseService } from '../../hooks/use_license';
-import { fleetGetCheckPermissionsHttpMock } from '../../../management/pages/mocks';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_license', () => {
