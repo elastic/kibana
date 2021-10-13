@@ -185,7 +185,7 @@ export const PolicyTrustedAppsList = memo(() => {
     }
 
     return newCardProps;
-  }, [allPoliciesById, getAppUrl, getTestId, isCardExpanded, trustedAppItems]);
+  }, [allPoliciesById, getAppUrl, getTestId, isCardExpanded, trustedAppItems, isPlatinumPlus]);
 
   const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
     (item) => {
