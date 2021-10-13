@@ -60,7 +60,7 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
           SearchStrategyClientParams &
           SearchStrategyServerParams = {
           ...searchServiceParams,
-          index: indices['apm_oss.transactionIndices'],
+          index: indices.transaction,
           includeFrozen,
         };
 

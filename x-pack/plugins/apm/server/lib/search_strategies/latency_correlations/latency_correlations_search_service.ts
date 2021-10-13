@@ -62,7 +62,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
         const indices = await getApmIndices();
         params = {
           ...searchServiceParams,
-          index: indices['apm_oss.transactionIndices'],
+          index: indices.transaction,
           includeFrozen,
         };
 

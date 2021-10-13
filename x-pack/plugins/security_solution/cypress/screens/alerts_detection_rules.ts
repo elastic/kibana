@@ -103,3 +103,7 @@ export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="allRulesDeleteC
 export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
+
+export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
+
+export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
