@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { ESFilter } from '../../../../../src/core/types/elasticsearch';
 import { createEsParams, useEsSearch } from './use_es_search';
+import { TRANSACTION_URL } from '../components/shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
 
 export interface Props {
   sourceField: string;
@@ -30,6 +31,27 @@ const uniqueValues = (values: ListItem[], prevValues: ListItem[]) => {
   return uniqBy([...values, ...prevValues], 'label');
 };
 
+const getIncludeClause = (sourceField: string, query?: string) => {
+  let includeClause = '';
+
+  if (query) {
+    if (sourceField === TRANSACTION_URL) {
+      // for the url we also match leading text
+      includeClause = `*.${query.toLowerCase()}.*`;
+    } else {
+      if (query[0].toLowerCase() === query[0]) {
+        // if first letter is lowercase we also add the capitalize option
+        includeClause = `(${query}|${capitalize(query)}).*`;
+      } else {
+        // otherwise we add lowercase option prefix
+        includeClause = `(${query}|${query.toLowerCase()}).*`;
+      }
+    }
+  }
+
+  return includeClause;
+};
+
 export const useValuesList = ({
   sourceField,
   indexPatternTitle,
@@ -43,18 +65,6 @@ export const useValuesList = ({
   const [values, setValues] = useState<ListItem[]>([]);
 
   const { from, to } = time ?? {};
-
-  let includeClause = '';
-
-  if (query) {
-    if (query[0].toLowerCase() === query[0]) {
-      // if first letter is lowercase we also add the capitalize option
-      includeClause = `(${query}|${capitalize(query)}).*`;
-    } else {
-      // otherwise we add lowercase option prefix
-      includeClause = `(${query}|${query.toLowerCase()}).*`;
-    }
-  }
 
   useDebounce(
     () => {
@@ -70,6 +80,8 @@ export const useValuesList = ({
       setDebounceQuery(query);
     }
   }, [query]);
+
+  const includeClause = getIncludeClause(sourceField, query);
 
   const { data, loading } = useEsSearch(
     createEsParams({

@@ -6,7 +6,6 @@
  */
 
 import React, { ReactNode } from 'react';
-import classNames from 'classnames';
 import { EuiHighlight, EuiSelectableOption } from '@elastic/eui';
 import styled from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
@@ -28,17 +27,6 @@ const StyledListSpan = styled.span`
 export type UrlOption<T = { [key: string]: any }> = {
   meta?: string[];
 } & EuiSelectableOption<T>;
-
-export const formatOptions = (options: EuiSelectableOption[]) => {
-  return options.map((item: EuiSelectableOption) => ({
-    title: item.label,
-    ...item,
-    className: classNames(
-      'euiSelectableTemplateSitewide__listItem',
-      item.className
-    ),
-  }));
-};
 
 export function selectableRenderOptions(
   option: UrlOption,
