@@ -70,7 +70,12 @@ export function onPremInstructions({
                 {
                   id: INSTRUCTION_VARIANT.FLEET,
                   instructions: [
-                    { customComponentName: 'TutorialFleetInstructions' },
+                    {
+                      title: i18n.translate('xpack.apm.tutorial.fleet.title', {
+                        defaultMessage: 'Fleet',
+                      }),
+                      customComponentName: 'TutorialFleetInstructions',
+                    },
                   ],
                 },
               ]

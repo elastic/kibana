@@ -6,3 +6,4 @@
  */
 
 export * from './context_menu_with_router_support';
+export * from './context_menu_item_nav_by_router';
