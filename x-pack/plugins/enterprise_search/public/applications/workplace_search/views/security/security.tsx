@@ -75,9 +75,6 @@ export const Security: React.FC = () => {
   };
 
   const headerActions = [
-    <EuiButtonEmpty disabled={!unsavedChanges || dataLoading} onClick={resetState}>
-      {RESET_BUTTON}
-    </EuiButtonEmpty>,
     <EuiButton
       disabled={!hasPlatinumLicense || !unsavedChanges || dataLoading}
       onClick={showConfirmModal}
@@ -86,6 +83,9 @@ export const Security: React.FC = () => {
     >
       {SAVE_SETTINGS_BUTTON}
     </EuiButton>,
+    <EuiButtonEmpty disabled={!unsavedChanges || dataLoading} onClick={resetState}>
+      {RESET_BUTTON}
+    </EuiButtonEmpty>,
   ];
 
   const allSourcesToggle = (

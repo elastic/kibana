@@ -119,6 +119,7 @@ export const Overview: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const closeModal = () => setIsModalVisible(false);
   const handleSyncClick = () => setIsModalVisible(true);
+  const showSyncTriggerCallout = !custom && isIndexedSource && isOrganization;
 
   const onSyncConfirm = () => {
     initializeSourceSynchronization(id);
@@ -491,7 +492,7 @@ export const Overview: React.FC = () => {
         <EuiText size="s">
           <FormattedMessage
             id="xpack.enterpriseSearch.workplaceSearch.sources.synchronizationCallout"
-            defaultMessage="Configure {syncFrequencyLink} or permissions {blockTimeWindowsLink}."
+            defaultMessage="Configure {syncFrequencyLink} or {blockTimeWindowsLink}."
             values={{
               syncFrequencyLink: (
                 <EuiLinkTo to={getContentSourcePath(SYNC_FREQUENCY_PATH, id, isOrganization)}>
@@ -586,7 +587,7 @@ export const Overview: React.FC = () => {
                 )}
               </>
             )}
-            {isIndexedSource && isOrganization && syncTriggerCallout}
+            {showSyncTriggerCallout && syncTriggerCallout}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
