@@ -35,6 +35,7 @@ export function registerTelemetryUsageStatsRoutes(
           request: req,
           unencrypted,
         };
+
         const stats = await telemetryCollectionManager.getStats(statsConfig);
         return res.ok({ body: stats });
       } catch (err) {
