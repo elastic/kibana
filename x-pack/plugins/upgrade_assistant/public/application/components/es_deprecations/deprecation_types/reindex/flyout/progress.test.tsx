@@ -77,6 +77,21 @@ describe('ReindexProgress', () => {
                       values={Object {}}
                     />
                   </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <CancelReindexingDocumentsButton
+                      cancelReindex={[MockFunction]}
+                      reindexState={
+                        Object {
+                          "errorMessage": null,
+                          "lastCompletedStep": 0,
+                          "reindexTaskPercComplete": null,
+                          "status": 0,
+                        }
+                      }
+                    />
+                  </EuiFlexItem>
                 </EuiFlexGroup>,
               },
               Object {

@@ -50,7 +50,7 @@ const buttonLabel = (status?: ReindexStatus) => {
     case ReindexStatus.cancelled:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.resumeLabel"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.restartLabel"
           defaultMessage="Restart reindex"
         />
       );
