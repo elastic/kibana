@@ -6,11 +6,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiButton, EuiColorStops, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import { DatatableColumn, ExpressionAstExpression } from 'src/plugins/expressions';
+import { EuiButton, EuiColorStops, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ExpressionAstExpression } from 'src/plugins/expressions';
+import { ColorStop } from '@elastic/eui/src/components/color_picker/color_stops';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
-import { ColorStop } from '@elastic/eui/src/components/color_picker/color_stops';
 
 const { StopsPalette: strings } = ArgumentStrings;
 
@@ -25,6 +25,22 @@ interface StopPaletteArgInputProps {
   };
 }
 
+const convertColorsToPaletteArgs = (colors: ColorStop[]) => {
+  return colors.reduce<{ color: string[]; stop: number[] }>(
+    (args, colorStop) => {
+      args.color.push(colorStop.color);
+      args.stop.push(colorStop.stop);
+      return args;
+    },
+    { color: [], stop: [] }
+  );
+};
+
+const convertPaletteArgColorAndStop = (argValue: ExpressionAstExpression): ColorStop[] => {
+  const { color: colors = [], stop = [] } = argValue.chain[0]?.arguments ?? {};
+  return (colors as string[]).map((color, index) => ({ color, stop: stop[index] as number }));
+};
+
 const StopsPaletteArgInput: React.FC<StopPaletteArgInputProps> = ({
   argValue,
   typeInstance,
@@ -33,23 +49,24 @@ const StopsPaletteArgInput: React.FC<StopPaletteArgInputProps> = ({
 }) => {
   const [value, setValue] = useState(argValue);
   const confirm = typeInstance?.options?.confirm;
-  const [colorStops, setColorStops] = useState<ColorStop[]>([]);
+  const colorStopsFromArg = convertPaletteArgColorAndStop(value);
+  const [colorStops, setColorStops] = useState<ColorStop[]>(colorStopsFromArg);
 
   useEffect(() => {
     setValue(argValue);
   }, [argValue]);
 
   const onChange = useCallback(
-    (ev) => {
+    (colorsWithStops) => {
       const onChangeFn = confirm ? setValue : onValueChange;
       const astObj: ExpressionAstExpression = {
         type: 'expression',
         chain: [
           {
             type: 'function',
-            function: 'visdimension',
+            function: 'palette',
             arguments: {
-              _: [ev.target.value],
+              ...convertColorsToPaletteArgs(colorsWithStops),
             },
           },
         ],
@@ -65,9 +82,13 @@ const StopsPaletteArgInput: React.FC<StopPaletteArgInputProps> = ({
       <EuiFlexItem>
         <EuiColorStops
           label="Single start"
-          onChange={(e: ColorStop[] | []) => {
-            console.log(e);
-            if (e) setColorStops(e);
+          onChange={(e: ColorStop[] | undefined, isInvalid?: boolean | undefined) => {
+            if (isInvalid) {
+              return;
+            }
+
+            setColorStops(e ?? []);
+            onChange(e ?? []);
           }}
           colorStops={colorStops}
           stopType="fixed"
