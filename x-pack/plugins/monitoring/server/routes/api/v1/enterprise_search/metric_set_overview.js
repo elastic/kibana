@@ -15,7 +15,11 @@ export const metricSet = [
       'enterprise_search_heap_used',
     ],
   },
-  'enterprise_search_threads_current',
+  'enterprise_search_jvm_finalizer_queue',
+  {
+    name: 'enterprise_search_threads',
+    keys: ['enterprise_search_threads_current', 'enterprise_search_daemon_threads_current'],
+  },
   'enterprise_search_threads_rate',
 
   // Networking metrics

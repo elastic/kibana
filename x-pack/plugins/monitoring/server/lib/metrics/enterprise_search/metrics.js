@@ -117,12 +117,44 @@ export const metrics = {
   enterprise_search_threads_current: new EnterpriseSearchMetric({
     field: 'enterprisesearch.health.jvm.threads.current',
     metricAgg: 'max',
+    title: i18n.translate('xpack.monitoring.metrics.entSearch.threads', {
+      defaultMessage: 'JVM Threads',
+    }),
     label: i18n.translate('xpack.monitoring.metrics.entSearch.threads.current', {
       defaultMessage: 'Active Threads',
     }),
     description: i18n.translate('xpack.monitoring.metrics.entSearch.threads.current.description', {
       defaultMessage: 'Currently running JVM threads used by the application.',
     }),
+    format: SMALL_FLOAT,
+    units: '',
+  }),
+
+  enterprise_search_daemon_threads_current: new EnterpriseSearchMetric({
+    field: 'enterprisesearch.health.jvm.threads.daemon',
+    metricAgg: 'max',
+    label: i18n.translate('xpack.monitoring.metrics.entSearch.threads.daemon', {
+      defaultMessage: 'Daemon Threads',
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.entSearch.threads.daemon.description', {
+      defaultMessage: 'Currently running JVM daemon threads used by the application.',
+    }),
+    format: SMALL_FLOAT,
+    units: '',
+  }),
+
+  enterprise_search_jvm_finalizer_queue: new EnterpriseSearchMetric({
+    field: 'enterprisesearch.health.jvm.memory_usage.object_pending_finalization_count',
+    metricAgg: 'max',
+    label: i18n.translate('xpack.monitoring.metrics.entSearch.finalizer_objects', {
+      defaultMessage: 'JVM Objects Pending Finalization',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.entSearch.finalizer_objects.description',
+      {
+        defaultMessage: 'Number of objects within the JVM heap waiting for the finalizer thread.',
+      }
+    ),
     format: SMALL_FLOAT,
     units: '',
   }),
