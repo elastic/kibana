@@ -479,5 +479,140 @@ describe('deprecations', () => {
         ]
       `);
     });
+
+    test('getDeprecations with multiple roles and get a deprecation on the role "second_role" in the space of "readSecuritySolution_2"', async () => {
+      getKibanaRolesByFeatureId.mockResolvedValue({
+        roles: [
+          {
+            _transform_error: [],
+            _unrecognized_applications: [],
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  bar: ['bar-privilege-1'],
+                  securitySolutionCases: ['read'],
+                  siem: ['minimal_read', 'cases_read'],
+                },
+                spaces: ['readSecuritySolution_1'],
+              },
+            ],
+            metadata: {
+              _reserved: true,
+            },
+            name: 'first_role',
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+          {
+            _transform_error: [],
+            _unrecognized_applications: [],
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  bar: ['bar-privilege-1'],
+                  siem: ['minimal_read', 'cases_read'],
+                },
+                spaces: ['readSecuritySolution_2'],
+              },
+            ],
+            metadata: {
+              _reserved: true,
+            },
+            name: 'second_role',
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+          {
+            _transform_error: [],
+            _unrecognized_applications: [],
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  bar: ['bar-privilege-1'],
+                  siem: ['minimal_all'],
+                },
+                spaces: ['allSecuritySolution'],
+              },
+            ],
+            metadata: {
+              _reserved: true,
+            },
+            name: 'third_role',
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        ],
+      });
+      const response = await getDeprecations(mockContext);
+      expect(response).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "correctiveActions": Object {
+              "api": Object {
+                "body": Object {
+                  "elasticsearch": Object {
+                    "cluster": Array [],
+                    "indices": Array [],
+                    "run_as": Array [],
+                  },
+                  "kibana": Array [
+                    Object {
+                      "base": Array [],
+                      "feature": Object {
+                        "bar": Array [
+                          "bar-privilege-1",
+                        ],
+                        "securitySolutionCases": Array [
+                          "read",
+                        ],
+                        "siem": Array [
+                          "minimal_read",
+                          "cases_read",
+                        ],
+                      },
+                      "spaces": Array [
+                        "readSecuritySolution_2",
+                      ],
+                    },
+                  ],
+                  "metadata": Object {
+                    "_reserved": true,
+                  },
+                },
+                "method": "PUT",
+                "omitContextFromBody": true,
+                "path": "/api/security/role/second_role",
+              },
+              "manualSteps": Array [],
+            },
+            "deprecationType": "feature",
+            "level": "warning",
+            "message": "The \\"Security\\" feature will be split into two separate features in 8.0. The \\"second_role\\" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.",
+            "title": "The \\"second_role\\" role needs to be updated",
+          },
+        ]
+      `);
+    });
   });
 });

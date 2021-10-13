@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { Logger } from 'src/core/server';
 
 import { DeprecationsDetails, DeprecationsServiceSetup } from '../../../../../src/core/server';
-import type { PrivilegeDeprecationsService } from '../../../security/common/model';
+import type { PrivilegeDeprecationsService, Role } from '../../../security/common/model';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../common/constants';
 
 interface Deps {
@@ -60,6 +60,14 @@ export const updateSecuritySolutionPrivileges = (
   };
 };
 
+const SIEM_PRIVILEGES_FOR_CASES = new Set(['all', 'read', 'cases_all', 'cases_read']);
+function outdatedSiemRolePredicate(role: Role) {
+  return role.kibana.some(
+    ({ feature }) =>
+      !feature[CASES_FEATURE_ID] && feature.siem.some((x) => SIEM_PRIVILEGES_FOR_CASES.has(x))
+  );
+}
+
 export const registerPrivilegeDeprecations = ({
   deprecationsService,
   getKibanaRolesByFeatureId,
@@ -79,16 +87,10 @@ export const registerPrivilegeDeprecations = ({
       if (responseRoles.errors && responseRoles.errors.length > 0) {
         return responseRoles.errors;
       }
-      if (
-        responseRoles.roles?.some((role) =>
-          role.kibana.some((privilege) => privilege.feature[CASES_FEATURE_ID] != null)
-        )
-      ) {
-        return [];
-      }
+
       try {
-        const roles = responseRoles.roles ?? [];
-        deprecatedRoles = roles.map<DeprecationsDetails>((role) => {
+        const filteredRoles = (responseRoles.roles ?? []).filter(outdatedSiemRolePredicate);
+        deprecatedRoles = filteredRoles.map<DeprecationsDetails>((role) => {
           const { metadata, elasticsearch, kibana, name: roleName } = role;
 
           const updatedKibana = kibana.map((privilege) => {
