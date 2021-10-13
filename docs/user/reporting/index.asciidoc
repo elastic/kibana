@@ -13,6 +13,8 @@ a PDF, PNG, or CSV document, which you can keep for yourself, or share with othe
 Reporting is available from the *Share* menu
 in *Discover*, *Dashboard*, and *Canvas*.
 
+PDF and PNG reports are a link:https://www.elastic.co/subscriptions[subscription feature].
+
 [role="screenshot"]
 image::user/reporting/images/share-menu.png["Share"]
 
