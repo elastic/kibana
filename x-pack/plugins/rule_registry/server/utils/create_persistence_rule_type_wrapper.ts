@@ -7,9 +7,9 @@
 
 import { ALERT_INSTANCE_ID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
-import { CreatePersistenceRuleTypeFactory } from './persistence_types';
+import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 
-export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory =
+export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient }) =>
   (type) => {
     return {

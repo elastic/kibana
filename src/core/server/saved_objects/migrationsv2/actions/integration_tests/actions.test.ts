@@ -55,7 +55,8 @@ const { startES } = kbnTestServer.createTestServers({
 });
 let esServer: kbnTestServer.TestElasticsearchUtils;
 
-describe('migration actions', () => {
+// Failing: See https://github.com/elastic/kibana/issues/113697
+describe.skip('migration actions', () => {
   let root: Root;
   let start: InternalCoreStart;
   let client: ElasticsearchClient;

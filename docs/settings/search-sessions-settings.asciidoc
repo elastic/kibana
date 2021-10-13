@@ -7,37 +7,26 @@
 
 Configure the search session settings in your `kibana.yml` configuration file.
 
+`xpack.data_enhanced.search.sessions.enabled` {ess-icon}::
+Set to `true` (default) to enable search sessions.
 
-[cols="2*<"]
-|===
-a| `xpack.data_enhanced.`
-`search.sessions.enabled` {ess-icon}
-| Set to `true` (default) to enable search sessions.
+`xpack.data_enhanced.search.sessions.trackingInterval` {ess-icon}::
+The frequency for updating the state of a search session. The default is `10s`.
 
-a| `xpack.data_enhanced.`
-`search.sessions.trackingInterval` {ess-icon}
-| The frequency for updating the state of a search session. The default is `10s`.
-
-a| `xpack.data_enhanced.`
-`search.sessions.pageSize` {ess-icon}
-| How many search sessions {kib} processes at once while monitoring
+`xpack.data_enhanced.search.sessions.pageSize` {ess-icon}::
+How many search sessions {kib} processes at once while monitoring
 session progress. The default is `100`.
 
-a| `xpack.data_enhanced.`
-`search.sessions.notTouchedTimeout` {ess-icon}
-| How long {kib} stores search results from unsaved sessions,
+`xpack.data_enhanced.search.sessions.notTouchedTimeout` {ess-icon}::
+How long {kib} stores search results from unsaved sessions,
 after the last search in the session completes. The default is `5m`.
 
-a| `xpack.data_enhanced.`
-`search.sessions.notTouchedInProgressTimeout` {ess-icon}
-| How long a search session can run after a user navigates away without saving a session. The default is `1m`.
+`xpack.data_enhanced.search.sessions.notTouchedInProgressTimeout` {ess-icon}::
+How long a search session can run after a user navigates away without saving a session. The default is `1m`.
 
-a| `xpack.data_enhanced.`
-`search.sessions.maxUpdateRetries` {ess-icon}
-| How many retries {kib} can perform while attempting to save a search session. The default is `3`.
+`xpack.data_enhanced.search.sessions.maxUpdateRetries` {ess-icon}::
+How many retries {kib} can perform while attempting to save a search session. The default is `3`.
 
-a| `xpack.data_enhanced.`
-`search.sessions.defaultExpiration` {ess-icon}
-| How long search session results are stored before they are deleted.
+`xpack.data_enhanced.search.sessions.defaultExpiration` {ess-icon}::
+How long search session results are stored before they are deleted.
 Extending a search session resets the expiration by the same value. The default is `7d`.
-|===
