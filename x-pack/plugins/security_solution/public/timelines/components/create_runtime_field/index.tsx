@@ -66,8 +66,9 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
           aria-label={i18n.CREATE_FIELD}
           data-test-subj="create-field"
           onClick={onClick}
+          isLoading={!dataView}
         >
-          {dataView ? i18n.CREATE_FIELD : <EuiLoadingSpinner size="m" />}
+          {i18n.CREATE_FIELD}
         </StyledButton>
       </>
     );
@@ -82,8 +83,12 @@ CreateFieldButton.displayName = 'CreateFieldButton';
 // [x] refetch data after creating field
 // [x] check user permissions
 // [x] timeline
-// display flyout over timeline (z-index issue)
-// Fix create field loading state
+// [x] display flyout over timeline (z-index issue)
+// [x] Fix create field loading state
+
+// TODO
+// Add cypress test
+// Fix unit tests
 
 // NICE TO HAVE
 // Change "create field" flyout subtitle
