@@ -109,13 +109,17 @@ export function getPointFilterExpression(
   );
 }
 
-export function getCentroidFilterExpression(
+export function getLabelFilterExpression(
   hasJoins: boolean,
+  isSourceGeoJson: boolean,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
-  return getFilterExpression(
-    [EXCLUDE_TOO_MANY_FEATURES_BOX, ['==', ['get', KBN_IS_CENTROID_FEATURE], true]],
-    hasJoins,
-    timesliceMaskConfig
-  );
+  const filters: unknown[] = [EXCLUDE_TOO_MANY_FEATURES_BOX];
+
+  // centroids added for geojson sources only
+  if (isSourceGeoJson) {
+    filters.push(['==', ['get', KBN_IS_CENTROID_FEATURE], true]);
+  }
+
+  return getFilterExpression(filters, hasJoins, timesliceMaskConfig);
 }

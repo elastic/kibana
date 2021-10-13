@@ -48,7 +48,7 @@ import {
 } from '../../util/can_skip_fetch';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import {
-  getCentroidFilterExpression,
+  getLabelFilterExpression,
   getFillFilterExpression,
   getLineFilterExpression,
   getPointFilterExpression,
@@ -265,16 +265,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getJoins().filter((join) => {
       return join.hasCompleteConfig();
     });
-  }
-
-  getLabelsDisabledReason() {
-    if (this.getSource().isMvt()) {
-      return i18n.translate('xpack.maps.vectorlayer.labelsDisabledReasonMvt', {
-        defaultMessage: 'Labels are not supported when using Elasticsearch vector tiles',
-      });
-    }
-
-    return null;
   }
 
   supportsFeatureEditing(): boolean {
@@ -1047,16 +1037,16 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
   }
 
-  _setMbCentroidProperties(
+  _setMbLabelProperties(
     mbMap: MbMap,
     mvtSourceLayer?: string,
     timesliceMaskConfig?: TimesliceMaskConfig
   ) {
-    const centroidLayerId = this._getMbCentroidLayerId();
-    const centroidLayer = mbMap.getLayer(centroidLayerId);
-    if (!centroidLayer) {
+    const labelLayerId = this._getMbLabelLayerId();
+    const labelLayer = mbMap.getLayer(labelLayerId);
+    if (!labelLayer) {
       const mbLayer: MbLayer = {
-        id: centroidLayerId,
+        id: labelLayerId,
         type: 'symbol',
         source: this.getId(),
       };
@@ -1066,27 +1056,32 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer);
     }
 
-    const filterExpr = getCentroidFilterExpression(this.hasJoins(), timesliceMaskConfig);
-    if (!_.isEqual(filterExpr, mbMap.getFilter(centroidLayerId))) {
-      mbMap.setFilter(centroidLayerId, filterExpr);
+    const isSourceGeoJson = !this.getSource().isMvt();
+    const filterExpr = getLabelFilterExpression(
+      this.hasJoins(),
+      isSourceGeoJson,
+      timesliceMaskConfig
+    );
+    if (!_.isEqual(filterExpr, mbMap.getFilter(labelLayerId))) {
+      mbMap.setFilter(labelLayerId, filterExpr);
     }
 
     this.getCurrentStyle().setMBPropertiesForLabelText({
       alpha: this.getAlpha(),
       mbMap,
-      textLayerId: centroidLayerId,
+      textLayerId: labelLayerId,
     });
 
-    this.syncVisibilityWithMb(mbMap, centroidLayerId);
-    mbMap.setLayerZoomRange(centroidLayerId, this.getMinZoom(), this.getMaxZoom());
+    this.syncVisibilityWithMb(mbMap, labelLayerId);
+    mbMap.setLayerZoomRange(labelLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   _syncStylePropertiesWithMb(mbMap: MbMap, timeslice?: Timeslice) {
     const timesliceMaskConfig = this._getTimesliceMaskConfig(timeslice);
     this._setMbPointsProperties(mbMap, undefined, timesliceMaskConfig);
     this._setMbLinePolygonProperties(mbMap, undefined, timesliceMaskConfig);
-    // centroid layers added after polygon layers to ensure they are on top of polygon layers
-    this._setMbCentroidProperties(mbMap, undefined, timesliceMaskConfig);
+    // label layers added after geometry layers to ensure they are on top
+    this._setMbLabelProperties(mbMap, undefined, timesliceMaskConfig);
   }
 
   _getTimesliceMaskConfig(timeslice?: Timeslice): TimesliceMaskConfig | undefined {
@@ -1117,8 +1112,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.makeMbLayerId('text');
   }
 
-  _getMbCentroidLayerId() {
-    return this.makeMbLayerId('centroid');
+  // _getMbTextLayerId is labels for Points and MultiPoints
+  // _getMbLabelLayerId is labels for not Points and MultiPoints
+  // _getMbLabelLayerId used to be called _getMbCentroidLayerId
+  // TODO merge textLayer and labelLayer into single layer
+  _getMbLabelLayerId() {
+    return this.makeMbLayerId('label');
   }
 
   _getMbSymbolLayerId() {
@@ -1141,7 +1140,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return [
       this._getMbPointLayerId(),
       this._getMbTextLayerId(),
-      this._getMbCentroidLayerId(),
+      this._getMbLabelLayerId(),
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),

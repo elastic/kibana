@@ -89,7 +89,6 @@ export interface ILayer {
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
-  getLabelsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
@@ -173,10 +172,6 @@ export class AbstractLayer implements ILayer {
 
   makeMbLayerId(layerNameSuffix: string): string {
     return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
-  }
-
-  getLabelsDisabledReason(): string | null {
-    return null;
   }
 
   isPreviewLayer(): boolean {
