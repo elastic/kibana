@@ -10,7 +10,6 @@ import {
   BarSeries,
   Chart,
   Position,
-  Settings,
   timeFormatter,
   BrushEndListener,
   XYChartElementEvent,

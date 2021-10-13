@@ -35,6 +35,7 @@ export interface VisTypePiePluginStartDependencies {
 export interface VisTypePieDependencies {
   theme: ChartsPluginSetup['theme'];
   palettes: ChartsPluginSetup['palettes'];
+  SharedChartSettings: ChartsPluginSetup['SharedChartSettings'];
   getStartDeps: () => Promise<{ data: DataPublicPluginStart; docLinks: DocLinksStart }>;
 }
 
@@ -55,7 +56,12 @@ export class VisTypePiePlugin {
 
       expressions.registerFunction(createPieVisFn);
       expressions.registerRenderer(
-        getPieVisRenderer({ theme: charts.theme, palettes: charts.palettes, getStartDeps })
+        getPieVisRenderer({
+          theme: charts.theme,
+          palettes: charts.palettes,
+          SharedChartSettings: charts.SharedChartSettings,
+          getStartDeps,
+        })
       );
       expressions.registerFunction(pieLabelsExpressionFunction);
       visualizations.createBaseVisualization(

@@ -9,9 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { Chart, Datum, Partition, Settings, PartitionLayout } from '@elastic/charts';
+import { Chart, Datum, Partition, PartitionLayout } from '@elastic/charts';
 import { DonutChartLegend } from './donut_chart_legend';
 import { UptimeThemeContext } from '../../../contexts';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ClientPluginsStart } from '../../../apps/plugin';
 
 interface DonutChartProps {
   down: number;
@@ -29,10 +31,8 @@ export const GreenCheckIcon = styled(EuiIcon)`
 `;
 
 export const DonutChart = ({ height, down, up }: DonutChartProps) => {
-  const {
-    colors: { danger, gray },
-    chartTheme,
-  } = useContext(UptimeThemeContext);
+  const { colors: { danger, gray } } = useContext(UptimeThemeContext);
+  const { services: { charts: { SharedChartSettings } } } = useKibana<ClientPluginsStart>();
 
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
@@ -44,9 +44,8 @@ export const DonutChart = ({ height, down, up }: DonutChartProps) => {
               'Pie chart showing the current status. {down} of {total} monitors are down.',
             values: { down, total: up + down },
           })}
-          {...chartTheme}
         >
-          <Settings />
+          <SharedChartSettings />
           <Partition
             id="spec_1"
             data={[

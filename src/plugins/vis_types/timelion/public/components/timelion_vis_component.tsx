@@ -10,7 +10,6 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { compact, last, map } from 'lodash';
 import {
   Chart,
-  Settings,
   Position,
   Axis,
   TooltipType,

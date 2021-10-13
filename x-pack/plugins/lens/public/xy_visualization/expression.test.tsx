@@ -54,7 +54,10 @@ const onSelectRange = jest.fn();
 const chartSetupContract = chartPluginMock.createSetupContract();
 const chartStartContract = chartPluginMock.createStartContract();
 
-const chartsThemeService = chartSetupContract.theme;
+const {
+  SharedChartSettings,
+  theme: chartsThemeService,
+} = chartSetupContract;
 const chartsActiveCursorService = chartStartContract.activeCursor;
 
 const paletteService = chartPluginMock.createPaletteRegistry();
@@ -525,6 +528,7 @@ describe('xy_expression', () => {
         timeZone: 'UTC',
         renderMode: 'view',
         chartsThemeService,
+        SharedChartSettings,
         chartsActiveCursorService,
         paletteService,
         minInterval: 50,

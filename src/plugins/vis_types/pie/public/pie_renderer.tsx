@@ -27,7 +27,7 @@ function shouldShowNoResultsMessage(visData: any): boolean {
 
 export const getPieVisRenderer: (
   deps: VisTypePieDependencies
-) => ExpressionRenderDefinition<RenderValue> = ({ theme, palettes, getStartDeps }) => ({
+) => ExpressionRenderDefinition<RenderValue> = ({ theme, palettes, SharedChartSettings, getStartDeps }) => ({
   name: vislibPieName,
   displayName: 'Pie visualization',
   reuseDomNode: true,
@@ -46,6 +46,7 @@ export const getPieVisRenderer: (
         <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
           <PieComponent
             chartsThemeService={theme}
+            SharedChartSettings={SharedChartSettings}
             palettesRegistry={palettesRegistry}
             visParams={visConfig}
             visData={visData}

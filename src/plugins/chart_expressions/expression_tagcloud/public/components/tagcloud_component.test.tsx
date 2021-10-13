@@ -22,6 +22,7 @@ jest.mock('../format_service', () => ({
   }),
 }));
 
+const { SharedChartSettings } = chartPluginMock.createSetupContract();
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
 const geoDestId = 'geo.dest';
 const countId = 'Count';
@@ -103,6 +104,7 @@ describe('TagCloudChart', function () {
       renderComplete: jest.fn(),
       syncColors: false,
       visType: 'tagcloud',
+      SharedChartSettings,
     };
 
     wrapperPropsWithColumnNames = {
@@ -133,6 +135,7 @@ describe('TagCloudChart', function () {
       renderComplete: jest.fn(),
       syncColors: false,
       visType: 'tagcloud',
+      SharedChartSettings,
     };
   });
 

@@ -33,6 +33,7 @@ export class HeatmapVisualization {
         getHeatmapRenderer({
           formatFactory,
           chartsThemeService: charts.theme,
+          SharedChartSettings: charts.SharedChartSettings,
           paletteService: palettes,
           timeZone,
         })

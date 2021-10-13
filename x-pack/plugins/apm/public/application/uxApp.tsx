@@ -26,7 +26,7 @@ import {
   RumHome,
   DASHBOARD_LABEL,
 } from '../components/app/RumDashboard/RumHome';
-import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
+import { ApmPluginContext, ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
@@ -110,10 +110,11 @@ export function UXAppRoot({
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
   const plugins = { ...deps, maps };
-  const apmPluginContextValue = {
+  const apmPluginContextValue: ApmPluginContextValue = {
     appMountParameters,
     config,
     core,
+    data,
     inspector,
     plugins,
     observability,

@@ -26,7 +26,10 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-const chartsThemeService = chartPluginMock.createSetupContract().theme;
+const {
+  theme: chartsThemeService,
+  SharedChartSettings,
+} = chartPluginMock.createSetupContract();
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
 const visParams = createMockPieParams();
 const visData = createMockVisData();
@@ -48,6 +51,7 @@ describe('PieComponent', function () {
     wrapperProps = {
       chartsThemeService,
       palettesRegistry,
+      SharedChartSettings,
       visParams,
       visData,
       uiState,

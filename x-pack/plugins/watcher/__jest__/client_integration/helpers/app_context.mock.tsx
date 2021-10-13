@@ -17,6 +17,7 @@ import {
   httpServiceMock,
   scopedHistoryMock,
 } from '../../../../../../src/core/public/mocks';
+import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { AppDeps } from '../../../public/application/app';
 import { LicenseStatus } from '../../../common/types/license_status';
@@ -44,9 +45,7 @@ export const mockContextValue: AppDeps = {
   createTimeBuckets: () => new MockTimeBuckets(),
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
-  theme: {
-    useChartsTheme: jest.fn(),
-  } as any,
+  charts: chartPluginMock.createSetupContract(),
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),
   history,

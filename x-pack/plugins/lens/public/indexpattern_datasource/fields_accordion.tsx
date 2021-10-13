@@ -30,6 +30,7 @@ export interface FieldItemSharedProps {
   core: DatasourceDataPanelProps['core'];
   fieldFormats: FieldFormatsStart;
   chartsThemeService: ChartsPluginSetup['theme'];
+  SharedChartSettings: ChartsPluginSetup['SharedChartSettings'];
   indexPattern: IndexPattern;
   highlight?: string;
   query: Query;

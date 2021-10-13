@@ -6,9 +6,6 @@
  */
 
 import {
-  DARK_THEME,
-  LIGHT_THEME,
-  mergeWithDefaultTheme,
   PartialTheme,
   Rendering,
   Rotation,
@@ -18,11 +15,8 @@ import {
   Position,
   BrushEndListener,
 } from '@elastic/charts';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-
-import { DEFAULT_DARK_MODE } from '../../../../common/constants';
-import { useUiSetting } from '../../lib/kibana';
 
 export const defaultChartHeight = '100%';
 export const defaultChartWidth = '100%';

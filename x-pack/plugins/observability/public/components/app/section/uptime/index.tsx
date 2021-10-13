@@ -11,7 +11,6 @@ import {
   niceTimeFormatter,
   Position,
   ScaleType,
-  Settings,
   TickFormatter,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';

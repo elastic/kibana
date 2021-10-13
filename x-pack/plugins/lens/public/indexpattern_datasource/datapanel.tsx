@@ -61,6 +61,7 @@ import { LensFieldIcon } from './lens_field_icon';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { FieldGroups, FieldList } from './field_list';
+import { FieldItemSharedProps } from './fields_accordion';
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
@@ -567,7 +568,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     [editField, editPermission]
   );
 
-  const fieldProps = useMemo(
+  const fieldProps = useMemo<FieldItemSharedProps>(
     () => ({
       core,
       data,
@@ -578,6 +579,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       query,
       filters,
       chartsThemeService: charts.theme,
+      SharedChartSettings: charts.SharedChartSettings,
     }),
     [
       core,
@@ -589,6 +591,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       filters,
       localState.nameFilter,
       charts.theme,
+      charts.SharedChartSettings,
     ]
   );
 

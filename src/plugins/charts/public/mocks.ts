@@ -6,19 +6,28 @@
  * Side Public License, v 1.
  */
 
+import { Settings } from '@elastic/charts';
+
 import { ChartsPlugin } from './plugin';
 import { themeServiceMock } from './services/theme/mock';
 import { activeCursorMock } from './services/active_cursor/mock';
 import { colorsServiceMock } from './services/legacy_colors/mock';
 import { getPaletteRegistry, paletteServiceMock } from './services/palettes/mock';
+import { SharedChartSettings } from './services/settings';
 
-export type Setup = jest.Mocked<ReturnType<ChartsPlugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<ChartsPlugin['start']>>;
+interface MockOverrides {
+  // override jest function mock as functional component
+  SharedChartSettings: SharedChartSettings;
+};
+
+export type Setup = Omit<jest.Mocked<ReturnType<ChartsPlugin['setup']>>, keyof MockOverrides> & MockOverrides;
+export type Start = Omit<jest.Mocked<ReturnType<ChartsPlugin['start']>>, keyof MockOverrides>  & MockOverrides;
 
 const createSetupContract = (): Setup => ({
   legacyColors: colorsServiceMock,
   theme: themeServiceMock,
   palettes: paletteServiceMock.setup({} as any),
+  SharedChartSettings: Settings,
 });
 
 const createStartContract = (): Start => ({
@@ -26,6 +35,7 @@ const createStartContract = (): Start => ({
   theme: themeServiceMock,
   activeCursor: activeCursorMock,
   palettes: paletteServiceMock.setup({} as any),
+  SharedChartSettings: Settings,
 });
 
 export { colorMapsMock } from '../common/static/color_maps/mock';

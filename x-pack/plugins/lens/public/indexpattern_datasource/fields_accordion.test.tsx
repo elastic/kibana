@@ -57,6 +57,7 @@ describe('Fields Accordion', () => {
       query: { query: '', language: 'lucene' },
       filters: [],
       chartsThemeService: chartPluginMock.createSetupContract().theme,
+      SharedChartSettings: chartPluginMock.createSetupContract().SharedChartSettings,
     };
 
     defaultProps = {

@@ -19,7 +19,7 @@ import { documentField } from './document_field';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
 
-const chartsThemeService = chartPluginMock.createSetupContract().theme;
+const { SharedChartSettings } = chartPluginMock.createSetupContract();
 
 function clickField(wrapper: ReactWrapper, field: string) {
   wrapper.find(`[data-test-subj="lnsFieldListPanelField-${field}"] button`).simulate('click');
@@ -108,7 +108,7 @@ describe('IndexPattern Field Item', () => {
         searchable: true,
       },
       exists: true,
-      chartsThemeService,
+      SharedChartSettings,
       groupIndex: 0,
       itemIndex: 0,
       dropOntoWorkspace: () => {},

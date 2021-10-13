@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -14,7 +14,6 @@ import {
   Chart,
   Position,
   timeFormatter,
-  Settings,
   BrushEndListener,
   LegendItemListener,
 } from '@elastic/charts';

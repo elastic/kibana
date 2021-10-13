@@ -36,6 +36,7 @@ export class PieVisualization {
         getPieRenderer({
           formatFactory,
           chartsThemeService: charts.theme,
+          SharedChartSettings: charts.SharedChartSettings,
           paletteService: palettes,
         })
       );

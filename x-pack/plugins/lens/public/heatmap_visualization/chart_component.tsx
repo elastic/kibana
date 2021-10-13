@@ -14,7 +14,6 @@ import {
   HeatmapElementEvent,
   HeatmapSpec,
   ScaleType,
-  Settings,
 } from '@elastic/charts';
 import type { CustomPaletteState } from 'src/plugins/charts/public';
 import { VisualizationContainer } from '../visualization_container';

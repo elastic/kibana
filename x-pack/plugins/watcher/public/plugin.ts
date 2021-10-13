@@ -67,7 +67,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           uiSettings,
           docLinks,
           setBreadcrumbs,
-          theme: charts.theme,
+          charts,
           savedObjects: savedObjects.client,
           I18nContext: i18nDep.Context,
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),

@@ -16,14 +16,16 @@ export const getEuiChartSettings = ({
   useChartsTheme,
   useChartsBaseTheme,
 }: ThemeService): FC<EuiChartSettingsProps> => {
-  return function SharedChartSettings({ theme: userTheme = [], ...rest }) {
+  return function SharedChartSettings({ theme: userTheme = [], baseTheme, ...rest }) {
     const userThemes = Array.isArray(userTheme) ? userTheme : [userTheme];
     return (
       <Settings
         {...rest}
         theme={[...userThemes, useChartsTheme()]}
-        baseTheme={useChartsBaseTheme()}
+        baseTheme={baseTheme ?? useChartsBaseTheme()}
       />
     );
   };
 };
+
+export type SharedChartSettings = ReturnType<typeof getEuiChartSettings>;

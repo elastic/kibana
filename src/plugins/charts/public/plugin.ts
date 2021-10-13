@@ -13,7 +13,7 @@ import { palette, systemPalette } from '../common';
 import { ThemeService, LegacyColorsService } from './services';
 import { PaletteService } from './services/palettes/service';
 import { ActiveCursor } from './services/active_cursor';
-import { getEuiChartSettings } from './services/settings/eui_chart_settings';
+import { getEuiChartSettings, SharedChartSettings } from './services/settings/eui_chart_settings';
 
 export type Theme = Omit<ThemeService, 'init'>;
 export type Color = Omit<LegacyColorsService, 'init'>;
@@ -30,7 +30,7 @@ export interface ChartsPluginSetup {
   /**
    * Wrapper around elastic charts `Settings` component to share settings.
    */
-  SharedChartSettings: ReturnType<typeof getEuiChartSettings>;
+  SharedChartSettings: SharedChartSettings;
 }
 
 /** @public */

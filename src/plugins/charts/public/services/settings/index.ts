@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ThemeService } from './theme';
+export * from './eui_chart_settings';

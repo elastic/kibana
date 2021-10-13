@@ -21,7 +21,6 @@ import {
   Position,
   RectAnnotation,
   ScaleType,
-  Settings,
   TickFormatter,
 } from '@elastic/charts';
 

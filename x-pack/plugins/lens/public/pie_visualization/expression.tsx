@@ -22,6 +22,7 @@ import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plug
 export const getPieRenderer = (dependencies: {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
+  SharedChartSettings: ChartsPluginSetup['SharedChartSettings'];
   paletteService: PaletteRegistry;
 }): ExpressionRenderDefinition<PieExpressionProps> => ({
   name: 'lens_pie_renderer',
@@ -42,6 +43,7 @@ export const getPieRenderer = (dependencies: {
           {...config}
           formatFactory={dependencies.formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
+          SharedChartSettings={dependencies.SharedChartSettings}
           interactive={handlers.isInteractive()}
           paletteService={dependencies.paletteService}
           onClickValue={onClickValue}

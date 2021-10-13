@@ -20,6 +20,7 @@ import type { HeatmapExpressionProps } from './types';
 export const getHeatmapRenderer = (dependencies: {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
+  SharedChartSettings: ChartsPluginSetup['SharedChartSettings'];
   paletteService: PaletteRegistry;
   timeZone: string;
 }) => ({
@@ -52,6 +53,7 @@ export const getHeatmapRenderer = (dependencies: {
             timeZone={dependencies.timeZone}
             formatFactory={dependencies.formatFactory}
             chartsThemeService={dependencies.chartsThemeService}
+            SharedChartSettings={dependencies.SharedChartSettings}
             paletteService={dependencies.paletteService}
           />
         }

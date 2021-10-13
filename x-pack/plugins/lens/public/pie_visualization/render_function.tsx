@@ -20,7 +20,6 @@ import {
   PartitionFillLabel,
   RecursivePartial,
   Position,
-  Settings,
   ElementClickListener,
 } from '@elastic/charts';
 import { RenderMode } from 'src/plugins/expressions';
