@@ -6,7 +6,8 @@
  */
 
 import { Field, NewJobCapsResponse } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 import { ml } from '../ml_api_service';
 
@@ -42,7 +43,7 @@ export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPattern
 }
 
 class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
-  public async initializeFromIndexPattern(indexPattern: IIndexPattern) {
+  public async initializeFromIndexPattern(indexPattern: DataView) {
     try {
       const resp: NewJobCapsResponse = await ml.dataFrameAnalytics.newJobCapsAnalytics(
         indexPattern.title,

@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 
@@ -41,7 +41,7 @@ import { getFeatureCount, getOutlierScoreFieldName } from './common';
 import { useExplorationDataGrid } from '../exploration_results_table/use_exploration_data_grid';
 
 export const useOutlierData = (
-  indexPattern: IndexPattern | undefined,
+  indexPattern: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: SavedSearchQuery
 ): UseIndexDataReturnType => {

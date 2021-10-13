@@ -30,7 +30,7 @@ jest.mock('../../../../../../application/util/dependency_cache', () => ({
 
 jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
-    services: mockCoreServices.createStart(),
+    services: { ...mockCoreServices.createStart(), data: { data_view: { find: jest.fn() } } },
   }),
   useNotifications: () => {
     return {

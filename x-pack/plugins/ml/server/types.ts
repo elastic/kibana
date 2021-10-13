@@ -23,6 +23,7 @@ import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
+import type { PluginStart as DataViewsPluginStart } from '../../../../src/plugins/data_views/server';
 import type {
   FieldFormatsSetup,
   FieldFormatsStart,
@@ -64,6 +65,7 @@ export interface PluginsSetup {
 
 export interface PluginsStart {
   data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
   fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
 }

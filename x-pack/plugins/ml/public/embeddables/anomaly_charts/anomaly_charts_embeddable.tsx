@@ -21,7 +21,7 @@ import {
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsServices,
 } from '..';
-import type { IndexPattern } from '../../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../../src/plugins/data_views/common';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 export const getDefaultExplorerChartsPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.anomalyChartsEmbeddable.title', {
@@ -66,7 +66,7 @@ export class AnomalyChartsEmbeddable extends Embeddable<
       const indices = new Set(jobs.map((j) => j.datafeed_config.indices).flat());
 
       // Then find the index patterns assuming the index pattern title matches the index name
-      const indexPatterns: Record<string, IndexPattern> = {};
+      const indexPatterns: Record<string, DataView> = {};
       for (const indexName of indices) {
         const response = await indexPatternsService.find(`"${indexName}"`);
 
