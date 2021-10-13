@@ -81,9 +81,7 @@ describe('Handle request to generate', () => {
 
     mockContext = getMockContext();
     mockContext.reporting = {} as ReportingSetup;
-    (mockContext.core.savedObjects.client.resolve as jest.Mock).mockResolvedValue({
-      saved_object: {},
-    });
+
     requestHandler = new RequestHandler(
       reportingCore,
       { username: 'testymcgee' },
@@ -199,7 +197,7 @@ describe('Handle request to generate', () => {
         "output": Object {},
         "payload": Object {
           "browserTimezone": "UTC",
-          "indexPatternSavedObject": undefined,
+          "indexPatternSavedObject": Object {},
           "isDeprecated": true,
           "layout": Object {
             "id": "preserve_layout",

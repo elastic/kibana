@@ -33,9 +33,8 @@ export function fieldFormatMapFactory(
 
   // Add FieldFormat instances for fields with custom formatters
   if (_.has(indexPatternSavedObject, 'fieldFormatMap')) {
-    const fieldFormatMap = JSON.parse(indexPatternSavedObject.fieldFormatMap);
-    Object.keys(fieldFormatMap).forEach((fieldName) => {
-      const formatConfig: FieldFormatConfig = fieldFormatMap[fieldName];
+    Object.keys(indexPatternSavedObject.fieldFormatMap!).forEach((fieldName) => {
+      const formatConfig: FieldFormatConfig = indexPatternSavedObject.fieldFormatMap![fieldName];
       const formatParams = {
         ...formatConfig.params,
         ...serverDateParams,
@@ -48,7 +47,7 @@ export function fieldFormatMapFactory(
   }
 
   // Add default FieldFormat instances for non-custom formatted fields
-  const indexFields = JSON.parse(_.get(indexPatternSavedObject, 'fields', '[]'));
+  const indexFields = _.get(indexPatternSavedObject, 'fields', []);
   indexFields.forEach((field: any) => {
     if (!formatsMap.has(field.name)) {
       formatsMap.set(

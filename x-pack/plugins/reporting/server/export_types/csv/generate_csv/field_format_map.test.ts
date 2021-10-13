@@ -19,12 +19,15 @@ import { fieldFormatMapFactory } from './field_format_map';
 type ConfigValue = { number: { id: string; params: {} } } | string;
 
 describe('field format map', function () {
-  const indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV = {
+  const indexPatternSavedObject = {
     timeFieldName: '@timestamp',
     title: 'logstash-*',
-    fields: '[{"name":"field1","type":"number"}, {"name":"field2","type":"number"}]',
-    fieldFormatMap: '{"field1":{"id":"bytes","params":{"pattern":"0,0.[0]b"}}}',
-  };
+    fields: [
+      { name: 'field1', type: 'number' },
+      { name: 'field2', type: 'number' },
+    ],
+    fieldFormatMap: { field1: { id: 'bytes', params: { pattern: '0,0.[0]b' } } },
+  } as unknown as IndexPatternSavedObjectDeprecatedCSV;
   const configMock: Record<string, ConfigValue> = {};
   configMock[FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
     number: { id: 'number', params: {} },

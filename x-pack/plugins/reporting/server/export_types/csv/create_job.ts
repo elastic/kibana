@@ -5,32 +5,43 @@
  * 2.0.
  */
 
+import { isNil, omitBy } from 'lodash';
+import type { DataView } from 'src/plugins/data_views/common';
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
-import {
-  IndexPatternSavedObjectDeprecatedCSV,
-  JobParamsDeprecatedCSV,
-  TaskPayloadDeprecatedCSV,
-} from './types';
+import { JobParamsDeprecatedCSV, TaskPayloadDeprecatedCSV } from './types';
 
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsDeprecatedCSV, TaskPayloadDeprecatedCSV>
-> = function createJobFactoryFn(_reporting, logger) {
+> = function createJobFactoryFn(reporting, logger) {
   return async function createJob(jobParams, context) {
     logger.warn(
-      `The "/generate/csv" endpoint is deprecated and will be removed in Kibana 8.0. Please recreate the POST URL used to automate this CSV export.`
+      `The "/generate/csv" endpoint is deprecated. Please recreate the POST URL used to automate this CSV export.`
     );
 
-    const savedObjectsClient = context.core.savedObjects.client;
-    const {
-      saved_object: { attributes: indexPatternSavedObject },
-    } = await savedObjectsClient.resolve<IndexPatternSavedObjectDeprecatedCSV>(
-      'index-pattern',
-      jobParams.indexPatternId
+    const { indexPatterns } = await reporting.getDataService();
+    const dataViews = await indexPatterns.dataViewsServiceFactory(
+      context.core.savedObjects.client,
+      context.core.elasticsearch.client.asInternalUser
     );
+    let dataView: DataView | undefined;
+
+    try {
+      dataView = await dataViews.get(jobParams.indexPatternId);
+    } catch (error) {
+      logger.error(`Failed to get the data view "${jobParams.indexPatternId}": ${error}`);
+    }
 
     return {
       isDeprecated: true,
-      indexPatternSavedObject,
+      indexPatternSavedObject: omitBy(
+        {
+          title: dataView?.title,
+          timeFieldName: dataView?.timeFieldName,
+          fields: dataView?.fields && [...dataView.fields.map((field) => field.toSpec())],
+          fieldFormatMap: dataView?.fieldFormatMap,
+        },
+        isNil
+      ),
       ...jobParams,
     };
   };

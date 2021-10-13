@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import type { FieldSpec } from 'src/plugins/data/common';
 import { BaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
 export interface IndexPatternSavedObjectDeprecatedCSV {
-  title: string;
-  timeFieldName: string;
-  fields?: string;
-  fieldFormatMap: string;
+  title?: string;
+  timeFieldName?: string;
+  fields?: FieldSpec[];
+  fieldFormatMap?: Record<string, any>;
 }
 
 interface BaseParamsDeprecatedCSV {
