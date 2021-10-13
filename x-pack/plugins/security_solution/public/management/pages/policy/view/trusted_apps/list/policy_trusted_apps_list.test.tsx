@@ -22,6 +22,8 @@ import {
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_ID } from '../../../../../../../common/constants';
 
+jest.mock('../../../../../../common/components/user_privileges/use_endpoint_privileges');
+
 describe('when rendering the PolicyTrustedAppsList', () => {
   // The index (zero based) of the card created by the generator that is policy specific
   const POLICY_SPECIFIC_CARD_INDEX = 2;
@@ -296,5 +298,11 @@ describe('when rendering the PolicyTrustedAppsList', () => {
         title: expect.any(String),
       })
     );
+  });
+
+  describe('license is downgraded to gold or below', () => {
+    it('does not show remove option in actions menu', () => {
+      // expect remove option to not be there
+    });
   });
 });
