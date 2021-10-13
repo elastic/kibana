@@ -356,7 +356,7 @@ export function Detail() {
                         ? {
                             content: missingSecurityConfiguration ? (
                               <FormattedMessage
-                                id="xpack..epm.addPackagePolicyButtonSecurityRequiredTooltip"
+                                id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
                                 defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the minimum required privileges. Contact your administrator."
                               />
                             ) : (
