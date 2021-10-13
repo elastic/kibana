@@ -31,7 +31,7 @@ const getDefaultProps = <InputType extends EmbeddableInput = EmbeddableInput>():
 > => ({
   diffInput: (a, b) => {
     const differences: Partial<InputType> = {};
-    const allKeys = [...Object.keys(a), Object.keys(b)] as Array<keyof InputType>;
+    const allKeys = [...Object.keys(a), ...Object.keys(b)] as Array<keyof InputType>;
     allKeys.forEach((key) => {
       if (!isEqual(a[key], b[key])) differences[key] = a[key];
     });
