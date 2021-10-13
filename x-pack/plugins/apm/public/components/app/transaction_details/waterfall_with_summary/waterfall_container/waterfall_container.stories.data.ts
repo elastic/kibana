@@ -1000,7 +1000,7 @@ export const traceWithErrors = {
           us: 2519,
         },
         subtype: 'postgresql',
-        name: 'SELECT FROM opbeans_order',
+        name: 'SELECT "n"."id", "n"."address", "n"."city", "n"."company_name", "n"."country", "n"."email", "n"."full_name", "n"."postal_code" FROM "customers" AS "n" WHERE "n"."id" = @__id_0 LIMIT 1',
         destination: {
           service: {
             resource: 'postgresql',
@@ -1014,7 +1014,7 @@ export const traceWithErrors = {
         sync: true,
         db: {
           statement:
-            'SELECT "opbeans_order"."id", "opbeans_order"."customer_id", "opbeans_customer"."full_name", "opbeans_order"."created_at" FROM "opbeans_order" INNER JOIN "opbeans_customer" ON ("opbeans_order"."customer_id" = "opbeans_customer"."id")  LIMIT 1000',
+            'SELECT "n"."id", "n"."address", "n"."city", "n"."company_name", "n"."country", "n"."email", "n"."full_name", "n"."postal_code" FROM "customers" AS "n" WHERE "n"."id" = @__id_0 LIMIT 1',
           type: 'sql',
         },
       },

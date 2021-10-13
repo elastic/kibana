@@ -15,15 +15,21 @@ import {
   simpleTrace,
   traceChildStartBeforeParent,
   traceWithErrors,
-  urlParams,
-} from './waterfallContainer.stories.data';
+  urlParams as testUrlParams,
+} from './waterfall_container.stories.data';
 
-export default {
+type Args = ComponentType<typeof WaterfallContainer>;
+
+const stories: Meta<Args> = {
   title: 'app/TransactionDetails/Waterfall',
   component: WaterfallContainer,
   decorators: [
     (Story: ComponentType) => (
-      <MemoryRouter>
+      <MemoryRouter
+        initialEntries={[
+          '/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName',
+        ]}
+      >
         <MockApmPluginContextWrapper>
           <Story />
         </MockApmPluginContextWrapper>
@@ -31,26 +37,39 @@ export default {
     ),
   ],
 };
+export default stories;
 
-export function Example() {
-  const waterfall = getWaterfall(simpleTrace, '975c8d5bfd1dd20b');
+export const Example: Story<Args> = ({ urlParams, waterfall }) => {
   return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
-}
+};
+Example.args = {
+  urlParams: testUrlParams,
+  waterfall: getWaterfall(simpleTrace, '975c8d5bfd1dd20b'),
+};
 
-export function WithErrors() {
-  const waterfall = getWaterfall(traceWithErrors, '975c8d5bfd1dd20b');
+export const WithErrors: Story<Args> = ({ urlParams, waterfall }) => {
   return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
-}
+};
+WithErrors.args = {
+  urlParams: testUrlParams,
+  waterfall: getWaterfall(traceWithErrors, '975c8d5bfd1dd20b'),
+};
 
-export function ChildStartsBeforeParent() {
-  const waterfall = getWaterfall(
-    traceChildStartBeforeParent,
-    '975c8d5bfd1dd20b'
-  );
+export const ChildStartsBeforeParent: Story<Args> = ({
+  urlParams,
+  waterfall,
+}) => {
   return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
-}
+};
+ChildStartsBeforeParent.args = {
+  urlParams: testUrlParams,
+  waterfall: getWaterfall(traceChildStartBeforeParent, '975c8d5bfd1dd20b'),
+};
 
-export function InferredSpans() {
-  const waterfall = getWaterfall(inferredSpans, 'f2387d37260d00bd');
+export const InferredSpans: Story<Args> = ({ urlParams, waterfall }) => {
   return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
-}
+};
+InferredSpans.args = {
+  urlParams: testUrlParams,
+  waterfall: getWaterfall(inferredSpans, 'f2387d37260d00bd'),
+};

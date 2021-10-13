@@ -71,7 +71,7 @@ const ItemText = euiStyled.span`
   /* add margin to all direct descendants */
   & > * {
     margin-right: ${({ theme }) => theme.eui.euiSizeS};
-    white-space: nowrap;
+   white-space: nowrap;
   }
 `;
 
