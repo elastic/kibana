@@ -203,7 +203,7 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const deprecationsSetup = this.deprecations.setup({
+    const deprecationsSetup = await this.deprecations.setup({
       http: httpSetup,
     });
 

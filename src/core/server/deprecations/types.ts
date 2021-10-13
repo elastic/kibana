@@ -11,9 +11,11 @@ import type { SavedObjectsClientContract } from '../saved_objects/types';
 import type { IScopedClusterClient } from '../elasticsearch';
 
 /**
+ * Base properties shared by all types of deprecations
+ *
  * @public
  */
-export interface DeprecationsDetails {
+export interface BaseDeprecationDetails {
   /**
    * The title of the deprecation.
    * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
@@ -75,11 +77,31 @@ export interface DeprecationsDetails {
 }
 
 /**
+ * @public
+ */
+export interface ConfigDeprecationDetails extends BaseDeprecationDetails {
+  configPath: string;
+  deprecationType: 'config';
+}
+
+/**
+ * @public
+ */
+export interface FeatureDeprecationDetails extends BaseDeprecationDetails {
+  deprecationType?: 'feature' | undefined;
+}
+
+/**
+ * @public
+ */
+export type DeprecationsDetails = ConfigDeprecationDetails | FeatureDeprecationDetails;
+
+/**
  * @internal
  */
-export interface DomainDeprecationDetails extends DeprecationsDetails {
+export type DomainDeprecationDetails = DeprecationsDetails & {
   domainId: string;
-}
+};
 
 /**
  * @public

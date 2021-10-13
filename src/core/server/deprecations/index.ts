@@ -7,7 +7,10 @@
  */
 
 export type {
+  BaseDeprecationDetails,
   DeprecationsDetails,
+  ConfigDeprecationDetails,
+  FeatureDeprecationDetails,
   GetDeprecationsContext,
   RegisterDeprecationsConfig,
   DeprecationsGetResponse,

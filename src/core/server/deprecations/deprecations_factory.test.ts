@@ -7,20 +7,25 @@
  */
 
 import type { GetDeprecationsContext } from './types';
-import { DeprecationsFactory } from './deprecations_factory';
+import { DeprecationsFactory, DeprecationsFactoryConfig } from './deprecations_factory';
 import { loggerMock } from '../logging/logger.mock';
 
 describe('DeprecationsFactory', () => {
-  const logger = loggerMock.create();
+  let logger: ReturnType<typeof loggerMock.create>;
+  let config: DeprecationsFactoryConfig;
+
   beforeEach(() => {
-    loggerMock.clear(logger);
+    logger = loggerMock.create();
+    config = {
+      ignoredConfigDeprecations: [],
+    };
   });
 
   describe('getRegistry', () => {
     const domainId = 'test-plugin';
 
     it('creates a registry for a domainId', async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const registry = deprecationsFactory.getRegistry(domainId);
 
       expect(registry).toHaveProperty('registerDeprecations');
@@ -28,7 +33,7 @@ describe('DeprecationsFactory', () => {
     });
 
     it('creates one registry for a domainId', async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const registry = deprecationsFactory.getRegistry(domainId);
       const sameRegistry = deprecationsFactory.getRegistry(domainId);
 
@@ -36,7 +41,7 @@ describe('DeprecationsFactory', () => {
     });
 
     it('returns a registered registry', () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const mockRegistry = 'mock-reg';
       const mockRegistries = {
         set: jest.fn(),
@@ -61,7 +66,7 @@ describe('DeprecationsFactory', () => {
     } as unknown as GetDeprecationsContext;
 
     it('returns a flattened array of deprecations', async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const mockPluginDeprecationsInfo = [
         {
           message: 'mockPlugin message',
@@ -110,7 +115,7 @@ describe('DeprecationsFactory', () => {
     });
 
     it(`returns a failure message for failed getDeprecations functions`, async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const domainId = 'mockPlugin';
       const mockError = new Error();
 
@@ -142,7 +147,7 @@ describe('DeprecationsFactory', () => {
     });
 
     it(`returns successful results even when some getDeprecations fail`, async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const mockPluginRegistry = deprecationsFactory.getRegistry('mockPlugin');
       const anotherMockPluginRegistry = deprecationsFactory.getRegistry('anotherMockPlugin');
       const mockError = new Error();
@@ -190,7 +195,7 @@ describe('DeprecationsFactory', () => {
     } as unknown as GetDeprecationsContext;
 
     it('returns a flattened array of DeprecationInfo', async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const deprecationsRegistry = deprecationsFactory.getRegistry('mockPlugin');
       const deprecationsBody = [
         {
@@ -225,7 +230,7 @@ describe('DeprecationsFactory', () => {
     });
 
     it('removes empty entries from the returned array', async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const deprecationsRegistry = deprecationsFactory.getRegistry('mockPlugin');
       const deprecationsBody = [
         {

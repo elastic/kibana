@@ -17,13 +17,21 @@ import type {
 
 export interface DeprecationsFactoryDeps {
   logger: Logger;
+  config: DeprecationsFactoryConfig;
+}
+
+export interface DeprecationsFactoryConfig {
+  ignoredConfigDeprecations: string[];
 }
 
 export class DeprecationsFactory {
   private readonly registries: Map<string, DeprecationsRegistry> = new Map();
   private readonly logger: Logger;
-  constructor({ logger }: DeprecationsFactoryDeps) {
+  // private readonly config: DeprecationsFactoryConfig;
+
+  constructor({ logger, config }: DeprecationsFactoryDeps) {
     this.logger = logger;
+    // this.config = config;
   }
 
   public getRegistry = (domainId: string): DeprecationsRegistry => {
