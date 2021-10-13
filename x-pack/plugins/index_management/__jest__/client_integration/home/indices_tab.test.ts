@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, nextTick } from '../helpers';
-import { IndicesTestBed, setup } from './indices_tab.helpers';
+import { IndicesTestBed, setup, ContextMenuOption } from './indices_tab.helpers';
 import { createDataStreamPayload } from './data_streams_tab.helpers';
 
 /**
@@ -160,18 +160,37 @@ describe('<IndexManagementHome />', () => {
       const latestRequest = server.requests[server.requests.length - 1];
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`);
     });
+  });
 
-    test('should be able to close index', async () => {
-      const { find, actions } = testBed;
+  describe('index actions from detail panel', () => {
+    const indexName = 'testOpenIndex';
+    beforeEach(async () => {
+      const index = {
+        health: 'green',
+        status: 'open',
+        primary: 1,
+        replica: 1,
+        documents: 10000,
+        documents_deleted: 100,
+        size: '156kb',
+        primary_size: '156kb',
+        name: indexName,
+      };
+      httpRequestsMockHelpers.setLoadIndicesResponse([index]);
 
-      actions.clickManageContextMenuButton();
-      const contextMenu = find('indexContextMenu');
+      testBed = await setup();
+      const { component, find } = testBed;
 
-      const closeIndexButton = contextMenu
-        .find('button[data-test-subj="indexTableContextMenuButton"]')
-        .at(0);
+      component.update();
 
-      await closeIndexButton.simulate('click');
+      find('indexTableIndexNameLink').at(0).simulate('click');
+    });
+    test('should be able to close an open index', async () => {
+      const { actions } = testBed;
+
+      await actions.clickManageContextMenuButton();
+      await actions.clickContextMenuOption(ContextMenuOption.CloseIndex);
+
       const latestRequest = server.requests[server.requests.length - 1];
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/close`);
     });
