@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
+// --------- DEPRECATED ---------
+// This implementation of flattenHit is deprecated and should no longer be used.
+// If you consider adding features to this, please don't but use the `flattenHit`
+// implementation from the data plugin.
+
 import _ from 'lodash';
 import { DataView } from './data_view';
 
