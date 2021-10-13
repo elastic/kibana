@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { UpgradeAssistantServerPlugin } from './plugin';
-import { configSchema, Config } from '../common/config';
+
+export { config } from './config';
 
 export const plugin = (ctx: PluginInitializerContext) => {
   return new UpgradeAssistantServerPlugin(ctx);
-};
-
-export const config: PluginConfigDescriptor<Config> = {
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
-  schema: configSchema,
-  exposeToBrowser: {
-    readonly: true,
-  },
 };
