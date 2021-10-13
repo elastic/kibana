@@ -20,10 +20,12 @@ import { SynchronizationLogic } from './synchronization_logic';
 
 export const BlockedWindows: React.FC = () => {
   const { contentSource } = useValues(SourceLogic);
-  const { blockedWindows } = useValues(SynchronizationLogic({ contentSource }));
+  const {
+    schedule: { blockedWindows },
+  } = useValues(SynchronizationLogic({ contentSource }));
   const { addBlockedWindow } = useActions(SynchronizationLogic({ contentSource }));
 
-  const hasBlockedWindows = blockedWindows.length > 0;
+  const hasBlockedWindows = blockedWindows && blockedWindows.length > 0;
 
   const emptyState = (
     <>
@@ -43,8 +45,8 @@ export const BlockedWindows: React.FC = () => {
 
   const blockedWindowItems = (
     <>
-      {blockedWindows.map((blockedWindow, i) => (
-        <BlockedWindowItem key={i} blockedWindow={blockedWindow} />
+      {blockedWindows?.map((blockedWindow, i) => (
+        <BlockedWindowItem key={i} index={i} blockedWindow={blockedWindow} />
       ))}
       <EuiSpacer />
       <EuiButton onClick={addBlockedWindow}>{ADD_LABEL}</EuiButton>
