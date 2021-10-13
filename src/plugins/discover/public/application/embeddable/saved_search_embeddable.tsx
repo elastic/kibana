@@ -165,7 +165,7 @@ export class SavedSearchEmbeddable
     const executionContext = {
       type: this.type,
       name: 'discover',
-      id: this.savedSearch.id,
+      id: this.savedSearch.id!,
       description: this.output.title || this.output.defaultTitle || '',
       url: this.output.editUrl,
       parent: this.input.executionContext,
@@ -232,7 +232,7 @@ export class SavedSearchEmbeddable
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
       inspectorAdapters: this.inspectorAdapters,
-      searchTitle: this.savedSearch.lastSavedTitle,
+      searchTitle: this.savedSearch.title,
       services: this.services,
       onAddColumn: (columnName: string) => {
         if (!props.columns) {
@@ -408,7 +408,6 @@ export class SavedSearchEmbeddable
 
   public destroy() {
     super.destroy();
-    this.savedSearch.destroy();
     if (this.searchProps) {
       delete this.searchProps;
     }
