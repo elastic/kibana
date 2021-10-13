@@ -150,6 +150,9 @@ export const getFieldEditorOpener =
               flyout.close();
             }
           },
+          maskProps: {
+            className: 'indexPatternFieldEditorMaskOverlay',
+          },
         }
       );
 

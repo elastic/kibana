@@ -25,7 +25,6 @@ const StyledButton = styled(EuiButton)`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 
-//   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(indexNames);
 export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
   ({ selectedDataViewId, onClick: onClickParam, scopeId }) => {
     const { indexFieldsSearch } = useIndexFields(scopeId, false);
