@@ -73,7 +73,7 @@ describe('When on the host isolation exceptions flyout form', () => {
         expect(confirmButton).not.toHaveAttribute('disabled');
         const waiter = waitForAction('hostIsolationExceptionsCreateEntry');
         userEvent.click(confirmButton);
-        await waiter;
+        expect(await waiter).toBeTruthy();
       });
 
       it('should disable the submit button when an operation is in progress', () => {
@@ -140,7 +140,7 @@ describe('When on the host isolation exceptions flyout form', () => {
           },
         });
         renderResult = render();
-        await waiter;
+        expect(await waiter).toBeTruthy();
       });
 
       it('should show a warning toast if the item fails to load', () => {
@@ -212,7 +212,7 @@ describe('When on the host isolation exceptions flyout form', () => {
         expect(confirmButton).not.toHaveAttribute('disabled');
         const waiter = waitForAction('hostIsolationExceptionsSubmitEdit');
         userEvent.click(confirmButton);
-        await waiter;
+        expect(await waiter).toBeTruthy();
       });
     });
   });
