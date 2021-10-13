@@ -28,6 +28,7 @@ import { getInterval } from './lib/get_interval';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { TIME_RANGE_DATA_MODES, PANEL_TYPES } from '../../../common/enums';
 import type { IndexPattern } from '../../../../../data/common';
+import '../index.scss';
 
 interface TimeseriesVisualizationProps {
   className?: string;
