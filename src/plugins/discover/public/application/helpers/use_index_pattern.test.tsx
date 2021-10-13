@@ -14,6 +14,15 @@ describe('Use Index Pattern', () => {
   test('returning a valid index pattern', async () => {
     const { result } = renderHook(() => useIndexPattern(indexPatternsMock, 'the-index-pattern-id'));
     await act(() => Promise.resolve());
-    expect(result.current).toBe(indexPatternMock);
+    expect(result.current.indexPattern).toBe(indexPatternMock);
+  });
+
+  test('returning an error', async () => {
+    const { result } = renderHook(() =>
+      useIndexPattern(indexPatternsMock, 'invalid-index-pattern-id')
+    );
+    await act(() => Promise.resolve());
+    expect(result.current.indexPattern).toBe(undefined);
+    expect(result.current.error).toBeTruthy();
   });
 });

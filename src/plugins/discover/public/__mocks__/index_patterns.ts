@@ -16,6 +16,8 @@ export const indexPatternsMock = {
   get: (id: string) => {
     if (id === 'the-index-pattern-id') {
       return indexPatternMock;
+    } else if (id === 'invalid-index-pattern-id') {
+      return Promise.reject(new Error('Invalid index pattern id'));
     }
   },
   updateSavedObject: jest.fn(),

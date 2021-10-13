@@ -32,7 +32,7 @@ export interface DocViewRenderProps {
   columns?: string[];
   filter?: DocViewFilterFn;
   hit: ElasticSearchHit;
-  indexPattern?: IndexPattern;
+  indexPattern: IndexPattern;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }
