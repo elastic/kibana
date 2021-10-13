@@ -26,7 +26,6 @@ import { useGetChoices } from './use_get_choices';
 import { choicesToEuiOptions, isLegacyConnector } from './helpers';
 
 import * as i18n from './translations';
-import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -60,12 +59,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
     [actionParams.subActionParams]
   );
 
-  const hasUpdateIncident =
-    incident.correlation_id != null && incident.correlation_id === UPDATE_INCIDENT_VARIABLE;
-  const [updateIncident, setUpdateIncident] = useState<boolean>(hasUpdateIncident);
   const [choices, setChoices] = useState<Fields>(defaultFields);
-
-  const correlationID = updateIncident ? UPDATE_INCIDENT_VARIABLE : NOT_UPDATE_INCIDENT_VARIABLE;
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -101,14 +95,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
       )
     );
   }, []);
-
-  const onUpdateIncidentSwitchChange = useCallback(() => {
-    const newCorrelationID = !updateIncident
-      ? UPDATE_INCIDENT_VARIABLE
-      : NOT_UPDATE_INCIDENT_VARIABLE;
-    editSubActionProperty('correlation_id', newCorrelationID);
-    setUpdateIncident(!updateIncident);
-  }, [editSubActionProperty, updateIncident]);
 
   const categoryOptions = useMemo(() => choicesToEuiOptions(choices.category), [choices.category]);
   const urgencyOptions = useMemo(() => choicesToEuiOptions(choices.urgency), [choices.urgency]);
