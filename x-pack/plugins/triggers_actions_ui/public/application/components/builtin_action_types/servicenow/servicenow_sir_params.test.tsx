@@ -175,7 +175,6 @@ describe('ServiceNowSIRParamsFields renders', () => {
     mount(<ServiceNowSIRParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual({
       incident: {
-        correlation_display: 'Alerting',
         correlation_id: '{{rule.id}}:{{alert.id}}',
       },
       comments: [],
@@ -200,7 +199,6 @@ describe('ServiceNowSIRParamsFields renders', () => {
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
       incident: {
-        correlation_display: 'Alerting',
         correlation_id: '{{rule.id}}:{{alert.id}}',
       },
       comments: [],

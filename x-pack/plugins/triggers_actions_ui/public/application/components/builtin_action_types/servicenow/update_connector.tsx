@@ -78,7 +78,7 @@ const warningMessage = i18n.translate(
   }
 );
 
-interface Props {
+export interface Props {
   action: ActionConnectorFieldsProps<ServiceNowActionConnector>['action'];
   applicationInfoErrorMsg: string | null;
   errors: ActionConnectorFieldsProps<ServiceNowActionConnector>['errors'];
@@ -183,10 +183,13 @@ const UpdateConnectorComponent: React.FC<Props> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel}>{cancelButtonText}</EuiButtonEmpty>
+            <EuiButtonEmpty data-test-subj="snUpdateInstallationCancel" onClick={onCancel}>
+              {cancelButtonText}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="snUpdateInstallationSubmit"
               onClick={onConfirm}
               color="danger"
               fill
