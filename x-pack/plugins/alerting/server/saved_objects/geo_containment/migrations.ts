@@ -14,9 +14,10 @@ import { AlertTypeParams } from '../../index';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 import { RawAlert } from '../../types';
 
-export const GEO_CONTAINMENT_ID = '.geo-containment';
-
-export interface GeoContainmentParams extends AlertTypeParams {
+// These definitions are dupes of the SO-types in stack_alerts/geo_containment
+// There are not exported to avoid deep imports from stack_alerts plugins into here
+const GEO_CONTAINMENT_ID = '.geo-containment';
+interface GeoContainmentParams extends AlertTypeParams {
   index: string;
   indexId: string;
   geoField: string;
@@ -30,11 +31,7 @@ export interface GeoContainmentParams extends AlertTypeParams {
   indexQuery?: Query;
   boundaryIndexQuery?: Query;
 }
-
-export type GeoContainmentExtractedParams = Omit<
-  GeoContainmentParams,
-  'indexId' | 'boundaryIndexId'
-> & {
+type GeoContainmentExtractedParams = Omit<GeoContainmentParams, 'indexId' | 'boundaryIndexId'> & {
   indexRefName: string;
   boundaryIndexRefName: string;
 };
@@ -64,27 +61,6 @@ export function extractEntityAndBoundaryReferences(params: GeoContainmentParams)
     },
     references,
   };
-}
-
-export function injectEntityAndBoundaryIds(
-  params: GeoContainmentExtractedParams,
-  references: SavedObjectReference[]
-): GeoContainmentParams {
-  const { indexRefName, boundaryIndexRefName, ...otherParams } = params;
-  const { id: indexId = null } = references.find((ref) => ref.name === indexRefName) || {};
-  const { id: boundaryIndexId = null } =
-    references.find((ref) => ref.name === boundaryIndexRefName) || {};
-  if (!indexId) {
-    throw new Error(`Index "${indexId}" not found in references array`);
-  }
-  if (!boundaryIndexId) {
-    throw new Error(`Boundary index "${boundaryIndexId}" not found in references array`);
-  }
-  return {
-    ...otherParams,
-    indexId,
-    boundaryIndexId,
-  } as GeoContainmentParams;
 }
 
 export function extractRefsFromGeoContainmentAlert(

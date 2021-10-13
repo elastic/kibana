@@ -16,7 +16,7 @@ import {
   RecoveryActionGroupId,
 } from './alert_type';
 
-import { GeoContainmentExtractedParams, GeoContainmentParams } from '../../../../alerting/server';
+import { GeoContainmentExtractedParams, GeoContainmentParams } from './alert_type';
 
 interface RegisterParams {
   logger: Logger;

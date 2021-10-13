@@ -17,14 +17,35 @@ import {
   AlertInstanceContext,
   RuleParamsAndRefs,
   extractEntityAndBoundaryReferences,
-  injectEntityAndBoundaryIds,
-  GeoContainmentExtractedParams,
-  GeoContainmentParams,
-  GEO_CONTAINMENT_ID,
+  AlertTypeParams,
 } from '../../../../alerting/server';
+import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const ActionGroupId = 'Tracked entity contained';
 export const RecoveryActionGroupId = 'notGeoContained';
+
+export const GEO_CONTAINMENT_ID = '.geo-containment';
+export interface GeoContainmentParams extends AlertTypeParams {
+  index: string;
+  indexId: string;
+  geoField: string;
+  entity: string;
+  dateField: string;
+  boundaryType: string;
+  boundaryIndexTitle: string;
+  boundaryIndexId: string;
+  boundaryGeoField: string;
+  boundaryNameField?: string;
+  indexQuery?: Query;
+  boundaryIndexQuery?: Query;
+}
+export type GeoContainmentExtractedParams = Omit<
+  GeoContainmentParams,
+  'indexId' | 'boundaryIndexId'
+> & {
+  indexRefName: string;
+  boundaryIndexRefName: string;
+};
 
 const actionVariableContextEntityIdLabel = i18n.translate(
   'xpack.stackAlerts.geoContainment.actionVariableContextEntityIdLabel',
@@ -136,6 +157,27 @@ export type GeoContainmentAlertType = AlertType<
   typeof ActionGroupId,
   typeof RecoveryActionGroupId
 >;
+
+export function injectEntityAndBoundaryIds(
+  params: GeoContainmentExtractedParams,
+  references: SavedObjectReference[]
+): GeoContainmentParams {
+  const { indexRefName, boundaryIndexRefName, ...otherParams } = params;
+  const { id: indexId = null } = references.find((ref) => ref.name === indexRefName) || {};
+  const { id: boundaryIndexId = null } =
+    references.find((ref) => ref.name === boundaryIndexRefName) || {};
+  if (!indexId) {
+    throw new Error(`Index "${indexId}" not found in references array`);
+  }
+  if (!boundaryIndexId) {
+    throw new Error(`Boundary index "${boundaryIndexId}" not found in references array`);
+  }
+  return {
+    ...otherParams,
+    indexId,
+    boundaryIndexId,
+  } as GeoContainmentParams;
+}
 
 export function getAlertType(logger: Logger): GeoContainmentAlertType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoContainment.alertTypeTitle', {
