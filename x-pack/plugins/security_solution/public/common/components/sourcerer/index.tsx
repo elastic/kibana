@@ -75,8 +75,6 @@ const StyledBadge = styled(EuiBadge)`
   margin-left: 8px;
 `;
 
-const SECURITY_DATA_VIEW_ID = 'detections';
-
 export const Sourcerer = React.memo<SourcererComponentProps>(
   ({ scope: scopeId, isTimelineSourcerer, showAlertsOnlyCheckbox }) => {
     const dispatch = useDispatch();
@@ -100,9 +98,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
     >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
     const { selectedDataViewId, selectedPatterns, loading } = sourcererScope;
     const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-    const defaultDataViewByPage = isOnlyDetectionAlerts
-      ? SECURITY_DATA_VIEW_ID
-      : selectedDataViewId ?? defaultDataView.id;
+    const defaultDataViewByPage = selectedDataViewId ?? defaultDataView.id;
     const [dataViewId, setDataViewId] = useState<string>(defaultDataViewByPage);
 
     const { patternList, selectablePatterns } = useMemo(() => {
@@ -246,7 +242,11 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
         >
           {i18n.DATA_VIEW}
           {isModified && <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>}
-          {isOnlyDetectionAlerts && <StyledBadge>{i18n.ALERTS_BADGE_TITLE}</StyledBadge>}
+          {isOnlyDetectionAlerts && (
+            <StyledBadge data-test-subj="sourcerer-alerts-badge">
+              {i18n.ALERTS_BADGE_TITLE}
+            </StyledBadge>
+          )}
         </StyledButton>
       ),
       [loading, setPopoverIsOpenCb, isModified, isOnlyDetectionAlerts]
@@ -260,10 +260,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
                 inputDisplay: (
                   <span data-test-subj="security-alerts-option-super">
                     <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_SECURITY_DATA_VIEW_LABEL}
-                    <StyledBadge>{i18n.ALERTS_BADGE_TITLE}</StyledBadge>
+                    <StyledBadge data-test-subj="security-alerts-option-badge">
+                      {i18n.ALERTS_BADGE_TITLE}
+                    </StyledBadge>
                   </span>
                 ),
-                value: SECURITY_DATA_VIEW_ID,
+                value: defaultDataView.id,
               },
             ]
           : kibanaDataViews.map(({ title, id }) => ({
@@ -287,9 +289,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
 
     useEffect(() => {
       setDataViewId((prevSelectedOption) =>
-        isOnlyDetectionAlerts
-          ? SECURITY_DATA_VIEW_ID
-          : selectedDataViewId != null && !deepEqual(selectedDataViewId, prevSelectedOption)
+        selectedDataViewId != null && !deepEqual(selectedDataViewId, prevSelectedOption)
           ? selectedDataViewId
           : prevSelectedOption
       );
@@ -337,11 +337,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
           ownFocus
         >
           <PopoverContent>
-            <EuiPopoverTitle>
+            <EuiPopoverTitle data-test-subj="sourcerer-title">
               <>{i18n.SELECT_DATA_VIEW}</>
             </EuiPopoverTitle>
             {isOnlyDetectionAlerts && (
               <EuiCallOut
+                data-test-subj="sourcerer-callout"
                 size="s"
                 iconType="iInCircle"
                 title={isTimelineSourcerer ? i18n.CALL_OUT_TIMELINE_TITLE : i18n.CALL_OUT_TITLE}
@@ -352,7 +353,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
               {showAlertsOnlyCheckbox && (
                 <StyledFormRow>
                   <EuiCheckbox
-                    id="timeline-sourcerer-checkbox"
+                    id="sourcerer-alert-only-checkbox"
+                    data-test-subj="sourcerer-alert-only-checkbox"
                     label={i18n.ALERTS_CHECKBOX_LABEL}
                     checked={isOnlyDetectionAlertsChecked}
                     onChange={onCheckboxChanged}
@@ -378,6 +380,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(
                 color="text"
                 onClick={onExpandAdvancedOptionsClicked}
                 iconType={expandAdvancedOptions ? 'arrowDown' : 'arrowRight'}
+                data-test-subj="sourcerer-advanced-options-toggle"
               >
                 {i18n.INDEX_PATTERNS_ADVANCED_OPTIONS_TITLE}
               </StyledButton>
