@@ -43,7 +43,11 @@ export const defaultPackages = unremovablePackages.filter((p) => p !== FLEET_END
 // the user to control this setting
 export const keepPoliciesUpToDatePackages = [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE];
 
-export const autoUpdatePackages = [FLEET_ENDPOINT_PACKAGE, ...keepPoliciesUpToDatePackages];
+export const autoUpdatePackages = [
+  FLEET_ENDPOINT_PACKAGE,
+  FLEET_APM_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+];
 
 export const agentAssetTypes = {
   Input: 'input',

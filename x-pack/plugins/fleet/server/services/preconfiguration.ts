@@ -328,9 +328,9 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
   }
 
-  const fulfilledPolicyPackagePolicyIds = fulfilledPolicies.flatMap<string>(
-    ({ policy }) => policy?.package_policies as string[]
-  );
+  const fulfilledPolicyPackagePolicyIds = fulfilledPolicies
+    .filter(({ policy }) => policy?.package_policies)
+    .flatMap<string>(({ policy }) => policy?.package_policies as string[]);
 
   const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
     soClient,
