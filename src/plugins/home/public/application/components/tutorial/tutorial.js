@@ -7,26 +7,18 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { SavedObjectsInstaller } from './saved_objects_installer';
-import {
-  EuiSpacer,
-  EuiPage,
-  EuiPanel,
-  EuiText,
-  EuiPageBody,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiSpacer, EuiPanel, EuiButton, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../../kibana_services';
+import { KibanaPageTemplate } from '../../../../../kibana_react/public';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -250,19 +242,22 @@ class TutorialUi extends React.Component {
         },
       ];
       return (
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
+        <>
+          <EuiSpacer />
+          <EuiFormRow>
             <EuiButtonGroup
+              isFullWidth
+              buttonSize="m"
               options={radioButtons}
               idSelected={this.state.visibleInstructions}
               onChange={this.setVisibleInstructions}
-              color="primary"
+              color="text"
               legend={i18n.translate('home.tutorial.selectionLegend', {
                 defaultMessage: 'Deployment type',
               })}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiFormRow>
+        </>
       );
     }
   };
@@ -286,22 +281,25 @@ class TutorialUi extends React.Component {
       offset += instructionSet.instructionVariants[0].instructions.length;
 
       return (
-        <InstructionSet
-          title={instructionSet.title}
-          instructionVariants={instructionSet.instructionVariants}
-          statusCheckConfig={instructionSet.statusCheck}
-          statusCheckState={this.state.statusCheckStates[index]}
-          onStatusCheck={() => {
-            this.onStatusCheck(index);
-          }}
-          offset={currentOffset}
-          params={instructions.params}
-          paramValues={this.state.paramValues}
-          setParameter={this.setParameter}
-          replaceTemplateStrings={this.props.replaceTemplateStrings}
-          key={index}
-          isCloudEnabled={this.props.isCloudEnabled}
-        />
+        <Fragment key={index}>
+          <InstructionSet
+            title={instructionSet.title}
+            callOut={instructionSet.callOut}
+            instructionVariants={instructionSet.instructionVariants}
+            statusCheckConfig={instructionSet.statusCheck}
+            statusCheckState={this.state.statusCheckStates[index]}
+            onStatusCheck={() => {
+              this.onStatusCheck(index);
+            }}
+            offset={currentOffset}
+            params={instructions.params}
+            paramValues={this.state.paramValues}
+            setParameter={this.setParameter}
+            replaceTemplateStrings={this.props.replaceTemplateStrings}
+            isCloudEnabled={this.props.isCloudEnabled}
+          />
+          {index < instructions.instructionSets.length - 1 && <EuiSpacer />}
+        </Fragment>
       );
     });
   };
@@ -312,11 +310,16 @@ class TutorialUi extends React.Component {
     }
 
     return (
-      <SavedObjectsInstaller
-        bulkCreate={this.props.bulkCreate}
-        savedObjects={this.state.tutorial.savedObjects}
-        installMsg={this.state.tutorial.savedObjectsInstallMsg}
-      />
+      <>
+        <EuiSpacer />
+        <EuiPanel paddingSize="l">
+          <SavedObjectsInstaller
+            bulkCreate={this.props.bulkCreate}
+            savedObjects={this.state.tutorial.savedObjects}
+            installMsg={this.state.tutorial.savedObjectsInstallMsg}
+          />
+        </EuiPanel>
+      </>
     );
   };
 
@@ -337,22 +340,23 @@ class TutorialUi extends React.Component {
     }
 
     if (url && label) {
-      return <Footer label={label} url={url} />;
+      return (
+        <>
+          <EuiSpacer />
+          <EuiPanel paddingSize="l">
+            <Footer label={label} url={url} />
+          </EuiPanel>
+        </>
+      );
     }
   };
 
   renderModuleNotices() {
     const notices = getServices().tutorialService.getModuleNotices();
     if (notices.length && this.state.tutorial.moduleName) {
-      return (
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {notices.map((ModuleNotice, index) => (
-            <EuiFlexItem key={index}>
-              <ModuleNotice moduleName={this.state.tutorial.moduleName} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      );
+      return notices.map((ModuleNotice, index) => (
+        <ModuleNotice key={index} moduleName={this.state.tutorial.moduleName} />
+      ));
     } else {
       return null;
     }
@@ -362,17 +366,34 @@ class TutorialUi extends React.Component {
     let content;
     if (this.state.notFound) {
       content = (
-        <div className="homTutorial__notFoundPanel">
-          <EuiText>
-            <p>
+        <KibanaPageTemplate
+          isEmptyState={true}
+          pageHeader={{
+            iconType: 'faceSad',
+            iconProps: {
+              color: 'subdued',
+            },
+            pageTitle: (
               <FormattedMessage
                 id="home.tutorial.noTutorialLabel"
                 defaultMessage="Unable to find tutorial {tutorialId}"
                 values={{ tutorialId: this.props.tutorialId }}
               />
-            </p>
-          </EuiText>
-        </div>
+            ),
+            rightSideItems: [
+              <EuiButton
+                href={this.props.addBasePath('/app/home#/tutorial_directory')}
+                fill
+                iconType="sortLeft"
+                iconSide="left"
+              >
+                {i18n.translate('home.tutorial.backToDirectory', {
+                  defaultMessage: 'Back to directory',
+                })}
+              </EuiButton>,
+            ],
+          }}
+        />
       );
     }
 
@@ -404,27 +425,20 @@ class TutorialUi extends React.Component {
             exportedFieldsUrl={exportedFieldsUrl}
             iconType={icon}
             isBeta={this.state.tutorial.isBeta}
+            notices={this.renderModuleNotices()}
           />
 
-          {this.renderModuleNotices()}
-          <EuiSpacer />
-          <div className="eui-textCenter">{this.renderInstructionSetsToggle()}</div>
+          {this.renderInstructionSetsToggle()}
 
           <EuiSpacer />
-          <EuiPanel paddingSize="l">
-            {this.renderInstructionSets(instructions)}
-            {this.renderSavedObjectsInstaller()}
-            {this.renderFooter()}
-          </EuiPanel>
+          {this.renderInstructionSets(instructions)}
+          {this.renderSavedObjectsInstaller()}
+          {this.renderFooter()}
         </div>
       );
     }
 
-    return (
-      <EuiPage restrictWidth={1200}>
-        <EuiPageBody>{content}</EuiPageBody>
-      </EuiPage>
-    );
+    return <KibanaPageTemplate template="empty">{content}</KibanaPageTemplate>;
   }
 }
 

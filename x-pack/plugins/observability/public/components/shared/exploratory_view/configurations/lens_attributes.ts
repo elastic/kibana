@@ -507,7 +507,7 @@ export class LensAttributes {
       const existFilter = filter as ExistsFilter;
 
       if (isExistsFilter(existFilter)) {
-        const fieldName = existFilter.exists?.field;
+        const fieldName = existFilter.query.exists?.field;
         const kql = `${fieldName} : *`;
         if (baseFilters.length > 0) {
           baseFilters += ` and ${kql}`;
