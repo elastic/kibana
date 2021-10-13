@@ -37,6 +37,8 @@ export class ProcRunner {
   private signalUnsubscribe: () => void;
 
   constructor(private log: ToolingLog) {
+    this.log = log.withType('ProcRunner');
+
     this.signalUnsubscribe = exitHook(() => {
       this.teardown().catch((error) => {
         log.error(`ProcRunner teardown error: ${error.stack}`);
