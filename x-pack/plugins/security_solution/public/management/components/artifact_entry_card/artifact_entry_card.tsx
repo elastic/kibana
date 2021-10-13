@@ -16,10 +16,11 @@ import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { CardContainerPanel } from './components/card_container_panel';
 import { CardSectionPanel } from './components/card_section_panel';
+import { CardComments } from './components/card_comments';
 import { usePolicyNavLinks } from './hooks/use_policy_nav_links';
 import { MaybeImmutable } from '../../../../common/endpoint/types';
 
-export interface ArtifactEntryCardProps extends CommonProps {
+export interface CommonArtifactEntryCardProps extends CommonProps {
   item: MaybeImmutable<AnyArtifact>;
   /**
    * The list of actions for the card. Will display an icon with the actions in a menu if defined.
@@ -34,12 +35,27 @@ export interface ArtifactEntryCardProps extends CommonProps {
   policies?: MenuItemPropsByPolicyId;
 }
 
+export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
+  // A flag to hide description section, false by default
+  hideDescription?: boolean;
+  // A flag to hide comments section, false by default
+  hideComments?: boolean;
+}
+
 /**
  * Display Artifact Items (ex. Trusted App, Event Filter, etc) as a card.
  * This component is a TS Generic that allows you to set what the Item type is
  */
 export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
-  ({ item, policies, actions, 'data-test-subj': dataTestSubj, ...commonProps }) => {
+  ({
+    item,
+    policies,
+    actions,
+    hideDescription = false,
+    hideComments = false,
+    'data-test-subj': dataTestSubj,
+    ...commonProps
+  }) => {
     const artifact = useNormalizedArtifact(item as AnyArtifact);
     const getTestId = useTestIdGenerator(dataTestSubj);
     const policyNavLinks = usePolicyNavLinks(artifact, policies);
@@ -63,11 +79,16 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
 
           <EuiSpacer size="m" />
 
-          <EuiText>
-            <p data-test-subj={getTestId('description')}>
-              {artifact.description || getEmptyValue()}
-            </p>
-          </EuiText>
+          {!hideDescription ? (
+            <EuiText>
+              <p data-test-subj={getTestId('description')}>
+                {artifact.description || getEmptyValue()}
+              </p>
+            </EuiText>
+          ) : null}
+          {!hideComments ? (
+            <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
+          ) : null}
         </CardSectionPanel>
 
         <EuiHorizontalRule margin="none" />
