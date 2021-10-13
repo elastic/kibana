@@ -22,8 +22,8 @@ import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data
 import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
 import { ExpressionsStart } from '../../../plugins/expressions/public';
 import { UiActionsStart } from '../../../plugins/ui_actions/public';
-import { SavedObjectLoader } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -60,5 +60,4 @@ export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Over
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
 
-export const [getSavedSearchLoader, setSavedSearchLoader] =
-  createGetterSetter<SavedObjectLoader>('savedSearchLoader');
+export const [getSpaces, setSpaces] = createGetterSetter<SpacesPluginStart>('Spaces', false);

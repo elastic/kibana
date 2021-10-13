@@ -22,9 +22,9 @@ import {
   setAggs,
   setChrome,
   setOverlays,
-  setSavedSearchLoader,
   setEmbeddable,
   setDocLinks,
+  setSpaces,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -48,8 +48,6 @@ import {
   saveVisualization,
   findListItems,
 } from './utils/saved_visualize_utils';
-
-import { createSavedSearchesLoader } from '../../discover/public';
 
 import type {
   PluginInitializerContext,
@@ -188,11 +186,11 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
-    const savedSearchLoader = createSavedSearchesLoader({
-      savedObjectsClient: core.savedObjects.client,
-      savedObjects,
-    });
-    setSavedSearchLoader(savedSearchLoader);
+
+    if (spaces) {
+      setSpaces(spaces);
+    }
+
     return {
       ...types,
       showNewVisModal,
