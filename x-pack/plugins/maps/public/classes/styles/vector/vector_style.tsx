@@ -492,9 +492,13 @@ export class VectorStyle implements IVectorStyle {
     const supportedShapeTypes = await this._source.getSupportedShapeTypes();
     const styleMeta: StyleMetaDescriptor = {
       geometryTypes: {
-        isPointsOnly: supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POINT),
-        isLinesOnly: supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE),
-        isPolygonsOnly: supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON),
+        isPointsOnly:
+          supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POINT),
+        isLinesOnly:
+          supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE),
+        isPolygonsOnly:
+          supportedShapeTypes.length === 1 &&
+          supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON),
       },
       fieldMeta: {},
     };

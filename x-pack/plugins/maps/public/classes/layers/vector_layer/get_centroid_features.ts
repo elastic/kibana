@@ -21,7 +21,11 @@ import turfArea from '@turf/area';
 import turfCenterOfMass from '@turf/center-of-mass';
 import turfLength from '@turf/length';
 import { lineString, polygon } from '@turf/helpers';
-import { GEO_JSON_TYPE, KBN_IS_CENTROID_FEATURE, KBN_METADATA_FEATURE } from './constants';
+import {
+  GEO_JSON_TYPE,
+  KBN_IS_CENTROID_FEATURE,
+  KBN_METADATA_FEATURE,
+} from '../../../../common/constants';
 
 export function getCentroidFeatures(featureCollection: FeatureCollection): Feature[] {
   const centroids = [];
