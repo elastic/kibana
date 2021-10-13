@@ -23,15 +23,12 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { encode } from '../../../../../../common/dataurl';
+import { IconPreview } from './icon_preview';
 
 const MAX_NAME_LENGTH = 40;
-const MAX_DESCRIPTION_LENGTH = 100;
 
 const strings = {
   getCancelButtonLabel: () =>
@@ -45,13 +42,9 @@ const strings = {
         numberOfRemainingCharacter,
       },
     }),
-  getDescriptionInputLabel: () =>
-    i18n.translate('xpack.maps.customIconModal.descriptionInputLabel', {
-      defaultMessage: 'Description',
-    }),
-  getElementPreviewTitle: () =>
+  getIconPreviewTitle: () =>
     i18n.translate('xpack.maps.customIconModal.elementPreviewTitle', {
-      defaultMessage: 'Element preview',
+      defaultMessage: 'Icon preview',
     }),
   getImageFilePickerPlaceholder: () =>
     i18n.translate('xpack.maps.customIconModal.imageFilePickerPlaceholder', {
@@ -81,10 +74,6 @@ interface Props {
    */
   name?: string;
   /**
-   * initial value of the description of the custom element
-   */
-  description?: string;
-  /**
    * initial value of the preview image of the custom element as a base64 dataurl
    */
   image?: string;
@@ -95,7 +84,7 @@ interface Props {
   /**
    * A click handler for the save button
    */
-  onSave: (name: string, description: string, image: string) => void;
+  onSave: (name: string, image: string) => void;
   /**
    * A click handler for the cancel button
    */
@@ -107,10 +96,6 @@ interface State {
    * name of the custom element to be saved
    */
   name?: string;
-  /**
-   * description of the custom element to be saved
-   */
-  description?: string;
   /**
    * image of the custom element to be saved
    */
@@ -129,11 +114,10 @@ export class CustomIconModal extends PureComponent<Props, State> {
 
   public state = {
     name: this.props.name || '',
-    description: this.props.description || '',
     image: this.props.image || '',
   };
 
-  private _handleChange = (type: 'name' | 'description' | 'image', img: string) => {
+  private _handleChange = (type: 'name' | 'id' | 'image', img: string) => {
     this.setState({ [type]: img });
   };
 
@@ -148,7 +132,7 @@ export class CustomIconModal extends PureComponent<Props, State> {
 
   public render() {
     const { onSave, onCancel, title, ...rest } = this.props;
-    const { name, description, image } = this.state;
+    const { name, image } = this.state;
 
     return (
       <EuiModal
@@ -183,22 +167,6 @@ export class CustomIconModal extends PureComponent<Props, State> {
                 />
               </EuiFormRow>
               <EuiFormRow
-                label={strings.getDescriptionInputLabel()}
-                helpText={strings.getCharactersRemainingDescription(
-                  MAX_DESCRIPTION_LENGTH - description.length
-                )}
-              >
-                <EuiTextArea
-                  value={description}
-                  rows={2}
-                  onChange={(e) =>
-                    e.target.value.length <= MAX_DESCRIPTION_LENGTH &&
-                    this._handleChange('description', e.target.value)
-                  }
-                  data-test-subj="mapsCustomIconForm-description"
-                />
-              </EuiFormRow>
-              <EuiFormRow
                 className="mapsCustomIconForm__thumbnail"
                 label={strings.getImageInputLabel()}
                 display="rowCompressed"
@@ -215,14 +183,16 @@ export class CustomIconModal extends PureComponent<Props, State> {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem
-              className="mapsElementCard__wrapper mapsCustomIconForm__preview"
+              className="mapsIconPreview__wrapper mapsCustomIconForm__preview"
               grow={1}
             >
               <EuiTitle size="xxxs">
-                <h4>{strings.getElementPreviewTitle()}</h4>
+                <h4>{strings.getIconPreviewTitle()}</h4>
               </EuiTitle>
               <EuiSpacer size="s" />
-              {/* TODO Render a preview in a MapComponent */}
+                <IconPreview
+                  svg={image}
+                />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalBody>
@@ -235,7 +205,7 @@ export class CustomIconModal extends PureComponent<Props, State> {
               <EuiButton
                 fill
                 onClick={() => {
-                  onSave(name, description, image);
+                  onSave(name, image);
                 }}
                 data-test-subj="mapsCustomIconForm-submit"
               >
