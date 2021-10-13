@@ -238,9 +238,11 @@
         "label": "FilterValueLabel",
         "description": [],
         "signature": [
-          "({\n  label,\n  field,\n  value,\n  negate,\n  indexPattern,\n  invertFilter,\n  removeFilter,\n  allowExclusion = true,\n}: Props) => JSX.Element | null"
+          "(props: ",
+          "FilterValueLabelProps",
+          ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx",
+        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
         "deprecated": false,
         "children": [
           {
@@ -248,12 +250,12 @@
             "id": "def-public.FilterValueLabel.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  label,\n  field,\n  value,\n  negate,\n  indexPattern,\n  invertFilter,\n  removeFilter,\n  allowExclusion = true,\n}",
+            "label": "props",
             "description": [],
             "signature": [
-              "Props"
+              "FilterValueLabelProps"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx",
+            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -381,6 +383,48 @@
             "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
             "deprecated": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.InspectorContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "InspectorContextProvider",
+        "description": [],
+        "signature": [
+          "({ children }: { children: React.ReactNode; }) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/context/inspector/inspector_context.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.InspectorContextProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/context/inspector/inspector_context.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.InspectorContextProvider.$1.children",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+                ],
+                "path": "x-pack/plugins/observability/public/context/inspector/inspector_context.tsx",
+                "deprecated": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -830,6 +874,23 @@
             ]
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.useInspectorContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useInspectorContext",
+        "description": [],
+        "signature": [
+          "() => ",
+          "InspectorContextValue"
+        ],
+        "path": "x-pack/plugins/observability/public/context/inspector/use_inspector_context.tsx",
+        "deprecated": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -3652,6 +3713,173 @@
                   }
                 ],
                 "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-server.getInspectResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "getInspectResponse",
+        "description": [
+          "\nCreate a formatted response to be sent in the _inspect key for use in the\ninspector."
+        ],
+        "signature": [
+          "({\n  esError,\n  esRequestParams,\n  esRequestStatus,\n  esResponse,\n  kibanaRequest,\n  operationName,\n  startTime,\n}: { esError: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.WrappedElasticsearchClientError",
+            "text": "WrappedElasticsearchClientError"
+          },
+          " | null; esRequestParams: Record<string, any>; esRequestStatus: ",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.RequestStatus",
+            "text": "RequestStatus"
+          },
+          "; esResponse: any; kibanaRequest: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>; operationName: string; startTime: number; }) => ",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Request",
+            "text": "Request"
+          }
+        ],
+        "path": "x-pack/plugins/observability/server/utils/get_inspect_response.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.getInspectResponse.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  esError,\n  esRequestParams,\n  esRequestStatus,\n  esResponse,\n  kibanaRequest,\n  operationName,\n  startTime,\n}",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/utils/get_inspect_response.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.getInspectResponse.$1.esError",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "esError",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observability",
+                    "scope": "server",
+                    "docId": "kibObservabilityPluginApi",
+                    "section": "def-server.WrappedElasticsearchClientError",
+                    "text": "WrappedElasticsearchClientError"
+                  },
+                  " | null"
+                ],
+                "path": "x-pack/plugins/observability/server/utils/get_inspect_response.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.getInspectResponse.$1.esRequestParams",
+                "type": "Object",
+                "tags": [],
+                "label": "esRequestParams",
+                "description": [],
+                "signature": [
+                  "{ [x: string]: any; }"
+                ],
+                "path": "x-pack/plugins/observability/server/utils/get_inspect_response.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.getInspectResponse.$1.esRequestStatus",
+                "type": "Enum",
+                "tags": [],
+                "label": "esRequestStatus",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.RequestStatus",
+                    "text": "RequestStatus"
+                  }
+                ],
+                "path": "x-pack/plugins/observability/server/utils/get_inspect_response.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.getInspectResponse.$1.esResponse",
+                "type": "Any",
+                "tags": [],
+                "label": "esResponse",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/utils/get_inspect_response.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.getInspectResponse.$1.kibanaRequest",
+                "type": "Object",
+                "tags": [],
+                "label": "kibanaRequest",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/plugins/observability/server/utils/get_inspect_response.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.getInspectResponse.$1.operationName",
+                "type": "string",
+                "tags": [],
+                "label": "operationName",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/utils/get_inspect_response.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.getInspectResponse.$1.startTime",
+                "type": "number",
+                "tags": [],
+                "label": "startTime",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/utils/get_inspect_response.ts",
                 "deprecated": false
               }
             ]
