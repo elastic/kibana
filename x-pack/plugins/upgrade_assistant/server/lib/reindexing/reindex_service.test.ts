@@ -20,7 +20,7 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { mockKibanaVersion } from '../../../common/constants';
+import { MAJOR_VERSION } from '../../../common/constants';
 import { licensingMock } from '../../../../licensing/server/mocks';
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
@@ -89,7 +89,7 @@ describe('reindexService', () => {
       licensingPluginSetup
     );
 
-    versionService.setup(mockKibanaVersion);
+    versionService.setup(MAJOR_VERSION);
   });
 
   describe('hasRequiredPrivileges', () => {
