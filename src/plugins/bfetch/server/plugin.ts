@@ -13,9 +13,6 @@ import type {
   Plugin,
   Logger,
   KibanaRequest,
-  RouteMethod,
-  RequestHandler,
-  RequestHandlerContext,
   StartServicesAccessor,
 } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
@@ -28,7 +25,6 @@ import {
   removeLeadingSlash,
   normalizeError,
 } from '../common';
-import { StreamingRequestHandler } from './types';
 import { createStream } from './streaming';
 import { getUiSettings } from './ui_settings';
 
@@ -52,44 +48,6 @@ export interface BfetchServerSetup {
     path: string,
     params: (request: KibanaRequest) => StreamingResponseHandler<Payload, Response>
   ) => void;
-  /**
-   * Create a streaming request handler to be able to use an Observable to return chunked content to the client.
-   * This is meant to be used with the `fetchStreaming` API of the `bfetch` client-side plugin.
-   *
-   * @example
-   * ```ts
-   * setup({ http }: CoreStart, { bfetch }: SetupDeps) {
-   *   const router = http.createRouter();
-   *   router.post(
-   *   {
-   *     path: '/api/my-plugin/stream-endpoint,
-   *     validate: {
-   *       body: schema.object({
-   *         term: schema.string(),
-   *       }),
-   *     }
-   *   },
-   *   bfetch.createStreamingResponseHandler(async (ctx, req) => {
-   *     const { term } = req.body;
-   *     const results$ = await myApi.getResults$(term);
-   *     return results$;
-   *   })
-   * )}
-   *
-   * ```
-   *
-   * @param streamHandler
-   */
-  createStreamingRequestHandler: <
-    Response,
-    P,
-    Q,
-    B,
-    Context extends RequestHandlerContext = RequestHandlerContext,
-    Method extends RouteMethod = any
-  >(
-    streamHandler: StreamingRequestHandler<Response, P, Q, B, Method>
-  ) => RequestHandler<P, Q, B, Context, Method>;
 }
 
 // eslint-disable-next-line
@@ -124,15 +82,10 @@ export class BfetchServerPlugin
       logger,
     });
     const addBatchProcessingRoute = this.addBatchProcessingRoute(addStreamingResponseRoute);
-    const createStreamingRequestHandler = this.createStreamingRequestHandler({
-      getStartServices: core.getStartServices,
-      logger,
-    });
 
     return {
       addBatchProcessingRoute,
       addStreamingResponseRoute,
-      createStreamingRequestHandler,
     };
   }
 
@@ -141,10 +94,6 @@ export class BfetchServerPlugin
   }
 
   public stop() {}
-
-  private getCompressionDisabled(request: KibanaRequest) {
-    return request.headers['x-chunk-encoding'] !== 'deflate';
-  }
 
   private addStreamingResponseRoute =
     ({
@@ -162,40 +111,19 @@ export class BfetchServerPlugin
           path: `/${removeLeadingSlash(path)}`,
           validate: {
             body: schema.any(),
+            query: schema.object({ compress: schema.boolean({ defaultValue: false }) }),
           },
         },
         async (context, request, response) => {
           const handlerInstance = handler(request);
           const data = request.body;
-          const compressionDisabled = this.getCompressionDisabled(request);
+          const compress = request.query.compress;
           return response.ok({
             headers: streamingHeaders,
-            body: createStream(
-              handlerInstance.getResponseStream(data),
-              logger,
-              compressionDisabled
-            ),
+            body: createStream(handlerInstance.getResponseStream(data), logger, compress),
           });
         }
       );
-    };
-
-  private createStreamingRequestHandler =
-    ({
-      logger,
-      getStartServices,
-    }: {
-      logger: Logger;
-      getStartServices: StartServicesAccessor;
-    }): BfetchServerSetup['createStreamingRequestHandler'] =>
-    (streamHandler) =>
-    async (context, request, response) => {
-      const response$ = await streamHandler(context, request);
-      const compressionDisabled = this.getCompressionDisabled(request);
-      return response.ok({
-        headers: streamingHeaders,
-        body: createStream(response$, logger, compressionDisabled),
-      });
     };
 
   private addBatchProcessingRoute =
