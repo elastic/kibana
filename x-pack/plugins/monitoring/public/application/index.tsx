@@ -58,9 +58,15 @@ import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
 export const renderApp = (
   core: CoreStart,
   plugins: MonitoringStartPluginDependencies,
-  { element, setHeaderActionMenu }: AppMountParameters,
+  { element, history, setHeaderActionMenu }: AppMountParameters,
   externalConfig: ExternalConfig
 ) => {
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlistenParentHistory = history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+
   ReactDOM.render(
     <MonitoringApp
       core={core}
@@ -73,6 +79,7 @@ export const renderApp = (
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
+    unlistenParentHistory();
   };
 };
 
