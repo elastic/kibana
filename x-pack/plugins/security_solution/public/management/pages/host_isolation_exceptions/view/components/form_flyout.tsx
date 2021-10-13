@@ -80,9 +80,11 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
     [navigateCallback]
   );
 
-  if (!license.isPlatinumPlus()) {
-    onCancel();
-  }
+  useEffect(() => {
+    if (!license.isPlatinumPlus()) {
+      onCancel();
+    }
+  }, [license, onCancel]);
 
   // load data to edit or create
   useEffect(() => {
