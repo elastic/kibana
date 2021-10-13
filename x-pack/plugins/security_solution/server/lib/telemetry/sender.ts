@@ -8,10 +8,11 @@
 import { cloneDeep } from 'lodash';
 import axios from 'axios';
 import { URL } from 'url';
+import { transformDataToNdjson } from '@kbn/securitysolution-utils';
+
 import { Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,

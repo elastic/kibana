@@ -556,9 +556,11 @@ export const exportExceptionList = async ({
   listId,
   namespaceType,
   signal,
-}: ExportExceptionListProps): Promise<Blob> =>
-  http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
-    method: 'GET',
+}: ExportExceptionListProps): Promise<Blob> => {
+  console.log({ id, listId });
+  return http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
+    method: 'POST',
     query: { id, list_id: listId, namespace_type: namespaceType },
     signal,
   });
+};
