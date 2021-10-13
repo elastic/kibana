@@ -100,6 +100,10 @@ export function FailedTransactionsCorrelations({
   );
   const euiTheme = useTheme();
 
+  const toggleShowStats = useCallback(() => {
+    setShowStats(!showStats);
+  }, [setShowStats, showStats]);
+
   const failedTransactionsCorrelationsColumns: Array<
     EuiBasicTableColumn<FailedTransactionsCorrelation>
   > = useMemo(() => {
@@ -519,8 +523,8 @@ export function FailedTransactionsCorrelations({
               }
             )}
             checked={showStats}
-            onChange={(e) => setShowStats(!showStats)}
-            compressed={true}
+            onChange={toggleShowStats}
+            compressed
           />
           <EuiIconTip
             size="m"
