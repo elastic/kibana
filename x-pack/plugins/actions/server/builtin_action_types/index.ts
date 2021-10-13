@@ -82,6 +82,7 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getResilientActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getTeamsActionType({ logger, configurationUtilities }));
 
+  // TODO: Remove when ITOM is ready
   if (ENABLE_ITOM) {
     actionTypeRegistry.register(getServiceNowITOMActionType({ logger, configurationUtilities }));
   }

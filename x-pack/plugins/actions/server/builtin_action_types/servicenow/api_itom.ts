@@ -12,13 +12,25 @@ import {
   ExternalServiceApiITOM,
 } from './types';
 
+const isValidDate = (d: Date) => !isNaN(d.valueOf());
+
 const formatTimeOfEvent = (timeOfEvent: string | null): string | undefined => {
-  try {
-    if (timeOfEvent != null) {
-      return new Date(timeOfEvent).toISOString();
-    }
-  } catch (error) {
-    // silence errors
+  if (timeOfEvent != null) {
+    const date = new Date(timeOfEvent);
+
+    return isValidDate(date)
+      ? // The format is: yyyy-MM-dd HH:mm:ss GMT
+        date.toLocaleDateString('en-CA', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          hour12: false,
+          minute: '2-digit',
+          second: '2-digit',
+          timeZone: 'GMT',
+        })
+      : undefined;
   }
 };
 
