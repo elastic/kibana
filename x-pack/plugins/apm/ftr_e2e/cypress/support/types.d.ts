@@ -7,6 +7,7 @@
 
 declare namespace Cypress {
   interface Chainable {
+    deleteAllRules(): void;
     loginAsReadOnlyUser(): void;
     loginAsPowerUser(): void;
     loginAs(params: { username: string; password: string }): void;

@@ -12,9 +12,6 @@ describe('Rules', () => {
       '.euiPopover__panel-isOpen [data-test-subj=comboBoxSearchInput]';
     const confirmModalButtonSelector =
       '.euiModal button[data-test-subj=confirmModalConfirmButton]';
-    const deleteButtonSelector =
-      '[data-test-subj=deleteActionHoverButton]:first';
-    const editButtonSelector = '[data-test-subj=editActionHoverButton]:first';
 
     describe('when created from APM', () => {
       describe('when created from Service Inventory', () => {

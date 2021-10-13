@@ -13,7 +13,7 @@ Cypress.Commands.add('deleteAllRules', () => {
       cy.log(`Deleting rules`);
     }
 
-    body.data.map(({ id }) => {
+    body.data.map(({ id }: { id: string }) => {
       cy.request({
         headers: { 'kbn-xsrf': 'true' },
         method: 'DELETE',
