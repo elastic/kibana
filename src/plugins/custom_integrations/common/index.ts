@@ -77,6 +77,7 @@ export interface IntegrationCategoryCount {
 // TODO: consider i18n
 export const SHIPPER_DISPLAY = {
   beats: 'Beats',
+  enterprise_search: 'Enterprise Search',
   language_clients: 'Language clients',
   other: 'Other',
   sample_data: 'Sample data',
