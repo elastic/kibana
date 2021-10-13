@@ -76,9 +76,8 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      data-test-subj="beatsOverviewPage"
     >
-      <div data-test-subj="beatsOverviewPage">{renderOverview(data)}</div>
+      <div>{renderOverview(data)}</div>
     </BeatsTemplate>
   );
 };
