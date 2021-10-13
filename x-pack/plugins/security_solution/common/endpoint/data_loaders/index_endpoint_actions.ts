@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HostMetadata, LogsEndpointAction, LogsEndpointActionResponse } from '../types';
 import { EndpointActionGenerator } from '../data_generators/endpoint_action_generator';
 import { wrapErrorAndRejectPromise } from './utils';
@@ -144,8 +144,8 @@ export const indexEndpointActionsForHost = async (
 };
 
 export interface DeleteIndexedEndpointActionsResponse {
-  endpointActionRequests: DeleteByQueryResponse | undefined;
-  endpointActionResponses: DeleteByQueryResponse | undefined;
+  endpointActionRequests: estypes.DeleteByQueryResponse | undefined;
+  endpointActionResponses: estypes.DeleteByQueryResponse | undefined;
 }
 
 export const deleteIndexedEndpointActions = async (

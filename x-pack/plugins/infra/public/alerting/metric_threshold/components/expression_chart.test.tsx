@@ -54,7 +54,6 @@ describe('ExpressionChart', () => {
         metricAlias: 'metricbeat-*',
         inventoryDefaultView: 'host',
         metricsExplorerDefaultView: 'host',
-        // @ts-expect-error message is missing
         fields: {
           timestamp: '@timestamp',
           container: 'container.id',
