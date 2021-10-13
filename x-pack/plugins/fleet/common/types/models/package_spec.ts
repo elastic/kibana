@@ -40,7 +40,6 @@ export type PackageSpecCategory =
   | 'kubernetes'
   | 'languages'
   | 'message_queue'
-  | 'ml'
   | 'monitoring'
   | 'network'
   | 'notification'

@@ -17,7 +17,11 @@ import type { InstallablePackage, InstallSource, PackageAssetReference } from '.
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { AssetReference, Installation, InstallType } from '../../../types';
 import { installTemplates } from '../elasticsearch/template/install';
-import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
+import {
+  installPipelines,
+  isTopLevelPipeline,
+  deletePreviousPipelines,
+} from '../elasticsearch/ingest_pipeline/';
 import { getAllTemplateRefs } from '../elasticsearch/template/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
@@ -54,7 +58,7 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
 }): Promise<AssetReference[]> {
-  const { name: pkgName, version: pkgVersion, categories: pkgCategories } = packageInfo;
+  const { name: pkgName, version: pkgVersion } = packageInfo;
 
   try {
     // if some installation already exists
@@ -166,8 +170,7 @@ export async function _installPackage({
 
     // if this is an update or retrying an update, delete the previous version's pipelines
     if (
-      pkgCategories &&
-      pkgCategories.includes('ml') === false &&
+      paths.filter((path) => isTopLevelPipeline(path)).length === 0 &&
       (installType === 'update' || installType === 'reupdate') &&
       installedPkg
     ) {

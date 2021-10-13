@@ -28,6 +28,13 @@ interface RewriteSubstitution {
   templateFunction: string;
 }
 
+export const isTopLevelPipeline = (path: string) => {
+  const pathParts = getPathParts(path);
+  return (
+    pathParts.type === ElasticsearchAssetType.ingestPipeline && pathParts.dataset === undefined
+  );
+};
+
 export const installPipelines = async (
   installablePackage: InstallablePackage,
   paths: string[],
@@ -265,13 +272,6 @@ const isDataStreamPipeline = (path: string, dataStreamDataset: string) => {
 const isPipeline = (path: string) => {
   const pathParts = getPathParts(path);
   return pathParts.type === ElasticsearchAssetType.ingestPipeline;
-};
-
-const isTopLevelPipeline = (path: string) => {
-  const pathParts = getPathParts(path);
-  return (
-    pathParts.type === ElasticsearchAssetType.ingestPipeline && pathParts.dataset === undefined
-  );
 };
 
 // XXX: assumes path/to/file.ext -- 0..n '/' and exactly one '.'
