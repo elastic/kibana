@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { ApmOssPlugin } from './plugin';
-
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
-export function plugin() {
-  return new ApmOssPlugin();
-}
-export { ApmOssPluginSetup, ApmOssPluginStart } from './types';
+/** @internal **/
+export const SAVED_SEARCH_TYPE = 'search';

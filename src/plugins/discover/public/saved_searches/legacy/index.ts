@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ApmOssPluginSetup {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ApmOssPluginStart {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AppPluginStartDependencies {}
+export { createSavedSearchesLoader } from './saved_searches';
+export { LegacySavedSearch, SavedSearchLoader } from './types';
