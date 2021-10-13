@@ -13,6 +13,7 @@ import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import type { ManagementSetup } from 'src/plugins/management/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
+import type { SpacesApi } from '../../spaces/public';
 import { registerFeature } from './register_feature';
 import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
@@ -24,6 +25,7 @@ export interface PluginsDependencies {
   home: HomePublicPluginSetup;
   savedObjects: SavedObjectsStart;
   share: SharePluginStart;
+  spaces?: SpacesApi;
   alerting?: AlertingSetup;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
 }

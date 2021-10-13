@@ -8,7 +8,7 @@
 import { createSearchSourceMock } from '../../../../../data/common/search/search_source/mocks';
 import { updateSearchSource } from './update_search_source';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
-import { SortOrder } from '../../../saved_searches/types';
+import type { SortOrder } from '../../../saved_searches';
 
 describe('updateSearchSource', () => {
   const defaults = {

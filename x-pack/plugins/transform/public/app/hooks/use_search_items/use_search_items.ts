@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { isIndexPattern } from '../../../../common/types/index_pattern';
 
-import { createSavedSearchesLoader } from '../../../shared_imports';
+import { getSavedSearch, getSavedSearchUrlConflictMessage } from '../../../shared_imports';
 
 import { useAppDependencies } from '../../app_dependencies';
 
@@ -20,7 +20,6 @@ import {
   getIndexPatternIdByTitle,
   loadCurrentIndexPattern,
   loadIndexPatterns,
-  loadCurrentSavedSearch,
   SearchItems,
 } from './common';
 
@@ -32,10 +31,6 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
   const indexPatterns = appDeps.data.indexPatterns;
   const uiSettings = appDeps.uiSettings;
   const savedObjectsClient = appDeps.savedObjects.client;
-  const savedSearches = createSavedSearchesLoader({
-    savedObjectsClient,
-    savedObjects: appDeps.savedObjectsPlugin,
-  });
 
   const [searchItems, setSearchItems] = useState<SearchItems | undefined>(undefined);
 
@@ -52,7 +47,16 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     }
 
     try {
-      fetchedSavedSearch = await loadCurrentSavedSearch(savedSearches, id);
+      fetchedSavedSearch = await getSavedSearch(id, {
+        search: appDeps.data.search,
+        savedObjectsClient: appDeps.savedObjects.client,
+        spaces: appDeps.spaces,
+      });
+
+      if (fetchedSavedSearch?.sharingSavedObjectProps?.errorJSON) {
+        setError(await getSavedSearchUrlConflictMessage(fetchedSavedSearch));
+        return;
+      }
     } catch (e) {
       // Just let fetchedSavedSearch stay undefined in case it doesn't exist.
     }

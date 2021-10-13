@@ -9,7 +9,7 @@
 import { updateSearchSource } from './update_search_source';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
-import { SortOrder } from '../../../../saved_searches/types';
+import type { SortOrder } from '../../../../saved_searches';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 
 describe('updateSearchSource', () => {

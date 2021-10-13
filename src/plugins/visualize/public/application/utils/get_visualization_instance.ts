@@ -14,10 +14,13 @@ import {
   VisualizeInput,
 } from 'src/plugins/visualizations/public';
 import { SearchSourceFields } from 'src/plugins/data/public';
-import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
-import { createSavedSearchesLoader } from '../../../../discover/public';
+import {
+  getSavedSearch,
+  SavedSearch,
+  throwErrorOnSavedSearchUrlConflict,
+} from '../../../../discover/public';
 import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '../../../../kibana_utils/common';
 import { VisualizeServices } from '../types';
 
@@ -33,8 +36,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const { data, createVisEmbeddableFromObject, savedObjects, savedObjectsPublic } =
-    visualizeServices;
+  const { data, createVisEmbeddableFromObject, savedObjects, spaces } = visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     id: '',
     timeRange: data.query.timefilter.timefilter.getTime(),
@@ -50,13 +52,16 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
     }
   });
 
-  let savedSearch: SavedObject | undefined;
+  let savedSearch: SavedSearch | undefined;
 
   if (vis.data.savedSearchId) {
-    savedSearch = await createSavedSearchesLoader({
+    savedSearch = await getSavedSearch(vis.data.savedSearchId, {
+      search: data.search,
       savedObjectsClient: savedObjects.client,
-      savedObjects: savedObjectsPublic,
-    }).get(vis.data.savedSearchId);
+      spaces,
+    });
+
+    await throwErrorOnSavedSearchUrlConflict(savedSearch);
   }
 
   return { savedSearch, embeddableHandler };

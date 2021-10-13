@@ -28,7 +28,6 @@ import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../kibana_utils/public';
-import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 import { VisualizeConstants } from './application/visualize_constants';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
@@ -45,6 +44,7 @@ import type { EmbeddableStart } from '../../embeddable/public';
 import type { DashboardStart } from '../../dashboard/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../usage_collection/public';
+import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 
 import { setVisEditorsRegistry, setUISettings, setUsageCollector } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
@@ -62,7 +62,7 @@ export interface VisualizePluginStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   usageCollection?: UsageCollectionStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesApi;
 }
 
 export interface VisualizePluginSetupDependencies {

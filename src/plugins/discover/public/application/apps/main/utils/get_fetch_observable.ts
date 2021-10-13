@@ -12,7 +12,7 @@ import { FetchStatus } from '../../../types';
 import type {
   AutoRefreshDoneFn,
   DataPublicPluginStart,
-  SearchSource,
+  ISearchSource,
 } from '../../../../../../data/public';
 import { DataMain$, DataRefetch$ } from '../services/use_saved_search';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
@@ -33,7 +33,7 @@ export function getFetch$({
   main$: DataMain$;
   refetch$: DataRefetch$;
   searchSessionManager: DiscoverSearchSessionManager;
-  searchSource: SearchSource;
+  searchSource: ISearchSource;
   initialFetchStatus: FetchStatus;
 }) {
   const { timefilter } = data.query.timefilter;

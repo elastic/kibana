@@ -11,7 +11,7 @@ import type { IUiSettingsClient } from 'src/core/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { ISearchSource, SearchSourceFields } from 'src/plugins/data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
-import type { SavedSearch, SortOrder } from '../../../../saved_searches/types';
+import type { SavedSearch, SortOrder } from '../../../../saved_searches';
 import { getSortForSearchSource } from '../components/doc_table';
 import { AppState } from '../services/discover_state';
 
