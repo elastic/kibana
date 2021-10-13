@@ -10,6 +10,7 @@ import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
 import { Client, errors } from '@elastic/elasticsearch';
 import { Transport, events } from '@elastic/transport';
+import { HttpConnection } from '@elastic/transport';
 import type {
   TransportRequestParams,
   TransportRequestOptions,
@@ -55,7 +56,11 @@ export const configureClient = (
     }
   }
 
-  const client = new Client({ ...clientOptions, Transport: KibanaTransport });
+  const client = new Client({
+    ...clientOptions,
+    Transport: KibanaTransport,
+    Connection: HttpConnection,
+  });
   addLogging(client, logger.get('query', type));
 
   // --------------------------------------------------------------------------------- //
