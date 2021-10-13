@@ -48,6 +48,7 @@ function setup() {
       id: 'test-index-pattern',
       title: 'log-indices-*',
       timeFieldName: '@timestamp',
+      type: undefined,
       fields: [
         {
           name: 'event.dataset',

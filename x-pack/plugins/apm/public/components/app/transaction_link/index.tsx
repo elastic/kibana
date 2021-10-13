@@ -28,7 +28,7 @@ export function TransactionLink() {
     (callApmApi) => {
       if (transactionId) {
         return callApmApi({
-          endpoint: 'GET /api/apm/transactions/{transactionId}',
+          endpoint: 'GET /internal/apm/transactions/{transactionId}',
           params: {
             path: {
               transactionId,
