@@ -9,10 +9,7 @@ import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Datatable } from 'src/plugins/expressions';
 import { PaletteOutput } from 'src/plugins/charts/public';
-import {
-  VisualizeFieldContext,
-  VisualizeEditorContext,
-} from '../../../../../../src/plugins/ui_actions/public';
+import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
   Datasource,
@@ -22,6 +19,7 @@ import {
   DatasourcePublicAPI,
   DatasourceMap,
   VisualizationMap,
+  VisualizeEditorContext,
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
 import { LayerType, layerTypes } from '../../../common';

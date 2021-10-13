@@ -6,11 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  createAction,
-  ACTION_CONVERT_TO_LENS,
-  VisualizeEditorContext,
-} from '../../../../../src/plugins/ui_actions/public';
+import { createAction, ACTION_CONVERT_TO_LENS } from '../../../../../src/plugins/ui_actions/public';
+import type { VisualizeEditorContext } from '../types';
 import type { ApplicationStart } from '../../../../../src/core/public';
 
 export const visualizeTSVBAction = (application: ApplicationStart) =>

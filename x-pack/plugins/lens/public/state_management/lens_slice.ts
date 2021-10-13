@@ -6,12 +6,13 @@
  */
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
-import { VisualizeFieldContext, VisualizeEditorContext } from 'src/plugins/ui_actions/public';
+import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getInitialDatasourceId, getResolvedDateRange } from '../utils';
 import { LensAppState, LensStoreDeps } from './types';
+import type { VisualizeEditorContext } from '../types';
 import { generateId } from '../id_generator';
 import {
   getVisualizeFieldSuggestions,

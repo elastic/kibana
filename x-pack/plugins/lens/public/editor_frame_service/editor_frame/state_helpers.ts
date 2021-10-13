@@ -17,13 +17,11 @@ import {
   Visualization,
   VisualizationDimensionGroupConfig,
   VisualizationMap,
+  VisualizeEditorContext,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
-import {
-  VisualizeFieldContext,
-  VisualizeEditorContext,
-} from '../../../../../../src/plugins/ui_actions/public';
+import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { ErrorMessage } from '../types';
 import {

@@ -49,12 +49,9 @@ import { IndexPatternColumn, getErrorMessages, insertNewColumn } from './operati
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import {
-  VisualizeFieldContext,
-  VisualizeEditorContext,
-} from '../../../../../src/plugins/ui_actions/public';
+import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { mergeLayer } from './state_helpers';
-import { Datasource, StateSetter } from '../types';
+import { Datasource, StateSetter, VisualizeEditorContext } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';

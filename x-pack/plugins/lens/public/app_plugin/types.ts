@@ -31,14 +31,18 @@ import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_taggi
 import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
-  VisualizeEditorContext,
   ACTION_CONVERT_TO_LENS,
 } from '../../../../../src/plugins/ui_actions/public';
 import type {
   EmbeddableEditorState,
   EmbeddableStateTransfer,
 } from '../../../../../src/plugins/embeddable/public';
-import type { DatasourceMap, EditorFrameInstance, VisualizationMap } from '../types';
+import type {
+  DatasourceMap,
+  EditorFrameInstance,
+  VisualizationMap,
+  VisualizeEditorContext,
+} from '../types';
 import type { PresentationUtilPluginStart } from '../../../../../src/plugins/presentation_util/public';
 import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
 import type { LensInspector } from '../lens_inspector_service';

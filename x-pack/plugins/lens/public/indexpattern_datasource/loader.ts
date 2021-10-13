@@ -8,7 +8,7 @@
 import { uniq, mapValues } from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { HttpSetup, SavedObjectReference } from 'kibana/public';
-import { InitializationOptions, StateSetter } from '../types';
+import { InitializationOptions, StateSetter, VisualizeEditorContext } from '../types';
 import {
   IndexPattern,
   IndexPatternRef,
@@ -25,10 +25,7 @@ import {
   IndexPattern as IndexPatternInstance,
   indexPatterns as indexPatternsUtils,
 } from '../../../../../src/plugins/data/public';
-import {
-  VisualizeFieldContext,
-  VisualizeEditorContext,
-} from '../../../../../src/plugins/ui_actions/public';
+import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';

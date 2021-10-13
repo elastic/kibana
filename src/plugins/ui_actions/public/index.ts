@@ -40,7 +40,6 @@ export {
 } from './triggers';
 export {
   VisualizeFieldContext,
-  VisualizeEditorContext,
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,

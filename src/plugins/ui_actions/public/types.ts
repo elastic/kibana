@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PaletteOutput } from '../../charts/public';
-import type { Query } from '../../data/public';
 import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
 
@@ -18,33 +16,6 @@ export interface VisualizeFieldContext {
   fieldName: string;
   indexPatternId: string;
   contextualFields?: string[];
-}
-
-interface SplitFilters {
-  color?: string;
-  filter?: Query;
-  id?: string;
-  label?: string;
-}
-
-interface Metric {
-  agg: string;
-  fieldName: string;
-  params?: Record<string, unknown>;
-  isFullReference: boolean;
-  color?: string;
-}
-
-export interface VisualizeEditorContext {
-  indexPatternId: string;
-  timeFieldName?: string;
-  chartType?: string;
-  termsParams?: Record<string, unknown>;
-  splitField?: string;
-  splitMode?: string;
-  splitFilters?: SplitFilters[];
-  palette?: PaletteOutput;
-  metrics: Metric[];
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';

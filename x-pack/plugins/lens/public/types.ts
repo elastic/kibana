@@ -31,7 +31,6 @@ import type {
   UiActionsStart,
   RowClickContext,
   VisualizeFieldContext,
-  VisualizeEditorContext,
 } from '../../../../src/plugins/ui_actions/public';
 
 import {
@@ -157,6 +156,33 @@ export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
 
 export interface InitializationOptions {
   isFullEditor?: boolean;
+}
+
+interface SplitFilters {
+  color?: string;
+  filter?: Query;
+  id?: string;
+  label?: string;
+}
+
+interface Metric {
+  agg: string;
+  fieldName: string;
+  params?: Record<string, unknown>;
+  isFullReference: boolean;
+  color?: string;
+}
+
+export interface VisualizeEditorContext {
+  indexPatternId: string;
+  timeFieldName?: string;
+  chartType?: string;
+  termsParams?: Record<string, unknown>;
+  splitField?: string;
+  splitMode?: string;
+  splitFilters?: SplitFilters[];
+  palette?: PaletteOutput;
+  metrics: Metric[];
 }
 
 /**
