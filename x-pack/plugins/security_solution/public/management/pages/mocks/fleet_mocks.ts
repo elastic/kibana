@@ -52,9 +52,10 @@ export const fleetGetEndpointPackagePolicyHttpMock =
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
       method: 'get',
       handler: () => {
-        return {
-          items: new EndpointDocGenerator('seed').generatePolicyPackagePolicy(),
+        const response: GetPolicyResponse = {
+          item: new EndpointDocGenerator('seed').generatePolicyPackagePolicy(),
         };
+        return response;
       },
     },
   ]);
