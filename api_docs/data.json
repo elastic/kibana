@@ -4170,6 +4170,18 @@
           },
           {
             "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts"
           },
           {
@@ -4187,18 +4199,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/utils/observability_index_patterns.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
           },
           {
             "plugin": "observability",
@@ -12313,10 +12313,6 @@
           },
           {
             "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/fields/utils.ts"
-          },
-          {
-            "plugin": "dataViews",
             "path": "src/plugins/data_views/common/fields/data_view_field.ts"
           },
           {
@@ -13311,14 +13307,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/types.ts"
           },
           {
@@ -13528,14 +13516,6 @@
           {
             "plugin": "timelines",
             "path": "x-pack/plugins/timelines/public/mock/index_pattern.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/common/search_strategy/index_fields/index.d.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/common/search_strategy/index_fields/index.d.ts"
           },
           {
             "plugin": "infra",
@@ -13800,6 +13780,14 @@
           {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/public/pages/metrics/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
@@ -15902,7 +15890,7 @@
             "section": "def-common.FilterMeta",
             "text": "FilterMeta"
           },
-          "; exists?: { field: string; } | undefined; }"
+          "; query: { exists?: { field: string; } | undefined; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -18097,6 +18085,11 @@
         ],
         "label": "IFieldSubType",
         "description": [],
+        "signature": [
+          "IFieldSubTypeMultiOptional",
+          " | ",
+          "IFieldSubTypeNestedOptional"
+        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
@@ -19798,9 +19791,9 @@
           },
           " & { meta: ",
           "MatchAllFilterMeta",
-          "; match_all: ",
+          "; query: { match_all: ",
           "QueryDslMatchAllQuery",
-          "; }"
+          "; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -19929,7 +19922,7 @@
             "section": "def-common.RangeFilterMeta",
             "text": "RangeFilterMeta"
           },
-          "; range: { [key: string]: ",
+          "; query: { range: { [key: string]: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -19937,7 +19930,7 @@
             "section": "def-common.RangeFilterParams",
             "text": "RangeFilterParams"
           },
-          "; }; }"
+          "; }; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -20319,22 +20312,6 @@
           },
           {
             "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
           },
           {
@@ -20348,6 +20325,22 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
           },
           {
             "plugin": "maps",
@@ -20452,10 +20445,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/query_bar/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
           },
           {
             "plugin": "securitySolution",
@@ -21517,66 +21506,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.esFilters.isMissingFilter",
-            "type": "Function",
-            "tags": [],
-            "label": "isMissingFilter",
-            "description": [],
-            "signature": [
-              "(filter: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              ") => filter is ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.MissingFilter",
-                "text": "MissingFilter"
-              }
-            ],
-            "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.esFilters.isMissingFilter.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "filter",
-                "description": [],
-                "signature": [
-                  "{ $state?: { store: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.FilterStateStore",
-                    "text": "FilterStateStore"
-                  },
-                  "; } | undefined; meta: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.FilterMeta",
-                    "text": "FilterMeta"
-                  },
-                  "; query?: Record<string, any> | undefined; }"
-                ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/missing_filter.d.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-public.esFilters.isQueryStringFilter",
             "type": "Function",
             "tags": [],
@@ -22563,7 +22492,7 @@
                     "section": "def-common.RangeFilterMeta",
                     "text": "RangeFilterMeta"
                   },
-                  "; range: { [key: string]: ",
+                  "; query: { range: { [key: string]: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -22571,7 +22500,7 @@
                     "section": "def-common.RangeFilterParams",
                     "text": "RangeFilterParams"
                   },
-                  "; }; }"
+                  "; }; }; }"
                 ],
                 "path": "src/plugins/data/public/query/timefilter/lib/change_time_filter.ts",
                 "deprecated": false
@@ -22630,7 +22559,7 @@
                     "section": "def-common.RangeFilterMeta",
                     "text": "RangeFilterMeta"
                   },
-                  "; range: { [key: string]: ",
+                  "; query: { range: { [key: string]: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -22638,7 +22567,7 @@
                     "section": "def-common.RangeFilterParams",
                     "text": "RangeFilterParams"
                   },
-                  "; }; }"
+                  "; }; }; }"
                 ],
                 "path": "src/plugins/data/public/query/timefilter/lib/change_time_filter.ts",
                 "deprecated": false
@@ -24148,15 +24077,15 @@
             "label": "isNestedField",
             "description": [],
             "signature": [
-              "(field: ",
+              "(field: Pick<",
               {
-                "pluginId": "dataViews",
+                "pluginId": "@kbn/es-query",
                 "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IFieldType",
-                "text": "IFieldType"
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
               },
-              ") => boolean"
+              ", \"subType\">) => boolean"
             ],
             "path": "src/plugins/data/public/index.ts",
             "deprecated": false,
@@ -24170,13 +24099,150 @@
                 "label": "field",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.IFieldType",
-                    "text": "IFieldType"
-                  }
+                  "{ subType?: ",
+                  "IFieldSubTypeMultiOptional",
+                  " | ",
+                  "IFieldSubTypeNestedOptional",
+                  " | undefined; }"
+                ],
+                "path": "src/plugins/data_views/common/fields/utils.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.indexPatterns.isMultiField",
+            "type": "Function",
+            "tags": [],
+            "label": "isMultiField",
+            "description": [],
+            "signature": [
+              "(field: Pick<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
+              ", \"subType\">) => boolean"
+            ],
+            "path": "src/plugins/data/public/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.indexPatterns.isMultiField.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "{ subType?: ",
+                  "IFieldSubTypeMultiOptional",
+                  " | ",
+                  "IFieldSubTypeNestedOptional",
+                  " | undefined; }"
+                ],
+                "path": "src/plugins/data_views/common/fields/utils.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.indexPatterns.getFieldSubtypeMulti",
+            "type": "Function",
+            "tags": [],
+            "label": "getFieldSubtypeMulti",
+            "description": [],
+            "signature": [
+              "(field: Pick<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
+              ", \"subType\">) => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubTypeMulti",
+                "text": "IFieldSubTypeMulti"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/public/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.indexPatterns.getFieldSubtypeMulti.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "{ subType?: ",
+                  "IFieldSubTypeMultiOptional",
+                  " | ",
+                  "IFieldSubTypeNestedOptional",
+                  " | undefined; }"
+                ],
+                "path": "src/plugins/data_views/common/fields/utils.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.indexPatterns.getFieldSubtypeNested",
+            "type": "Function",
+            "tags": [],
+            "label": "getFieldSubtypeNested",
+            "description": [],
+            "signature": [
+              "(field: Pick<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
+              ", \"subType\">) => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubTypeNested",
+                "text": "IFieldSubTypeNested"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/public/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.indexPatterns.getFieldSubtypeNested.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "{ subType?: ",
+                  "IFieldSubTypeMultiOptional",
+                  " | ",
+                  "IFieldSubTypeNestedOptional",
+                  " | undefined; }"
                 ],
                 "path": "src/plugins/data_views/common/fields/utils.ts",
                 "deprecated": false
@@ -26317,10 +26383,6 @@
             {
               "plugin": "indexPatternManagement",
               "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx"
-            },
-            {
-              "plugin": "visTypeMetric",
-              "path": "src/plugins/vis_types/metric/public/plugin.ts"
             },
             {
               "plugin": "visTypePie",
@@ -29774,6 +29836,18 @@
           },
           {
             "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts"
           },
           {
@@ -29791,18 +29865,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/utils/observability_index_patterns.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
           },
           {
             "plugin": "observability",
@@ -33987,10 +34049,6 @@
           },
           {
             "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/fields/utils.ts"
-          },
-          {
-            "plugin": "dataViews",
             "path": "src/plugins/data_views/common/fields/data_view_field.ts"
           },
           {
@@ -36961,6 +37019,11 @@
         ],
         "label": "IFieldSubType",
         "description": [],
+        "signature": [
+          "IFieldSubTypeMultiOptional",
+          " | ",
+          "IFieldSubTypeNestedOptional"
+        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
@@ -41065,18 +41128,14 @@
           {
             "parentPluginId": "data",
             "id": "def-common.DataViewField.subType",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "subType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -41129,6 +41188,82 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewField.isSubtypeNested",
+            "type": "Function",
+            "tags": [],
+            "label": "isSubtypeNested",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.isSubtypeMulti",
+            "type": "Function",
+            "tags": [],
+            "label": "isSubtypeMulti",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.getSubtypeNested",
+            "type": "Function",
+            "tags": [],
+            "label": "getSubtypeNested",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubTypeNested",
+                "text": "IFieldSubTypeNested"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.getSubtypeMulti",
+            "type": "Function",
+            "tags": [],
+            "label": "getSubtypeMulti",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubTypeMulti",
+                "text": "IFieldSubTypeMulti"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewField.deleteCount",
             "type": "Function",
             "tags": [],
@@ -41151,13 +41286,9 @@
             "description": [],
             "signature": [
               "() => { count: number; script: string | undefined; lang: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
               " | undefined; customLabel: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -43916,6 +44047,18 @@
           },
           {
             "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts"
           },
           {
@@ -43933,18 +44076,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/utils/observability_index_patterns.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
           },
           {
             "plugin": "observability",
@@ -49137,6 +49268,106 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.getFieldSubtypeMulti",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldSubtypeMulti",
+        "description": [],
+        "signature": [
+          "(field: Pick<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          },
+          ", \"subType\">) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubTypeMulti",
+            "text": "IFieldSubTypeMulti"
+          },
+          " | undefined"
+        ],
+        "path": "src/plugins/data_views/common/fields/utils.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getFieldSubtypeMulti.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "{ subType?: ",
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
+              " | undefined; }"
+            ],
+            "path": "src/plugins/data_views/common/fields/utils.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.getFieldSubtypeNested",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldSubtypeNested",
+        "description": [],
+        "signature": [
+          "(field: Pick<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          },
+          ", \"subType\">) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubTypeNested",
+            "text": "IFieldSubTypeNested"
+          },
+          " | undefined"
+        ],
+        "path": "src/plugins/data_views/common/fields/utils.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getFieldSubtypeNested.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "{ subType?: ",
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
+              " | undefined; }"
+            ],
+            "path": "src/plugins/data_views/common/fields/utils.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.getFilterableKbnTypeNames",
         "type": "Function",
         "tags": [
@@ -49764,64 +49995,41 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.isMissingFilter",
+        "id": "def-common.isMultiField",
         "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "isMissingFilter",
+        "tags": [],
+        "label": "isMultiField",
         "description": [],
         "signature": [
-          "(filter: ",
+          "(field: Pick<",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
             "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
           },
-          ") => filter is ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.MissingFilter",
-            "text": "MissingFilter"
-          }
+          ", \"subType\">) => boolean"
         ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "removeBy": "8.1",
-        "references": [],
+        "path": "src/plugins/data_views/common/fields/utils.ts",
+        "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.isMissingFilter.$1",
+            "id": "def-common.isMultiField.$1",
             "type": "Object",
             "tags": [],
-            "label": "filter",
+            "label": "field",
             "description": [],
             "signature": [
-              "{ $state?: { store: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.FilterStateStore",
-                "text": "FilterStateStore"
-              },
-              "; } | undefined; meta: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.FilterMeta",
-                "text": "FilterMeta"
-              },
-              "; query?: Record<string, any> | undefined; }"
+              "{ subType?: ",
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
+              " | undefined; }"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/missing_filter.d.ts",
+            "path": "src/plugins/data_views/common/fields/utils.ts",
             "deprecated": false
           }
         ],
@@ -49835,18 +50043,19 @@
         "label": "isNestedField",
         "description": [],
         "signature": [
-          "(field: ",
+          "(field: Pick<",
           {
-            "pluginId": "dataViews",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.IFieldType",
-            "text": "IFieldType"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
           },
-          ") => boolean"
+          ", \"subType\">) => boolean"
         ],
         "path": "src/plugins/data_views/common/fields/utils.ts",
         "deprecated": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "data",
@@ -49856,20 +50065,16 @@
             "label": "field",
             "description": [],
             "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IFieldType",
-                "text": "IFieldType"
-              }
+              "{ subType?: ",
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
+              " | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/utils.ts",
-            "deprecated": false,
-            "isRequired": true
+            "deprecated": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -51582,18 +51787,14 @@
           {
             "parentPluginId": "data",
             "id": "def-common.FieldSpecExportFmt.subType",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "subType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -51997,10 +52198,6 @@
         "deprecated": true,
         "removeBy": "8.1",
         "references": [
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/fields/utils.ts"
-          },
           {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/common/fields/utils.ts"
@@ -53005,14 +53202,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/types.ts"
           },
           {
@@ -53222,14 +53411,6 @@
           {
             "plugin": "timelines",
             "path": "x-pack/plugins/timelines/public/mock/index_pattern.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/common/search_strategy/index_fields/index.d.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/common/search_strategy/index_fields/index.d.ts"
           },
           {
             "plugin": "infra",
@@ -53494,6 +53675,14 @@
           {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/public/pages/metrics/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
@@ -55604,7 +55793,7 @@
             "section": "def-common.FilterMeta",
             "text": "FilterMeta"
           },
-          "; exists?: { field: string; } | undefined; }"
+          "; query: { exists?: { field: string; } | undefined; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -57641,6 +57830,11 @@
         ],
         "label": "IFieldSubType",
         "description": [],
+        "signature": [
+          "IFieldSubTypeMultiOptional",
+          " | ",
+          "IFieldSubTypeNestedOptional"
+        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
@@ -57713,19 +57907,19 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualization_references/controls_references.ts"
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/controls_references.ts"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualization_references/controls_references.ts"
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/controls_references.ts"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualization_references/timeseries_references.ts"
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualization_references/timeseries_references.ts"
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
           },
           {
             "plugin": "dashboard",
@@ -59166,9 +59360,9 @@
           },
           " & { meta: ",
           "MatchAllFilterMeta",
-          "; match_all: ",
+          "; query: { match_all: ",
           "QueryDslMatchAllQuery",
-          "; }"
+          "; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -59188,39 +59382,6 @@
         ],
         "path": "src/plugins/data_views/common/constants.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.MissingFilter",
-        "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "MissingFilter",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          " & { meta: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.FilterMeta",
-            "text": "FilterMeta"
-          },
-          "; missing: { field: string; }; }"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "removeBy": "8.1",
-        "references": [],
         "initialIsOpen": false
       },
       {
@@ -59435,7 +59596,7 @@
             "section": "def-common.RangeFilterMeta",
             "text": "RangeFilterMeta"
           },
-          "; range: { [key: string]: ",
+          "; query: { range: { [key: string]: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -59443,7 +59604,7 @@
             "section": "def-common.RangeFilterParams",
             "text": "RangeFilterParams"
           },
-          "; }; }"
+          "; }; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
