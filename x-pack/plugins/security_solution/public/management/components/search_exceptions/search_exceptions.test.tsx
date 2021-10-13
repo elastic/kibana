@@ -16,7 +16,8 @@ interface EuiFieldSearchPropsFake {
   onSearch(value: string): void;
 }
 
-describe('Search exceptions', () => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+describe.skip('Search exceptions', () => {
   beforeEach(() => {
     onSearchMock = jest.fn();
   });
@@ -39,8 +40,7 @@ describe('Search exceptions', () => {
     expect(defaultValue).toBe(expectedDefaultValue);
   });
 
-  // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-  it.skip('should dispatch search action when submit search field', () => {
+  it('should dispatch search action when submit search field', () => {
     const expectedDefaultValue = 'this is a default value';
     const element = mount(getElement());
     expect(onSearchMock).toHaveBeenCalledTimes(0);
@@ -55,8 +55,7 @@ describe('Search exceptions', () => {
     expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '', '');
   });
 
-  // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-  it.skip('should dispatch search action when click on button', () => {
+  it('should dispatch search action when click on button', () => {
     const expectedDefaultValue = 'this is a default value';
     const element = mount(getElement(expectedDefaultValue));
     expect(onSearchMock).toHaveBeenCalledTimes(0);
