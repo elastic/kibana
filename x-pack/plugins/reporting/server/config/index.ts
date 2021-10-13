@@ -74,8 +74,8 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepTwo', {
                 defaultMessage:
-                  `Create one or more roles that grant the Kibana application ` +
-                  `privilege for reporting from **Management > Security > Roles**.`,
+                  `Create one or more roles that grant the Kibana application` +
+                  ` privilege for reporting from **Management > Security > Roles**.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepThree', {
                 defaultMessage:
