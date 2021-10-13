@@ -215,29 +215,31 @@ export function insertNewColumn({
       throw new Error(`Can't create operation ${op} with the provided field ${field.name}`);
     }
     if (operationDefinition.input === 'managedReference') {
-      const newColumn = operationDefinition.buildColumn(
-        { ...baseOptions, layer },
-        columnParams
-      ) as FormulaIndexPatternColumn;
       // TODO: need to create on the fly the new columns for Formula,
       // like we do for fullReferences to show a seamless transition
-      let newLayer;
-      const tempLayer = { ...layer };
-      try {
-        newLayer = columnParams?.formula
-          ? regenerateLayerFromAst(
-              columnParams?.formula as string,
-              tempLayer,
-              columnId,
-              newColumn,
-              indexPattern,
-              operationDefinitionMap
-            ).newLayer
-          : tempLayer;
-      } catch (e) {
-        newLayer = tempLayer;
+      if (operationDefinition.type === 'formula') {
+        const newColumn = operationDefinition.buildColumn(
+          { ...baseOptions, layer },
+          columnParams
+        ) as FormulaIndexPatternColumn;
+        let newLayer;
+        const tempLayer = { ...layer };
+        try {
+          newLayer = columnParams?.formula
+            ? regenerateLayerFromAst(
+                columnParams?.formula as string,
+                tempLayer,
+                columnId,
+                newColumn,
+                indexPattern,
+                operationDefinitionMap
+              ).newLayer
+            : tempLayer;
+        } catch (e) {
+          newLayer = tempLayer;
+        }
+        return newLayer;
       }
-      return newLayer;
     }
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
