@@ -19,7 +19,7 @@ import { SavedObject } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { IRuleStatusSOAttributes } from '../../rules/types';
 // eslint-disable-next-line no-restricted-imports
-import { ruleStatusSavedObjectType } from '../../rules/legacy_rule_status/legacy_rule_status_saved_object_mappings';
+import { legacyRuleStatusSavedObjectType } from '../../rules/legacy_rule_status/legacy_rule_status_saved_object_mappings';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { RuleParams } from '../../schemas/rule_schemas';
@@ -726,7 +726,7 @@ export const sampleRuleGuid = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 export const sampleIdGuid = 'e1e08ddc-5e37-49ff-a258-5393aa44435a';
 
 export const exampleRuleStatus: () => SavedObject<IRuleStatusSOAttributes> = () => ({
-  type: ruleStatusSavedObjectType,
+  type: legacyRuleStatusSavedObjectType,
   id: '042e6d90-7069-11ea-af8b-0f8ae4fa817e',
   attributes: {
     alertId: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',

@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/server';
+import { SavedObject, SavedObjectReference } from 'src/core/server';
 import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetRuleReference } from '../../rules/legacy_rule_status/legacy_utils';
+
 import { IRuleStatusSOAttributes } from '../../rules/types';
 import {
   RuleStatusSavedObjectsClient,
@@ -79,20 +82,24 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
   private createNewRuleStatus = async (
     ruleId: string
   ): Promise<SavedObject<IRuleStatusSOAttributes>> => {
+    const references: SavedObjectReference[] = [legacyGetRuleReference(ruleId)];
     const now = new Date().toISOString();
-    return this.ruleStatusClient.create({
-      alertId: ruleId,
-      statusDate: now,
-      status: RuleExecutionStatus['going to run'],
-      lastFailureAt: null,
-      lastSuccessAt: null,
-      lastFailureMessage: null,
-      lastSuccessMessage: null,
-      gap: null,
-      bulkCreateTimeDurations: [],
-      searchAfterTimeDurations: [],
-      lastLookBackDate: null,
-    });
+    return this.ruleStatusClient.create(
+      {
+        alertId: ruleId,
+        statusDate: now,
+        status: RuleExecutionStatus['going to run'],
+        lastFailureAt: null,
+        lastSuccessAt: null,
+        lastFailureMessage: null,
+        lastSuccessMessage: null,
+        gap: null,
+        bulkCreateTimeDurations: [],
+        searchAfterTimeDurations: [],
+        lastLookBackDate: null,
+      },
+      { references }
+    );
   };
 
   private getOrCreateRuleStatuses = async (
@@ -138,7 +145,10 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
 
         // We always update the newest status, so to 'persist' a failure we push a copy to the head of the list
         await this.ruleStatusClient.update(currentStatus.id, failureAttributes);
-        const lastStatus = await this.ruleStatusClient.create(failureAttributes);
+        const references: SavedObjectReference[] = [
+          legacyGetRuleReference(failureAttributes.alertId),
+        ];
+        const lastStatus = await this.ruleStatusClient.create(failureAttributes, { references });
 
         // drop oldest failures
         const oldStatuses = [lastStatus, ...ruleStatuses].slice(MAX_RULE_STATUSES);

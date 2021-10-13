@@ -13,9 +13,10 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
   SavedObjectsFindOptionsReference,
-} from '../../../../../../../../src/core/server';
+  SavedObjectsCreateOptions,
+} from 'kibana/server';
 // eslint-disable-next-line no-restricted-imports
-import { ruleStatusSavedObjectType } from '../../rules/legacy_rule_status/legacy_rule_status_saved_object_mappings';
+import { legacyRuleStatusSavedObjectType } from '../../rules/legacy_rule_status/legacy_rule_status_saved_object_mappings';
 import { IRuleStatusSOAttributes } from '../../rules/types';
 
 export interface RuleStatusSavedObjectsClient {
@@ -23,7 +24,10 @@ export interface RuleStatusSavedObjectsClient {
     options?: Omit<SavedObjectsFindOptions, 'type'>
   ) => Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>>;
   findBulk: (ids: string[], statusesPerId: number) => Promise<FindBulkResponse>;
-  create: (attributes: IRuleStatusSOAttributes) => Promise<SavedObject<IRuleStatusSOAttributes>>;
+  create: (
+    attributes: IRuleStatusSOAttributes,
+    options?: SavedObjectsCreateOptions
+  ) => Promise<SavedObject<IRuleStatusSOAttributes>>;
   update: (
     id: string,
     attributes: Partial<IRuleStatusSOAttributes>
@@ -44,7 +48,7 @@ export const ruleStatusSavedObjectsClientFactory = (
   find: async (options) => {
     const result = await savedObjectsClient.find<IRuleStatusSOAttributes>({
       ...options,
-      type: ruleStatusSavedObjectType,
+      type: legacyRuleStatusSavedObjectType,
     });
     return result.saved_objects;
   },
@@ -52,7 +56,6 @@ export const ruleStatusSavedObjectsClientFactory = (
     if (ids.length === 0) {
       return {};
     }
-    const filter = `${ruleStatusSavedObjectType}.references.type: "alert"`;
     const references = ids.map<SavedObjectsFindOptionsReference>((alertId) => ({
       id: alertId,
       type: 'alert',
@@ -61,7 +64,7 @@ export const ruleStatusSavedObjectsClientFactory = (
     const aggs = {
       alertIds: {
         terms: {
-          field: `${ruleStatusSavedObjectType}.references.id`,
+          field: `${legacyRuleStatusSavedObjectType}.references.id`,
           size: ids.length,
         },
         aggs: {
@@ -69,7 +72,7 @@ export const ruleStatusSavedObjectsClientFactory = (
             top_hits: {
               sort: [
                 {
-                  [`${ruleStatusSavedObjectType}.statusDate`]: {
+                  [`${legacyRuleStatusSavedObjectType}.statusDate`]: {
                     order,
                   },
                 },
@@ -81,10 +84,9 @@ export const ruleStatusSavedObjectsClientFactory = (
       },
     };
     const results = await savedObjectsClient.find({
-      filter,
       hasReference: references,
       aggs,
-      type: ruleStatusSavedObjectType,
+      type: legacyRuleStatusSavedObjectType,
       perPage: 0,
     });
     const buckets = get(results, 'aggregations.alertIds.buckets');
@@ -97,7 +99,10 @@ export const ruleStatusSavedObjectsClientFactory = (
       return acc;
     }, {});
   },
-  create: (attributes) => savedObjectsClient.create(ruleStatusSavedObjectType, attributes),
-  update: (id, attributes) => savedObjectsClient.update(ruleStatusSavedObjectType, id, attributes),
-  delete: (id) => savedObjectsClient.delete(ruleStatusSavedObjectType, id),
+  create: (attributes, options) => {
+    return savedObjectsClient.create(legacyRuleStatusSavedObjectType, attributes, options);
+  },
+  update: (id, attributes) =>
+    savedObjectsClient.update(legacyRuleStatusSavedObjectType, id, attributes),
+  delete: (id) => savedObjectsClient.delete(legacyRuleStatusSavedObjectType, id),
 });
