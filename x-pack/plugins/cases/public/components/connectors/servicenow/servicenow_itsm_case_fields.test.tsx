@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, render, screen } from '@testing-library/react';
 import { EuiSelect } from '@elastic/eui';
 import { mount } from 'enzyme';
 
@@ -125,6 +125,17 @@ describe('ServiceNowITSM Fields', () => {
         { value: '4', text: '4 - Low' },
       ])
     );
+  });
+
+  test('it shows the deprecated callout when the connector is legacy', async () => {
+    const legacyConnector = { ...connector, config: { isLegacy: true } };
+    render(<Fields fields={fields} onChange={onChange} connector={legacyConnector} />);
+    expect(screen.getByTestId('legacy-connector-warning-callout')).toBeInTheDocument();
+  });
+
+  test('it does not show the deprecated callout when the connector is not legacy', async () => {
+    render(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    expect(screen.queryByTestId('legacy-connector-warning-callout')).not.toBeInTheDocument();
   });
 
   describe('onChange calls', () => {
