@@ -12,6 +12,8 @@ import {
   EuiContextMenuPanelProps,
   EuiPopover,
   EuiPopoverProps,
+  EuiPopoverTitle,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import uuid from 'uuid';
 import {
@@ -30,6 +32,12 @@ export interface ContextMenuWithRouterSupportProps
    * overwritten to `true`. Setting this prop's value to `undefined` will suppress the default behaviour.
    */
   maxWidth?: CSSProperties['maxWidth'];
+  /**
+   * It makes the panel scrollable
+   */
+  scroll?: boolean;
+  title?: string;
+  loading?: boolean;
 }
 
 /**
@@ -38,7 +46,17 @@ export interface ContextMenuWithRouterSupportProps
  * Menu also supports automatically closing the popup when an item is clicked.
  */
 export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportProps>(
-  ({ items, button, panelPaddingSize, anchorPosition, maxWidth = '32ch', ...commonProps }) => {
+  ({
+    items,
+    button,
+    panelPaddingSize,
+    anchorPosition,
+    maxWidth = '32ch',
+    title,
+    scroll = false,
+    loading = true,
+    ...commonProps
+  }) => {
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -51,6 +69,9 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
 
     const menuItems: EuiContextMenuPanelProps['items'] = useMemo(() => {
       return items.map((itemProps, index) => {
+        if (loading) {
+          return <EuiLoadingContent lines={1} />;
+        }
         return (
           <ContextMenuItemNavByRouter
             {...itemProps}
@@ -66,7 +87,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           />
         );
       });
-    }, [getTestId, handleCloseMenu, items, maxWidth]);
+    }, [getTestId, handleCloseMenu, items, maxWidth, loading]);
 
     type AdditionalPanelProps = Partial<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>>;
     const additionalContextMenuPanelProps = useMemo<AdditionalPanelProps>(() => {
@@ -78,8 +99,13 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         newAdditionalProps.style!.maxWidth = maxWidth;
       }
 
+      if (scroll) {
+        newAdditionalProps.style!.overflowY = 'scroll';
+        newAdditionalProps.style!.maxHeight = '235px';
+      }
+
       return newAdditionalProps;
-    }, [maxWidth]);
+    }, [maxWidth, scroll]);
 
     return (
       <EuiPopover
@@ -100,6 +126,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         isOpen={isOpen}
         closePopover={handleCloseMenu}
       >
+        {title ? <EuiPopoverTitle>{title}</EuiPopoverTitle> : null}
         <EuiContextMenuPanel {...additionalContextMenuPanelProps} items={menuItems} />
       </EuiPopover>
     );
