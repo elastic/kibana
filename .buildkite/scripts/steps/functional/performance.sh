@@ -4,9 +4,9 @@ set -uo pipefail
 
 if [[ $ITERATION_COUNT_ENV -gt 0 ]]
 then
-  ITERATION_COUNT=ITERATION_COUNT_ENV
+  ITERATION_COUNT=$ITERATION_COUNT_ENV
 else
-  ITERATION_COUNT=$(buildkite-agent meta-data get performance-test-iteration-count)
+  ITERATION_COUNT="$(buildkite-agent meta-data get performance-test-iteration-count)"
 fi
 
 tput setab 2; tput setaf 0; echo "Performance test will be run at ${BUILDKITE_BRANCH} ${ITERATION_COUNT} times"
