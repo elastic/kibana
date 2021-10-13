@@ -46,7 +46,6 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipelines`;
 
-    const options: any = getPaginationRouteOptions();
     const response = await services.http?.fetch(url, {
       method: 'POST',
       body: JSON.stringify({
@@ -55,8 +54,7 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
           min: bounds.min.toISOString(),
           max: bounds.max.toISOString(),
         },
-        pagination: options.pagination,
-        queryText: options.queryText,
+        ...getPaginationRouteOptions(),
       }),
     });
 
