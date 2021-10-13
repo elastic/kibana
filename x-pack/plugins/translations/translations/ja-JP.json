@@ -1146,8 +1146,6 @@
     "core.euiLink.external.ariaLabel": "外部リンク",
     "core.euiLink.newTarget.screenReaderOnlyText": "（新しいタブまたはウィンドウで開く）",
     "core.euiMarkdownEditorFooter.closeButton": "閉じる",
-    "core.euiMarkdownEditorFooter.descriptionPrefix": "このエディターは使用します",
-    "core.euiMarkdownEditorFooter.descriptionSuffix": "これらの追加の構文プラグインを利用して、リッチコンテンツをテキストに追加することもできます。",
     "core.euiMarkdownEditorFooter.errorsTitle": "エラー",
     "core.euiMarkdownEditorFooter.openUploadModal": "ファイルのアップロードモーダルを開く",
     "core.euiMarkdownEditorFooter.showMarkdownHelp": "マークダウンヘルプを表示",

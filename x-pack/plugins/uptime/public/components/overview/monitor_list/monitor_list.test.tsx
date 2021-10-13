@@ -23,12 +23,6 @@ import { mockMoment } from '../../../lib/helper/test_helpers';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { NO_DATA_MESSAGE } from './translations';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
-
 const testFooPings: Ping[] = [
   makePing({
     docId: 'foo1',

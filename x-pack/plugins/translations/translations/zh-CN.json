@@ -1162,8 +1162,6 @@
     "core.euiLink.external.ariaLabel": "外部链接",
     "core.euiLink.newTarget.screenReaderOnlyText": "（在新选项卡或窗口中打开）",
     "core.euiMarkdownEditorFooter.closeButton": "关闭",
-    "core.euiMarkdownEditorFooter.descriptionPrefix": "此编辑器使用",
-    "core.euiMarkdownEditorFooter.descriptionSuffix": "还可以利用这些附加的语法插件向文本添加富文本内容。",
     "core.euiMarkdownEditorFooter.errorsTitle": "错误",
     "core.euiMarkdownEditorFooter.openUploadModal": "打开上传文件模式窗口",
     "core.euiMarkdownEditorFooter.showMarkdownHelp": "显示 Markdown 帮助",
