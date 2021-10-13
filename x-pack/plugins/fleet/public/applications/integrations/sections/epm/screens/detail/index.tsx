@@ -252,7 +252,6 @@ export function Detail() {
         CreatePackagePolicyRouteState['onCancelNavigateTo'];
       let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
       if (agentPolicyIdFromContext) {
-        // fleet policy details
         redirectToPath = [
           PLUGIN_ID,
           {
@@ -267,7 +266,6 @@ export function Detail() {
           openEnrollmentFlyout: true,
         };
       } else {
-        // integrations policies
         redirectToPath = [
           INTEGRATIONS_PLUGIN_ID,
           {
