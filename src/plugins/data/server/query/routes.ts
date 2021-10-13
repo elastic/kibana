@@ -25,7 +25,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
           title: schema.string(),
           description: schema.string(),
           query: schema.object({
-            query: schema.string(),
+            query: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
             language: schema.string(),
           }),
           filters: schema.maybe(schema.arrayOf(schema.any())),

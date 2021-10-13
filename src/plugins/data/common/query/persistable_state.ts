@@ -9,8 +9,8 @@
 import uuid from 'uuid';
 import { Filter } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import { SavedObjectReference } from '../../../../core/types';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../constants';
 
 export const extract = (filters: Filter[]) => {
   const references: SavedObjectReference[] = [];

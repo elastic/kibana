@@ -12,7 +12,6 @@ import { SavedQueryAttributes } from '../../../common';
 
 export const createSavedQueryService = (http: HttpStart) => {
   const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
-    // TODO: Handle `attributes.query.query`
     // TODO: Handle `overwrite`
     const savedQuery = await http.post('/api/saved_query/_create', {
       body: JSON.stringify(attributes),
@@ -50,7 +49,7 @@ export const createSavedQueryService = (http: HttpStart) => {
   };
 
   const getSavedQueryCount = async (): Promise<number> => {
-    return http.get('api/saved_query/_count');
+    return http.get('/api/saved_query/_count');
   };
 
   return {
