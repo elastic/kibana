@@ -34,6 +34,7 @@ import { DefaultLayout } from '../../../../layouts';
 import type { PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
+import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { PackageListItem } from '../../../../types';
@@ -57,7 +58,10 @@ function getParams(params: CategoryParams, search: string) {
   const selectedCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam };
+  return { selectedCategory, searchParam } as {
+    selectedCategory: IntegrationCategory & '';
+    searchParam: string;
+  };
 }
 
 function categoryExists(category: string, categories: CategoryFacet[]) {
@@ -224,8 +228,9 @@ const InstalledPackages: React.FC = memo(() => {
     />
   );
 
-  const cards = (
-    selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages
+  const cards = (selectedCategory === 'updates_available'
+    ? updatablePackages
+    : allInstalledPackages
   ).map((item) => {
     return mapToCard(getAbsolutePath, getHref, item);
   });
@@ -321,15 +326,18 @@ const AvailablePackages: React.FC = memo(() => {
 
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
 
-  const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
-    useMergeEprPackagesWithReplacements(
-      eprPackages || [],
-      replacementCustomIntegrations || [],
-      selectedCategory as IntegrationCategory
-    );
+  const mergedEprPackages: Array<
+    PackageListItem | CustomIntegration
+  > = useMergeEprPackagesWithReplacements(
+    eprPackages || [],
+    replacementCustomIntegrations || [],
+    selectedCategory as IntegrationCategory
+  );
 
-  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
-    useGetAppendCustomIntegrations();
+  const {
+    loading: isLoadingAppendCustomIntegrations,
+    value: appendCustomIntegrations,
+  } = useGetAppendCustomIntegrations();
   const filteredAddableIntegrations = appendCustomIntegrations
     ? appendCustomIntegrations.filter((integration: CustomIntegration) => {
         if (!selectedCategory) {

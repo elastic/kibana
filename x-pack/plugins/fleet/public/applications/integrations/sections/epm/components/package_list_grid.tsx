@@ -31,7 +31,7 @@ import { PackageCard } from './package_card';
 
 export interface ListProps {
   isLoading?: boolean;
-  controls?: ReactNode;
+  controls?: ReactNode | ReactNode[];
   title: string;
   list: IntegrationCardItem[];
   initialSearch?: string;
