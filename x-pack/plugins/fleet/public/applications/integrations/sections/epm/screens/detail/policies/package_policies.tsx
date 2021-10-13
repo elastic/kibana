@@ -81,6 +81,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     () => queryParams.get('addAgentToPolicyId'),
     [queryParams]
   );
+  const showAddAgentHelpForPolicyId = useMemo(
+    () => queryParams.get('showAddAgentHelpForPolicyId'),
+    [queryParams]
+  );
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string | null>(
     agentPolicyIdFromParams
   );
@@ -294,6 +298,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
               agentPolicyId={agentPolicy.id}
               agentCount={agentPolicy.agents}
               onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
+              hasHelpPopover={showAddAgentHelpForPolicyId === agentPolicy.id}
             />
           );
         },
@@ -321,7 +326,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
     ],
-    [getHref, viewDataStep]
+    [getHref, showAddAgentHelpForPolicyId, viewDataStep]
   );
 
   const noItemsMessage = useMemo(() => {
