@@ -42,9 +42,6 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   // Kibana added
   upload_file: 'Upload a file',
   language_client: 'Language client',
-
-  // Internal
-  updates_available: 'Updates available',
 };
 
 /**

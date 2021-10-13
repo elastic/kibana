@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Filter, IndexPattern, SearchSource } from 'src/plugins/data/public';
+import { Filter, IndexPattern, ISearchSource } from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { convertIsoToMillis, extractNanos } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
@@ -53,7 +53,7 @@ export async function fetchSurroundingDocs(
   }
   const { data } = getServices();
   const timeField = indexPattern.timeFieldName!;
-  const searchSource = data.search.searchSource.createEmpty() as SearchSource;
+  const searchSource = data.search.searchSource.createEmpty();
   updateSearchSource(searchSource, indexPattern, filters, Boolean(useNewFieldsApi));
   const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
 
@@ -104,7 +104,7 @@ export async function fetchSurroundingDocs(
 }
 
 export function updateSearchSource(
-  searchSource: SearchSource,
+  searchSource: ISearchSource,
   indexPattern: IndexPattern,
   filters: Filter[],
   useNewFieldsApi: boolean
