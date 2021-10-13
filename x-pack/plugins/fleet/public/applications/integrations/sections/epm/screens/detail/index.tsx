@@ -356,12 +356,12 @@ export function Detail() {
                         ? {
                             content: missingSecurityConfiguration ? (
                               <FormattedMessage
-                                id="xpack.fleetp.epm.addPackagePolicyButtonSecurityRequiredTooltip"
+                                id="xpack..epm.addPackagePolicyButtonSecurityRequiredTooltip"
                                 defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the minimum required privileges. Contact your administrator."
                               />
                             ) : (
                               <FormattedMessage
-                                id="xpack.fleetp.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
+                                id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
                                 defaultMessage="To add Elastic Agent integrations, you must have the minimum required privileges. Contact your adminstrator."
                               />
                             ),
@@ -524,10 +524,28 @@ export function Detail() {
       <EuiCallOut
         color="warning"
         iconType="lock"
-        title="Security needs to be enabled in order to add Elastic Agent integrations"
+        title={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutTitle"
+            defaultMessage="Security needs to be enabled in order to add Elastic Agent integrations"
+          />
+        }
       >
-        In order to fully use Fleet, you must enable Elasticsearch and Kibana security features.
-        Follow the <a href="/app/fleet">steps in this guide</a> to enable security.
+        <FormattedMessage
+          id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescription"
+          defaultMessage="In order to fully use Fleet, you must enable Elasticsearch and Kibana security features.
+        Follow the {guideLink} to enable security."
+          values={{
+            guideLink: (
+              <a href="/app/fleet">
+                <FormattedMessage
+                  id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescriptionGuideLink"
+                  defaultMessage="steps in this guide"
+                />
+              </a>
+            ),
+          }}
+        />
       </EuiCallOut>
       <EuiSpacer />
     </>
