@@ -321,7 +321,7 @@ export function FailedTransactionsCorrelations({
               onAddFilter({
                 fieldName,
                 fieldValue,
-                include: true,
+                include: false,
               }),
           },
         ],
