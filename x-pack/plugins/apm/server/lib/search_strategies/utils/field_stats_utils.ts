@@ -56,24 +56,3 @@ export function buildSamplerAggregation(
     aggs,
   };
 }
-
-// Returns the path of aggregations in the elasticsearch response, as an array,
-// depending on whether sampling is being used.
-// A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
-// of less than 1 indicates no sampling, and an empty array is returned.
-export function getSamplerAggregationsResponsePath(
-  samplerShardSize: number
-): string[] {
-  return samplerShardSize > 0 ? ['sample'] : [];
-}
-
-// Returns a name which is safe to use in elasticsearch aggregations for the supplied
-// field name. Aggregation names must be alpha-numeric and can only contain '_' and '-' characters,
-// so if the supplied field names contains disallowed characters, the provided index
-// identifier is used to return a safe 'dummy' name in the format 'field_index' e.g. field_0, field_1
-export function getSafeAggregationName(
-  fieldName: string,
-  index: number
-): string {
-  return fieldName.match(/^[a-zA-Z0-9-_.]+$/) ? fieldName : `field_${index}`;
-}

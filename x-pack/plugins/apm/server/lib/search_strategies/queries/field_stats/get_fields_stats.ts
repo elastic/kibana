@@ -49,12 +49,7 @@ export const fetchFieldsStats = async (
         switch (ft) {
           case ES_FIELD_TYPES.KEYWORD:
           case ES_FIELD_TYPES.IP:
-            return fetchKeywordFieldStats(
-              esClient,
-              fieldStatsParams,
-              field,
-              idx
-            );
+            return fetchKeywordFieldStats(esClient, fieldStatsParams, field);
             break;
 
           case 'numeric':
@@ -68,21 +63,11 @@ export const fetchFieldsStats = async (
           case ES_FIELD_TYPES.SHORT:
           case ES_FIELD_TYPES.UNSIGNED_LONG:
           case ES_FIELD_TYPES.BYTE:
-            return fetchNumericFieldStats(
-              esClient,
-              fieldStatsParams,
-              field,
-              idx
-            );
+            return fetchNumericFieldStats(esClient, fieldStatsParams, field);
 
             break;
           case ES_FIELD_TYPES.BOOLEAN:
-            return fetchBooleanFieldStats(
-              esClient,
-              fieldStatsParams,
-              field,
-              idx
-            );
+            return fetchBooleanFieldStats(esClient, fieldStatsParams, field);
 
           default:
             return;

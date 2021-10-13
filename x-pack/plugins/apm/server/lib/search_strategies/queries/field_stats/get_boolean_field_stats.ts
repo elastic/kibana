@@ -7,39 +7,35 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { SearchRequest } from '@elastic/elasticsearch/api/types';
-import { get } from 'lodash';
-import {
-  buildSamplerAggregation,
-  getSafeAggregationName,
-  getSamplerAggregationsResponsePath,
-} from '../../utils/field_stats_utils';
+import { estypes } from '@elastic/elasticsearch';
+import { buildSamplerAggregation } from '../../utils/field_stats_utils';
 import { FieldValuePair } from '../../../../../common/search_strategies/types';
 import {
   FieldStatsCommonRequestParams,
   BooleanFieldStats,
   Aggs,
+  TopValueBucket,
 } from '../../../../../common/search_strategies/field_stats_types';
 import { getQueryWithParams } from '../get_query_with_params';
 
 export const getBooleanFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
-  fieldName: string,
-  safeFieldName: string
+  fieldName: string
 ): SearchRequest => {
   const query = getQueryWithParams({ params });
 
   const { index, samplerShardSize } = params;
 
   const size = 0;
-  const aggs: Aggs = {};
-
-  aggs[`${safeFieldName}_value_count`] = {
-    filter: { exists: { field: fieldName } },
-  };
-  aggs[`${safeFieldName}_values`] = {
-    terms: {
-      field: fieldName,
-      size: 2,
+  const aggs: Aggs = {
+    sampled_value_count: {
+      filter: { exists: { field: fieldName } },
+    },
+    sampled_values: {
+      terms: {
+        field: fieldName,
+        size: 2,
+      },
     },
   };
 
@@ -60,37 +56,26 @@ export const getBooleanFieldStatsRequest = (
 export const fetchBooleanFieldStats = async (
   esClient: ElasticsearchClient,
   params: FieldStatsCommonRequestParams,
-  field: FieldValuePair,
-  identifier: number
+  field: FieldValuePair
 ): Promise<BooleanFieldStats> => {
-  const { samplerShardSize } = params;
-
-  const safeFieldName = getSafeAggregationName(field.fieldName, identifier);
-  const request = getBooleanFieldStatsRequest(
-    params,
-    field.fieldName,
-    safeFieldName
-  );
+  const request = getBooleanFieldStatsRequest(params, field.fieldName);
   const { body } = await esClient.search(request);
-  const aggregations = body.aggregations;
-  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+  const aggregations = body.aggregations as {
+    sample: {
+      sampled_value_count: estypes.AggregationsFiltersBucketItemKeys;
+      sampled_values: estypes.AggregationsTermsAggregate<TopValueBucket>;
+    };
+  };
 
   const stats: BooleanFieldStats = {
     fieldName: field.fieldName,
-    count: get(
-      aggregations,
-      [...aggsPath, `${safeFieldName}_value_count`, 'doc_count'],
-      0
-    ),
+    count: aggregations?.sample.sampled_value_count.doc_count ?? 0,
   };
 
-  const valueBuckets: Array<{ [key: string]: number }> = get(
-    aggregations,
-    [...aggsPath, `${safeFieldName}_values`, 'buckets'],
-    []
-  );
+  const valueBuckets: TopValueBucket[] =
+    aggregations?.sample.sampled_values.buckets;
   valueBuckets.forEach((bucket) => {
-    stats[`${bucket.key_as_string}Count`] = bucket.doc_count;
+    stats[`${bucket.key.toString()}Count`] = bucket.doc_count;
   });
   return stats;
 };

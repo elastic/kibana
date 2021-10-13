@@ -8,27 +8,23 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { find, get } from 'lodash';
+import { estypes } from '@elastic/elasticsearch/index';
 import {
   NumericFieldStats,
   FieldStatsCommonRequestParams,
   TopValueBucket,
+  Aggs,
 } from '../../../../../common/search_strategies/field_stats_types';
 import { FieldValuePair } from '../../../../../common/search_strategies/types';
 import { getQueryWithParams } from '../get_query_with_params';
-import {
-  buildSamplerAggregation,
-  getSafeAggregationName,
-  getSamplerAggregationsResponsePath,
-} from '../../utils/field_stats_utils';
-import { SAMPLER_TOP_TERMS_SHARD_SIZE } from '../../constants';
+import { buildSamplerAggregation } from '../../utils/field_stats_utils';
 
 // Only need 50th percentile for the median
 const PERCENTILES = [50];
 
 export const getNumericFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
-  fieldName: string,
-  safeFieldName: string
+  fieldName: string
 ) => {
   const query = getQueryWithParams({ params });
   const size = 0;
@@ -36,45 +32,32 @@ export const getNumericFieldStatsRequest = (
   const { index, samplerShardSize } = params;
 
   const percents = PERCENTILES;
-  const aggs: { [key: string]: any } = {};
-  aggs[`${safeFieldName}_field_stats`] = {
-    filter: { exists: { field: fieldName } },
-    aggs: {
-      actual_stats: {
-        stats: { field: fieldName },
-      },
-    },
-  };
-  aggs[`${safeFieldName}_percentiles`] = {
-    percentiles: {
-      field: fieldName,
-      percents,
-      keyed: false,
-    },
-  };
-
-  const top = {
-    terms: {
-      field: fieldName,
-      size: 10,
-      order: {
-        _count: 'desc',
-      },
-    },
-  };
-
-  if (samplerShardSize < 1) {
-    aggs[`${safeFieldName}_top`] = {
-      sampler: {
-        shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-      },
+  const aggs: Aggs = {
+    sampled_field_stats: {
+      filter: { exists: { field: fieldName } },
       aggs: {
-        top,
+        actual_stats: {
+          stats: { field: fieldName },
+        },
       },
-    };
-  } else {
-    aggs[`${safeFieldName}_top`] = top;
-  }
+    },
+    sampled_percentiles: {
+      percentiles: {
+        field: fieldName,
+        percents,
+        keyed: false,
+      },
+    },
+    sampled_top: {
+      terms: {
+        field: fieldName,
+        size: 10,
+        order: {
+          _count: 'desc',
+        },
+      },
+    },
+  };
 
   const searchBody = {
     query,
@@ -93,37 +76,28 @@ export const getNumericFieldStatsRequest = (
 export const fetchNumericFieldStats = async (
   esClient: ElasticsearchClient,
   params: FieldStatsCommonRequestParams,
-  field: FieldValuePair,
-  identifier: number
+  field: FieldValuePair
 ): Promise<NumericFieldStats> => {
-  const { samplerShardSize } = params;
-
-  const safeFieldName = getSafeAggregationName(field.fieldName, identifier);
   const request: SearchRequest = getNumericFieldStatsRequest(
     params,
-    field.fieldName,
-    safeFieldName
+    field.fieldName
   );
   const { body } = await esClient.search(request);
-  const aggregations = body.aggregations;
-  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-  const docCount = get(
-    aggregations,
-    [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'],
-    0
-  );
-  const fieldStatsResp = get(
-    aggregations,
-    [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
-    {}
-  );
 
-  const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
-  if (samplerShardSize < 1) {
-    topAggsPath.push('top');
-  }
-
-  const topValues = get(aggregations, [...topAggsPath, 'buckets'], []);
+  const aggregations = body.aggregations as {
+    sample: {
+      sampled_top: estypes.AggregationsTermsAggregate<TopValueBucket>;
+      sampled_percentiles: estypes.AggregationsHdrPercentilesAggregate;
+      sampled_field_stats: {
+        doc_count: number;
+        actual_stats: estypes.AggregationsStatsAggregate;
+      };
+    };
+  };
+  const docCount = aggregations?.sample.sampled_field_stats.doc_count;
+  const fieldStatsResp =
+    aggregations?.sample.sampled_field_stats.actual_stats ?? {};
+  const topValues = aggregations?.sample.sampled_top.buckets ?? [];
 
   const stats: NumericFieldStats = {
     fieldName: field.fieldName,
@@ -134,16 +108,12 @@ export const fetchNumericFieldStats = async (
     topValues,
     topValuesSampleSize: topValues.reduce(
       (acc: number, curr: TopValueBucket) => acc + curr.doc_count,
-      get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
+      aggregations.sample.sampled_top.sum_other_doc_count ?? 0
     ),
   };
 
   if (stats.count !== undefined && stats.count > 0) {
-    const percentiles = get(
-      aggregations,
-      [...aggsPath, `${safeFieldName}_percentiles`, 'values'],
-      []
-    );
+    const percentiles = aggregations?.sample.sampled_percentiles.values ?? [];
     const medianPercentile: { value: number; key: number } | undefined = find(
       percentiles,
       {

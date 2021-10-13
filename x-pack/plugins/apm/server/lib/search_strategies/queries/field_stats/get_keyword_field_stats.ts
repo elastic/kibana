@@ -6,19 +6,11 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import {
-  AggregationsAggregationContainer,
-  SearchRequest,
-} from '@elastic/elasticsearch/api/types';
-import { get } from 'lodash';
+import { SearchRequest } from '@elastic/elasticsearch/api/types';
+import { estypes } from '@elastic/elasticsearch';
 import { FieldValuePair } from '../../../../../common/search_strategies/types';
 import { getQueryWithParams } from '../get_query_with_params';
-import {
-  buildSamplerAggregation,
-  getSafeAggregationName,
-  getSamplerAggregationsResponsePath,
-} from '../../utils/field_stats_utils';
-import { SAMPLER_TOP_TERMS_SHARD_SIZE } from '../../constants';
+import { buildSamplerAggregation } from '../../utils/field_stats_utils';
 import {
   FieldStatsCommonRequestParams,
   KeywordFieldStats,
@@ -28,8 +20,7 @@ import {
 
 export const getKeywordFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
-  fieldName: string,
-  safeFieldName: string
+  fieldName: string
 ): SearchRequest => {
   const query = getQueryWithParams({ params });
 
@@ -37,7 +28,7 @@ export const getKeywordFieldStatsRequest = (
 
   const size = 0;
   const aggs: Aggs = {
-    [`${safeFieldName}_top`]: {
+    sampled_top: {
       terms: {
         field: fieldName,
         size: 10,
@@ -65,39 +56,23 @@ export const getKeywordFieldStatsRequest = (
 export const fetchKeywordFieldStats = async (
   esClient: ElasticsearchClient,
   params: FieldStatsCommonRequestParams,
-  field: FieldValuePair,
-  identifier: number
+  field: FieldValuePair
 ): Promise<KeywordFieldStats> => {
-  const { samplerShardSize } = params;
-
-  const safeFieldName = getSafeAggregationName(field.fieldName, identifier);
-  const request = getKeywordFieldStatsRequest(
-    params,
-    field.fieldName,
-    safeFieldName
-  );
+  const request = getKeywordFieldStatsRequest(params, field.fieldName);
   const { body } = await esClient.search(request);
-  const aggregations = body.aggregations;
-  // const topValues = aggregations.sample.sampled_top;
-  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-
-  const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
-  if (samplerShardSize < 1) {
-    topAggsPath.push('top');
-  }
-
-  const topValues: TopValueBucket[] = get(
-    aggregations,
-    [...topAggsPath, 'buckets'],
-    []
-  );
+  const aggregations = body.aggregations as {
+    sample: {
+      sampled_top: estypes.AggregationsTermsAggregate<TopValueBucket>;
+    };
+  };
+  const topValues: TopValueBucket[] = aggregations?.sample.sampled_top.buckets;
 
   const stats = {
     fieldName: field.fieldName,
     topValues,
     topValuesSampleSize: topValues.reduce(
       (acc, curr) => acc + curr.doc_count,
-      get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
+      aggregations.sample.sampled_top.sum_other_doc_count ?? 0
     ),
   };
 
