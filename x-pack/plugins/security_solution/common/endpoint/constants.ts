@@ -10,7 +10,7 @@
 export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
 export const ENDPOINT_ACTIONS_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;
 export const ENDPOINT_ACTION_RESPONSES_DS = '.logs-endpoint.action.responses';
-export const ENDPOINT_ACTION_RESPONSES_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;
+export const ENDPOINT_ACTION_RESPONSES_INDEX = `${ENDPOINT_ACTION_RESPONSES_DS}-default`;
 
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
