@@ -44,6 +44,7 @@ describe('when using EffectedPolicySelect component', () => {
     componentProps = {
       options: [],
       isGlobal: true,
+      isPlatinumPlus: true,
       onChange: handleOnChange,
       'data-test-subj': 'test',
     };
