@@ -21,6 +21,7 @@ import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constant
 import { CurationsLogic } from '../curations_logic';
 import { getCurationsBreadcrumbs } from '../utils';
 
+import { CurationsHistory } from './curations_history/curations_history';
 import { CurationsOverview } from './curations_overview';
 import { CurationsSettings } from './curations_settings';
 
@@ -38,6 +39,16 @@ export const Curations: React.FC = () => {
       ),
       isSelected: selectedPageTab === 'overview',
       onClick: () => onSelectPageTab('overview'),
+    },
+    {
+      label: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.engine.curations.historyPageTabLabel',
+        {
+          defaultMessage: 'History',
+        }
+      ),
+      isSelected: selectedPageTab === 'history',
+      onClick: () => onSelectPageTab('history'),
     },
     {
       label: i18n.translate(
@@ -74,6 +85,7 @@ export const Curations: React.FC = () => {
       isLoading={dataLoading && !curations.length}
     >
       {selectedPageTab === 'overview' && <CurationsOverview />}
+      {selectedPageTab === 'history' && <CurationsHistory />}
       {selectedPageTab === 'settings' && <CurationsSettings />}
     </AppSearchPageTemplate>
   );
