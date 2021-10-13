@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit, mean } from 'lodash';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
@@ -138,8 +139,13 @@ describe('getAlertInstanceSummary()', () => {
 
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
+    const durations: number[] = events
+      .filter((ev) => ev?.event?.action === 'execute' && ev?.event?.duration !== undefined)
+      .map((ev) => ev?.event?.duration! / (1000 * 1000)) as number[];
+
     const result = await rulesClient.getAlertInstanceSummary({ id: '1', dateStart });
-    expect(result).toMatchInlineSnapshot(`
+    const resultWithoutExecutionDuration = omit(result, 'executionDuration');
+    expect(resultWithoutExecutionDuration).toMatchInlineSnapshot(`
       Object {
         "alertTypeId": "123",
         "consumer": "alert-consumer",
@@ -182,6 +188,13 @@ describe('getAlertInstanceSummary()', () => {
         "throttle": null,
       }
     `);
+
+    expect(result.executionDuration).toEqual({
+      average: Math.round(mean(durations)),
+      max: Math.max(...durations),
+      min: Math.min(...durations),
+      values: durations.reverse(),
+    });
   });
 
   // Further tests don't check the result of `getAlertInstanceSummary()`, as the result
