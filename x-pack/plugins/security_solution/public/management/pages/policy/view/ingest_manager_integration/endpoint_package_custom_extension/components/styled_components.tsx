@@ -34,3 +34,7 @@ export const StyledEuiFlexGridItem = styled(EuiFlexItem)<{
   margin: 0px;
   padding: 12px;
 `;
+
+export const StyledEuiFlexItem = styled(EuiFlexItem)`
+  flex-direction: row-reverse;
+`;
