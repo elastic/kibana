@@ -42,8 +42,7 @@ import { outputService } from './output';
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
   packages: string[];
-  nonFatalErrors: PreconfigurationError[];
-  packagePolicyUpgradeResults: UpgradeManagedPackagePoliciesResult[];
+  nonFatalErrors: Array<PreconfigurationError | UpgradeManagedPackagePoliciesResult>;
 }
 
 function isPreconfiguredOutputDifferentFromCurrent(
@@ -354,8 +353,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           }
     ),
     packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
-    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
-    packagePolicyUpgradeResults,
+    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies, ...packagePolicyUpgradeResults],
   };
 }
 

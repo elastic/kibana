@@ -49,7 +49,6 @@ describe('FleetSetupHandler', () => {
       Promise.resolve({
         isInitialized: true,
         nonFatalErrors: [],
-        packagePolicyUpgradeResults: [],
       })
     );
     await fleetSetupHandler(context, request, response);
@@ -57,7 +56,6 @@ describe('FleetSetupHandler', () => {
     const expectedBody: PostFleetSetupResponse = {
       isInitialized: true,
       nonFatalErrors: [],
-      packagePolicyUpgradeResults: [],
     };
     expect(response.customError).toHaveBeenCalledTimes(0);
     expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });

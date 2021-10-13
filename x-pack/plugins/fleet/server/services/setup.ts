@@ -36,8 +36,9 @@ import type { UpgradeManagedPackagePoliciesResult } from './managed_package_poli
 
 export interface SetupStatus {
   isInitialized: boolean;
-  nonFatalErrors: Array<PreconfigurationError | DefaultPackagesInstallationError>;
-  packagePolicyUpgradeResults: UpgradeManagedPackagePoliciesResult[];
+  nonFatalErrors: Array<
+    PreconfigurationError | DefaultPackagesInstallationError | UpgradeManagedPackagePoliciesResult
+  >;
 }
 
 export async function setupFleet(
@@ -92,14 +93,13 @@ async function createSetupSideEffects(
     ...autoUpdateablePackages.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
-  const { nonFatalErrors, packagePolicyUpgradeResults } =
-    await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
-      esClient,
-      policies,
-      packages,
-      defaultOutput
-    );
+  const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+    soClient,
+    esClient,
+    policies,
+    packages,
+    defaultOutput
+  );
 
   await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
 
@@ -109,7 +109,6 @@ async function createSetupSideEffects(
   return {
     isInitialized: true,
     nonFatalErrors,
-    packagePolicyUpgradeResults,
   };
 }
 
