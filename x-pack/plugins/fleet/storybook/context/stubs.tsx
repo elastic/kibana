@@ -14,8 +14,7 @@ type Stubs =
   | 'fatalErrors'
   | 'navigation'
   | 'overlays'
-  | 'savedObjects'
-  | 'cloud';
+  | 'savedObjects';
 
 type StubbedStartServices = Pick<FleetStartServices, Stubs>;
 
@@ -27,5 +26,4 @@ export const stubbedStartServices: StubbedStartServices = {
   navigation: {} as FleetStartServices['navigation'],
   overlays: {} as FleetStartServices['overlays'],
   savedObjects: {} as FleetStartServices['savedObjects'],
-  cloud: {} as FleetStartServices['cloud'],
 };
