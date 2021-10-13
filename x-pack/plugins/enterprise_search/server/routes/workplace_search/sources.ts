@@ -891,6 +891,25 @@ export function registerOrgSourceOauthConfigurationRoute({
   );
 }
 
+export function registerOrgSourceSynchronizeRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/internal/workplace_search/org/sources/{id}/sync',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:id/sync',
+    })
+  );
+}
+
 // Same route is used for org and account. `state` passes the context.
 export function registerOauthConnectorParamsRoute({
   router,
@@ -956,5 +975,6 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);
+  registerOrgSourceSynchronizeRoute(dependencies);
   registerOauthConnectorParamsRoute(dependencies);
 };
