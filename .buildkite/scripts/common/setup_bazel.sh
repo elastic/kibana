@@ -11,4 +11,4 @@ cp "$KIBANA_DIR/src/dev/ci_setup/.bazelrc-ci" "$KIBANA_DIR/.bazelrc"
 ### append auth token to buildbuddy into "$HOME/.bazelrc";
 ###
 echo "# Appended by .buildkite/scripts/setup_bazel.sh" >> "$KIBANA_DIR/.bazelrc"
-echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" >> "$HOME/.bazelrc"
+echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" >> "$KIBANA_DIR/.bazelrc"
