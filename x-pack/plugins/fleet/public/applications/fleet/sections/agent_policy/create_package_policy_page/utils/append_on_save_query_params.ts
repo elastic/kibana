@@ -30,7 +30,7 @@ export function appendOnSaveQueryParamsToPath({
   paramsToApply.forEach((paramName) => {
     const paramOptions = mappingOptions[paramName];
     if (paramOptions) {
-      const [paramKey, paramValue] = createQueryParam(paramName, paramOptions, policy.id);
+      const [paramKey, paramValue] = createQueryParam(paramName, paramOptions, policy.policy_id);
       if (paramKey && paramValue) {
         queryParams[paramKey] = paramValue;
       }
