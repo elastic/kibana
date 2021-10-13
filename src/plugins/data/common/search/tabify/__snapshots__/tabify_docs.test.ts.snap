@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`tabifyDocs converts fields by default 1`] = `
+exports[`tabify_docs tabifyDocs converts fields by default 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -108,7 +108,7 @@ Object {
 }
 `;
 
-exports[`tabifyDocs converts source if option is set 1`] = `
+exports[`tabify_docs tabifyDocs converts source if option is set 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -216,7 +216,7 @@ Object {
 }
 `;
 
-exports[`tabifyDocs skips nested fields if option is set 1`] = `
+exports[`tabify_docs tabifyDocs skips nested fields if option is set 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -324,7 +324,7 @@ Object {
 }
 `;
 
-exports[`tabifyDocs works without provided index pattern 1`] = `
+exports[`tabify_docs tabifyDocs works without provided index pattern 1`] = `
 Object {
   "columns": Array [
     Object {
