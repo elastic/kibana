@@ -22,7 +22,7 @@ import type {
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
 
-import type { SecurityPluginStart } from '../../../security/server';
+import type { SecurityPluginStart, SecurityPluginSetup } from '../../../security/server';
 import type { FleetConfigType } from '../../common';
 import type {
   ExternalCallback,
@@ -39,7 +39,8 @@ class AppContextService {
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
-  private security: SecurityPluginStart | undefined;
+  private securitySetup: SecurityPluginSetup | undefined;
+  private securityStart: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
   private configSubject$?: BehaviorSubject<FleetConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
@@ -56,7 +57,8 @@ class AppContextService {
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
-    this.security = appContext.security;
+    this.securitySetup = appContext.securitySetup;
+    this.securityStart = appContext.securityStart;
     this.savedObjects = appContext.savedObjects;
     this.isProductionMode = appContext.isProductionMode;
     this.cloud = appContext.cloud;
@@ -92,14 +94,21 @@ class AppContextService {
   }
 
   public getSecurity() {
-    if (!this.security) {
+    if (!this.hasSecurity()) {
       throw new Error('Security service not set.');
     }
-    return this.security;
+    return this.securityStart!;
+  }
+
+  public getSecurityLicense() {
+    if (!this.hasSecurity()) {
+      throw new Error('Security service not set.');
+    }
+    return this.securitySetup!.license;
   }
 
   public hasSecurity() {
-    return !!this.security;
+    return !!this.securitySetup && !!this.securityStart;
   }
 
   public getCloud() {

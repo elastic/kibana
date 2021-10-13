@@ -7,12 +7,10 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from 'kibana/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
+import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
@@ -49,29 +47,23 @@ const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   </EuiErrorBoundary>
 );
 
-const Panel = styled(EuiPanel)`
-  max-width: 500px;
-  margin-right: auto;
-  margin-left: auto;
-`;
-
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('integrations');
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
-  const [permissionsError, setPermissionsError] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
   const [initializationError, setInitializationError] = useState<Error | null>(null);
 
   useEffect(() => {
     (async () => {
-      setPermissionsError(undefined);
       setIsInitialized(false);
       setInitializationError(null);
       try {
+        // Attempt Fleet Setup if user has permissions, otherwise skip
         setIsPermissionsLoading(true);
         const permissionsResponse = await sendGetPermissionsCheck();
         setIsPermissionsLoading(false);
+
         if (permissionsResponse.data?.success) {
           try {
             const setupResponse = await sendSetup();
@@ -83,69 +75,20 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
           }
           setIsInitialized(true);
         } else {
-          setPermissionsError(permissionsResponse.data?.error || 'REQUEST_ERROR');
+          setIsInitialized(true);
         }
-      } catch (err) {
-        setPermissionsError('REQUEST_ERROR');
+      } catch {
+        // If there's an error checking permissions, default to proceeding without running setup
+        // User will only have access to EPM endpoints if they actually have permission
+        setIsInitialized(true);
       }
     })();
   }, []);
 
-  if (isPermissionsLoading || permissionsError) {
+  if (isPermissionsLoading) {
     return (
       <ErrorLayout>
-        {isPermissionsLoading ? (
-          <Loading />
-        ) : permissionsError === 'REQUEST_ERROR' ? (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.fleet.permissionsRequestErrorMessageTitle"
-                defaultMessage="Unable to check permissions"
-              />
-            }
-            error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
-              defaultMessage: 'There was a problem checking Fleet permissions',
-            })}
-          />
-        ) : (
-          <Panel>
-            <EuiEmptyPrompt
-              iconType="securityApp"
-              title={
-                <h2>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.fleet.permissionDeniedErrorTitle"
-                      defaultMessage="Permission denied"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.securityRequiredErrorTitle"
-                      defaultMessage="Security is not enabled"
-                    />
-                  )}
-                </h2>
-              }
-              body={
-                <p>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.fleet.integrationsPermissionDeniedErrorMessage"
-                      defaultMessage="You are not authorized to access Integrations. Integrations requires {roleName} privileges."
-                      values={{ roleName: <EuiCode>superuser</EuiCode> }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.integrationsSecurityRequiredErrorMessage"
-                      defaultMessage="You must enable security in Kibana and Elasticsearch to use Integrations."
-                    />
-                  )}
-                </p>
-              }
-            />
-          </Panel>
-        )}
+        <Loading />
       </ErrorLayout>
     );
   }

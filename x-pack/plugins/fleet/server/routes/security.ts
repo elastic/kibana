@@ -13,6 +13,14 @@ export function enforceSuperUser<T1, T2, T3>(
   handler: RequestHandler<T1, T2, T3>
 ): RequestHandler<T1, T2, T3> {
   return function enforceSuperHandler(context, req, res) {
+    if (!appContextService.hasSecurity() || !appContextService.getSecurityLicense().isEnabled()) {
+      return res.forbidden({
+        body: {
+          message: `Access to this API requires that security is enabled`,
+        },
+      });
+    }
+
     const security = appContextService.getSecurity();
     const user = security.authc.getCurrentUser(req);
     if (!user) {
