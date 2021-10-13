@@ -19,18 +19,6 @@ export class Span extends BaseSpan {
     });
   }
 
-  children(...children: BaseSpan[]) {
-    super.children(...children);
-
-    children.forEach((child) =>
-      child.defaults({
-        'parent.id': this.fields['span.id'],
-      })
-    );
-
-    return this;
-  }
-
   duration(duration: number) {
     this.fields['span.duration.us'] = duration * 1000;
     return this;

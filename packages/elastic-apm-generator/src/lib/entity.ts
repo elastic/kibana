@@ -10,9 +10,11 @@ export type Fields = Partial<{
   '@timestamp': number;
   'agent.name': string;
   'agent.version': string;
+  'container.id': string;
   'ecs.version': string;
   'event.outcome': string;
   'event.ingested': number;
+  'host.name': string;
   'metricset.name': string;
   'observer.version': string;
   'observer.version_major': number;
@@ -42,6 +44,8 @@ export type Fields = Partial<{
   'span.destination.service.type': string;
   'span.destination.service.response_time.sum.us': number;
   'span.destination.service.response_time.count': number;
+  'span.self_time.count': number;
+  'span.self_time.sum.us': number;
 }>;
 
 export class Entity {

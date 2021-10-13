@@ -7,17 +7,18 @@
  */
 
 import { service, timerange, getTransactionMetrics, getSpanDestinationMetrics } from '../..';
+import { getBreakdownMetrics } from '../../lib/utils/get_breakdown_metrics';
 
 export function simpleTrace(from: number, to: number) {
   const instance = service('opbeans-go', 'production', 'go').instance('instance');
 
   const range = timerange(from, to);
 
-  const transactionName = '100rpm (75% success) failed 1000ms';
+  const transactionName = '100rpm (80% success) failed 1000ms';
 
   const successfulTraceEvents = range
-    .interval('1m')
-    .rate(75)
+    .interval('30s')
+    .rate(40)
     .flatMap((timestamp) =>
       instance
         .transaction(transactionName)
@@ -31,14 +32,14 @@ export function simpleTrace(from: number, to: number) {
             .success()
             .destination('elasticsearch')
             .timestamp(timestamp),
-          instance.span('custom_operation', 'app').duration(50).success().timestamp(timestamp)
+          instance.span('custom_operation', 'custom').duration(100).success().timestamp(timestamp)
         )
         .serialize()
     );
 
   const failedTraceEvents = range
-    .interval('1m')
-    .rate(25)
+    .interval('30s')
+    .rate(10)
     .flatMap((timestamp) =>
       instance
         .transaction(transactionName)
@@ -50,5 +51,10 @@ export function simpleTrace(from: number, to: number) {
 
   const events = successfulTraceEvents.concat(failedTraceEvents);
 
-  return events.concat(getTransactionMetrics(events)).concat(getSpanDestinationMetrics(events));
+  return [
+    ...events,
+    ...getTransactionMetrics(events),
+    ...getSpanDestinationMetrics(events),
+    ...getBreakdownMetrics(events),
+  ];
 }

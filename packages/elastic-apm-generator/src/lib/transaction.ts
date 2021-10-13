@@ -11,6 +11,8 @@ import { Fields } from './entity';
 import { generateEventId } from './utils/generate_id';
 
 export class Transaction extends BaseSpan {
+  private _sampled: boolean = true;
+
   constructor(fields: Fields) {
     super({
       ...fields,
@@ -19,19 +21,25 @@ export class Transaction extends BaseSpan {
       'transaction.sampled': true,
     });
   }
-  children(...children: BaseSpan[]) {
-    super.children(...children);
-    children.forEach((child) =>
-      child.defaults({
-        'transaction.id': this.fields['transaction.id'],
-        'parent.id': this.fields['transaction.id'],
-      })
-    );
-    return this;
-  }
 
   duration(duration: number) {
     this.fields['transaction.duration.us'] = duration * 1000;
     return this;
+  }
+
+  sample(sampled: boolean = true) {
+    this._sampled = sampled;
+    return this;
+  }
+
+  serialize() {
+    const [transaction, ...spans] = super.serialize();
+
+    const events = [transaction];
+    if (this._sampled) {
+      events.push(...spans);
+    }
+
+    return events;
   }
 }
