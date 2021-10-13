@@ -99,7 +99,7 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
         );
       } else {
         return (
-          <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center" cardSize={cardSize}>
+          <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center">
             <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
               <EuiText>
                 <h4>{getTitleMessage()}</h4>
