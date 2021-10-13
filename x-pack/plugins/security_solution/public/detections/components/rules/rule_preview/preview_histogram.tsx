@@ -6,21 +6,18 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
+import { Unit } from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { getHistogramConfig } from './helpers';
-import {
-  ChartSeriesConfigs,
-  ChartSeriesData,
-  ChartData,
-} from '../../../../common/components/charts/common';
-import { InspectResponse } from '../../../../types';
-import { inputsModel } from '../../../../common/store';
+import { getHistogramConfig, isNoisy } from './helpers';
+import { ChartSeriesConfigs, ChartSeriesData } from '../../../../common/components/charts/common';
 import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { BarChart } from '../../../../common/components/charts/barchart';
+import { usePreviewHistogram } from './use_preview_histogram';
+import { formatDate } from '../../../../common/components/super_date_picker';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -30,31 +27,36 @@ const LoadingChart = styled(EuiLoadingChart)`
 export const ID = 'previewHistogram';
 
 interface PreviewHistogramProps {
-  data: ChartData[];
-  dataTestSubj?: string;
-  disclaimer: string;
-  from: string;
-  inspect: InspectResponse;
-  isLoading: boolean;
-  refetch: inputsModel.Refetch;
-  title: string;
-  to: string;
-  totalCount: number;
+  timeFrame: Unit;
+  previewId: string;
+  addNoiseWarning: () => void;
 }
 
+const DEFAULT_HISTOGRAM_HEIGHT = 300;
+
 export const PreviewHistogram = ({
-  data,
-  dataTestSubj,
-  disclaimer,
-  from,
-  inspect,
-  isLoading,
-  refetch,
-  title,
-  to,
-  totalCount,
+  timeFrame,
+  previewId,
+  addNoiseWarning,
 }: PreviewHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
+
+  const from = useMemo(() => `now-1${timeFrame}`, [timeFrame]);
+  const to = useMemo(() => 'now', []);
+  const startDate = useMemo(() => formatDate(from), [from]);
+  const endDate = useMemo(() => formatDate(to), [to]);
+
+  const [isLoading, { data, inspect, totalCount, refetch }] = usePreviewHistogram({
+    previewId,
+    startDate,
+    endDate,
+  });
+
+  useEffect(() => {
+    if (isNoisy(totalCount, timeFrame)) {
+      addNoiseWarning();
+    }
+  }, [totalCount, addNoiseWarning, timeFrame]);
 
   useEffect((): void => {
     if (!isLoading && !isInitializing) {
@@ -77,21 +79,24 @@ export const PreviewHistogram = ({
 
   return (
     <>
-      <Panel height={300} data-test-subj={dataTestSubj}>
+      <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
-            <HeaderSection id={ID} title={title} titleSize="xs" subtitle={subtitle} />
+            <HeaderSection
+              id={ID}
+              title={i18n.QUERY_GRAPH_HITS_TITLE}
+              titleSize="xs"
+              subtitle={subtitle}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             {isLoading ? (
-              <LoadingChart size="l" data-test-subj="queryPreviewLoading" />
+              <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
             ) : (
               <BarChart
                 configs={barConfig}
                 barChart={chartData}
-                stackByField={undefined}
-                timelineId={undefined}
-                data-test-subj="sharedPreviewQueryHistogram"
+                data-test-subj="preview-histogram-bar-chart"
               />
             )}
           </EuiFlexItem>
@@ -99,7 +104,7 @@ export const PreviewHistogram = ({
             <>
               <EuiSpacer />
               <EuiText size="s" color="subdued">
-                <p>{disclaimer}</p>
+                <p>{i18n.QUERY_PREVIEW_DISCLAIMER}</p>
               </EuiText>
             </>
           </EuiFlexItem>

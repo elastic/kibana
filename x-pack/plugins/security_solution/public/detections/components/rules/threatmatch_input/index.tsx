@@ -49,19 +49,22 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
   onValidityChange,
 }: ThreatMatchInputProps) => {
   const { setValue, value: threatItems } = threatMapping;
+
   const { isInvalid: isThreatMappingInvalid, errorMessage } =
     getFieldValidityAndErrorMessage(threatMapping);
   const [isThreatIndexPatternValid, setIsThreatIndexPatternValid] = useState(false);
+
+  useEffect(() => {
+    onValidityChange(!isThreatMappingInvalid && isThreatIndexPatternValid);
+  }, [isThreatIndexPatternValid, isThreatMappingInvalid, onValidityChange]);
+
   const handleBuilderOnChange = useCallback(
     ({ entryItems }: { entryItems: ThreatMapEntries[] }): void => {
       setValue(entryItems);
     },
     [setValue]
   );
-  useEffect(() => {
-    const isValid = !isThreatMappingInvalid && isThreatIndexPatternValid;
-    onValidityChange(isValid);
-  }, [isThreatIndexPatternValid, isThreatMappingInvalid, onValidityChange]);
+
   return (
     <>
       <EuiSpacer size="m" />

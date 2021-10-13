@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
-import * as i18n from './translations';
 import { MatrixHistogramType } from '../../../../../common';
+import { convertToBuildEsQuery } from '../../../../common/lib/keury';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
+import { useKibana } from '../../../../common/lib/kibana';
 
-// TODO: use CTI constant
+// TODO: use CTI constant when backend becomes available
 const DEFAULT_PREVIEW_INDEX = '.siem-preview-signals';
 
 interface PreviewHistogramParams {
@@ -19,23 +21,33 @@ interface PreviewHistogramParams {
 }
 
 export const usePreviewHistogram = ({ previewId, startDate, endDate }: PreviewHistogramParams) => {
-  const [isHistogramLoading, { inspect, totalCount, refetch, data }, start] = useMatrixHistogram({
-    errorMessage: i18n.QUERY_PREVIEW_ERROR,
-    endDate,
-    startDate,
-    filterQuery: { query: '*:*', language: 'kuery' },
-    indexNames: [`${DEFAULT_PREVIEW_INDEX}-*`],
-    includeMissingData: false,
-    histogramType: MatrixHistogramType.events,
-    stackByField: 'event.category',
-    skip: true,
+  const { uiSettings } = useKibana().services;
+  const [filterQuery] = convertToBuildEsQuery({
+    config: getEsQueryConfig(uiSettings),
+    indexPattern: {
+      fields: [
+        {
+          name: 'signal.rule.id',
+          type: 'string',
+        },
+      ],
+      title: 'Preview',
+    },
+    queries: [{ query: `signal.rule.id:${previewId}`, language: 'kuery' }],
+    filters: [],
   });
 
-  useEffect(() => {
-    if (previewId) {
-      start(startDate, endDate);
-    }
-  }, [previewId, start]);
+  const matrixHistogramRequest = useMemo(() => {
+    return {
+      endDate,
+      errorMessage: 'oops',
+      filterQuery,
+      histogramType: MatrixHistogramType.preview,
+      indexNames: [`${DEFAULT_PREVIEW_INDEX}-*`],
+      stackByField: 'signal.rule.id',
+      startDate,
+    };
+  }, [startDate, endDate, filterQuery]);
 
-  return { isHistogramLoading, inspect, refetch, totalCount, data };
+  return useMatrixHistogram(matrixHistogramRequest);
 };

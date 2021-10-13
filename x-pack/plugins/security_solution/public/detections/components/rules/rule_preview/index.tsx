@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
-// import { Unit } from '@elastic/datemath';
+import React, { Fragment, useState, useEffect } from 'react';
+import { Unit } from '@elastic/datemath';
+import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
 import {
   EuiFlexGroup,
@@ -22,14 +23,16 @@ import { FieldValueQueryBar } from '../query_bar';
 import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';
 import { PreviewHistogram } from './preview_histogram';
-import { usePreviewHistogram } from './use_preview_histogram';
+import { getTimeframeOptions } from './helpers';
 
 interface RulePreviewProps {
   index: string[];
-  threatIndex: string[];
-  query: FieldValueQueryBar;
-  threatQuery: FieldValueQueryBar;
   isDisabled: boolean;
+  query: FieldValueQueryBar;
+  ruleType: Type;
+  threatIndex: string[];
+  threatMapping: ThreatMapping;
+  threatQuery: FieldValueQueryBar;
 }
 
 const Select = styled(EuiSelect)`
@@ -64,20 +67,35 @@ const CalloutGroup: React.FC<{ items: string[]; isError?: boolean }> = ({ items,
 
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   index,
-  threatIndex,
-  query,
   isDisabled,
+  query,
+  ruleType,
+  threatIndex,
   threatQuery,
+  threatMapping,
 }) => {
-  const [timeFrame, setTimeFrame] = useState<'h' | 'M' | 'd'>('h');
-  const { createPreview, errors, isPreviewRequestInProgress, previewId, warnings } =
-    usePreviewRoute();
-
-  const { isHistogramLoading, inspect, refetch, totalCount, data } = usePreviewHistogram({
+  const [timeFrame, setTimeFrame] = useState<Unit>('h');
+  const {
+    addNoiseWarning,
+    createPreview,
+    clearPreview,
+    errors,
+    isPreviewRequestInProgress,
     previewId,
-    startDate: 'now',
-    endDate: 'now-1M',
+    warnings,
+  } = usePreviewRoute({
+    index,
+    query,
+    threatIndex,
+    threatQuery,
+    timeFrame,
+    ruleType,
+    threatMapping,
   });
+
+  useEffect(() => {
+    if (isDisabled) clearPreview();
+  }, [isDisabled, clearPreview]);
 
   return (
     <>
@@ -93,9 +111,9 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           <EuiFlexItem grow={1}>
             <Select
               id="previewTimeFrame"
-              options={[]}
+              options={getTimeframeOptions(ruleType)}
               value={timeFrame}
-              onChange={(e) => setTimeFrame('m')}
+              onChange={(e) => setTimeFrame(e.target.value as Unit)}
               aria-label={i18n.QUERY_PREVIEW_SELECT_ARIA}
               disabled={isDisabled}
               data-test-subj="preview-time-frame"
@@ -116,15 +134,9 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       <EuiSpacer size="s" />
       {previewId && (
         <PreviewHistogram
-          title={'TODO title'}
-          disclaimer={'TODO test'}
-          to={'now'}
-          from={'now-1M'}
-          data={data}
-          totalCount={totalCount}
-          inspect={inspect}
-          refetch={refetch}
-          isLoading={isHistogramLoading}
+          timeFrame={timeFrame}
+          previewId={previewId}
+          addNoiseWarning={addNoiseWarning}
         />
       )}
       <CalloutGroup items={errors} isError />

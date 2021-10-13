@@ -58,6 +58,7 @@ import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
 import { PreviewQuery } from '../query_preview';
 import { RulePreview } from '../rule_preview';
+import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -162,6 +163,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       threatIndex: formThreatIndex,
       threatQueryBar: formThreatQuery,
       threshold: formThreshold,
+      threatMapping: formThreatMapping,
     },
   ] = useFormData<DefineStepRule>({
     form,
@@ -175,8 +177,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'threshold.cardinality.field',
       'threshold.cardinality.value',
       'threatIndex',
+      'threatMapping',
     ],
   });
+
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
@@ -519,15 +523,19 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <EuiSpacer size="s" />
             <RulePreview
               index={index}
-              threatIndex={threatIndex}
+              isDisabled={getIsRulePreviewDisabled({
+                ruleType,
+                isQueryBarValid,
+                isThreatQueryBarValid,
+                index,
+                threatIndex,
+                threatMapping: formThreatMapping,
+              })}
               query={formQuery}
+              ruleType={ruleType}
+              threatIndex={threatIndex}
               threatQuery={formThreatQuery}
-              isDisabled={
-                !isQueryBarValid ||
-                !isThreatQueryBarValid ||
-                index.length === 0 ||
-                threatIndex.length === 0
-              }
+              threatMapping={formThreatMapping}
             />
           </>
         )}
