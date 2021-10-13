@@ -26,18 +26,18 @@ import {
   getSimpleMlRule,
   getSimpleMlRuleOutput,
   waitForRuleSuccessOrStatus,
-  // waitForSignalsToBePresent,
-  // waitForAlertToComplete,
   getRuleForSignalTesting,
   getRuleForSignalTestingWithTimestampOverride,
   waitForAlertToComplete,
   waitForSignalsToBePresent,
-  // getRuleForSignalTestingWithTimestampOverride,
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
-// import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -319,6 +319,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForAlertToComplete(supertest, bodyId);
         await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
+        await sleep(5000);
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -349,6 +350,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyId = body.id;
 
         await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
+        await sleep(5000);
         await waitForSignalsToBePresent(supertest, 2, [bodyId]);
 
         const { body: statusBody } = await supertest
