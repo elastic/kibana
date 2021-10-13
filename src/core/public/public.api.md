@@ -712,6 +712,7 @@ export interface DocLinksStart {
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
+            apiKeysLearnMore: string;
         }>;
         readonly ecs: {
             readonly guide: string;
