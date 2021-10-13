@@ -59,6 +59,13 @@ export function useGetPackagePolicies(query: GetPackagePoliciesRequest['query'])
   });
 }
 
+export const useGetOnePackagePolicy = (packagePolicyId: string) => {
+  return useRequest<GetOnePackagePolicyResponse>({
+    path: packagePolicyRouteService.getInfoPath(packagePolicyId),
+    method: 'get',
+  });
+};
+
 export const sendGetOnePackagePolicy = (packagePolicyId: string) => {
   return sendRequest<GetOnePackagePolicyResponse>({
     path: packagePolicyRouteService.getInfoPath(packagePolicyId),

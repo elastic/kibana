@@ -44,7 +44,10 @@ import {
   sendUpgradePackagePolicy,
   sendUpgradePackagePolicyDryRun,
 } from '../../../hooks';
-import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
+import {
+  useBreadcrumbs as useIntegrationsBreadcrumbs,
+  useGetOnePackagePolicy,
+} from '../../../../integrations/hooks';
 import { Loading, Error, ExtensionWrapper } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
@@ -68,7 +71,23 @@ export const EditPackagePolicyPage = memo(() => {
     params: { packagePolicyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
 
-  return <EditPackagePolicyForm packagePolicyId={packagePolicyId} />;
+  const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
+
+  const extensionView = useUIExtension(
+    packagePolicy.data?.item?.package?.name ?? '',
+    'package-policy-edit'
+  );
+
+  return (
+    <EditPackagePolicyForm
+      packagePolicyId={packagePolicyId}
+      // If an extension opts in to this `useLatestPackageVersion` flag, we want to display
+      // the edit form in an "upgrade" state regardless of whether the user intended to
+      // "edit" their policy or "upgrade" it. This ensures the new policy generated will be
+      // set to use the latest version of the package, not its current version.
+      isUpgrade={extensionView?.useLatestPackageVersion}
+    />
+  );
 });
 
 export const EditPackagePolicyForm = memo<{
@@ -417,7 +436,7 @@ export const EditPackagePolicyForm = memo<{
   const [selectedTab, setSelectedTab] = useState(0);
 
   const layoutProps = {
-    from,
+    from: extensionView?.useLatestPackageVersion ? 'upgrade-from-extension' : from,
     cancelUrl,
     agentPolicy,
     packageInfo,
