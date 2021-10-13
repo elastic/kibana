@@ -14,6 +14,7 @@ import {
 } from 'src/core/public/mocks';
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { ReportingPanelContent, ReportingPanelProps as Props } from '.';
+import { ErrorUnsavedWorkPanel } from './components';
 
 jest.mock('./constants', () => ({
   getMaxUrlLength: jest.fn(() => 9999999),
@@ -88,7 +89,7 @@ describe('ReportingPanelContent', () => {
     });
 
     it('changing the layout triggers refreshing the state with the latest job params', () => {
-      const wrapper = mountComponent({ requiresSavedState: false });
+      const wrapper = mountComponent({ requiresSavedState: false, isDirty: false });
       wrapper.update();
       expect(wrapper.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
         `"http://localhost/api/reporting/generate/test?jobParams=%28appState%3Avery_cool_app_state_X%2CbrowserTimezone%3AMars%2CobjectType%3Anoice_object%2Ctitle%3Aultimate_title%2Cversion%3A%277.15.0-test%27%29"`
@@ -108,14 +109,14 @@ describe('ReportingPanelContent', () => {
       const wrapper = mountComponent({ requiresSavedState: false, isDirty: false });
       wrapper.update();
       expect(wrapper.exists('EuiCopy')).toBe(true);
-      expect(wrapper.exists('WarningUnsavedWorkPanel')).toBe(false);
+      expect(wrapper.exists(ErrorUnsavedWorkPanel)).toBe(false);
     });
 
-    it('shows the copy button and a warning with unsaved state', () => {
+    it('does not show the copy button when there is unsaved state', () => {
       const wrapper = mountComponent({ requiresSavedState: false, isDirty: true });
       wrapper.update();
-      expect(wrapper.exists('EuiCopy')).toBe(true);
-      expect(wrapper.exists('WarningUnsavedWorkPanel')).toBe(true);
+      expect(wrapper.exists('EuiCopy')).toBe(false);
+      expect(wrapper.exists(ErrorUnsavedWorkPanel)).toBe(true);
     });
 
     it('does not show the copy button when the URL is too long', () => {

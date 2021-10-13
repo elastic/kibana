@@ -30,7 +30,7 @@ import {
 } from '../../../common/constants';
 import { BaseParams } from '../../../common/types';
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
-import { WarningUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
+import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';
 
 export interface ReportingPanelProps {
@@ -117,9 +117,15 @@ class ReportingPanelContentUi extends Component<Props, State> {
     isUnsaved: boolean;
     exceedsMaxLength: boolean;
   }) {
-    const showCopyPostURLButton = !exceedsMaxLength;
-
-    const button = showCopyPostURLButton ? (
+    if (isUnsaved) {
+      if (exceedsMaxLength) {
+        return <ErrorUrlTooLongPanel isUnsaved />;
+      }
+      return <ErrorUnsavedWorkPanel />;
+    } else if (exceedsMaxLength) {
+      return <ErrorUrlTooLongPanel isUnsaved={false} />;
+    }
+    return (
       <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
         {(copy) => (
           <EuiButton color={isUnsaved ? 'warning' : 'primary'} fullWidth onClick={copy} size="s">
@@ -130,18 +136,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
           </EuiButton>
         )}
       </EuiCopy>
-    ) : undefined;
-
-    if (isUnsaved) {
-      if (exceedsMaxLength) {
-        return <ErrorUrlTooLongPanel isUnsaved />;
-      }
-
-      return <WarningUnsavedWorkPanel>{button}</WarningUnsavedWorkPanel>;
-    } else if (exceedsMaxLength) {
-      return <ErrorUrlTooLongPanel isUnsaved={false} />;
-    }
-    return button;
+    );
   }
 
   public render() {
