@@ -221,4 +221,4 @@ metadata:
   labels:
     k8s-app: elastic-agent
 ---
-`
+`;

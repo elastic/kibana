@@ -13,6 +13,8 @@ import type {
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 
+import { safeDump } from 'js-yaml';
+
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 import type { AuthenticatedUser } from '../../../security/server';
@@ -41,6 +43,12 @@ import type {
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
 
+import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
+
+import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
+
+import { elasticAgentManifest } from './elastic_agent_manifest';
+
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
@@ -49,10 +57,6 @@ import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
-import {FullAgentConfigMap} from "../../common/types/models/agent_cm";
-import {fullAgentConfigMapToYaml} from "../../common/services/agent_cm_to_yaml";
-import { safeDump } from 'js-yaml';
-import {elasticAgentManifest} from "../../public/components/agent_enrollment_flyout/elastic_agent_manifest";
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
 class AgentPolicyService {
@@ -720,41 +724,36 @@ class AgentPolicyService {
     return res.body.hits.hits[0]._source;
   }
 
-
   public async getFullAgentConfigMap(
     soClient: SavedObjectsClientContract,
     id: string,
-    options?: { standalone: boolean}
+    options?: { standalone: boolean }
   ): Promise<string | null> {
-
-
-    const fullAgentPolicy = await getFullAgentPolicy(
-      soClient,
-      id,
-      { standalone: true}
-    );
+    const fullAgentPolicy = await getFullAgentPolicy(soClient, id, { standalone: true });
     if (fullAgentPolicy) {
       const fullAgentConfigMap: FullAgentConfigMap = {
-        apiVersion: "v1",
-        kind: "ConfigMap",
+        apiVersion: 'v1',
+        kind: 'ConfigMap',
         metadata: {
-          name: "agent-node-datastreams",
-          namespace: "kube-system",
+          name: 'agent-node-datastreams',
+          namespace: 'kube-system',
           labels: {
-            "k8s-app": "elastic-agent"
+            'k8s-app': 'elastic-agent',
           },
         },
         data: fullAgentPolicy,
-      }
+      };
 
       const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
-      const updateMapHosts = configMapYaml.replace("http://localhost:9200","{ES_HOST}");
-      const updateManifestVersion = elasticAgentManifest.replace("VERSION",appContextService.getKibanaVersion());
-      return [updateMapHosts, updateManifestVersion].join('\n')
+      const updateMapHosts = configMapYaml.replace('http://localhost:9200', '{ES_HOST}');
+      const updateManifestVersion = elasticAgentManifest.replace(
+        'VERSION',
+        appContextService.getKibanaVersion()
+      );
+      return [updateMapHosts, updateManifestVersion].join('\n');
     } else {
-        return "";
+      return '';
     }
-
   }
 
   public async getFullAgentPolicy(

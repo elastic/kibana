@@ -31,9 +31,10 @@ import {
 } from '../../hooks';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../services';
 
+import type { PackagePolicy } from '../../../common';
+
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 import type { BaseProps } from './types';
-import {PackagePolicy} from "../../../common";
 
 type Props = BaseProps;
 
@@ -45,15 +46,10 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
 
   const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(agentPolicy?.id);
   const [fullAgentPolicy, setFullAgentPolicy] = useState<any | undefined>();
-  const [isK8s, setIsK8s] = useState<string | undefined>("isLoading");
-  const [yaml, setYaml] = useState<string | string>("");
-  const [runInstructions, setRunInstructions] = useState<string | string>("");
+  const [isK8s, setIsK8s] = useState<string | undefined>('isLoading');
+  const [yaml, setYaml] = useState<string | string>('');
+  const [runInstructions, setRunInstructions] = useState<string | string>('');
   const [downloadLink, setDownloadLink] = useState<string | undefined>();
-  const [policyMessage, setPolicyMessage] = useState<string | undefined>("");
-  const [applyMessage, setApplyMessage] = useState<string | undefined>("");
-  const [downloadMessage, setDownloadMessage] = useState<string | undefined>("");
-
-
 
   useEffect(() => {
     async function checkifK8s() {
@@ -61,32 +57,31 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
         return;
       }
       const agentPolicyRequest = await sendGetOneAgentPolicy(selectedPolicyId);
-      const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
+      const agentPol = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
 
-      if (!agentPolicy) {
-        setIsK8s("false");
+      if (!agentPol) {
+        setIsK8s('false');
         return;
       }
       let found = false;
-      (agentPolicy.package_policies as PackagePolicy[]).forEach(({ package: pkg }) => {
+      (agentPol.package_policies as PackagePolicy[]).forEach(({ package: pkg }) => {
         if (!pkg) {
           return;
         }
-        if (pkg.name == "kubernetes") {
+        if (pkg.name === 'kubernetes') {
           found = true;
           return;
         }
       });
 
       if (found) {
-        setIsK8s("true");
+        setIsK8s('true');
       } else {
-        setIsK8s("false");
+        setIsK8s('false');
       }
     }
-    checkifK8s()
+    checkifK8s();
   }, [selectedPolicyId, notifications.toasts]);
-
 
   useEffect(() => {
     async function fetchFullPolicy() {
@@ -95,10 +90,14 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
           return;
         }
         let query = { standalone: true, kubernetes: false };
-        let downloandLinkUrl = `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?standalone=true`;
-        if (isK8s == "true"){
+        let downloandLinkUrl = `${agentPolicyRouteService.getInfoFullDownloadPath(
+          selectedPolicyId
+        )}?standalone=true`;
+        if (isK8s === 'true') {
           query = { standalone: true, kubernetes: true };
-          downloandLinkUrl = `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?kubernetes=true`;
+          downloandLinkUrl = `${agentPolicyRouteService.getInfoFullDownloadPath(
+            selectedPolicyId
+          )}?kubernetes=true`;
         }
         const res = await sendGetOneAgentPolicyFull(selectedPolicyId, query);
         if (res.error) {
@@ -109,44 +108,98 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
           throw new Error('No data while fetching full agent policy');
         }
         setFullAgentPolicy(res.data.item);
-        setDownloadLink(core.http.basePath.prepend(
-          downloandLinkUrl
-        ));
+        setDownloadLink(core.http.basePath.prepend(downloandLinkUrl));
       } catch (error) {
         notifications.toasts.addError(error, {
           title: 'Error',
         });
       }
     }
-    if (isK8s != "isLoading") {
-        fetchFullPolicy()
+    if (isK8s !== 'isLoading') {
+      fetchFullPolicy();
     }
-  }, [selectedPolicyId, notifications.toasts, isK8s],);
+  }, [selectedPolicyId, notifications.toasts, isK8s, core.http.basePath]);
 
-  useMemo(() => setYamlInstructions(), [fullAgentPolicy]);
-
-  function setYamlInstructions(){
-    if (isK8s == "true") {
-        if (typeof fullAgentPolicy === 'object') {
-          return;
-        }
-        setYaml(fullAgentPolicy);
-        setRunInstructions('kubectl apply -f elastic-agent.yml');
-        setPolicyMessage("Copy or download the Kubernetes manifest inside the Kubernetes cluster. Modify {ESUsernameVariable}, {ESPasswordVariable} and {ESHostVariable} in the Daemonset environment variables and apply the manifest.");
-        setApplyMessage("From the directory where the Kubernetes manifest is downloaded, run the apply command.");
-        setDownloadMessage("Download Manifest");
+  useMemo(() => {
+    if (isK8s === 'true') {
+      if (typeof fullAgentPolicy === 'object') {
+        return;
+      }
+      setYaml(fullAgentPolicy);
+      setRunInstructions('kubectl apply -f elastic-agent.yml');
     } else {
-        if (typeof fullAgentPolicy === 'string') {
-          return;
-        }
-        setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump));
-        setRunInstructions('./elastic-agent install');
-        setPolicyMessage("Copy this policy to the {fileName} on the host where the Elastic Agent is installed. Modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of {fileName} to use your Elasticsearch credentials.");
-        setApplyMessage("From the agent directory, run this command to install, enroll and start an Elastic Agent. You can reuse this command to set up agents on more than one host. Requires administrator privileges.");
-        setDownloadMessage("Download Policy");
+      if (typeof fullAgentPolicy === 'string') {
+        return;
+      }
+      setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump));
+      setRunInstructions('./elastic-agent install');
+    }
+  }, [fullAgentPolicy, isK8s]);
+
+  function policyMsg() {
+    if (isK8s === 'true') {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.agentEnrollment.stepConfigureAgentDescriptionk8s"
+          defaultMessage="Copy or download the Kubernetes manifest inside the Kubernetes cluster. Modify {ESUsernameVariable}, {ESPasswordVariable} and {ESHostVariable} in the Daemonset environment variables and apply the manifest."
+          values={{
+            ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
+            ESPasswordVariable: <EuiCode>ES_PASSWORD</EuiCode>,
+            ESHostVariable: <EuiCode>ES_HOST</EuiCode>,
+          }}
+        />
+      );
+    } else {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.agentEnrollment.stepConfigureAgentDescription"
+          defaultMessage="Copy this policy to the {fileName} on the host where the Elastic Agent is installed. Modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of {fileName} to use your Elasticsearch credentials."
+          values={{
+            fileName: <EuiCode>elastic-agent.yml</EuiCode>,
+            ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
+            ESPasswordVariable: <EuiCode>ES_PASSWORD</EuiCode>,
+            outputSection: <EuiCode>outputs</EuiCode>,
+          }}
+        />
+      );
     }
   }
 
+  function downloadMsg() {
+    if (isK8s === 'true') {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.agentEnrollment.downloadPolicyButtonk8s"
+          defaultMessage="Download Manifest"
+        />
+      );
+    } else {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.agentEnrollment.downloadPolicyButton"
+          defaultMessage="Download Policy"
+        />
+      );
+    }
+  }
+
+  function applyMsg() {
+    if (isK8s === 'true') {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s"
+          defaultMessage="From the directory where the Kubernetes manifest is downloaded, run the apply command."
+        />
+      );
+    } else {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.agentEnrollment.stepRunAgentDescription"
+          defaultMessage="From the agent directory, run this command to install, enroll and start an Elastic Agent. You can reuse this command to set up agents on more than one host. Requires administrator privileges."
+        />
+      );
+    }
+  }
 
   const steps = [
     DownloadStep(),
@@ -160,17 +213,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
       children: (
         <>
           <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.stepConfigureAgentDescription"
-              defaultMessage={policyMessage}
-              values={{
-                fileName: <EuiCode>elastic-agent.yml</EuiCode>,
-                ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
-                ESPasswordVariable: <EuiCode>ES_PASSWORD</EuiCode>,
-                ESHostVariable: <EuiCode>ES_HOST</EuiCode>,
-                outputSection: <EuiCode>outputs</EuiCode>,
-              }}
-            />
+            {policyMsg()}
             <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
@@ -187,10 +230,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton iconType="download" href={downloadLink} isDisabled={!downloadLink}>
-                  <FormattedMessage
-                    id="xpack.fleet.agentEnrollment.downloadPolicyButton"
-                    defaultMessage={downloadMessage}
-                  />
+                  {downloadMsg()}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -209,10 +249,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
       children: (
         <>
           <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.stepRunAgentDescription"
-              defaultMessage={applyMessage}
-            />
+            {applyMsg()}
             <EuiSpacer size="m" />
             <EuiCodeBlock fontSize="m">{runInstructions}</EuiCodeBlock>
             <EuiSpacer size="m" />

@@ -75,7 +75,10 @@ export async function getFullAgentPolicy(
     id: agentPolicy.id,
     outputs: {
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
-        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(output, standalone);
+        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
+          output,
+          standalone
+        );
 
         return acc;
       }, {}),

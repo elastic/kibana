@@ -7,16 +7,14 @@
 
 import type { safeDump } from 'js-yaml';
 
-import {FullAgentConfigMap} from "../types/models/agent_cm";
+import type { FullAgentConfigMap } from '../types/models/agent_cm';
 
-const CM_KEYS_ORDER = [
-  'apiVersion',
-  'kind',
-  'metadata',
-  'data',
-];
+const CM_KEYS_ORDER = ['apiVersion', 'kind', 'metadata', 'data'];
 
-export const fullAgentConfigMapToYaml = (policy: FullAgentConfigMap, toYaml: typeof safeDump): string => {
+export const fullAgentConfigMapToYaml = (
+  policy: FullAgentConfigMap,
+  toYaml: typeof safeDump
+): string => {
   return toYaml(policy, {
     skipInvalid: true,
     sortKeys: (keyA: string, keyB: string) => {
