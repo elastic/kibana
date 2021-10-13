@@ -141,21 +141,19 @@ Object {
         hits: {
           hits: [
             {
-              action: {
-                id: '1',
-                actionTypeId: '.server-log',
-              },
-              namespaces: {
-                default: 1,
+              _source: {
+                action: {
+                  id: '1',
+                  actionTypeId: '.server-log',
+                },
               },
             },
             {
-              action: {
-                id: '2',
-                actionTypeId: '.slack',
-              },
-              namespaces: {
-                test: 1,
+              _source: {
+                action: {
+                  id: '2',
+                  actionTypeId: '.slack',
+                },
               },
             },
           ],
@@ -164,7 +162,7 @@ Object {
     );
     const telemetry = await getInUseTotalCount(mockEsClient, 'test');
 
-    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
   "countByAlertHistoryConnectorType": 0,
@@ -217,21 +215,19 @@ Object {
         hits: {
           hits: [
             {
-              action: {
-                id: '1',
-                actionTypeId: '.server-log',
-              },
-              namespaces: {
-                default: 1,
+              _source: {
+                action: {
+                  id: '1',
+                  actionTypeId: '.server-log',
+                },
               },
             },
             {
-              action: {
-                id: '2',
-                actionTypeId: '.slack',
-              },
-              namespaces: {
-                test: 1,
+              _source: {
+                action: {
+                  id: '2',
+                  actionTypeId: '.slack',
+                },
               },
             },
           ],
@@ -240,7 +236,7 @@ Object {
     );
     const telemetry = await getInUseTotalCount(mockEsClient, 'test');
 
-    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
   "countByAlertHistoryConnectorType": 1,
@@ -376,7 +372,7 @@ Object {
 
   test('getInUseTotalCount() accounts for preconfigured connectors', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockReturnValueOnce(
       // @ts-expect-error not full search response
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
@@ -422,30 +418,27 @@ Object {
         hits: {
           hits: [
             {
-              action: {
-                id: '1',
-                actionTypeId: '.server-log',
-              },
-              namespaces: {
-                default: 1,
-              },
-            },
-            {
-              action: {
-                id: '2',
-                actionTypeId: '.slack',
-              },
-              namespaces: {
-                test: 1,
+              _source: {
+                action: {
+                  id: '1',
+                  actionTypeId: '.server-log',
+                },
               },
             },
             {
-              action: {
-                id: '3',
-                actionTypeId: '.email',
+              _source: {
+                action: {
+                  id: '2',
+                  actionTypeId: '.slack',
+                },
               },
-              namespaces: {
-                test: 1,
+            },
+            {
+              _source: {
+                action: {
+                  id: '3',
+                  actionTypeId: '.email',
+                },
               },
             },
           ],
@@ -454,7 +447,7 @@ Object {
     );
     const telemetry = await getInUseTotalCount(mockEsClient, 'test');
 
-    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
   "countByAlertHistoryConnectorType": 1,

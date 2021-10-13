@@ -254,10 +254,9 @@ export async function getInUseTotalCount(
     body: { hits: actions },
   } = await esClient.search<{
     action: ActionResult;
-    namespaces: string[];
   }>({
     index: kibanaIndex,
-    _source_includes: ['action', 'namespaces'],
+    _source_includes: ['action'],
     body: {
       query: {
         bool: {
