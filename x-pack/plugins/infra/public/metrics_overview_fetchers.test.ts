@@ -74,7 +74,7 @@ describe('Metrics UI Observability Homepage Functions', () => {
       expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview/top', {
         body: JSON.stringify({
           sourceId: 'default',
-          bucketSize,
+          bucketSize: intervalString,
           size: 5,
           timerange: {
             from: startTime.valueOf(),
