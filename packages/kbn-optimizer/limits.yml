@@ -39,7 +39,6 @@ pageLoadAssetSize:
   inspector: 148711
   kibanaLegacy: 107711
   kibanaOverview: 56279
-  kibanaReact: 188705
   kibanaUtils: 198829
   lens: 96624
   licenseManagement: 41817
@@ -116,3 +115,4 @@ pageLoadAssetSize:
   expressionMetricVis: 23121
   visTypeMetric: 23332
   dataViews: 42000
+  kibanaReact: 98050

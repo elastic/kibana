@@ -7,20 +7,17 @@
  */
 
 import React from 'react';
-import {
-  EuiDelayRender,
-  EuiErrorBoundary,
-  EuiLoadingContent,
-  EuiFormControlLayout,
-} from '@elastic/eui';
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiDelayRender, EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
+
 import { useUiSetting } from '../ui_settings';
 import type { Props } from './code_editor';
 
 export * from './languages/constants';
 
 const LazyBaseEditor = React.lazy(() => import('./code_editor'));
+const LazyCodeEditorField = React.lazy(() =>
+  import('./code_editor_field').then((m) => ({ default: m.CodeEditorField }))
+);
 
 const Fallback: React.FunctionComponent<{ height: Props['height'] }> = ({ height }) => {
   return (
@@ -57,38 +54,11 @@ export const CodeEditor: React.FunctionComponent<Props> = (props) => {
  * Renders a Monaco code editor in the same style as other EUI form fields.
  */
 export const CodeEditorField: React.FunctionComponent<Props> = (props) => {
-  const { width, height, options, fullWidth } = props;
   const darkMode = useUiSetting<boolean>('theme:darkMode');
-  const theme = darkMode ? darkTheme : lightTheme;
-  const style = {
-    width,
-    height,
-    backgroundColor: options?.readOnly
-      ? theme.euiFormBackgroundReadOnlyColor
-      : theme.euiFormBackgroundColor,
-  };
-
   return (
     <EuiErrorBoundary>
-      <React.Suspense
-        fallback={
-          <EuiFormControlLayout
-            append={<div hidden />}
-            style={{ ...style, padding: theme.paddingSizes.m }}
-            readOnly={options?.readOnly}
-          >
-            <Fallback height={props.height} />
-          </EuiFormControlLayout>
-        }
-      >
-        <EuiFormControlLayout
-          append={<div hidden />}
-          style={style}
-          readOnly={options?.readOnly}
-          fullWidth={fullWidth}
-        >
-          <LazyBaseEditor {...props} useDarkTheme={darkMode} transparentBackground />
-        </EuiFormControlLayout>
+      <React.Suspense fallback={<Fallback height={props.height} />}>
+        <LazyCodeEditorField {...props} useDarkTheme={darkMode} />
       </React.Suspense>
     </EuiErrorBoundary>
   );
