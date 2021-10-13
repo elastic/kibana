@@ -22,6 +22,7 @@ import { DiscoverServices } from '../../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
 import { DocTableContext } from '../main/components/doc_table/doc_table_context';
 import { EsHitRecordList } from '../../types';
+import { SortPairArr } from '../main/components/doc_table/lib/get_sort';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -109,6 +110,9 @@ export function ContextAppContent({
     },
     [setAppState]
   );
+  const sort = useMemo(() => {
+    return [[indexPattern.timeFieldName!, SortDirection.desc]];
+  }, [indexPattern]);
 
   return (
     <Fragment>
@@ -132,7 +136,7 @@ export function ContextAppContent({
           onFilter={addFilter}
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
-          sort={[[indexPattern.timeFieldName!, SortDirection.desc]]}
+          sort={sort}
           useNewFieldsApi={useNewFieldsApi}
           dataTestSubj="contextDocTable"
         />
@@ -147,7 +151,7 @@ export function ContextAppContent({
             expandedDoc={expandedDoc}
             isLoading={isAnchorLoading}
             sampleSize={0}
-            sort={[[indexPattern.timeFieldName!, SortDirection.desc]]}
+            sort={sort as SortPairArr[]}
             isSortEnabled={false}
             showTimeCol={showTimeCol}
             services={services}

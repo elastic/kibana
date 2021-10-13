@@ -9,8 +9,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../../common';
 import { DiscoverServices } from '../../../../build_services';
-import { fetchAnchorProvider } from '../services/anchor';
-import { fetchContextProvider, SurrDocType } from '../services/context';
+import { fetchAnchor } from '../services/anchor';
+import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import { MarkdownSimple, toMountPoint } from '../../../../../../kibana_react/public';
 import { IndexPattern, SortDirection } from '../../../../../../data/public';
 import {
@@ -51,13 +51,6 @@ export function useContextAppFetch({
     () => getFirstSortableField(indexPattern, config.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)),
     [config, indexPattern]
   );
-  const fetchAnchor = useMemo(() => {
-    return fetchAnchorProvider(searchSource, useNewFieldsApi);
-  }, [searchSource, useNewFieldsApi]);
-  const { fetchSurroundingDocs } = useMemo(
-    () => fetchContextProvider(useNewFieldsApi),
-    [useNewFieldsApi]
-  );
 
   const [fetchedState, setFetchedState] = useState<ContextFetchState>(
     getInitialContextQueryState()
@@ -89,10 +82,12 @@ export function useContextAppFetch({
 
     try {
       setState({ anchorStatus: { value: LoadingStatus.LOADING } });
-      const anchor = await fetchAnchor(indexPattern, anchorId, [
+      const sort = [
         { [indexPattern.timeFieldName!]: SortDirection.desc },
         { [tieBreakerField]: SortDirection.desc },
-      ]);
+      ];
+      const anchor = await fetchAnchor(anchorId, indexPattern, searchSource, sort, useNewFieldsApi);
+
       setState({ anchor, anchorStatus: { value: LoadingStatus.LOADED } });
       return anchor;
     } catch (error) {
@@ -102,7 +97,15 @@ export function useContextAppFetch({
         text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
       });
     }
-  }, [tieBreakerField, setState, toastNotifications, fetchAnchor, anchorId, indexPattern]);
+  }, [
+    anchorId,
+    indexPattern,
+    searchSource,
+    setState,
+    tieBreakerField,
+    toastNotifications,
+    useNewFieldsApi,
+  ]);
 
   const fetchSurroundingRows = useCallback(
     async (type: SurrDocType, fetchedAnchor?: EsHitRecord) => {
@@ -125,7 +128,8 @@ export function useContextAppFetch({
           tieBreakerField,
           SortDirection.desc,
           count,
-          filters
+          filters,
+          useNewFieldsApi
         );
         setState({ [type]: rows, [statusKey]: { value: LoadingStatus.LOADED } });
       } catch (error) {
@@ -142,9 +146,9 @@ export function useContextAppFetch({
       fetchedState.anchor,
       tieBreakerField,
       setState,
-      fetchSurroundingDocs,
       indexPattern,
       toastNotifications,
+      useNewFieldsApi,
     ]
   );
 

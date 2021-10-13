@@ -585,6 +585,11 @@ export class TaskRunner<
     event.kibana.alerting = event.kibana.alerting || {};
     event.kibana.alerting.status = executionStatus.status;
 
+    // Copy duration into execution status if available
+    if (null != event.event?.duration) {
+      executionStatus.lastDuration = Math.round(event.event?.duration / Millis2Nanos);
+    }
+
     // if executionStatus indicates an error, fill in fields in
     // event from it
     if (executionStatus.error) {

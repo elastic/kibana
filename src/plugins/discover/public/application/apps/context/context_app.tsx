@@ -36,19 +36,16 @@ export interface ContextAppProps {
 
 export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const services = getServices();
-  const { uiSettings: config, capabilities, indexPatterns, navigation, filterManager } = services;
+  const { uiSettings, capabilities, indexPatterns, navigation, filterManager } = services;
 
-  const isLegacy = useMemo(() => config.get(DOC_TABLE_LEGACY), [config]);
-  const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
+  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
+  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   /**
    * Context app state
    */
-  const { appState, setAppState } = useContextAppState({ indexPattern, services });
+  const { appState, setAppState } = useContextAppState({ services });
   const prevAppState = useRef<AppState>();
-  if (!indexPattern.timeFieldName && appState.timefield) {
-    indexPattern.timeFieldName = appState.timefield;
-  }
 
   /**
    * Context fetched state
@@ -89,7 +86,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,
-    config,
+    config: uiSettings,
     indexPattern,
     indexPatterns,
     state: appState,
@@ -112,7 +109,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
         field,
         values,
         operation,
-        indexPattern
+        indexPattern.id!
       );
       filterManager.addFilters(newFilters);
       if (indexPatterns) {
@@ -120,7 +117,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
         await popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       }
     },
-    [filterManager, indexPattern, indexPatterns, capabilities]
+    [filterManager, indexPatterns, indexPattern, capabilities]
   );
 
   const TopNavMenu = navigation.ui.TopNavMenu;

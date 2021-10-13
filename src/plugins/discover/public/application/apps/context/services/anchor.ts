@@ -6,36 +6,35 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { ISearchSource, EsQuerySortValue, IndexPattern } from '../../../../../../data/public';
 import { EsHitRecord } from '../../../types';
 
-export function fetchAnchorProvider(searchSource: ISearchSource, useNewFieldsApi: boolean = false) {
-  return async function fetchAnchor(
-    indexPattern: IndexPattern,
-    anchorId: string,
-    sort: EsQuerySortValue[]
-  ): Promise<EsHitRecord> {
-    updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
+export async function fetchAnchor(
+  anchorId: string,
+  indexPattern: IndexPattern,
+  searchSource: ISearchSource,
+  sort: EsQuerySortValue[],
+  useNewFieldsApi: boolean = false
+): Promise<EsHitRecord> {
+  updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
 
-    const response = await searchSource.fetch();
-    const doc = get(response, ['hits', 'hits', 0]);
+  const response = await searchSource.fetch();
+  const doc = response.hits?.hits?.[0];
 
-    if (!doc) {
-      throw new Error(
-        i18n.translate('discover.context.failedToLoadAnchorDocumentErrorDescription', {
-          defaultMessage: 'Failed to load anchor document.',
-        })
-      );
-    }
+  if (!doc) {
+    throw new Error(
+      i18n.translate('discover.context.failedToLoadAnchorDocumentErrorDescription', {
+        defaultMessage: 'Failed to load anchor document.',
+      })
+    );
+  }
 
-    return {
-      ...doc,
-      isAnchor: true,
-    } as EsHitRecord;
-  };
+  return {
+    ...doc,
+    isAnchor: true,
+  } as EsHitRecord;
 }
 
 export function updateSearchSource(
