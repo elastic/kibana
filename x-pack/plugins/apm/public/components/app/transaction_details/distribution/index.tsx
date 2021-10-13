@@ -113,7 +113,7 @@ export function TransactionDistribution({
     (callApmApi) => {
       if (serviceName && environment && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/latency/overall_distribution',
+          endpoint: 'GET /internal/apm/latency/overall_distribution',
           params: {
             query: {
               serviceName,

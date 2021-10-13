@@ -13,7 +13,7 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
 const latencyOverallDistributionRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/latency/overall_distribution',
+  endpoint: 'GET /internal/apm/latency/overall_distribution',
   params: t.type({
     query: t.intersection([
       t.partial({
