@@ -412,7 +412,9 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }>"
+                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; ruleExecutionLog: Readonly<{} & { underlyingClient: ",
+                  "UnderlyingLogClient",
+                  "; }>; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }>"
                 ],
                 "path": "x-pack/plugins/security_solution/server/client/client.ts",
                 "deprecated": false,
@@ -845,7 +847,9 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; readonly alertIgnoreFields: string[]; readonly enableExperimental: string[]; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly packagerTaskInterval: string; readonly prebuiltRulesFromFileSystem: boolean; readonly prebuiltRulesFromSavedObjects: boolean; }"
+          "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; readonly alertIgnoreFields: string[]; readonly enableExperimental: string[]; readonly ruleExecutionLog: Readonly<{} & { underlyingClient: ",
+          "UnderlyingLogClient",
+          "; }>; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly packagerTaskInterval: string; readonly prebuiltRulesFromFileSystem: boolean; readonly prebuiltRulesFromSavedObjects: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/server/config.ts",
         "deprecated": false,
@@ -2437,12 +2441,15 @@
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.BrowserField.subType",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "subType",
             "description": [],
             "signature": [
-              "{ [key: string]: unknown; nested?: { path: string; } | undefined; } | undefined"
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
+              " | undefined"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
             "deprecated": false
@@ -2942,13 +2949,9 @@
                         "text": "ColumnHeaderType"
                       },
                       "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-                      {
-                        "pluginId": "@kbn/es-query",
-                        "scope": "common",
-                        "docId": "kibKbnEsQueryPluginApi",
-                        "section": "def-common.IFieldSubType",
-                        "text": "IFieldSubType"
-                      },
+                      "IFieldSubTypeMultiOptional",
+                      " | ",
+                      "IFieldSubTypeNestedOptional",
                       " | undefined; type?: string | undefined; }"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
@@ -7725,18 +7728,194 @@
       },
       {
         "parentPluginId": "securitySolution",
-        "id": "def-common.HostsRiskyHostsStrategyResponse",
+        "id": "def-common.HostsRiskScore",
         "type": "Interface",
         "tags": [],
-        "label": "HostsRiskyHostsStrategyResponse",
+        "label": "HostsRiskScore",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risk_score/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostsRiskScore.host",
+            "type": "Object",
+            "tags": [],
+            "label": "host",
+            "description": [],
+            "signature": [
+              "{ name: string; }"
+            ],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risk_score/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostsRiskScore.risk_score",
+            "type": "number",
+            "tags": [],
+            "label": "risk_score",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risk_score/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostsRiskScore.risk",
+            "type": "string",
+            "tags": [],
+            "label": "risk",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risk_score/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostsRiskScoreRequestOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostsRiskScoreRequestOptions",
         "description": [],
         "signature": [
           {
             "pluginId": "securitySolution",
             "scope": "common",
             "docId": "kibSecuritySolutionPluginApi",
-            "section": "def-common.HostsRiskyHostsStrategyResponse",
-            "text": "HostsRiskyHostsStrategyResponse"
+            "section": "def-common.HostsRiskScoreRequestOptions",
+            "text": "HostsRiskScoreRequestOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IEsSearchRequest",
+            "text": "IEsSearchRequest"
+          }
+        ],
+        "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risk_score/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostsRiskScoreRequestOptions.defaultIndex",
+            "type": "Array",
+            "tags": [],
+            "label": "defaultIndex",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risk_score/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostsRiskScoreRequestOptions.factoryQueryType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "factoryQueryType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.HostsQueries",
+                "text": "HostsQueries"
+              },
+              " | ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.HostsKpiQueries",
+                "text": "HostsKpiQueries"
+              },
+              " | ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.UebaQueries",
+                "text": "UebaQueries"
+              },
+              " | ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.NetworkQueries",
+                "text": "NetworkQueries"
+              },
+              " | ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.NetworkKpiQueries",
+                "text": "NetworkKpiQueries"
+              },
+              " | ",
+              "CtiQueries",
+              " | \"matrixHistogram\" | \"matrixHistogramEntities\" | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risk_score/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostsRiskScoreRequestOptions.hostName",
+            "type": "string",
+            "tags": [],
+            "label": "hostName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risk_score/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostsRiskScoreRequestOptions.timerange",
+            "type": "Object",
+            "tags": [],
+            "label": "timerange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.TimerangeInput",
+                "text": "TimerangeInput"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risk_score/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostsRiskScoreStrategyResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostsRiskScoreStrategyResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostsRiskScoreStrategyResponse",
+            "text": "HostsRiskScoreStrategyResponse"
           },
           " extends ",
           {
@@ -7748,12 +7927,12 @@
           },
           "<any>"
         ],
-        "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risky_hosts/index.ts",
+        "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risk_score/index.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.HostsRiskyHostsStrategyResponse.inspect",
+            "id": "def-common.HostsRiskScoreStrategyResponse.inspect",
             "type": "CompoundType",
             "tags": [],
             "label": "inspect",
@@ -7768,7 +7947,7 @@
               },
               " | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risky_hosts/index.ts",
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risk_score/index.ts",
             "deprecated": false
           }
         ],
@@ -8937,18 +9116,14 @@
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.IndexField.subType",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "subType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
               " | undefined"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
@@ -19263,13 +19438,9 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.IFieldSubType",
-            "text": "IFieldSubType"
-          },
+          "IFieldSubTypeMultiOptional",
+          " | ",
+          "IFieldSubTypeNestedOptional",
           " | undefined; type?: string | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
@@ -19829,26 +20000,6 @@
           }
         ],
         "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/kpi/unique_ips/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.HostsRiskyHostsRequestOptions",
-        "type": "Type",
-        "tags": [],
-        "label": "HostsRiskyHostsRequestOptions",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "securitySolution",
-            "scope": "common",
-            "docId": "kibSecuritySolutionPluginApi",
-            "section": "def-common.RequestBasicOptions",
-            "text": "RequestBasicOptions"
-          }
-        ],
-        "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risky_hosts/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -21393,13 +21544,13 @@
             "section": "def-common.HostsQueries",
             "text": "HostsQueries"
           },
-          ".riskyHosts ? ",
+          ".hostsRiskScore ? ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
             "docId": "kibSecuritySolutionPluginApi",
-            "section": "def-common.RequestBasicOptions",
-            "text": "RequestBasicOptions"
+            "section": "def-common.HostsRiskScoreRequestOptions",
+            "text": "HostsRiskScoreRequestOptions"
           },
           " : T extends ",
           {
@@ -21883,13 +22034,13 @@
             "section": "def-common.HostsQueries",
             "text": "HostsQueries"
           },
-          ".riskyHosts ? ",
+          ".hostsRiskScore ? ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
             "docId": "kibSecuritySolutionPluginApi",
-            "section": "def-common.HostsRiskyHostsStrategyResponse",
-            "text": "HostsRiskyHostsStrategyResponse"
+            "section": "def-common.HostsRiskScoreStrategyResponse",
+            "text": "HostsRiskScoreStrategyResponse"
           },
           " : T extends ",
           {
