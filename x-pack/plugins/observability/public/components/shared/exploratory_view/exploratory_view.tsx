@@ -20,8 +20,15 @@ import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
 import { SeriesViews } from './views/series_views';
 import { LensEmbeddable } from './lens_embeddable';
 import { EmptyView } from './components/empty_view';
+import { ChartCreationInfo } from './chart_creation_info';
 
 export type PanelId = 'seriesPanel' | 'chartPanel';
+
+export interface ChartTimeRangeContext {
+  lastUpdated: number;
+  to: number;
+  from: number;
+}
 
 export function ExploratoryView({
   saveAttributes,
@@ -37,7 +44,9 @@ export function ExploratoryView({
 
   const [height, setHeight] = useState<string>('100vh');
 
-  const [lastUpdated, setLastUpdated] = useState<number | undefined>();
+  const [chartTimeRangeContext, setChartTimeRangeContext] = useState<
+    ChartTimeRangeContext | undefined
+  >();
 
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
@@ -96,7 +105,10 @@ export function ExploratoryView({
     <Wrapper>
       {lens ? (
         <>
-          <ExploratoryViewHeader lensAttributes={lensAttributes} lastUpdated={lastUpdated} />
+          <ExploratoryViewHeader
+            lensAttributes={lensAttributes}
+            lastUpdated={chartTimeRangeContext?.lastUpdated}
+          />
           <LensWrapper ref={wrapperRef} height={height}>
             <EuiResizableContainer
               style={{ height: '100%' }}
@@ -116,7 +128,7 @@ export function ExploratoryView({
                     >
                       {lensAttributes ? (
                         <LensEmbeddable
-                          setLastUpdated={setLastUpdated}
+                          setChartTimeRangeContext={setChartTimeRangeContext}
                           lensAttributes={lensAttributes}
                         />
                       ) : (
@@ -144,6 +156,11 @@ export function ExploratoryView({
                           {HIDE_CHART_LABEL}
                         </HideChart>
                       )}
+                      <ChartCreationInfo
+                        lastUpdated={chartTimeRangeContext?.lastUpdated}
+                        to={chartTimeRangeContext?.to}
+                        from={chartTimeRangeContext?.from}
+                      />
                       <SeriesViews
                         seriesBuilderRef={seriesBuilderRef}
                         onSeriesPanelCollapse={onChange}

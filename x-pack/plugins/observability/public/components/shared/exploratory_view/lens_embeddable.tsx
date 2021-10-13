@@ -13,14 +13,16 @@ import { useSeriesStorage } from './hooks/use_series_storage';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useExpViewTimeRange } from './hooks/use_time_range';
+import { ChartTimeRangeContext } from './exploratory_view';
+import { parseRelativeDate } from './components/date_range_picker';
 
 interface Props {
   lensAttributes: TypedLensByValueInput['attributes'];
-  setLastUpdated: Dispatch<SetStateAction<number | undefined>>;
+  setChartTimeRangeContext: Dispatch<SetStateAction<ChartTimeRangeContext | undefined>>;
 }
 
 export function LensEmbeddable(props: Props) {
-  const { lensAttributes, setLastUpdated } = props;
+  const { lensAttributes, setChartTimeRangeContext } = props;
 
   const {
     services: { lens, notifications },
@@ -35,8 +37,12 @@ export function LensEmbeddable(props: Props) {
   const timeRange = useExpViewTimeRange();
 
   const onLensLoad = useCallback(() => {
-    setLastUpdated(Date.now());
-  }, [setLastUpdated]);
+    setChartTimeRangeContext({
+      lastUpdated: Date.now(),
+      to: parseRelativeDate(timeRange?.to || '').valueOf(),
+      from: parseRelativeDate(timeRange?.from || '').valueOf(),
+    });
+  }, [setChartTimeRangeContext, timeRange]);
 
   const onBrushEnd = useCallback(
     ({ range }: { range: number[] }) => {
