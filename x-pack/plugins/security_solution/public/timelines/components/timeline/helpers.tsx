@@ -9,6 +9,7 @@ import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
 import { EsQueryConfig, Filter, Query } from '@kbn/es-query';
+import { DataViewSpec } from 'src/plugins/data_views/common';
 import {
   handleSkipFocus,
   elementOrChildrenHasFocus,
@@ -25,7 +26,6 @@ import {
   EXISTS_OPERATOR,
 } from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
@@ -151,7 +151,7 @@ export const combineQueries = ({
 }: {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewSpec;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;

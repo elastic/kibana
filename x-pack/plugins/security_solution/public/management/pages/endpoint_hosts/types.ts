@@ -20,7 +20,7 @@ import {
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../fleet/common';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { DataViewSpec } from '../../../../../../../src/plugins/data_views/common';
 import { AsyncResourceState } from '../../state';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 
@@ -86,7 +86,7 @@ export interface EndpointState {
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   endpointsExist: boolean;
   /** index patterns for query bar */
-  patterns: IIndexPattern[];
+  patterns: DataViewSpec[];
   /** api error from retrieving index patters for query bar */
   patternsError?: ServerApiError;
   /** Is auto-refresh enabled */
