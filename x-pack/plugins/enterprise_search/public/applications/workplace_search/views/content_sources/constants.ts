@@ -579,6 +579,49 @@ export const SOURCE_SYNCHRONIZATION_FREQUENCY_TITLE = i18n.translate(
   }
 );
 
+export const SOURCE_SYNCHRONIZATION_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationTitle',
+  {
+    defaultMessage: 'Synchronization',
+  }
+);
+
+export const SOURCE_SYNCHRONIZATION_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationButtonLabel',
+  {
+    defaultMessage: 'Synchronize content',
+  }
+);
+
+export const SOURCE_SYNC_FREQUENCY_LINK_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncFrequencyLinkLabel',
+  {
+    defaultMessage: 'sync frequency',
+  }
+);
+
+export const SOURCE_BLOCKED_TIME_WINDOWS_LINK_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceBlockedTimeWindowsLinkLabel',
+  {
+    defaultMessage: 'blocked time windows',
+  }
+);
+
+export const SOURCE_SYNC_CONFIRM_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncConfirmTitle',
+  {
+    defaultMessage: 'Start new content sync?',
+  }
+);
+
+export const SOURCE_SYNC_CONFIRM_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncConfirmMessage',
+  {
+    defaultMessage:
+      'Are you sure you would like to continue with this request and stop all other syncs?',
+  }
+);
+
 export const SOURCE_SYNC_FREQUENCY_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncFrequencyTitle',
   {

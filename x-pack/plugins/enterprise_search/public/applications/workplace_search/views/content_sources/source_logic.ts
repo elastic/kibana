@@ -27,6 +27,7 @@ export interface SourceActions {
   onUpdateSourceName(name: string): string;
   setSearchResults(searchResultsResponse: SearchResultsResponse): SearchResultsResponse;
   initializeFederatedSummary(sourceId: string): { sourceId: string };
+  initializeSourceSynchronization(sourceId: string): { sourceId: string };
   onUpdateSummary(summary: DocumentSummaryItem[]): DocumentSummaryItem[];
   setContentFilterValue(contentFilterValue: string): string;
   setActivePage(activePage: number): number;
@@ -81,6 +82,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     setActivePage: (activePage: number) => activePage,
     initializeSource: (sourceId: string) => ({ sourceId }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
+    initializeSourceSynchronization: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
     updateContentSource: (sourceId: string, source: SourceUpdatePayload) => ({ sourceId, source }),
     removeContentSource: (sourceId: string) => ({
@@ -252,6 +254,15 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         flashAPIErrors(e);
       } finally {
         actions.setButtonNotLoading();
+      }
+    },
+    initializeSourceSynchronization: async ({ sourceId }) => {
+      const route = `/internal/workplace_search/org/sources/${sourceId}/sync`;
+      try {
+        await HttpLogic.values.http.post(route);
+        actions.initializeSource(sourceId);
+      } catch (e) {
+        flashAPIErrors(e);
       }
     },
     onUpdateSourceName: (name: string) => {

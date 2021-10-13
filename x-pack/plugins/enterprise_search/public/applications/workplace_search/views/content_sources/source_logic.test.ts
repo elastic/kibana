@@ -429,6 +429,34 @@ describe('SourceLogic', () => {
       });
     });
 
+    describe('initializeSourceSynchronization', () => {
+      it('calls API and fetches fresh source state', async () => {
+        const initializeSourceSpy = jest.spyOn(SourceLogic.actions, 'initializeSource');
+        const promise = Promise.resolve(contentSource);
+        http.post.mockReturnValue(promise);
+        SourceLogic.actions.initializeSourceSynchronization(contentSource.id);
+
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/org/sources/123/sync');
+        await promise;
+        expect(initializeSourceSpy).toHaveBeenCalledWith(contentSource.id);
+      });
+
+      it('handles error', async () => {
+        const error = {
+          response: {
+            error: 'this is an error',
+            status: 400,
+          },
+        };
+        const promise = Promise.reject(error);
+        http.post.mockReturnValue(promise);
+        SourceLogic.actions.initializeSourceSynchronization(contentSource.id);
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith(error);
+      });
+    });
+
     it('resetSourceState', () => {
       SourceLogic.actions.resetSourceState();
 
