@@ -1,5 +1,5 @@
 # Used in the on-merge job to persist the Bazel cache to BuildBuddy
-# from: .buildkite/scripts/common/setup_bazel.sh
+# from: .buildkite/scripts/common/persist_bazel_cache.sh
 
 import %workspace%/.bazelrc.common
 
