@@ -38,6 +38,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
   const globalState = useContext(GlobalStateContext);
   const { showCgroupMetricsElasticsearch } = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();
+  const [isLoading, setIsLoading] = React.useState(false);
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const { getPaginationRouteOptions, updateTotalItemCount, getPaginationTableProps } =
     useTable('elasticsearch.nodes');
@@ -69,6 +70,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`;
     if (services.http?.fetch && clusterUuid) {
+      setIsLoading(true);
       const response = await services.http?.fetch(url, {
         method: 'POST',
         body: JSON.stringify({
@@ -81,6 +83,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
         }),
       });
 
+      setIsLoading(false);
       setData(response);
       updateTotalItemCount(response.totalNodeCount);
       const alertsResponse = await fetchAlerts({
@@ -129,6 +132,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
                 setupMode={setupMode}
                 nodes={data.nodes}
                 alerts={alerts}
+                isLoading={isLoading}
                 showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
                 {...getPaginationTableProps()}
               />
