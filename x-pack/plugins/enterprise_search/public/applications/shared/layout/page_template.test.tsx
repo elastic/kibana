@@ -12,8 +12,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/react-page-template';
 
-import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
 import { FlashMessages } from '../flash_messages';
 import { Loading } from '../loading';
 

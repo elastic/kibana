@@ -11,11 +11,8 @@ import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/react-page-template';
 import type { ApplicationStart } from '../../../../../../../src/core/public';
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
 import type { NavigationSection } from '../../../services/navigation_registry';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 

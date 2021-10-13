@@ -13,10 +13,7 @@ import { useValues } from 'kea';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/react-page-template';
 
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';

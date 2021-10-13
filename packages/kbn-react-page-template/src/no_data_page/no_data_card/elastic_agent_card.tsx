@@ -10,12 +10,11 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCard } from '@elastic/eui';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
-import { KibanaContext } from '../../page_template';
 
-export type ElasticAgentCardProps = KibanaContext &
-  NoDataPageActions & {
-    solution: string;
-  };
+export type ElasticAgentCardProps = NoDataPageActions & {
+  solution: string;
+  addBasePath: (path: string) => string;
+};
 
 /**
  * Applies extra styling to a typical EuiAvatar

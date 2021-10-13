@@ -53,9 +53,9 @@ const OverviewEmptyComponent: React.FC = () => {
         solution: SOLUTION_NAME,
         actions: canAccessFleet ? agentAction : beatsAction,
         docsLink: docLinks.links.siem.gettingStarted,
+        addBasePath: http.basePath.prepend,
+        isDarkMode,
       }}
-      addBasePath={http.basePath.prepend}
-      isDarkMode={isDarkMode}
     />
   );
 };

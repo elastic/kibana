@@ -9,37 +9,51 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { ElasticBeatsCard } from './elastic_beats_card';
-import { KibanaContext } from '../../page_template';
 
-const kibanaContext: KibanaContext = {
-  isDarkMode: false,
-  addBasePath: (path: string) => (path ? path : 'path'),
-};
+const addBasePath = (path: string) => (path ? path : 'path');
 
 describe('ElasticBeatsCard', () => {
   test('renders', () => {
-    const component = shallow(<ElasticBeatsCard solution="Solution" {...kibanaContext} />);
+    const component = shallow(
+      <ElasticBeatsCard solution="Solution" isDarkMode={false} addBasePath={addBasePath} />
+    );
     expect(component).toMatchSnapshot();
   });
 
   describe('props', () => {
     test('recommended', () => {
       const component = shallow(
-        <ElasticBeatsCard recommended solution="Solution" {...kibanaContext} />
+        <ElasticBeatsCard
+          recommended
+          solution="Solution"
+          isDarkMode={false}
+          addBasePath={addBasePath}
+        />
       );
       expect(component).toMatchSnapshot();
     });
 
     test('button', () => {
       const component = shallow(
-        <ElasticBeatsCard button="Button" solution="Solution" {...kibanaContext} />
+        <ElasticBeatsCard
+          button="Button"
+          solution="Solution"
+          isDarkMode={false}
+          addBasePath={addBasePath}
+        />
       );
       expect(component).toMatchSnapshot();
     });
 
     test('href', () => {
       const component = shallow(
-        <ElasticBeatsCard href="#" button="Button" solution="Solution" {...kibanaContext} />
+        <ElasticBeatsCard
+          href="#"
+          button="Button"
+          solution="Solution"
+          isDarkMode={false}
+          addBasePath={addBasePath}
+        />
       );
       expect(component).toMatchSnapshot();
     });

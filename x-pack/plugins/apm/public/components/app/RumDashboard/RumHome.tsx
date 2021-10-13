@@ -8,6 +8,7 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
+import type { KibanaPageTemplateProps } from '@kbn/react-page-template';
 import { RumOverview } from '../RumDashboard';
 import { CsmSharedContextProvider } from './CsmSharedContext';
 import { WebApplicationSelect } from './Panels/WebApplicationSelect';
@@ -15,7 +16,6 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 import { useHasRumData } from './hooks/useHasRumData';
 import { RumDatePicker } from './rum_datepicker';
 import { EmptyStateLoading } from './empty_state_loading';
@@ -52,6 +52,8 @@ export function RumHome() {
             },
           },
           docsLink: core.docLinks.links.observability.guide,
+          isDarkMode: core.uiSettings.get('theme:darkMode'),
+          addBasePath: core.http.basePath.prepend,
         }
       : undefined;
 

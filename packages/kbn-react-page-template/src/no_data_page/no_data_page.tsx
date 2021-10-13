@@ -24,7 +24,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
 import { KibanaPageTemplateSolutionNavAvatar } from '../solution_nav';
-import { KibanaContext } from '../page_template';
 
 export const NO_DATA_PAGE_MAX_WIDTH = 950;
 export const NO_DATA_PAGE_TEMPLATE_PROPS: EuiPageTemplateProps = {
@@ -83,9 +82,20 @@ export interface NoDataPageProps {
    * Otherwise use a custom key that contains `EuiCard` props.
    */
   actions: NoDataPageActionsProps;
+
+  /**
+   * Prepend Kibana's base path
+   * @param path
+   */
+  addBasePath: (path: string) => string;
+
+  /**
+   * Is Kibana is darkMode
+   */
+  isDarkMode: boolean;
 }
 
-export const NoDataPage: FunctionComponent<NoDataPageProps & KibanaContext> = ({
+export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   solution,
   logo,
   actions,
@@ -113,12 +123,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps & KibanaContext> = ({
       if (actionsKeys[i] === 'elasticAgent') {
         return (
           <EuiFlexItem key={`empty-page-agent-action`} className="kbnNoDataPageContents__item">
-            <ElasticAgentCard
-              solution={solution}
-              isDarkMode={isDarkMode}
-              addBasePath={addBasePath}
-              {...action}
-            />
+            <ElasticAgentCard solution={solution} addBasePath={addBasePath} {...action} />
           </EuiFlexItem>
         );
       } else if (actionsKeys[i] === 'beats') {

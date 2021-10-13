@@ -11,12 +11,12 @@ import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import {
   KibanaPageTemplate,
   KibanaPageTemplateSolutionNavAvatar,
   NO_DATA_PAGE_TEMPLATE_PROPS,
-} from '../../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/react-page-template';
+
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';

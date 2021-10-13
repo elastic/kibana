@@ -8,14 +8,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { KibanaContext, KibanaPageTemplate, KibanaPageTemplateProps } from './page_template';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from './page_template';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
-
-const kibanaContext: KibanaContext = {
-  isDarkMode: false,
-  addBasePath: (path: string) => (path ? path : 'path'),
-};
 
 const navItems: KibanaPageTemplateSolutionNavProps['items'] = [
   {
@@ -64,6 +59,8 @@ const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
     custom: {},
   },
   docsLink: 'test',
+  isDarkMode: false,
+  addBasePath: (str) => str,
 };
 
 describe('KibanaPageTemplate', () => {
@@ -77,7 +74,6 @@ describe('KibanaPageTemplate', () => {
           description: 'test',
           rightSideItems: ['test'],
         }}
-        {...kibanaContext}
       />
     );
     expect(component).toMatchSnapshot();
@@ -85,7 +81,7 @@ describe('KibanaPageTemplate', () => {
 
   test('render custom empty prompt only', () => {
     const component = shallow(
-      <KibanaPageTemplate isEmptyState={true} {...kibanaContext}>
+      <KibanaPageTemplate isEmptyState={true}>
         <EuiEmptyPrompt title={<h1>custom test</h1>} />
       </KibanaPageTemplate>
     );
@@ -102,7 +98,6 @@ describe('KibanaPageTemplate', () => {
           description: 'test',
           rightSideItems: ['test'],
         }}
-        {...kibanaContext}
       >
         <EuiEmptyPrompt title={<h1>custom test</h1>} />
       </KibanaPageTemplate>
@@ -119,7 +114,6 @@ describe('KibanaPageTemplate', () => {
           description: 'test',
           rightSideItems: ['test'],
         }}
-        {...kibanaContext}
       />
     );
     expect(component).toMatchSnapshot();
@@ -139,7 +133,6 @@ describe('KibanaPageTemplate', () => {
           icon: 'solution',
           items: navItems,
         }}
-        {...kibanaContext}
       />
     );
     expect(component).toMatchSnapshot();
@@ -160,7 +153,6 @@ describe('KibanaPageTemplate', () => {
           items: navItems,
         }}
         noDataConfig={noDataConfig}
-        {...kibanaContext}
       />
     );
     expect(component).toMatchSnapshot();
@@ -175,7 +167,6 @@ describe('KibanaPageTemplate', () => {
           items: navItems,
         }}
         pageSideBarProps={{ className: 'customClass' }}
-        {...kibanaContext}
       />
     );
     expect(component.prop('pageSideBarProps').className).toEqual(

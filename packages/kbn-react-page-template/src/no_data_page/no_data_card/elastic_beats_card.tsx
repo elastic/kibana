@@ -10,12 +10,12 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCard } from '@elastic/eui';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
-import { KibanaContext } from '../../page_template';
 
-export type ElasticBeatsCardProps = KibanaContext &
-  NoDataPageActions & {
-    solution: string;
-  };
+export type ElasticBeatsCardProps = NoDataPageActions & {
+  solution: string;
+  addBasePath: (path: string) => string;
+  isDarkMode: boolean;
+};
 
 export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
   recommended,

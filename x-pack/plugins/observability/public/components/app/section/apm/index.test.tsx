@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { KibanaPageTemplate } from '@kbn/react-page-template';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { render } from '../../../../utils/test_helper';
 import { APMSection } from './';
@@ -16,7 +17,6 @@ import { HasDataContextValue } from '../../../../context/has_data_context';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
-import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({

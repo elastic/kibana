@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `<Fragment />`;
-
-exports[`KibanaPageTemplateSolutionNav renders 1`] = `<Fragment />`;
-
-exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `<Fragment />`;

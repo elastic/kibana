@@ -7,12 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { KibanaPageTemplateProps } from '@kbn/react-page-template';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
-import {
-  KibanaPageTemplateProps,
-  useKibana,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 interface LogsPageTemplateProps extends LazyObservabilityPageTemplateProps {
   hasData?: boolean;
@@ -32,7 +30,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
     },
   } = useKibanaContextForPlugin();
 
-  const { http } = useKibana().services;
+  const { http, uiSettings } = useKibana().services;
   const basePath = http!.basePath.get();
 
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = hasData
@@ -54,6 +52,8 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
           },
         },
         docsLink: docLinks.links.observability.guide,
+        addBasePath: http!.basePath.prepend,
+        isDarkMode: uiSettings!.get('theme:darkMode'),
       };
 
   return (

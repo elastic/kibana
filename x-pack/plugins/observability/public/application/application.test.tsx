@@ -8,8 +8,8 @@
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Observable } from 'rxjs';
+import { KibanaPageTemplate } from '@kbn/react-page-template';
 import { AppMountParameters, CoreStart } from 'src/core/public';
-import { KibanaPageTemplate } from '../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from './';

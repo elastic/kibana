@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
+import type { KibanaPageTemplateProps } from '@kbn/react-page-template';
 import { AppLeaveHandler } from '../../../../../../../../src/core/public';
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
 import { useSourcererScope, getScopeFromPath } from '../../../../common/containers/sourcerer';

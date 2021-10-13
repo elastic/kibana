@@ -21,11 +21,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
-  RedirectAppLinks,
-  useKibana,
   KibanaPageTemplate,
   KibanaPageTemplateSolutionNavAvatar,
   KibanaPageTemplateProps,
+} from '@kbn/react-page-template';
+import {
+  RedirectAppLinks,
+  useKibana,
   overviewPageActions,
   OverviewPageFooter,
 } from '../../../../../../src/plugins/kibana_react/public';

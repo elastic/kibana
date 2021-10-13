@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { KibanaPageTemplateProps } from '@kbn/react-page-template';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
-import { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
 import { useLinkProps } from '../../hooks/use_link_props';
 
 interface MetricsPageTemplateProps extends LazyObservabilityPageTemplateProps {
@@ -27,6 +27,8 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
         navigation: { PageTemplate },
       },
       docLinks,
+      http,
+      uiSettings,
     },
   } = useKibanaContextForPlugin();
 
@@ -54,6 +56,8 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
           },
         },
         docsLink: docLinks.links.observability.guide,
+        addBasePath: http.basePath.prepend,
+        isDarkMode: uiSettings.get('theme:darkMode'),
       };
 
   return (

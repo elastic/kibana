@@ -9,8 +9,9 @@ import { render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
+import { KibanaPageTemplate } from '@kbn/react-page-template';
 import { httpServiceMock } from 'src/core/public/mocks';
-import { KibanaContextProvider, KibanaPageTemplate } from 'src/plugins/kibana_react/public';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { useLogSource } from '../../containers/logs/log_source';
 import {
   createLoadedUseLogSourceMock,

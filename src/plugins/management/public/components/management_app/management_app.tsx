@@ -11,15 +11,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/react-page-template';
 import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateProps,
-  reactRouterNavigate,
-} from '../../../../kibana_react/public';
+import { reactRouterNavigate } from '../../../../kibana_react/public';
 import { SectionsServiceStart } from '../../types';
 
 interface ManagementAppProps {

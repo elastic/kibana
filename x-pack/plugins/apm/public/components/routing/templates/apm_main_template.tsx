@@ -8,10 +8,8 @@
 import { EuiPageHeaderProps } from '@elastic/eui';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-  useKibana,
-  KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import type { KibanaPageTemplateProps } from '@kbn/react-page-template';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
@@ -42,7 +40,8 @@ export function ApmMainTemplate({
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { http, docLinks } = services;
+
+  const { http, docLinks, uiSettings } = services;
   const basePath = http?.basePath.get();
 
   const ObservabilityPageTemplate =
@@ -56,6 +55,8 @@ export function ApmMainTemplate({
     basePath,
     docsLink: docLinks!.links.observability.guide,
     hasData: data?.hasData,
+    addBasePath: http!.basePath.prepend,
+    isDarkMode: uiSettings!.get('theme:darkMode'),
   });
 
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
