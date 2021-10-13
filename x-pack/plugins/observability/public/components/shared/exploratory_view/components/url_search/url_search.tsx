@@ -157,12 +157,13 @@ export function URLSearch({ series, seriesConfig, seriesId }: Props) {
     setItems((prevItems) => {
       const newItems: UrlOption[] = (prevItems ?? []).map((item) => {
         if (currValues.includes(item.label) || wildcards.includes(item.title)) {
-          return { checked: 'on', ...item };
+          return { ...item, checked: 'on' };
         }
+
         if (currNotValues.includes(item.label) || notWildcards.includes(item.title)) {
-          return { checked: 'off', ...item };
+          return { ...item, checked: 'off' };
         }
-        return { ...item, checked: undefined, title: item.label };
+        return { ...item, checked: undefined };
       });
 
       return newItems;
