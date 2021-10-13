@@ -13,7 +13,7 @@ import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../common/lib/kibana';
 
 import * as i18n from './translations';
-// import { useIndexFields } from '../../../common/containers/source';
+import { useIndexFields } from '../../../common/containers/source';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 interface CreateFieldButtonProps {
@@ -28,9 +28,7 @@ const StyledButton = styled(EuiButton)`
 //   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(indexNames);
 export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
   ({ selectedDataViewId, onClick: onClickParam, scopeId }) => {
-    // I can't use this hook because it fetches the data as soon as it is called.
-    // const { indexFieldsSearch } = useIndexFields(scopeId);
-    const indexFieldsSearch = (_: string) => undefined;
+    const { indexFieldsSearch } = useIndexFields(scopeId, false);
 
     const {
       indexPatternFieldEditor,
@@ -56,7 +54,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
         });
       }
       onClickParam();
-    }, [indexPatternFieldEditor, dataView, selectedDataViewId, onClickParam]);
+    }, [indexPatternFieldEditor, dataView, selectedDataViewId, onClickParam, indexFieldsSearch]);
 
     if (!indexPatternFieldEditor?.userPermissions.editIndexPattern()) {
       return null;
@@ -80,11 +78,11 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
 CreateFieldButton.displayName = 'CreateFieldButton';
 
 // MUST HAVE
-// alerts - Fix scope id bug. When I call useIndexFields it fetch the data and set t-grid loading state...
-// Close modal
-// refetch data after creating field
-// check user permissions
-// timeline
+// [x] alerts - Fix scope id bug. When I call useIndexFields it fetch the data and set t-grid loading state...
+// [x] Close modal
+// [x] refetch data after creating field
+// [x] check user permissions
+// [x] timeline
 // display flyout over timeline (z-index issue)
 // Fix create field loading state
 
