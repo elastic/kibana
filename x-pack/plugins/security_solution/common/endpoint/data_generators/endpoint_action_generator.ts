@@ -8,51 +8,7 @@
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
-import { EndpointActionData, ISOLATION_ACTIONS } from '../types';
-
-interface EcsError {
-  code: string;
-  id: string;
-  message: string;
-  stack_trace: string;
-  type: string;
-}
-
-interface EndpointActionFields {
-  action_id: string;
-  data: EndpointActionData;
-}
-
-interface ActionRequestFields {
-  expiration: string;
-  type: 'INPUT_ACTION';
-  input_type: 'endpoint';
-}
-
-interface ActionResponseFields {
-  completed_at: string;
-  started_at: string;
-}
-export interface LogsEndpointAction {
-  '@timestamp': string;
-  agent: {
-    id: string | string[];
-  };
-  EndpointAction: EndpointActionFields & ActionRequestFields;
-  error?: EcsError;
-  user: {
-    id: string;
-  };
-}
-
-export interface LogsEndpointActionResponse {
-  '@timestamp': string;
-  agent: {
-    id: string | string[];
-  };
-  EndpointAction: EndpointActionFields & ActionResponseFields;
-  error?: EcsError;
-}
+import { ISOLATION_ACTIONS, LogsEndpointAction, LogsEndpointActionResponse } from '../types';
 
 const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
@@ -66,7 +22,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         agent: {
           id: [this.randomUUID()],
         },
-        EndpointAction: {
+        EndpointActions: {
           action_id: this.randomUUID(),
           expiration: this.randomFutureDate(timeStamp),
           type: 'INPUT_ACTION',
@@ -86,11 +42,11 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   generateIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointAction: { data: { command: 'isolate' } } }), overrides);
+    return merge(this.generate({ EndpointActions: { data: { command: 'isolate' } } }), overrides);
   }
 
   generateUnIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointAction: { data: { command: 'unisolate' } } }), overrides);
+    return merge(this.generate({ EndpointActions: { data: { command: 'unisolate' } } }), overrides);
   }
 
   /** Generates an endpoint action response */
@@ -105,7 +61,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         agent: {
           id: this.randomUUID(),
         },
-        EndpointAction: {
+        EndpointActions: {
           action_id: this.randomUUID(),
           completed_at: timeStamp.toISOString(),
           data: {

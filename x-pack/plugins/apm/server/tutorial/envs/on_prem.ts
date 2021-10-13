@@ -37,13 +37,7 @@ export function onPremInstructions({
   apmConfig,
   isFleetPluginEnabled,
 }: {
-  apmConfig: Pick<
-    APMConfig,
-    | 'apm_oss.errorIndices'
-    | 'apm_oss.transactionIndices'
-    | 'apm_oss.metricsIndices'
-    | 'apm_oss.onboardingIndices'
-  >;
+  apmConfig: APMConfig;
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema {
   const EDIT_CONFIG = createEditConfig();
@@ -149,7 +143,7 @@ export function onPremInstructions({
             }
           ),
           esHitsCheck: {
-            index: apmConfig['apm_oss.onboardingIndices'],
+            index: apmConfig.indices.onboarding,
             query: {
               bool: {
                 filter: [
@@ -242,9 +236,9 @@ export function onPremInstructions({
           ),
           esHitsCheck: {
             index: [
-              apmConfig['apm_oss.errorIndices'],
-              apmConfig['apm_oss.transactionIndices'],
-              apmConfig['apm_oss.metricsIndices'],
+              apmConfig.indices.error,
+              apmConfig.indices.transaction,
+              apmConfig.indices.metric,
             ],
             query: {
               bool: {

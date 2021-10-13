@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import moment from 'moment';
-
 import { SyncJobType, DayOfWeek } from '../../../../../types';
 
 export const blockedWindow = {
   jobType: 'incremental' as SyncJobType,
   day: 'sunday' as DayOfWeek,
-  start: moment().set('hour', 11).set('minutes', 0),
-  end: moment().set('hour', 13).set('minutes', 0),
+  start: '11:00:00Z',
+  end: '13:00:00Z',
 };
