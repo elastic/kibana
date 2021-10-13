@@ -12,6 +12,7 @@ import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../co
 import { setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
+import { upgradeManagedPackagePolicies } from '../../services/managed_package_policies';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   try {
@@ -49,13 +50,21 @@ export const fleetSetupHandler: RequestHandler = async (context, request, respon
     const setupStatus = await setupFleet(soClient, esClient);
     const body: PostFleetSetupResponse = {
       ...setupStatus,
-      nonFatalErrors: setupStatus.nonFatalErrors.map((e) => {
+      nonFatalErrors: setupStatus.nonFatalErrors.flatMap((e) => {
         // JSONify the error object so it can be displayed properly in the UI
-        const error = e.error ?? e;
-        return {
-          name: error.name,
-          message: error.message,
-        };
+        if ('error' in e) {
+          return {
+            name: e.error.name,
+            message: e.error.message,
+          };
+        } else {
+          return e.errors.map((upgradePackagePolicyError: any) => {
+            return {
+              name: upgradePackagePolicyError.key,
+              message: upgradePackagePolicyError.message,
+            };
+          });
+        }
       }),
     };
 
