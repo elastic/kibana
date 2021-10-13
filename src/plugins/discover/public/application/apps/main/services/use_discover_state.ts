@@ -102,14 +102,6 @@ export function useDiscoverState({
     return () => stopSync();
   }, [stateContainer, filterManager, data, indexPattern]);
 
-  useEffect(() => {
-    const chartHidden = Boolean(storage.get(CHART_HIDDEN_KEY));
-    const nextState = { ...state };
-    nextState.hideChart = chartHidden;
-    setState(nextState);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   /**
    * Track state changes that should trigger a fetch
    */
