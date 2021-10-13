@@ -37,7 +37,7 @@ export const useMigrateSystemIndices = () => {
 
   const { data, error, isLoading, resendRequest, isInitialRequest } =
     api.useLoadSystemIndicesMigrationStatus();
-  const isInProgress = data?.upgrade_status === 'IN_PROGRESS';
+  const isInProgress = data?.migration_status === 'IN_PROGRESS';
 
   // We only want to poll for the status while the migration process is in progress.
   useInterval(resendRequest, isInProgress ? SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS : null);

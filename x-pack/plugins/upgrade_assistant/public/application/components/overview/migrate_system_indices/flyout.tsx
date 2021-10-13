@@ -27,7 +27,7 @@ import {
 import {
   SystemIndicesMigrationStatus,
   SystemIndicesMigrationFeature,
-  UPGRADE_STATUS,
+  MIGRATION_STATUS,
 } from '../../../../../common/types';
 
 export interface SystemIndicesFlyoutProps {
@@ -84,7 +84,7 @@ const i18nTexts = {
   ),
 };
 
-const renderMigrationStatus = (status: UPGRADE_STATUS) => {
+const renderMigrationStatus = (status: MIGRATION_STATUS) => {
   if (status === 'NO_UPGRADE_NEEDED') {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -150,7 +150,7 @@ const columns = [
     render: (name: string) => startCase(name),
   },
   {
-    field: 'upgrade_status',
+    field: 'migration_status',
     name: i18nTexts.statusTableColumn,
     sortable: true,
     render: renderMigrationStatus,
