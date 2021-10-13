@@ -1515,13 +1515,14 @@ export function computeLayer(
     const field = firstElement
       ? indexPattern.getFieldByName(firstElement.fieldName)
       : documentField;
+
     const column = insertNewColumn({
       op: firstElement?.agg as OperationType,
       layer: isLast
         ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
         : computeLayer(metricsArray.length === 1, metricsArray, indexPattern),
       columnId: generateId(),
-      field: !firstElement?.isFullReference ? field : undefined,
+      field: !firstElement?.isFullReference ? field ?? documentField : undefined,
       columnParams: firstElement?.params ?? undefined,
       incompleteFieldName: firstElement?.isFullReference ? field?.name : undefined,
       indexPattern,
