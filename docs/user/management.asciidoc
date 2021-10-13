@@ -193,8 +193,6 @@ include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
 
 include::security/index.asciidoc[]
 
-include::{kib-repo-dir}/management/snapshot-restore/index.asciidoc[]
-
 include::{kib-repo-dir}/spaces/index.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-tags.asciidoc[]
