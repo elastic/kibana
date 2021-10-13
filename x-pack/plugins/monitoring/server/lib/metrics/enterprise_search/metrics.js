@@ -13,6 +13,10 @@ const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.entSearch.pe
   defaultMessage: '/s',
 });
 
+const msTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.entSearch.msTimeUnitLabel', {
+  defaultMessage: 'ms',
+});
+
 export const metrics = {
   app_search_total_engines: new EnterpriseSearchMetric({
     field: 'enterprisesearch.stats.product_usage.app_search.total_engines',
@@ -112,6 +116,34 @@ export const metrics = {
     }),
     format: LARGE_BYTES,
     units: 'bytes',
+  }),
+
+  enterprise_search_gc_rate: new EnterpriseSearchMetric({
+    field: 'enterprisesearch.health.jvm.gc.collection_count',
+    derivative: true,
+    metricAgg: 'max',
+    label: i18n.translate('xpack.monitoring.metrics.entSearch.gc_rate', {
+      defaultMessage: 'JVM GC Rate',
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.entSearch.gc_rate.description', {
+      defaultMessage: 'The rate of JVM garbage collector invocations across the fleet.',
+    }),
+    format: SMALL_FLOAT,
+    units: perSecondUnitLabel,
+  }),
+
+  enterprise_search_gc_time: new EnterpriseSearchMetric({
+    field: 'enterprisesearch.health.jvm.gc.collection_time.ms',
+    derivative: true,
+    metricAgg: 'max',
+    label: i18n.translate('xpack.monitoring.metrics.entSearch.gc_time', {
+      defaultMessage: 'Time spent on JVM garbage collection',
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.entSearch.gc_time.description', {
+      defaultMessage: 'Time spent performing JVM garbage collections.',
+    }),
+    format: LARGE_FLOAT,
+    units: msTimeUnitLabel,
   }),
 
   enterprise_search_threads_current: new EnterpriseSearchMetric({

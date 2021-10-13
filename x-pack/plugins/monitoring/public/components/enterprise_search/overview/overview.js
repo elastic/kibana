@@ -27,6 +27,8 @@ export class EnterpriseSearchOverview extends PureComponent {
     const lowLevelUsageMetrics = [
       metrics.enterprise_search_heap,
       metrics.enterprise_search_jvm_finalizer_queue,
+      metrics.enterprise_search_gc_time,
+      metrics.enterprise_search_gc_rate,
       metrics.enterprise_search_threads,
       metrics.enterprise_search_threads_rate,
     ];

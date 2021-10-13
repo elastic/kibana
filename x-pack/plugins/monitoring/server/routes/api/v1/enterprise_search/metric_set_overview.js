@@ -16,6 +16,8 @@ export const metricSet = [
     ],
   },
   'enterprise_search_jvm_finalizer_queue',
+  'enterprise_search_gc_time',
+  'enterprise_search_gc_rate',
   {
     name: 'enterprise_search_threads',
     keys: ['enterprise_search_threads_current', 'enterprise_search_daemon_threads_current'],
