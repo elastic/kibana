@@ -32,6 +32,7 @@ const args: Args = {
   url: '/',
   icons: [],
   integration: '',
+  categories: ['foobar'],
 };
 
 const argTypes = {
