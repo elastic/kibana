@@ -7,7 +7,8 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
-import { blockedWindow } from './__mocks__/syncronization.mock';
+import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
+import { blockedWindow } from './__mocks__/synchronization.mock';
 
 import React from 'react';
 
@@ -23,8 +24,11 @@ describe('BlockedWindows', () => {
   const mockActions = {
     addBlockedWindow,
   };
+  const contentSource = { ...fullContentSources[0] };
+  contentSource.indexing.schedule.blockedWindows = [blockedWindow] as any;
   const mockValues = {
-    blockedWindows: [blockedWindow],
+    contentSource,
+    schedule: contentSource.indexing.schedule,
   };
 
   beforeEach(() => {
@@ -39,7 +43,7 @@ describe('BlockedWindows', () => {
   });
 
   it('renders empty state', () => {
-    setMockValues({ blockedWindows: [] });
+    setMockValues({ schedule: { blockedWindows: [] } });
     const wrapper = shallow(<BlockedWindows />);
 
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);

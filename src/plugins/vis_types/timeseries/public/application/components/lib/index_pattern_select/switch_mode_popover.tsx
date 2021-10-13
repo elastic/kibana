@@ -57,7 +57,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
     allowStringIndicesLabel = (
       <FormattedMessage
         id="visTypeTimeseries.indexPatternSelect.switchModePopover.enableAllowStringIndices"
-        defaultMessage="To search by Elasticsearch indices enable {allowStringIndices} setting."
+        defaultMessage="To query Elasticsearch indices, you must enable the {allowStringIndices} setting."
         values={{
           allowStringIndices: canEditAdvancedSettings ? (
             <EuiLink color="accent" onClick={handleAllowStringIndicesLinkClick}>
@@ -79,7 +79,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
           aria-label={i18n.translate(
             'visTypeTimeseries.indexPatternSelect.switchModePopover.areaLabel',
             {
-              defaultMessage: 'Configure data view selection mode',
+              defaultMessage: 'Configure index pattern selection mode',
             }
           )}
           onClick={onButtonClick}
@@ -97,13 +97,14 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
       >
         <EuiPopoverTitle>
           {i18n.translate('visTypeTimeseries.indexPatternSelect.switchModePopover.title', {
-            defaultMessage: 'Data view mode',
+            defaultMessage: 'Index pattern selection mode',
           })}
         </EuiPopoverTitle>
         <EuiText>
           <FormattedMessage
             id="visTypeTimeseries.indexPatternSelect.switchModePopover.text"
-            defaultMessage="A data view groups and retrieves data from Elasticsearch. Disable this mode to directly query Elasticsearch indices instead. {allowStringIndicesLabel}"
+            defaultMessage="An index pattern identifies one or more Elasticsearch indices that you want to explore.
+            Kibana index patterns are used by default. {allowStringIndicesLabel}"
             values={{
               allowStringIndicesLabel,
             }}
@@ -115,7 +116,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
           label={i18n.translate(
             'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
             {
-              defaultMessage: 'Use Kibana data views',
+              defaultMessage: 'Use only index patterns',
             }
           )}
           onChange={switchMode}
