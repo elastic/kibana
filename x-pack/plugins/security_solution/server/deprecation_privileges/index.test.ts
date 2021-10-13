@@ -480,7 +480,7 @@ describe('deprecations', () => {
       `);
     });
 
-    test('getDeprecations with multiple roles and get a deprecation on the role "second_role" in the space of "readSecuritySolution_2"', async () => {
+    test('getDeprecations handles multiple roles and filters out any that have already been updated', async () => {
       getKibanaRolesByFeatureId.mockResolvedValue({
         roles: [
           {
