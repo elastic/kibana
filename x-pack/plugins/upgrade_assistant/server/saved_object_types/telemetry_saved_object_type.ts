@@ -15,42 +15,6 @@ export const telemetrySavedObjectType: SavedObjectsType = {
   namespaceType: 'agnostic',
   mappings: {
     properties: {
-      ui_open: {
-        properties: {
-          overview: {
-            type: 'long',
-            null_value: 0,
-          },
-          elasticsearch: {
-            type: 'long',
-            null_value: 0,
-          },
-          kibana: {
-            type: 'long',
-            null_value: 0,
-          },
-        },
-      },
-      ui_reindex: {
-        properties: {
-          close: {
-            type: 'long',
-            null_value: 0,
-          },
-          open: {
-            type: 'long',
-            null_value: 0,
-          },
-          start: {
-            type: 'long',
-            null_value: 0,
-          },
-          stop: {
-            type: 'long',
-            null_value: 0,
-          },
-        },
-      },
       features: {
         properties: {
           deprecation_logging: {
