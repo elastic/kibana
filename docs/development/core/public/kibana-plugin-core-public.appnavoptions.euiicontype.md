@@ -4,7 +4,7 @@
 
 ## AppNavOptions.euiIconType property
 
-A EUI iconType that will be used for the app's icon. This icon takes precendence over the `icon` property.
+A EUI iconType that will be used for the app's icon. This icon takes precedence over the `icon` property.
 
 <b>Signature:</b>
 

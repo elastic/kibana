@@ -14,6 +14,7 @@ import { mlPluginServerMock } from '../../../../../../ml/server/mocks';
 
 import type { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
+import { eventLogServiceMock } from '../../../../../../event_log/server/mocks';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { AlertAttributes } from '../../signals/types';
@@ -55,6 +56,7 @@ export const createRuleTypeMocks = (
     references: [],
     attributes: {
       actions: [],
+      alertTypeId: 'siem.signals',
       enabled: true,
       name: 'mock rule',
       tags: [],
@@ -89,7 +91,7 @@ export const createRuleTypeMocks = (
       ruleDataClient: ruleRegistryMocks.createRuleDataClient(
         '.alerts-security.alerts'
       ) as IRuleDataClient,
-      ruleDataService: ruleRegistryMocks.createRuleDataPluginService(),
+      eventLogService: eventLogServiceMock.create(),
     },
     services,
     scheduleActions,

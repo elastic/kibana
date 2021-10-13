@@ -28,7 +28,7 @@ export const getPersisted = async ({
   lensServices: LensAppServices;
   history?: History<unknown>;
 }): Promise<
-  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'errorJSON'> } | undefined
+  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'sourceId'> } | undefined
 > => {
   const { notifications, spaces, attributeService } = lensServices;
   let doc: Document;

@@ -13,7 +13,8 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 
-type ServicesDetailedStatisticsReturn = APIReturnType<'GET /api/apm/services/detailed_statistics'>;
+type ServicesDetailedStatisticsReturn =
+  APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
@@ -30,7 +31,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles the empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/detailed_statistics`,
+            pathname: `/internal/apm/services/detailed_statistics`,
             query: {
               start,
               end,
@@ -56,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/detailed_statistics`,
+            pathname: `/internal/apm/services/detailed_statistics`,
             query: {
               start,
               end,
@@ -107,7 +108,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns empty when empty service names is passed', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/detailed_statistics`,
+            pathname: `/internal/apm/services/detailed_statistics`,
             query: {
               start,
               end,
@@ -124,7 +125,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('filters by environment', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/detailed_statistics`,
+            pathname: `/internal/apm/services/detailed_statistics`,
             query: {
               start,
               end,
@@ -141,7 +142,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('filters by kuery', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/detailed_statistics`,
+            pathname: `/internal/apm/services/detailed_statistics`,
             query: {
               start,
               end,
@@ -165,7 +166,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/detailed_statistics`,
+            pathname: `/internal/apm/services/detailed_statistics`,
             query: {
               start: moment(end).subtract(15, 'minutes').toISOString(),
               end,
