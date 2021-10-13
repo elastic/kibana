@@ -103,7 +103,6 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
         setException(exceptionToEdit);
       }
     }
-    // initialize an empty exception to create
   }, [dispatch, exception, exceptionToEdit, location.id, location.show, onCancel]);
 
   // handle creation and edit success

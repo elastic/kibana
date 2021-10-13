@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  CreateExceptionListItemSchema,
+  UpdateEndpointListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { applyMiddleware, createStore, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
@@ -224,22 +227,23 @@ describe('Host isolation exceptions middleware', () => {
 
   describe('When updating an item from host isolation exceptions', () => {
     const fakeId = 'dc5d1d00-2766-11ec-981f-7f84cfc8764f';
-    const fakeException = {
-      ...createEmptyHostIsolationException(),
-      name: 'name edit me',
-      description: 'initial description',
-      id: fakeId,
-      item_id: fakeId,
-      entries: [
-        {
-          field: 'destination.ip',
-          operator: 'included',
-          type: 'match',
-          value: '10.0.0.5',
-        },
-      ],
-    };
+    let fakeException: UpdateEndpointListItemSchema;
     beforeEach(() => {
+      fakeException = {
+        ...createEmptyHostIsolationException(),
+        name: 'name edit me',
+        description: 'initial description',
+        id: fakeId,
+        item_id: fakeId,
+        entries: [
+          {
+            field: 'destination.ip',
+            operator: 'included',
+            type: 'match',
+            value: '10.0.0.5',
+          },
+        ],
+      };
       getOneHostIsolationExceptionItemMock.mockReset();
       getOneHostIsolationExceptionItemMock.mockImplementation(async () => {
         return fakeException;

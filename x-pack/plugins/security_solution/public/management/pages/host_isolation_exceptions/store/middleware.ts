@@ -79,7 +79,7 @@ async function createHostIsolationException(
   dispatch({
     type: 'hostIsolationExceptionsFormStateChanged',
     payload: {
-      // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored
+      // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
       type: 'LoadingResourceState',
       previousState: entry,
     },
@@ -122,7 +122,7 @@ async function loadHostIsolationExceptionsList(
     dispatch({
       type: 'hostIsolationExceptionsPageDataChanged',
       payload: {
-        // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored
+        // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
         type: 'LoadingResourceState',
         previousState: getCurrentListPageDataState(store.getState()),
       },
@@ -164,7 +164,7 @@ async function deleteHostIsolationExceptionsItem(
     dispatch({
       type: 'hostIsolationExceptionsDeleteStatusChanged',
       payload: {
-        // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored
+        // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
         type: 'LoadingResourceState',
         previousState: store.getState().deletion.status,
       },
@@ -221,7 +221,7 @@ async function updateHostIsolationExceptionsItem(
   try {
     const entry = transformOutput(exception as UpdateExceptionListItemSchema);
     // Clean unnecessary fields for update action
-    [
+    const fieldsToRemove: Array<keyof ExceptionListItemSchema> = [
       'created_at',
       'created_by',
       'created_at',
@@ -230,7 +230,9 @@ async function updateHostIsolationExceptionsItem(
       'tie_breaker_id',
       'updated_at',
       'updated_by',
-    ].forEach((field) => {
+    ];
+
+    fieldsToRemove.forEach((field) => {
       delete entry[field as keyof UpdateExceptionListItemSchema];
     });
     const response: ExceptionListItemSchema = await updateOneHostIsolationExceptionItem(
