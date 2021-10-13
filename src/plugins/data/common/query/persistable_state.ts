@@ -11,6 +11,7 @@ import { Filter } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import { SavedObjectReference } from '../../../../core/types';
+import { MigrateFunctionsObject } from '../../../kibana_utils/common';
 
 export const extract = (filters: Filter[]) => {
   const references: SavedObjectReference[] = [];
@@ -60,6 +61,6 @@ export const migrateToLatest = (filters: Filter[], version: string) => {
   return filters;
 };
 
-export const getAllMigrations = () => {
+export const getAllMigrations = (): MigrateFunctionsObject => {
   return {};
 };
