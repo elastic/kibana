@@ -16,6 +16,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -107,6 +108,15 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
           </p>
         </EuiCallOut>
 
+        <EuiSpacer />
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
+              defaultMessage="Accept changes"
+            />
+          </h3>
+        </EuiTitle>
         <EuiSpacer />
 
         {warnings.map((warning, index) => {
