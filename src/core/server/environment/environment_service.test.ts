@@ -137,7 +137,7 @@ describe('UuidService', () => {
     });
 
     // TODO: From Nodejs v16 emitting an unhandledRejection will kill the process
-    describe('unhandledRejection warnings', () => {
+    describe.skip('unhandledRejection warnings', () => {
       it('logs warn for an unhandeld promise rejected with an Error', async () => {
         await service.preboot();
 
