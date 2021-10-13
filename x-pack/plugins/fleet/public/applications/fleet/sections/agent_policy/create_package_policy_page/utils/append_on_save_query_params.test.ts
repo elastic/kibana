@@ -115,7 +115,7 @@ describe('appendOnSaveQueryParamsToPath', () => {
     const hrefOut = appendOnSaveQueryParamsToPath(options);
     const [basePath, qs] = parseHref(hrefOut);
     expect(basePath).toEqual('/hello');
-    expect(qs).toEqual({ renamedKey: mockPolicy.id });
+    expect(qs).toEqual({ renamedKey: mockPolicy.policy_id });
   });
 
   it('should append renamed param and policyId (existing param)', () => {
@@ -131,7 +131,7 @@ describe('appendOnSaveQueryParamsToPath', () => {
     const hrefOut = appendOnSaveQueryParamsToPath(options);
     const [basePath, qs] = parseHref(hrefOut);
     expect(basePath).toEqual('/hello');
-    expect(qs).toEqual({ renamedKey: mockPolicy.id, world: '1' });
+    expect(qs).toEqual({ renamedKey: mockPolicy.policy_id, world: '1' });
   });
 
   it('should append renamed params and policyIds (existing param)', () => {
@@ -148,6 +148,10 @@ describe('appendOnSaveQueryParamsToPath', () => {
     const hrefOut = appendOnSaveQueryParamsToPath(options);
     const [basePath, qs] = parseHref(hrefOut);
     expect(basePath).toEqual('/hello');
-    expect(qs).toEqual({ renamedKey: mockPolicy.id, renamedKey2: mockPolicy.id, world: '1' });
+    expect(qs).toEqual({
+      renamedKey: mockPolicy.policy_id,
+      renamedKey2: mockPolicy.policy_id,
+      world: '1',
+    });
   });
 });
