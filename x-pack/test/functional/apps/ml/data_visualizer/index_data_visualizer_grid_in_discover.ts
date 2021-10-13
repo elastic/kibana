@@ -690,6 +690,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
+
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async function () {
