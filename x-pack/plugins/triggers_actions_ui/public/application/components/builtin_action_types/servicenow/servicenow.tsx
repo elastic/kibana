@@ -92,14 +92,14 @@ export const SERVICENOW_SIR_TITLE = i18n.translate(
 );
 
 export const SERVICENOW_ITOM_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.actionTypeTitle',
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.actionTypeTitle',
   {
     defaultMessage: 'ServiceNow ITOM',
   }
 );
 
 export const SERVICENOW_ITOM_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText',
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.selectMessageText',
   {
     defaultMessage: 'Create an event in ServiceNow ITOM.',
   }
