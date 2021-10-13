@@ -36,7 +36,7 @@ const first = (stream, map) =>
 
 exports.Cluster = class Cluster {
   constructor({ log = defaultLog, ssl = false } = {}) {
-    this._log = log;
+    this._log = log.withType('@kbn/es Cluster');
     this._ssl = ssl;
     this._caCertPromise = ssl ? readFile(CA_CERT_PATH) : undefined;
   }
