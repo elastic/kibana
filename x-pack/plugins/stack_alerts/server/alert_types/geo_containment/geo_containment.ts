@@ -18,7 +18,7 @@ import {
   GeoContainmentState,
 } from './alert_type';
 
-import { GEO_CONTAINMENT_ID } from '../../../../alerting/server';
+import { GEO_CONTAINMENT_ID } from './alert_type';
 
 export type LatestEntityLocation = GeoContainmentInstanceState;
 
