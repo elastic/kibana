@@ -73,7 +73,7 @@ export default function (providerContext: FtrProviderContext) {
     // Endpoint doesn't currently support uninstalls
     describe.skip('uninstall', () => {
       before(async () => {
-        await uninstallPackage(`${pkgName}-${pkgVersion}`).expect(200);
+        await uninstallPackage(`${pkgName}-${pkgVersion}`);
       });
 
       transforms.forEach((transform) => {
