@@ -13,22 +13,36 @@ import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../
 import { defaultIngestErrorHandler, GenerateServiceTokenError } from '../../errors';
 
 export const getCheckPermissionsHandler: RequestHandler = async (context, request, response) => {
-  const body: CheckPermissionsResponse = { success: true };
+  const missingSecurityBody: CheckPermissionsResponse = {
+    success: false,
+    error: 'MISSING_SECURITY',
+  };
 
   if (!appContextService.hasSecurity() || !appContextService.getSecurityLicense().isEnabled()) {
-    body.success = false;
-    body.error = 'MISSING_SECURITY';
+    return response.ok({ body: missingSecurityBody });
   } else {
     const security = appContextService.getSecurity();
     const user = security.authc.getCurrentUser(request);
 
-    if (!user?.roles.includes('superuser')) {
-      body.success = false;
-      body.error = 'MISSING_SUPERUSER_ROLE';
+    // Defensively handle situation where user is undefined (should only happen when ES security is disabled)
+    // This should be covered by the `getSecurityLicense().isEnabled()` check above, but we leave this for robustness.
+    if (!user) {
+      return response.ok({
+        body: missingSecurityBody,
+      });
     }
-  }
 
-  return response.ok({ body });
+    if (!user?.roles.includes('superuser')) {
+      return response.ok({
+        body: {
+          success: false,
+          error: 'MISSING_SUPERUSER_ROLE',
+        } as CheckPermissionsResponse,
+      });
+    }
+
+    return response.ok({ body: { success: true } as CheckPermissionsResponse });
+  }
 };
 
 export const generateServiceTokenHandler: RequestHandler = async (context, request, response) => {
