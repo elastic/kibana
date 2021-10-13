@@ -25,7 +25,6 @@ import {
   Aggs,
   TopValueBucket,
 } from '../../../../../common/search_strategies/field_stats_types';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 
 export const getKeywordFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
@@ -34,40 +33,26 @@ export const getKeywordFieldStatsRequest = (
 ): SearchRequest => {
   const query = getQueryWithParams({ params });
 
-  const { index, runtimeFieldMap, samplerShardSize } = params;
+  const { index, samplerShardSize } = params;
 
   const size = 0;
-  const aggs: Aggs = {};
-
-  const top: AggregationsAggregationContainer = {
-    terms: {
-      field: fieldName,
-      size: 10,
-      order: {
-        _count: 'desc',
+  const aggs: Aggs = {
+    [`${safeFieldName}_top`]: {
+      terms: {
+        field: fieldName,
+        size: 10,
+        order: {
+          _count: 'desc',
+        },
       },
     },
   };
 
-  if (samplerShardSize < 1) {
-    aggs[`${safeFieldName}_top`] = {
-      sampler: {
-        shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-      },
-      aggs: {
-        top,
-      },
-    };
-  } else {
-    aggs[`${safeFieldName}_top`] = top;
-  }
-
   const searchBody = {
     query,
-    aggs: buildSamplerAggregation(aggs, samplerShardSize),
-    ...(isPopulatedObject(runtimeFieldMap)
-      ? { runtime_mappings: runtimeFieldMap }
-      : {}),
+    aggs: {
+      sample: buildSamplerAggregation(aggs, samplerShardSize),
+    },
   };
 
   return {
@@ -93,6 +78,7 @@ export const fetchKeywordFieldStats = async (
   );
   const { body } = await esClient.search(request);
   const aggregations = body.aggregations;
+  // const topValues = aggregations.sample.sampled_top;
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
 
   const topAggsPath = [...aggsPath, `${safeFieldName}_top`];

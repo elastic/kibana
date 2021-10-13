@@ -21,7 +21,6 @@ import {
   getSamplerAggregationsResponsePath,
 } from '../../utils/field_stats_utils';
 import { SAMPLER_TOP_TERMS_SHARD_SIZE } from '../../constants';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 
 // Only need 50th percentile for the median
 const PERCENTILES = [50];
@@ -34,7 +33,7 @@ export const getNumericFieldStatsRequest = (
   const query = getQueryWithParams({ params });
   const size = 0;
 
-  const { index, runtimeFieldMap, samplerShardSize } = params;
+  const { index, samplerShardSize } = params;
 
   const percents = PERCENTILES;
   const aggs: { [key: string]: any } = {};
@@ -79,10 +78,9 @@ export const getNumericFieldStatsRequest = (
 
   const searchBody = {
     query,
-    aggs: buildSamplerAggregation(aggs, samplerShardSize),
-    ...(isPopulatedObject(runtimeFieldMap)
-      ? { runtime_mappings: runtimeFieldMap }
-      : {}),
+    aggs: {
+      sample: buildSamplerAggregation(aggs, samplerShardSize),
+    },
   };
 
   return {

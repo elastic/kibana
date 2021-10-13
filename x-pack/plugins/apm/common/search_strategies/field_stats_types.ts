@@ -11,7 +11,6 @@ import { isPopulatedObject } from '../utils/object_utils';
 
 export interface FieldStatsCommonRequestParams extends SearchStrategyParams {
   samplerShardSize: number;
-  runtimeFieldMap?: estypes.MappingRuntimeFields;
 }
 
 export interface Field {
@@ -54,8 +53,6 @@ export type KeywordFieldStats = TopValuesStats;
 export interface BooleanFieldStats {
   fieldName: string;
   count: number;
-  trueCount: number;
-  falseCount: number;
   [key: string]: number | string;
 }
 

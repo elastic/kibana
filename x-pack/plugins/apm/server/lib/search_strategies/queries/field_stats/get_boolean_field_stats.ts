@@ -20,7 +20,6 @@ import {
   Aggs,
 } from '../../../../../common/search_strategies/field_stats_types';
 import { getQueryWithParams } from '../get_query_with_params';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 
 export const getBooleanFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
@@ -29,7 +28,7 @@ export const getBooleanFieldStatsRequest = (
 ): SearchRequest => {
   const query = getQueryWithParams({ params });
 
-  const { index, runtimeFieldMap, samplerShardSize } = params;
+  const { index, samplerShardSize } = params;
 
   const size = 0;
   const aggs: Aggs = {};
@@ -46,10 +45,9 @@ export const getBooleanFieldStatsRequest = (
 
   const searchBody = {
     query,
-    aggs: buildSamplerAggregation(aggs, samplerShardSize),
-    ...(isPopulatedObject(runtimeFieldMap)
-      ? { runtime_mappings: runtimeFieldMap }
-      : {}),
+    aggs: {
+      sample: buildSamplerAggregation(aggs, samplerShardSize),
+    },
   };
 
   return {
@@ -84,8 +82,6 @@ export const fetchBooleanFieldStats = async (
       [...aggsPath, `${safeFieldName}_value_count`, 'doc_count'],
       0
     ),
-    trueCount: 0,
-    falseCount: 0,
   };
 
   const valueBuckets: Array<{ [key: string]: number }> = get(
