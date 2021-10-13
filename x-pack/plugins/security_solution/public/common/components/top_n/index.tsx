@@ -8,15 +8,11 @@
 import React, { useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { useGlobalTime } from '../../containers/use_global_time';
 import { BrowserFields } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
-import {
-  esQuery,
-  Filter,
-  Query,
-  IIndexPattern,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -77,7 +73,7 @@ const connector = connect(makeMapStateToProps);
 export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;

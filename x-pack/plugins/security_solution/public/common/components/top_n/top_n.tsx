@@ -11,10 +11,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
-import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { InputsModelId } from '../../store/inputs/constants';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
@@ -54,7 +54,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   options: TopNOption[];
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;

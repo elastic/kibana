@@ -10,6 +10,7 @@ import { createSelector } from 'reselect';
 import { State } from '../types';
 import { SourcererDataView, SourcererScope, SourcererScopeById, SourcererScopeName } from './model';
 import { FieldSpec } from '../../../../../../../src/plugins/data_views/common';
+import { SecuritySolutionDataViewBase } from '../../types';
 
 export const sourcererKibanaDataViewsSelector = ({ sourcerer }: State): SourcererDataView[] =>
   sourcerer.kibanaDataViews;
@@ -51,7 +52,7 @@ export interface SelectedDataView {
   browserFields: SourcererDataView['browserFields'];
   dataViewId: SourcererDataView['id'];
   docValueFields: SourcererDataView['docValueFields'];
-  indexPattern: { title: string; fields: FieldSpec[] }; // should this be DataView?
+  indexPattern: SecuritySolutionDataViewBase;
   indicesExist: boolean;
   loading: boolean;
   patternList: string[];

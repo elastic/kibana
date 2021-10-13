@@ -14,7 +14,7 @@ import { Storage } from '../../../../../../../../../src/plugins/kibana_utils/pub
 import { urlFromQueryParams } from '../url_from_query_params';
 import { useEndpointSelector } from '../hooks';
 import * as selectors from '../../store/selectors';
-import { clone } from '../../models/index_pattern';
+import { dataViewToIndexPattern } from '../../../../../common/utils/data_view_to_index_pattern';
 
 const AdminQueryBar = styled.div`
   .globalQueryBar {
@@ -28,7 +28,7 @@ export const AdminSearchBar = memo(() => {
   const searchBarIndexPatterns = useEndpointSelector(selectors.patterns);
   const searchBarQuery = useEndpointSelector(selectors.searchBarQuery);
   const clonedIndexPatterns = useMemo(
-    () => searchBarIndexPatterns.map((pattern) => clone(pattern)),
+    () => searchBarIndexPatterns.map((pattern) => dataViewToIndexPattern(pattern)),
     [searchBarIndexPatterns]
   );
 

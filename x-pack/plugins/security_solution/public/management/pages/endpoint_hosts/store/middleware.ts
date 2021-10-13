@@ -9,6 +9,7 @@ import { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
 
 import { CoreStart, HttpStart } from 'kibana/public';
+import { DataViewBase, Query } from '@kbn/es-query';
 import {
   ActivityLog,
   HostInfo,
@@ -66,7 +67,6 @@ import {
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '../../../../../common/endpoint/constants';
-import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 import {
   createFailedResourceState,
   createLoadedResourceState,
@@ -93,7 +93,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   // or else wrong pattern might be loaded
   async function fetchIndexPatterns(
     state: ImmutableObject<EndpointState>
-  ): Promise<IIndexPattern[]> {
+  ): Promise<DataViewBase[]> {
     const packageVersion = endpointPackageVersion(state) ?? '';
     const parsedPackageVersion = packageVersion.includes('-')
       ? packageVersion.substring(0, packageVersion.indexOf('-'))
@@ -107,7 +107,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     const fields = await indexPatterns.getFieldsForWildcard({
       pattern: indexPatternToFetch,
     });
-    const indexPattern: IIndexPattern = {
+    const indexPattern: DataViewBase = {
       title: indexPatternToFetch,
       fields,
     };
@@ -396,7 +396,7 @@ async function endpointDetailsListMiddleware({
 }: {
   store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
   coreStart: CoreStart;
-  fetchIndexPatterns: (state: ImmutableObject<EndpointState>) => Promise<IIndexPattern[]>;
+  fetchIndexPatterns: (state: ImmutableObject<EndpointState>) => Promise<DataViewBase[]>;
 }) {
   const { getState, dispatch } = store;
 

@@ -12,6 +12,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { useDispatch } from 'react-redux';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
@@ -31,12 +32,7 @@ import {
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
 import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
@@ -124,7 +120,7 @@ interface Props {
   headerFilterGroup?: React.ReactNode;
   id: TimelineId;
   indexNames: string[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   isLive: boolean;
   isLoadingIndexPattern: boolean;
   itemsPerPage: number;

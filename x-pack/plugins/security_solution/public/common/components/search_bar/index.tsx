@@ -13,14 +13,9 @@ import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import {
-  FilterManager,
-  IIndexPattern,
-  TimeRange,
-  Query,
-  Filter,
-  SavedQuery,
-} from 'src/plugins/data/public';
+
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { FilterManager, TimeRange, SavedQuery } from 'src/plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 
@@ -43,12 +38,13 @@ import { hostsActions } from '../../../hosts/store';
 import { networkActions } from '../../../network/store';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
+import { dataViewToIndexPattern } from '../../utils/data_view_to_index_pattern';
 
 const APP_STATE_STORAGE_KEY = 'securitySolution.searchBar.appState';
 
 interface SiemSearchBarProps {
   id: InputsModelId;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   timelineId?: string;
   dataTestSubj?: string;
 }
@@ -272,7 +268,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const indexPatterns = useMemo(() => [dataViewToIndexPattern(indexPattern)], [indexPattern]);
 
     return (
       <SearchBarContainer data-test-subj={`${id}DatePicker`}>

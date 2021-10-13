@@ -84,9 +84,9 @@ export const defaultProps: UrlStateContainerPropTypes = {
   indexPattern: {
     fields: [
       {
-        aggregatable: true,
+        // aggregatable: true,
         name: '@timestamp',
-        searchable: true,
+        // searchable: true,
         type: 'date',
       },
     ],

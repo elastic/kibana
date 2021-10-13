@@ -8,7 +8,7 @@
 import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
 import { useKibana } from '../../lib/kibana';
@@ -41,7 +41,7 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): IIndexPattern =>
+  (title: string, fields: IndexField[]): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -114,7 +114,7 @@ interface FetchIndexReturn {
   docValueFields: DocValueFields[];
   indexes: string[];
   indexExists: boolean;
-  indexPatterns: IIndexPattern;
+  indexPatterns: DataViewBase;
 }
 
 /**

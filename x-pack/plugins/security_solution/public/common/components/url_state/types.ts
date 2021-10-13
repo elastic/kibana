@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  Filter,
-  FilterManager,
-  IIndexPattern,
-  Query,
-  SavedQueryService,
-} from 'src/plugins/data/public';
-
+import { Filter, FilterManager, Query, SavedQueryService } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -58,7 +52,7 @@ export type ValueUrlState = UrlState[keyof UrlState];
 
 export interface UrlStateProps {
   navTabs: SecurityNav;
-  indexPattern?: IIndexPattern;
+  indexPattern?: DataViewBase;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
   onInitialize?: (urlState: UrlState) => void;
@@ -88,7 +82,7 @@ export interface UrlStateToRedux {
 
 export interface SetInitialStateFromUrl {
   filterManager: FilterManager;
-  indexPattern: IIndexPattern | undefined;
+  indexPattern: DataViewBase | undefined;
   pageName: string;
   savedQueries: SavedQueryService;
   urlStateToUpdate: UrlStateToRedux[];

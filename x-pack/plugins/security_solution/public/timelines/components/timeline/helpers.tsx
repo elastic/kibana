@@ -8,8 +8,7 @@
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
-import { EsQueryConfig, Filter, Query } from '@kbn/es-query';
-import { DataViewSpec } from 'src/plugins/data_views/common';
+import { DataViewBase, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import {
   handleSkipFocus,
   elementOrChildrenHasFocus,
@@ -151,7 +150,7 @@ export const combineQueries = ({
 }: {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  indexPattern: DataViewSpec;
+  indexPattern: DataViewBase;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;

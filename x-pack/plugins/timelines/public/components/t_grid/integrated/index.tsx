@@ -15,6 +15,7 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
@@ -35,13 +36,7 @@ import type {
   RowRenderer,
   AlertStatus,
 } from '../../../../common/types/timeline';
-import {
-  esQuery,
-  Filter,
-  IIndexPattern,
-  Query,
-  DataPublicPluginStart,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery, DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
@@ -120,7 +115,7 @@ export interface TGridIntegratedProps {
   height?: number;
   id: TimelineId;
   indexNames: string[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   isLive: boolean;
   isLoadingIndexPattern: boolean;
   itemsPerPage: number;

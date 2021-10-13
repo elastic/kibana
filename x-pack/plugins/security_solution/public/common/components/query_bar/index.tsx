@@ -8,11 +8,9 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
 import {
-  Filter,
-  IIndexPattern,
   FilterManager,
-  Query,
   TimeHistory,
   TimeRange,
   SavedQuery,
@@ -20,13 +18,14 @@ import {
   SavedQueryTimeFilter,
 } from '../../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { dataViewToIndexPattern } from '../../utils/data_view_to_index_pattern';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
@@ -104,7 +103,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const CustomButton = <>{null}</>;
-    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const indexPatterns = useMemo(() => [dataViewToIndexPattern(indexPattern)], [indexPattern]);
 
     return (
       <SearchBar

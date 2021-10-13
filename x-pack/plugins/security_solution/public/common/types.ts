@@ -6,6 +6,9 @@
  */
 
 import { ResponseErrorAttributes } from 'kibana/server';
+import { DataViewBase } from '@kbn/es-query';
+import { FieldSpec } from '../../../../../src/plugins/data_views/common';
+
 export interface ServerApiError {
   statusCode: number;
   error: string;
@@ -15,4 +18,8 @@ export interface ServerApiError {
 
 export interface SecuritySolutionUiConfigType {
   enableExperimental: string[];
+}
+
+export interface SecuritySolutionDataViewBase extends DataViewBase {
+  fields: FieldSpec[];
 }
