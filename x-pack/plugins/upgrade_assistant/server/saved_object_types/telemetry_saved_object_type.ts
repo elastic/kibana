@@ -8,6 +8,7 @@
 import { SavedObjectsType } from 'src/core/server';
 
 import { UPGRADE_ASSISTANT_TYPE } from '../../common/types';
+import { telemetrySavedObjectMigrations } from './migrations';
 
 export const telemetrySavedObjectType: SavedObjectsType = {
   name: UPGRADE_ASSISTANT_TYPE,
@@ -29,4 +30,5 @@ export const telemetrySavedObjectType: SavedObjectsType = {
       },
     },
   },
+  migrations: telemetrySavedObjectMigrations,
 };
