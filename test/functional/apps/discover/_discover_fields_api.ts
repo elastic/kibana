@@ -78,5 +78,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.discover.getDocHeader()).to.have.string('_source');
     });
+
+    it('switches to Document column when fields API is used', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSettings();
+      await PageObjects.settings.toggleAdvancedSettingCheckbox('discover:searchFieldsFromSource');
+
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
+    });
   });
 }
