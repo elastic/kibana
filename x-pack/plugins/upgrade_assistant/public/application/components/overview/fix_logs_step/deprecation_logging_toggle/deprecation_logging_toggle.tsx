@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ResponseError } from '../../../../lib/api';
+import { ResponseError } from '../../../../../../common/types';
 import { DeprecationLoggingPreviewProps } from '../../../types';
 
 import './_deprecation_logging_toggle.scss';
@@ -79,7 +79,18 @@ const ErrorDetailsLink = ({ error }: { error: ResponseError }) => {
   );
 };
 
-export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPreviewProps> = ({
+type Props = Pick<
+  DeprecationLoggingPreviewProps,
+  | 'isDeprecationLogIndexingEnabled'
+  | 'isLoading'
+  | 'isUpdating'
+  | 'fetchError'
+  | 'updateError'
+  | 'resendRequest'
+  | 'toggleLogging'
+>;
+
+export const DeprecationLoggingToggle: FunctionComponent<Props> = ({
   isDeprecationLogIndexingEnabled,
   isLoading,
   isUpdating,

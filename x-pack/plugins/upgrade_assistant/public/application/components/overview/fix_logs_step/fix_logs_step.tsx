@@ -106,12 +106,23 @@ const FixLogsStep: FunctionComponent<Props> = ({
   hasPrivileges,
   privilegesMissing,
 }) => {
-  const state = useDeprecationLogging();
   const {
     services: {
       core: { docLinks },
     },
   } = useAppContext();
+
+  const {
+    isDeprecationLogIndexingEnabled,
+    onlyDeprecationLogWritingEnabled,
+    isLoading,
+    isUpdating,
+    fetchError,
+    updateError,
+    resendRequest,
+    toggleLogging,
+  } = useDeprecationLogging();
+
   const [checkpoint, setCheckpoint] = useState(loadLogsCheckpoint());
 
   useEffect(() => {
@@ -119,13 +130,13 @@ const FixLogsStep: FunctionComponent<Props> = ({
   }, [checkpoint]);
 
   useEffect(() => {
-    if (!state.isDeprecationLogIndexingEnabled) {
+    if (!isDeprecationLogIndexingEnabled) {
       setIsComplete(false);
     }
 
     // Depending upon setIsComplete would create an infinite loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.isDeprecationLogIndexingEnabled]);
+  }, [isDeprecationLogIndexingEnabled]);
 
   return (
     <>
@@ -134,10 +145,18 @@ const FixLogsStep: FunctionComponent<Props> = ({
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel>
-        <DeprecationLoggingToggle {...state} />
+        <DeprecationLoggingToggle
+          isDeprecationLogIndexingEnabled={isDeprecationLogIndexingEnabled}
+          isLoading={isLoading}
+          isUpdating={isUpdating}
+          fetchError={fetchError}
+          updateError={updateError}
+          resendRequest={resendRequest}
+          toggleLogging={toggleLogging}
+        />
       </EuiPanel>
 
-      {state.onlyDeprecationLogWritingEnabled && (
+      {onlyDeprecationLogWritingEnabled && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
@@ -151,7 +170,7 @@ const FixLogsStep: FunctionComponent<Props> = ({
         </>
       )}
 
-      {!hasPrivileges && state.isDeprecationLogIndexingEnabled && (
+      {!hasPrivileges && isDeprecationLogIndexingEnabled && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
@@ -165,7 +184,7 @@ const FixLogsStep: FunctionComponent<Props> = ({
         </>
       )}
 
-      {hasPrivileges && state.isDeprecationLogIndexingEnabled && (
+      {hasPrivileges && isDeprecationLogIndexingEnabled && (
         <>
           <EuiSpacer size="xl" />
           <EuiText data-test-subj="externalLinksTitle">

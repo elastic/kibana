@@ -10,6 +10,7 @@ import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
   FILTER_RECORDS,
+  LABEL_FIELDS_FILTER,
   REPORT_METRIC_FIELD,
   ReportTypes,
   USE_BREAK_DOWN_COLUMN,
@@ -75,6 +76,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
         field: USER_AGENT_NAME,
         nested: USER_AGENT_VERSION,
       },
+      LABEL_FIELDS_FILTER,
     ],
     breakdownFields: [
       SERVICE_NAME,
