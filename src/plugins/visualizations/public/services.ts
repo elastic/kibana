@@ -47,8 +47,10 @@ export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContr
 
 export const [getSearch, setSearch] = createGetterSetter<DataPublicPluginStart['search']>('Search');
 
-export const [getUsageCollector, setUsageCollector] =
-  createGetterSetter<UsageCollectionSetup>('UsageCollection');
+export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
+  'UsageCollection',
+  false
+);
 
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
 
