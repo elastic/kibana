@@ -82,7 +82,11 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
   useEffect(() => {
     if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
       actionConnectorRef.current = actionConnector.id;
-      editAction('subActionParams', { additional_info: additionalInformation }, index);
+      editAction(
+        'subActionParams',
+        { additional_info: additionalInformation, message_key: '{{rule.id}}:{{alert.id}}' },
+        index
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
@@ -93,7 +97,11 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
     }
 
     if (!actionParams.subActionParams) {
-      editAction('subActionParams', { additional_info: additionalInformation }, index);
+      editAction(
+        'subActionParams',
+        { additional_info: additionalInformation, message_key: '{{rule.id}}:{{alert.id}}' },
+        index
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams]);
