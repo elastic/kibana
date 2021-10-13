@@ -208,15 +208,18 @@ export class InspectorService extends FtrService {
 
   /**
    * Returns the selected option value from combobox
-   * @param index combobox option array
    */
-  public async getSelectedOption(index: number = 0): Promise<string> {
+  public async getSelectedOption(): Promise<string> {
     await this.openInspectorRequestsView();
     const selectedOption = await this.comboBox.getComboBoxSelectedOptions(
       'inspectorRequestChooser'
     );
 
-    return selectedOption[index];
+    if (selectedOption.length !== 1) {
+      return false;
+    }
+
+    return selectedOption[0];
   }
 
   /**
