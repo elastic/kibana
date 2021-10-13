@@ -134,7 +134,7 @@ describe('core deprecations', () => {
 
   describe('rewriteBasePath', () => {
     it('logs a warning is server.basePath is set and server.rewriteBasePath is not', () => {
-      const { messages } = applyCoreDeprecations({
+      const { messages, levels } = applyCoreDeprecations({
         server: {
           basePath: 'foo',
         },
@@ -142,6 +142,11 @@ describe('core deprecations', () => {
       expect(messages).toMatchInlineSnapshot(`
         Array [
           "You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, Kibana will expect that all requests start with server.basePath rather than expecting you to rewrite the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the current behavior and silence this warning.",
+        ]
+      `);
+      expect(levels).toMatchInlineSnapshot(`
+        Array [
+          "warning",
         ]
       `);
     });
