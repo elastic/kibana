@@ -20,24 +20,54 @@ import {
   BLOCKED_TIME_WINDOWS_PATH,
   getContentSourcePath,
 } from '../../../../routes';
-import { BlockedWindow, IndexingSchedule } from '../../../../types';
+import { BlockedWindow, IndexingSchedule, SyncJobType, TimeUnit } from '../../../../types';
 
-import {
-  SYNC_ENABLED_MESSAGE,
-  SYNC_DISABLED_MESSAGE,
-  SYNC_SETTINGS_UPDATED_MESSAGE,
-} from '../../constants';
+import { SYNC_SETTINGS_UPDATED_MESSAGE } from '../../constants';
 import { SourceLogic } from '../../source_logic';
+
+interface ServerBlockedWindow {
+  job_type: string;
+  day: string;
+  start: string;
+  end: string;
+}
+
+interface ServerSyncSettingsBody {
+  content_source: {
+    indexing: {
+      enabled?: boolean;
+      features?: {
+        content_extraction: { enabled: boolean };
+        thumbnails: { enabled: boolean };
+      };
+      schedule?: {
+        full: string;
+        incremental: string;
+        delete: string;
+        permissions?: string;
+        blocked_windows?: ServerBlockedWindow[];
+      };
+    };
+  };
+}
 
 interface SynchronizationActions {
   setNavigatingBetweenTabs(navigatingBetweenTabs: boolean): boolean;
   handleSelectedTabChanged(tabId: TabId): TabId;
   addBlockedWindow(): void;
-  updateSyncSettings(): void;
+  updateFrequencySettings(): void;
+  updateObjectsAndAssetsSettings(): void;
   resetSyncSettings(): void;
   updateSyncEnabled(enabled: boolean): boolean;
   setThumbnailsChecked(checked: boolean): boolean;
+  setSyncFrequency(
+    type: SyncJobType,
+    value: string,
+    unit: TimeUnit
+  ): { type: SyncJobType; value: number; unit: TimeUnit };
   setContentExtractionChecked(checked: boolean): boolean;
+  setServerSchedule(schedule: IndexingSchedule): IndexingSchedule;
+  updateServerSettings(body: ServerSyncSettingsBody): ServerSyncSettingsBody;
 }
 
 interface SynchronizationValues {
@@ -67,8 +97,16 @@ export const SynchronizationLogic = kea<
     handleSelectedTabChanged: (tabId: TabId) => tabId,
     updateSyncEnabled: (enabled: boolean) => enabled,
     setThumbnailsChecked: (checked: boolean) => checked,
+    setSyncFrequency: (type: SyncJobType, value: string, unit: TimeUnit) => ({
+      type,
+      value,
+      unit,
+    }),
     setContentExtractionChecked: (checked: boolean) => checked,
-    updateSyncSettings: true,
+    updateServerSettings: (body: ServerSyncSettingsBody) => body,
+    setServerSchedule: (schedule: IndexingSchedule) => schedule,
+    updateFrequencySettings: true,
+    updateObjectsAndAssetsSettings: true,
     resetSyncSettings: true,
     addBlockedWindow: true,
   },
@@ -89,16 +127,57 @@ export const SynchronizationLogic = kea<
       props.contentSource.indexing.features.thumbnails.enabled,
       {
         setThumbnailsChecked: (_, thumbnailsChecked) => thumbnailsChecked,
+        resetSyncSettings: () => props.contentSource.indexing.features.thumbnails.enabled,
       },
     ],
     contentExtractionChecked: [
       props.contentSource.indexing.features.contentExtraction.enabled,
       {
         setContentExtractionChecked: (_, contentExtractionChecked) => contentExtractionChecked,
+        resetSyncSettings: () => props.contentSource.indexing.features.contentExtraction.enabled,
       },
     ],
-    cachedSchedule: [stripScheduleSeconds(props.contentSource.indexing.schedule)],
-    schedule: [stripScheduleSeconds(props.contentSource.indexing.schedule)],
+    cachedSchedule: [
+      stripScheduleSeconds(props.contentSource.indexing.schedule),
+      {
+        setServerSchedule: (_, schedule) => schedule,
+      },
+    ],
+    schedule: [
+      stripScheduleSeconds(props.contentSource.indexing.schedule),
+      {
+        resetSyncSettings: () => stripScheduleSeconds(props.contentSource.indexing.schedule),
+        setServerSchedule: (_, schedule) => schedule,
+        setSyncFrequency: (state, { type, value, unit }) => {
+          let currentValue;
+          const schedule = cloneDeep(state);
+          const duration = schedule[type];
+
+          switch (unit) {
+            case 'days':
+              currentValue = moment.duration(duration).days();
+              break;
+            case 'hours':
+              currentValue = moment.duration(duration).hours();
+              break;
+            default:
+              currentValue = moment.duration(duration).minutes();
+              break;
+          }
+
+          // momentJS doesn't seem to have a way to simply set the minutes/hours/days, so we have
+          // to subtract the current value and then add the new value.
+          // https://momentjs.com/docs/#/durations/
+          schedule[type] = moment
+            .duration(duration)
+            .subtract(currentValue, unit)
+            .add(value, unit)
+            .toISOString();
+
+          return schedule;
+        },
+      },
+    ],
   }),
   selectors: ({ selectors }) => ({
     hasUnsavedObjectsAndAssetsChanges: [
@@ -125,7 +204,7 @@ export const SynchronizationLogic = kea<
     ],
     hasUnsavedFrequencyChanges: [
       () => [selectors.cachedSchedule, selectors.schedule],
-      (cachedSchedule, schedule) => isEqual(cachedSchedule, schedule),
+      (cachedSchedule, schedule) => !isEqual(cachedSchedule, schedule),
     ],
   }),
   listeners: ({ actions, values, props }) => ({
@@ -149,46 +228,48 @@ export const SynchronizationLogic = kea<
       actions.setNavigatingBetweenTabs(false);
     },
     updateSyncEnabled: async (enabled) => {
-      const { id: sourceId } = props.contentSource;
-      const route = `/internal/workplace_search/org/sources/${sourceId}/settings`;
-      const successMessage = enabled ? SYNC_ENABLED_MESSAGE : SYNC_DISABLED_MESSAGE;
-
-      try {
-        const response = await HttpLogic.values.http.patch(route, {
-          body: JSON.stringify({ content_source: { indexing: { enabled } } }),
-        });
-
-        SourceLogic.actions.setContentSource(response);
-        flashSuccessToast(successMessage);
-      } catch (e) {
-        flashAPIErrors(e);
-      }
+      actions.updateServerSettings({
+        content_source: {
+          indexing: { enabled },
+        },
+      });
     },
-    resetSyncSettings: () => {
-      actions.setThumbnailsChecked(props.contentSource.indexing.features.thumbnails.enabled);
-      actions.setContentExtractionChecked(
-        props.contentSource.indexing.features.contentExtraction.enabled
-      );
-    },
-    updateSyncSettings: async () => {
-      const { id: sourceId } = props.contentSource;
-      const route = `/internal/workplace_search/org/sources/${sourceId}/settings`;
-
-      try {
-        const response = await HttpLogic.values.http.patch(route, {
-          body: JSON.stringify({
-            content_source: {
-              indexing: {
-                features: {
-                  content_extraction: { enabled: values.contentExtractionChecked },
-                  thumbnails: { enabled: values.thumbnailsChecked },
-                },
-              },
+    updateObjectsAndAssetsSettings: () => {
+      actions.updateServerSettings({
+        content_source: {
+          indexing: {
+            features: {
+              content_extraction: { enabled: values.contentExtractionChecked },
+              thumbnails: { enabled: values.thumbnailsChecked },
             },
-          }),
+          },
+        },
+      });
+    },
+    updateFrequencySettings: () => {
+      actions.updateServerSettings({
+        content_source: {
+          indexing: {
+            schedule: {
+              full: values.schedule.full,
+              incremental: values.schedule.incremental,
+              delete: values.schedule.delete,
+            },
+          },
+        },
+      });
+    },
+    updateServerSettings: async (body: ServerSyncSettingsBody) => {
+      const { id: sourceId } = props.contentSource;
+      const route = `/internal/workplace_search/org/sources/${sourceId}/settings`;
+
+      try {
+        const response = await HttpLogic.values.http.patch(route, {
+          body: JSON.stringify(body),
         });
 
         SourceLogic.actions.setContentSource(response);
+        SynchronizationLogic.actions.setServerSchedule(response.indexing.schedule);
         flashSuccessToast(SYNC_SETTINGS_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
