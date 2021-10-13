@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common';
 import { convertToBuildEsQuery } from '../../../../common/lib/keury';
 import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../common/lib/kibana';
+import { QUERY_PREVIEW_ERROR } from './translations';
 
 // TODO: use CTI constant when backend becomes available
 const DEFAULT_PREVIEW_INDEX = '.siem-preview-signals';
@@ -21,7 +22,13 @@ interface PreviewHistogramParams {
 }
 
 export const usePreviewHistogram = ({ previewId, startDate, endDate }: PreviewHistogramParams) => {
-  const { uiSettings } = useKibana().services;
+  const { uiSettings, spaces } = useKibana().services;
+
+  const [spaceId, setSpaceId] = useState('');
+  useEffect(() => {
+    spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+  }, [spaces]);
+
   const [filterQuery] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
     indexPattern: {
@@ -40,14 +47,14 @@ export const usePreviewHistogram = ({ previewId, startDate, endDate }: PreviewHi
   const matrixHistogramRequest = useMemo(() => {
     return {
       endDate,
-      errorMessage: 'oops',
+      errorMessage: QUERY_PREVIEW_ERROR,
       filterQuery,
       histogramType: MatrixHistogramType.preview,
-      indexNames: [`${DEFAULT_PREVIEW_INDEX}-*`],
+      indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
       stackByField: 'signal.rule.id',
       startDate,
     };
-  }, [startDate, endDate, filterQuery]);
+  }, [startDate, endDate, filterQuery, spaceId]);
 
   return useMatrixHistogram(matrixHistogramRequest);
 };
