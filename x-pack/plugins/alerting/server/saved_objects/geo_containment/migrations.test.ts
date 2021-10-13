@@ -53,14 +53,14 @@ describe('geo_containment migration utilities', () => {
       injectEntityAndBoundaryIds(
         {
           boundaryGeoField: 'geometry',
-          boundaryIndexRef: 'boundary_index_boundaryid',
+          boundaryIndexRefName: 'boundary_index_boundaryid',
           boundaryIndexTitle: 'boundary*',
           boundaryType: 'entireIndex',
           dateField: '@timestamp',
           entity: 'vehicle_id',
           geoField: 'geometry',
           index: 'foo*',
-          indexRef: 'tracked_index_foobar',
+          indexRefName: 'tracked_index_foobar',
         },
         [
           {

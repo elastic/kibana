@@ -35,8 +35,8 @@ export type GeoContainmentExtractedParams = Omit<
   GeoContainmentParams,
   'indexId' | 'boundaryIndexId'
 > & {
-  indexRef: string;
-  boundaryIndexRef: string;
+  indexRefName: string;
+  boundaryIndexRefName: string;
 };
 
 export function extractEntityAndBoundaryReferences(params: GeoContainmentParams): {
@@ -59,8 +59,8 @@ export function extractEntityAndBoundaryReferences(params: GeoContainmentParams)
   return {
     params: {
       ...otherParams,
-      indexRef: `tracked_index_${indexId}`,
-      boundaryIndexRef: `boundary_index_${boundaryIndexId}`,
+      indexRefName: `tracked_index_${indexId}`,
+      boundaryIndexRefName: `boundary_index_${boundaryIndexId}`,
     },
     references,
   };
@@ -70,10 +70,10 @@ export function injectEntityAndBoundaryIds(
   params: GeoContainmentExtractedParams,
   references: SavedObjectReference[]
 ): GeoContainmentParams {
-  const { indexRef, boundaryIndexRef, ...otherParams } = params;
-  const { id: indexId = null } = references.find((ref) => ref.name === indexRef) || {};
+  const { indexRefName, boundaryIndexRefName, ...otherParams } = params;
+  const { id: indexId = null } = references.find((ref) => ref.name === indexRefName) || {};
   const { id: boundaryIndexId = null } =
-    references.find((ref) => ref.name === boundaryIndexRef) || {};
+    references.find((ref) => ref.name === boundaryIndexRefName) || {};
   if (!indexId) {
     throw new Error(`Index "${indexId}" not found in references array`);
   }
@@ -87,7 +87,7 @@ export function injectEntityAndBoundaryIds(
   } as GeoContainmentParams;
 }
 
-export function extractIndexAndBoundaryRefsFromGeoContainmentStackAlert(
+export function extractRefsFromGeoContainmentAlert(
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> {
   if (doc.attributes.alertTypeId !== GEO_CONTAINMENT_ID) {
