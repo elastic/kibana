@@ -65,14 +65,9 @@ const uploadPipeline = (pipelineContent) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
     }
 
-    // Disabled for now, these are failing/disabled in Jenkins currently as well
-    // if (
-    //   await doAnyChangesMatch([
-    //     /^x-pack\/plugins\/apm/,
-    //   ])
-    // ) {
-    //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
-    // }
+    if (await doAnyChangesMatch([/^x-pack\/plugins\/apm/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
+    }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
