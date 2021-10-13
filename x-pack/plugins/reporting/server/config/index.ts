@@ -66,7 +66,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           }),
           correctiveActions: {
             manualSteps: [
-              i18n.translate('xpack.reporting.deprecations.reportingRoles.manuakklStepOne', {
+              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOne', {
                 defaultMessage: `Set "xpack.reporting.roles.enabled" to "false" in kibana.yml.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepTwo', {
