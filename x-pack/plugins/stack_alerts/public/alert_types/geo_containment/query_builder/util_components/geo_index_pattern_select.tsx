@@ -100,9 +100,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               id="xpack.stackAlerts.geoContainment.noIndexPattern.doThisPrefixDescription"
               defaultMessage="You'll need to "
             />
-            <EuiLink
-              href={this.props.http.basePath.prepend(`/app/management/kibana/indexPatterns`)}
-            >
+            <EuiLink href={this.props.http.basePath.prepend(`/app/management/dataViews/dataView`)}>
               <FormattedMessage
                 id="xpack.stackAlerts.geoContainment.noIndexPattern.doThisLinkTextDescription"
                 defaultMessage="Create an index pattern."

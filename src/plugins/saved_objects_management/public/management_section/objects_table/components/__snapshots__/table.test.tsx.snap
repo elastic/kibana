@@ -174,10 +174,10 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "attributes": Object {},
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
+              "editUrl": "#/management/kibana/dataViews/dataView/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/management/kibana/indexPatterns/patterns/1",
+                "path": "/management/kibana/dataViews/dataView/1",
                 "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "MyIndexPattern*",
@@ -394,10 +394,10 @@ exports[`Table should render normally 1`] = `
             "attributes": Object {},
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
+              "editUrl": "#/management/kibana/dataViews/dataView/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/management/kibana/indexPatterns/patterns/1",
+                "path": "/management/kibana/dataViews/dataView/1",
                 "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "MyIndexPattern*",

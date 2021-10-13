@@ -62,7 +62,7 @@ export const IndexPatternsMissingPromptComponent = () => {
       }
       actions={
         <EuiButton
-          href={`${kibanaBasePath}/management/kibana/indexPatterns`}
+          href={`${kibanaBasePath}/management/kibana/dataViews`}
           color="primary"
           target="_blank"
           fill

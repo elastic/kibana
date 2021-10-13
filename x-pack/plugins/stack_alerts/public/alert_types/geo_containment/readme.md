@@ -43,7 +43,7 @@ quantities of data the frequency listed below (20000ms = 20s) or higher:
 There are 3 separate tabs you'll need for a combination of loading and viewing the
 data. Since you'll be jumping between them, it might be easiest to just open them
 upfront. Each is preceded by `https://localhost:5601/<your dev env prefix>/app/`:
-- Stack Management > Index Patterns: `management/kibana/indexPatterns`
+- Stack Management > Index Patterns: `management/kibana/dataViews`
 - Stack Management > Alerts & Actions: `management/insightsAndAlerting/triggersActions/alerts`
 - Maps: `maps`
 

@@ -31,7 +31,7 @@ export const IndexPatternPrompt: FC<Props> = ({ destIndex }) => {
             destIndex,
             linkToIndexPatternManagement: (
               <EuiLink
-                href={`${basePath.get()}/app/management/kibana/indexPatterns/create`}
+                href={`${basePath.get()}/app/management/kibana/dataViews/create`}
                 target="_blank"
               >
                 <FormattedMessage

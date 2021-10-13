@@ -39,7 +39,7 @@ exports[`should render no index pattern warning when there are no matching index
         values={Object {}}
       />
       <EuiLink
-        href="abc//app/management/kibana/indexPatterns"
+        href="abc//app/management/kibana/dataViews"
       >
         <FormattedMessage
           defaultMessage="Create an index pattern."
