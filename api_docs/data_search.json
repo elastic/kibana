@@ -2277,13 +2277,7 @@
             "label": "uiSettingsClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "{ get: <T = any>(key: string) => Promise<T>; }"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false
@@ -28577,7 +28571,7 @@
             "label": "fn",
             "description": [],
             "signature": [
-              "(input: null, args: Arguments) => any"
+              "(input: null, args: Arguments) => { type: \"kibana_filter\"; meta: { negate: boolean; alias: string; disabled: boolean; }; query: any; }"
             ],
             "path": "src/plugins/data/common/search/expressions/kibana_filter.ts",
             "deprecated": false,
