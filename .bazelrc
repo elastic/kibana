@@ -26,3 +26,5 @@ build --build_metadata=TEST_GROUPS=//packages
 ## Reset remote cache and backend support
 build:offline --bes_backend="" --remote_cache=""
 run:offline --bes_backend="" --remote_cache=""
+
+startup --output_base=.bazel
