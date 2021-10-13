@@ -19,7 +19,7 @@ import {
 
 import { KibanaTemplate } from './kibana_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 // @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
@@ -107,12 +107,7 @@ export const KibanaOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
   return (
-    <KibanaTemplate
-      data-test-subj="kibanaOverviewPage"
-      getPageData={getPageData}
-      title={title}
-      pageTitle={pageTitle}
-    >
+    <KibanaTemplate getPageData={getPageData} title={title} pageTitle={pageTitle}>
       <KibanaOverview data={data} />
     </KibanaTemplate>
   );
