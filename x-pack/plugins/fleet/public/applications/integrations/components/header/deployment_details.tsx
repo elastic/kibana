@@ -38,7 +38,8 @@ export const DeploymentDetails = () => {
     return null;
   }
 
-  const endpointUrl = `https://${cloudId}.${cname}`;
+  const cnameNormalized = cname.startsWith('.') ? cname.substring(1) : cname;
+  const endpointUrl = `https://${cloudId}.${cnameNormalized}`;
 
   const managementUrl = share.url.locators
     .get('MANAGEMENT_APP_LOCATOR')
