@@ -13,6 +13,7 @@ export type {
   ConfigDeprecationWithContext,
   ConfigDeprecation,
   ConfigDeprecationCommand,
+  ConfigDeprecationContext,
   ChangedDeprecatedPaths,
 } from './deprecation';
 
@@ -30,5 +31,4 @@ export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './c
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { CliArgs, Env, RawPackageInfo } from './env';
 export { EnvironmentMode, PackageInfo } from './types';
-export { LegacyObjectToConfigAdapter, LegacyLoggingConfig } from './legacy';
 export { getPluginSearchPaths } from './plugins';

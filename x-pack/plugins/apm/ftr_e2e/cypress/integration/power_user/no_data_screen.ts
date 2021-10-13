@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
-const apmIndicesSaveURL = '/api/apm/settings/apm-indices/save';
+const apmIndicesSaveURL = '/internal/apm/settings/apm-indices/save';
 
 describe('No data screen', () => {
   describe('bypass no data screen on settings pages', () => {
@@ -20,12 +19,12 @@ describe('No data screen', () => {
         url: apmIndicesSaveURL,
         method: 'POST',
         body: {
-          'apm_oss.sourcemapIndices': 'foo-*',
-          'apm_oss.errorIndices': 'foo-*',
-          'apm_oss.onboardingIndices': 'foo-*',
-          'apm_oss.spanIndices': 'foo-*',
-          'apm_oss.transactionIndices': 'foo-*',
-          'apm_oss.metricsIndices': 'foo-*',
+          sourcemaps: 'foo-*',
+          errors: 'foo-*',
+          onboarding: 'foo-*',
+          spans: 'foo-*',
+          transactions: 'foo-*',
+          metrics: 'foo-*',
         },
         headers: {
           'kbn-xsrf': true,
@@ -50,12 +49,12 @@ describe('No data screen', () => {
         url: apmIndicesSaveURL,
         method: 'POST',
         body: {
-          'apm_oss.sourcemapIndices': '',
-          'apm_oss.errorIndices': '',
-          'apm_oss.onboardingIndices': '',
-          'apm_oss.spanIndices': '',
-          'apm_oss.transactionIndices': '',
-          'apm_oss.metricsIndices': '',
+          sourcemaps: '',
+          errors: '',
+          onboarding: '',
+          spans: '',
+          transactions: '',
+          metrics: '',
         },
         headers: { 'kbn-xsrf': true },
         auth: { user: 'apm_power_user', pass: 'changeme' },

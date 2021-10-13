@@ -30,7 +30,7 @@ const inlineStyle = (obj: Record<string, string | number>) => {
   return styles.join(';');
 };
 
-interface Arguments {
+export interface FontArguments {
   align?: TextAlignment;
   color?: string;
   family?: FontFamily;
@@ -41,7 +41,12 @@ interface Arguments {
   weight?: FontWeight;
 }
 
-export type ExpressionFunctionFont = ExpressionFunctionDefinition<'font', null, Arguments, Style>;
+export type ExpressionFunctionFont = ExpressionFunctionDefinition<
+  'font',
+  null,
+  FontArguments,
+  Style
+>;
 
 export const font: ExpressionFunctionFont = {
   name: 'font',

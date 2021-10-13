@@ -14,9 +14,12 @@ import { SemVer } from 'semver';
 import {
   notificationServiceMock,
   docLinksServiceMock,
+  uiSettingsServiceMock,
 } from '../../../../../../src/core/public/mocks';
 import { GlobalFlyout } from '../../../../../../src/plugins/es_ui_shared/public';
+import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
 
+import { MAJOR_VERSION } from '../../../common';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
@@ -32,12 +35,9 @@ import {
 } from '../../../public/application/components';
 import { componentTemplatesMockDependencies } from '../../../public/application/components/component_templates/__jest__';
 import { init as initHttpRequests } from './http_requests';
-import { MAJOR_VERSION } from './constants';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 const { GlobalFlyoutProvider } = GlobalFlyout;
-
-export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 export const services = {
   extensionsService: new ExtensionsService(),
@@ -53,6 +53,15 @@ const appDependencies = {
   core: { getUrlForApp: () => {} },
   plugins: {},
 } as any;
+
+export const kibanaVersion = new SemVer(MAJOR_VERSION);
+
+const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+  uiSettings: uiSettingsServiceMock.createSetupContract(),
+  kibanaVersion: {
+    get: () => kibanaVersion,
+  },
+});
 
 export const setupEnvironment = () => {
   // Mock initialization of services
@@ -75,14 +84,16 @@ export const WithAppDependencies =
   (props: any) => {
     const mergedDependencies = merge({}, appDependencies, overridingDependencies);
     return (
-      <AppContextProvider value={mergedDependencies}>
-        <MappingsEditorProvider>
-          <ComponentTemplatesProvider value={componentTemplatesMockDependencies}>
-            <GlobalFlyoutProvider>
-              <Comp {...props} />
-            </GlobalFlyoutProvider>
-          </ComponentTemplatesProvider>
-        </MappingsEditorProvider>
-      </AppContextProvider>
+      <KibanaReactContextProvider>
+        <AppContextProvider value={mergedDependencies}>
+          <MappingsEditorProvider>
+            <ComponentTemplatesProvider value={componentTemplatesMockDependencies}>
+              <GlobalFlyoutProvider>
+                <Comp {...props} />
+              </GlobalFlyoutProvider>
+            </ComponentTemplatesProvider>
+          </MappingsEditorProvider>
+        </AppContextProvider>
+      </KibanaReactContextProvider>
     );
   };

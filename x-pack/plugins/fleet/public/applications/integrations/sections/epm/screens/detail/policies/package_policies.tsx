@@ -81,6 +81,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     () => queryParams.get('addAgentToPolicyId'),
     [queryParams]
   );
+  const showAddAgentHelpForPolicyId = useMemo(
+    () => queryParams.get('showAddAgentHelpForPolicyId'),
+    [queryParams]
+  );
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string | null>(
     agentPolicyIdFromParams
   );
@@ -217,7 +221,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         }),
         render(_version, { agentPolicy, packagePolicy }) {
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s" className="eui-textNoWrap">
                   <FormattedMessage
@@ -294,6 +298,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
               agentPolicyId={agentPolicy.id}
               agentCount={agentPolicy.agents}
               onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
+              hasHelpPopover={showAddAgentHelpForPolicyId === agentPolicy.id}
             />
           );
         },
@@ -321,7 +326,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
     ],
-    [getHref, viewDataStep]
+    [getHref, showAddAgentHelpForPolicyId, viewDataStep]
   );
 
   const noItemsMessage = useMemo(() => {

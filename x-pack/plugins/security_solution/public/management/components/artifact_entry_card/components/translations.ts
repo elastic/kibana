@@ -100,3 +100,29 @@ export const OS_LINUX = i18n.translate('xpack.securitySolution.artifactCard.cond
 export const OS_MAC = i18n.translate('xpack.securitySolution.artifactCard.conditions.macos', {
   defaultMessage: 'Mac',
 });
+
+export const EXPAND_ACTION = i18n.translate(
+  'xpack.securitySolution.artifactExpandableCard.expand',
+  {
+    defaultMessage: 'Expand',
+  }
+);
+
+export const COLLAPSE_ACTION = i18n.translate(
+  'xpack.securitySolution.artifactExpandableCard.collpase',
+  {
+    defaultMessage: 'Collapse',
+  }
+);
+
+export const SHOW_COMMENTS_LABEL = (count: number = 0) =>
+  i18n.translate('xpack.securitySolution.artifactCard.comments.label.show', {
+    defaultMessage: 'Show comments ({count})',
+    values: { count },
+  });
+
+export const HIDE_COMMENTS_LABEL = (count: number = 0) =>
+  i18n.translate('xpack.securitySolution.artifactCard.comments.label.hide', {
+    defaultMessage: 'Hide comments ({count})',
+    values: { count },
+  });

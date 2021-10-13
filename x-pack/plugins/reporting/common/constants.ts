@@ -7,6 +7,8 @@
 
 export const PLUGIN_ID = 'reporting';
 
+export const REPORTING_SYSTEM_INDEX = '.reporting';
+
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
@@ -55,6 +57,11 @@ export const LAYOUT_TYPES = {
   CANVAS: 'canvas',
   PRESERVE_LAYOUT: 'preserve_layout',
   PRINT: 'print',
+};
+
+export const DEFAULT_VIEWPORT = {
+  width: 1950,
+  height: 1200,
 };
 
 // Export Type Definitions

@@ -77,7 +77,7 @@ export const renderApp = ({
           <presentationUtil.ContextProvider>
             <I18nProvider>
               <Provider store={canvasStore}>
-                <App />
+                <App history={params.history} />
               </Provider>
             </I18nProvider>
           </presentationUtil.ContextProvider>

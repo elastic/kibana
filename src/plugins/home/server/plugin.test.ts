@@ -53,7 +53,6 @@ describe('HomeServerPlugin', () => {
         homeServerPluginSetupDependenciesMock
       );
       expect(setup).toHaveProperty('sampleData');
-      expect(setup.sampleData).toHaveProperty('registerSampleDataset');
       expect(setup.sampleData).toHaveProperty('getSampleDatasets');
       expect(setup.sampleData).toHaveProperty('addSavedObjectsToSampleDataset');
       expect(setup.sampleData).toHaveProperty('addAppLinksToSampleDataset');
@@ -78,7 +77,7 @@ describe('HomeServerPlugin', () => {
     test('is defined', () => {
       const plugin = new HomeServerPlugin(initContext);
       plugin.setup(mockCoreSetup, homeServerPluginSetupDependenciesMock); // setup() must always be called before start()
-      const start = plugin.start();
+      const start = plugin.start(coreMock.createStart());
       expect(start).toBeDefined();
       expect(start).toHaveProperty('tutorials');
       expect(start).toHaveProperty('sampleData');

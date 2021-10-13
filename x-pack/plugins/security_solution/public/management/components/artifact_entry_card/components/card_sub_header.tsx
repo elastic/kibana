@@ -20,7 +20,7 @@ export const CardSubHeader = memo<SubHeaderProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
-      <EuiFlexGroup alignItems="center" responsive={false} data-test-subj={dataTestSubj}>
+      <EuiFlexGroup alignItems="center" responsive={true} data-test-subj={dataTestSubj}>
         <EuiFlexItem grow={false}>
           <TouchedByUsers
             createdBy={createdBy}
