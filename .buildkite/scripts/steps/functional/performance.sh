@@ -2,7 +2,7 @@
 
 set -uo pipefail
 
-ITERATION_COUNT=`echo "$(buildkite-agent meta-data get performance-test-iteration-count)" | xargs`
+ITERATION_COUNT="$(buildkite-agent meta-data get performance-test-iteration-count)"
 
 tput setab 2; tput setaf 0; echo "Performance test will be run at ${BUILDKITE_BRANCH} ${ITERATION_COUNT} times"
 
