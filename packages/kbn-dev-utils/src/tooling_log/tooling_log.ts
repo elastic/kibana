@@ -20,8 +20,8 @@ export interface ToolingLogOptions {
   type?: string;
   /**
    * parent ToolingLog. When a ToolingLog has a parent they will both
-   * share indent and writters state. Changing the indent width or
-   * writers on either log will update the other too
+   * share indent and writers state. Changing the indent width or
+   * writers on either log will update the other too.
    */
   parent?: ToolingLog;
 }

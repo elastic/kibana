@@ -8,6 +8,9 @@
 
 export type MessageTypes = 'verbose' | 'debug' | 'info' | 'success' | 'warning' | 'error' | 'write';
 
+/**
+ * The object shape passed to ToolingLog writers each time the log is used.
+ */
 export interface Message {
   /** level/type of message */
   type: MessageTypes;
