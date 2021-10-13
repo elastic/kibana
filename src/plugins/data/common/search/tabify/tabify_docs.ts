@@ -11,7 +11,6 @@ import { isPlainObject } from 'lodash';
 import { IndexPattern } from '../..';
 import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
 
-// TODO: complete this list
 type ValidMetaFieldNames = keyof Pick<
   estypes.SearchHit,
   | '_id'
@@ -112,6 +111,8 @@ export function flattenHit(
     flatten(hit._source as Record<string, any>);
   }
 
+  // Merge all valid meta fields into the flattened object
+  // expect for _source (in case that was specified as a meta field)
   indexPattern?.metaFields?.forEach((metaFieldName) => {
     if (!isValidMetaFieldName(metaFieldName) || metaFieldName === '_source') {
       return;
@@ -119,6 +120,8 @@ export function flattenHit(
     flat[metaFieldName] = hit[metaFieldName];
   });
 
+  // Use a proxy to make sure that keys are always returned in a specific order,
+  // so we have a guarantee on the flattened order of keys.
   return new Proxy(flat, {
     ownKeys: (target) => {
       return Reflect.ownKeys(target).sort((a, b) => {
