@@ -13,7 +13,7 @@ import { DataPanel } from '../../../../data_panel';
 
 import { CurationChangesPanel } from './curation_changes_panel';
 
-describe('CuraationChagesPanel', () => {
+describe('CurationChangesPanel', () => {
   it('renders', () => {
     const wrapper = shallow(<CurationChangesPanel />);
 

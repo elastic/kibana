@@ -7,4 +7,3 @@
 
 export { CurationsTable } from './curations_table';
 export { EmptyState } from './empty_state';
-export { IgnoredSuggestionsTable } from './ignored_suggestions_table';
