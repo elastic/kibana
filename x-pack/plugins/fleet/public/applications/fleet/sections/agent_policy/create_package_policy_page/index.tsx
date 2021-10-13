@@ -286,12 +286,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const onSaveNavigate = useCallback(
     (policy?: PackagePolicy) => {
       if (doOnSaveNavigation.current) {
+        // when navigating from integration ["integrations",{"path":"/detail/system-1.4.0/policies"}]
+        // when navigating from policy ["fleet",{"path":"/policies/c2eca570-2ac7-11ec-b125-9be2578ed7b9"}]
         if (routeState && routeState.onSaveNavigateTo && policy) {
-          handleNavigateTo(
-            typeof routeState.onSaveNavigateTo === 'function'
-              ? routeState.onSaveNavigateTo(policy)
-              : routeState.onSaveNavigateTo
-          );
+          handleNavigateTo(routeState.onSaveNavigateTo);
         } else {
           history.push(getPath('policy_details', { policyId: agentPolicy!.id }));
         }

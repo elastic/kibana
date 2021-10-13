@@ -7,16 +7,12 @@
 
 import type { ApplicationStart } from 'kibana/public';
 
-import type { PackagePolicy } from './';
-
 /**
  * Supported routing state for the create package policy page routes
  */
 export interface CreatePackagePolicyRouteState {
   /** On a successful save of the package policy, use navigate to the given app */
-  onSaveNavigateTo?:
-    | Parameters<ApplicationStart['navigateToApp']>
-    | ((newPackagePolicy: PackagePolicy) => Parameters<ApplicationStart['navigateToApp']>);
+  onSaveNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
   /** On cancel, navigate to the given app */
   onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
   /** Url to be used on cancel links */
