@@ -13,7 +13,7 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { ElasticsearchNodes } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
@@ -27,12 +27,6 @@ import {
   RULE_MEMORY_USAGE,
   RULE_MISSING_MONITORING_DATA,
 } from '../../../../common/constants';
-
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
 
 export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
