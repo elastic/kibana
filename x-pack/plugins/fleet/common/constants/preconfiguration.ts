@@ -13,7 +13,6 @@ import {
   FLEET_SERVER_PACKAGE,
   autoUpdatePackages,
   monitoringTypes,
-  keepPoliciesUpToDatePackages,
 } from './epm';
 
 export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
@@ -69,11 +68,6 @@ export const DEFAULT_PACKAGES = defaultPackages.map((name) => ({
 }));
 
 export const AUTO_UPDATE_PACKAGES = autoUpdatePackages.map((name) => ({
-  name,
-  version: PRECONFIGURATION_LATEST_KEYWORD,
-}));
-
-export const KEEP_POLICIES_UP_TO_DATE_PACKAGES = keepPoliciesUpToDatePackages.map((name) => ({
   name,
   version: PRECONFIGURATION_LATEST_KEYWORD,
 }));

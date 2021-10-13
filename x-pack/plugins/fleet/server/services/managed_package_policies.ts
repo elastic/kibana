@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
 import type { UpgradePackagePolicyDryRunResponseItem } from '../../common';
-import { AUTO_UPDATE_PACKAGES, KEEP_POLICIES_UP_TO_DATE_PACKAGES } from '../../common';
+import { AUTO_UPDATE_PACKAGES } from '../../common';
 
 import { appContextService } from './app_context';
 import { getInstallation, getPackageInfo } from './epm/packages';
@@ -54,8 +54,7 @@ export const upgradeManagedPackagePolicies = async (
 
     const shouldUpgradePolicies =
       !isPolicyVersionAlignedWithInstalledVersion &&
-      (KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === packageInfo.name) ||
-        AUTO_UPDATE_PACKAGES.some((pkg) => pkg.name === packageInfo.name) ||
+      (AUTO_UPDATE_PACKAGES.some((pkg) => pkg.name === packageInfo.name) ||
         packageInfo.keepPoliciesUpToDate);
 
     if (shouldUpgradePolicies) {
