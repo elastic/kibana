@@ -74,10 +74,7 @@ export class ScalingForm extends Component<Props, State> {
 
   _onScalingTypeSelect = (optionId: SCALING_TYPES): void => {
     if (this.props.hasJoins && optionId !== SCALING_TYPES.LIMIT) {
-      this.setState({
-        nextScalingType: optionId,
-        showModal: true,
-      });
+      this._openModal(optionId);
     } else {
       this._onScalingTypeChange(optionId);
     }
@@ -100,19 +97,24 @@ export class ScalingForm extends Component<Props, State> {
     this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
   };
 
+  _openModal = (optionId: SCALING_TYPES) => {
+    this.setState({
+      nextScalingType: optionId,
+      showModal: true,
+    });
+  };
+
   _closeModal = () => {
     this.setState({
+      nextScalingType: undefined,
       showModal: false,
     });
   };
 
   _acceptModal = () => {
-    this._closeModal();
     this.props.clearJoins();
     this._onScalingTypeChange(this.state.nextScalingType!);
-    this.setState({
-      nextScalingType: undefined,
-    });
+    this._closeModal();
   };
 
   _renderModal() {
