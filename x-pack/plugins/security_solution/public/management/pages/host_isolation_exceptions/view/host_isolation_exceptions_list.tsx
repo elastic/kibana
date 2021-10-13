@@ -144,7 +144,9 @@ export const HostIsolationExceptionsList = () => {
               defaultMessage="Add Host Isolation Exception"
             />
           </EuiButton>
-        ) : null
+        ) : (
+          []
+        )
       }
     >
       {showFlyout && <HostIsolationExceptionsFormFlyout />}
