@@ -7,17 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-  EuiBadge,
-  EuiToolTip,
-  EuiSpacer,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexItem, EuiBadge, EuiToolTip, EuiSpacer } from '@elastic/eui';
 
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
@@ -26,13 +16,10 @@ import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from './release_badge'
 
 export type PackageCardProps = IntegrationCardItem;
 
-const Link = styled(EuiLink)`
-  &.euiLink {
-    color: inherit;
-  }
-  &.euiLink:hover {
-    text-decoration: none;
-  }
+// adding the `href` causes EuiCard to use a `a` instead of a `button`
+// `a` tags use `euiLinkColor` which results in blueish Badge text
+const Card = styled(EuiCard)`
+  color: inherit;
 `;
 
 export function PackageCard({
@@ -61,33 +48,24 @@ export function PackageCard({
   }
 
   return (
-    <Link href={url}>
-      <EuiPanel paddingSize="m">
-        <EuiFlexGroup gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <CardIcon
-              icons={icons}
-              packageName={name}
-              integrationName={integration}
-              version={version}
-              size="xl"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h3>{title}</h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s">{description}</EuiText>
-              </EuiFlexItem>
-              {releaseBadge}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </Link>
+    <Card
+      layout="horizontal"
+      title={title || ''}
+      titleSize="xs"
+      description={description}
+      icon={
+        <CardIcon
+          icons={icons}
+          packageName={name}
+          integrationName={integration}
+          version={version}
+          size="xl"
+        />
+      }
+      href={url}
+      target={url.startsWith('http') || url.startsWith('https') ? '_blank' : undefined}
+    >
+      {releaseBadge}
+    </Card>
   );
 }
