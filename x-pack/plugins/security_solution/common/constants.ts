@@ -300,6 +300,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.swimlane',
   '.webhook',
   '.servicenow',
+  '.servicenow-sir',
   '.jira',
   '.resilient',
   '.teams',
@@ -333,7 +334,7 @@ export const ELASTIC_NAME = 'estc';
 
 export const METADATA_TRANSFORM_STATS_URL = `/api/transform/transforms/${METADATA_TRANSFORMS_PATTERN}/_stats`;
 
-export const HOST_RISK_SCORES_INDEX = 'ml_host_risk_score_latest';
+export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_latest_';
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',

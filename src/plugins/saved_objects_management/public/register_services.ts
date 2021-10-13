@@ -36,7 +36,7 @@ export const registerServices = async (
     registry.register({
       id: 'savedSearches',
       title: 'searches',
-      service: discover.savedSearchLoader,
+      service: discover.__LEGACY.savedSearchLoader,
     });
   }
 };

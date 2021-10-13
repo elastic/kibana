@@ -67,10 +67,8 @@ describe('handleNestedFilter', function () {
     // for example, we don't support query_string queries
     const filter = buildQueryFilter(
       {
-        query: {
-          query_string: {
-            query: 'response:200',
-          },
+        query_string: {
+          query: 'response:200',
         },
       },
       'logstash-*',
