@@ -183,11 +183,19 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
+      memory_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.mac.popup,
         malware: {
           message: '',
           enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: false,
         },
         behavior_protection: {
           message: '',
@@ -201,11 +209,19 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
+      memory_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.linux.popup,
         malware: {
           message: '',
           enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: false,
         },
         behavior_protection: {
           message: '',
