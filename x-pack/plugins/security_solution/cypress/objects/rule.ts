@@ -108,7 +108,7 @@ export const getIndexPatterns = (): string[] => [
   'winlogbeat-*',
 ];
 
-export const getThreatIndexPatterns = (): string[] => ['filebeat-*'];
+export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
 
 const getMitre1 = (): Mitre => ({
   tactic: `${getMockThreatData().tactic.name} (${getMockThreatData().tactic.id})`,
