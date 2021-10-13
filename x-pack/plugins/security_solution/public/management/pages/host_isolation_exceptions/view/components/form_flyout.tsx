@@ -26,6 +26,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Dispatch } from 'redux';
+import { useLicense } from '../../../../../common/hooks/use_license';
 import { Loader } from '../../../../../common/components/loader';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
@@ -52,9 +53,7 @@ import { HostIsolationExceptionsForm } from './form';
 export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
   const toasts = useToasts();
-
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
-
   const creationInProgress = useHostIsolationExceptionsSelector((state) =>
     isLoadingResourceState(state.form.status)
   );
@@ -62,12 +61,10 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
     isLoadedResourceState(state.form.status)
   );
   const creationFailure = useHostIsolationExceptionsSelector(getFormStatusFailure);
-
   const exceptionToEdit = useHostIsolationExceptionsSelector(getExceptionToEdit);
-
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
-
   const history = useHistory();
+  const license = useLicense();
 
   const [formHasError, setFormHasError] = useState(true);
   const [exception, setException] = useState<
@@ -82,6 +79,10 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
       }),
     [navigateCallback]
   );
+
+  if (!license.isPlatinumPlus()) {
+    onCancel();
+  }
 
   // load data to edit or create
   useEffect(() => {
