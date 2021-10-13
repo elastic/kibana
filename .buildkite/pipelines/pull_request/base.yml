@@ -4,6 +4,13 @@ steps:
 
   - wait
 
+  - command: .buildkite/scripts/steps/bootstrap.sh
+    label: Bootstrap
+    agents:
+      queue: n2-2
+
+  - wait
+
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
