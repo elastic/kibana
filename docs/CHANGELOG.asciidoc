@@ -101,9 +101,10 @@ APM::
 Canvas::
 * Hide dashed border on embeddable panel {kibana-pull}113985[#113985]
 Discover::
-* Fixes columns selection state after resetting state {kibana-pull}114178[#114178]
-* Fixes doc viewer table columns {kibana-pull}113124[#113124]
-* Fixes navigation to a `new` from saved search and saved query, fix `discover:searchOnPageLoad` {kibana-pull}112262[#112262]
+* Fixes CSV export problem with _source column {kibana-pull}114178[#114178]
+* Fixes too narrow columns when viewing document {kibana-pull}113124[#113124]
+* Fixes old saved query from becoming active when switching index patterns or creating new saved search {kibana-pull}112262[#112262]
+* Fixes `discover:searchOnPageLoad` not working correctly {kibana-pull}112262[#112262]
 Elastic Security::
 For the Elastic Security 7.15.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
