@@ -33,6 +33,9 @@ export const metricVis = () => ({
       name: 'palette',
       argType: 'stops_palette',
       default: `{palette}`,
+      options: {
+        confirm: true,
+      },
     },
     {
       name: 'font',
@@ -50,7 +53,7 @@ export const metricVis = () => ({
       options: {
         choices: [
           { value: 'None', name: strings.getColorModeNoneOption() },
-          { value: 'Label', name: strings.getColorModeLabelOption() },
+          { value: 'Labels', name: strings.getColorModeLabelOption() },
           { value: 'Background', name: strings.getColorModeBackgroundOption() },
         ],
       },

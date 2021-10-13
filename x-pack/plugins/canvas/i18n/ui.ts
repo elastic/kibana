@@ -1341,8 +1341,8 @@ export const ViewStrings = {
         defaultMessage: 'None',
       }),
     getColorModeLabelOption: () =>
-      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.labelOption', {
-        defaultMessage: 'Label',
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.labelsOption', {
+        defaultMessage: 'Labels',
       }),
     getColorModeBackgroundOption: () =>
       i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.backgroundOption', {
