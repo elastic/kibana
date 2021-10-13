@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import { EuiHorizontalRule } from '@elastic/eui';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -30,6 +31,9 @@ import type { PackageListItem } from '../../../../types';
 import type { IntegrationCardItem } from '../../../../../../../common/types/models';
 
 import { useMergeEprPackagesWithReplacements } from '../../../../hooks/use_merge_epr_with_replacements';
+
+import type { IntegrationPreferenceType } from '../../components/integration_preference';
+import { IntegrationPreference } from '../../components/integration_preference';
 
 import { mergeCategoriesAndCount } from './util';
 import { ALL_CATEGORY, CategoryFacets } from './category_facets';
@@ -96,11 +100,14 @@ const title = i18n.translate('xpack.fleet.epmList.allTitle', {
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
 export const AvailablePackages: React.FC = memo(() => {
+  const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
   useBreadcrumbs('integrations_all');
+
   const { selectedCategory, searchParam } = getParams(
     useParams<CategoryParams>(),
     useLocation().search
   );
+
   const history = useHistory();
   const { getHref, getAbsolutePath } = useLink();
 
@@ -111,6 +118,7 @@ export const AvailablePackages: React.FC = memo(() => {
     })[1];
     history.push(url);
   }
+
   function setSearchTerm(search: string) {
     // Use .replace so the browser's back button is not tied to single keystroke
     history.replace(
@@ -121,25 +129,32 @@ export const AvailablePackages: React.FC = memo(() => {
   const { data: eprPackages, isLoading: isLoadingAllPackages } = useGetPackages({
     category: '',
   });
+
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.response || []),
     [eprPackages]
   );
+
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
+
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
     useMergeEprPackagesWithReplacements(
-      eprIntegrationList || [],
-      replacementCustomIntegrations || []
+      preference === 'beats' ? [] : eprIntegrationList,
+      preference === 'agent' ? [] : replacementCustomIntegrations || []
     );
+
   const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
     useGetAppendCustomIntegrations();
+
   const eprAndCustomPackages: Array<CustomIntegration | PackageListItem> = [
     ...mergedEprPackages,
     ...(appendCustomIntegrations || []),
   ];
+
   const cards: IntegrationCardItem[] = eprAndCustomPackages.map((item) => {
     return mapToCard(getAbsolutePath, getHref, item);
   });
+
   cards.sort((a, b) => {
     return a.title.localeCompare(b.title);
   });
@@ -147,6 +162,7 @@ export const AvailablePackages: React.FC = memo(() => {
   const { data: eprCategories, isLoading: isLoadingCategories } = useGetCategories({
     include_policy_templates: true,
   });
+
   const categories = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] =
       isLoadingCategories || !eprCategories
@@ -169,16 +185,24 @@ export const AvailablePackages: React.FC = memo(() => {
     return null;
   }
 
-  const controls = categories ? (
-    <CategoryFacets
-      isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
-      categories={categories}
-      selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategoryFacet) => {
-        setSelectedCategory(id);
-      }}
-    />
-  ) : null;
+  let controls = [
+    <EuiHorizontalRule />,
+    <IntegrationPreference initialType={preference} onChange={setPreference} />,
+  ];
+
+  if (categories) {
+    controls = [
+      <CategoryFacets
+        isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={({ id }) => {
+          setSelectedCategory(id);
+        }}
+      />,
+      ...controls,
+    ];
+  }
 
   const filteredCards = cards.filter((c) => {
     if (selectedCategory === '') {
