@@ -41,8 +41,6 @@ import {
   PackagePolicyActionsMenu,
 } from '../../../../../components';
 
-import { packagePolicyRouteService } from '../../../../../services';
-
 import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
