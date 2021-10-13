@@ -54,7 +54,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
     maxWidth = '32ch',
     title,
     scroll = false,
-    loading = true,
+    loading = false,
     ...commonProps
   }) => {
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
@@ -70,7 +70,12 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
     const menuItems: EuiContextMenuPanelProps['items'] = useMemo(() => {
       return items.map((itemProps, index) => {
         if (loading) {
-          return <EuiLoadingContent lines={1} />;
+          return (
+            <EuiLoadingContent
+              lines={1}
+              data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-loading-${index}`)}
+            />
+          );
         }
         return (
           <ContextMenuItemNavByRouter

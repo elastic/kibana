@@ -130,4 +130,11 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
       expect.objectContaining({ path: '/one/two/three' })
     );
   });
+
+  it('should display loading state', () => {
+    render({ loading: true });
+    clickMenuTriggerButton();
+    expect(renderResult.getByTestId('testMenu-item-loading-1')).not.toBeNull();
+    expect(renderResult.getByTestId('testMenu-item-loading-2')).not.toBeNull();
+  });
 });
