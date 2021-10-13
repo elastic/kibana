@@ -17,6 +17,7 @@ import { PageSetupResults, ScreenshotObservableOpts, ScreenshotResults } from '.
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
+import { getRenderErrors } from './get_render_errors';
 import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
@@ -138,26 +139,30 @@ export class ScreenshotObservableHandler {
 
   public completeRender(apmTrans: apm.Transaction | null) {
     const driver = this.driver;
+    const layout = this.layout;
+    const logger = this.logger;
+
     return (withElements: Rx.Observable<void>) => {
       return withElements.pipe(
         mergeMap(async () => {
           // Waiting till _after_ elements have rendered before injecting our CSS
           // allows for them to be displayed properly in many cases
-          await injectCustomCss(driver, this.layout, this.logger);
+          await injectCustomCss(driver, layout, logger);
 
           const apmPositionElements = apmTrans?.startSpan('position_elements', 'correction');
-          if (this.layout.positionElements) {
+          if (layout.positionElements) {
             // position panel elements for print layout
-            await this.layout.positionElements(driver, this.logger);
+            await layout.positionElements(driver, logger);
           }
           if (apmPositionElements) apmPositionElements.end();
 
-          await waitForRenderComplete(this.captureConfig, driver, this.layout, this.logger);
+          await waitForRenderComplete(this.captureConfig, driver, layout, logger);
         }),
         mergeMap(async () => {
           return await Promise.all([
-            getTimeRange(driver, this.layout, this.logger),
-            getElementPositionAndAttributes(driver, this.layout, this.logger),
+            getTimeRange(driver, layout, logger),
+            getElementPositionAndAttributes(driver, layout, logger),
+            getRenderErrors(driver, layout, logger),
           ]).then(([timeRange, elementsPositionAndAttributes]) => ({
             elementsPositionAndAttributes,
             timeRange,
