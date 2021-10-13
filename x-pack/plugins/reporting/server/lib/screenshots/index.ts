@@ -53,5 +53,12 @@ export interface ScreenshotResults {
   timeRange: string | null;
   screenshots: Screenshot[];
   error?: Error;
+
+  /**
+   * Individual visualizations might encounter errors at runtime. If there are any they are added to this
+   * field. Any text captured here is intended to be shown to the user for debugging purposes, reporting
+   * does no further sanitization on these strings.
+   */
+  renderErrors?: string[];
   elementsPositionAndAttributes?: ElementsPositionAndAttribute[]; // NOTE: for testing
 }

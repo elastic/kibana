@@ -78,6 +78,9 @@ mockBrowserEvaluate.mockImplementation(() => {
   if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
     return Promise.resolve(getMockElementsPositionAndAttributes('Default Mock Title', 'Default '));
   }
+  if (mockCall === contexts.CONTEXT_GETRENDERERRORS) {
+    return Promise.resolve();
+  }
   throw new Error(mockCall);
 });
 const mockScreenshot = jest.fn(async () => Buffer.from('screenshot'));
