@@ -25,9 +25,12 @@ import {
   LayoutDirection,
   ElementClickListener,
   BrushEndListener,
+  XYBrushEvent,
   CurveType,
   LegendPositionConfig,
   LabelOverflowConstraint,
+  DisplayValueStyle,
+  RecursivePartial,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import type {
@@ -169,7 +172,9 @@ export const getXyChartRenderer = (dependencies: {
   },
 });
 
-function getValueLabelsStyling(isHorizontal: boolean) {
+function getValueLabelsStyling(isHorizontal: boolean): {
+  displayValue: RecursivePartial<DisplayValueStyle>;
+} {
   const VALUE_LABELS_MAX_FONTSIZE = 12;
   const VALUE_LABELS_MIN_FONTSIZE = 10;
   const VALUE_LABELS_VERTICAL_OFFSET = -10;
@@ -178,11 +183,9 @@ function getValueLabelsStyling(isHorizontal: boolean) {
   return {
     displayValue: {
       fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
-      fill: { textContrast: true, textInverted: false, textBorder: 0 },
+      fill: { textBorder: 0 },
       alignment: isHorizontal
-        ? {
-            vertical: VerticalAlignment.Middle,
-          }
+        ? { vertical: VerticalAlignment.Middle }
         : { horizontal: HorizontalAlignment.Center },
       offsetX: isHorizontal ? VALUE_LABELS_HORIZONTAL_OFFSET : 0,
       offsetY: isHorizontal ? 0 : VALUE_LABELS_VERTICAL_OFFSET,
@@ -388,14 +391,14 @@ export function XYChart({
       })
     );
     const fit = !hasBarOrArea && extent.mode === 'dataBounds';
-    let min: undefined | number;
-    let max: undefined | number;
+    let min: number = NaN;
+    let max: number = NaN;
 
     if (extent.mode === 'custom') {
       const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
       if (!inclusiveZeroError && !boundaryError) {
-        min = extent.lowerBound;
-        max = extent.upperBound;
+        min = extent.lowerBound ?? NaN;
+        max = extent.upperBound ?? NaN;
       }
     } else {
       const axisHasThreshold = thresholdLayers.some(({ yConfig }) =>
@@ -517,7 +520,7 @@ export function XYChart({
     onClickValue(context);
   };
 
-  const brushHandler: BrushEndListener = ({ x }) => {
+  const brushHandler = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
     }
@@ -592,7 +595,7 @@ export function XYChart({
         allowBrushingLastHistogramBucket={Boolean(isTimeViz)}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={interactive ? brushHandler : undefined}
+        onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={getLegendAction(
           filteredLayers,
