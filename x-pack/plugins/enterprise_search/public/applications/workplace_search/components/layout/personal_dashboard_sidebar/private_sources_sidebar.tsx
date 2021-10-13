@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiSideNav, EuiSideNavItemType } from '@elastic/eui';
+import { EuiSideNav } from '@elastic/eui';
 
 import { AppLogic } from '../../../app_logic';
 import {
@@ -38,7 +38,7 @@ export const PrivateSourcesSidebar = () => {
     contentSource: { id = '' },
   } = useValues(SourceLogic);
 
-  const navItems = [{ id, items: useSourceSubNav() }] as Array<EuiSideNavItemType<unknown>>;
+  const navItems = [{ id, name: '', items: useSourceSubNav() }];
 
   return (
     <>
