@@ -36,7 +36,7 @@ const sectionsHeader = i18n.translate('indexPatternManagement.indexPattern.secti
   defaultMessage: 'Index Patterns',
 });
 
-const IPM_APP_ID = 'indexPatterns';
+const IPM_APP_ID = 'dataViews';
 
 export class IndexPatternManagementPlugin
   implements
