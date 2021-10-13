@@ -4525,7 +4525,6 @@
     "telemetry.seeExampleOfClusterDataAndEndpointSecuity": "当社が収集する{clusterData}および{endpointSecurityData}の例をご覧ください。",
     "telemetry.telemetryBannerDescription": "Elastic Stackの改善にご協力ください使用状況データの収集は現在無効です。使用状況データの収集を有効にすると、製品とサービスを管理して改善することができます。詳細については、{privacyStatementLink}をご覧ください。",
     "telemetry.telemetryConfigAndLinkDescription": "使用状況データの収集を有効にすると、製品とサービスを管理して改善することができます。詳細については、{privacyStatementLink}をご覧ください。",
-    "telemetry.telemetryConfigDescription": "基本的な機能の利用状況に関する統計情報を提供して、Elastic Stack の改善にご協力ください。このデータは Elastic 社外と共有されません。",
     "telemetry.telemetryOptedInDisableUsage": "ここで使用状況データを無効にする",
     "telemetry.telemetryOptedInDismissMessage": "閉じる",
     "telemetry.telemetryOptedInNoticeDescription": "使用状況データがどのように製品とサービスの管理と改善につながるのかに関する詳細については、{privacyStatementLink}をご覧ください。収集を停止するには、{disableLink}。",

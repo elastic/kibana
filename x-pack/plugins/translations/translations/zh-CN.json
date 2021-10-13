@@ -4570,7 +4570,6 @@
     "telemetry.seeExampleOfClusterDataAndEndpointSecuity": "查看我们收集的{clusterData}和 {endpointSecurityData}示例。",
     "telemetry.telemetryBannerDescription": "想帮助我们改进 Elastic Stack？数据使用情况收集当前已禁用。启用使用情况数据收集可帮助我们管理并改善产品和服务。有关更多详情，请参阅我们的{privacyStatementLink}。",
     "telemetry.telemetryConfigAndLinkDescription": "启用使用情况数据收集可帮助我们管理并改善产品和服务。有关更多详情，请参阅我们的{privacyStatementLink}。",
-    "telemetry.telemetryConfigDescription": "通过提供基本功能的使用情况统计信息，来帮助我们改进 Elastic Stack。我们不会在 Elastic 之外共享此数据。",
     "telemetry.telemetryOptedInDisableUsage": "请在此禁用使用情况数据",
     "telemetry.telemetryOptedInDismissMessage": "关闭",
     "telemetry.telemetryOptedInNoticeDescription": "要了解使用情况数据如何帮助我们管理和改善产品和服务，请参阅我们的{privacyStatementLink}。要停止收集，{disableLink}。",
