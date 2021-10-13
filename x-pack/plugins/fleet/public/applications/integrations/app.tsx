@@ -42,6 +42,7 @@ import { EPMApp } from './sections/epm';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { PackageInstallProvider } from './hooks';
 import { useBreadcrumbs, UIExtensionsContext } from './hooks';
+import { IntegrationsHeader } from './components/header';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
@@ -186,41 +187,53 @@ export const IntegrationsAppContext: React.FC<{
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
-}> = memo(({ children, startServices, config, history, kibanaVersion, extensions }) => {
-  const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+}> = memo(
+  ({
+    children,
+    startServices,
+    config,
+    history,
+    kibanaVersion,
+    extensions,
+    setHeaderActionMenu,
+  }) => {
+    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
-  return (
-    <RedirectAppLinks application={startServices.application}>
-      <startServices.i18n.Context>
-        <KibanaContextProvider services={{ ...startServices }}>
-          <EuiErrorBoundary>
-            <ConfigContext.Provider value={config}>
-              <KibanaVersionContext.Provider value={kibanaVersion}>
-                <EuiThemeProvider darkMode={isDarkMode}>
-                  <UIExtensionsContext.Provider value={extensions}>
-                    <FleetStatusProvider>
-                      <startServices.customIntegrations.ContextProvider>
-                        <Router history={history}>
-                          <AgentPolicyContextProvider>
-                            <PackageInstallProvider notifications={startServices.notifications}>
-                              {children}
-                            </PackageInstallProvider>
-                          </AgentPolicyContextProvider>
-                        </Router>
-                      </startServices.customIntegrations.ContextProvider>
-                    </FleetStatusProvider>
-                  </UIExtensionsContext.Provider>
-                </EuiThemeProvider>
-              </KibanaVersionContext.Provider>
-            </ConfigContext.Provider>
-          </EuiErrorBoundary>
-        </KibanaContextProvider>
-      </startServices.i18n.Context>
-    </RedirectAppLinks>
-  );
-});
+    return (
+      <RedirectAppLinks application={startServices.application}>
+        <startServices.i18n.Context>
+          <KibanaContextProvider services={{ ...startServices }}>
+            <EuiErrorBoundary>
+              <ConfigContext.Provider value={config}>
+                <KibanaVersionContext.Provider value={kibanaVersion}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <UIExtensionsContext.Provider value={extensions}>
+                      <FleetStatusProvider>
+                        <startServices.customIntegrations.ContextProvider>
+                          <Router history={history}>
+                            <AgentPolicyContextProvider>
+                              <PackageInstallProvider notifications={startServices.notifications}>
+                                <IntegrationsHeader {...{ setHeaderActionMenu }} />
+                                {children}
+                              </PackageInstallProvider>
+                            </AgentPolicyContextProvider>
+                          </Router>
+                        </startServices.customIntegrations.ContextProvider>
+                      </FleetStatusProvider>
+                    </UIExtensionsContext.Provider>
+                  </EuiThemeProvider>
+                </KibanaVersionContext.Provider>
+              </ConfigContext.Provider>
+            </EuiErrorBoundary>
+          </KibanaContextProvider>
+        </startServices.i18n.Context>
+      </RedirectAppLinks>
+    );
+  }
+);
 
 export const AppRoutes = memo(() => {
   const { modal, setModal } = useUrlModal();
