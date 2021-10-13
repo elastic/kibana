@@ -491,7 +491,7 @@ export const Overview: React.FC = () => {
         <EuiText size="s">
           <FormattedMessage
             id="xpack.enterpriseSearch.workplaceSearch.sources.synchronizationCallout"
-            defaultMessage="Configure {syncFrequencyLink} or permissions {blockTimeWindowsLink}."
+            defaultMessage="Configure {syncFrequencyLink} or {blockTimeWindowsLink}."
             values={{
               syncFrequencyLink: (
                 <EuiLinkTo to={getContentSourcePath(SYNC_FREQUENCY_PATH, id, isOrganization)}>
