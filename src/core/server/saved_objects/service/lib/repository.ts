@@ -2102,13 +2102,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Pre-flight check to get a multi-namespace saved object's included namespaces. This ensures that, if the saved object exists, it
-   * includes the target namespace.
-   *
-   * @returns Array of namespaces that this saved object currently includes, or (if the object does not exist yet) the namespaces that a
-   * newly-created object will include. Value may be undefined if an existing saved object has no namespaces attribute; this should not
-   * happen in normal operations, but it is possible if the Elasticsearch document is manually modified.
-   * @throws Will throw an error if the saved object exists and it does not include the target namespace.
+   * Pre-flight check to ensure that a multi-namespace object exists in the current namespace.
    */
   private async preflightCheckNamespaces({
     type,
