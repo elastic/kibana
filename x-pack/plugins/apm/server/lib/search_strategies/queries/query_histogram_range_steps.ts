@@ -19,10 +19,11 @@ import { getRequestBase } from './get_request_base';
 
 const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
+  // We round the final values because the ES range agg we used won't accept numbers with decimals for `transaction.duration.us`.
   const logFn = scaleLog().domain([min, max]).range([1, steps]);
   return [...Array(steps).keys()]
     .map(logFn.invert)
-    .map((d) => (isNaN(d) ? 0 : d));
+    .map((d) => (isNaN(d) ? 0 : Math.round(d)));
 };
 
 export const getHistogramIntervalRequest = (
