@@ -152,6 +152,10 @@ export class ResourceInstaller {
     await Promise.all(concreteIndices.map((item) => this.updateAliasWriteIndexMapping(item)));
   }
 
+  // NOTE / IMPORTANT: Please note this will update the mappings of backing indices but
+  // *not* the settings. This is due to the fact settings can be classed as dynamic and static,
+  // and static updates will fail on an index that isn't closed. New settings *will* be applied as part
+  // of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
   private async updateAliasWriteIndexMapping({ index, alias }: ConcreteIndexInfo) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
