@@ -207,6 +207,19 @@ export class InspectorService extends FtrService {
   }
 
   /**
+   * Returns the selected option value from combobox
+   * @param index combobox option array
+   */
+  public async getSelectedOption(index: number = 0): Promise<string> {
+    await this.openInspectorRequestsView();
+    const selectedOption = await this.comboBox.getComboBoxSelectedOptions(
+      'inspectorRequestChooser'
+    );
+
+    return selectedOption[index];
+  }
+
+  /**
    * Returns request name as the comma-separated string from combobox
    */
   public async getRequestNames(): Promise<string> {
@@ -226,5 +239,18 @@ export class InspectorService extends FtrService {
 
   public getOpenRequestDetailResponseButton() {
     return this.testSubjects.find('inspectorRequestDetailResponse');
+  }
+
+  /**
+   * Returns true if the value equals the combobox options list
+   * @param value default combobox single option text
+   */
+  public async hasSingleRequest(
+    value: string = "You've selected all available options"
+  ): Promise<boolean> {
+    await this.openInspectorRequestsView();
+    const comboBoxOptions = await this.comboBox.getOptionsList('inspectorRequestChooser');
+
+    return value === comboBoxOptions;
   }
 }
