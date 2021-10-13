@@ -39,29 +39,28 @@ describe('Swimlane API', () => {
     });
 
     it('returns an error when the response fails', async () => {
+      expect.assertions(1);
       const abortCtrl = new AbortController();
-
       fetchMock.mockResolvedValueOnce({
         ok: false,
         status: 401,
         json: async () => getApplicationResponse,
       });
 
-      try {
-        await getApplication({
+      await expect(() =>
+        getApplication({
           signal: abortCtrl.signal,
           apiToken: '',
           appId: '',
           url: '',
-        });
-      } catch (e) {
-        expect(e.message).toContain('Received status:');
-      }
+        })
+      ).rejects.toThrow('Received status:');
     });
 
     it('returns an error when parsing the json fails', async () => {
-      const abortCtrl = new AbortController();
+      expect.assertions(1);
 
+      const abortCtrl = new AbortController();
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -70,16 +69,14 @@ describe('Swimlane API', () => {
         },
       });
 
-      try {
-        await getApplication({
+      await expect(() =>
+        getApplication({
           signal: abortCtrl.signal,
           apiToken: '',
           appId: '',
           url: '',
-        });
-      } catch (e) {
-        expect(e.message).toContain('bad');
-      }
+        })
+      ).rejects.toThrow('bad');
     });
 
     it('it removes unsafe fields', async () => {

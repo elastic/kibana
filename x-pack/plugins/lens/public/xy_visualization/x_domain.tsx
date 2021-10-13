@@ -26,12 +26,12 @@ export const getXDomain = (
 ) => {
   const baseDomain = isTimeViz
     ? {
-        min: data.dateRange?.fromDate.getTime(),
-        max: data.dateRange?.toDate.getTime(),
+        min: data.dateRange?.fromDate.getTime() ?? NaN,
+        max: data.dateRange?.toDate.getTime() ?? NaN,
         minInterval,
       }
     : isHistogram
-    ? { minInterval }
+    ? { minInterval, min: NaN, max: NaN }
     : undefined;
 
   if (isHistogram && isFullyQualified(baseDomain)) {

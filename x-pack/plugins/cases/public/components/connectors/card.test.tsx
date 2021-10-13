@@ -10,22 +10,18 @@ import { mount } from 'enzyme';
 
 import { ConnectorTypes } from '../../../common';
 import { useKibana } from '../../common/lib/kibana';
-import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { connectors } from '../configure_cases/__mock__';
 import { ConnectorCard } from './card';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('ConnectorCard ', () => {
-  const { createMockActionTypeModel } = actionTypeRegistryMock;
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
 
   beforeAll(() => {
-    connectors.forEach((connector) =>
-      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
-        createMockActionTypeModel({ id: connector.actionTypeId, iconClass: 'logoSecurity' })
-      )
-    );
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectors);
   });
 
   it('it does not throw when accessing the icon if the connector type is not registered', () => {
