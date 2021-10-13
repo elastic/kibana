@@ -7,12 +7,13 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
+import { VIS } from '../constants';
 
 type Props = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
 
 export const TestImageA: FunctionComponent<Props> = ({
-  width = '100%',
-  height = '100%',
+  width = VIS.width,
+  height = VIS.height,
   ...restProps
 }) => {
   return (

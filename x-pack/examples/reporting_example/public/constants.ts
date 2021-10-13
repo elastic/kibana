@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+// Values based on A4 page size
+export const VIS = {
+  width: 1950 / 2,
+  height: 1200 / 2,
+};
+
 export const ROUTES = {
   captureTest: '/captureTest',
   main: '/',
