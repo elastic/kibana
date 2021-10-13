@@ -141,11 +141,11 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     };
   };
 
-  const getCaptureTestPDFJobParams = (): JobParamsPDFV2 => {
+  const getCaptureTestPDFJobParams = (print: boolean) => (): JobParamsPDFV2 => {
     return {
       version: '8.0.0',
       layout: {
-        id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+        id: print ? constants.LAYOUT_TYPES.PRINT : constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
       },
       locatorParams: [
         {
@@ -266,7 +266,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       title: 'Test A',
       content: (
         <reporting.components.ReportingPanelPDFV2
-          getJobParams={getCaptureTestPDFJobParams}
+          getJobParams={getCaptureTestPDFJobParams(false)}
           onClose={closePopover}
         />
       ),
@@ -277,7 +277,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       content: (
         <reporting.components.ReportingPanelPDFV2
           layoutOption="print"
-          getJobParams={getCaptureTestPDFJobParams}
+          getJobParams={getCaptureTestPDFJobParams(true)}
           onClose={closePopover}
         />
       ),
