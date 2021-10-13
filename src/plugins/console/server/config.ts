@@ -20,6 +20,7 @@ const baseSettings = {
 
 // Settings only available in 7.x
 const deprecatedSettings = {
+  enabled: schema.boolean({ defaultValue: true }),
   proxyFilter: schema.arrayOf(schema.string(), { defaultValue: ['.*'] }),
   proxyConfig: schema.arrayOf(
     schema.object({
@@ -63,7 +64,16 @@ const configSchema7x = schema.object(
 export type ConfigType = TypeOf<typeof configSchema>;
 export type ConfigType7x = TypeOf<typeof configSchema7x>;
 
+const deprecations: PluginConfigDescriptor['deprecations'] = ({ unused }) => [unused('ssl')];
+
+const deprecations7x: PluginConfigDescriptor['deprecations'] = ({ deprecate, unused }) => [
+  deprecate('enabled', '8.0.0'),
+  deprecate('proxyFilter', '8.0.0'),
+  deprecate('proxyConfig', '8.0.0'),
+  unused('ssl'),
+];
+
 export const config: PluginConfigDescriptor<ConfigType | ConfigType7x> = {
   schema: kibanaVersion.major < 8 ? configSchema7x : configSchema,
-  deprecations: ({ deprecate, unused }) => [unused('ssl')],
+  deprecations: kibanaVersion.major < 8 ? deprecations7x : deprecations,
 };
