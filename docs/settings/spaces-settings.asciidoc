@@ -21,7 +21,7 @@ The default is `1000`.
 `monitoring.cluster_alerts-allowedSpaces` {ess-icon}:: 
 Specifies the spaces where cluster alerts are automatically generated. 
 You must specify all spaces where you want to generate alerts, including the default space. 
-When the default space is unspecified, {kib} is unable to generate an alert for default space.
+When the default space is unspecified, {kib} is unable to generate an alert for the default space.
 {es} clusters that run on {es} services are all containers. To send monitoring data 
 from your self-managed {es} installation to {es} services, set to `false`. 
 The default is `true`.
