@@ -4,11 +4,98 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { SemVer } from 'semver';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor, AddConfigDeprecation } from 'src/core/server';
 
-export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-});
+import { MAJOR_VERSION } from '../common';
+
+const kibanaVersion = new SemVer(MAJOR_VERSION);
+
+const baseConfig = {
+  exposeToBrowser: {
+    ui: true,
+  },
+};
+
+const baseSchema = {
+  ui: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+};
+
+// >= 8.x
+const configSchema = schema.object(
+  {
+    ...baseSchema,
+  },
+  { defaultValue: undefined }
+);
+
+// Settings that will be deprecated in the next major
+const deprecations: PluginConfigDescriptor['deprecations'] = () => [];
+
+// Config in latest major
+const configLatest: PluginConfigDescriptor<RollupConfig> = {
+  ...baseConfig,
+  schema: configSchema,
+  deprecations,
+};
 
 export type RollupConfig = TypeOf<typeof configSchema>;
+
+// 7.x
+const settings7x = {
+  enabled: schema.boolean({ defaultValue: true }),
+};
+
+const configSchema7x = schema.object(
+  {
+    ...baseSchema,
+    ...settings7x,
+  },
+  { defaultValue: undefined }
+);
+
+// Settings that will be deprecated in 8.0
+const deprecations7x: PluginConfigDescriptor<RollupConfig7x>['deprecations'] = () => [
+  (completeConfig: Record<string, any>, rootPath: string, addDeprecation: AddConfigDeprecation) => {
+    if (get(completeConfig, 'xpack.rollup.enabled') === undefined) {
+      return completeConfig;
+    }
+
+    addDeprecation({
+      title: i18n.translate('xpack.rollup.deprecations.enabledTitle', {
+        defaultMessage: 'Setting "xpack.rollup.enabled" is deprecated',
+      }),
+      message: i18n.translate('xpack.rollup.deprecations.enabledMessage', {
+        defaultMessage:
+          'Use the "xpack.rollup.ui.enabled" setting instead of "xpack.rollup.enabled".',
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate('xpack.rollup.deprecations.enabled.manualStepOneMessage', {
+            defaultMessage: 'Open the kibana.yml config file.',
+          }),
+          i18n.translate('xpack.rollup.deprecations.enabled.manualStepTwoMessage', {
+            defaultMessage:
+              'Change the "xpack.rollup.enabled" setting to "xpack.rollup.ui.enabled".',
+          }),
+        ],
+      },
+    });
+    return completeConfig;
+  },
+];
+export type RollupConfig7x = TypeOf<typeof configSchema7x>;
+
+const config7x: PluginConfigDescriptor<RollupConfig7x> = {
+  ...baseConfig,
+  schema: configSchema7x,
+  deprecations: deprecations7x,
+};
+
+export const config: PluginConfigDescriptor<RollupConfig | RollupConfig7x> =
+  kibanaVersion.major < 8 ? config7x : configLatest;
