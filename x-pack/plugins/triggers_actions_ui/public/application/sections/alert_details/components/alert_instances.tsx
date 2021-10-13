@@ -21,17 +21,17 @@ import {
   EuiStat,
   EuiEmptyPrompt,
   EuiIconTip,
-  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
-import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
+import { BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
 import {
   ActionGroup,
+  AlertExecutionStatusErrorReasons,
   AlertInstanceStatusValues,
-  parseDuration,
 } from '../../../../../../alerting/common';
 import {
   Alert,
@@ -47,6 +47,15 @@ import {
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import './alert_instances.scss';
 import { RuleMutedSwitch } from './rule_muted_switch';
+import { getHealthColor } from '../../alerts_list/components/alert_status_filter';
+import {
+  alertsStatusesTranslationsMapping,
+  ALERT_STATUS_LICENSE_ERROR,
+} from '../../alerts_list/translations';
+import {
+  formatMillisForDisplay,
+  shouldShowDurationWarning,
+} from '../../../lib/execution_duration_utils';
 
 type AlertInstancesProps = {
   alert: Alert;
@@ -56,21 +65,6 @@ type AlertInstancesProps = {
   requestRefresh: () => Promise<void>;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
-
-function formatExecutionDuration(value: number | undefined) {
-  if (!value) {
-    return '00:00:00.000';
-  }
-
-  const duration = moment.duration(value);
-  const durationString = [duration.hours(), duration.minutes(), duration.seconds()]
-    .map((v: number) => padStart(`${v}`, 2, '0'))
-    .join(':');
-
-  // add millis
-  const millisString = padStart(`${duration.milliseconds()}`, 3, '0');
-  return `${durationString}.${millisString}`;
-}
 
 export const alertInstancesTableColumns = (
   onMuteAction: (instance: AlertInstanceListItem) => Promise<void>,
@@ -196,91 +190,106 @@ export function AlertInstances({
     requestRefresh();
   };
 
-  const ruleTypeTimeout: string | undefined = alertType.ruleTaskTimeout;
-  const ruleTypeTimeoutMillis: number | undefined = ruleTypeTimeout
-    ? parseDuration(ruleTypeTimeout)
-    : undefined;
-  const showDurationWarning: boolean = ruleTypeTimeoutMillis
-    ? alertInstanceSummary.executionDuration.average > ruleTypeTimeoutMillis
-    : false;
+  const showDurationWarning = shouldShowDurationWarning(
+    alertType,
+    alertInstanceSummary.executionDuration.average
+  );
 
   const paddedExecutionDurations = assign(
-    fill(new Array(50), 0),
+    fill(new Array(30), 0),
     alertInstanceSummary.executionDuration.values
+  );
+
+  const healthColor = getHealthColor(alert.executionStatus.status);
+  const isLicenseError =
+    alert.executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+  const statusMessage = isLicenseError
+    ? ALERT_STATUS_LICENSE_ERROR
+    : alertsStatusesTranslationsMapping[alert.executionStatus.status];
+
+  const health = (
+    <EuiHealth
+      textSize="inherit"
+      data-test-subj={`ruleStatus-${alert.executionStatus.status}`}
+      color={healthColor}
+    >
+      {statusMessage}
+    </EuiHealth>
   );
 
   return (
     <>
       <EuiHorizontalRule />
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPanel hasBorder={true}>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={8}>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiStat
-                      title={
-                        <EuiFlexGroup gutterSize="xs">
-                          {showDurationWarning && (
-                            <EuiFlexItem grow={false}>
-                              <EuiIconTip
-                                data-test-subj="ruleDurationWarning"
-                                anchorClassName="ruleDurationWarningIcon"
-                                type="alert"
-                                color="danger"
-                                content={i18n.translate(
-                                  'xpack.triggersActionsUI.sections.alertDetails.alertInstances.ruleTypeExcessDurationMessage',
-                                  {
-                                    defaultMessage: `Duration exceeds the rule's expected run time.`,
-                                  }
-                                )}
-                                position="top"
-                              />
-                            </EuiFlexItem>
-                          )}
-                          <EuiFlexItem grow={false}>
-                            {formatExecutionDuration(
-                              alertInstanceSummary.executionDuration.average
-                            )}
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      }
-                      description="Average duration"
-                      titleColor={`${showDurationWarning ? 'danger' : 'text'}`}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiStat
-                      title={formatExecutionDuration(alertInstanceSummary.executionDuration.max)}
-                      description="Max duration"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiStat
-                      title={formatExecutionDuration(alertInstanceSummary.executionDuration.min)}
-                      description="Min duration"
-                    />
+        <EuiFlexItem grow={false}>
+          <EuiPanel color="subdued" hasBorder={false}>
+            <EuiStat title={health} description="Last response" />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPanel color={showDurationWarning ? 'warning' : 'subdued'} hasBorder={false}>
+            <EuiStat
+              title={
+                <EuiFlexGroup gutterSize="xs" className="ruleDurationStat">
+                  {showDurationWarning && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        data-test-subj="ruleDurationWarning"
+                        anchorClassName="ruleDurationWarningIcon"
+                        type="alert"
+                        color="warning"
+                        content={i18n.translate(
+                          'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.ruleTypeExcessDurationMessage',
+                          {
+                            defaultMessage: `Duration exceeds the rule's expected run time.`,
+                          }
+                        )}
+                        position="top"
+                      />
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    {formatMillisForDisplay(alertInstanceSummary.executionDuration.average)}
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText textAlign="right">
-                  <p>
+              }
+              description="Average duration"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiPanel hasBorder={true}>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h4>
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.executionDurationNum"
-                      defaultMessage="Last 50 executions"
+                      id="xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.recentDurationsTitle"
+                      defaultMessage="Recent execution durations"
                     />
-                  </p>
-                </EuiText>
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  anchorClassName="executionDurationChartTitleIcon"
+                  color="subdued"
+                  type="questionInCircle"
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.recentDurationsTooltip',
+                    {
+                      defaultMessage: `Recent rule executions include up to the last 30 executions.`,
+                    }
+                  )}
+                  position="top"
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
 
-            <EuiHorizontalRule />
             {alertInstanceSummary.executionDuration.values &&
             alertInstanceSummary.executionDuration.values.length > 0 ? (
               <>
-                <Chart size={{ height: 200 }}>
+                <Chart size={{ height: 120 }}>
                   <Settings
                     theme={{
                       lineSeriesStyle: {
@@ -309,8 +318,6 @@ export function AlertInstances({
                     ])}
                     curve={CurveType.CURVE_NATURAL}
                   />
-                  <Axis id="bottom-axis" position="bottom" />
-                  <Axis id="left-axis" position="left" tickFormat={(d) => d} />
                 </Chart>
               </>
             ) : (
@@ -320,7 +327,7 @@ export function AlertInstances({
                     <>
                       <p>
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.executionDurationNoData"
+                          id="xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.executionDurationNoData"
                           defaultMessage="There are no available executions for this rule."
                         />
                       </p>
