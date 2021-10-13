@@ -27,11 +27,11 @@ export interface DeprecationsFactoryConfig {
 export class DeprecationsFactory {
   private readonly registries: Map<string, DeprecationsRegistry> = new Map();
   private readonly logger: Logger;
-  // private readonly config: DeprecationsFactoryConfig;
+  private readonly config: DeprecationsFactoryConfig;
 
   constructor({ logger, config }: DeprecationsFactoryDeps) {
     this.logger = logger;
-    // this.config = config;
+    this.config = config;
   }
 
   public getRegistry = (domainId: string): DeprecationsRegistry => {
@@ -49,7 +49,7 @@ export class DeprecationsFactory {
     dependencies: GetDeprecationsContext
   ): Promise<DomainDeprecationDetails[]> => {
     const infoBody = await this.getDeprecationsBody(domainId, dependencies);
-    return this.createDeprecationInfo(domainId, infoBody).flat();
+    return this.createDeprecationInfo(domainId, infoBody);
   };
 
   public getAllDeprecations = async (
@@ -71,13 +71,10 @@ export class DeprecationsFactory {
     domainId: string,
     deprecationInfoBody: DeprecationsDetails[]
   ): DomainDeprecationDetails[] => {
-    return deprecationInfoBody
-      .flat()
-      .filter(Boolean)
-      .map((pluginDeprecation) => ({
-        ...pluginDeprecation,
-        domainId,
-      }));
+    return deprecationInfoBody.map((pluginDeprecation) => ({
+      ...pluginDeprecation,
+      domainId,
+    }));
   };
 
   private getDeprecationsBody = async (
@@ -121,7 +118,7 @@ export class DeprecationsFactory {
           ];
         }
 
-        return settledResult.value;
+        return filterIgnoredDeprecations(settledResult.value.flat(), this.config);
       });
     } catch (err) {
       this.logger.warn(`Failed to get deprecations info for plugin "${domainId}".`, err);
@@ -129,3 +126,15 @@ export class DeprecationsFactory {
     }
   };
 }
+
+const filterIgnoredDeprecations = (
+  deprecations: DeprecationsDetails[],
+  config: DeprecationsFactoryConfig
+): DeprecationsDetails[] => {
+  return deprecations.filter((deprecation) => {
+    if (deprecation.deprecationType === 'config') {
+      return !config.ignoredConfigDeprecations.includes(deprecation.configPath);
+    }
+    return true;
+  });
+};
