@@ -55,6 +55,10 @@ export type NoDataPageActions = Partial<EuiCardProps> & {
    * Remapping `onClick` to any element
    */
   onClick?: MouseEventHandler<HTMLElement>;
+  /**
+   * Category to auto-select within Fleet
+   */
+  category?: string;
 };
 
 export type NoDataPageActionsProps = Record<string, NoDataPageActions>;
