@@ -10,6 +10,7 @@ import { map, share } from 'rxjs/operators';
 import { inflateResponse } from '.';
 import { fromStreamingXhr } from './from_streaming_xhr';
 import { split } from './split';
+import { appendQueryParam } from '../../common';
 
 export interface FetchStreamingParams {
   url: string;
@@ -34,15 +35,14 @@ export function fetchStreaming({
 }: FetchStreamingParams) {
   const xhr = new window.XMLHttpRequest();
 
+  const isCompressionDisabled = getIsCompressionDisabled();
+  if (!isCompressionDisabled) {
+    url = appendQueryParam(url, 'compress', 'true');
+  }
+
   // Begin the request
   xhr.open(method, url);
   xhr.withCredentials = true;
-
-  const isCompressionDisabled = getIsCompressionDisabled();
-
-  if (!isCompressionDisabled) {
-    headers['X-Chunk-Encoding'] = 'deflate';
-  }
 
   // Set the HTTP headers
   Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
