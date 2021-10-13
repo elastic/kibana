@@ -42,52 +42,58 @@ export class SnapshotRestoreUIPlugin {
 
   public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): void {
     const config = this.initializerContext.config.get<ClientConfigType>();
-    const { http } = coreSetup;
-    const { home, management, usageCollection } = plugins;
+    const {
+      ui: { enabled: isSnapshotRestoreUiEnabled },
+    } = config;
 
-    // Initialize services
-    this.uiMetricService.setup(usageCollection);
-    textService.setup(i18n);
-    httpService.setup(http);
+    if (isSnapshotRestoreUiEnabled) {
+      const { http } = coreSetup;
+      const { home, management, usageCollection } = plugins;
 
-    management.sections.section.data.registerApp({
-      id: PLUGIN.id,
-      title: i18n.translate('xpack.snapshotRestore.appTitle', {
-        defaultMessage: 'Snapshot and Restore',
-      }),
-      order: 3,
-      mount: async (params) => {
-        const { mountManagementSection } = await import('./application/mount_management_section');
-        const services = {
-          uiMetricService: this.uiMetricService,
-        };
-        return await mountManagementSection(coreSetup, services, config, params);
-      },
-    });
+      // Initialize services
+      this.uiMetricService.setup(usageCollection);
+      textService.setup(i18n);
+      httpService.setup(http);
 
-    if (home) {
-      home.featureCatalogue.register({
+      management.sections.section.data.registerApp({
         id: PLUGIN.id,
-        title: i18n.translate('xpack.snapshotRestore.featureCatalogueTitle', {
-          defaultMessage: 'Back up and restore',
+        title: i18n.translate('xpack.snapshotRestore.appTitle', {
+          defaultMessage: 'Snapshot and Restore',
         }),
-        description: i18n.translate('xpack.snapshotRestore.featureCatalogueDescription', {
-          defaultMessage:
-            'Save snapshots to a backup repository, and restore to recover index and cluster state.',
-        }),
-        icon: 'storage',
-        path: '/app/management/data/snapshot_restore',
-        showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
-        order: 630,
+        order: 3,
+        mount: async (params) => {
+          const { mountManagementSection } = await import('./application/mount_management_section');
+          const services = {
+            uiMetricService: this.uiMetricService,
+          };
+          return await mountManagementSection(coreSetup, services, config, params);
+        },
       });
-    }
 
-    plugins.share.url.locators.create(
-      new SnapshotRestoreLocatorDefinition({
-        managementAppLocator: plugins.management.locator,
-      })
-    );
+      if (home) {
+        home.featureCatalogue.register({
+          id: PLUGIN.id,
+          title: i18n.translate('xpack.snapshotRestore.featureCatalogueTitle', {
+            defaultMessage: 'Back up and restore',
+          }),
+          description: i18n.translate('xpack.snapshotRestore.featureCatalogueDescription', {
+            defaultMessage:
+              'Save snapshots to a backup repository, and restore to recover index and cluster state.',
+          }),
+          icon: 'storage',
+          path: '/app/management/data/snapshot_restore',
+          showOnHomePage: true,
+          category: FeatureCatalogueCategory.ADMIN,
+          order: 630,
+        });
+      }
+
+      plugins.share.url.locators.create(
+        new SnapshotRestoreLocatorDefinition({
+          managementAppLocator: plugins.management.locator,
+        })
+      );
+    }
   }
 
   public start() {}
