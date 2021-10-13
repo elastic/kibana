@@ -85,6 +85,9 @@ export const migrations = {
             'visualization:regionmap:showWarnings',
             'visualization:tileMap:WMSdefaults',
             'visualization:tileMap:maxPrecision',
+            // owner: Team:Core
+            'telemetry:optIn',
+            'xPackMonitoring:allowReport',
           ].includes(key)
             ? {
                 ...acc,
