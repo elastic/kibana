@@ -28,6 +28,12 @@ describe('loadAlertInstanceSummary', () => {
       statusStartDate: '2021-04-01T21:19:25.174Z',
       tags: [],
       throttle: null,
+      executionDuration: {
+        average: 0,
+        max: 0,
+        min: 0,
+        values: [],
+      },
     };
 
     http.get.mockResolvedValueOnce({
@@ -45,6 +51,12 @@ describe('loadAlertInstanceSummary', () => {
       status_start_date: '2021-04-01T21:19:25.174Z',
       tags: [],
       throttle: null,
+      execution_duration: {
+        average: 0,
+        max: 0,
+        min: 0,
+        values: [],
+      },
     });
 
     const result = await loadAlertInstanceSummary({ http, alertId: 'te/st' });
