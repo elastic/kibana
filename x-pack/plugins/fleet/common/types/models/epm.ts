@@ -69,6 +69,7 @@ export enum KibanaAssetType {
   lens = 'lens',
   securityRule = 'security_rule',
   mlModule = 'ml_module',
+  tag = 'tag',
 }
 
 /*
@@ -83,6 +84,7 @@ export enum KibanaSavedObjectType {
   lens = 'lens',
   mlModule = 'ml-module',
   securityRule = 'security-rule',
+  tag = 'tag',
 }
 
 export enum ElasticsearchAssetType {
@@ -225,6 +227,7 @@ export type RegistrySearchResult = Pick<
   | 'internal'
   | 'data_streams'
   | 'policy_templates'
+  | 'categories'
 >;
 
 export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
@@ -374,6 +377,7 @@ export interface IntegrationCardItem {
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   integration: string;
   id: string;
+  categories: string[];
 }
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;

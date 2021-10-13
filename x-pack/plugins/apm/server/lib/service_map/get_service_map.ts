@@ -65,10 +65,7 @@ async function getConnectionData({
       end,
     });
 
-    const chunks = chunk(
-      traceIds,
-      setup.config['xpack.apm.serviceMapMaxTracesPerRequest']
-    );
+    const chunks = chunk(traceIds, setup.config.serviceMapMaxTracesPerRequest);
 
     const init = {
       connections: [],

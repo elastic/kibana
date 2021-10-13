@@ -16,6 +16,8 @@ import { createIndicatorMatchAlertType } from './create_indicator_match_alert_ty
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { CountResponse } from 'kibana/server';
 import { RuleParams } from '../../schemas/rule_schemas';
+import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -49,19 +51,23 @@ describe('Indicator Match Alerts', () => {
     to: 'now',
     type: 'threat_match',
   };
+  const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
+  const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+    lists: dependencies.lists,
+    logger: dependencies.logger,
+    config: createMockConfig(),
+    ruleDataClient: dependencies.ruleDataClient,
+    eventLogService: dependencies.eventLogService,
+  });
 
   it('does not send an alert when no events found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
-    const indicatorMatchAlertType = createIndicatorMatchAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      ignoreFields: [],
-      mergeStrategy: 'allFields',
-      ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
-      version: '1.0.0',
-    });
+    const indicatorMatchAlertType = securityRuleTypeWrapper(
+      createIndicatorMatchAlertType({
+        experimentalFeatures: allowedExperimentalValues,
+        logger: dependencies.logger,
+        version: '1.0.0',
+      })
+    );
 
     dependencies.alerting.registerType(indicatorMatchAlertType);
 
@@ -92,17 +98,13 @@ describe('Indicator Match Alerts', () => {
   });
 
   it('does not send an alert when no enrichments are found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
-    const indicatorMatchAlertType = createIndicatorMatchAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
-      ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
-      version: '1.0.0',
-    });
+    const indicatorMatchAlertType = securityRuleTypeWrapper(
+      createIndicatorMatchAlertType({
+        experimentalFeatures: allowedExperimentalValues,
+        logger: dependencies.logger,
+        version: '1.0.0',
+      })
+    );
 
     dependencies.alerting.registerType(indicatorMatchAlertType);
 
@@ -131,17 +133,13 @@ describe('Indicator Match Alerts', () => {
   });
 
   it('sends an alert when enrichments are found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
-    const indicatorMatchAlertType = createIndicatorMatchAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
-      ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
-      version: '1.0.0',
-    });
+    const indicatorMatchAlertType = securityRuleTypeWrapper(
+      createIndicatorMatchAlertType({
+        experimentalFeatures: allowedExperimentalValues,
+        logger: dependencies.logger,
+        version: '1.0.0',
+      })
+    );
 
     dependencies.alerting.registerType(indicatorMatchAlertType);
 

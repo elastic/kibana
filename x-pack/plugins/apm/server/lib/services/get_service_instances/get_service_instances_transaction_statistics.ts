@@ -115,6 +115,9 @@ export async function getServiceInstancesTransactionStatistics<
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
+        ...getDocumentTypeFilterForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
         ...(isComparisonSearch && serviceNodeIds
           ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
           : []),

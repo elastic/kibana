@@ -37,7 +37,7 @@ const serviceMapRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { config, context, params, logger } = resources;
-    if (!config['xpack.apm.serviceMapEnabled']) {
+    if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
     if (!isActivePlatinumLicense(context.licensing.license)) {
@@ -86,7 +86,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
   handler: async (resources) => {
     const { config, context, params } = resources;
 
-    if (!config['xpack.apm.serviceMapEnabled']) {
+    if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
     if (!isActivePlatinumLicense(context.licensing.license)) {
@@ -130,7 +130,7 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
   handler: async (resources) => {
     const { config, context, params } = resources;
 
-    if (!config['xpack.apm.serviceMapEnabled']) {
+    if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
     if (!isActivePlatinumLicense(context.licensing.license)) {

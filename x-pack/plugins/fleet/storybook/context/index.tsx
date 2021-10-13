@@ -27,6 +27,7 @@ import { getHttp } from './http';
 import { getUiSettings } from './ui_settings';
 import { getNotifications } from './notifications';
 import { stubbedStartServices } from './stubs';
+import { getDocLinks } from './doc_links';
 
 // TODO: clintandrewhall - this is not ideal, or complete.  The root context of Fleet applications
 // requires full start contracts of its dependencies.  As a result, we have to mock all of those contracts
@@ -42,8 +43,10 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
   const history = new ScopedHistory(browserHistory, basepath);
 
   const startServices: FleetStartServices = {
+    ...stubbedStartServices,
     application: getApplication(),
     chrome: getChrome(),
+    docLinks: getDocLinks(),
     http: getHttp(),
     notifications: getNotifications(),
     uiSettings: getUiSettings(),
@@ -58,13 +61,15 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
     customIntegrations: {
       ContextProvider: getStorybookContextProvider(),
     },
-    ...stubbedStartServices,
   };
 
   setHttpClient(startServices.http);
   setCustomIntegrations({
     getAppendCustomIntegrations: async () => [],
-    getReplacementCustomIntegrations: async () => [],
+    getReplacementCustomIntegrations: async () => {
+      const { integrations } = await import('./fixtures/replacement_integrations');
+      return integrations;
+    },
   });
 
   const config = {
