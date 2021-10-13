@@ -385,3 +385,17 @@ export const MESSAGE_KEY = i18n.translate(
     defaultMessage: 'Message key',
   }
 );
+
+export const SEVERITY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredSeverityTextField',
+  {
+    defaultMessage: 'Severity is required.',
+  }
+);
+
+export const SEVERITY_REQUIRED_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severityRequiredSelectFieldLabel',
+  {
+    defaultMessage: 'Severity (required)',
+  }
+);

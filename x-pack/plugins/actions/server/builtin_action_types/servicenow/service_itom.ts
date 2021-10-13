@@ -61,5 +61,6 @@ export const createExternalServiceITOM: ServiceFactory<ExternalServiceITOM> = (
 
   return {
     addEvent,
+    getChoices: snService.getChoices,
   };
 };

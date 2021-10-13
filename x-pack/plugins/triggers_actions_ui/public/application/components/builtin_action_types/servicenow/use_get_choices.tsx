@@ -60,15 +60,16 @@ export const useGetChoices = ({
       });
 
       if (!didCancel.current) {
+        const data = Array.isArray(res.data) ? res.data : [];
         setIsLoading(false);
-        setChoices(res.data ?? []);
+        setChoices(data);
         if (res.status && res.status === 'error') {
           toastNotifications.addDanger({
             title: i18n.CHOICES_API_ERROR,
             text: `${res.serviceMessage ?? res.message}`,
           });
         } else if (onSuccess) {
-          onSuccess(res.data ?? []);
+          onSuccess(data);
         }
       }
     } catch (error) {

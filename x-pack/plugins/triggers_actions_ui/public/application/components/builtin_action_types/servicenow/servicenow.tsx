@@ -191,7 +191,19 @@ export function getServiceNowITOMActionType(): ActionTypeModel<
     actionConnectorFields: lazy(() => import('./servicenow_connectors_no_app')),
     validateParams: async (
       actionParams: ServiceNowITOMActionParams
-    ): Promise<GenericValidationResult<unknown>> => ({ errors: {} }),
+    ): Promise<GenericValidationResult<unknown>> => {
+      const translations = await import('./translations');
+      const errors = {
+        severity: new Array<string>(),
+      };
+      const validationResult = { errors };
+
+      if (actionParams.subActionParams.severity == null) {
+        errors.severity.push(translations.SEVERITY_REQUIRED);
+      }
+
+      return validationResult;
+    },
     actionParamsFields: lazy(() => import('./servicenow_itom_params')),
   };
 }

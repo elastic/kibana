@@ -168,7 +168,9 @@ export interface GetCommonFieldsHandlerArgs extends ExternalServiceApiHandlerArg
   params: ExecutorSubActionCommonFieldsParams;
 }
 
-export interface GetChoicesHandlerArgs extends ExternalServiceApiHandlerArgs {
+export interface GetChoicesHandlerArgs {
+  externalService: Partial<ExternalService> & { getChoices: ExternalService['getChoices'] };
+  logger: Logger;
   params: ExecutorSubActionGetChoicesParams;
 }
 
@@ -290,6 +292,7 @@ export type ServiceFactory<T = ExternalService> = (
 export type ExecutorSubActionAddEventParams = TypeOf<typeof ExecutorSubActionAddEventParamsSchema>;
 
 export interface ExternalServiceITOM {
+  getChoices: ExternalService['getChoices'];
   addEvent: (params: ExecutorSubActionAddEventParams) => Promise<void>;
 }
 
@@ -297,7 +300,13 @@ export interface AddEventApiHandlerArgs extends ExternalServiceApiHandlerArgs<Ex
   params: ExecutorSubActionAddEventParams;
 }
 
+export interface GetCommonFieldsHandlerArgsITOM
+  extends ExternalServiceApiHandlerArgs<ExternalServiceITOM> {
+  params: ExecutorSubActionGetChoicesParams;
+}
+
 export interface ExternalServiceApiITOM {
+  getChoices: ExternalServiceAPI['getChoices'];
   addEvent: (args: AddEventApiHandlerArgs) => Promise<void>;
 }
 

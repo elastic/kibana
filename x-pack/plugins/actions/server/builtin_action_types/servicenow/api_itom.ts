@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { api } from './api';
 import {
   ExecutorSubActionAddEventParams,
   AddEventApiHandlerArgs,
@@ -52,5 +53,6 @@ const addEventServiceHandler = async ({
 };
 
 export const apiITOM: ExternalServiceApiITOM = {
+  getChoices: api.getChoices,
   addEvent: addEventServiceHandler,
 };

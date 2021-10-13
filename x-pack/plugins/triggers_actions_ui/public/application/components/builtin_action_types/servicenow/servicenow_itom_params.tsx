@@ -6,16 +6,18 @@
  */
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { EuiFormRow, EuiSpacer, EuiTitle, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiTitle, EuiSelect } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 
 import * as i18n from './translations';
-import { useGetChoices } from './use_get_choices';
-import { Choice, Fields, ServiceNowITOMActionParams } from './types';
-import { choicesToEuiOptions } from './helpers';
+import { useChoices } from './use_choices';
+import { ServiceNowITOMActionParams } from './types';
+import { choicesToEuiOptions, isFieldInvalid } from './helpers';
+
+const choicesFields = ['severity'];
 
 const fields: Array<{
   label: string;
@@ -32,15 +34,28 @@ const fields: Array<{
 
 const ServiceNowITOMParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowITOMActionParams>
-> = ({ actionConnector, actionParams, editAction, index, messageVariables }) => {
+> = ({ actionConnector, actionParams, editAction, index, messageVariables, errors }) => {
   const params = useMemo(
     () => (actionParams.subActionParams ?? {}) as ServiceNowITOMActionParams['subActionParams'],
     [actionParams.subActionParams]
   );
 
-  const { description } = params;
+  const { description, severity } = params;
+
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
+  const { choices, isLoading: isLoadingChoices } = useChoices({
+    http,
+    toastNotifications: toasts,
+    actionConnector,
+    fields: choicesFields,
+  });
+
+  const severityOptions = useMemo(() => choicesToEuiOptions(choices.severity), [choices.severity]);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -88,6 +103,22 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
           <EuiSpacer size="m" />
         </>
       ))}
+      <EuiFormRow
+        fullWidth
+        label={i18n.SEVERITY_REQUIRED_LABEL}
+        error={errors.severity}
+        isInvalid={isFieldInvalid(severity, errors.severity)}
+      >
+        <EuiSelect
+          fullWidth
+          data-test-subj="severitySelect"
+          isLoading={isLoadingChoices}
+          disabled={isLoadingChoices}
+          options={severityOptions}
+          value={severity ?? ''}
+          onChange={(e) => editSubActionProperty('severity', e.target.value)}
+        />
+      </EuiFormRow>
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubActionProperty}

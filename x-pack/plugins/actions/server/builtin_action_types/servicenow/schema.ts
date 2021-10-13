@@ -160,4 +160,8 @@ export const ExecutorParamsSchemaITOM = schema.oneOf([
     subAction: schema.literal('addEvent'),
     subActionParams: ExecutorSubActionAddEventParamsSchema,
   }),
+  schema.object({
+    subAction: schema.literal('getChoices'),
+    subActionParams: ExecutorSubActionGetChoicesParamsSchema,
+  }),
 ]);

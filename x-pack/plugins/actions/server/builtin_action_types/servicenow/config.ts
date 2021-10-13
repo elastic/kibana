@@ -6,6 +6,7 @@
  */
 
 import {
+  ENABLE_ITOM,
   ENABLE_NEW_SN_ITSM_CONNECTOR,
   ENABLE_NEW_SN_SIR_CONNECTOR,
 } from '../../constants/connectors';
@@ -36,8 +37,8 @@ export const snExternalServiceConfig: SNProductsConfig = {
   '.servicenow-itom': {
     importSetTable: 'x_elas2_inc_int_elastic_incident',
     appScope: 'x_elas2_inc_int',
-    table: 'incident',
-    useImportAPI: ENABLE_NEW_SN_ITSM_CONNECTOR,
+    table: 'em_event',
+    useImportAPI: ENABLE_ITOM,
     commentFieldKey: 'work_notes',
   },
 };

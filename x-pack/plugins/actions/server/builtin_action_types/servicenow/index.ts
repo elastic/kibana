@@ -237,7 +237,7 @@ async function executor(
   return { status: 'ok', data: data ?? {}, actionId };
 }
 
-const supportedSubActionsITOM = ['addEvent'];
+const supportedSubActionsITOM = ['addEvent', 'getChoices'];
 
 async function executorITOM(
   {
@@ -258,6 +258,7 @@ async function executorITOM(
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];
+  let data: ServiceNowExecutorResultData | null = null;
 
   const externalService = createService(
     {
@@ -287,5 +288,14 @@ async function executorITOM(
     });
   }
 
-  return { status: 'ok', data: {}, actionId };
+  if (subAction === 'getChoices') {
+    const getChoicesParams = subActionParams as ExecutorSubActionGetChoicesParams;
+    data = await api.getChoices({
+      externalService,
+      params: getChoicesParams,
+      logger,
+    });
+  }
+
+  return { status: 'ok', data: data ?? {}, actionId };
 }
