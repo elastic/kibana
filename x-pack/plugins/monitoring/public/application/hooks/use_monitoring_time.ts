@@ -8,7 +8,7 @@ import { useCallback, useState, useContext, useEffect } from 'react';
 import createContainer from 'constate';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { Legacy } from '../../legacy_shims';
-import { GlobalStateContext } from '../../application/global_state_context';
+import { GlobalStateContext } from '../contexts/global_state_context';
 
 interface TimeOptions {
   from: string;
