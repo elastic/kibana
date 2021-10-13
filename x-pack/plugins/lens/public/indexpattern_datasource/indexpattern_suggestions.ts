@@ -23,7 +23,7 @@ import {
   getReferencedColumnIds,
   getSplitByTermsLayer,
   getSplitByFiltersLayer,
-  computeLayer,
+  computeLayerFromContext,
 } from './operations';
 import { hasField } from './utils';
 import type {
@@ -187,7 +187,11 @@ function createNewLayerWithMetricAggregationFromVizEditor(
     return getSplitByFiltersLayer(indexPattern, dateField, layer);
   } else {
     const copyMetricsArray = [...metrics];
-    const computedLayer = computeLayer(metrics.length === 1, copyMetricsArray, indexPattern);
+    const computedLayer = computeLayerFromContext(
+      metrics.length === 1,
+      copyMetricsArray,
+      indexPattern
+    );
 
     return insertNewColumn({
       op: 'date_histogram',

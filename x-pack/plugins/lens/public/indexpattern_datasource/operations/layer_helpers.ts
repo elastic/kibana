@@ -217,29 +217,6 @@ export function insertNewColumn({
     if (operationDefinition.input === 'managedReference') {
       // TODO: need to create on the fly the new columns for Formula,
       // like we do for fullReferences to show a seamless transition
-      if (operationDefinition.type === 'formula') {
-        const newColumn = operationDefinition.buildColumn(
-          { ...baseOptions, layer },
-          columnParams
-        ) as FormulaIndexPatternColumn;
-        let newLayer;
-        const tempLayer = { ...layer };
-        try {
-          newLayer = columnParams?.formula
-            ? regenerateLayerFromAst(
-                columnParams?.formula as string,
-                tempLayer,
-                columnId,
-                newColumn,
-                indexPattern,
-                operationDefinitionMap
-              ).newLayer
-            : tempLayer;
-        } catch (e) {
-          newLayer = tempLayer;
-        }
-        return newLayer;
-      }
     }
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
@@ -1526,22 +1503,48 @@ export function getManagedColumnsFrom(
   return store.filter(([, column]) => column);
 }
 
-export function computeLayer(
+export function computeLayerFromContext(
   isLast: boolean,
   metricsArray: VisualizeEditorContext['metrics'],
   indexPattern: IndexPattern
-) {
+): IndexPatternLayer {
   if (isArray(metricsArray)) {
     const firstElement = metricsArray.shift();
     const field = firstElement
       ? indexPattern.getFieldByName(firstElement.fieldName)
       : documentField;
 
-    const column = insertNewColumn({
-      op: firstElement?.agg as OperationType,
+    const operation = firstElement?.agg;
+    // Formula should be treated differently from other operations
+    if (operation === 'formula') {
+      const operationDefinition = operationDefinitionMap.formula as OperationDefinition<
+        FormulaIndexPatternColumn,
+        'managedReference'
+      >;
+      const tempLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
+      const newColumn = operationDefinition.buildColumn(
+        {
+          indexPattern,
+          layer: tempLayer,
+        },
+        firstElement?.params
+      ) as FormulaIndexPatternColumn;
+      return firstElement?.params?.formula
+        ? regenerateLayerFromAst(
+            firstElement?.params?.formula as string,
+            tempLayer,
+            generateId(),
+            newColumn,
+            indexPattern,
+            operationDefinitionMap
+          ).newLayer
+        : tempLayer;
+    }
+    return insertNewColumn({
+      op: operation as OperationType,
       layer: isLast
         ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
-        : computeLayer(metricsArray.length === 1, metricsArray, indexPattern),
+        : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern),
       columnId: generateId(),
       field: !firstElement?.isFullReference ? field ?? documentField : undefined,
       columnParams: firstElement?.params ?? undefined,
@@ -1549,7 +1552,6 @@ export function computeLayer(
       indexPattern,
       visualizationGroups: [],
     });
-    return column;
   }
   return { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
 }
@@ -1562,7 +1564,11 @@ export function getSplitByTermsLayer(
 ): IndexPatternLayer {
   const { termsParams, metrics } = layer;
   const copyMetricsArray = [...metrics];
-  const computedLayer = computeLayer(metrics.length === 1, copyMetricsArray, indexPattern);
+  const computedLayer = computeLayerFromContext(
+    metrics.length === 1,
+    copyMetricsArray,
+    indexPattern
+  );
   return insertNewColumn({
     op: 'terms',
     layer: insertNewColumn({
@@ -1599,7 +1605,11 @@ export function getSplitByFiltersLayer(
     };
   });
   const copyMetricsArray = [...metrics];
-  const computedLayer = computeLayer(metrics.length === 1, copyMetricsArray, indexPattern);
+  const computedLayer = computeLayerFromContext(
+    metrics.length === 1,
+    copyMetricsArray,
+    indexPattern
+  );
   return insertNewColumn({
     op: 'filters',
     layer: insertNewColumn({
