@@ -6,11 +6,16 @@
  */
 
 import { HttpSetup } from 'kibana/public';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError } from './types';
+import { rewriteResponseToCamelCase } from '../rewrite_response_body';
+import { ActionTypeExecutorResult } from '../../../../../../actions/common';
+import { BASE_ACTION_API_PATH } from '../../../constants';
+import { Choice } from './types';
 
 export async function getChoices({
   http,
@@ -22,16 +27,15 @@ export async function getChoices({
   signal: AbortSignal;
   connectorId: string;
   fields: string[];
-}): Promise<Record<string, any>> {
-  return await http.post(
-    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
-    {
+}): Promise<ActionTypeExecutorResult<Choice[]>> {
+  return await http
+    .post(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`, {
       body: JSON.stringify({
         params: { subAction: 'getChoices', subActionParams: { fields } },
       }),
       signal,
-    }
-  );
+    })
+    .then((res) => rewriteResponseToCamelCase(res));
 }
 
 /**

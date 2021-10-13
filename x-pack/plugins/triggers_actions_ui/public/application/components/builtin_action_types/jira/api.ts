@@ -9,7 +9,7 @@ import { HttpSetup } from 'kibana/public';
 import { ActionTypeExecutorResult } from '../../../../../../actions/common';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { rewriteResponseToCamelCase } from '../rewrite_response_body';
-import { Fields, Issue, Issues, IssueTypes } from '../types';
+import { Fields, Issue, IssueTypes } from '../types';
 
 export async function getIssueTypes({
   http,
@@ -61,7 +61,7 @@ export async function getIssues({
   signal: AbortSignal;
   connectorId: string;
   title: string;
-}): Promise<ActionTypeExecutorResult<Issues>> {
+}): Promise<ActionTypeExecutorResult<Issue[]>> {
   return await http
     .post(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`, {
       body: JSON.stringify({
