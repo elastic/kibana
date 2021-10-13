@@ -39,10 +39,6 @@ export const unremovablePackages = [
 
 export const defaultPackages = unremovablePackages.filter((p) => p !== FLEET_ENDPOINT_PACKAGE);
 
-// Packages that always exhibit the "Keep Policies Up To Date" functionality and do not allow
-// the user to control this setting
-export const keepPoliciesUpToDatePackages = [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE];
-
 export const autoUpdatePackages = [
   FLEET_ENDPOINT_PACKAGE,
   FLEET_APM_PACKAGE,
