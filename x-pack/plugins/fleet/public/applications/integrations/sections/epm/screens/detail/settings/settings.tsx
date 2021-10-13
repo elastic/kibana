@@ -37,7 +37,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   AUTO_UPDATE_PACKAGES,
   DEFAULT_PACKAGES,
-  KEEP_POLICIES_UP_TO_DATE_PACKAGES,
 } from '../../../../../constants';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
@@ -108,10 +107,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   const { notifications } = useStartServices();
 
   const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
-    if (KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name)) {
-      return false;
-    }
-
     const packages = [...DEFAULT_PACKAGES, ...AUTO_UPDATE_PACKAGES];
 
     const packageNames = uniq(packages.map((pkg) => pkg.name));
