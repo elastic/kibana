@@ -107,7 +107,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security.html#_required_permissions_7",
                 "level": "fetch_error",
                 "message": "You do not have enough permissions to fix this deprecation.",
-                "title": "The \\"kibana_user\\" role is removed and \\"kibana_admin\\" role is added",
+                "title": "The \\"kibana_user\\" role is deprecated in favor of \\"kibana_admin\\" role",
               },
             ]
           `);
@@ -132,7 +132,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "deprecationType": "feature",
                 "level": "fetch_error",
                 "message": "Failed to perform deprecation check. Check Kibana logs for more details.",
-                "title": "The \\"kibana_user\\" role is removed and \\"kibana_admin\\" role is added",
+                "title": "The \\"kibana_user\\" role is deprecated in favor of \\"kibana_admin\\" role",
               },
             ]
           `);
@@ -158,7 +158,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security.html#_required_permissions_7",
                 "level": "fetch_error",
                 "message": "You do not have enough permissions to fix this deprecation.",
-                "title": "The \\"kibana_user\\" role is removed and \\"kibana_admin\\" role is added",
+                "title": "The \\"kibana_user\\" role is deprecated in favor of \\"kibana_admin\\" role",
               },
             ]
           `);
@@ -183,7 +183,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "deprecationType": "feature",
                 "level": "fetch_error",
                 "message": "Failed to perform deprecation check. Check Kibana logs for more details.",
-                "title": "The \\"kibana_user\\" role is removed and \\"kibana_admin\\" role is added",
+                "title": "The \\"kibana_user\\" role is deprecated in favor of \\"kibana_admin\\" role",
               },
             ]
           `);
