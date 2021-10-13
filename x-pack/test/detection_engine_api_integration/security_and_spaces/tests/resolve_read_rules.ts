@@ -36,7 +36,10 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should create a "migrated" rule where querying for the new SO _id will resolve the new object and not return the outcome field when outcome === exactMatch', async () => {
+      /**
+       * Skipped because the 8.0 migrations happen in 8.0. They do not happen in 7.16!
+       */
+      it.skip('should create a "migrated" rule where querying for the new SO _id will resolve the new object and not return the outcome field when outcome === exactMatch', async () => {
         // link to the new URL with migrated SO id 74f3e6d7-b7bb-477d-ac28-92ee22728e6e
         const URL = `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}?id=90e3ca0e-71f7-513a-b60a-ac678efd8887`;
         const readRulesAliasMatchRes = await supertest.get(URL).set('kbn-xsrf', 'true').send();
@@ -52,7 +55,10 @@ export default ({ getService }: FtrProviderContext) => {
         expect(readRulesExactMatchRes.body.outcome).to.eql(undefined);
       });
 
-      it('should create a rule and a "conflicting rule" where the SO _id matches the sourceId (see legacy-url-alias SO) of a migrated rule', async () => {
+      /**
+       * Skipped because the 8.0 migrations happen in 8.0. They do not happen in 7.16!
+       */
+      it.skip('should create a rule and a "conflicting rule" where the SO _id matches the sourceId (see legacy-url-alias SO) of a migrated rule', async () => {
         // mimic a rule SO that was inserted accidentally
         // we have to insert this outside of esArchiver otherwise kibana will migrate this
         // and we won't have a conflict
