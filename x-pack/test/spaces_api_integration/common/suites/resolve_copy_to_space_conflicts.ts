@@ -250,35 +250,7 @@ export function resolveCopyToSpaceConflictsSuite(
             {
               statusCode: 403,
               error: 'Forbidden',
-              message: 'Unable to bulk_get index-pattern',
-            },
-          ],
-        },
-      } as CopyResponse);
-
-      // Query ES to ensure that nothing was copied
-      const [dashboard, visualization] = await getObjectsAtSpace(destination);
-      expect(dashboard.attributes.title).to.eql(
-        `This is the ${destination} test space CTS dashboard`
-      );
-      expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${destination} space`);
-    };
-
-  const createExpectReadonlyAtSpaceWithReferencesResult =
-    (spaceId: string = DEFAULT_SPACE_ID) =>
-    async (resp: TestResponse) => {
-      const destination = getDestinationSpace(spaceId);
-
-      const result = resp.body as CopyResponse;
-      expect(result).to.eql({
-        [destination]: {
-          success: false,
-          successCount: 0,
-          errors: [
-            {
-              statusCode: 403,
-              error: 'Forbidden',
-              message: 'Unable to bulk_create visualization',
+              message: 'Unable to bulk_create index-pattern,visualization',
             },
           ],
         },
@@ -611,7 +583,6 @@ export function resolveCopyToSpaceConflictsSuite(
     createExpectNonOverriddenResponseWithReferences,
     createExpectNonOverriddenResponseWithoutReferences,
     createExpectUnauthorizedAtSpaceWithReferencesResult,
-    createExpectReadonlyAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     createMultiNamespaceTestCases,
     originSpaces: ['default', 'space_1'],
