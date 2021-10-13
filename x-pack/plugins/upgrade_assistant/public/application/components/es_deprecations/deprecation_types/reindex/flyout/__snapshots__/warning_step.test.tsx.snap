@@ -23,6 +23,18 @@ exports[`WarningsFlyoutStep renders 1`] = `
       </p>
     </EuiCallOut>
     <EuiSpacer />
+    <EuiTitle
+      size="s"
+    >
+      <h3>
+        <FormattedMessage
+          defaultMessage="Accept changes"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
+          values={Object {}}
+        />
+      </h3>
+    </EuiTitle>
+    <EuiSpacer />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup
