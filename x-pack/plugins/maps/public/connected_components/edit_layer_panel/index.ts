@@ -10,8 +10,9 @@ import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { EditLayerPanel } from './edit_layer_panel';
 import { getSelectedLayer } from '../../selectors/map_selectors';
-import { updateSourceProps } from '../../actions';
+import { setJoinsForLayer, updateSourceProps } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
+import { ILayer } from '../../classes/layers/layer';
 import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../../classes/sources/source';
 
@@ -31,6 +32,9 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
+    clearJoins: (layer: ILayer) => {
+      dispatch(setJoinsForLayer(layer, []));
+    },
     updateSourceProps: async (id: string, sourcePropChanges: OnSourceChangeArgs[]) =>
       await dispatch(updateSourceProps(id, sourcePropChanges)),
   };

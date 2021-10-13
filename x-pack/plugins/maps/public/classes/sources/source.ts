@@ -29,8 +29,10 @@ export type OnSourceChangeArgs = {
 };
 
 export type SourceEditorArgs = {
+  clearJoins: () => void;
+  currentLayerType: string;
+  hasJoins: boolean;
   onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
-  currentLayerType?: string;
 };
 
 export type ImmutableSourceProperty = {

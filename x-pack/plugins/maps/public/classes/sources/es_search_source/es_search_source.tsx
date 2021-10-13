@@ -226,6 +226,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         sortOrder={this._descriptor.sortOrder}
         scalingType={this._descriptor.scalingType}
         filterByMapBounds={this.isFilterByMapBounds()}
+        hasJoins={sourceEditorArgs.hasJoins}
+        clearJoins={sourceEditorArgs.clearJoins}
       />
     );
   }

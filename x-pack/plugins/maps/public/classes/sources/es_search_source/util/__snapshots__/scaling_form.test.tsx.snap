@@ -46,14 +46,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
         />
       </EuiToolTip>
       <EuiToolTip
-        content={
-          <React.Fragment>
-            <EuiHorizontalRule
-              margin="xs"
-            />
-            Use Elasticsearch vector tiles for faster display of large datasets.
-          </React.Fragment>
-        }
+        content="Use vector tiles for faster display of large datasets."
         delay="regular"
         display="inlineBlock"
         position="left"
@@ -61,7 +54,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
         <EuiRadio
           checked={false}
           id="MVT"
-          label="Use Elasticsearch vector tiles"
+          label="Use vector tiles"
           onChange={[Function]}
         />
       </EuiToolTip>
@@ -124,14 +117,7 @@ exports[`scaling form should render 1`] = `
         onChange={[Function]}
       />
       <EuiToolTip
-        content={
-          <React.Fragment>
-            <EuiHorizontalRule
-              margin="xs"
-            />
-            Use Elasticsearch vector tiles for faster display of large datasets.
-          </React.Fragment>
-        }
+        content="Use vector tiles for faster display of large datasets."
         delay="regular"
         display="inlineBlock"
         position="left"
@@ -139,7 +125,7 @@ exports[`scaling form should render 1`] = `
         <EuiRadio
           checked={false}
           id="MVT"
-          label="Use Elasticsearch vector tiles"
+          label="Use vector tiles"
           onChange={[Function]}
         />
       </EuiToolTip>

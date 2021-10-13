@@ -7,15 +7,14 @@
 
 import React, { Component, Fragment } from 'react';
 import {
+  EuiConfirmModal,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiRadio,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiTitle,
   EuiToolTip,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -35,15 +34,20 @@ interface Props {
   scalingType: SCALING_TYPES;
   supportsClustering: boolean;
   clusteringDisabledReason?: string | null;
+  hasJoins: boolean;
+  clearJoins: () => void;
 }
 
 interface State {
+  nextScalingType?: SCALING_TYPES;
   maxResultWindow: string;
+  showModal: boolean;
 }
 
 export class ScalingForm extends Component<Props, State> {
-  state = {
+  state: State = {
     maxResultWindow: DEFAULT_MAX_RESULT_WINDOW.toLocaleString(),
+    showModal: false,
   };
   _isMounted = false;
 
@@ -68,7 +72,18 @@ export class ScalingForm extends Component<Props, State> {
     }
   }
 
-  _onScalingTypeChange = (optionId: string): void => {
+  _onScalingTypeSelect = (optionId: SCALING_TYPES): void => {
+    if (this.props.hasJoins && optionId !== SCALING_TYPES.LIMIT) {
+      this.setState({
+        nextScalingType: optionId,
+        showModal: true,
+      });
+    } else {
+      this._onScalingTypeChange(optionId);
+    }
+  };
+
+  _onScalingTypeChange = (optionId: SCALING_TYPES): void => {
     let layerType;
     if (optionId === SCALING_TYPES.CLUSTERS) {
       layerType = LAYER_TYPE.BLENDED_VECTOR;
@@ -85,6 +100,64 @@ export class ScalingForm extends Component<Props, State> {
     this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
   };
 
+  _closeModal = () => {
+    this.setState({
+      showModal: false,
+    });
+  };
+
+  _acceptModal = () => {
+    this._closeModal();
+    this.props.clearJoins();
+    this._onScalingTypeChange(this.state.nextScalingType!);
+    this.setState({
+      nextScalingType: undefined,
+    });
+  };
+
+  _renderModal() {
+    if (!this.state.showModal || this.state.nextScalingType === undefined) {
+      return null;
+    }
+
+    const scalingOptionLabel =
+      this.state.nextScalingType === SCALING_TYPES.CLUSTERS
+        ? i18n.translate('xpack.maps.source.esSearch.scalingModal.clusters', {
+            defaultMessage: `clusters`,
+          })
+        : i18n.translate('xpack.maps.source.esSearch.scalingModal.vectorTiles', {
+            defaultMessage: `vector tiles`,
+          });
+    return (
+      <EuiConfirmModal
+        title={i18n.translate('xpack.maps.source.esSearch.scalingModal.title', {
+          defaultMessage: `Term joins not supported`,
+        })}
+        onCancel={this._closeModal}
+        onConfirm={this._acceptModal}
+        cancelButtonText={i18n.translate('xpack.maps.source.esSearch.scalingModal.cancelBtnLabel', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate(
+          'xpack.maps.source.esSearch.scalingModal.confirmBtnLabel',
+          {
+            defaultMessage: 'Accept',
+          }
+        )}
+        buttonColor="danger"
+        defaultFocusedButton="cancel"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.maps.source.esSearch.scalingModal.message"
+            defaultMessage="Scaling option {scalingOptionLabel} does not support term joins. Switching to {scalingOptionLabel} will remove all term joins from your layer configuration."
+            values={{ scalingOptionLabel }}
+          />
+        </p>
+      </EuiConfirmModal>
+    );
+  }
+
   _renderClusteringRadio() {
     const clusteringRadio = (
       <EuiRadio
@@ -94,7 +167,7 @@ export class ScalingForm extends Component<Props, State> {
           values: { maxResultWindow: this.state.maxResultWindow },
         })}
         checked={this.props.scalingType === SCALING_TYPES.CLUSTERS}
-        onChange={() => this._onScalingTypeChange(SCALING_TYPES.CLUSTERS)}
+        onChange={() => this._onScalingTypeSelect(SCALING_TYPES.CLUSTERS)}
         disabled={!this.props.supportsClustering}
       />
     );
@@ -108,37 +181,8 @@ export class ScalingForm extends Component<Props, State> {
     );
   }
 
-  _renderMVTRadio() {
-    const labelText = i18n.translate('xpack.maps.source.esSearch.useMVTVectorTiles', {
-      defaultMessage: 'Use Elasticsearch vector tiles',
-    });
-    const mvtRadio = (
-      <EuiRadio
-        id={SCALING_TYPES.MVT}
-        label={labelText}
-        checked={this.props.scalingType === SCALING_TYPES.MVT}
-        onChange={() => this._onScalingTypeChange(SCALING_TYPES.MVT)}
-      />
-    );
-
-    const enabledInfo = (
-      <>
-        <EuiHorizontalRule margin="xs" />
-        {i18n.translate('xpack.maps.source.esSearch.mvtDescription', {
-          defaultMessage: 'Use Elasticsearch vector tiles for faster display of large datasets.',
-        })}
-      </>
-    );
-
-    return (
-      <EuiToolTip position="left" content={enabledInfo}>
-        {mvtRadio}
-      </EuiToolTip>
-    );
-  }
-
   render() {
-    let filterByBoundsSwitch = null;
+    let filterByBoundsSwitch;
     if (this.props.scalingType === SCALING_TYPES.LIMIT) {
       filterByBoundsSwitch = (
         <EuiFormRow>
@@ -154,22 +198,9 @@ export class ScalingForm extends Component<Props, State> {
       );
     }
 
-    let mvtCallout = null;
-    if (this.props.scalingType === SCALING_TYPES.MVT) {
-      mvtCallout = (
-        <EuiFormRow>
-          <EuiCallOut>
-            {i18n.translate('xpack.maps.source.esSearch.mvtCallout', {
-              defaultMessage:
-                'Using Elasticsearch vector tiles allows you to quickly view large data sets. Some layer-settings are not compatible with this selection and will be disabled.',
-            })}
-          </EuiCallOut>
-        </EuiFormRow>
-      );
-    }
-
     return (
       <Fragment>
+        {this._renderModal()}
         <EuiTitle size="xs">
           <h5>
             <FormattedMessage id="xpack.maps.esSearch.scaleTitle" defaultMessage="Scaling" />
@@ -187,14 +218,28 @@ export class ScalingForm extends Component<Props, State> {
                 values: { maxResultWindow: this.state.maxResultWindow },
               })}
               checked={this.props.scalingType === SCALING_TYPES.LIMIT}
-              onChange={() => this._onScalingTypeChange(SCALING_TYPES.LIMIT)}
+              onChange={() => this._onScalingTypeSelect(SCALING_TYPES.LIMIT)}
             />
             {this._renderClusteringRadio()}
-            {this._renderMVTRadio()}
+            <EuiToolTip
+              position="left"
+              content={i18n.translate('xpack.maps.source.esSearch.mvtDescription', {
+                defaultMessage: 'Use vector tiles for faster display of large datasets.',
+              })}
+            >
+              <EuiRadio
+                id={SCALING_TYPES.MVT}
+                label={i18n.translate('xpack.maps.source.esSearch.useMVTVectorTiles', {
+                  defaultMessage: 'Use vector tiles',
+                })}
+                checked={this.props.scalingType === SCALING_TYPES.MVT}
+                onChange={() => this._onScalingTypeSelect(SCALING_TYPES.MVT)}
+              />
+            </EuiToolTip>
           </div>
         </EuiFormRow>
+
         {filterByBoundsSwitch}
-        {mvtCallout}
       </Fragment>
     );
   }

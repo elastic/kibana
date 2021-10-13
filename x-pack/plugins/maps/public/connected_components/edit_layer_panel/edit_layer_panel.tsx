@@ -39,6 +39,7 @@ import { IField } from '../../classes/fields/field';
 const localStorage = new Storage(window.localStorage);
 
 export interface Props {
+  clearJoins: (layer: ILayer) => void;
   selectedLayer?: ILayer;
   updateSourceProps: (layerId: string, sourcePropChanges: OnSourceChangeArgs[]) => Promise<void>;
 }
@@ -136,6 +137,12 @@ export class EditLayerPanel extends Component<Props, State> {
 
   _onSourceChange = (...args: OnSourceChangeArgs[]) => {
     return this.props.updateSourceProps(this.props.selectedLayer!.getId(), args);
+  };
+
+  _clearJoins = () => {
+    if (this.props.selectedLayer) {
+      this.props.clearJoins(this.props.selectedLayer);
+    }
   };
 
   _renderLayerErrors() {
@@ -270,6 +277,11 @@ export class EditLayerPanel extends Component<Props, State> {
               />
 
               {this.props.selectedLayer.renderSourceSettingsEditor({
+                clearJoins: this._clearJoins,
+                currentLayerType: this.props.selectedLayer.getType(),
+                hasJoins: isVectorLayer(this.props.selectedLayer)
+                  ? (this.props.selectedLayer as IVectorLayer).hasJoins()
+                  : false,
                 onChange: this._onSourceChange,
               })}
 

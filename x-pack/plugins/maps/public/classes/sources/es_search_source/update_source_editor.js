@@ -34,6 +34,8 @@ export class UpdateSourceEditor extends Component {
     sortOrder: PropTypes.string.isRequired,
     scalingType: PropTypes.string.isRequired,
     source: PropTypes.object,
+    hasJoins: PropTypes.bool.isRequired,
+    clearJoins: PropTypes.func.isRequired,
   };
 
   state = {
@@ -209,6 +211,8 @@ export class UpdateSourceEditor extends Component {
           scalingType={this.props.scalingType}
           supportsClustering={this.state.supportsClustering}
           clusteringDisabledReason={this.state.clusteringDisabledReason}
+          hasJoins={this.props.hasJoins}
+          clearJoins={this.props.clearJoins}
         />
       </EuiPanel>
     );
