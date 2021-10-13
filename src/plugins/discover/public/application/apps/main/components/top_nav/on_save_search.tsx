@@ -96,17 +96,20 @@ export async function onSaveSearch({
   const onSave = async ({
     newTitle,
     newCopyOnSave,
+    newDescription,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: {
     newTitle: string;
     newCopyOnSave: boolean;
+    newDescription: string;
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
     const currentTitle = savedSearch.title;
     savedSearch.title = newTitle;
     savedSearch.copyOnSave = newCopyOnSave;
+    savedSearch.description = newDescription;
     const saveOptions = {
       confirmOverwrite: false,
       isTitleDuplicateConfirmed,
@@ -135,6 +138,7 @@ export async function onSaveSearch({
       onClose={() => {}}
       title={savedSearch.title}
       showCopyOnSave={!!savedSearch.id}
+      description={savedSearch.description}
       objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
         defaultMessage: 'search',
       })}
