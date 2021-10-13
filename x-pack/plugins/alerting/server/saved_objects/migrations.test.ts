@@ -1934,8 +1934,8 @@ describe('successful migrations', () => {
       ]);
 
       expect(migratedAlert.attributes.params).toEqual({
-        boundaryIndexRef: 'boundary_index_bar',
-        indexRef: 'tracked_index_foo',
+        boundaryIndexRefName: 'boundary_index_bar',
+        indexRefName: 'tracked_index_foo',
       });
 
       expect(migratedAlert.attributes.params.indexId).toEqual(undefined);
