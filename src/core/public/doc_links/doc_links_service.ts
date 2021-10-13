@@ -25,6 +25,7 @@ export class DocLinksService {
     const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
     const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
     const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
+    const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
@@ -223,13 +224,17 @@ export class DocLinksService {
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
         },
         siem: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
-          gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
-          privileges: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/sec-requirements.html`,
-          ml: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/machine-learning.html`,
-          ruleChangeLog: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/prebuilt-rules-changelog.html`,
-          detectionsReq: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/detections-permissions-section.html`,
-          networkMap: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/conf-map-ui.html`,
+          guide: `${SECURITY_SOLUTION_DOCS}index.html`,
+          gettingStarted: `${SECURITY_SOLUTION_DOCS}index.html`,
+          privileges: `${SECURITY_SOLUTION_DOCS}sec-requirements.html`,
+          ml: `${SECURITY_SOLUTION_DOCS}machine-learning.html`,
+          ruleChangeLog: `${SECURITY_SOLUTION_DOCS}prebuilt-rules-changelog.html`,
+          detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
+          networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
+          troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
+        },
+        securitySolution: {
+          trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
         },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -283,6 +288,8 @@ export class DocLinksService {
         },
         transforms: {
           guide: `${ELASTICSEARCH_DOCS}transforms.html`,
+          // TODO add valid docs URL
+          alertingRules: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-alerts.html`,
         },
         visualize: {
           guide: `${KIBANA_DOCS}dashboard.html`,
@@ -353,6 +360,10 @@ export class DocLinksService {
           mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
           mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
           runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
+        },
+        spaces: {
+          kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
+          kibanaDisableLegacyUrlAliasesApi: `${KIBANA_DOCS}spaces-api-disable-legacy-url-aliases.html`,
         },
         watcher: {
           jiraAction: `${ELASTICSEARCH_DOCS}actions-jira.html`,
@@ -468,6 +479,7 @@ export class DocLinksService {
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
+          learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -630,6 +642,10 @@ export interface DocLinksStart {
       readonly ruleChangeLog: string;
       readonly detectionsReq: string;
       readonly networkMap: string;
+      readonly troubleshootGaps: string;
+    };
+    readonly securitySolution: {
+      readonly trustedApps: string;
     };
     readonly query: {
       readonly eql: string;
@@ -700,6 +716,10 @@ export interface DocLinksStart {
       mappingRolesFieldRules: string;
       runAsPrivilege: string;
     }>;
+    readonly spaces: Readonly<{
+      kibanaLegacyUrlAliases: string;
+      kibanaDisableLegacyUrlAliasesApi: string;
+    }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
     readonly plugins: Record<string, string>;
@@ -717,6 +737,7 @@ export interface DocLinksStart {
       datastreamsNamingScheme: string;
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
+      learnMoreBlog: string;
     }>;
     readonly ecs: {
       readonly guide: string;
