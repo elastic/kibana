@@ -68,5 +68,12 @@ export const browserNormalizers: BrowserNormalizerMap = {
       fields?.[ConfigKeys.ZIP_URL_TLS_VERSION]?.value,
       ConfigKeys.TLS_VERSION
     ),
+  [ConfigKeys.JOURNEY_FILTERS_MATCH]: getBrowserJsonToJavascriptNormalizer(
+    ConfigKeys.JOURNEY_FILTERS_MATCH
+  ),
+  [ConfigKeys.JOURNEY_FILTERS_TAGS]: getBrowserJsonToJavascriptNormalizer(
+    ConfigKeys.JOURNEY_FILTERS_TAGS
+  ),
+  [ConfigKeys.IGNORE_HTTPS_ERRORS]: getBrowserNormalizer(ConfigKeys.IGNORE_HTTPS_ERRORS),
   ...commonNormalizers,
 };

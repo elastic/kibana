@@ -44,5 +44,10 @@ export const browserFormatters: BrowserFormatMap = {
     tlsValueToStringFormatter(fields[ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]),
   [ConfigKeys.ZIP_URL_TLS_VERSION]: (fields) =>
     tlsArrayToYamlFormatter(fields[ConfigKeys.ZIP_URL_TLS_VERSION]),
+  [ConfigKeys.JOURNEY_FILTERS_MATCH]: (fields) =>
+    stringToJsonFormatter(fields[ConfigKeys.JOURNEY_FILTERS_MATCH]),
+  [ConfigKeys.JOURNEY_FILTERS_TAGS]: (fields) =>
+    arrayToJsonFormatter(fields[ConfigKeys.JOURNEY_FILTERS_TAGS]),
+  [ConfigKeys.IGNORE_HTTPS_ERRORS]: null,
   ...commonFormatters,
 };
