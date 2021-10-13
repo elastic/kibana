@@ -13,16 +13,18 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiSwitch,
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
-import { ServiceNowITSMActionParams, Choice, Fields } from './types';
+import { ServiceNowITSMActionParams, Choice, Fields, ServiceNowActionConnector } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { useGetChoices } from './use_get_choices';
-import { choicesToEuiOptions } from './helpers';
+import { choicesToEuiOptions, isLegacyConnector } from './helpers';
 
 import * as i18n from './translations';
+import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -42,6 +44,8 @@ const ServiceNowParamsFields: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
+  const isOldConnector = isLegacyConnector(actionConnector as unknown as ServiceNowActionConnector);
+
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
     () =>
@@ -53,7 +57,12 @@ const ServiceNowParamsFields: React.FunctionComponent<
     [actionParams.subActionParams]
   );
 
+  const hasUpdateIncident =
+    incident.correlation_id != null && incident.correlation_id === UPDATE_INCIDENT_VARIABLE;
+  const [updateIncident, setUpdateIncident] = useState<boolean>(hasUpdateIncident);
   const [choices, setChoices] = useState<Fields>(defaultFields);
+
+  const correlationID = updateIncident ? UPDATE_INCIDENT_VARIABLE : NOT_UPDATE_INCIDENT_VARIABLE;
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -90,6 +99,14 @@ const ServiceNowParamsFields: React.FunctionComponent<
     );
   }, []);
 
+  const onUpdateIncidentSwitchChange = useCallback(() => {
+    const newCorrelationID = !updateIncident
+      ? UPDATE_INCIDENT_VARIABLE
+      : NOT_UPDATE_INCIDENT_VARIABLE;
+    editSubActionProperty('correlation_id', newCorrelationID);
+    setUpdateIncident(!updateIncident);
+  }, [editSubActionProperty, updateIncident]);
+
   const categoryOptions = useMemo(() => choicesToEuiOptions(choices.category), [choices.category]);
   const urgencyOptions = useMemo(() => choicesToEuiOptions(choices.urgency), [choices.urgency]);
   const severityOptions = useMemo(() => choicesToEuiOptions(choices.severity), [choices.severity]);
@@ -119,7 +136,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: correlationID, correlation_display: 'Alerting' },
           comments: [],
         },
         index
@@ -136,7 +153,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: correlationID, correlation_display: 'Alerting' },
           comments: [],
         },
         index
@@ -236,25 +253,43 @@ const ServiceNowParamsFields: React.FunctionComponent<
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        error={errors['subActionParams.incident.short_description']}
-        isInvalid={
-          errors['subActionParams.incident.short_description'] !== undefined &&
-          errors['subActionParams.incident.short_description'].length > 0 &&
-          incident.short_description !== undefined
-        }
-        label={i18n.SHORT_DESCRIPTION_LABEL}
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'short_description'}
-          inputTargetValue={incident?.short_description ?? undefined}
-          errors={errors['subActionParams.incident.short_description'] as string[]}
-        />
-      </EuiFormRow>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            error={errors['subActionParams.incident.short_description']}
+            isInvalid={
+              errors['subActionParams.incident.short_description'] !== undefined &&
+              errors['subActionParams.incident.short_description'].length > 0 &&
+              incident.short_description !== undefined
+            }
+            label={i18n.SHORT_DESCRIPTION_LABEL}
+          >
+            <TextFieldWithMessageVariables
+              index={index}
+              editAction={editSubActionProperty}
+              messageVariables={messageVariables}
+              paramsProperty={'short_description'}
+              inputTargetValue={incident?.short_description ?? undefined}
+              errors={errors['subActionParams.incident.short_description'] as string[]}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        {!isOldConnector && (
+          <EuiFlexItem>
+            <EuiFormRow id="update-incident-form-row" fullWidth label={i18n.UPDATE_INCIDENT_LABEL}>
+              <EuiSwitch
+                label={updateIncident ? i18n.ON : i18n.OFF}
+                name="update-incident-switch"
+                checked={updateIncident}
+                onChange={onUpdateIncidentSwitchChange}
+                aria-describedby="update-incident-form-row"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubActionProperty}

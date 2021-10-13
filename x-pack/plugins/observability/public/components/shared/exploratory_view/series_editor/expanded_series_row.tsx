@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
 import { SeriesConfig, SeriesUrl } from '../types';
+import { PERCENTILE } from '../configurations/constants';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { OperationTypeSelect } from './columns/operation_type_select';
 import { parseCustomFieldName } from '../configurations/lens_attributes';
@@ -42,6 +43,9 @@ export function ExpandedSeriesRow(seriesProps: Props) {
 
   const columnType = getColumnType(seriesConfig, selectedMetricField);
 
+  // if the breakdown field is percentiles, we can't apply further operations
+  const hasPercentileBreakdown = series.breakdown === PERCENTILE;
+
   return (
     <div style={{ width: '100%' }}>
       <EuiFlexGroup gutterSize="xs">
@@ -69,7 +73,7 @@ export function ExpandedSeriesRow(seriesProps: Props) {
             </EuiFlexGroup>
           </EuiFormRow>
         </EuiFlexItem>
-        {(hasOperationType || columnType === 'operation') && (
+        {(hasOperationType || (columnType === 'operation' && !hasPercentileBreakdown)) && (
           <EuiFlexItem grow={1}>
             <EuiFormRow label={OPERATION_LABEL}>
               <OperationTypeSelect
