@@ -9075,7 +9075,7 @@ class CiStatsReporter {
     try {
       const {
         stdout
-      } = await (0, _execa.default)('git', ['branch', '--show-current']);
+      } = await (0, _execa.default)('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
       branch = stdout;
     } catch (e) {
       this.log.debug(e.message);
