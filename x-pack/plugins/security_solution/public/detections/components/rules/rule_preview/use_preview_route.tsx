@@ -13,6 +13,7 @@ import { FieldValueQueryBar } from '../query_bar';
 import { QUERY_PREVIEW_NOISE_WARNING } from './translations';
 
 interface PreviewRouteParams {
+  isDisabled: boolean;
   index: string[];
   threatIndex: string[];
   query: FieldValueQueryBar;
@@ -24,6 +25,7 @@ interface PreviewRouteParams {
 
 export const usePreviewRoute = ({
   index,
+  isDisabled,
   query,
   threatIndex,
   threatQuery,
@@ -46,6 +48,20 @@ export const usePreviewRoute = ({
     setErrors([]);
     setWarnings([]);
   }, []);
+
+  useEffect(() => {
+    clearPreview();
+  }, [
+    clearPreview,
+    index,
+    isDisabled,
+    query,
+    threatIndex,
+    threatQuery,
+    timeFrame,
+    ruleType,
+    threatMapping,
+  ]);
 
   const prevIsPreviewRequestInProgress = usePrevious(isPreviewRequestInProgress);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Unit } from '@elastic/datemath';
 import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
@@ -78,13 +78,13 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   const {
     addNoiseWarning,
     createPreview,
-    clearPreview,
     errors,
     isPreviewRequestInProgress,
     previewId,
     warnings,
   } = usePreviewRoute({
     index,
+    isDisabled,
     query,
     threatIndex,
     threatQuery,
@@ -92,10 +92,6 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     ruleType,
     threatMapping,
   });
-
-  useEffect(() => {
-    if (isDisabled) clearPreview();
-  }, [isDisabled, clearPreview]);
 
   return (
     <>
@@ -110,7 +106,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
             <Select
-              id="previewTimeFrame"
+              id="preview-time-frame"
               options={getTimeframeOptions(ruleType)}
               value={timeFrame}
               onChange={(e) => setTimeFrame(e.target.value as Unit)}
@@ -124,7 +120,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
               fill
               isDisabled={isDisabled || isPreviewRequestInProgress}
               onClick={createPreview}
-              data-test-subj="queryPreviewButton"
+              data-test-subj="preview-button"
             >
               {i18n.QUERY_PREVIEW_BUTTON}
             </PreviewButton>
