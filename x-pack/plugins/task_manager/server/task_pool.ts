@@ -114,7 +114,10 @@ export class TaskPool {
       performance.mark('attemptToRun_start');
       await Promise.all(
         tasksToRun
-          .filter((taskRunner) => !this.tasksInPool.has(taskRunner.id))
+          .filter(
+            (taskRunner) =>
+              !Array.from(this.tasksInPool.keys()).some((key) => key.startsWith(taskRunner.id))
+          )
           .map(async (taskRunner) => {
             // We use taskRunner.taskUuid instead of taskRunner.id as key for the task pool map because
             // task cancellation is a non-blocking procedure. We calculate the expiration and immediately remove
