@@ -108,6 +108,7 @@ import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
 // eslint-disable-next-line no-restricted-imports
 import { legacyIsNotificationAlertExecutor } from './lib/detection_engine/notifications/legacy_types';
+import { createSecurityRuleTypeWrapper } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 import { IEventLogClientService, IEventLogService } from '../../event_log/server';
 import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
 
@@ -264,20 +265,34 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       // Register rule types via rule-registry
       const createRuleOptions: CreateRuleOptions = {
         experimentalFeatures,
-        lists: plugins.lists,
         logger: this.logger,
-        config: this.config,
         ml: plugins.ml,
-        ruleDataClient,
-        eventLogService,
         version: this.context.env.packageInfo.version,
       };
 
-      this.setupPlugins.alerting.registerType(createEqlAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createMlAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createThresholdAlertType(createRuleOptions));
+      const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+        lists: plugins.lists,
+        logger: this.logger,
+        config: this.config,
+        ruleDataClient,
+        eventLogService,
+      });
+
+      this.setupPlugins.alerting.registerType(
+        securityRuleTypeWrapper(createEqlAlertType(createRuleOptions))
+      );
+      this.setupPlugins.alerting.registerType(
+        securityRuleTypeWrapper(createIndicatorMatchAlertType(createRuleOptions))
+      );
+      this.setupPlugins.alerting.registerType(
+        securityRuleTypeWrapper(createMlAlertType(createRuleOptions))
+      );
+      this.setupPlugins.alerting.registerType(
+        securityRuleTypeWrapper(createQueryAlertType(createRuleOptions))
+      );
+      this.setupPlugins.alerting.registerType(
+        securityRuleTypeWrapper(createThresholdAlertType(createRuleOptions))
+      );
     }
 
     // TODO We need to get the endpoint routes inside of initRoutes
