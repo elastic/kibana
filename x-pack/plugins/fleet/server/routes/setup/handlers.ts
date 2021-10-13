@@ -12,7 +12,6 @@ import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../co
 import { setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
-import { upgradeManagedPackagePolicies } from '../../services/managed_package_policies';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   try {
