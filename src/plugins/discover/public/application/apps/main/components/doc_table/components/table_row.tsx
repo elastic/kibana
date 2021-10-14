@@ -170,7 +170,13 @@ export const TableRow = ({
           />
         );
       } else {
-        const isFilterable = Boolean(mapping(column)?.filterable && filter);
+        // Check whether the field is defined as filterable in the mapping and does
+        // NOT have ignored values in it to determine whether we want to allow filtering.
+        // We should improve this and show a helpful tooltip why the filter buttons are not
+        // there/disabled when there are ignored values.
+        const isFilterable = Boolean(
+          mapping(column)?.filterable && filter && !row._ignored?.includes(column)
+        );
         rowCells.push(
           <TableCell
             key={column}
