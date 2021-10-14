@@ -24,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const queryBar = getService('queryBar');
-  const testSubjects = getService('testSubjects');
 
   describe('lens query context', () => {
     before(async () => {
