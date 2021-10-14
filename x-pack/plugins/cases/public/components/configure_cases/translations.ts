@@ -170,6 +170,13 @@ export const DEPRECATED_TOOLTIP_TITLE = i18n.translate(
   }
 );
 
+export const DEPRECATED_TOOLTIP_TEXT = i18n.translate(
+  'xpack.cases.configureCases.deprecatedTooltipText',
+  {
+    defaultMessage: 'deprecated',
+  }
+);
+
 export const DEPRECATED_TOOLTIP_CONTENT = i18n.translate(
   'xpack.cases.configureCases.deprecatedTooltipContent',
   {
