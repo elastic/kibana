@@ -273,7 +273,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
-      // await testSubjects.waitForDeleted('testQuerySuccess');
+      await testSubjects.waitForDeleted('testQuerySuccess');
 
       // Invalid query
       await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
