@@ -29,19 +29,23 @@ export type OnAddFilter = ({
 }) => void;
 
 interface Props {
-  stats: FieldStats;
+  topValueStats: FieldStats;
   compressed?: boolean;
   onAddFilter?: OnAddFilter;
   fieldValue?: string | number;
 }
 
-export function TopValues({ stats, onAddFilter, fieldValue }: Props) {
-  const { topValues, topValuesSampleSize, count, fieldName } = stats;
+export function TopValues({ topValueStats, onAddFilter, fieldValue }: Props) {
+  const { topValues, topValuesSampleSize, count, fieldName } = topValueStats;
   const theme = useTheme();
 
   if (!Array.isArray(topValues) || topValues.length === 0) return null;
 
-  const progressBarMax = topValuesSampleSize ?? count;
+  const sampledSize =
+    typeof topValuesSampleSize === 'string'
+      ? parseInt(topValuesSampleSize, 10)
+      : topValuesSampleSize;
+  const progressBarMax = sampledSize ?? count;
   return (
     <div
       data-test-subj="apmCorrelationsContextPopoverTopValues"
