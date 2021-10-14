@@ -6,7 +6,7 @@
  */
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useCanSeeHostIsolationExceptionsMenu } from './hooks';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
 import { getHostIsolationExceptionSummary } from '../service';
 
