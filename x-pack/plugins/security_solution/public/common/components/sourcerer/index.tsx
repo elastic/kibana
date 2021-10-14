@@ -7,27 +7,21 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
+  EuiCallOut,
+  EuiCheckbox,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiForm,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
   EuiSuperSelect,
-  EuiForm,
-  EuiFormRow,
   EuiToolTip,
-  EuiCallOut,
-  EuiFormRowProps,
-  EuiBadge,
-  EuiCheckbox,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
 
 import * as i18n from './translations';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
@@ -37,41 +31,20 @@ import { SecurityPageName } from '../../../../common/constants';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
+import {
+  FormRow,
+  getDataViewSelectOptions,
+  getTooltipContent,
+  PopoverContent,
+  ResetButton,
+  StyledBadge,
+  StyledButton,
+  StyledFormRow,
+} from './helpers';
 
-const FormRow = styled(EuiFormRow)<EuiFormRowProps & { $expandAdvancedOptions: boolean }>`
-  display: ${({ $expandAdvancedOptions }) => ($expandAdvancedOptions ? 'flex' : 'none')};
-  max-width: none;
-`;
-
-const StyledFormRow = styled(EuiFormRow)`
-  max-width: none;
-`;
-
-const StyledButton = styled(EuiButtonEmpty)`
-  &:enabled:focus,
-  &:focus {
-    background-color: transparent;
-  }
-`;
-
-const ResetButton = styled(EuiButtonEmpty)`
-  width: fit-content;
-  &:enabled:focus,
-  &:focus {
-    background-color: transparent;
-  }
-`;
 interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
-
-const PopoverContent = styled.div`
-  width: 600px;
-`;
-
-const StyledBadge = styled(EuiBadge)`
-  margin-left: 8px;
-`;
 
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
@@ -196,37 +169,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const dataViewSelectOptions = useMemo(
     () =>
-      isOnlyDetectionAlerts
-        ? [
-            {
-              inputDisplay: (
-                <span data-test-subj="security-alerts-option-super">
-                  <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_SECURITY_DATA_VIEW_LABEL}
-                  <StyledBadge data-test-subj="security-alerts-option-badge">
-                    {i18n.ALERTS_BADGE_TITLE}
-                  </StyledBadge>
-                </span>
-              ),
-              value: defaultDataView.id,
-            },
-          ]
-        : kibanaDataViews.map(({ title, id }) => ({
-            inputDisplay:
-              id === defaultDataView.id ? (
-                <span data-test-subj="security-option-super">
-                  <EuiIcon type="logoSecurity" size="s" /> {i18n.SECURITY_DEFAULT_DATA_VIEW_LABEL}
-                  {isModified && id === dataViewId && (
-                    <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>
-                  )}
-                </span>
-              ) : (
-                <span data-test-subj="dataView-option-super">
-                  <EuiIcon type="logoKibana" size="s" /> {title}
-                </span>
-              ),
-            value: id,
-          })),
-    [dataViewId, defaultDataView.id, isOnlyDetectionAlerts, isModified, kibanaDataViews]
+      getDataViewSelectOptions({
+        dataViewId,
+        defaultDataView,
+        isModified,
+        isOnlyDetectionAlerts,
+        kibanaDataViews,
+      }),
+    [dataViewId, defaultDataView, isModified, isOnlyDetectionAlerts, kibanaDataViews]
   );
 
   useEffect(() => {
@@ -239,14 +189,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const tooltipContent = useMemo(
     () =>
-      isPopoverOpen
-        ? null
-        : (isOnlyDetectionAlerts
-            ? signalIndexName
-              ? [signalIndexName]
-              : []
-            : selectedPatterns
-          ).join(', '),
+      getTooltipContent({
+        isOnlyDetectionAlerts,
+        isPopoverOpen,
+        selectedPatterns,
+        signalIndexName,
+      }),
     [isPopoverOpen, isOnlyDetectionAlerts, signalIndexName, selectedPatterns]
   );
 
