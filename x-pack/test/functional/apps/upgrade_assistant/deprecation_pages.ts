@@ -50,6 +50,7 @@ export default function upgradeAssistantFunctionalTests({
 }: FtrProviderContext) {
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const retry = getService('retry');
+  const security = getService('security');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
   const security = getService('security');
