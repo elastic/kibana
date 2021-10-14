@@ -33,18 +33,15 @@ import { HostIsolationExceptionsEmptyState } from './components/empty';
 import { HostIsolationExceptionsPageAction } from '../store/action';
 import { HostIsolationExceptionDeleteModal } from './components/delete_modal';
 import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
+import {
+  DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
+  EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
+} from './components/translations';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
   typeof ExceptionItem
 >;
-
-const DELETE_HOST_ISOLATION_EXCEPTION_LABEL = i18n.translate(
-  'xpack.securitySolution.hostIsolationExceptions.list.actions.delete',
-  {
-    defaultMessage: 'Delete Exception',
-  }
-);
 
 export const HostIsolationExceptionsList = () => {
   const listItems = useHostIsolationExceptionsSelector(getListItems);
@@ -70,6 +67,17 @@ export const HostIsolationExceptionsList = () => {
     item: element,
     'data-test-subj': `hostIsolationExceptionsCard`,
     actions: [
+      {
+        icon: 'trash',
+        onClick: () => {
+          navigateCallback({
+            show: 'edit',
+            id: element.id,
+          });
+        },
+        'data-test-subj': 'editHostIsolationException',
+        children: EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
+      },
       {
         icon: 'trash',
         onClick: () => {

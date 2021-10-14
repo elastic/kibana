@@ -32,7 +32,6 @@ import {
   CUSTOM_QUERY_REQUIRED,
   DEFAULT_RISK_SCORE_INPUT,
   DEFINE_CONTINUE_BUTTON,
-  DEFINE_EDIT_TAB,
   EQL_QUERY_INPUT,
   EQL_QUERY_PREVIEW_HISTOGRAM,
   EQL_QUERY_VALIDATION_SPINNER,
@@ -493,10 +492,6 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
   getDefineContinueButton().should('exist').click({ force: true });
 
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).should('not.exist');
-};
-
-export const goToDefineStepTab = () => {
-  cy.get(DEFINE_EDIT_TAB).click({ force: true });
 };
 
 export const goToAboutStepTab = () => {
