@@ -38,6 +38,7 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_PASSWORD),
   [ConfigKeys.SOURCE_ZIP_FOLDER]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_FOLDER),
   [ConfigKeys.SOURCE_INLINE]: getBrowserJsonToJavascriptNormalizer(ConfigKeys.SOURCE_INLINE),
+  [ConfigKeys.SOURCE_ZIP_PROXY_URL]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_PROXY_URL),
   [ConfigKeys.PARAMS]: getBrowserNormalizer(ConfigKeys.PARAMS),
   [ConfigKeys.SCREENSHOTS]: getBrowserNormalizer(ConfigKeys.SCREENSHOTS),
   [ConfigKeys.SYNTHETICS_ARGS]: getBrowserJsonToJavascriptNormalizer(ConfigKeys.SYNTHETICS_ARGS),

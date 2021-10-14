@@ -17,6 +17,7 @@ import { defaultConfig } from './synthetics_policy_create_extension';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
@@ -56,7 +57,7 @@ const defaultNewPolicy: NewPackagePolicy = {
             dataset: 'http',
           },
           vars: {
-            metadata: {
+            __ui: {
               value: JSON.stringify({ is_tls_enabled: true }),
               type: 'yaml',
             },

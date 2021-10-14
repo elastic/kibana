@@ -27,6 +27,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKeys.SOURCE_ZIP_USERNAME]: null,
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: null,
   [ConfigKeys.SOURCE_ZIP_FOLDER]: null,
+  [ConfigKeys.SOURCE_ZIP_PROXY_URL]: null,
   [ConfigKeys.SOURCE_INLINE]: (fields) => stringToJsonFormatter(fields[ConfigKeys.SOURCE_INLINE]),
   [ConfigKeys.PARAMS]: null,
   [ConfigKeys.SCREENSHOTS]: null,

@@ -24,6 +24,7 @@ import { defaultConfig } from './synthetics_policy_create_extension';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
@@ -229,7 +230,8 @@ describe('<CustomFields />', () => {
     ).toBeInTheDocument();
 
     // expect tls options to be available for browser
-    expect(queryByLabelText('Enable TLS configuration for ZIP URL')).toBeInTheDocument();
+    expect(queryByLabelText('Zip Proxy URL')).toBeInTheDocument();
+    expect(queryByLabelText('Enable TLS configuration for Zip URL')).toBeInTheDocument();
 
     // ensure at least one browser advanced option is present
     advancedOptionsButton = getByText('Advanced Browser options');

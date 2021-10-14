@@ -27,6 +27,7 @@ enum SourceType {
 
 interface SourceConfig {
   zipUrl: string;
+  proxyUrl: string;
   folder: string;
   username: string;
   password: string;
@@ -41,6 +42,7 @@ interface Props {
 
 export const defaultValues = {
   zipUrl: '',
+  proxyUrl: '',
   folder: '',
   username: '',
   password: '',
@@ -98,6 +100,29 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
             />
           </EuiFormRow>
           <ZipUrlTLSFields />
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.brower.proxyURL.label"
+                defaultMessage="Zip Proxy URL"
+              />
+            }
+            labelAppend={<OptionalLabel />}
+            helpText={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.http.helpText"
+                defaultMessage="HTTP proxy for Zip URL."
+              />
+            }
+          >
+            <EuiFieldText
+              onChange={({ target: { value } }) =>
+                setConfig((prevConfig) => ({ ...prevConfig, proxyUrl: value }))
+              }
+              value={config.proxyUrl}
+              data-test-subj="syntheticsBrowserZipUrlProxy"
+            />
+          </EuiFormRow>
           <EuiFormRow
             label={
               <FormattedMessage

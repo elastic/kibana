@@ -80,7 +80,7 @@ export enum ConfigKeys {
   JOURNEY_FILTERS_MATCH = 'filter_journeys.match',
   JOURNEY_FILTERS_TAGS = 'filter_journeys.tags',
   MAX_REDIRECTS = 'max_redirects',
-  METADATA = 'metadata',
+  METADATA = '__ui',
   MONITOR_TYPE = 'type',
   NAME = 'name',
   PARAMS = 'params',
@@ -105,6 +105,7 @@ export enum ConfigKeys {
   SOURCE_ZIP_USERNAME = 'source.zip_url.username',
   SOURCE_ZIP_PASSWORD = 'source.zip_url.password',
   SOURCE_ZIP_FOLDER = 'source.zip_url.folder',
+  SOURCE_ZIP_PROXY_URL = 'source.zip_url.proxy_url',
   SYNTHETICS_ARGS = 'synthetics_args',
   TLS_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
   TLS_CERTIFICATE = 'ssl.certificate',
@@ -201,6 +202,7 @@ export type IBrowserSimpleFields = {
   [ConfigKeys.SOURCE_ZIP_FOLDER]: string;
   [ConfigKeys.SOURCE_ZIP_USERNAME]: string;
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: string;
+  [ConfigKeys.SOURCE_ZIP_PROXY_URL]: string;
   [ConfigKeys.PARAMS]: string;
 } & ICommonFields &
   IZipUrlTLSFields;

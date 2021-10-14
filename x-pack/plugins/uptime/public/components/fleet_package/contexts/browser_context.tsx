@@ -31,6 +31,7 @@ export const initialValues: IBrowserSimpleFields = {
   [ConfigKeys.SOURCE_ZIP_USERNAME]: '',
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: '',
   [ConfigKeys.SOURCE_ZIP_FOLDER]: '',
+  [ConfigKeys.SOURCE_ZIP_PROXY_URL]: '',
   [ConfigKeys.SOURCE_INLINE]: '',
   [ConfigKeys.PARAMS]: '',
   [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]:

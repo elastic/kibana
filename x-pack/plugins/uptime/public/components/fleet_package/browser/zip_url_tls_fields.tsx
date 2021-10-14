@@ -59,7 +59,7 @@ export const ZipUrlTLSFields = () => {
           label={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.enableZipUrlSSLSettings.label"
-              defaultMessage="Enable TLS configuration for ZIP URL"
+              defaultMessage="Enable TLS configuration for Zip URL"
             />
           }
           onChange={(event) => setIsZipUrlTLSEnabled(event.target.checked)}

@@ -13,6 +13,7 @@ import { SourceField, defaultValues } from './source_field';
 import { BrowserSimpleFieldsContextProvider } from '../contexts';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 

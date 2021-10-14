@@ -18,6 +18,7 @@ import {
 } from '../contexts';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
@@ -34,7 +35,7 @@ describe('<SourceField />', () => {
   it('renders ZipUrlTLSFields', () => {
     const { getByLabelText, getByText } = render(<WrappedComponent isEnabled={false} />);
 
-    const toggle = getByText('Enable TLS configuration for ZIP URL');
+    const toggle = getByText('Enable TLS configuration for Zip URL');
 
     fireEvent.click(toggle);
 
