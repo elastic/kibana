@@ -125,11 +125,6 @@ export async function getServiceTransactionGroupDetailedStatistics({
                   },
                 },
                 aggs: {
-                  throughput_rate: {
-                    rate: {
-                      unit: 'minute',
-                    },
-                  },
                   ...getLatencyAggregation(latencyAggregationType, field),
                   [EVENT_OUTCOME]: {
                     terms: {
@@ -160,7 +155,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     }));
     const throughput = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,
-      y: timeseriesBucket.throughput_rate.value,
+      y: timeseriesBucket.doc_count, // sparklines only shows trend (no axis)
     }));
     const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,

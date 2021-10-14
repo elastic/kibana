@@ -301,8 +301,8 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             "avgErrorRate": 0,
             "avgMemoryUsage": 0.202572668763642,
             "transactionStats": Object {
-              "avgRequestsPerMinute": 5.2,
-              "avgTransactionDuration": 53906.6603773585,
+              "avgRequestsPerMinute": 7.13333333333333,
+              "avgTransactionDuration": 53147.5747663551,
             },
           }
         `);

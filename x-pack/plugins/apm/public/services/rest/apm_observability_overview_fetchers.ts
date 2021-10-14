@@ -15,6 +15,7 @@ export const fetchObservabilityOverviewPageData = async ({
   absoluteTime,
   relativeTime,
   bucketSize,
+  intervalString,
 }: FetchDataParams): Promise<ApmFetchDataResponse> => {
   const data = await callApmApi({
     endpoint: 'GET /internal/apm/observability_overview',
@@ -24,6 +25,7 @@ export const fetchObservabilityOverviewPageData = async ({
         start: new Date(absoluteTime.start).toISOString(),
         end: new Date(absoluteTime.end).toISOString(),
         bucketSize,
+        intervalString,
       },
     },
   });
