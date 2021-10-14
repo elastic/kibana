@@ -511,8 +511,19 @@ export const saveInstalledEsRefs = async (
 ) => {
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   const installedAssetsToSave = installedPkg?.attributes.installed_es.concat(installedAssets);
+
+  const deduplicatedAssets =
+    installedAssetsToSave?.reduce((acc, currentAsset) => {
+      const foundAsset = acc.find((asset: EsAssetReference) => asset.id === currentAsset.id);
+      if (!foundAsset) {
+        return acc.concat([currentAsset]);
+      } else {
+        return acc;
+      }
+    }, [] as EsAssetReference[]) || [];
+
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_es: installedAssetsToSave,
+    installed_es: deduplicatedAssets,
   });
   return installedAssets;
 };
