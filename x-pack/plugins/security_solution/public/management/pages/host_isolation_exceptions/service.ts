@@ -123,3 +123,26 @@ export async function getHostIsolationExceptionSummary(
     },
   });
 }
+
+export async function getOneHostIsolationExceptionItem(
+  http: HttpStart,
+  id: string
+): Promise<UpdateExceptionListItemSchema> {
+  await ensureHostIsolationExceptionsListExists(http);
+  return http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    query: {
+      id,
+      namespace_type: 'agnostic',
+    },
+  });
+}
+
+export async function updateOneHostIsolationExceptionItem(
+  http: HttpStart,
+  exception: UpdateExceptionListItemSchema
+): Promise<ExceptionListItemSchema> {
+  await ensureHostIsolationExceptionsListExists(http);
+  return http.put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    body: JSON.stringify(exception),
+  });
+}
