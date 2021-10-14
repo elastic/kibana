@@ -93,9 +93,10 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   const deprecationsCountByLevel: {
     warningDeprecations: number;
     criticalDeprecations: number;
-  } = useMemo(() => getDeprecationCountByLevel(esDeprecations?.deprecations || []), [
-    esDeprecations?.deprecations,
-  ]);
+  } = useMemo(
+    () => getDeprecationCountByLevel(esDeprecations?.deprecations || []),
+    [esDeprecations?.deprecations]
+  );
 
   useEffect(() => {
     breadcrumbs.setBreadcrumbs('esDeprecations');

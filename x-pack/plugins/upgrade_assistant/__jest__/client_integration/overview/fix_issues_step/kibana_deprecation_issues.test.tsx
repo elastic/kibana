@@ -17,10 +17,8 @@ import { esNoDeprecations } from './mock_es_issues';
 describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
-  const {
-    mockedKibanaDeprecations,
-    mockedCriticalKibanaDeprecations,
-  } = kibanaDeprecationsServiceHelpers.defaultMockedResponses;
+  const { mockedKibanaDeprecations, mockedCriticalKibanaDeprecations } =
+    kibanaDeprecationsServiceHelpers.defaultMockedResponses;
 
   afterAll(() => {
     server.restore();

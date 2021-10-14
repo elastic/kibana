@@ -120,10 +120,8 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
     },
   } = useAppContext();
 
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const getAllDeprecations = useCallback(async () => {
     setIsLoading(true);
