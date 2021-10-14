@@ -313,7 +313,7 @@ export function AlertInstances({
             {alertInstanceSummary.executionDuration.values &&
             alertInstanceSummary.executionDuration.values.length > 0 ? (
               <>
-                <Chart data-test-subj="executionDurationChart" size={{ height: 120 }}>
+                <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
                   <Settings
                     theme={{
                       lineSeriesStyle: {
