@@ -10,14 +10,10 @@ import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
-import {
-  AlertInstances,
-  AlertInstanceListItem,
-  alertInstanceToListItem,
-  padOrTruncateDurations,
-} from './alert_instances';
+import { AlertInstances, AlertInstanceListItem, alertInstanceToListItem } from './alert_instances';
 import { Alert, AlertInstanceSummary, AlertInstanceStatus, AlertType } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
+import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -370,72 +366,24 @@ describe('execution duration overview', () => {
     expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeTruthy();
   });
 
-  it('renders empty state when no execution duration values are available', async () => {
+  it('renders execution duration chart', () => {
     const rule = mockAlert();
-    const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
+    const ruleType = mockAlertType();
     const alertSummary = mockAlertInstanceSummary();
 
-    const wrapper = mountWithIntl(
-      <AlertInstances
-        {...mockAPIs}
-        alert={rule}
-        alertType={ruleType}
-        readOnly={false}
-        alertInstanceSummary={alertSummary}
-      />
-    );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="executionDurationChartEmpty"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="executionDurationChart"]').exists()).toBeFalsy();
-  });
-
-  it('renders chart when execution duration values are available', async () => {
-    const rule = mockAlert();
-    const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
-    const alertSummary = mockAlertInstanceSummary({
-      executionDuration: { average: 10, values: [1, 2] },
-    });
-
-    const wrapper = mountWithIntl(
-      <AlertInstances
-        {...mockAPIs}
-        alert={rule}
-        alertType={ruleType}
-        readOnly={false}
-        alertInstanceSummary={alertSummary}
-      />
-    );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="executionDurationChartEmpty"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="executionDurationChart"]').exists()).toBeTruthy();
-  });
-});
-
-describe('padOrTruncateDurations', () => {
-  it('does nothing when array is the correct length', () => {
-    expect(padOrTruncateDurations([1, 2, 3], 3)).toEqual([1, 2, 3]);
-  });
-
-  it('pads execution duration values when there are fewer than display desires', () => {
-    expect(padOrTruncateDurations([1, 2, 3], 10)).toEqual([1, 2, 3, 0, 0, 0, 0, 0, 0, 0]);
-  });
-
-  it('truncates execution duration values when there are more than display desires', () => {
-    expect(padOrTruncateDurations([1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13], 10)).toEqual([
-      3, 5, 6, 7, 8, 9, 10, 11, 12, 13,
-    ]);
+    expect(
+      shallow(
+        <AlertInstances
+          {...mockAPIs}
+          alert={rule}
+          alertType={ruleType}
+          alertInstanceSummary={alertSummary}
+          readOnly={false}
+        />
+      )
+        .find(ExecutionDurationChart)
+        .exists()
+    ).toBeTruthy();
   });
 });
 

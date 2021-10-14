@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import moment, { Duration } from 'moment';
-import { assign, fill } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
@@ -19,16 +18,11 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiStat,
-  EuiEmptyPrompt,
   EuiIconTip,
-  EuiTitle,
 } from '@elastic/eui';
-import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
-import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
@@ -57,6 +51,7 @@ import {
   formatMillisForDisplay,
   shouldShowDurationWarning,
 } from '../../../lib/execution_duration_utils';
+import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 
 type AlertInstancesProps = {
   alert: Alert;
@@ -66,8 +61,6 @@ type AlertInstancesProps = {
   requestRefresh: () => Promise<void>;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
-
-const DESIRED_NUM_EXECUTION_DURATIONS = 30;
 
 export const alertInstancesTableColumns = (
   onMuteAction: (instance: AlertInstanceListItem) => Promise<void>,
@@ -198,11 +191,6 @@ export function AlertInstances({
     alertInstanceSummary.executionDuration.average
   );
 
-  const paddedExecutionDurations = padOrTruncateDurations(
-    alertInstanceSummary.executionDuration.values,
-    DESIRED_NUM_EXECUTION_DURATIONS
-  );
-
   const healthColor = getHealthColor(alert.executionStatus.status);
   const isLicenseError =
     alert.executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
@@ -280,93 +268,7 @@ export function AlertInstances({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={4}>
-          <EuiPanel data-test-subj="executionDurationChartPanel" hasBorder={true}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.recentDurationsTitle"
-                      defaultMessage="Recent execution durations"
-                    />
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  color="subdued"
-                  type="questionInCircle"
-                  content={i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.recentDurationsTooltip',
-                    {
-                      defaultMessage: `Recent rule executions include up to the last {numExecutions} executions.`,
-                      values: {
-                        numExecutions: DESIRED_NUM_EXECUTION_DURATIONS,
-                      },
-                    }
-                  )}
-                  position="top"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            {alertInstanceSummary.executionDuration.values &&
-            alertInstanceSummary.executionDuration.values.length > 0 ? (
-              <>
-                <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
-                  <Settings
-                    theme={{
-                      lineSeriesStyle: {
-                        point: { visible: false },
-                        line: { stroke: lightEuiTheme.euiColorAccent },
-                      },
-                    }}
-                  />
-                  <BarSeries
-                    id="executionDuration"
-                    xScaleType="linear"
-                    yScaleType="linear"
-                    xAccessor={0}
-                    yAccessors={[1]}
-                    data={paddedExecutionDurations.map((val, ndx) => [ndx, val])}
-                  />
-                  <LineSeries
-                    id="rule_duration_avg"
-                    xScaleType="linear"
-                    yScaleType="linear"
-                    xAccessor={0}
-                    yAccessors={[1]}
-                    data={paddedExecutionDurations.map((val, ndx) => [
-                      ndx,
-                      alertInstanceSummary.executionDuration.average,
-                    ])}
-                    curve={CurveType.CURVE_NATURAL}
-                  />
-                  <Axis
-                    id="left-axis"
-                    position="left"
-                    tickFormat={(d) => formatMillisForDisplay(d)}
-                  />
-                </Chart>
-              </>
-            ) : (
-              <>
-                <EuiEmptyPrompt
-                  data-test-subj="executionDurationChartEmpty"
-                  body={
-                    <>
-                      <p>
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.executionDurationNoData"
-                          defaultMessage="There are no available executions for this rule."
-                        />
-                      </p>
-                    </>
-                  }
-                />
-              </>
-            )}
-          </EuiPanel>
+          <ExecutionDurationChart executionDuration={alertInstanceSummary.executionDuration} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
@@ -474,15 +376,4 @@ function getSortPriorityByStatus(status?: AlertInstanceStatusValues): number {
       return 1;
   }
   return 2;
-}
-
-export function padOrTruncateDurations(values: number[], desiredSize: number) {
-  if (values.length === desiredSize) {
-    return values;
-  } else if (values.length < desiredSize) {
-    return assign(fill(new Array(desiredSize), 0), values);
-  } else {
-    // oldest durations are at the start of the array, so take the last {desiredSize} values
-    return values.slice(-desiredSize);
-  }
 }
