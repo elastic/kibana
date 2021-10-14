@@ -1108,6 +1108,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsFormula-fullscreen');
     },
 
+    async goToListingPageViaBreadcrumbs() {
+      await retry.try(async () => {
+        await testSubjects.click('breadcrumb first');
+        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 3000 });
+      });
+    },
+
     async typeFormula(formula: string) {
       await find.byCssSelector('.monaco-editor');
       await find.clickByCssSelectorWhenNotDisabled('.monaco-editor');

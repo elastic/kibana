@@ -115,63 +115,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Switching in Visualize App', () => {
-      describe('from empty visualization to existing one', () => {
-        before(async () => {
-          await PageObjects.visualize.gotoVisualizationLandingPage();
-          await listingTable.searchForItemWithName('lnsTableVis');
-          await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
-          await PageObjects.lens.goToTimeRange();
-        });
-        it('when moving to empty workspace, preserves time range, cleans filters and query', async () => {
-          await testSubjects.click('breadcrumb first');
-          await PageObjects.header.waitUntilLoadingHasFinished();
+      it('when moving from existing to empty workspace, preserves time range, cleans filters and query', async () => {
+        // go to existing vis
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.searchForItemWithName('lnsTableVis');
+        await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
+        await PageObjects.lens.goToTimeRange();
+        // go to empty vis
+        await PageObjects.lens.goToListingPageViaBreadcrumbs();
+        await PageObjects.visualize.clickNewVisualization();
+        await PageObjects.visualize.waitForGroupsSelectPage();
+        await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.lens.waitForEmptyWorkspace();
+        await PageObjects.lens.switchToVisualization('lnsMetric');
+        await PageObjects.lens.dragFieldToWorkspace('@timestamp');
 
-          await PageObjects.visualize.clickNewVisualization();
-          await PageObjects.visualize.waitForGroupsSelectPage();
-          await PageObjects.visualize.clickVisType('lens');
+        const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
+        expect(timePickerValues.start).to.eql(PageObjects.timePicker.defaultStartTime);
+        expect(timePickerValues.end).to.eql(PageObjects.timePicker.defaultEndTime);
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(0);
+        const query = await queryBar.getQueryString();
+        expect(query).to.equal('');
+        await PageObjects.lens.assertMetric('Unique count of @timestamp', '14,181');
+      });
+      it('when moving from empty to existing workspace, preserves time range and loads filters and query', async () => {
+        // go to existing vis
+        await PageObjects.lens.goToListingPageViaBreadcrumbs();
+        await listingTable.searchForItemWithName('lnsTableVis');
+        await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
 
-          await PageObjects.lens.waitForEmptyWorkspace();
-          await PageObjects.lens.switchToVisualization('lnsMetric');
-          await PageObjects.lens.dragFieldToWorkspace('@timestamp');
-          // fill the navigation search and select empty
-          // see the time
-          const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-          expect(timePickerValues.start).to.eql(PageObjects.timePicker.defaultStartTime);
-          expect(timePickerValues.end).to.eql(PageObjects.timePicker.defaultEndTime);
+        expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('404 › Median of bytes');
+        expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal('503 › Median of bytes');
+        expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('TG');
+        expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('9,931');
 
-          const filterCount = await filterBar.getFilterCount();
-          expect(filterCount).to.equal(0);
-
-          const query = await queryBar.getQueryString();
-          expect(query).to.equal('');
-
-          await PageObjects.lens.assertMetric('Unique count of @timestamp', '14,181');
-        });
-        it('when moving to existing workspace, preserves time range and loads filters and query', async () => {
-          await testSubjects.click('breadcrumb first');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await listingTable.searchForItemWithName('lnsTableVis');
-          await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
-
-          expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal(
-            '404 › Median of bytes'
-          );
-          expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal(
-            '503 › Median of bytes'
-          );
-          expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('TG');
-          expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('9,931');
-
-          const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-          expect(timePickerValues.start).to.eql(PageObjects.timePicker.defaultStartTime);
-          expect(timePickerValues.end).to.eql(PageObjects.timePicker.defaultEndTime);
-
-          const filterCount = await filterBar.getFilterCount();
-          expect(filterCount).to.equal(1);
-
-          const query = await queryBar.getQueryString();
-          expect(query).to.equal('extension.raw : "jpg" or extension.raw : "gif" ');
-        });
+        const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
+        expect(timePickerValues.start).to.eql(PageObjects.timePicker.defaultStartTime);
+        expect(timePickerValues.end).to.eql(PageObjects.timePicker.defaultEndTime);
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
+        const query = await queryBar.getQueryString();
+        expect(query).to.equal('extension.raw : "jpg" or extension.raw : "gif" ');
       });
     });
 
