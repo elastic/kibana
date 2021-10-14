@@ -1238,7 +1238,7 @@
         "label": "SolutionToolbarPopover",
         "description": [],
         "signature": [
-          "({ label, iconType, primary, iconSide, ...popover }: ",
+          "({ label, iconType, primary, iconSide, children, ...popover }: ",
           "Props",
           ") => JSX.Element"
         ],
@@ -1250,7 +1250,7 @@
             "id": "def-public.SolutionToolbarPopover.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  label,\n  iconType,\n  primary,\n  iconSide,\n  ...popover\n}",
+            "label": "{\n  label,\n  iconType,\n  primary,\n  iconSide,\n  children,\n  ...popover\n}",
             "description": [],
             "signature": [
               "Props"
@@ -1870,19 +1870,6 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.QuickButtonProps.isDarkModeEnabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isDarkModeEnabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2399,6 +2386,19 @@
               "section": "def-public.PresentationLabsService",
               "text": "PresentationLabsService"
             }
+          ],
+          "path": "src/plugins/presentation_util/public/types.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "presentationUtil",
+          "id": "def-public.PresentationUtilPluginStart.controlsService",
+          "type": "Object",
+          "tags": [],
+          "label": "controlsService",
+          "description": [],
+          "signature": [
+            "PresentationControlsService"
           ],
           "path": "src/plugins/presentation_util/public/types.ts",
           "deprecated": false

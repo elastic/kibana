@@ -217,11 +217,9 @@
               "\nSearch sessions SO CRUD\n{@link ISessionsClient}"
             ],
             "signature": [
-              "{ get: (sessionId: string) => Promise<",
+              "{ create: ({ name, appId, urlGeneratorId, initialState, restoreState, sessionId, }: { name: string; appId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; urlGeneratorId: string; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
-              ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, urlGeneratorId, initialState, restoreState, sessionId, }: { name: string; appId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; urlGeneratorId: string; sessionId: string; }) => Promise<",
-              "SearchSessionSavedObject",
-              ">; find: (options: Pick<",
+              ">; delete: (sessionId: string) => Promise<void>; find: (options: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -237,7 +235,9 @@
                 "section": "def-server.SavedObjectsFindResponse",
                 "text": "SavedObjectsFindResponse"
               },
-              "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
+              "<unknown, unknown>>; get: (sessionId: string) => Promise<",
+              "SearchSessionSavedObject",
+              ">; update: (sessionId: string, attributes: unknown) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -379,7 +379,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
+              " | undefined; schema?: string | undefined; }, \"id\" | \"enabled\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -395,7 +395,7 @@
                 "section": "def-common.IAggType",
                 "text": "IAggType"
               },
-              "; }, never>, \"type\" | \"enabled\" | \"id\" | \"schema\" | \"params\">[] | undefined) => ",
+              "; }, never>, \"type\" | \"id\" | \"enabled\" | \"schema\" | \"params\">[] | undefined) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -617,11 +617,9 @@
               "\nSearch sessions SO CRUD\n{@link ISessionsClient}"
             ],
             "signature": [
-              "{ get: (sessionId: string) => Promise<",
+              "{ create: ({ name, appId, urlGeneratorId, initialState, restoreState, sessionId, }: { name: string; appId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; urlGeneratorId: string; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
-              ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, urlGeneratorId, initialState, restoreState, sessionId, }: { name: string; appId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; urlGeneratorId: string; sessionId: string; }) => Promise<",
-              "SearchSessionSavedObject",
-              ">; find: (options: Pick<",
+              ">; delete: (sessionId: string) => Promise<void>; find: (options: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -637,7 +635,9 @@
                 "section": "def-server.SavedObjectsFindResponse",
                 "text": "SavedObjectsFindResponse"
               },
-              "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
+              "<unknown, unknown>>; get: (sessionId: string) => Promise<",
+              "SearchSessionSavedObject",
+              ">; update: (sessionId: string, attributes: unknown) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -957,11 +957,9 @@
         "label": "ISessionsClient",
         "description": [],
         "signature": [
-          "{ get: (sessionId: string) => Promise<",
+          "{ create: ({ name, appId, urlGeneratorId, initialState, restoreState, sessionId, }: { name: string; appId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; urlGeneratorId: string; sessionId: string; }) => Promise<",
           "SearchSessionSavedObject",
-          ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, urlGeneratorId, initialState, restoreState, sessionId, }: { name: string; appId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; urlGeneratorId: string; sessionId: string; }) => Promise<",
-          "SearchSessionSavedObject",
-          ">; find: (options: Pick<",
+          ">; delete: (sessionId: string) => Promise<void>; find: (options: Pick<",
           {
             "pluginId": "core",
             "scope": "server",
@@ -977,7 +975,9 @@
             "section": "def-server.SavedObjectsFindResponse",
             "text": "SavedObjectsFindResponse"
           },
-          "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
+          "<unknown, unknown>>; get: (sessionId: string) => Promise<",
+          "SearchSessionSavedObject",
+          ">; update: (sessionId: string, attributes: unknown) => Promise<",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1921,25 +1921,7 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              "{ get: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              "SavedObject",
-              "<T>>; delete: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteOptions",
-                "text": "SavedObjectsDeleteOptions"
-              },
-              ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+              "{ create: <T = unknown>(type: string, attributes: T, options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1997,7 +1979,15 @@
                 "section": "def-server.SavedObjectsCheckConflictsResponse",
                 "text": "SavedObjectsCheckConflictsResponse"
               },
-              ">; find: <T = unknown, A = unknown>(options: ",
+              ">; delete: (type: string, id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsDeleteOptions",
+                "text": "SavedObjectsDeleteOptions"
+              },
+              ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -2061,6 +2051,16 @@
                 "section": "def-server.SavedObjectsBulkResolveResponse",
                 "text": "SavedObjectsBulkResolveResponse"
               },
+              "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              ") => Promise<",
+              "SavedObject",
               "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
               {
                 "pluginId": "core",
@@ -2593,7 +2593,7 @@
                     "section": "def-server.SerializableRecord",
                     "text": "SerializableRecord"
                   },
-                  " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
+                  " | undefined; schema?: string | undefined; }, \"id\" | \"enabled\" | \"schema\" | \"params\"> & Pick<{ type: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -2609,7 +2609,7 @@
                     "section": "def-common.IAggType",
                     "text": "IAggType"
                   },
-                  "; }, never>, \"type\" | \"enabled\" | \"id\" | \"schema\" | \"params\">"
+                  "; }, never>, \"type\" | \"id\" | \"enabled\" | \"schema\" | \"params\">"
                 ],
                 "path": "src/plugins/data/common/search/aggs/agg_config.ts",
                 "deprecated": false,
@@ -3660,7 +3660,7 @@
                     "section": "def-server.SerializableRecord",
                     "text": "SerializableRecord"
                   },
-                  " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
+                  " | undefined; schema?: string | undefined; }, \"id\" | \"enabled\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -3676,7 +3676,7 @@
                     "section": "def-common.IAggType",
                     "text": "IAggType"
                   },
-                  "; }, never>, \"type\" | \"enabled\" | \"id\" | \"schema\" | \"params\">[]"
+                  "; }, never>, \"type\" | \"id\" | \"enabled\" | \"schema\" | \"params\">[]"
                 ],
                 "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
                 "deprecated": false,
@@ -3905,7 +3905,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
+              " | undefined; schema?: string | undefined; }, \"id\" | \"enabled\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3921,7 +3921,7 @@
                 "section": "def-common.IAggType",
                 "text": "IAggType"
               },
-              "; }, never>, \"type\" | \"enabled\" | \"id\" | \"schema\" | \"params\">, { addToAggConfigs }?: { addToAggConfigs?: boolean | undefined; }) => T"
+              "; }, never>, \"type\" | \"id\" | \"enabled\" | \"schema\" | \"params\">, { addToAggConfigs }?: { addToAggConfigs?: boolean | undefined; }) => T"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
             "deprecated": false,
@@ -3942,7 +3942,7 @@
                     "section": "def-server.SerializableRecord",
                     "text": "SerializableRecord"
                   },
-                  " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
+                  " | undefined; schema?: string | undefined; }, \"id\" | \"enabled\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -3958,7 +3958,7 @@
                     "section": "def-common.IAggType",
                     "text": "IAggType"
                   },
-                  "; }, never>, \"type\" | \"enabled\" | \"id\" | \"schema\" | \"params\">"
+                  "; }, never>, \"type\" | \"id\" | \"enabled\" | \"schema\" | \"params\">"
                 ],
                 "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
                 "deprecated": false,
@@ -4967,7 +4967,7 @@
               "\nThe type the values produced by this agg will have in the final data table.\nIf not specified, the type of the field is used."
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false
@@ -5289,7 +5289,7 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  "; history: Record<string, any>[]; setPreferredSearchStrategyId: (searchStrategyId: string) => void; setField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
+                  "; history: Record<string, any>[]; setPreferredSearchStrategyId: (searchStrategyId: string) => void; setField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -5305,7 +5305,7 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  "; removeField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+                  "; removeField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -5337,7 +5337,7 @@
                     "section": "def-common.SearchSourceFields",
                     "text": "SearchSourceFields"
                   },
-                  "; getField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
+                  "; getField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -5345,7 +5345,7 @@
                     "section": "def-common.SearchSourceFields",
                     "text": "SearchSourceFields"
                   },
-                  "[K]; getOwnField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+                  "[K]; getOwnField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -5528,13 +5528,21 @@
             "signature": [
               "(agg: TAggConfig) => ",
               {
-                "pluginId": "expressions",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<Record<string, any>>"
+              "<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              ">"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false,
@@ -7556,7 +7564,7 @@
               "\nsets value to a single search source field"
             ],
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
+              "<K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -7621,7 +7629,7 @@
               "\nremove field"
             ],
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => this"
+              "<K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => this"
             ],
             "path": "src/plugins/data/common/search/search_source/search_source.ts",
             "deprecated": false,
@@ -7746,7 +7754,7 @@
               "\nGets a single field from the fields"
             ],
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
+              "<K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -7800,7 +7808,7 @@
               "\nGet the field from our own fields, don't traverse up the chain"
             ],
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+              "<K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -8381,7 +8389,7 @@
                 "section": "def-common.DataViewsService",
                 "text": "DataViewsService"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, dependencies: ",
+              ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">, dependencies: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -8434,7 +8442,7 @@
                     "section": "def-common.DataViewsService",
                     "text": "DataViewsService"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
+                  ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">"
                 ],
                 "path": "src/plugins/data/common/search/search_source/search_source_service.ts",
                 "deprecated": false,
@@ -9388,7 +9396,7 @@
             "section": "def-common.DataViewsService",
             "text": "DataViewsService"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, searchSourceDependencies: ",
+          ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">, searchSourceDependencies: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9435,7 +9443,7 @@
                 "section": "def-common.DataViewsService",
                 "text": "DataViewsService"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
+              ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">"
             ],
             "path": "src/plugins/data/common/search/search_source/create_search_source.ts",
             "deprecated": false,
@@ -13382,7 +13390,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".FILTER>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ geo_bounding_box?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
+              ".FILTER>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ geo_bounding_box?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -13478,7 +13486,7 @@
                 "section": "def-common.Query",
                 "text": "Query"
               },
-              "> | undefined; }, never>, \"enabled\" | \"id\" | \"filter\" | \"schema\" | \"geo_bounding_box\" | \"json\" | \"customLabel\" | \"timeShift\">, ",
+              "> | undefined; }, never>, \"id\" | \"filter\" | \"enabled\" | \"schema\" | \"geo_bounding_box\" | \"json\" | \"customLabel\" | \"timeShift\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -13534,7 +13542,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".FILTERS>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ filters?: ",
+              ".FILTERS>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ filters?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13566,7 +13574,7 @@
                 "section": "def-common.QueryFilter",
                 "text": "QueryFilter"
               },
-              ">[] | undefined; }, never>, \"enabled\" | \"id\" | \"filters\" | \"schema\" | \"json\" | \"timeShift\">, ",
+              ">[] | undefined; }, never>, \"id\" | \"filters\" | \"enabled\" | \"schema\" | \"json\" | \"timeShift\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -13678,7 +13686,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".IP_RANGE>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\"> & Pick<{ ranges?: (",
+              ".IP_RANGE>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\"> & Pick<{ ranges?: (",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13742,7 +13750,7 @@
                 "section": "def-common.IpRange",
                 "text": "IpRange"
               },
-              ">)[] | undefined; ipRangeType?: string | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"ipRangeType\" | \"ranges\">, ",
+              ">)[] | undefined; ipRangeType?: string | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"ipRangeType\" | \"ranges\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -13798,7 +13806,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".DATE_RANGE>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"time_zone\"> & Pick<{ ranges?: ",
+              ".DATE_RANGE>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"time_zone\"> & Pick<{ ranges?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13830,7 +13838,7 @@
                 "section": "def-common.DateRange",
                 "text": "DateRange"
               },
-              ">[] | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"ranges\" | \"time_zone\">, ",
+              ">[] | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"ranges\" | \"time_zone\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -13886,7 +13894,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".RANGE>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\"> & Pick<{ ranges?: ",
+              ".RANGE>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\"> & Pick<{ ranges?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13918,7 +13926,7 @@
                 "section": "def-common.NumericalRange",
                 "text": "NumericalRange"
               },
-              ">[] | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"ranges\">, ",
+              ">[] | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"ranges\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14030,7 +14038,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".GEOHASH_GRID>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\"> & Pick<{ boundingBox?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
+              ".GEOHASH_GRID>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\"> & Pick<{ boundingBox?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -14094,7 +14102,7 @@
                 "section": "def-common.GeoPoint",
                 "text": "GeoPoint"
               },
-              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\" | \"boundingBox\">, ",
+              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\" | \"boundingBox\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14150,7 +14158,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".HISTOGRAM>, \"enabled\" | \"interval\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\"> & Pick<{ extended_bounds?: ",
+              ".HISTOGRAM>, \"interval\" | \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\"> & Pick<{ extended_bounds?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -14182,7 +14190,7 @@
                 "section": "def-common.ExtendedBounds",
                 "text": "ExtendedBounds"
               },
-              "> | undefined; }, never>, \"enabled\" | \"interval\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\" | \"extended_bounds\">, ",
+              "> | undefined; }, never>, \"interval\" | \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\" | \"extended_bounds\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14238,7 +14246,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".DATE_HISTOGRAM>, \"enabled\" | \"interval\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\"> & Pick<{ timeRange?: ",
+              ".DATE_HISTOGRAM>, \"interval\" | \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\"> & Pick<{ timeRange?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -14302,7 +14310,7 @@
                 "section": "def-common.ExtendedBounds",
                 "text": "ExtendedBounds"
               },
-              "> | undefined; }, never>, \"enabled\" | \"interval\" | \"id\" | \"timeRange\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"extended_bounds\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\">, ",
+              "> | undefined; }, never>, \"interval\" | \"id\" | \"timeRange\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"extended_bounds\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14358,11 +14366,11 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".TERMS>, \"enabled\" | \"id\" | \"size\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"orderBy\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\"> & Pick<{ orderAgg?: ",
+              ".TERMS>, \"id\" | \"size\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"orderBy\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\"> & Pick<{ orderAgg?: ",
               "AggExpressionType",
               " | undefined; }, \"orderAgg\"> & Pick<{ orderAgg?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"size\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"orderBy\" | \"orderAgg\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\">, ",
+              " | undefined; }, never>, \"id\" | \"size\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"orderBy\" | \"orderAgg\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14474,7 +14482,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".AVG_BUCKET>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".AVG_BUCKET>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -14482,7 +14490,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14538,7 +14546,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".MAX_BUCKET>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".MAX_BUCKET>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -14546,7 +14554,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14602,7 +14610,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".MIN_BUCKET>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".MIN_BUCKET>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -14610,7 +14618,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14666,7 +14674,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".SUM_BUCKET>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".SUM_BUCKET>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -14674,7 +14682,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14730,7 +14738,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".FILTERED_METRIC>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".FILTERED_METRIC>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -14738,7 +14746,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14906,11 +14914,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".CUMULATIVE_SUM>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
+              ".CUMULATIVE_SUM>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
+              " | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14966,11 +14974,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".DERIVATIVE>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
+              ".DERIVATIVE>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
+              " | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -15362,11 +15370,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".MOVING_FN>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\"> & Pick<{ customMetric?: ",
+              ".MOVING_FN>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\">, ",
+              " | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -15534,11 +15542,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".SERIAL_DIFF>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
+              ".SERIAL_DIFF>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
+              " | undefined; }, never>, \"id\" | \"enabled\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -18302,7 +18310,7 @@
             "label": "valueType",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false
@@ -18397,13 +18405,21 @@
             "signature": [
               "((agg: TAggConfig) => ",
               {
-                "pluginId": "expressions",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<Record<string, any>>) | undefined"
+              "<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              ">) | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false,
@@ -22456,7 +22472,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; enabled?: boolean | undefined; id?: string | undefined; schema?: string | undefined; params?: {} | ",
+          "; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; params?: {} | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "server",
@@ -22945,7 +22961,7 @@
             "section": "def-server.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
+          " | undefined; schema?: string | undefined; }, \"id\" | \"enabled\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -22961,7 +22977,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; }, never>, \"type\" | \"enabled\" | \"id\" | \"schema\" | \"params\">[] | undefined) => ",
+          "; }, never>, \"type\" | \"id\" | \"enabled\" | \"schema\" | \"params\">[] | undefined) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -23132,7 +23148,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; enabled?: boolean | undefined; id?: string | undefined; schema?: string | undefined; params?: {} | ",
+          "; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; params?: {} | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "server",
@@ -25452,7 +25468,7 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; history: Record<string, any>[]; setPreferredSearchStrategyId: (searchStrategyId: string) => void; setField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
+          "; history: Record<string, any>[]; setPreferredSearchStrategyId: (searchStrategyId: string) => void; setField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -25468,7 +25484,7 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; removeField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+          "; removeField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -25500,7 +25516,7 @@
             "section": "def-common.SearchSourceFields",
             "text": "SearchSourceFields"
           },
-          "; getField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
+          "; getField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -25508,7 +25524,7 @@
             "section": "def-common.SearchSourceFields",
             "text": "SearchSourceFields"
           },
-          "[K]; getOwnField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+          "[K]; getOwnField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
           {
             "pluginId": "data",
             "scope": "common",
