@@ -23,7 +23,7 @@ import {
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { satisfies } from 'semver';
+import satisfies from 'semver/functions/satisfies';
 
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { Form, getUseField, Field, useFormData } from '../../shared_imports';

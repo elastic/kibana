@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { satisfies } from 'semver';
+import satisfies from 'semver/functions/satisfies';
 
 import {
   OsqueryManagerPackagePolicyInputStream,
