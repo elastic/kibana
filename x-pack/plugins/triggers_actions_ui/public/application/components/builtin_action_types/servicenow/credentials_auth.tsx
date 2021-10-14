@@ -21,6 +21,8 @@ interface Props {
   editActionSecrets: ActionConnectorFieldsProps<ServiceNowActionConnector>['editActionSecrets'];
 }
 
+const NUMBER_OF_FIELDS = 2;
+
 const CredentialsAuthComponent: React.FC<Props> = ({
   action,
   errors,
@@ -50,7 +52,7 @@ const CredentialsAuthComponent: React.FC<Props> = ({
       <EuiFormRow fullWidth>
         {getEncryptedFieldNotifyLabel(
           !action.id,
-          2,
+          NUMBER_OF_FIELDS,
           action.isMissingSecrets ?? false,
           i18n.REENTER_VALUES_LABEL
         )}

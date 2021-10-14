@@ -25,7 +25,7 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
 import { ServiceNowSIRActionParams, Fields, Choice, ServiceNowActionConnector } from './types';
-import { choicesToEuiOptions, isLegacyConnector } from './helpers';
+import { choicesToEuiOptions, isLegacyConnector, DEFAULT_CORRELATION_ID } from './helpers';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -43,7 +43,9 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
-  const isOldConnector = isLegacyConnector(actionConnector as unknown as ServiceNowActionConnector);
+  const isDeprecatedConnector = isLegacyConnector(
+    actionConnector as unknown as ServiceNowActionConnector
+  );
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
@@ -121,7 +123,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: { correlation_id: '{{rule.id}}:{{alert.id}}' },
+          incident: { correlation_id: DEFAULT_CORRELATION_ID },
           comments: [],
         },
         index
@@ -138,7 +140,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: { correlation_id: '{{rule.id}}:{{alert.id}}' },
+          incident: { correlation_id: DEFAULT_CORRELATION_ID },
           comments: [],
         },
         index
@@ -227,7 +229,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!isOldConnector && (
+      {!isDeprecatedConnector && (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>
