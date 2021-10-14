@@ -78,38 +78,36 @@ export const PreviewHistogram = ({
   const chartData = useMemo((): ChartSeriesData[] => [{ key: 'hits', value: data }], [data]);
 
   return (
-    <>
-      <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
-        <EuiFlexGroup gutterSize="none" direction="column">
-          <EuiFlexItem grow={1}>
-            <HeaderSection
-              id={ID}
-              title={i18n.QUERY_GRAPH_HITS_TITLE}
-              titleSize="xs"
-              subtitle={subtitle}
+    <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
+      <EuiFlexGroup gutterSize="none" direction="column">
+        <EuiFlexItem grow={1}>
+          <HeaderSection
+            id={ID}
+            title={i18n.QUERY_GRAPH_HITS_TITLE}
+            titleSize="xs"
+            subtitle={subtitle}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          {isLoading ? (
+            <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
+          ) : (
+            <BarChart
+              configs={barConfig}
+              barChart={chartData}
+              data-test-subj="preview-histogram-bar-chart"
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            {isLoading ? (
-              <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
-            ) : (
-              <BarChart
-                configs={barConfig}
-                barChart={chartData}
-                data-test-subj="preview-histogram-bar-chart"
-              />
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <>
-              <EuiSpacer />
-              <EuiText size="s" color="subdued">
-                <p>{i18n.QUERY_PREVIEW_DISCLAIMER}</p>
-              </EuiText>
-            </>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Panel>
-    </>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <>
+            <EuiSpacer />
+            <EuiText size="s" color="subdued">
+              <p>{i18n.QUERY_PREVIEW_DISCLAIMER}</p>
+            </EuiText>
+          </>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Panel>
   );
 };

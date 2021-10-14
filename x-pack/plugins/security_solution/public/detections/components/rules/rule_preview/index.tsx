@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import { Unit } from '@elastic/datemath';
 import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
@@ -15,8 +15,6 @@ import {
   EuiSelect,
   EuiFormRow,
   EuiButton,
-  EuiCallOut,
-  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 import { FieldValueQueryBar } from '../query_bar';
@@ -24,8 +22,9 @@ import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';
 import { PreviewHistogram } from './preview_histogram';
 import { getTimeframeOptions } from './helpers';
+import { CalloutGroup } from './callout_group';
 
-interface RulePreviewProps {
+export interface RulePreviewProps {
   index: string[];
   isDisabled: boolean;
   query: FieldValueQueryBar;
@@ -42,28 +41,6 @@ const Select = styled(EuiSelect)`
 const PreviewButton = styled(EuiButton)`
   margin-left: 0;
 `;
-
-const CalloutGroup: React.FC<{ items: string[]; isError?: boolean }> = ({ items, isError }) =>
-  items.length > 0 ? (
-    <>
-      {items.map((item, i) => (
-        <Fragment key={`${item}-${i}`}>
-          <EuiSpacer size="s" />
-          <EuiCallOut
-            color={isError ? 'danger' : 'warning'}
-            iconType="help"
-            data-test-subj={isError ? 'preview-error' : 'preview-warning'}
-          >
-            <EuiText>
-              <p>{item}</p>
-            </EuiText>
-          </EuiCallOut>
-        </Fragment>
-      ))}
-    </>
-  ) : (
-    <></>
-  );
 
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   index,
