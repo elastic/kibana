@@ -6,24 +6,24 @@
  */
 
 import expect from '@kbn/expect';
-import { format } from 'url';
-import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('legacySupertestAsApmReadUser');
-  const archiveName = 'apm_8.0.0';
-  const range = archives_metadata[archiveName];
+  const apmApiClient = getService('apmApiClient');
 
-  const url = format({
-    pathname: `/internal/apm/latency/overall_distribution`,
-    query: {
-      start: range.start,
-      end: range.end,
-      environment: 'ENVIRONMENT_ALL',
-      kuery: '',
-      percentileThreshold: '95',
+  const endpoint = 'GET /internal/apm/latency/overall_distribution';
+
+  // This matches the parameters used for the other tab's search strategy approach in `../correlations/*`.
+  const getOptions = () => ({
+    params: {
+      query: {
+        environment: 'ENVIRONMENT_ALL',
+        start: '2020',
+        end: '2021',
+        kuery: '',
+        percentileThreshold: '95',
+      },
     },
   });
 
@@ -32,31 +32,33 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'trial', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(url);
+        const response = await apmApiClient.readUser({
+          endpoint,
+          ...getOptions(),
+        });
 
         expect(response.status).to.be(200);
-        expect(response.body.response).to.be(undefined);
+        expect(response.body?.percentileThresholdValue).to.be(undefined);
+        expect(response.body?.overallHistogram?.length).to.be(undefined);
       });
     }
   );
 
   registry.when(
     'latency overall distribution with data and default args',
-    { config: 'trial', archives: ['apm_8.0.0'] },
+    // This uses the same archvie used for the other tab's search strategy approach in `../correlations/*`.
+    { config: 'trial', archives: ['8.0.0'] },
     () => {
-      let response: any;
-      before(async () => {
-        response = await supertest.get(url);
-      });
+      it('returns percentileThresholdValue and overall histogram', async () => {
+        const response = await apmApiClient.readUser({
+          endpoint,
+          ...getOptions(),
+        });
 
-      it('returns successfully', () => {
         expect(response.status).to.eql(200);
-      });
-
-      it('returns overall distribution', () => {
         // This matches the values returned for the other tab's search strategy approach in `../correlations/*`.
         expect(response.body?.percentileThresholdValue).to.be(1309695.875);
-        expect(response.body?.overallHistogram.length).to.be(101);
+        expect(response.body?.overallHistogram?.length).to.be(101);
       });
     }
   );
