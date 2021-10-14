@@ -11,6 +11,7 @@ import { ReactWrapper, shallow } from 'enzyme';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { flattenHit } from 'src/plugins/data/common';
 
 jest.mock('../../../../../kibana_react/public', () => ({
   useUiSetting: () => true,
@@ -68,12 +69,16 @@ const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
   },
 ];
 
+const flatten = (hit: ElasticSearchHit): Record<string, unknown> => {
+  return flattenHit(hit, indexPatternMock);
+};
+
 describe('Discover grid cell rendering', function () {
   it('renders bytes column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsSource,
-      rowsSource.map((row) => indexPatternMock.flattenHit(row)),
+      rowsSource.map(flatten),
       false,
       [],
       100
@@ -95,7 +100,7 @@ describe('Discover grid cell rendering', function () {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsSource,
-      rowsSource.map((row) => indexPatternMock.flattenHit(row)),
+      rowsSource.map(flatten),
       false,
       [],
       100
@@ -146,7 +151,7 @@ describe('Discover grid cell rendering', function () {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsSource,
-      rowsSource.map((row) => indexPatternMock.flattenHit(row)),
+      rowsSource.map(flatten),
       false,
       [],
       100
@@ -189,7 +194,7 @@ describe('Discover grid cell rendering', function () {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsFields,
-      rowsFields.map((row) => indexPatternMock.flattenHit(row)),
+      rowsFields.map(flatten),
       true,
       [],
       100
@@ -244,7 +249,7 @@ describe('Discover grid cell rendering', function () {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsFields,
-      rowsFields.map((row) => indexPatternMock.flattenHit(row)),
+      rowsFields.map(flatten),
       true,
       [],
       // this is the number of rendered items
@@ -287,7 +292,7 @@ describe('Discover grid cell rendering', function () {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsFields,
-      rowsFields.map((row) => indexPatternMock.flattenHit(row)),
+      rowsFields.map(flatten),
       true,
       [],
       100
@@ -335,7 +340,7 @@ describe('Discover grid cell rendering', function () {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
-      rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
+      rowsFieldsWithTopLevelObject.map(flatten),
       true,
       [],
       100
@@ -376,7 +381,7 @@ describe('Discover grid cell rendering', function () {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
-      rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
+      rowsFieldsWithTopLevelObject.map(flatten),
       true,
       [],
       100
@@ -416,7 +421,7 @@ describe('Discover grid cell rendering', function () {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
-      rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
+      rowsFieldsWithTopLevelObject.map(flatten),
       true,
       [],
       100
@@ -447,7 +452,7 @@ describe('Discover grid cell rendering', function () {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
-      rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
+      rowsFieldsWithTopLevelObject.map(flatten),
       true,
       [],
       100
@@ -466,7 +471,9 @@ describe('Discover grid cell rendering', function () {
       <span
         dangerouslySetInnerHTML={
           Object {
-            "__html": 100,
+            "__html": Array [
+              100,
+            ],
           }
         }
       />
@@ -477,7 +484,7 @@ describe('Discover grid cell rendering', function () {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsSource,
-      rowsSource.map((row) => indexPatternMock.flattenHit(row)),
+      rowsSource.map(flatten),
       false,
       [],
       100
@@ -499,7 +506,7 @@ describe('Discover grid cell rendering', function () {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsSource,
-      rowsSource.map((row) => indexPatternMock.flattenHit(row)),
+      rowsSource.map(flatten),
       false,
       [],
       100
