@@ -30,20 +30,22 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
 
     beforeEach(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
+    });
 
+    it('shows coming soon prompt', async () => {
       await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
-        return testSubjects.exists('overview');
+        return testSubjects.exists('comingSoonPrompt');
       });
     });
 
-    it('Should render all steps', async () => {
+    it.skip('Should render all steps', async () => {
       testSubjects.exists('backupStep-incomplete');
       testSubjects.exists('fixIssuesStep-incomplete');
       testSubjects.exists('fixLogsStep-incomplete');
       testSubjects.exists('upgradeStep');
     });
 
-    describe('fixLogsStep', () => {
+    describe.skip('fixLogsStep', () => {
       before(async () => {
         // Access to system indices will be deprecated and should generate a deprecation log
         await es.indices.get({ index: '.kibana' });
