@@ -71,7 +71,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       dirty: false,
       model: {
         isNew: !this.props.vis.id,
-        ...this.props.vis.params, 
+        ...this.props.vis.params,
       },
       extractedIndexPatterns: [''],
     };
