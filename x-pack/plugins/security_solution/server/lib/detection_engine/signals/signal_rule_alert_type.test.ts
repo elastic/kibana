@@ -90,9 +90,9 @@ const getPayload = (
     ruleTypeName: 'Name of rule',
     enabled: true,
     schedule: {
-      interval: '1h',
+      interval: '5m',
     },
-    actions: [],
+    actions: ruleAlert.actions,
     createdBy: 'elastic',
     updatedBy: 'elastic',
     createdAt: new Date('2019-12-13T16:50:33.400Z'),
@@ -214,7 +214,7 @@ describe('signal_rule_alert_type', () => {
     });
 
     it('should warn about the gap between runs if gap is very large', async () => {
-      payload.previousStartedAt = moment().subtract(100, 'm').toDate();
+      payload.previousStartedAt = moment(payload.startedAt).subtract(100, 'm').toDate();
       await alert.executor(payload);
       expect(logger.warn).toHaveBeenCalled();
       expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
@@ -347,20 +347,16 @@ describe('signal_rule_alert_type', () => {
         },
       ];
 
-      alertServices.savedObjectsClient.get.mockResolvedValue({
-        id: 'rule-id',
-        type: 'type',
-        references: [],
-        attributes: ruleAlert,
-      });
-      payload.params.meta = {};
+      const modifiedPayload = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
 
-      await alert.executor(payload);
+      await alert.executor(modifiedPayload);
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          resultsLink:
-            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+          resultsLink: `/app/security/detections/rules/id/${ruleAlert.id}?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))`,
         })
       );
     });
@@ -380,20 +376,16 @@ describe('signal_rule_alert_type', () => {
         },
       ];
 
-      alertServices.savedObjectsClient.get.mockResolvedValue({
-        id: 'rule-id',
-        type: 'type',
-        references: [],
-        attributes: ruleAlert,
-      });
-      delete payload.params.meta;
+      const modifiedPayload = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
 
-      await alert.executor(payload);
+      await alert.executor(modifiedPayload);
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          resultsLink:
-            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+          resultsLink: `/app/security/detections/rules/id/${ruleAlert.id}?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))`,
         })
       );
     });
@@ -413,20 +405,16 @@ describe('signal_rule_alert_type', () => {
         },
       ];
 
-      alertServices.savedObjectsClient.get.mockResolvedValue({
-        id: 'rule-id',
-        type: 'type',
-        references: [],
-        attributes: ruleAlert,
-      });
-      payload.params.meta = { kibana_siem_app_url: 'http://localhost' };
+      const modifiedPayload = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
 
-      await alert.executor(payload);
+      await alert.executor(modifiedPayload);
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          resultsLink:
-            'http://localhost/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+          resultsLink: `http://localhost/detections/rules/id/${ruleAlert.id}?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))`,
         })
       );
     });
