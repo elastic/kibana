@@ -7,3 +7,4 @@
  */
 
 export { extractCodeMessages } from './code';
+export { extractHtmlMessages } from './html';

@@ -8,7 +8,7 @@
 
 import path from 'path';
 
-import { extractCodeMessages } from './extractors';
+import { extractHtmlMessages, extractCodeMessages } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
 import { createFailError, isFailError } from '@kbn/dev-utils';
@@ -67,17 +67,25 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     absolute,
   });
 
-  const { codeEntries } = entries.reduce(
+  const { htmlEntries, codeEntries } = entries.reduce(
     (paths, entry) => {
       const resolvedPath = path.resolve(inputPath, entry);
-      paths.codeEntries.push(resolvedPath);
+
+      if (resolvedPath.endsWith('.html')) {
+        paths.htmlEntries.push(resolvedPath);
+      } else {
+        paths.codeEntries.push(resolvedPath);
+      }
 
       return paths;
     },
-    { codeEntries: [] }
+    { htmlEntries: [], codeEntries: [] }
   );
 
-  return [[codeEntries, extractCodeMessages]];
+  return [
+    [htmlEntries, extractHtmlMessages],
+    [codeEntries, extractCodeMessages],
+  ];
 }
 
 export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
