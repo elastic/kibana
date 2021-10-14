@@ -2569,7 +2569,6 @@
     "discover.sourceViewer.errorMessage": "現在データを取得できませんでした。タブを更新して、再試行してください。",
     "discover.sourceViewer.errorMessageTitle": "エラーが発生しました",
     "discover.sourceViewer.refresh": "更新",
-    "discover.timeLabel": "時間",
     "discover.toggleSidebarAriaLabel": "サイドバーを切り替える",
     "discover.topNav.openOptionsPopover.description": "お知らせDiscoverでは、データの並べ替え、列のドラッグアンドドロップ、ドキュメントの比較を行う方法が改善されました。詳細設定で［クラシックテーブルを使用］を切り替えて、開始します。",
     "discover.topNav.openSearchPanel.manageSearchesButtonLabel": "検索の管理",

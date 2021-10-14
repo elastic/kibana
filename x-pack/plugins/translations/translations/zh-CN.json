@@ -2596,7 +2596,6 @@
     "discover.sourceViewer.errorMessage": "当前无法获取数据。请刷新选项卡以重试。",
     "discover.sourceViewer.errorMessageTitle": "发生错误",
     "discover.sourceViewer.refresh": "刷新",
-    "discover.timeLabel": "时间",
     "discover.toggleSidebarAriaLabel": "切换侧边栏",
     "discover.topNav.openOptionsPopover.description": "好消息！Discover 有更好的方法排序数据、拖放列和比较文档。在“高级模式”中切换“使用经典表”来开始。",
     "discover.topNav.openSearchPanel.manageSearchesButtonLabel": "管理搜索",
