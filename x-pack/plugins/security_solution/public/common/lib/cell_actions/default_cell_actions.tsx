@@ -69,6 +69,7 @@ const cellActionLink = [
           const eventId = header && get('_id' ?? '', ecs);
 
           if (pageRowIndex >= data.length) {
+            // data grid expects each cell action always return an element, it crashes if returns null
             return <></>;
           }
 

@@ -15,7 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isString, isEmpty } from 'lodash/fp';
-import React, { SyntheticEvent, useCallback } from 'react';
+import React, { SyntheticEvent, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -81,25 +81,29 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     [navigateToApp, ruleId, search]
   );
 
+  const href = useMemo(
+    () =>
+      getUrlForApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
+        path: getRuleDetailsUrl(ruleId ?? '', search),
+      }),
+    [getUrlForApp, ruleId, search]
+  );
+  const id = `event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`;
+
   if (isString(value) && ruleName.length > 0 && ruleId != null) {
     const link = Component ? (
       <Component
-        onClick={goToRuleDetails}
-        iconType="link"
         aria-label={title}
-        title={title}
         data-test-subj={`view-${fieldName}`}
+        iconType="link"
+        onClick={goToRuleDetails}
+        title={title}
       >
         {title ?? value}
       </Component>
     ) : (
-      <LinkAnchor
-        onClick={goToRuleDetails}
-        href={getUrlForApp(APP_ID, {
-          deepLinkId: SecurityPageName.rules,
-          path: getRuleDetailsUrl(ruleId, search),
-        })}
-      >
+      <LinkAnchor onClick={goToRuleDetails} href={href}>
         {content}
       </LinkAnchor>
     );
@@ -107,7 +111,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
+        id={id}
         isDraggable={isDraggable}
         tooltipContent={value}
         value={value}
@@ -121,7 +125,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
+        id={id}
         isDraggable={isDraggable}
         tooltipContent={value}
         value={`${value}`}
@@ -267,7 +271,13 @@ export const renderUrl = ({
 
   const formattedValue = truncate ? <TruncatableText>{value}</TruncatableText> : value;
   const content = isUrlValid ? (
-    <GenericLink href={urlName} dataTestSubj="ata-grid-url" title={title} iconType="link" />
+    <GenericLink
+      Component={Component}
+      href={urlName}
+      dataTestSubj="ata-grid-url"
+      title={title}
+      iconType="link"
+    />
   ) : (
     <>{formattedValue}</>
   );
