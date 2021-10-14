@@ -99,34 +99,6 @@ export const TITLE_REQUIRED = i18n.translate(
   }
 );
 
-export const SOURCE_IP_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.sourceIPTitle',
-  {
-    defaultMessage: 'Source IPs',
-  }
-);
-
-export const SOURCE_IP_HELP_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.sourceIPHelpText',
-  {
-    defaultMessage: 'List of source IPs (comma, or pipe delimited)',
-  }
-);
-
-export const DEST_IP_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.destinationIPTitle',
-  {
-    defaultMessage: 'Destination IPs',
-  }
-);
-
-export const DEST_IP_HELP_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.destIPHelpText',
-  {
-    defaultMessage: 'List of destination IPs (comma, or pipe delimited)',
-  }
-);
-
 export const INCIDENT = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.title',
   {
@@ -152,34 +124,6 @@ export const COMMENTS_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.commentsTextAreaFieldLabel',
   {
     defaultMessage: 'Additional comments',
-  }
-);
-
-export const MALWARE_URL_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareURLTitle',
-  {
-    defaultMessage: 'Malware URLs',
-  }
-);
-
-export const MALWARE_URL_HELP_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareURLHelpText',
-  {
-    defaultMessage: 'List of malware URLs (comma, or pipe delimited)',
-  }
-);
-
-export const MALWARE_HASH_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareHashTitle',
-  {
-    defaultMessage: 'Malware Hashes',
-  }
-);
-
-export const MALWARE_HASH_HELP_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareHashHelpText',
-  {
-    defaultMessage: 'List of malware hashes (comma, or pipe delimited)',
   }
 );
 
@@ -296,27 +240,6 @@ export const UNKNOWN = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.unknown',
   {
     defaultMessage: 'UNKNOWN',
-  }
-);
-
-export const UPDATE_INCIDENT_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateIncidentCheckboxLabel',
-  {
-    defaultMessage: 'Update incident when alert instance is updated',
-  }
-);
-
-export const ON = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateIncidentOn',
-  {
-    defaultMessage: 'On',
-  }
-);
-
-export const OFF = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateIncidentOff',
-  {
-    defaultMessage: 'Off',
   }
 );
 
