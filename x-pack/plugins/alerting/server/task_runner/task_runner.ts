@@ -521,6 +521,7 @@ export class TaskRunner<
     const scheduleDelay = runDate.getTime() - this.taskInstance.runAt.getTime();
 
     const event = createAlertEventLogRecordObject({
+      runDateString,
       ruleId: alertId,
       ruleType: this.alertType as UntypedNormalizedAlertType,
       action: EVENT_LOG_ACTIONS.execute,
@@ -534,6 +535,7 @@ export class TaskRunner<
           id: alertId,
           type: 'alert',
           typeId: this.alertType.id,
+          relation: SAVED_OBJECT_REL_PRIMARY,
         },
       ],
     });

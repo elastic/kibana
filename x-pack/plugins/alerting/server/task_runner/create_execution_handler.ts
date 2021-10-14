@@ -215,6 +215,7 @@ export function createExecutionHandler<
             type: 'alert',
             id: alertId,
             typeId: alertType.id,
+            relation: SAVED_OBJECT_REL_PRIMARY
           },
           {
             type: 'action',

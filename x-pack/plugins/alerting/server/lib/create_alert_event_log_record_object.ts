@@ -31,15 +31,26 @@ interface CreateAlertEventLogRecordParams {
     type: string;
     id: string;
     typeId: string;
+    relation?: string;
   }>;
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
   const { ruleType, action, state, message, task, ruleId, group, subgroup, namespace } = params;
+  const alerting =
+    params.instanceId || group || subgroup
+      ? {
+          alerting: {
+            ...(params.instanceId ? { instance_id: params.instanceId } : {}),
+            ...(group ? { action_group_id: group } : {}),
+            ...(subgroup ? { action_subgroup: subgroup } : {}),
+          },
+        }
+      : undefined;
   const event: Event = {
     // explicitly set execute timestamp so it will be before other events
     // generated here (new-instance, schedule-action, etc)
-    '@timestamp': params.runDateString,
+    ...(params.runDateString ? { '@timestamp': params.runDateString } : {}),
     event: {
       action,
       kind: 'alert',
@@ -49,13 +60,9 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
     },
     kibana: {
-      alerting: {
-        instance_id: params.instanceId,
-        ...(group ? { action_group_id: group } : {}),
-        ...(subgroup ? { action_subgroup: subgroup } : {}),
-      },
+      ...(alerting ? alerting : {}),
       saved_objects: params.savedObjects.map((so) => ({
-        rel: SAVED_OBJECT_REL_PRIMARY,
+        ...(so.relation ? { rel: so.relation } : {}),
         type: so.type,
         id: so.id,
         type_id: so.typeId,
@@ -69,7 +76,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       license: ruleType.minimumLicenseRequired,
       category: ruleType.id,
       ruleset: ruleType.producer,
-      name: params.ruleName,
+      ...(params.ruleName ? { name: params.ruleName } : {}),
     },
   };
   return event;

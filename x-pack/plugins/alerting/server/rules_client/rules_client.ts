@@ -61,7 +61,7 @@ import {
   AlertingAuthorizationFilterType,
   AlertingAuthorizationFilterOpts,
 } from '../authorization';
-import { IEvent, IEventLogClient, IEventLogger } from '../../../event_log/server';
+import { IEvent, IEventLogClient, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
 import { AuditLogger } from '../../../security/server';
@@ -1239,6 +1239,7 @@ export class RulesClient {
             id,
             type: 'alert',
             typeId: attributes.alertTypeId,
+            relation: SAVED_OBJECT_REL_PRIMARY
           },
         ],
       });
