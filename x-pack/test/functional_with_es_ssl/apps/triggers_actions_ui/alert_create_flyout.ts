@@ -272,6 +272,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
+
+      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.existOrFail('confirmAlertCloseModal');
+      await testSubjects.click('confirmAlertCloseModal > confirmModalConfirmButton');
     });
 
     it('should show error when es_query is invalid', async () => {
