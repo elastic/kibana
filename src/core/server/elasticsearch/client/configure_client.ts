@@ -8,7 +8,7 @@
 
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { Client, errors, Transport, events, HttpConnection } from '@elastic/elasticsearch';
+import { Client, errors, Transport, HttpConnection } from '@elastic/elasticsearch';
 import type {
   TransportRequestParams,
   TransportRequestOptions,
@@ -133,7 +133,7 @@ export function getRequestDebugMeta(event: DiagnosticResult): {
 }
 
 const addLogging = (client: Client, logger: Logger) => {
-  client.diagnostic.on(events.RESPONSE, (error, event) => {
+  client.diagnostic.on('response', (error, event) => {
     if (event) {
       const opaqueId = event.meta.request.options.opaqueId;
       const meta = opaqueId
