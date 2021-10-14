@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
-import { DEFAULT_COLUMNS_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../../../../common';
 import { SavedSearch } from '../../../../saved_searches';
 import { DataPublicPluginStart } from '../../../../../../data/public';
 
@@ -20,6 +24,9 @@ import { Storage } from '../../../../../../kibana_utils/public';
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
     return [...savedSearch.columns];
+  }
+  if (config.get(SEARCH_FIELDS_FROM_SOURCE) && isEqual(config.get(DEFAULT_COLUMNS_SETTING), [])) {
+    return ['_source'];
   }
   return [...config.get(DEFAULT_COLUMNS_SETTING)];
 }
@@ -35,10 +42,11 @@ export function getStateDefaults({
   savedSearch: SavedSearch;
   storage: Storage;
 }) {
-  const searchSource = savedSearch.searchSource;
-  const indexPattern = savedSearch.searchSource.getField('index');
+  const { searchSource } = savedSearch;
+  const indexPattern = searchSource.getField('index');
+
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-  const sort = getSortArray(savedSearch.sort, indexPattern!);
+  const sort = getSortArray(savedSearch.sort ?? [], indexPattern!);
   const columns = getDefaultColumns(savedSearch, config);
   const chartHidden = Boolean(storage.get(CHART_HIDDEN_KEY));
 
@@ -48,7 +56,7 @@ export function getStateDefaults({
       ? getDefaultSort(indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
       : sort,
     columns,
-    index: indexPattern!.id,
+    index: indexPattern?.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')),
     hideChart: chartHidden ? chartHidden : undefined,
