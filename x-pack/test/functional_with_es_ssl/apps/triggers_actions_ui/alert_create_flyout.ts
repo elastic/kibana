@@ -155,9 +155,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterSave).to.eql([
         {
-          name: alertName,
+          name: `${alertName}Index threshold`,
           tags: '',
-          alertType: 'Index threshold',
           interval: '1 min',
           duration: '00:00:00.000',
         },
