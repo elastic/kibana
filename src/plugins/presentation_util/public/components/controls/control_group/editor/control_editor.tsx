@@ -46,7 +46,7 @@ interface ManageControlProps {
   updateWidth: (newWidth: ControlWidth) => void;
 }
 
-export const ManageControlComponent = ({
+export const ControlEditor = ({
   controlEditorComponent,
   removeControl,
   updateTitle,
