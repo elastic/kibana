@@ -173,7 +173,7 @@ interface Metric {
   color?: string;
 }
 
-export interface VisualizeEditorContext {
+export interface VisualizeEditorLayersContext {
   indexPatternId: string;
   timeFieldName?: string;
   chartType?: string;
@@ -183,6 +183,17 @@ export interface VisualizeEditorContext {
   splitFilters?: SplitFilters[];
   palette?: PaletteOutput;
   metrics: Metric[];
+}
+
+export interface VisualizeEditorContext {
+  layers: VisualizeEditorLayersContext[];
+  configuration: ChartSettings;
+}
+
+interface ChartSettings {
+  fill?: string;
+  legend?: Record<string, boolean | string>;
+  gridLinesVisibility?: Record<string, boolean>;
 }
 
 /**
@@ -197,7 +208,7 @@ export interface Datasource<T = unknown, P = unknown> {
   initialize: (
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext | VisualizeEditorContext[],
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext,
     options?: InitializationOptions
   ) => Promise<T>;
 
@@ -268,7 +279,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeCharts: (
     state: T,
-    context: VisualizeEditorContext[]
+    context: VisualizeEditorLayersContext[]
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
     state: T,
@@ -524,7 +535,7 @@ interface VisualizationDimensionChangeProps<T> {
 interface VisualizationConfigurationFromContextChangeProps<T> {
   layerId: string;
   prevState: T;
-  context: VisualizeEditorContext;
+  context: VisualizeEditorLayersContext;
 }
 
 /**

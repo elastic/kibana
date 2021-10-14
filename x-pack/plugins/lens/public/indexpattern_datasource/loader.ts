@@ -212,7 +212,7 @@ export async function loadInitialState({
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   options?: InitializationOptions;
 }): Promise<IndexPatternPrivateState> {
   const { isFullEditor } = options ?? {};
@@ -243,14 +243,15 @@ export async function loadInitialState({
   // * then fallback to the required ones
   // * then as last resort use a random one from the available list
   const indexPatternIds = [];
-  if (Array.isArray(initialContext)) {
-    for (let layerIdx = 0; layerIdx < initialContext.length; layerIdx++) {
-      const layerContext = initialContext[layerIdx];
+  if (initialContext && 'layers' in initialContext) {
+    for (let layerIdx = 0; layerIdx < initialContext.layers.length; layerIdx++) {
+      const layerContext = initialContext.layers[layerIdx];
       indexPatternIds.push(layerContext.indexPatternId);
     }
   } else if (initialContext) {
     indexPatternIds.push(initialContext.indexPatternId);
   }
+
   const availableIndexPatternIds = [
     ...indexPatternIds,
     ...requiredPatterns,

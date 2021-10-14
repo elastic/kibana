@@ -100,7 +100,7 @@ export interface LensTopNavMenuProps {
 
 export interface HistoryLocationState {
   type: typeof ACTION_VISUALIZE_LENS_FIELD | typeof ACTION_CONVERT_TO_LENS;
-  payload: VisualizeFieldContext | VisualizeEditorContext[];
+  payload: VisualizeFieldContext | VisualizeEditorContext;
 }
 
 export interface LensAppServices {

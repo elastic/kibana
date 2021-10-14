@@ -128,7 +128,7 @@ export function getIndexPatternDatasource({
     async initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
-      initialContext?: VisualizeFieldContext | VisualizeEditorContext[],
+      initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       options?: InitializationOptions
     ) {
       return loadInitialState({

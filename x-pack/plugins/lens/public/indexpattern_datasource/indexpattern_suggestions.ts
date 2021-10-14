@@ -8,7 +8,7 @@
 import { flatten, minBy, pick, mapValues, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../id_generator';
-import type { DatasourceSuggestion, TableChangeType, VisualizeEditorContext } from '../types';
+import type { DatasourceSuggestion, TableChangeType, VisualizeEditorLayersContext } from '../types';
 import { columnToOperation } from './indexpattern';
 import {
   insertNewColumn,
@@ -133,7 +133,7 @@ export function getDatasourceSuggestionsForField(
 // Called when the user navigates from TSVB to Lens
 export function getDatasourceSuggestionsForVisualizeCharts(
   state: IndexPatternPrivateState,
-  context: VisualizeEditorContext[]
+  context: VisualizeEditorLayersContext[]
 ): IndexPatternSuggestion[] {
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter(
@@ -145,7 +145,7 @@ export function getDatasourceSuggestionsForVisualizeCharts(
 
 function getEmptyLayersSuggestionsForVisualizeCharts(
   state: IndexPatternPrivateState,
-  context: VisualizeEditorContext[]
+  context: VisualizeEditorLayersContext[]
 ): IndexPatternSuggestion[] {
   const suggestions: IndexPatternSuggestion[] = [];
   for (let layerIdx = 0; layerIdx < context.length; layerIdx++) {
@@ -174,7 +174,7 @@ function getEmptyLayersSuggestionsForVisualizeCharts(
 
 function createNewLayerWithMetricAggregationFromVizEditor(
   indexPattern: IndexPattern,
-  layer: VisualizeEditorContext
+  layer: VisualizeEditorLayersContext
 ): IndexPatternLayer | undefined {
   const { timeFieldName, splitMode, splitFilters, metrics } = layer;
   const dateField = indexPattern.getFieldByName(timeFieldName!);

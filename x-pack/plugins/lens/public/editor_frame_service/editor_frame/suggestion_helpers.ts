@@ -73,7 +73,7 @@ export function getSuggestions({
   subVisualizationId?: string;
   visualizationState: unknown;
   field?: unknown;
-  visualizeTriggerFieldContext?: VisualizeFieldContext | VisualizeEditorContext[];
+  visualizeTriggerFieldContext?: VisualizeFieldContext | VisualizeEditorContext;
   activeData?: Record<string, Datatable>;
   mainPalette?: PaletteOutput;
 }): Suggestion[] {
@@ -104,10 +104,10 @@ export function getSuggestions({
     // context is used to pass the state from location to datasource
     if (visualizeTriggerFieldContext) {
       // used for navigating from VizEditor to Lens
-      if (Array.isArray(visualizeTriggerFieldContext)) {
+      if ('layers' in visualizeTriggerFieldContext) {
         dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeCharts(
           datasourceState,
-          visualizeTriggerFieldContext
+          visualizeTriggerFieldContext.layers
         );
       } else {
         // used for navigating from Discover to Lens
@@ -190,7 +190,7 @@ export function getVisualizeFieldSuggestions({
   datasourceStates: DatasourceStates;
   visualizationMap: VisualizationMap;
   subVisualizationId?: string;
-  visualizeTriggerFieldContext?: VisualizeFieldContext | VisualizeEditorContext[];
+  visualizeTriggerFieldContext?: VisualizeFieldContext | VisualizeEditorContext;
 }): Suggestion | undefined {
   const activeVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
   const suggestions = getSuggestions({
@@ -202,10 +202,12 @@ export function getVisualizeFieldSuggestions({
     visualizeTriggerFieldContext,
   });
 
-  if (visualizeTriggerFieldContext && Array.isArray(visualizeTriggerFieldContext)) {
+  if (visualizeTriggerFieldContext && 'layers' in visualizeTriggerFieldContext) {
+    const { layers, configuration } = visualizeTriggerFieldContext;
     const allSuggestions = suggestions.filter(
       (s) => s.visualizationId === activeVisualization?.id
     ) as SuggestionMultipleLayers[];
+    const fillOpacity = configuration.fill ? Number(configuration.fill) : undefined;
 
     const visualizationStateLayers = [];
     let datasourceStateLayers = {};
@@ -217,7 +219,7 @@ export function getVisualizeFieldSuggestions({
         const updatedSuggestionState = activeVisualization.updateLayersConfigurationFromContext({
           prevState: currentSuggestion.visualizationState,
           layerId: currentSuggestionsLayers[0].layerId as string,
-          context: visualizeTriggerFieldContext[suggestionIdx],
+          context: layers[suggestionIdx],
         }) as StateWithLayers;
 
         visualizationStateLayers.push(...updatedSuggestionState.layers);
@@ -239,6 +241,9 @@ export function getVisualizeFieldSuggestions({
       },
       visualizationState: {
         ...suggestion.visualizationState,
+        fillOpacity,
+        legend: configuration.legend,
+        gridlinesVisibilitySettings: configuration.gridLinesVisibility,
         layers: visualizationStateLayers,
       },
     };

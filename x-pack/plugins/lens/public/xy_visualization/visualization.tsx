@@ -472,7 +472,6 @@ export const getXyVisualization = ({
 
   updateLayersConfigurationFromContext({ prevState, layerId, context }) {
     const { chartType, palette, metrics } = context;
-
     const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
       return prevState;

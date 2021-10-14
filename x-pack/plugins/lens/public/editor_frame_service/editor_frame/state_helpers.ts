@@ -35,7 +35,7 @@ export async function initializeDatasources(
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates,
   references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext[],
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext,
   options?: InitializationOptions
 ) {
   const states: DatasourceStates = {};

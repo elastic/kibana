@@ -64,6 +64,6 @@ export interface LensStoreDeps {
   lensServices: LensAppServices;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   embeddableEditorIncomingState?: EmbeddableEditorState;
 }

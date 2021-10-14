@@ -128,7 +128,7 @@ export const initEmpty = createAction(
     initialContext,
   }: {
     newState: Partial<LensAppState>;
-    initialContext?: VisualizeFieldContext | VisualizeEditorContext[];
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   }) {
     return { payload: { layerId: generateId(), newState, initialContext } };
   }
@@ -368,7 +368,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }: {
         payload: {
           newState: Partial<LensAppState>;
-          initialContext: VisualizeFieldContext | VisualizeEditorContext[] | undefined;
+          initialContext: VisualizeFieldContext | VisualizeEditorContext | undefined;
           layerId: string;
         };
       }

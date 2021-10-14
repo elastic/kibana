@@ -13,7 +13,7 @@ import type {
   FrameDatasourceAPI,
   OperationMetadata,
   VisualizationDimensionGroupConfig,
-  VisualizeEditorContext,
+  VisualizeEditorLayersContext,
 } from '../../types';
 import {
   operationDefinitionMap,
@@ -1505,7 +1505,7 @@ export function getManagedColumnsFrom(
 
 export function computeLayerFromContext(
   isLast: boolean,
-  metricsArray: VisualizeEditorContext['metrics'],
+  metricsArray: VisualizeEditorLayersContext['metrics'],
   indexPattern: IndexPattern
 ): IndexPatternLayer {
   if (isArray(metricsArray)) {
@@ -1560,7 +1560,7 @@ export function getSplitByTermsLayer(
   indexPattern: IndexPattern,
   splitField: IndexPatternField,
   dateField: IndexPatternField | undefined,
-  layer: VisualizeEditorContext
+  layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { termsParams, metrics } = layer;
   const copyMetricsArray = [...metrics];
@@ -1590,7 +1590,7 @@ export function getSplitByTermsLayer(
 export function getSplitByFiltersLayer(
   indexPattern: IndexPattern,
   dateField: IndexPatternField | undefined,
-  layer: VisualizeEditorContext
+  layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { splitFilters, metrics } = layer;
   const filterParams = splitFilters?.map((param) => {

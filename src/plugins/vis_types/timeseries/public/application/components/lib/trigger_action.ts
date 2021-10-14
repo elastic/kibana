@@ -36,7 +36,7 @@ interface Metric {
   color?: string;
 }
 
-interface VisualizeEditorContext {
+interface LayersSettings {
   indexPatternId: string;
   timeFieldName?: string;
   chartType?: string;
@@ -85,7 +85,7 @@ const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
 
 export const triggerVisualizeToLensActions = async (model: Panel) => {
   const { dataViews } = getDataStart();
-  const options: { [key: string]: VisualizeEditorContext } = {};
+  const options: { [key: string]: LayersSettings } = {};
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
     const layer = model.series[layerIdx];
@@ -118,7 +118,9 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
       }
     }
     const metricIdx = layer.metrics.length - 1;
-    const aggregation = layer.metrics[metricIdx].type;
+    // find the metric idx that has math expression
+    const mathMetricIdx = layer.metrics.findIndex((metric) => metric.type === 'math');
+    const aggregation = layer.metrics[mathMetricIdx > 0 ? mathMetricIdx : metricIdx].type;
     const fieldName = layer.metrics[metricIdx].field;
     // translate to Lens seriesType
     const chartType = layer.chart_type === 'line' && layer.fill !== '0' ? 'area' : layer.chart_type;
@@ -129,7 +131,7 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
     }
 
     // handle multiple metrics
-    let metricsArray: VisualizeEditorContext['metrics'] = [];
+    let metricsArray: LayersSettings['metrics'] = [];
 
     if (aggregation === 'percentile' && layer.metrics[metricIdx].percentiles) {
       layer.metrics[metricIdx].percentiles?.forEach((percentile) => {
@@ -142,17 +144,21 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
         });
       });
     } else if (aggregation === 'math') {
-      let finalScript = layer.metrics[metricIdx].script;
-      const variables = layer.metrics[metricIdx].variables;
+      let finalScript = layer.metrics[mathMetricIdx].script;
+      const variables = layer.metrics[mathMetricIdx].variables;
+      const layerMetricsArray = layer.metrics;
+      layerMetricsArray.splice(mathMetricIdx, 1);
       if (!variables) {
         return null;
       }
       // create the script
-      for (let layerMetricIdx = 0; layerMetricIdx < layer.metrics.length - 1; layerMetricIdx++) {
+      for (let layerMetricIdx = 0; layerMetricIdx < layerMetricsArray.length; layerMetricIdx++) {
         const currentMetric = layer.metrics[layerMetricIdx];
         finalScript = finalScript?.replace(
           `params.${variables[layerMetricIdx].name}`,
-          `${LENS_METRIC_TYPES[currentMetric.type].name}(${currentMetric.field})`
+          `${LENS_METRIC_TYPES[currentMetric.type].name}(${
+            currentMetric.type === 'count' ? '' : currentMetric.field
+          })`
         );
       }
       metricsArray = [
@@ -176,10 +182,15 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
       ];
     }
 
-    const triggerOptions: VisualizeEditorContext = {
+    const triggerOptions: LayersSettings = {
       indexPatternId,
       timeFieldName: timeField,
-      chartType: layer.stacked === 'none' ? chartType : `${chartType}_stacked`,
+      chartType:
+        layer.stacked === 'none'
+          ? chartType
+          : chartType !== 'line'
+          ? `${chartType}_stacked`
+          : 'line',
       splitField: layer.terms_field ?? undefined,
       splitMode: layer.split_mode !== 'everything' ? layer.split_mode : undefined,
       splitFilters: layer.split_filters ?? undefined,
@@ -191,5 +202,21 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
     };
     options[layerIdx] = triggerOptions;
   }
-  return options;
+  return {
+    layers: options,
+    configuration: {
+      fill: model.series[0].fill ?? 0.3,
+      legend: {
+        isVisible: Boolean(model.show_legend) ?? true,
+        position: model.legend_position ?? 'right',
+        shouldTruncate: Boolean(model.truncate_legend) ?? false,
+        maxLines: model.max_lines_legend ?? 1,
+      },
+      gridLinesVisibility: {
+        x: Boolean(model.show_grid) ?? true,
+        yLeft: Boolean(model.show_grid) ?? true,
+        yRight: Boolean(model.show_grid) ?? true,
+      },
+    },
+  };
 };

@@ -20,14 +20,14 @@ export const visualizeTSVBAction = (application: ApplicationStart) =>
       }),
     isCompatible: async () => !!application.capabilities.visualize.show,
     execute: async (context: { [key: string]: VisualizeEditorContext }) => {
-      const table: VisualizeEditorContext[] = [];
-      for (const [key, value] of Object.entries(context)) {
-        if (key !== 'trigger') {
-          table.push(value);
-        }
-      }
+      delete context.trigger;
+      const table = Object.entries(context.layers).map(([_, value]) => value);
+      const payload = {
+        ...context,
+        layers: table,
+      };
       application.navigateToApp('lens', {
-        state: { type: ACTION_CONVERT_TO_LENS, payload: table },
+        state: { type: ACTION_CONVERT_TO_LENS, payload },
       });
     },
   });
