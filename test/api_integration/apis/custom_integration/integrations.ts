@@ -24,9 +24,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body.length).to.be(12);
 
-        ['flights', 'logs', 'ecommerce'].forEach((sampleData) => {
-          expect(resp.body.findIndex((c: { id: string }) => c.id === sampleData)).to.be.above(-1);
-        });
+        // Test for sample data card
+        expect(resp.body.findIndex((c: { id: string }) => c.id === 'sample_data_all')).to.be.above(
+          -1
+        );
       });
     });
 
