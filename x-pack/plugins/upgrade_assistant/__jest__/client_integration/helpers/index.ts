@@ -7,4 +7,3 @@
 
 export { setupEnvironment, WithAppDependencies, kibanaVersion } from './setup_environment';
 export { advanceTime } from './time_manipulation';
-export { kibanaDeprecationsServiceHelpers } from './kibana_deprecations_service.mock';

@@ -31,6 +31,7 @@ const kibanaDeprecations: DomainDeprecationDetails[] = [
     domainId: 'test_domain_2',
     level: 'warning',
     title: 'Test deprecation title 1',
+    documentationUrl: 'https://',
     message: 'Test deprecation message 2',
     deprecationType: 'feature',
   },

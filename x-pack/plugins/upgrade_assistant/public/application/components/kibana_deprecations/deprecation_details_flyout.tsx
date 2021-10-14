@@ -165,7 +165,7 @@ export const DeprecationDetailsFlyout = ({
 
           {documentationUrl && (
             <p>
-              <EuiLink target="_blank" href={documentationUrl}>
+              <EuiLink target="_blank" data-test-subj="documentationLink" href={documentationUrl}>
                 {i18nTexts.learnMoreLinkLabel}
               </EuiLink>
             </p>
