@@ -31,7 +31,7 @@ export interface NodeItem {
   id: string;
   roles: string[];
   allocated_models: any[];
-  inference_count: number;
+  total_inference_count: number;
   avg_inference_time: number;
   pipelines?: ModelPipelines['pipelines'] | null;
 }

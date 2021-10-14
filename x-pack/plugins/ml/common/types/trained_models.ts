@@ -117,3 +117,59 @@ export interface ModelPipelines {
 export interface InferenceConfigResponse {
   trained_model_configs: TrainedModelConfigResponse[];
 }
+
+export interface TrainedModelDeploymentStatsResponse {
+  model_id: string;
+  model_size: string;
+  inference_threads: number;
+  model_threads: number;
+  state: string;
+  allocation_status: { target_allocation_count: number; state: string; allocation_count: number };
+  nodes: Array<{
+    node: Record<
+      string,
+      {
+        transport_address: string;
+        roles: string[];
+        name: string;
+        attributes: {
+          'ml.machine_memory': string;
+          'xpack.installed': string;
+          'ml.max_open_jobs': string;
+          'ml.max_jvm_size': string;
+        };
+        ephemeral_id: string;
+      }
+    >;
+    inference_count: number;
+    routing_state: { routing_state: string };
+    average_inference_time_ms: number;
+    last_access: number;
+  }>;
+}
+
+export interface NodeDeploymentStatsResponse {
+  id: string;
+  name: string;
+  ephemeral_id: string;
+  transport_address: string;
+  attributes: {
+    'ml.machine_memory': string;
+    'xpack.installed': string;
+    'ml.max_open_jobs': string;
+    'ml.max_jvm_size': string;
+  };
+  roles: string[];
+  allocated_models: Array<{
+    inference_threads: number;
+    allocation_status: {
+      target_allocation_count: number;
+      state: string;
+      allocation_count: number;
+    };
+    model_id: string;
+    state: string;
+    model_threads: number;
+    model_size: string;
+  }>;
+}

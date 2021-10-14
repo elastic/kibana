@@ -7,12 +7,15 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { searchProvider } from './search';
+import { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 
 type OrigMlClient = ElasticsearchClient['ml'];
 
 export interface MlClient extends OrigMlClient {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
-  getTrainedModelsDeploymentStats: () => any;
+  getTrainedModelsDeploymentStats: () => Promise<{
+    body: { count: number; deployment_stats: TrainedModelDeploymentStatsResponse[] };
+  }>;
 }
 
 export type MlClientParams =

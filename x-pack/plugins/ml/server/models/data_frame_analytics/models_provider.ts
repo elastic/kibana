@@ -6,7 +6,10 @@
  */
 
 import type { IScopedClusterClient } from 'kibana/server';
-import type { PipelineDefinition } from '../../../common/types/trained_models';
+import type {
+  NodeDeploymentStatsResponse,
+  PipelineDefinition,
+} from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
@@ -43,7 +46,7 @@ export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient)
       return modelIdsMap;
     },
 
-    async getNodesOverview() {
+    async getNodesOverview(): Promise<{ count: number; nodes: NodeDeploymentStatsResponse[] }> {
       const { body: deploymentStats } = await mlClient.getTrainedModelsDeploymentStats();
 
       const nodesR = deploymentStats.deployment_stats.reduce((acc, curr) => {
@@ -51,7 +54,7 @@ export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient)
         nodes.forEach((n) => {
           Object.entries(n.node).forEach(([id, o]) => {
             if (acc.has(id)) {
-              const d = acc.get(id);
+              const d = acc.get(id)!;
               d.allocated_models.push(modelAttrs);
             } else {
               acc.set(id, { ...o, id, allocated_models: [modelAttrs] });
@@ -59,7 +62,7 @@ export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient)
           });
         });
         return acc;
-      }, new Map<string, object>());
+      }, new Map<string, NodeDeploymentStatsResponse>());
 
       return {
         count: nodesR.size,
