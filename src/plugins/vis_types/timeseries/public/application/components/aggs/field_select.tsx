@@ -20,8 +20,6 @@ import type { TimeseriesUIRestrictions } from '../../../../common/ui_restriction
 
 // @ts-ignore
 import { isFieldEnabled } from '../../lib/check_ui_restrictions';
-import { PanelModelContext } from '../../contexts/panel_model_context';
-import { USE_KIBANA_INDEXES_KEY } from '../../../../common/constants';
 
 interface FieldSelectProps {
   label: string | ReactNode;
@@ -64,7 +62,6 @@ export function FieldSelect({
   uiRestrictions,
   'data-test-subj': dataTestSubj = 'metricsIndexPatternFieldsSelect',
 }: FieldSelectProps) {
-  const panelModel = useContext(PanelModelContext);
   const htmlId = htmlIdGenerator();
 
   let selectedOptions: Array<EuiComboBoxOptionOption<string>> = [];
@@ -119,7 +116,7 @@ export function FieldSelect({
     }
   });
 
-  let isInvalid = Boolean(value && fields[fieldsSelector] && !selectedOptions.length);
+  const isInvalid = Boolean(value && fields[fieldsSelector] && !selectedOptions.length);
 
   if (value && !selectedOptions.length) {
     selectedOptions = [{ label: value!, id: 'INVALID_FIELD' }];
