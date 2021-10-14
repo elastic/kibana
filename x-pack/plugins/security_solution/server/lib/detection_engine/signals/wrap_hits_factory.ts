@@ -33,6 +33,5 @@ export const wrapHitsFactory =
       },
     ]);
 
-    // TODO: that was RuleSO.id, not RuleSO.attributes.params.ruleId - is this going to work?
     return filterDuplicateSignals(completeRule.alertId, wrappedDocs, false);
   };
