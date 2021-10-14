@@ -36,12 +36,12 @@ describe('geo_containment migration utilities', () => {
       references: [
         {
           id: 'foobar',
-          name: 'tracked_index_foobar',
+          name: 'param:tracked_index_foobar',
           type: 'index-pattern',
         },
         {
           id: 'boundaryid',
-          name: 'boundary_index_boundaryid',
+          name: 'param:boundary_index_boundaryid',
           type: 'index-pattern',
         },
       ],

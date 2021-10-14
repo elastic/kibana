@@ -158,6 +158,35 @@ export type GeoContainmentAlertType = AlertType<
   typeof RecoveryActionGroupId
 >;
 
+export function extractEntityAndBoundaryReferences(params: GeoContainmentParams): {
+  params: GeoContainmentExtractedParams;
+  references: SavedObjectReference[];
+} {
+  const { indexId, boundaryIndexId, ...otherParams } = params;
+
+  //  Reference names omit the `param:`-prefix. This is handled by the alerting framework already
+  const references = [
+    {
+      name: `tracked_index_${indexId}`,
+      type: 'index-pattern',
+      id: indexId as string,
+    },
+    {
+      name: `boundary_index_${boundaryIndexId}`,
+      type: 'index-pattern',
+      id: boundaryIndexId as string,
+    },
+  ];
+  return {
+    params: {
+      ...otherParams,
+      indexRefName: `tracked_index_${indexId}`,
+      boundaryIndexRefName: `boundary_index_${boundaryIndexId}`,
+    },
+    references,
+  };
+}
+
 export function injectEntityAndBoundaryIds(
   params: GeoContainmentExtractedParams,
   references: SavedObjectReference[]

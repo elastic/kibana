@@ -41,14 +41,19 @@ export function extractEntityAndBoundaryReferences(params: GeoContainmentParams)
   references: SavedObjectReference[];
 } {
   const { indexId, boundaryIndexId, ...otherParams } = params;
+
+  const indexRefNamePrefix = 'tracked_index_';
+  const boundaryRefNamePrefix = 'boundary_index_';
+
+  // Since these are stack-alerts, we need to prefix with the `param:`-namespace
   const references = [
     {
-      name: `tracked_index_${indexId}`,
-      type: 'index-pattern',
+      name: `param:${indexRefNamePrefix}${indexId}`,
+      type: `index-pattern`,
       id: indexId as string,
     },
     {
-      name: `boundary_index_${boundaryIndexId}`,
+      name: `param:${boundaryRefNamePrefix}${boundaryIndexId}`,
       type: 'index-pattern',
       id: boundaryIndexId as string,
     },
@@ -56,8 +61,8 @@ export function extractEntityAndBoundaryReferences(params: GeoContainmentParams)
   return {
     params: {
       ...otherParams,
-      indexRefName: `tracked_index_${indexId}`,
-      boundaryIndexRefName: `boundary_index_${boundaryIndexId}`,
+      indexRefName: `${indexRefNamePrefix}${indexId}`,
+      boundaryIndexRefName: `${boundaryRefNamePrefix}${boundaryIndexId}`,
     },
     references,
   };

@@ -1929,8 +1929,8 @@ describe('successful migrations', () => {
       const migratedAlert = migration7160(alert, migrationContext);
 
       expect(migratedAlert.references).toEqual([
-        { id: 'foo', name: 'tracked_index_foo', type: 'index-pattern' },
-        { id: 'bar', name: 'boundary_index_bar', type: 'index-pattern' },
+        { id: 'foo', name: 'param:tracked_index_foo', type: 'index-pattern' },
+        { id: 'bar', name: 'param:boundary_index_bar', type: 'index-pattern' },
       ]);
 
       expect(migratedAlert.attributes.params).toEqual({
@@ -1969,8 +1969,8 @@ describe('successful migrations', () => {
           id: '999',
           type: 'foreign-name',
         },
-        { id: 'foo', name: 'tracked_index_foo', type: 'index-pattern' },
-        { id: 'bar', name: 'boundary_index_bar', type: 'index-pattern' },
+        { id: 'foo', name: 'param:tracked_index_foo', type: 'index-pattern' },
+        { id: 'bar', name: 'param:boundary_index_bar', type: 'index-pattern' },
       ]);
 
       expect(migratedAlert.attributes.params).toEqual({
