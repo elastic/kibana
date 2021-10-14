@@ -7,7 +7,14 @@
 
 import type { ApplicationStart } from 'kibana/public';
 
+/**
+ * Supported query parameters for CreatePackagePolicyRouteState
+ */
 export type OnSaveQueryParamKeys = 'showAddAgentHelp' | 'openEnrollmentFlyout';
+
+/**
+ * Query string parameter options for CreatePackagePolicyRouteState
+ */
 export type OnSaveQueryParamOpts =
   | {
       renameKey?: string; // override param name
