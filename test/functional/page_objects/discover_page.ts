@@ -7,6 +7,7 @@
  */
 
 import { FtrService } from '../ftr_provider_context';
+import expect from '../../../../../../../../private/var/tmp/_bazel_quynhnguyen/bd5cc7ce3740c1abb2c63a2609d8bb9f/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-expect';
 
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
@@ -540,5 +541,38 @@ export class DiscoverPageObject extends FtrService {
 
   public async clearSavedQuery() {
     await this.testSubjects.click('saved-query-management-clear-button');
+  }
+
+  public async assertHitCount(expectedHitCount: string) {
+    await this.retry.tryForTime(2 * 1000, async () => {
+      // Close side bar to ensure Discover hit count shows
+      // edge case for when browser width is small
+      await this.closeSidebar();
+      const hitCount = await this.getHitCount();
+      expect(hitCount).to.eql(
+        expectedHitCount,
+        `Expected Discover hit count to be ${expectedHitCount} but got ${hitCount}.`
+      );
+    });
+  }
+
+  public async assertViewModeToggleNotExists() {
+    await this.testSubjects.missingOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+  }
+
+  public async assertViewModeToggleExists() {
+    await this.testSubjects.existOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+  }
+
+  public async assertFieldStatsTableNotExists() {
+    await this.testSubjects.missingOrFail('dscFieldStatsEmbeddedContent', { timeout: 2 * 1000 });
+  }
+
+  public async clickViewModeFieldStatsButton() {
+    await this.retry.tryForTime(2 * 1000, async () => {
+      await this.testSubjects.existOrFail('dscViewModeFieldStatsButton');
+      await this.testSubjects.clickWhenNotDisabled('dscViewModeFieldStatsButton');
+      await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
+    });
   }
 }

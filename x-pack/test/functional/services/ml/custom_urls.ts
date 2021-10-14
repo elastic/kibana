@@ -171,7 +171,7 @@ export function MachineLearningCustomUrlsProvider({
       await PageObjects.discover.waitForDiscoverAppOnScreen();
       // During cloud tests, the small browser width might cause hit count to be invisible
       // so temporarily collapsing the sidebar ensures the count shows
-      await PageObjects.discover.toggleSidebarCollapse();
+      await PageObjects.discover.closeSidebar();
       await retry.tryForTime(10 * 1000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         expect(hitCount).to.eql(
