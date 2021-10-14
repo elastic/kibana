@@ -171,8 +171,6 @@ interface PreflightCheckNamespacesParams {
   id: string;
   /** The current space */
   namespace: string | undefined;
-  /** The type of error to throw if the object exists, but not in the current space */
-  errorType: 'notFound' | 'conflict';
   /** Optional; for an object that is being created, this specifies the initial namespace(s) it will exist in (overriding the current space) */
   initialNamespaces?: string[];
 }
@@ -181,10 +179,13 @@ interface PreflightCheckNamespacesParams {
  * @internal
  */
 interface PreflightCheckNamespacesResult {
-  /** Whether or not the object exists */
-  found: boolean;
-  /** What namespace(s) the object should exist in, if it needs to be created; practically speaking this will never be undefined */
-  savedObjectNamespaces: string[] | undefined;
+  /** If the object exists, and whether or not it exists in the current space */
+  checkResult: 'not_found' | 'found_in_namespace' | 'found_outside_namespace';
+  /**
+   * What namespace(s) the object should exist in, if it needs to be created; practically speaking, this will never be undefined if
+   * checkResult == not_found or checkResult == found_in_namespace
+   */
+  savedObjectNamespaces?: string[];
   /** The source of the raw document, if the object already exists */
   rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
 }
@@ -329,9 +330,11 @@ export class SavedObjectsRepository {
           type,
           id,
           namespace,
-          errorType: 'conflict',
           initialNamespaces,
         });
+        if (preflightResult.checkResult === 'found_outside_namespace') {
+          throw SavedObjectsErrorHelpers.createConflictError(type, id);
+        }
         savedObjectNamespaces = preflightResult.savedObjectNamespaces;
       } else {
         savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
@@ -708,9 +711,11 @@ export class SavedObjectsRepository {
         type,
         id,
         namespace,
-        errorType: 'notFound',
       });
-      if (!preflightResult.found) {
+      if (
+        preflightResult.checkResult === 'found_outside_namespace' ||
+        preflightResult.checkResult === 'not_found'
+      ) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
       const existingNamespaces = preflightResult.savedObjectNamespaces ?? [];
@@ -1253,9 +1258,11 @@ export class SavedObjectsRepository {
         type,
         id,
         namespace,
-        errorType: 'notFound',
       });
-      if (!upsert && !preflightResult.found) {
+      if (
+        preflightResult.checkResult === 'found_outside_namespace' ||
+        (!upsert && preflightResult.checkResult === 'not_found')
+      ) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
     }
@@ -1263,7 +1270,8 @@ export class SavedObjectsRepository {
     const time = getCurrentTime();
 
     let rawUpsert: SavedObjectsRawDoc | undefined;
-    if (upsert) {
+    // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
+    if (upsert && (!preflightResult || preflightResult.checkResult === 'not_found')) {
       let savedObjectNamespace: string | undefined;
       let savedObjectNamespaces: string[] | undefined;
 
@@ -1298,11 +1306,9 @@ export class SavedObjectsRepository {
         index: this.getIndexForType(type),
         ...getExpectedVersionProperties(version, preflightResult?.rawDocSource),
         refresh,
-
         body: {
           doc,
-          // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
-          ...(rawUpsert && !preflightResult?.found && { upsert: rawUpsert._source }),
+          ...(rawUpsert && { upsert: rawUpsert._source }),
         },
         _source_includes: ['namespace', 'namespaces', 'originId'],
         require_alias: true,
@@ -1806,8 +1812,10 @@ export class SavedObjectsRepository {
         type,
         id,
         namespace,
-        errorType: 'conflict',
       });
+      if (preflightResult.checkResult === 'found_outside_namespace') {
+        throw SavedObjectsErrorHelpers.createConflictError(type, id);
+      }
       savedObjectNamespaces = preflightResult.savedObjectNamespaces;
     }
 
@@ -2108,7 +2116,6 @@ export class SavedObjectsRepository {
     type,
     id,
     namespace,
-    errorType,
     initialNamespaces,
   }: PreflightCheckNamespacesParams): Promise<PreflightCheckNamespacesResult> {
     if (!this._registry.isMultiNamespace(type)) {
@@ -2130,16 +2137,10 @@ export class SavedObjectsRepository {
     const indexFound = statusCode !== 404;
     if (indexFound && isFoundGetResponse(body)) {
       if (!this.rawDocExistsInNamespaces(body, namespaces)) {
-        switch (errorType) {
-          case 'conflict':
-            throw SavedObjectsErrorHelpers.createConflictError(type, id);
-          case 'notFound':
-          default:
-            throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-        }
+        return { checkResult: 'found_outside_namespace' };
       }
       return {
-        found: true,
+        checkResult: 'found_in_namespace',
         savedObjectNamespaces: initialNamespaces ?? getSavedObjectNamespaces(namespace, body),
         rawDocSource: body,
       };
@@ -2148,7 +2149,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
     }
     return {
-      found: false,
+      checkResult: 'not_found',
       savedObjectNamespaces: initialNamespaces ?? getSavedObjectNamespaces(namespace),
     };
   }
