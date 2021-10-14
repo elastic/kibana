@@ -45,6 +45,7 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
         />
       }
       buttonColor="primary"
+      data-test-subj="postInstallAddAgentModal"
     >
       <FormattedMessage
         id="xpack.fleet.agentPolicy.postInstallAddAgentModalDescription"
