@@ -16,7 +16,7 @@ import type {
   TransportRequestParams,
   DiagnosticResult,
 } from '@elastic/elasticsearch';
-import type { RequestBody } from '@elastic/elasticsearch/lib/types';
+import type { RequestBody } from '@elastic/transport/lib/types';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
