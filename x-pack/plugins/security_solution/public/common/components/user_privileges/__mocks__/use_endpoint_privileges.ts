@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-import { EndpointPrivileges } from '../use_endpoint_privileges';
+import { getAllEndpointPrivilegesMock } from './get_all_endpoint_privileges_mock';
 
-export const useEndpointPrivileges = jest.fn(() => {
-  const endpointPrivilegesMock: EndpointPrivileges = {
-    loading: false,
-    canAccessFleet: true,
-    canAccessEndpointManagement: true,
-    isPlatinumPlus: true,
-  };
-  return endpointPrivilegesMock;
-});
+export const useEndpointPrivileges = jest.fn(getAllEndpointPrivilegesMock);
