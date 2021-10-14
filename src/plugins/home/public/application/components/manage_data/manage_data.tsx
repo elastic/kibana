@@ -61,7 +61,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
             {isDevToolsEnabled || isManagementEnabled ? (
               <EuiFlexItem className="homDataManage__actions" grow={false}>
                 <EuiFlexGroup alignItems="center" responsive={false} wrap>
-                  {isDevToolsEnabled ? (
+                  {isDevToolsEnabled && consoleHref !== undefined ? (
                     <EuiFlexItem grow={false}>
                       <RedirectAppLinks application={application}>
                         <EuiButtonEmpty
