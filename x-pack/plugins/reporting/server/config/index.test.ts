@@ -36,15 +36,6 @@ const applyReportingDeprecations = (settings: Record<string, any> = {}) => {
 };
 
 describe('deprecations', () => {
-  ['.foo', '.reporting'].forEach((index) => {
-    it('logs a warning if index is set', () => {
-      const { messages } = applyReportingDeprecations({ index, roles: { enabled: false } });
-      expect(messages).toMatchObject([
-        'Multitenancy by changing "xpack.reporting.index" will not be supported in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details',
-      ]);
-    });
-  });
-
   it('logs a warning if roles.enabled: true is set', () => {
     const { messages } = applyReportingDeprecations({ roles: { enabled: true } });
     expect(messages).toMatchInlineSnapshot(`
