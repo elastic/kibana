@@ -5,19 +5,15 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
 
-import styled, { useTheme } from 'styled-components';
-
-import type { EuiTheme } from 'src/plugins/kibana_react/common';
-
 import { useLink } from '../../../hooks';
 import type { Section } from '../sections';
 
-import { useLinks, useStartServices } from '../hooks';
+import { useStartServices } from '../hooks';
 
 import { WithHeaderLayout } from './';
 
@@ -26,45 +22,12 @@ interface Props {
   children?: React.ReactNode;
 }
 
-const Illustration = styled(EuiImage)`
-  margin-bottom: -77px;
-  position: relative;
-  top: -16px;
-  width: 395px;
-`;
-
-const Hero = styled.div`
-  text-align: right;
-`;
-
-const HeroImage = memo(() => {
-  const { toSharedAssets } = useLinks();
-  const theme = useTheme() as EuiTheme;
-  const IS_DARK_THEME = theme.darkMode;
-
-  return (
-    <Hero>
-      <Illustration
-        alt={i18n.translate('xpack.fleet.epm.illustrationAltText', {
-          defaultMessage: 'Illustration of an integration',
-        })}
-        url={
-          IS_DARK_THEME
-            ? toSharedAssets('illustration_integrations_darkmode.svg')
-            : toSharedAssets('illustration_integrations_lightmode.svg')
-        }
-      />
-    </Hero>
-  );
-});
-
 export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, children }) => {
   const { getHref } = useLink();
   const { docLinks } = useStartServices();
 
   return (
     <WithHeaderLayout
-      rightColumn={<HeroImage />}
       leftColumn={
         <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
           <EuiText>
@@ -79,20 +42,11 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
           <EuiSpacer size="s" />
 
           <EuiFlexItem grow={false}>
-            <EuiText size="m" color="subdued">
+            <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
                   id="xpack.fleet.epm.pageSubtitle"
-                  defaultMessage="Collect data from popular applications and services.  To learn more about Integrations, view {link}"
-                  values={{
-                    link: (
-                      <EuiLink target="_blank" href={docLinks.links.elasticStackGetStarted}>
-                        {i18n.translate('xpack.fleet.epm.pageSubtitleLinkText', {
-                          defaultMessage: 'Getting started with Elastic Stack',
-                        })}
-                      </EuiLink>
-                    ),
-                  }}
+                  defaultMessage="Choose an integration to start collecting and analyzing your data"
                 />
               </p>
             </EuiText>

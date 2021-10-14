@@ -16,10 +16,9 @@ import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from './release_badge'
 
 export type PackageCardProps = IntegrationCardItem;
 
-// adding the `href` causes EuiCard to use a `a` instead of a `button`
-// `a` tags use `euiLinkColor` which results in blueish Badge text
+// Min-height is roughly 4
 const Card = styled(EuiCard)`
-  color: inherit;
+  min-height: 127px;
 `;
 
 export function PackageCard({
@@ -53,6 +52,7 @@ export function PackageCard({
       title={title || ''}
       titleSize="xs"
       description={description}
+      hasBorder
       icon={
         <CardIcon
           icons={icons}
