@@ -53,6 +53,7 @@ describe('Cases privileges', () => {
   before(() => {
     cleanKibana();
     createUsersAndRoles(usersToCreate, rolesToCreate);
+    visitSecuritySolution();
   });
 
   after(() => {
@@ -62,7 +63,6 @@ describe('Cases privileges', () => {
 
   beforeEach(() => {
     deleteCases();
-    visitSecuritySolution();
   });
 
   for (const user of [secAllUser, secReadCasesAllUser]) {
