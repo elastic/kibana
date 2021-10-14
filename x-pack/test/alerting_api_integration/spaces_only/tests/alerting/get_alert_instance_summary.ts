@@ -58,7 +58,12 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       const { status_start_date: statusStartDate, status_end_date: statusEndDate } = response.body;
       expect(Date.parse(statusStartDate)).to.be.lessThan(Date.parse(statusEndDate));
 
-      const stableBody = omit(response.body, ['status_start_date', 'status_end_date', 'last_run']);
+      const stableBody = omit(response.body, [
+        'status_start_date',
+        'status_end_date',
+        'last_run',
+        'execution_duration',
+      ]);
       expect(stableBody).to.eql({
         id: createdAlert.id,
         name: 'abc',
@@ -91,7 +96,12 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       const { status_start_date: statusStartDate, status_end_date: statusEndDate } = response.body;
       expect(Date.parse(statusStartDate)).to.be.lessThan(Date.parse(statusEndDate));
 
-      const stableBody = omit(response.body, ['status_start_date', 'status_end_date', 'last_run']);
+      const stableBody = omit(response.body, [
+        'status_start_date',
+        'status_end_date',
+        'last_run',
+        'execution_duration',
+      ]);
       expect(stableBody).to.eql({
         id: createdAlert.id,
         name: 'abc',
