@@ -149,6 +149,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             : []),
           '--xpack.ruleRegistry.enabled=true',
           '--xpack.ruleRegistry.write.enabled=true',
+          '--xpack.ruleRegistry.write.cache.enabled=false',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
         ],
       },
