@@ -150,7 +150,6 @@ export const TableRow = ({
     );
   } else {
     columns.forEach(function (column: string) {
-      // when useNewFieldsApi is true, addressing to the fields property is safe
       if (useNewFieldsApi && !mapping(column) && row.fields && !row.fields[column]) {
         const innerColumns = Object.fromEntries(
           Object.entries(row.fields).filter(([key]) => {
