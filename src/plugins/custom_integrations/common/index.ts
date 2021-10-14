@@ -75,7 +75,6 @@ export const SHIPPER_DISPLAY = {
   sample_data: 'Sample data',
   tests: 'Tests',
   tutorial: 'Tutorials',
-  add_data: 'Add data',
 };
 
 /**

@@ -25,7 +25,7 @@ function registerWithCustomIntegrations(customIntegrations: CustomIntegrationsPl
       },
     ],
     categories: ['upload_file'],
-    shipper: 'add_data',
+    shipper: 'other',
   });
 }
 
