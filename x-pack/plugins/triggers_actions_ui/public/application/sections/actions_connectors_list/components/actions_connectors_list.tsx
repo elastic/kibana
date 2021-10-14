@@ -177,7 +177,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           item as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
         ).config;
         const showLegacyTooltip =
-          itemConfig?.isLegacy &&
+          itemConfig?.usesTableApi &&
           // TODO: Remove when applications are certified
           ((ENABLE_NEW_SN_ITSM_CONNECTOR && item.actionTypeId === '.servicenow') ||
             (ENABLE_NEW_SN_SIR_CONNECTOR && item.actionTypeId === '.servicenow-sir'));

@@ -26,7 +26,7 @@ export const isFieldInvalid = (
 ): boolean => error !== undefined && error.length > 0 && field !== undefined;
 
 // TODO: Remove when the applications are certified
-export const isLegacyConnector = (connector: ServiceNowActionConnector) => {
+export const isDeprecatedConnector = (connector: ServiceNowActionConnector) => {
   if (connector == null) {
     return true;
   }
@@ -39,5 +39,5 @@ export const isLegacyConnector = (connector: ServiceNowActionConnector) => {
     return true;
   }
 
-  return connector.config.isLegacy;
+  return connector.config.usesTableApi;
 };

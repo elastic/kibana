@@ -13,7 +13,7 @@ import { ConnectorTypes } from '../../../common';
 import { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
-import { getConnectorIcon, isLegacyConnector } from '../utils';
+import { getConnectorIcon, isDeprecateConnector } from '../utils';
 
 export interface Props {
   connectors: ActionConnector[];
@@ -89,7 +89,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <span>{connector.name}</span>
                 </EuiFlexItem>
-                {isLegacyConnector(connector) && (
+                {isDeprecateConnector(connector) && (
                   <EuiFlexItem grow={false}>
                     <EuiIconTip
                       aria-label={i18n.DEPRECATED_TOOLTIP_TITLE}

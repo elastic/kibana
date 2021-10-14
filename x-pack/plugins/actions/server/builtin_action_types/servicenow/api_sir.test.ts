@@ -192,7 +192,7 @@ describe('api_sir', () => {
       const res = await apiSIR.pushToService({
         externalService,
         params,
-        config: { isLegacy: false },
+        config: { usesTableApi: false },
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
@@ -221,7 +221,7 @@ describe('api_sir', () => {
       await apiSIR.pushToService({
         externalService,
         params,
-        config: { isLegacy: false },
+        config: { usesTableApi: false },
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
@@ -249,7 +249,7 @@ describe('api_sir', () => {
       await apiSIR.pushToService({
         externalService,
         params,
-        config: { isLegacy: true },
+        config: { usesTableApi: true },
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
@@ -274,7 +274,7 @@ describe('api_sir', () => {
       await apiSIR.pushToService({
         externalService,
         params,
-        config: { isLegacy: false },
+        config: { usesTableApi: false },
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'work_notes',

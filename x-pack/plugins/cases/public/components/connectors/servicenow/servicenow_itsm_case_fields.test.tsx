@@ -128,7 +128,7 @@ describe('ServiceNowITSM Fields', () => {
   });
 
   test('it shows the deprecated callout when the connector is legacy', async () => {
-    const legacyConnector = { ...connector, config: { isLegacy: true } };
+    const legacyConnector = { ...connector, config: { usesTableApi: true } };
     render(<Fields fields={fields} onChange={onChange} connector={legacyConnector} />);
     expect(screen.getByTestId('legacy-connector-warning-callout')).toBeInTheDocument();
   });

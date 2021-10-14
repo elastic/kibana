@@ -78,7 +78,7 @@ export const getConnectorIcon = (
 };
 
 // TODO: Remove when the applications are certified
-export const isLegacyConnector = (connector?: CaseActionConnector) => {
+export const isDeprecateConnector = (connector?: CaseActionConnector) => {
   if (connector == null) {
     return true;
   }
@@ -91,5 +91,5 @@ export const isLegacyConnector = (connector?: CaseActionConnector) => {
     return true;
   }
 
-  return connector.config.isLegacy;
+  return connector.config.usesTableApi;
 };

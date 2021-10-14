@@ -21,7 +21,7 @@ import { ServiceNowITSMActionParams, Choice, Fields, ServiceNowActionConnector }
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { useGetChoices } from './use_get_choices';
-import { choicesToEuiOptions, isLegacyConnector } from './helpers';
+import { choicesToEuiOptions, isDeprecatedConnector } from './helpers';
 
 import * as i18n from './translations';
 import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
@@ -44,7 +44,9 @@ const ServiceNowParamsFields: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
-  const isOldConnector = isLegacyConnector(actionConnector as unknown as ServiceNowActionConnector);
+  const supportsNewApplication = !isDeprecatedConnector(
+    actionConnector as unknown as ServiceNowActionConnector
+  );
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
@@ -275,7 +277,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
             />
           </EuiFormRow>
         </EuiFlexItem>
-        {!isOldConnector && (
+        {supportsNewApplication && (
           <EuiFlexItem>
             <EuiFormRow id="update-incident-form-row" fullWidth label={i18n.UPDATE_INCIDENT_LABEL}>
               <EuiSwitch

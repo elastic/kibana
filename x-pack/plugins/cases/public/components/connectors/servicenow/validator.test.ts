@@ -15,7 +15,7 @@ describe('ServiceNow validator', () => {
         ...connector,
         config: {
           ...connector.config,
-          isLegacy: true,
+          usesTableApi: true,
         },
       };
 
@@ -27,7 +27,7 @@ describe('ServiceNow validator', () => {
         ...connector,
         config: {
           ...connector.config,
-          isLegacy: false,
+          usesTableApi: false,
         },
       };
 

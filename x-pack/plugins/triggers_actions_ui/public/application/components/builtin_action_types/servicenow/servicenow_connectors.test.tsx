@@ -59,7 +59,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       name: 'servicenow',
       config: {
         apiUrl: 'https://test/',
-        isLegacy: false,
+        usesTableApi: false,
       },
     } as ServiceNowActionConnector;
     const wrapper = mountWithIntl(

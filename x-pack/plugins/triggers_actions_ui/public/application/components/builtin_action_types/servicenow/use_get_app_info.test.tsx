@@ -34,7 +34,7 @@ const actionConnector = {
   isPreconfigured: false,
   config: {
     apiUrl: 'https://test.service-now.com/',
-    isLegacy: false,
+    usesTableApi: false,
   },
 } as ServiceNowActionConnector;
 

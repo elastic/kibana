@@ -59,10 +59,10 @@ const observablesToString = (obs: string | string[] | null | undefined): string 
 };
 
 export const prepareParams = (
-  isLegacy: boolean,
+  usesTableApi: boolean,
   params: PushToServiceApiParamsSIR
 ): PushToServiceApiParamsSIR => {
-  if (isLegacy) {
+  if (usesTableApi) {
     /**
      * The schema has change to accept an array of observables
      * or a string. In the case of a legacy connector we need to
@@ -108,7 +108,7 @@ const pushToServiceHandler = async ({
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
   const res = await api.pushToService({
     externalService,
-    params: prepareParams(!!config.isLegacy, params as PushToServiceApiParamsSIR),
+    params: prepareParams(!!config.usesTableApi, params as PushToServiceApiParamsSIR),
     config,
     secrets,
     commentFieldKey,
@@ -130,7 +130,7 @@ const pushToServiceHandler = async ({
    * through the pushToService call.
    */
 
-  if (!config.isLegacy) {
+  if (!config.usesTableApi) {
     const sirExternalService = externalService as ExternalServiceSIR;
 
     const obsWithType: Array<[string[], ObservableTypes]> = [

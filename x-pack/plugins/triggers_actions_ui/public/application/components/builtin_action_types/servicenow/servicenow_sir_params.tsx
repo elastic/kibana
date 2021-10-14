@@ -23,7 +23,7 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
 import { ServiceNowSIRActionParams, Fields, Choice, ServiceNowActionConnector } from './types';
-import { choicesToEuiOptions, isLegacyConnector } from './helpers';
+import { choicesToEuiOptions, isDeprecatedConnector } from './helpers';
 import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
@@ -49,7 +49,9 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
-  const isOldConnector = isLegacyConnector(actionConnector as unknown as ServiceNowActionConnector);
+  const supportsNewApplication = !isDeprecatedConnector(
+    actionConnector as unknown as ServiceNowActionConnector
+  );
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
@@ -303,7 +305,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         label={i18n.COMMENTS_LABEL}
       />
       <EuiSpacer size="m" />
-      {!isOldConnector && (
+      {supportsNewApplication && (
         <EuiFormRow id="update-incident-form-row" fullWidth label={i18n.UPDATE_INCIDENT_LABEL}>
           <EuiSwitch
             label={updateIncident ? i18n.ON : i18n.OFF}

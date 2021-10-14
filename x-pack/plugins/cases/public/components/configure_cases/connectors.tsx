@@ -23,7 +23,7 @@ import { ActionConnector, CaseConnectorMapping } from '../../containers/configur
 import { Mapping } from './mapping';
 import { ActionTypeConnector, ConnectorTypes } from '../../../common';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
-import { isLegacyConnector } from '../utils';
+import { isDeprecateConnector } from '../utils';
 
 const EuiFormRowExtended = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {
@@ -111,7 +111,7 @@ const ConnectorsComponent: React.FC<Props> = ({
                 appendAddConnectorButton={true}
               />
             </EuiFlexItem>
-            {selectedConnector.type !== ConnectorTypes.none && isLegacyConnector(connector) && (
+            {selectedConnector.type !== ConnectorTypes.none && isDeprecateConnector(connector) && (
               <EuiFlexItem grow={false}>
                 <DeprecatedCallout />
               </EuiFlexItem>

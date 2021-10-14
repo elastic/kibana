@@ -15,7 +15,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { DeprecatedCallout } from './deprecated_callout';
 import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
-import { isRESTApiError, isLegacyConnector } from './helpers';
+import { isRESTApiError, isDeprecatedConnector } from './helpers';
 import { InstallationCallout } from './installation_callout';
 import { UpdateConnectorModal } from './update_connector_modal';
 import { updateActionConnector } from '../../../lib/action_connector_api';
@@ -38,7 +38,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     } = useKibana().services;
     const { apiUrl } = action.config;
     const { username, password } = action.secrets;
-    const isOldConnector = isLegacyConnector(action);
+    const requireNewApplication = !isDeprecatedConnector(action);
 
     const [showModal, setShowModal] = useState(false);
 
@@ -69,10 +69,10 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     }, [action, fetchAppInfo]);
 
     const beforeActionConnectorSave = useCallback(async () => {
-      if (!isOldConnector) {
+      if (requireNewApplication) {
         await getApplicationInfo();
       }
-    }, [getApplicationInfo, isOldConnector]);
+    }, [getApplicationInfo, requireNewApplication]);
 
     useEffect(
       () => setCallbacks({ beforeActionConnectorSave }),
@@ -88,13 +88,13 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
         http,
         connector: {
           name: action.name,
-          config: { apiUrl, isLegacy: false },
+          config: { apiUrl, usesTableApi: false },
           secrets: { username, password },
         },
         id: action.id,
       });
 
-      editActionConfig('isLegacy', false);
+      editActionConfig('usesTableApi', false);
       setShowModal(false);
 
       toasts.addSuccess({
@@ -128,8 +128,8 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
             onCancel={onModalCancel}
           />
         )}
-        {!isOldConnector && <InstallationCallout />}
-        {isOldConnector && <DeprecatedCallout onMigrate={onMigrateClick} />}
+        {requireNewApplication && <InstallationCallout />}
+        {!requireNewApplication && <DeprecatedCallout onMigrate={onMigrateClick} />}
         <Credentials
           action={action}
           errors={errors}
@@ -138,7 +138,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
           editActionSecrets={editActionSecrets}
           editActionConfig={editActionConfig}
         />
-        {applicationRequired && !isOldConnector && (
+        {applicationRequired && requireNewApplication && (
           <ApplicationRequiredCallout message={applicationInfoErrorMsg} />
         )}
       </>

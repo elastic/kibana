@@ -29,7 +29,7 @@ export interface ServiceNowSIRActionParams {
 
 export interface ServiceNowConfig {
   apiUrl: string;
-  isLegacy: boolean;
+  usesTableApi: boolean;
 }
 
 export interface ServiceNowSecrets {

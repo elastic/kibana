@@ -166,7 +166,7 @@ describe('successful migrations', () => {
       expect(migratedAction).toEqual(action);
     });
 
-    test('set isLegacy config property for .servicenow', () => {
+    test('set usesTableApi config property for .servicenow', () => {
       const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
       const action = getMockDataForServiceNow();
       const migratedAction = migration716(action, context);
@@ -177,13 +177,13 @@ describe('successful migrations', () => {
           ...action.attributes,
           config: {
             apiUrl: 'https://example.com',
-            isLegacy: true,
+            usesTableApi: true,
           },
         },
       });
     });
 
-    test('set isLegacy config property for .servicenow-sir', () => {
+    test('set usesTableApi config property for .servicenow-sir', () => {
       const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
       const action = getMockDataForServiceNow({ actionTypeId: '.servicenow-sir' });
       const migratedAction = migration716(action, context);
@@ -194,13 +194,13 @@ describe('successful migrations', () => {
           ...action.attributes,
           config: {
             apiUrl: 'https://example.com',
-            isLegacy: true,
+            usesTableApi: true,
           },
         },
       });
     });
 
-    test('it does not set isLegacy config for other connectors', () => {
+    test('it does not set usesTableApi config for other connectors', () => {
       const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
       const action = getMockData();
       const migratedAction = migration716(action, context);

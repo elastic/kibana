@@ -77,7 +77,7 @@ export const connectorsMock: ActionConnector[] = [
     name: 'My Connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
-      isLegacy: true,
+      usesTableApi: true,
     },
     isPreconfigured: false,
   },
