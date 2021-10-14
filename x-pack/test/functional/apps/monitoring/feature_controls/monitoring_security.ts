@@ -128,7 +128,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('monitoring');
         await noData.isOnNoDataPage();
         await noData.clickSetupWithSelfMonitoring();
-        await noData.isOnNoDataPageMonitoringEnablementDenied();
+        expect(await noData.isOnNoDataPageMonitoringEnablementDenied()).to.be(true);
       });
     });
   });
