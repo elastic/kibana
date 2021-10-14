@@ -75,6 +75,7 @@ export class IndexActionsContextMenu extends Component {
     const items = [];
     if (!detailPanel && selectedIndexCount === 1) {
       items.push({
+        'data-test-subj': 'showSettingsIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel', {
           defaultMessage:
             'Show {selectedIndexCount, plural, one {index} other {indices} } settings',
@@ -85,6 +86,7 @@ export class IndexActionsContextMenu extends Component {
         },
       });
       items.push({
+        'data-test-subj': 'showMappingsIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexMappingLabel', {
           defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } mapping',
           values: { selectedIndexCount },
@@ -95,6 +97,7 @@ export class IndexActionsContextMenu extends Component {
       });
       if (allOpen) {
         items.push({
+          'data-test-subj': 'showStatsIndexMenuButton',
           name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexStatsLabel', {
             defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } stats',
             values: { selectedIndexCount },
@@ -105,6 +108,7 @@ export class IndexActionsContextMenu extends Component {
         });
       }
       items.push({
+        'data-test-subj': 'editIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.editIndexSettingsLabel', {
           defaultMessage:
             'Edit {selectedIndexCount, plural, one {index} other {indices} } settings',
@@ -117,6 +121,7 @@ export class IndexActionsContextMenu extends Component {
     }
     if (allOpen) {
       items.push({
+        'data-test-subj': 'closeIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.closeIndexLabel', {
           defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {indices} }',
           values: { selectedIndexCount },
@@ -131,6 +136,7 @@ export class IndexActionsContextMenu extends Component {
         },
       });
       items.push({
+        'data-test-subj': 'forcemergeIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.forceMergeIndexLabel', {
           defaultMessage: 'Force merge {selectedIndexCount, plural, one {index} other {indices} }',
           values: { selectedIndexCount },
@@ -141,6 +147,7 @@ export class IndexActionsContextMenu extends Component {
         },
       });
       items.push({
+        'data-test-subj': 'refreshIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.refreshIndexLabel', {
           defaultMessage: 'Refresh {selectedIndexCount, plural, one {index} other {indices} }',
           values: { selectedIndexCount },
@@ -150,6 +157,7 @@ export class IndexActionsContextMenu extends Component {
         },
       });
       items.push({
+        'data-test-subj': 'clearCacheIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.clearIndexCacheLabel', {
           defaultMessage: 'Clear {selectedIndexCount, plural, one {index} other {indices} } cache',
           values: { selectedIndexCount },
@@ -159,6 +167,7 @@ export class IndexActionsContextMenu extends Component {
         },
       });
       items.push({
+        'data-test-subj': 'flushIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.flushIndexLabel', {
           defaultMessage: 'Flush {selectedIndexCount, plural, one {index} other {indices} }',
           values: { selectedIndexCount },
@@ -191,6 +200,7 @@ export class IndexActionsContextMenu extends Component {
       }
     } else {
       items.push({
+        'data-test-subj': 'openIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.openIndexLabel', {
           defaultMessage: 'Open {selectedIndexCount, plural, one {index} other {indices} }',
           values: { selectedIndexCount },
@@ -238,9 +248,6 @@ export class IndexActionsContextMenu extends Component {
           });
         }
       }
-    });
-    items.forEach((item) => {
-      item['data-test-subj'] = 'indexTableContextMenuButton';
     });
     const panelTree = {
       id: 0,
@@ -732,7 +739,11 @@ export class IndexActionsContextMenu extends Component {
                 anchorPosition={anchorPosition}
                 repositionOnScroll
               >
-                <EuiContextMenu initialPanelId={0} panels={panels} />
+                <EuiContextMenu
+                  initialPanelId={0}
+                  panels={panels}
+                  data-test-subj="indexContextMenu"
+                />
               </EuiPopover>
             </div>
           );
