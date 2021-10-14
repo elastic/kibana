@@ -39,7 +39,6 @@ export class IlmPolicyManager {
    */
   public async createIlmPolicy(): Promise<void> {
     await this.client.ilm.putLifecycle({
-      policy: ILM_POLICY_NAME,
       body: reportingIlmPolicy,
     });
   }

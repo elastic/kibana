@@ -196,7 +196,7 @@ export class ReportingStore {
       await ilmPolicyManager.createIlmPolicy();
     } catch (e) {
       this.logger.error('Error in start phase');
-      this.logger.error(e.body.error);
+      this.logger.error(e.body?.error);
       throw e;
     }
   }
