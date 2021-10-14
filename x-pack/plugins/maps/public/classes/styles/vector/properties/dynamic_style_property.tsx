@@ -39,8 +39,6 @@ import { IVectorLayer } from '../../../layers/vector_layer';
 import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
-import { pluckRangeFieldMeta } from '../../../../../common/pluck_range_field_meta';
-import { pluckCategoryFieldMeta } from '../../../../../common/pluck_category_field_meta';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
@@ -353,9 +351,24 @@ export class DynamicStyleProperty<T>
     }
 
     const name = this.getFieldName();
-    return pluckRangeFieldMeta(features, name, (rawValue: unknown) => {
-      return parseFloat(rawValue as string);
-    });
+    let min = Infinity;
+    let max = -Infinity;
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i];
+      const newValue = feature.properties ? parseFloat(feature.properties[name]) : NaN;
+      if (!isNaN(newValue)) {
+        min = Math.min(min, newValue);
+        max = Math.max(max, newValue);
+      }
+    }
+
+    return min === Infinity || max === -Infinity
+      ? null
+      : {
+          min,
+          max,
+          delta: max - min,
+        };
   }
 
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null {
@@ -364,7 +377,32 @@ export class DynamicStyleProperty<T>
       return null;
     }
 
-    return pluckCategoryFieldMeta(features, this.getFieldName(), size);
+    const counts = new Map();
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i];
+      const term = feature.properties ? feature.properties[this.getFieldName()] : undefined;
+      // properties object may be sparse, so need to check if the field is effectively present
+      if (typeof term !== undefined) {
+        if (counts.has(term)) {
+          counts.set(term, counts.get(term) + 1);
+        } else {
+          counts.set(term, 1);
+        }
+      }
+    }
+
+    const ordered = [];
+    for (const [key, value] of counts) {
+      ordered.push({ key, count: value });
+    }
+
+    ordered.sort((a, b) => {
+      return b.count - a.count;
+    });
+    const truncated = ordered.slice(0, size);
+    return {
+      categories: truncated,
+    } as CategoryFieldMeta;
   }
 
   _pluckOrdinalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): RangeFieldMeta | null {
