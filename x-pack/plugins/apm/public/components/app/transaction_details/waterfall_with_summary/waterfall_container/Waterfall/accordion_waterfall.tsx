@@ -102,6 +102,8 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     onToggleEntryTransaction,
   } = props;
 
+  console.log({ item, isOpen, level });
+
   const nextLevel = level + 1;
 
   const children = waterfall.childrenByParentId[item.id] || [];
@@ -139,9 +141,9 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={() => {
         setIsOpen((isCurrentOpen) => !isCurrentOpen);
-        if (onToggleEntryTransaction) {
-          onToggleEntryTransaction();
-        }
+        // if (onToggleEntryTransaction) {
+        //   onToggleEntryTransaction();
+        // }
       }}
     >
       {children.map((child) => (

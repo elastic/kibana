@@ -17,6 +17,7 @@ import {
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/Timeline';
+import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { SyncBadge } from './sync_badge';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { FailureBadge } from './failure_badge';
@@ -71,7 +72,7 @@ const ItemText = euiStyled.span`
   /* add margin to all direct descendants */
   & > * {
     margin-right: ${({ theme }) => theme.eui.euiSizeS};
-   white-space: nowrap;
+    white-space: nowrap;
   }
 `;
 
@@ -160,7 +161,11 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
             : '';
         name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;
       }
-      return <EuiText size="s">{name}</EuiText>;
+      return (
+        <EuiText style={{ overflow: 'hidden' }} size="s">
+          <TruncateWithTooltip content={name} text={name} />
+        </EuiText>
+      );
     case 'transaction':
       return (
         <EuiTitle size="xxs">
@@ -205,7 +210,10 @@ export function WaterfallItem({
         type={item.docType}
       />
       <ItemText // using inline styles instead of props to avoid generating a css class for each item
-        style={{ minWidth: `${Math.max(100 - left, 0)}%` }}
+        style={{
+          maxWidth: `${Math.max(100 - left, 0)}%`,
+          minWidth: `${Math.max(100 - left, 0)}%`,
+        }}
       >
         <SpanActionToolTip item={item}>
           <PrefixIcon item={item} />

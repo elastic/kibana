@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
+import { Meta, Story } from '@storybook/react';
+import React, { ComponentProps } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { WaterfallContainer } from './index';
@@ -18,20 +19,20 @@ import {
   urlParams as testUrlParams,
 } from './waterfall_container.stories.data';
 
-type Args = ComponentType<typeof WaterfallContainer>;
+type Args = ComponentProps<typeof WaterfallContainer>;
 
 const stories: Meta<Args> = {
   title: 'app/TransactionDetails/Waterfall',
   component: WaterfallContainer,
   decorators: [
-    (Story: ComponentType) => (
+    (StoryComponent) => (
       <MemoryRouter
         initialEntries={[
           '/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName',
         ]}
       >
         <MockApmPluginContextWrapper>
-          <Story />
+          <StoryComponent />
         </MockApmPluginContextWrapper>
       </MemoryRouter>
     ),
