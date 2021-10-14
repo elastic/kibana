@@ -7,9 +7,8 @@
 
 import React, { memo, useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, EuiFlexItem } from '@elastic/eui';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -93,10 +92,6 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
   }, []);
 };
 
-const title = i18n.translate('xpack.fleet.epmList.allTitle', {
-  defaultMessage: 'Browse by category',
-});
-
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
 export const AvailablePackages: React.FC = memo(() => {
@@ -121,9 +116,7 @@ export const AvailablePackages: React.FC = memo(() => {
 
   function setSearchTerm(search: string) {
     // Use .replace so the browser's back button is not tied to single keystroke
-    history.replace(
-      pagePathGetters.integrations_all({ category: selectedCategory, searchTerm: search })[1]
-    );
+    history.replace(pagePathGetters.integrations_all({ searchTerm: search })[1]);
   }
 
   const { data: eprPackages, isLoading: isLoadingAllPackages } = useGetPackages({
@@ -186,20 +179,26 @@ export const AvailablePackages: React.FC = memo(() => {
   }
 
   let controls = [
-    <EuiHorizontalRule />,
-    <IntegrationPreference initialType={preference} onChange={setPreference} />,
+    <EuiFlexItem grow={false}>
+      <EuiHorizontalRule margin="m" />
+      <IntegrationPreference initialType={preference} onChange={setPreference} />,
+    </EuiFlexItem>,
   ];
 
   if (categories) {
     controls = [
-      <CategoryFacets
-        isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={({ id }) => {
-          setSelectedCategory(id);
-        }}
-      />,
+      <EuiFlexItem className="eui-yScrollWithShadows">
+        <CategoryFacets
+          isLoading={
+            isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
+          }
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={({ id }) => {
+            setSelectedCategory(id);
+          }}
+        />
+      </EuiFlexItem>,
       ...controls,
     ];
   }
@@ -214,7 +213,6 @@ export const AvailablePackages: React.FC = memo(() => {
   return (
     <PackageListGrid
       isLoading={isLoadingAllPackages}
-      title={title}
       controls={controls}
       initialSearch={searchParam}
       list={filteredCards}
