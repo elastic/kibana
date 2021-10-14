@@ -729,7 +729,6 @@ export const exampleRuleStatus: () => SavedObject<IRuleStatusSOAttributes> = () 
   type: legacyRuleStatusSavedObjectType,
   id: '042e6d90-7069-11ea-af8b-0f8ae4fa817e',
   attributes: {
-    alertId: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
     statusDate: '2020-03-27T22:55:59.517Z',
     status: RuleExecutionStatus.succeeded,
     lastFailureAt: null,
@@ -741,7 +740,13 @@ export const exampleRuleStatus: () => SavedObject<IRuleStatusSOAttributes> = () 
     searchAfterTimeDurations: [],
     lastLookBackDate: null,
   },
-  references: [],
+  references: [
+    {
+      id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
+      type: 'alert',
+      name: 'alert_0',
+    },
+  ],
   updated_at: '2020-03-27T22:55:59.577Z',
   version: 'WzgyMiwxXQ==',
 });

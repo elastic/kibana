@@ -62,8 +62,9 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
     return this.ruleStatusClient.findBulk(ruleIds, logsCount);
   }
 
-  public async update({ id, attributes }: UpdateExecutionLogArgs) {
-    await this.ruleStatusClient.update(id, attributes);
+  public async update({ id, attributes, ruleId }: UpdateExecutionLogArgs) {
+    const references: SavedObjectReference[] = [legacyGetRuleReference(ruleId)];
+    await this.ruleStatusClient.update(id, attributes, { references });
   }
 
   public async delete(id: string) {
@@ -123,6 +124,8 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
   };
 
   public async logStatusChange({ newStatus, ruleId, message, metrics }: LogStatusChangeArgs) {
+    const references: SavedObjectReference[] = [legacyGetRuleReference(ruleId)];
+
     switch (newStatus) {
       case RuleExecutionStatus['going to run']:
       case RuleExecutionStatus.succeeded:
@@ -130,10 +133,14 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
       case RuleExecutionStatus['partial failure']: {
         const [currentStatus] = await this.getOrCreateRuleStatuses(ruleId);
 
-        await this.ruleStatusClient.update(currentStatus.id, {
-          ...currentStatus.attributes,
-          ...buildRuleStatusAttributes(newStatus, message, metrics),
-        });
+        await this.ruleStatusClient.update(
+          currentStatus.id,
+          {
+            ...currentStatus.attributes,
+            ...buildRuleStatusAttributes(newStatus, message, metrics),
+          },
+          { references }
+        );
 
         return;
       }
@@ -148,10 +155,7 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
         };
 
         // We always update the newest status, so to 'persist' a failure we push a copy to the head of the list
-        await this.ruleStatusClient.update(currentStatus.id, failureAttributes);
-        const references: SavedObjectReference[] = [
-          legacyGetRuleReference(failureAttributes.alertId),
-        ];
+        await this.ruleStatusClient.update(currentStatus.id, failureAttributes, { references });
         const lastStatus = await this.ruleStatusClient.create(failureAttributes, { references });
 
         // drop oldest failures

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import {
-  SavedObjectsClientContract,
   SavedObject,
-  SavedObjectsUpdateResponse,
-  SavedObjectsFindOptions,
-  SavedObjectsFindResult,
-  SavedObjectsFindOptionsReference,
+  SavedObjectsClientContract,
   SavedObjectsCreateOptions,
-  SavedObjectsBulkGetObject,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
+  SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
 } from 'kibana/server';
+import { get } from 'lodash';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleStatusSavedObjectType } from '../../rules/legacy_rule_status/legacy_rule_status_saved_object_mappings';
 import { IRuleStatusSOAttributes } from '../../rules/types';
@@ -58,19 +57,12 @@ export const ruleStatusSavedObjectsClientFactory = (
     if (ids.length === 0) {
       return {};
     }
-    // With migration from `alertId` to `references[].id` it's not possible to fetch
-    // just the most recent RuleStatusSO's in one query as SO.find() API doesn't support
-    // `reverse_nested` so you can't include the parent. Broken out into two queries,
-    // first for fetching most recent RuleStatusSO id's, then the objects themself.
-    // TODO: Still use one query but return all status SO's and filter server side? Perf test?
-
-    // Query 1: Fetch most recent RuleStatusSO _id's
     const references = ids.map<SavedObjectsFindOptionsReference>((alertId) => ({
       id: alertId,
       type: 'alert',
     }));
     const order: 'desc' = 'desc';
-    const nestedAggs = {
+    const aggs = {
       references: {
         nested: {
           path: `${legacyRuleStatusSavedObjectType}.references`,
@@ -82,16 +74,21 @@ export const ruleStatusSavedObjectsClientFactory = (
               size: ids.length,
             },
             aggs: {
-              most_recent_statuses: {
-                top_hits: {
-                  sort: [
-                    {
-                      [`${legacyRuleStatusSavedObjectType}.statusDate`]: {
-                        order,
-                      },
+              rule_status: {
+                reverse_nested: {},
+                aggs: {
+                  most_recent_statuses: {
+                    top_hits: {
+                      sort: [
+                        {
+                          [`${legacyRuleStatusSavedObjectType}.statusDate`]: {
+                            order,
+                          },
+                        },
+                      ],
+                      size: statusesPerId,
                     },
-                  ],
-                  size: statusesPerId,
+                  },
                 },
               },
             },
@@ -99,30 +96,18 @@ export const ruleStatusSavedObjectsClientFactory = (
         },
       },
     };
-    const statusIdResults = await savedObjectsClient.find({
+    const results = await savedObjectsClient.find({
       hasReference: references,
-      aggs: nestedAggs,
+      aggs,
       type: legacyRuleStatusSavedObjectType,
       perPage: 0,
     });
-    const statusIdResultBuckets = get(statusIdResults, 'aggregations.references.alertIds.buckets');
-    const ruleStatusIds: string[] = statusIdResultBuckets.map((b: unknown) => {
-      const hits = get(b, 'most_recent_statuses.hits.hits');
-      return get(hits, `[${hits.length - 1}]._id`); // TODO: top_hits agg doesn't appear to be working above
-    });
-
-    // Query 2: Retrieve RuleStatusSO objects via `_id`'s
-    const objects: SavedObjectsBulkGetObject[] = ruleStatusIds.map((id) => ({
-      type: legacyRuleStatusSavedObjectType,
-      id: id.substring(`${legacyRuleStatusSavedObjectType}:`.length), // TODO: Any gotchas here w/ any potential additional share-capable prefixes
-    }));
-    const statusResult = await savedObjectsClient.bulkGet(objects);
-
-    const hits = get(statusResult, 'saved_objects');
-    return hits.reduce((acc: Record<string, IRuleStatusSOAttributes[]>, hit: unknown) => {
-      const alertId: string = get(hit, `references[0].id`);
-      // TODO: Fine to not support multi-status now?
-      acc[alertId] = [get(hit, 'attributes')];
+    const buckets = get(results, 'aggregations.references.alertIds.buckets');
+    return buckets.reduce((acc: Record<string, unknown>, bucket: unknown) => {
+      const key = get(bucket, 'key');
+      const hits = get(bucket, 'rule_status.most_recent_statuses.hits.hits');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      acc[key] = hits.map((hit: any) => hit._source[legacyRuleStatusSavedObjectType]);
       return acc;
     }, {});
   },

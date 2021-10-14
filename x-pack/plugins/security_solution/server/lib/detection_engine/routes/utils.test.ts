@@ -142,7 +142,7 @@ describe.each([
       statusTwo.attributes.status = RuleExecutionStatus.failed;
       const currentStatus = exampleRuleStatus();
       const foundRules = [currentStatus.attributes, statusOne.attributes, statusTwo.attributes];
-      const res = mergeStatuses(currentStatus.attributes.alertId, foundRules, {
+      const res = mergeStatuses(currentStatus.references[0].id, foundRules, {
         'myfakealertid-8cfac': {
           current_status: {
             alert_id: 'myfakealertid-8cfac',
