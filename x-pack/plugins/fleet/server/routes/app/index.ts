@@ -17,13 +17,15 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
     success: false,
     error: 'MISSING_SECURITY',
   };
-  const body: CheckPermissionsResponse = { success: true };
-  try {
-    const security = await appContextService.getSecurity();
+
+  if (!appContextService.hasSecurity() || !appContextService.getSecurityLicense().isEnabled()) {
+    return response.ok({ body: missingSecurityBody });
+  } else {
+    const security = appContextService.getSecurity();
     const user = security.authc.getCurrentUser(request);
 
-    // when ES security is disabled, but Kibana security plugin is not explicitly disabled,
-    // `authc.getCurrentUser()` does not error, instead it comes back as `null`
+    // Defensively handle situation where user is undefined (should only happen when ES security is disabled)
+    // This should be covered by the `getSecurityLicense().isEnabled()` check above, but we leave this for robustness.
     if (!user) {
       return response.ok({
         body: missingSecurityBody,
@@ -31,20 +33,15 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
     }
 
     if (!user?.roles.includes('superuser')) {
-      body.success = false;
-      body.error = 'MISSING_SUPERUSER_ROLE';
       return response.ok({
-        body,
+        body: {
+          success: false,
+          error: 'MISSING_SUPERUSER_ROLE',
+        } as CheckPermissionsResponse,
       });
     }
 
-    return response.ok({ body: { success: true } });
-  } catch (e) {
-    // when Kibana security plugin is explicitly disabled,
-    // `appContextService.getSecurity()` returns an error, so we catch it here
-    return response.ok({
-      body: missingSecurityBody,
-    });
+    return response.ok({ body: { success: true } as CheckPermissionsResponse });
   }
 };
 
