@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies potential use of an SSH utility to establish RDP over a reverse SSH Tunnel. This could be indicative of adversary lateral movement to interactively access restricted networks.",
+  "description": "Identifies potential use of an SSH utility to establish RDP over a reverse SSH Tunnel. This can be used by attackers to enable routing of network packets that would otherwise not reach their intended destination.",
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
@@ -24,26 +24,26 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Lateral Movement"
+    "Command and Control"
   ],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
-        "id": "TA0008",
-        "name": "Lateral Movement",
-        "reference": "https://attack.mitre.org/tactics/TA0008/"
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
       },
       "technique": [
         {
-          "id": "T1021",
-          "name": "Remote Services",
-          "reference": "https://attack.mitre.org/techniques/T1021/"
+          "id": "T1572",
+          "name": "Protocol Tunneling",
+          "reference": "https://attack.mitre.org/techniques/T1572/"
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }
