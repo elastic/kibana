@@ -15,13 +15,13 @@ export const useIndexPattern = (indexPatterns: IndexPatternsContract, indexPatte
   useEffect(() => {
     async function loadIndexPattern() {
       try {
-        const ip = await indexPatterns.get(indexPatternId);
-        setIndexPattern(ip);
+        const item = await indexPatterns.get(indexPatternId);
+        setIndexPattern(item);
       } catch (e) {
         setError(e);
       }
     }
     loadIndexPattern();
-  });
+  }, [indexPatternId, indexPatterns]);
   return { indexPattern, error };
 };
