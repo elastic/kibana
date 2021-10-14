@@ -184,9 +184,10 @@ export class ScreenshotObservableHandler {
             getTimeRange(driver, layout, logger),
             getElementPositionAndAttributes(driver, layout, logger),
             getRenderErrors(driver, layout, logger),
-          ]).then(([timeRange, elementsPositionAndAttributes]) => ({
+          ]).then(([timeRange, elementsPositionAndAttributes, renderErrors]) => ({
             elementsPositionAndAttributes,
             timeRange,
+            renderErrors,
           }));
         })
       );
