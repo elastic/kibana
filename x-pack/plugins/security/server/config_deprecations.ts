@@ -50,7 +50,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     const message = i18n.translate('xpack.security.deprecations.auditLoggerMessage', {
       defaultMessage:
-        'The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.',
+        'Use the new ECS-compliant audit logger. The legacy audit logger will be removed in 8.0.',
     });
 
     const documentationUrl = `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#audit-logging-settings`;
@@ -65,7 +65,10 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           manualSteps: [
             i18n.translate('xpack.security.deprecations.auditLogger.manualStepOneMessageCloud', {
               defaultMessage:
-                'The new ECS-compliant audit logger will be automatically enabled after upgrading to 8.0. You can optionally enable the ECS-compliant audit logger before upgrading by setting "xpack.security.audit.appender.type" to "rolling-file".',
+                'To enable the ECS audit logger now, add the "xpack.security.audit.appender.type: rolling-file" setting.',
+            }),
+            i18n.translate('xpack.security.deprecations.auditLogger.manualStepTwoMessageCloud', {
+              defaultMessage: `If you don't make any changes, the ECS audit logger will be enabled when you upgrade to 8.0.`,
             }),
           ],
         },
@@ -74,12 +77,16 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       addDeprecation({
         title,
         message,
+        level: 'warning',
         documentationUrl,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.auditLogger.manualStepOneMessage', {
               defaultMessage:
-                'Declare an audit logger "appender" via "xpack.security.audit.appender" to enable the ECS audit logger.',
+                'To enable the ECS audit logger now, configure an appender with "xpack.security.audit.appender".',
+            }),
+            i18n.translate('xpack.security.deprecations.auditLogger.manualStepTwoMessage', {
+              defaultMessage: `If you don't make any changes, the ECS audit logger will be enabled when you upgrade to 8.0.`,
             }),
           ],
         },

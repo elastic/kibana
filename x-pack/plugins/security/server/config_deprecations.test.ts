@@ -284,8 +284,8 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
-          "message": "The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.",
+          "level": "warning",
+          "message": "Use the new ECS-compliant audit logger. The legacy audit logger will be removed in 8.0.",
         },
       ]
     `);
@@ -331,7 +331,7 @@ describe('Config Deprecations', () => {
       Array [
         Object {
           "level": "warning",
-          "message": "The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.",
+          "message": "Use the new ECS-compliant audit logger. The legacy audit logger will be removed in 8.0.",
         },
       ]
     `);
