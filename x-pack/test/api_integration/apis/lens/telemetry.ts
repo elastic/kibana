@@ -37,7 +37,6 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('lens telemetry', () => {
-    const kibanaClient = convertToKibanaClient(es);
     beforeEach(async () => {
       await es.deleteByQuery({
         index: '.kibana',
@@ -106,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
         refresh: 'wait_for',
       });
-
+      const kibanaClient = convertToKibanaClient(es);
       const result = await getDailyEvents('.kibana', () => Promise.resolve(kibanaClient));
 
       expect(result).to.eql({
@@ -149,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
           getEvent('revert', date1, 'suggestion'),
         ],
       });
-
+      const kibanaClient = convertToKibanaClient(es);
       const result = await getDailyEvents('.kibana', () => Promise.resolve(kibanaClient));
 
       expect(result).to.eql({
@@ -176,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
       const esArchiver = getService('esArchiver');
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
-
+      const kibanaClient = convertToKibanaClient(es);
       const results = await getVisualizationCounts(() => Promise.resolve(kibanaClient), '.kibana');
 
       expect(results).to.have.keys([

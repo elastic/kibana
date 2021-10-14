@@ -82,7 +82,6 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Metric Threshold Alerts Executor', () => {
-    const kbnClient = convertToKibanaClient(esClient);
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
 
@@ -102,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
+          const kbnClient = convertToKibanaClient(esClient);
           const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
@@ -125,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should alert on the last value when the end date is the same as the last event', async () => {
           const params = { ...baseParams };
           const timeFrame = { end: gauge.max };
+          const kbnClient = convertToKibanaClient(esClient);
           const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
@@ -162,6 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
+          const kbnClient = convertToKibanaClient(esClient);
           const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
@@ -202,6 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
             groupBy: ['env'],
           };
           const timeFrame = { end: gauge.max };
+          const kbnClient = convertToKibanaClient(esClient);
           const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
@@ -243,6 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
             groupBy: ['env'],
           };
           const timeFrame = { end: gauge.midpoint };
+          const kbnClient = convertToKibanaClient(esClient);
           const results = await evaluateAlert(
             kbnClient,
             params,
@@ -303,6 +307,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
+          const kbnClient = convertToKibanaClient(esClient);
           const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
@@ -343,6 +348,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
+          const kbnClient = convertToKibanaClient(esClient);
           const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
