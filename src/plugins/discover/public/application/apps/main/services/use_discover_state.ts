@@ -34,7 +34,7 @@ export function useDiscoverState({
   savedSearch: SavedSearch;
   history: History;
 }) {
-  const { uiSettings: config, data, filterManager, indexPatterns } = services;
+  const { uiSettings: config, data, filterManager, indexPatterns, storage } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
   const { timefilter } = data.query.timefilter;
 
@@ -53,13 +53,14 @@ export function useDiscoverState({
             config,
             data,
             savedSearch,
+            storage,
           }),
         storeInSessionStorage: config.get('state:storeInSessionStorage'),
         history,
         toasts: services.core.notifications.toasts,
         uiSettings: config,
       }),
-    [config, data, history, savedSearch, services.core.notifications.toasts]
+    [config, data, history, savedSearch, services.core.notifications.toasts, storage]
   );
 
   const { appStateContainer } = stateContainer;
@@ -160,11 +161,12 @@ export function useDiscoverState({
         config,
         data,
         savedSearch: newSavedSearch,
+        storage,
       });
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
-    [indexPattern, services, config, data, stateContainer]
+    [services, indexPattern, config, data, storage, stateContainer]
   );
 
   /**
@@ -209,10 +211,11 @@ export function useDiscoverState({
       config,
       data,
       savedSearch,
+      storage,
     });
     stateContainer.replaceUrlAppState(newAppState);
     setState(newAppState);
-  }, [config, data, savedSearch, reset, stateContainer]);
+  }, [config, data, savedSearch, reset, stateContainer, storage]);
 
   /**
    * Trigger data fetching on indexPattern or savedSearch changes
