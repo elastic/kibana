@@ -134,6 +134,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
             groupType: 'mutually_exclusive',
             privileges: [
               {
+                api: [`${PLUGIN_ID}-writeSavedQueries`],
                 id: 'saved_queries_all',
                 includeIn: 'all',
                 name: 'All',
@@ -144,6 +145,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 ui: ['writeSavedQueries', 'readSavedQueries'],
               },
               {
+                api: [`${PLUGIN_ID}-readSavedQueries`],
                 id: 'saved_queries_read',
                 includeIn: 'read',
                 name: 'Read',

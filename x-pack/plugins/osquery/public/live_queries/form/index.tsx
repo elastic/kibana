@@ -93,6 +93,16 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const formSchema = {
+    agentSelection: {
+      defaultValue: {
+        agents: [],
+        allAgentsSelected: false,
+        platformsSelected: [],
+        policiesSelected: [],
+      },
+      type: FIELD_TYPES.JSON,
+      validations: [],
+    },
     savedQueryId: {
       type: FIELD_TYPES.TEXT,
       validations: [],
@@ -196,7 +206,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     (savedQuery) => {
       if (savedQuery) {
         setFieldValue('query', savedQuery.query);
-        setFieldValue('savedQueryId', savedQuery.id);
+        setFieldValue('savedQueryId', savedQuery.savedQueryId);
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
           setAdvancedContentState('open');
@@ -221,6 +231,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     const newState = isOpen ? 'open' : 'closed';
     setAdvancedContentState(newState);
   }, []);
+
+  const ecsFieldProps = useMemo(
+    () => ({
+      isDisabled: !permissions.writeSavedQueries,
+    }),
+    [permissions.writeSavedQueries]
+  );
 
   const queryFieldStepContent = useMemo(
     () => (
@@ -249,6 +266,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             component={ECSMappingEditorField}
             query={query}
             fieldRef={ecsFieldRef}
+            euiFieldProps={ecsFieldProps}
           />
         </StyledEuiAccordion>
         <EuiSpacer />
@@ -293,6 +311,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       advancedContentState,
       handleToggle,
       query,
+      ecsFieldProps,
       singleAgentMode,
       agentSelected,
       queryValueProvided,

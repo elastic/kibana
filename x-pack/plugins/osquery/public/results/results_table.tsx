@@ -20,6 +20,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { pagePathGetters } from '../../../fleet/public';
@@ -188,7 +189,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
               size="s"
               content={
                 <>
-                  {`Field is mapped to:`}
+                  <FormattedMessage
+                    id="xpack.osquery.liveQueryResults.table.fieldMappedLabel"
+                    defaultMessage="Field is mapped to"
+                  />
+                  {`:`}
                   <ul>
                     {
                       // @ts-expect-error update types

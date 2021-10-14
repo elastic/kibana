@@ -12,7 +12,7 @@ export { queryFieldValidation } from '../../common/validations';
 
 const idPattern = /^[a-zA-Z0-9-_]+$/;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const idSchemaValidation: ValidationFunc<any, string, string> = ({ value }) => {
+export const idSchemaValidation: ValidationFunc<any, string, string> = ({ value }) => {
   const valueIsValid = idPattern.test(value);
   if (!valueIsValid) {
     return {

@@ -72,7 +72,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           data: pickBy({
             id: uuid.v4(),
             query: request.body.query,
-            saved_query_id: request.body.savedQueryId,
+            saved_query_id: request.body.saved_query_id,
             ecs_mapping: request.body.ecs_mapping,
           }),
         };

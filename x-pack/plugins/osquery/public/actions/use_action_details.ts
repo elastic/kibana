@@ -62,7 +62,6 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
             defaultMessage: 'Error while fetching action details',
           }),
         }),
-
       retryDelay: 1000,
     }
   );

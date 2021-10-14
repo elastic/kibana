@@ -37,6 +37,7 @@ import { useAgentPolicies } from '../../agent_policies';
 import { useCreatePack } from '../use_create_pack';
 import { useUpdatePack } from '../use_update_pack';
 import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
+import { idSchemaValidation } from '../queries/validations';
 
 const GhostFormField = () => <></>;
 
@@ -82,6 +83,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
           defaultMessage: 'Name',
         }),
         validations: [
+          {
+            validator: idSchemaValidation,
+          },
           {
             validator: fieldValidators.emptyField(
               i18n.translate('xpack.osquery.pack.form.nameFieldRequiredErrorMessage', {
