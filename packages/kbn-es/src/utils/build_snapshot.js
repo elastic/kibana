@@ -26,6 +26,7 @@ const onceEvent = (emitter, event) => new Promise((resolve) => emitter.once(even
  * @returns {Object} containing archive and optional plugins
  *
  * Gradle tasks:
+ *   $ ./gradlew tasks --all | grep 'distribution.*assemble\s'
  *   :distribution:archives:darwin-tar:assemble
  *   :distribution:archives:linux-tar:assemble
  *   :distribution:archives:windows-zip:assemble
