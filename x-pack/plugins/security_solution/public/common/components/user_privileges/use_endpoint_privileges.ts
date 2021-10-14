@@ -90,3 +90,14 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
 
   return privileges;
 };
+
+export const getEndpointPrivilegesInitialState = (): EndpointPrivileges => {
+  return {
+    loading: true,
+    canAccessFleet: false,
+    canAccessEndpointManagement: false,
+    canIsolateHost: false,
+    canCreateArtifactsByPolicy: false,
+    isPlatinumPlus: false,
+  };
+};

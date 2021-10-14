@@ -13,7 +13,7 @@ import { appRoutesService } from '../../../../../fleet/common';
 import { AuthenticatedUser } from '../../../../../security/common';
 import { licenseService } from '../../hooks/use_license';
 import { fleetGetCheckPermissionsHttpMock } from '../../../management/pages/mocks';
-import { getAllEndpointPrivilegesMock } from './__mocks__/get_all_endpoint_privileges_mock';
+import { getEndpointPrivilegesInitialStateMock } from './__mocks__/get_endpoint_privileges_initial_state_mock';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_license', () => {
@@ -73,7 +73,7 @@ describe('When using useEndpointPrivileges hook', () => {
 
     const { rerender } = render();
     expect(result.current).toEqual(
-      getAllEndpointPrivilegesMock({
+      getEndpointPrivilegesInitialStateMock({
         canAccessEndpointManagement: false,
         canAccessFleet: false,
         loading: true,
@@ -84,7 +84,7 @@ describe('When using useEndpointPrivileges hook', () => {
     (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
     rerender();
     expect(result.current).toEqual(
-      getAllEndpointPrivilegesMock({
+      getEndpointPrivilegesInitialStateMock({
         canAccessEndpointManagement: false,
         canAccessFleet: false,
         loading: true,
@@ -96,7 +96,7 @@ describe('When using useEndpointPrivileges hook', () => {
       fleetApiMock.waitForApi();
       releaseApiResponse!();
     });
-    expect(result.current).toEqual(getAllEndpointPrivilegesMock());
+    expect(result.current).toEqual(getEndpointPrivilegesInitialStateMock());
   });
 
   it('should call Fleet permissions api to determine user privilege to fleet', async () => {
@@ -114,7 +114,7 @@ describe('When using useEndpointPrivileges hook', () => {
     await waitForNextUpdate();
     await fleetApiMock.waitForApi();
     expect(result.current).toEqual(
-      getAllEndpointPrivilegesMock({
+      getEndpointPrivilegesInitialStateMock({
         canAccessEndpointManagement: false,
       })
     );
@@ -130,7 +130,7 @@ describe('When using useEndpointPrivileges hook', () => {
     await waitForNextUpdate();
     await fleetApiMock.waitForApi();
     expect(result.current).toEqual(
-      getAllEndpointPrivilegesMock({
+      getEndpointPrivilegesInitialStateMock({
         canAccessEndpointManagement: false,
         canAccessFleet: false,
       })
