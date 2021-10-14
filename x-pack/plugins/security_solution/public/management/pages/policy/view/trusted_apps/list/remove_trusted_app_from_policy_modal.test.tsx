@@ -18,7 +18,10 @@ import {
   RemoveTrustedAppFromPolicyModal,
   RemoveTrustedAppFromPolicyModalProps,
 } from './remove_trusted_app_from_policy_modal';
-import { PolicyArtifactsUpdateTrustedApps } from '../../../store/policy_details/action/policy_trusted_apps_action';
+import {
+  PolicyArtifactsUpdateTrustedApps,
+  PolicyDetailsTrustedAppsRemoveListStateChanged,
+} from '../../../store/policy_details/action/policy_trusted_apps_action';
 import { Immutable } from '../../../../../../../common/endpoint/types';
 import { HttpFetchOptionsWithPath } from 'kibana/public';
 
@@ -79,19 +82,48 @@ describe('When using the RemoveTrustedAppFromPolicyModal component', () => {
     renderResult.getByTestId('confirmModalConfirmButton') as HTMLButtonElement;
 
   const clickConfirmButton = async (
-    waitForActionDispatch: boolean = false
-  ): Promise<Immutable<PolicyArtifactsUpdateTrustedApps> | undefined> => {
+    /* wait for the UI action to the store middleware to initialize the remove */
+    waitForUpdateRequestActionDispatch: boolean = false,
+    /* wait for the removal to succeed */
+    waitForRemoveSuccessActionDispatch: boolean = false
+  ): Promise<
+    Immutable<
+      Array<PolicyArtifactsUpdateTrustedApps | PolicyDetailsTrustedAppsRemoveListStateChanged>
+    >
+  > => {
     const pendingConfirmStoreAction = waitForAction('policyArtifactsUpdateTrustedApps');
+    const pendingRemoveSuccessAction = waitForAction(
+      'policyDetailsTrustedAppsRemoveListStateChanged',
+      {
+        validate({ payload }) {
+          return isLoadedResourceState(payload);
+        },
+      }
+    );
 
     act(() => {
       fireEvent.click(getConfirmButton());
     });
 
-    let response: PolicyArtifactsUpdateTrustedApps | undefined;
+    let response: Array<
+      PolicyArtifactsUpdateTrustedApps | PolicyDetailsTrustedAppsRemoveListStateChanged
+    > = [];
 
-    if (waitForActionDispatch) {
+    if (waitForUpdateRequestActionDispatch || waitForRemoveSuccessActionDispatch) {
+      const pendingActions: Array<
+        Promise<PolicyArtifactsUpdateTrustedApps | PolicyDetailsTrustedAppsRemoveListStateChanged>
+      > = [];
+
+      if (waitForUpdateRequestActionDispatch) {
+        pendingActions.push(pendingConfirmStoreAction);
+      }
+
+      if (waitForRemoveSuccessActionDispatch) {
+        pendingActions.push(pendingRemoveSuccessAction);
+      }
+
       await act(async () => {
-        response = await pendingConfirmStoreAction;
+        response = await Promise.all(pendingActions);
       });
     }
 
@@ -122,7 +154,7 @@ describe('When using the RemoveTrustedAppFromPolicyModal component', () => {
 
   it('should dispatch action when confirmed', async () => {
     await render();
-    const confirmedAction = await clickConfirmButton(true);
+    const confirmedAction = (await clickConfirmButton(true))[0];
 
     expect(confirmedAction!.payload).toEqual({
       action: 'remove',
@@ -176,14 +208,7 @@ describe('When using the RemoveTrustedAppFromPolicyModal component', () => {
 
   it('should show success toast and close modal when removed is successful', async () => {
     await render();
-    await clickConfirmButton(true);
-    await act(async () => {
-      await waitForAction('policyDetailsTrustedAppsRemoveListStateChanged', {
-        validate({ payload }) {
-          return isLoadedResourceState(payload);
-        },
-      });
-    });
+    await clickConfirmButton(true, true);
 
     expect(appTestContext.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       text: '"Avast Business Antivirus" has been removed from Endpoint Policy policy',
@@ -192,25 +217,39 @@ describe('When using the RemoveTrustedAppFromPolicyModal component', () => {
   });
 
   it('should show multiples removal success message', async () => {
-    trustedApps.push({
-      ...trustedApps[0],
-      id: '123',
-      name: 'trusted app 2',
-    });
+    trustedApps = [
+      ...trustedApps,
+      {
+        ...trustedApps[0],
+        id: '123',
+        name: 'trusted app 2',
+      },
+    ];
 
     await render();
-    await clickConfirmButton(true);
-    await act(async () => {
-      await waitForAction('policyDetailsTrustedAppsRemoveListStateChanged', {
-        validate({ payload }) {
-          return isLoadedResourceState(payload);
-        },
-      });
-    });
+    await clickConfirmButton(true, true);
 
     expect(appTestContext.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       text: '2 trusted applications have been removed from Endpoint Policy policy',
       title: 'Successfully removed',
     });
+  });
+
+  it('should trigger a refresh of trusted apps list data on successful removal', async () => {
+    await render();
+    const pendingActions = Promise.all([
+      // request list refresh
+      waitForAction('policyDetailsTrustedAppsForceListDataRefresh'),
+
+      // list data refresh received
+      waitForAction('assignedTrustedAppsListStateChanged', {
+        validate({ payload }) {
+          return isLoadedResourceState(payload);
+        },
+      }),
+    ]);
+    await clickConfirmButton(true, true);
+
+    await expect(pendingActions).resolves.toHaveLength(2);
   });
 });
