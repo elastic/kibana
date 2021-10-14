@@ -72,10 +72,6 @@ image::management/connectors/images/servicenow-sir-params-test.png[ServiceNow Se
 ServiceNow SecOps actions have the following configuration properties.
 
 Short description::    A short description for the incident, used for searching the contents of the knowledge base.
-Source Ips::           A list of source IPs related to the incident. The IPs will be added as observables to the security incident.
-Destination Ips::      A list of destination IPs related to the incident. The IPs will be added as observables to the security incident.
-Malware URLs::         A list of malware URLs related to the incident. The URLs will be added as observables to the security incident.
-Malware Hashes::       A list of malware hashes related to the incident. The hashes  will be added as observables to the security incident.
 Priority::             The priority of the incident.
 Category::             The category of the incident.
 Subcategory::          The subcategory of the incident.
