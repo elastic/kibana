@@ -70,7 +70,7 @@ export const useWorkpad = (
         platformService.redirectLegacyUrl(`#${getRedirectPath(aliasId)}`, getWorkpadLabel());
       }
     })();
-  }, [storedWorkpad, resolveInfo, getRedirectPath, platformService]);
+  }, [resolveInfo, getRedirectPath, platformService]);
 
   return [storedWorkpad.id === workpadId ? storedWorkpad : undefined, error];
 };
