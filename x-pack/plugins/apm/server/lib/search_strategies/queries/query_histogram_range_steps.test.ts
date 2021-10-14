@@ -106,8 +106,8 @@ describe('query_histogram_range_steps', () => {
       );
 
       expect(resp.length).toEqual(100);
-      expect(resp[0]).toEqual(9.260965422132594);
-      expect(resp[99]).toEqual(18521.930844265193);
+      expect(resp[0]).toEqual(9);
+      expect(resp[99]).toEqual(18522);
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });
