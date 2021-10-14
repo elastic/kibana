@@ -20,7 +20,7 @@ export interface EndpointPrivileges {
   canCreateArtifactsByPolicy: boolean;
   /** If user has permissions to use the Host isolation feature */
   canIsolateHost: boolean;
-  /** @deprecated do not use. instead, use one of the other privileges defiened */
+  /** @deprecated do not use. instead, use one of the other privileges defined */
   isPlatinumPlus: boolean;
 }
 
