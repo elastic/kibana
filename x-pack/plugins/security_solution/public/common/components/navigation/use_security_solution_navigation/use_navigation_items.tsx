@@ -90,8 +90,8 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
           navTabs.endpoints,
           navTabs.trusted_apps,
           navTabs.event_filters,
-          canSeeHostIsolationExceptions ? navTabs.host_isolation_exceptions : undefined,
-        ].filter((tab): tab is NavTab => tab !== undefined),
+          ...(canSeeHostIsolationExceptions ? [navTabs.host_isolation_exceptions] : []),
+        ],
       },
     ];
   }, [navTabs, hasCasesReadPermissions, canSeeHostIsolationExceptions]);
