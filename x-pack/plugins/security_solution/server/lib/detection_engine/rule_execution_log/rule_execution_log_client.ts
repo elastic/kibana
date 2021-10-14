@@ -38,7 +38,7 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
         this.client = new SavedObjectsAdapter(savedObjectsClient);
         break;
       case UnderlyingLogClient.eventLog:
-        this.client = new EventLogAdapter(eventLogService);
+        this.client = new EventLogAdapter(eventLogService, savedObjectsClient);
         break;
     }
   }
