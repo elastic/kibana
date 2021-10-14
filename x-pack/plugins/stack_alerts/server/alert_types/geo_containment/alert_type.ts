@@ -16,7 +16,6 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RuleParamsAndRefs,
-  extractEntityAndBoundaryReferences,
   AlertTypeParams,
 } from '../../../../alerting/server';
 import { Query } from '../../../../../../src/plugins/data/common/query';
