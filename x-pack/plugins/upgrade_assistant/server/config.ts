@@ -74,19 +74,19 @@ const deprecations7x: PluginConfigDescriptor<UpgradeAssistantConfig7x>['deprecat
     }
 
     addDeprecation({
-      title: i18n.translate('xpack.upgrade_assistant.deprecations.enabledTitle', {
+      title: i18n.translate('xpack.upgradeAssistant.deprecations.enabledTitle', {
         defaultMessage: 'Setting "xpack.upgrade_assistant.enabled" is deprecated',
       }),
-      message: i18n.translate('xpack.upgrade_assistant.deprecations.enabledMessage', {
+      message: i18n.translate('xpack.upgradeAssistant.deprecations.enabledMessage', {
         defaultMessage:
           'Use the "xpack.upgrade_assistant.ui.enabled" setting instead of "xpack.upgrade_assistant.enabled".',
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('xpack.upgrade_assistant.deprecations.enabled.manualStepOneMessage', {
+          i18n.translate('xpack.upgradeAssistant.deprecations.enabled.manualStepOneMessage', {
             defaultMessage: 'Open the kibana.yml config file.',
           }),
-          i18n.translate('xpack.upgrade_assistant.deprecations.enabled.manualStepTwoMessage', {
+          i18n.translate('xpack.upgradeAssistant.deprecations.enabled.manualStepTwoMessage', {
             defaultMessage:
               'Change the "xpack.upgrade_assistant.enabled" setting to "xpack.upgrade_assistant.ui.enabled".',
           }),
