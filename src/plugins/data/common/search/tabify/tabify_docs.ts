@@ -55,7 +55,16 @@ export interface TabifyDocsOptions {
    * merged into the flattened document.
    */
   source?: boolean;
+  /**
+   * If set to `true` values that have been ignored in ES (ignored_field_values)
+   * will be merged into the flattened document.
+   */
+  includeIgnoredValues?: boolean;
 }
+
+// This is an overwrite of the SearchHit type to add the ignored_field_values.
+// Can be removed once the estypes.SearchHit knows about ignored_field_values
+type Hit<T = unknown> = estypes.SearchHit<T> & { ignored_field_values?: Record<string, unknown[]> };
 
 /**
  * Flattens an individual hit (from an ES response) into an object. This will
@@ -65,11 +74,7 @@ export interface TabifyDocsOptions {
  * @param indexPattern The index pattern for the requested index if available.
  * @param params Parameters how to flatten the hit
  */
-export function flattenHit(
-  hit: estypes.SearchHit,
-  indexPattern?: IndexPattern,
-  params?: TabifyDocsOptions
-) {
+export function flattenHit(hit: Hit, indexPattern?: IndexPattern, params?: TabifyDocsOptions) {
   const flat = {} as Record<string, any>;
 
   function flatten(obj: Record<string, any>, keyPrefix: string = '') {
@@ -109,6 +114,22 @@ export function flattenHit(
   flatten(hit.fields || {});
   if (params?.source !== false && hit._source) {
     flatten(hit._source as Record<string, any>);
+  }
+
+  // TODO: pack behind a method parameter
+  // The values in `ignored_field_values` are guaranteed to always be wrapped in an array
+  if (params?.includeIgnoredValues && hit.ignored_field_values) {
+    Object.entries(hit.ignored_field_values).forEach(([fieldName, fieldValue]) => {
+      if (flat[fieldName]) {
+        if (Array.isArray(flat[fieldName])) {
+          flat[fieldName] = [...flat[fieldName], ...fieldValue];
+        } else {
+          flat[fieldName] = [flat[fieldName], ...fieldValue];
+        }
+      } else {
+        flat[fieldName] = fieldValue;
+      }
+    });
   }
 
   // Merge all valid meta fields into the flattened object

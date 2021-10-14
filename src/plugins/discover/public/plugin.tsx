@@ -62,6 +62,7 @@ import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_fie
 import { DeferredSpinner } from './shared';
 import { ViewSavedSearchAction } from './application/embeddable/view_saved_search_action';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
+import { FieldFormatsStart } from '../../field_formats/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -185,6 +186,7 @@ export interface DiscoverStartPlugins {
   navigation: NavigationStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   share?: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;

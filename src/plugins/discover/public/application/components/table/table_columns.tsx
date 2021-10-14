@@ -82,8 +82,18 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
         </strong>
       </EuiText>
     ),
-    render: ({ formattedValue }: FieldRecord['value'], { field: { field } }: FieldRecord) => {
-      return <TableFieldValue field={field} formattedValue={formattedValue} />;
+    render: (
+      { formattedValue, ignored }: FieldRecord['value'],
+      { field: { field }, action: { flattenedField } }: FieldRecord
+    ) => {
+      return (
+        <TableFieldValue
+          field={field}
+          formattedValue={formattedValue}
+          rawValue={flattenedField}
+          ignoreReason={ignored}
+        />
+      );
     },
   },
 ];

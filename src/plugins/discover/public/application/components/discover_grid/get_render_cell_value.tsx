@@ -22,6 +22,7 @@ import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
 import { EsHitRecord } from '../../types';
+import { formatFieldValue } from '../../helpers/format_value';
 
 export const getRenderCellValueFn =
   (
@@ -191,12 +192,12 @@ export const getRenderCellValueFn =
       return <span>{JSON.stringify(rowFlattened[columnId])}</span>;
     }
 
-    const valueFormatted = indexPattern.formatField(row, columnId);
+    const valueFormatted = formatFieldValue(rowFlattened[columnId], row, indexPattern, field);
     if (typeof valueFormatted === 'undefined') {
       return <span>-</span>;
     }
     return (
       // eslint-disable-next-line react/no-danger
-      <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, columnId) }} />
+      <span dangerouslySetInnerHTML={{ __html: valueFormatted }} />
     );
   };

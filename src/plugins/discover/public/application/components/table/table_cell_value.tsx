@@ -8,14 +8,24 @@
 
 import classNames from 'classnames';
 import React, { Fragment, useState } from 'react';
+import { IgnoredReason } from '../../helpers/get_ignored_reason';
 import { FieldRecord } from './table';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
-type TableFieldValueProps = FieldRecord['value'] & Pick<FieldRecord['field'], 'field'>;
+type TableFieldValueProps = Pick<FieldRecord['field'], 'field'> & {
+  formattedValue: FieldRecord['value']['formattedValue'];
+  rawValue: unknown;
+  ignoreReason?: IgnoredReason;
+};
 
-export const TableFieldValue = ({ formattedValue, field }: TableFieldValueProps) => {
+export const TableFieldValue = ({
+  formattedValue,
+  field,
+  rawValue,
+  ignoreReason,
+}: TableFieldValueProps) => {
   const [fieldOpen, setFieldOpen] = useState(false);
 
   const value = String(formattedValue);
@@ -30,10 +40,17 @@ export const TableFieldValue = ({ formattedValue, field }: TableFieldValueProps)
 
   const onToggleCollapse = () => setFieldOpen((fieldOpenPrev) => !fieldOpenPrev);
 
+  const multiValue = Array.isArray(rawValue) && rawValue.length > 1;
+
   return (
     <Fragment>
       {isCollapsible && (
         <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
+      )}
+      {ignoreReason && (
+        <em>
+          {ignoreReason.toString()} (multiValue: {String(multiValue)})
+        </em>
       )}
       <div
         className={valueClassName}

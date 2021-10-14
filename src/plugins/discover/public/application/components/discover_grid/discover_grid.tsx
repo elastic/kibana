@@ -271,7 +271,11 @@ export const DiscoverGrid = ({
       getRenderCellValueFn(
         indexPattern,
         displayedRows,
-        displayedRows ? displayedRows.map((hit) => flattenHit(hit, indexPattern)) : [],
+        displayedRows
+          ? displayedRows.map((hit) =>
+              flattenHit(hit, indexPattern, { includeIgnoredValues: true })
+            )
+          : [],
         useNewFieldsApi,
         fieldsToShow,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)

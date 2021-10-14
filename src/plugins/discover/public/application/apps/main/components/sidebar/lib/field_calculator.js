@@ -13,7 +13,7 @@ import { flattenHit } from '../../../../../../../../data/common';
 function getFieldValues(hits, field, indexPattern) {
   const name = field.name;
   return map(hits, function (hit) {
-    return flattenHit(hit, indexPattern)[name];
+    return flattenHit(hit, indexPattern, { includeIgnoredValues: true })[name];
   });
 }
 

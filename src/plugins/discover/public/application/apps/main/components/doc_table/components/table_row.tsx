@@ -10,6 +10,7 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
+import { formatFieldValue } from '../../../../../helpers/format_value';
 import { flattenHit } from '../../../../../../../../data/common';
 import { DocViewer } from '../../../../../components/doc_viewer/doc_viewer';
 import { FilterManager, IndexPattern } from '../../../../../../../../data/public';
@@ -58,7 +59,10 @@ export const TableRow = ({
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
 
-  const flattenedRow = useMemo(() => flattenHit(row, indexPattern), [indexPattern, row]);
+  const flattenedRow = useMemo(
+    () => flattenHit(row, indexPattern, { includeIgnoredValues: true }),
+    [indexPattern, row]
+  );
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
 
   // toggle display of the rows details, a full list of the fields from each row
@@ -68,7 +72,12 @@ export const TableRow = ({
    * Fill an element with the value of a field
    */
   const displayField = (fieldName: string) => {
-    const formattedField = indexPattern.formatField(row, fieldName);
+    const formattedField = formatFieldValue(
+      flattenedRow[fieldName],
+      row,
+      indexPattern,
+      mapping(fieldName)
+    );
 
     // field formatters take care of escaping
     // eslint-disable-next-line react/no-danger
@@ -142,9 +151,9 @@ export const TableRow = ({
   } else {
     columns.forEach(function (column: string) {
       // when useNewFieldsApi is true, addressing to the fields property is safe
-      if (useNewFieldsApi && !mapping(column) && !row.fields![column]) {
+      if (useNewFieldsApi && !mapping(column) && row.fields && !row.fields[column]) {
         const innerColumns = Object.fromEntries(
-          Object.entries(row.fields!).filter(([key]) => {
+          Object.entries(row.fields).filter(([key]) => {
             return key.indexOf(`${column}.`) === 0;
           })
         );

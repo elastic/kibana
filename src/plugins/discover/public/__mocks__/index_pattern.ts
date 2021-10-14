@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { flattenHit, IIndexPatternFieldList } from '../../../data/common';
+import { IIndexPatternFieldList } from '../../../data/common';
 import { IndexPattern } from '../../../data/common';
 
 const fields = [
@@ -86,10 +85,5 @@ const indexPattern = {
 } as unknown as IndexPattern;
 
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
-indexPattern.formatField = (hit: Record<string, unknown>, fieldName: string) => {
-  return fieldName === '_source'
-    ? hit._source
-    : flattenHit(hit as unknown as estypes.SearchHit, indexPattern)[fieldName];
-};
 
 export const indexPatternMock = indexPattern;
