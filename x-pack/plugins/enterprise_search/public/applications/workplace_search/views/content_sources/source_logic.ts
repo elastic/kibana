@@ -112,6 +112,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       {
         setContentSource: () => false,
         resetSourceState: () => true,
+        removeContentSource: () => true,
       },
     ],
     buttonLoading: [
@@ -119,7 +120,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       {
         setButtonNotLoading: () => false,
         resetSourceState: () => false,
-        removeContentSource: () => true,
       },
     ],
     sectionLoading: [
