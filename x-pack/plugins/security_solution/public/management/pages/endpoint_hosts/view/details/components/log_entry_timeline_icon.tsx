@@ -7,31 +7,24 @@
 
 import React, { memo } from 'react';
 import { EuiAvatar, EuiAvatarProps } from '@elastic/eui';
-import { useEuiTheme } from '../../../../../../common/lib/theme/use_eui_theme';
 
 export const LogEntryTimelineIcon = memo(
   ({
+    avatarColor,
     avatarSize,
-    isResponseEvent,
-    isSuccessful,
     iconType,
+    isResponseEvent,
   }: {
+    avatarColor: EuiAvatarProps['color'];
     avatarSize: EuiAvatarProps['size'];
-    isResponseEvent: boolean;
-    isSuccessful: boolean;
     iconType: EuiAvatarProps['iconType'];
+    isResponseEvent: boolean;
   }) => {
-    const euiTheme = useEuiTheme();
-
     return (
       <EuiAvatar
         name="Timeline Icon"
         size={avatarSize ?? 's'}
-        color={
-          isResponseEvent && !isSuccessful
-            ? euiTheme.euiColorVis9_behindText
-            : euiTheme.euiColorLightestShade
-        }
+        color={avatarColor}
         iconColor="default"
         iconType={iconType ?? 'dot'}
       />
