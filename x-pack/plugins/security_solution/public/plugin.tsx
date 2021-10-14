@@ -127,7 +127,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...coreStart,
         ...startPlugins,
         storage: this.storage,
-        security: plugins.security,
       };
       return services;
     })();

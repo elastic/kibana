@@ -6,6 +6,7 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
+import { bufferTime } from 'rxjs/operators';
 
 interface AlertContext {
   alert_id: string;
@@ -37,13 +38,23 @@ export interface InsightsPayload {
 // Generic insights service class that works with the insights observable
 // Both server and client plugins instancates a singleton version of this class
 export class InsightsService {
-  private observable: Observable<IInsights> | null = null;
+  private observable: Observable<InsightsPayload> | null = null;
   private subscription: Subscription | null = null;
-  private buffer: InsightsPayload[] | null = null;
+  private clusterId: string;
 
-  public start(insights$: Observable<IInsights>) {
+  constructor(clusterId: string) {
+    this.clusterId = clusterId;
+  }
+
+  public start(insights$: Observable<InsightsPayload>, clusterId: string) {
     this.observable = insights$;
-    this.subscription = this.observable.subscribe(this.updateInformation.bind(this));
+    this.subscription = this.observable.pipe(bufferTime(10_000)).subscribe();
+  }
+
+  public add(alertId: string, sessionId: string) {}
+
+  private buildAlertAction(status: string): InsightsAction {
+    return { dismiss_timestamp: '' };
   }
 
   public stop() {
@@ -52,7 +63,3 @@ export class InsightsService {
     }
   }
 }
-
-export const isAtLeast = (insights: IInsights | null, level: InsightsType): boolean => {
-  return !!insights && insights.isAvailable && insights.isActive && insights.hasAtLeast(level);
-};
