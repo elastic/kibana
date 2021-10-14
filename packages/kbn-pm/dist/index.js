@@ -625,12 +625,20 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
  * Side Public License, v 1.
  */
 class ToolingLog {
-  constructor(writerConfig) {
-    (0, _defineProperty2.default)(this, "indentWidth", 0);
-    (0, _defineProperty2.default)(this, "writers", void 0);
+  constructor(writerConfig, options) {
+    (0, _defineProperty2.default)(this, "indentWidth$", void 0);
+    (0, _defineProperty2.default)(this, "writers$", void 0);
     (0, _defineProperty2.default)(this, "written$", void 0);
-    this.writers = writerConfig ? [new _tooling_log_text_writer.ToolingLogTextWriter(writerConfig)] : [];
-    this.written$ = new Rx.Subject();
+    (0, _defineProperty2.default)(this, "type", void 0);
+    this.indentWidth$ = options !== null && options !== void 0 && options.parent ? options.parent.indentWidth$ : new Rx.BehaviorSubject(0);
+    this.writers$ = options !== null && options !== void 0 && options.parent ? options.parent.writers$ : new Rx.BehaviorSubject([]);
+
+    if (!(options !== null && options !== void 0 && options.parent) && writerConfig) {
+      this.writers$.next([new _tooling_log_text_writer.ToolingLogTextWriter(writerConfig)]);
+    }
+
+    this.written$ = options !== null && options !== void 0 && options.parent ? options.parent.written$ : new Rx.Subject();
+    this.type = options === null || options === void 0 ? void 0 : options.type;
   }
   /**
    * Get the current indentation level of the ToolingLog
@@ -638,7 +646,7 @@ class ToolingLog {
 
 
   getIndent() {
-    return this.indentWidth;
+    return this.indentWidth$.getValue();
   }
   /**
    * Indent the output of the ToolingLog by some character (4 is a good choice usually).
@@ -652,8 +660,8 @@ class ToolingLog {
 
 
   indent(delta = 0, block) {
-    const originalWidth = this.indentWidth;
-    this.indentWidth = Math.max(this.indentWidth + delta, 0);
+    const originalWidth = this.indentWidth$.getValue();
+    this.indentWidth$.next(Math.max(originalWidth + delta, 0));
 
     if (!block) {
       return;
@@ -663,7 +671,7 @@ class ToolingLog {
       try {
         return await block();
       } finally {
-        this.indentWidth = originalWidth;
+        this.indentWidth$.next(originalWidth);
       }
     })();
   }
@@ -697,26 +705,41 @@ class ToolingLog {
   }
 
   getWriters() {
-    return this.writers.slice(0);
+    return [...this.writers$.getValue()];
   }
 
   setWriters(writers) {
-    this.writers = [...writers];
+    this.writers$.next([...writers]);
   }
 
   getWritten$() {
     return this.written$.asObservable();
   }
+  /**
+   * Create a new ToolingLog which sets a different "type", allowing messages to be filtered out by "source"
+   * @param type A string that will be passed along with messages from this logger which can be used to filter messages with `ignoreSources`
+   */
+
+
+  withType(type) {
+    return new ToolingLog(undefined, {
+      type,
+      parent: this
+    });
+  }
 
   sendToWriters(type, args) {
+    const indent = this.indentWidth$.getValue();
+    const writers = this.writers$.getValue();
     const msg = {
       type,
-      indent: this.indentWidth,
+      indent,
+      source: this.type,
       args
     };
     let written = false;
 
-    for (const writer of this.writers) {
+    for (const writer of writers) {
       if (writer.write(msg)) {
         written = true;
       }
@@ -6618,8 +6641,10 @@ class ToolingLogTextWriter {
   constructor(config) {
     (0, _defineProperty2.default)(this, "level", void 0);
     (0, _defineProperty2.default)(this, "writeTo", void 0);
+    (0, _defineProperty2.default)(this, "ignoreSources", void 0);
     this.level = (0, _log_levels.parseLogLevel)(config.level);
     this.writeTo = config.writeTo;
+    this.ignoreSources = config.ignoreSources;
 
     if (!this.writeTo || typeof this.writeTo.write !== 'function') {
       throw new Error('ToolingLogTextWriter requires the `writeTo` option be set to a stream (like process.stdout)');
@@ -6628,6 +6653,10 @@ class ToolingLogTextWriter {
 
   write(msg) {
     if (!shouldWriteType(this.level, msg.type)) {
+      return false;
+    }
+
+    if (this.ignoreSources && msg.source && this.ignoreSources.includes(msg.source)) {
       return false;
     }
 
@@ -8773,6 +8802,20 @@ class ToolingLogCollectingWriter extends _tooling_log_text_writer.ToolingLogText
     });
     (0, _defineProperty2.default)(this, "messages", []);
   }
+  /**
+   * Called by ToolingLog, extends messages with the source if message includes one.
+   */
+
+
+  write(msg) {
+    if (msg.source) {
+      return super.write({ ...msg,
+        args: [`source[${msg.source}]`, ...msg.args]
+      });
+    }
+
+    return super.write(msg);
+  }
 
 }
 
@@ -9010,6 +9053,9 @@ var _ci_stats_config = __webpack_require__(218);
 const BASE_URL = 'https://ci-stats.kibana.dev';
 
 class CiStatsReporter {
+  /**
+   * Create a CiStatsReporter by inspecting the ENV for the necessary config
+   */
   static fromEnv(log) {
     return new CiStatsReporter((0, _ci_stats_config.parseConfig)(log), log);
   }
@@ -9018,10 +9064,21 @@ class CiStatsReporter {
     this.config = config;
     this.log = log;
   }
+  /**
+   * Determine if CI_STATS is explicitly disabled by the environment. To determine
+   * if the CiStatsReporter has enough information in the environment to send metrics
+   * for builds use #hasBuildConfig().
+   */
+
 
   isEnabled() {
     return process.env.CI_STATS_DISABLED !== 'true';
   }
+  /**
+   * Determines if the CiStatsReporter is disabled by the environment, or properly
+   * configured and able to send stats
+   */
+
 
   hasBuildConfig() {
     var _this$config, _this$config2;
@@ -9061,7 +9118,7 @@ class CiStatsReporter {
     try {
       const {
         stdout
-      } = await (0, _execa.default)('git', ['branch', '--show-current']);
+      } = await (0, _execa.default)('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
       branch = stdout;
     } catch (e) {
       this.log.debug(e.message);
@@ -9069,7 +9126,7 @@ class CiStatsReporter {
 
     const memUsage = process.memoryUsage();
     const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
-    const defaultMetadata = {
+    const defaultMeta = {
       kibanaUuid,
       isElasticCommitter,
       committerHash: email ? _crypto.default.createHash('sha256').update(email).digest('hex').substring(0, 20) : undefined,
@@ -9090,15 +9147,15 @@ class CiStatsReporter {
       osRelease: _os.default.release(),
       totalMem: _os.default.totalmem()
     };
-    this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
+    this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
     return await this.req({
       auth: !!buildId,
       path: '/v1/timings',
       body: {
         buildId,
         upstreamBranch,
-        timings,
-        defaultMetadata
+        defaultMeta,
+        timings
       },
       bodyDesc: timings.length === 1 ? `${timings.length} timing` : `${timings.length} timings`
     });
@@ -9109,7 +9166,7 @@ class CiStatsReporter {
    */
 
 
-  async metrics(metrics) {
+  async metrics(metrics, options) {
     var _this$config4;
 
     if (!this.hasBuildConfig()) {
@@ -9127,6 +9184,7 @@ class CiStatsReporter {
       path: '/v1/metrics',
       body: {
         buildId,
+        defaultMeta: options === null || options === void 0 ? void 0 : options.defaultMeta,
         metrics
       },
       bodyDesc: `metrics: ${metrics.map(({
@@ -15450,6 +15508,12 @@ exports.parseConfig = parseConfig;
  * 2.0 and the Server Side Public License, v 1; you may not use this file except
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
+ */
+
+/**
+ * Information about how CiStatsReporter should talk to the ci-stats service. Normally
+ * it is read from a JSON environment variable using the `parseConfig()` function
+ * exported by this module.
  */
 function validateConfig(log, config) {
   const validApiToken = typeof config.apiToken === 'string' && config.apiToken.length !== 0;

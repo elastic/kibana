@@ -134,6 +134,7 @@ export const sampleAttributeCoreWebVital = {
       ],
       legend: {
         isVisible: true,
+        showSingleSeries: true,
         position: 'right',
       },
       preferredSeriesType: 'line',

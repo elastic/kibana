@@ -83,7 +83,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     act(() => {
       fireEvent.click(cancelButton);
     });
-    await waiter;
+    expect(await waiter).toBeTruthy();
   });
 
   it('should show success toast after the delete is completed', async () => {
