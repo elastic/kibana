@@ -16,6 +16,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -40,7 +41,6 @@ const warningToComponentMap: {
 
 export const idForWarning = (id: number) => `reindexWarning-${id}`;
 interface WarningsConfirmationFlyoutProps {
-  renderGlobalCallouts: () => React.ReactNode;
   closeFlyout: () => void;
   warnings: ReindexWarning[];
   advanceNextStep: () => void;
@@ -52,7 +52,6 @@ interface WarningsConfirmationFlyoutProps {
  */
 export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFlyoutProps> = ({
   warnings,
-  renderGlobalCallouts,
   closeFlyout,
   advanceNextStep,
 }) => {
@@ -87,8 +86,6 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
   return (
     <>
       <EuiFlyoutBody>
-        {renderGlobalCallouts()}
-
         <EuiCallOut
           title={
             <FormattedMessage
@@ -107,6 +104,15 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
           </p>
         </EuiCallOut>
 
+        <EuiSpacer />
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
+              defaultMessage="Accept changes"
+            />
+          </h3>
+        </EuiTitle>
         <EuiSpacer />
 
         {warnings.map((warning, index) => {

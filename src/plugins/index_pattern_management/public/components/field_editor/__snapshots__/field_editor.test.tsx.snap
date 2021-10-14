@@ -172,11 +172,13 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       isInvalid={true}
       label="Script"
     >
-      <eui-code-editor
+      <code-editor
+        aria-label="Script editor"
         data-test-subj="editorFieldScript"
         height="300px"
-        mode="groovy"
+        languageId="painless"
         onChange={[Function]}
+        value=""
         width="100%"
       />
     </eui-form-row>
@@ -407,10 +409,11 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       isInvalid={false}
       label="Script"
     >
-      <eui-code-editor
+      <code-editor
+        aria-label="Script editor"
         data-test-subj="editorFieldScript"
         height="300px"
-        mode="groovy"
+        languageId="painless"
         onChange={[Function]}
         value="doc.test.value"
         width="100%"
@@ -705,11 +708,13 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       isInvalid={true}
       label="Script"
     >
-      <eui-code-editor
+      <code-editor
+        aria-label="Script editor"
         data-test-subj="editorFieldScript"
         height="300px"
-        mode="groovy"
+        languageId="painless"
         onChange={[Function]}
+        value=""
         width="100%"
       />
     </eui-form-row>
@@ -1033,10 +1038,11 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       isInvalid={false}
       label="Script"
     >
-      <eui-code-editor
+      <code-editor
+        aria-label="Script editor"
         data-test-subj="editorFieldScript"
         height="300px"
-        mode="groovy"
+        languageId="painless"
         onChange={[Function]}
         value="doc.test.value"
         width="100%"
@@ -1387,11 +1393,13 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       isInvalid={true}
       label="Script"
     >
-      <eui-code-editor
+      <code-editor
+        aria-label="Script editor"
         data-test-subj="editorFieldScript"
         height="300px"
-        mode="groovy"
+        languageId="painless"
         onChange={[Function]}
+        value=""
         width="100%"
       />
     </eui-form-row>
