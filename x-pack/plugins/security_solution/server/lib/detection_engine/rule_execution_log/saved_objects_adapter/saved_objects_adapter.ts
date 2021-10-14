@@ -54,7 +54,7 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
       sortField: 'statusDate',
       sortOrder: 'desc',
       search: ruleId,
-      searchFields: ['alertId'],
+      searchFields: ['references.id'],
     });
   }
 
@@ -71,12 +71,17 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
   }
 
   public async logExecutionMetrics({ ruleId, metrics }: LogExecutionMetricsArgs) {
+    const references: SavedObjectReference[] = [legacyGetRuleReference(ruleId)];
     const [currentStatus] = await this.getOrCreateRuleStatuses(ruleId);
 
-    await this.ruleStatusClient.update(currentStatus.id, {
-      ...currentStatus.attributes,
-      ...convertMetricFields(metrics),
-    });
+    await this.ruleStatusClient.update(
+      currentStatus.id,
+      {
+        ...currentStatus.attributes,
+        ...convertMetricFields(metrics),
+      },
+      { references }
+    );
   }
 
   private createNewRuleStatus = async (
@@ -86,7 +91,6 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
     const now = new Date().toISOString();
     return this.ruleStatusClient.create(
       {
-        alertId: ruleId,
         statusDate: now,
         status: RuleExecutionStatus['going to run'],
         lastFailureAt: null,

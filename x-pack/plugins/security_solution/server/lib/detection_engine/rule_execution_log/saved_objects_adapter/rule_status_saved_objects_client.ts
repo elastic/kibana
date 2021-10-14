@@ -14,6 +14,7 @@ import {
   SavedObjectsFindResult,
   SavedObjectsFindOptionsReference,
   SavedObjectsCreateOptions,
+  SavedObjectsBulkGetObject,
 } from 'kibana/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleStatusSavedObjectType } from '../../rules/legacy_rule_status/legacy_rule_status_saved_object_mappings';
@@ -30,7 +31,8 @@ export interface RuleStatusSavedObjectsClient {
   ) => Promise<SavedObject<IRuleStatusSOAttributes>>;
   update: (
     id: string,
-    attributes: Partial<IRuleStatusSOAttributes>
+    attributes: Partial<IRuleStatusSOAttributes>,
+    options?: SavedObjectsCreateOptions
   ) => Promise<SavedObjectsUpdateResponse<IRuleStatusSOAttributes>>;
   delete: (id: string) => Promise<{}>;
 }
@@ -56,53 +58,78 @@ export const ruleStatusSavedObjectsClientFactory = (
     if (ids.length === 0) {
       return {};
     }
+    // With migration from `alertId` to `references[].id` it's not possible to fetch
+    // just the most recent RuleStatusSO's in one query as SO.find() API doesn't support
+    // `reverse_nested` so you can't include the parent. Broken out into two queries,
+    // first for fetching most recent RuleStatusSO id's, then the objects themself.
+    // TODO: Still use one query but return all status SO's and filter server side? Perf test?
+
+    // Query 1: Fetch most recent RuleStatusSO _id's
     const references = ids.map<SavedObjectsFindOptionsReference>((alertId) => ({
       id: alertId,
       type: 'alert',
     }));
     const order: 'desc' = 'desc';
-    const aggs = {
-      alertIds: {
-        terms: {
-          field: `${legacyRuleStatusSavedObjectType}.references.id`,
-          size: ids.length,
+    const nestedAggs = {
+      references: {
+        nested: {
+          path: `${legacyRuleStatusSavedObjectType}.references`,
         },
         aggs: {
-          most_recent_statuses: {
-            top_hits: {
-              sort: [
-                {
-                  [`${legacyRuleStatusSavedObjectType}.statusDate`]: {
-                    order,
-                  },
+          alertIds: {
+            terms: {
+              field: `${legacyRuleStatusSavedObjectType}.references.id`,
+              size: ids.length,
+            },
+            aggs: {
+              most_recent_statuses: {
+                top_hits: {
+                  sort: [
+                    {
+                      [`${legacyRuleStatusSavedObjectType}.statusDate`]: {
+                        order,
+                      },
+                    },
+                  ],
+                  size: statusesPerId,
                 },
-              ],
-              size: statusesPerId,
+              },
             },
           },
         },
       },
     };
-    const results = await savedObjectsClient.find({
+    const statusIdResults = await savedObjectsClient.find({
       hasReference: references,
-      aggs,
+      aggs: nestedAggs,
       type: legacyRuleStatusSavedObjectType,
       perPage: 0,
     });
-    const buckets = get(results, 'aggregations.alertIds.buckets');
-    return buckets.reduce((acc: Record<string, unknown>, bucket: unknown) => {
-      const key = get(bucket, 'key');
-      const hits = get(bucket, 'most_recent_statuses.hits.hits');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const statuses = hits.map((hit: any) => hit._source['siem-detection-engine-rule-status']);
-      acc[key] = statuses;
+    const statusIdResultBuckets = get(statusIdResults, 'aggregations.references.alertIds.buckets');
+    const ruleStatusIds: string[] = statusIdResultBuckets.map((b: unknown) => {
+      const hits = get(b, 'most_recent_statuses.hits.hits');
+      return get(hits, `[${hits.length - 1}]._id`); // TODO: top_hits agg doesn't appear to be working above
+    });
+
+    // Query 2: Retrieve RuleStatusSO objects via `_id`'s
+    const objects: SavedObjectsBulkGetObject[] = ruleStatusIds.map((id) => ({
+      type: legacyRuleStatusSavedObjectType,
+      id: id.substring(`${legacyRuleStatusSavedObjectType}:`.length), // TODO: Any gotchas here w/ any potential additional share-capable prefixes
+    }));
+    const statusResult = await savedObjectsClient.bulkGet(objects);
+
+    const hits = get(statusResult, 'saved_objects');
+    return hits.reduce((acc: Record<string, IRuleStatusSOAttributes[]>, hit: unknown) => {
+      const alertId: string = get(hit, `references[0].id`);
+      // TODO: Fine to not support multi-status now?
+      acc[alertId] = [get(hit, 'attributes')];
       return acc;
     }, {});
   },
   create: (attributes, options) => {
     return savedObjectsClient.create(legacyRuleStatusSavedObjectType, attributes, options);
   },
-  update: (id, attributes) =>
-    savedObjectsClient.update(legacyRuleStatusSavedObjectType, id, attributes),
+  update: (id, attributes, options) =>
+    savedObjectsClient.update(legacyRuleStatusSavedObjectType, id, attributes, options),
   delete: (id) => savedObjectsClient.delete(legacyRuleStatusSavedObjectType, id),
 });
