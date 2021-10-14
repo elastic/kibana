@@ -5,6 +5,27 @@
  * 2.0.
  */
 
+function deleteAllRules() {
+  cy.request({
+    log: false,
+    method: 'GET',
+    url: '/api/alerting/rules/_find',
+  }).then(({ body }) => {
+    if (body.data.length > 0) {
+      cy.log(`Deleting rules`);
+    }
+
+    body.data.map(({ id }: { id: string }) => {
+      cy.request({
+        headers: { 'kbn-xsrf': 'true' },
+        log: false,
+        method: 'DELETE',
+        url: `/api/alerting/rule/${id}`,
+      });
+    });
+  });
+}
+
 describe('Rules', () => {
   describe('Error count', () => {
     const ruleName = 'Error count threshold';
@@ -17,11 +38,11 @@ describe('Rules', () => {
       describe('when created from Service Inventory', () => {
         before(() => {
           cy.loginAsPowerUser();
-          cy.deleteAllRules();
+          deleteAllRules();
         });
 
         after(() => {
-          cy.deleteAllRules();
+          deleteAllRules();
         });
 
         it('creates a rule', () => {
@@ -43,7 +64,7 @@ describe('Rules', () => {
     describe('when created from Stack management', () => {
       before(() => {
         cy.loginAsPowerUser();
-        cy.deleteAllRules();
+        deleteAllRules();
         cy.intercept(
           'GET',
           '/api/alerting/rules/_find?page=1&per_page=10&default_search_operator=AND&sort_field=name&sort_order=asc'
@@ -51,7 +72,7 @@ describe('Rules', () => {
       });
 
       after(() => {
-        cy.deleteAllRules();
+        deleteAllRules();
       });
 
       it('creates a rule', () => {

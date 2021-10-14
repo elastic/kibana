@@ -7,22 +7,6 @@
 import 'cypress-real-events/support';
 import { Interception } from 'cypress/types/net-stubbing';
 
-Cypress.Commands.add('deleteAllRules', () => {
-  cy.request('/api/alerting/rules/_find').then(({ body }) => {
-    if (body.data.length > 0) {
-      cy.log(`Deleting rules`);
-    }
-
-    body.data.map(({ id }: { id: string }) => {
-      cy.request({
-        headers: { 'kbn-xsrf': 'true' },
-        method: 'DELETE',
-        url: `/api/alerting/rule/${id}`,
-      });
-    });
-  });
-});
-
 Cypress.Commands.add('loginAsReadOnlyUser', () => {
   cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
 });
@@ -37,6 +21,7 @@ Cypress.Commands.add(
     cy.log(`Logging in as ${username}`);
     const kibanaUrl = Cypress.env('KIBANA_URL');
     cy.request({
+      log: false,
       method: 'POST',
       url: `${kibanaUrl}/internal/security/login`,
       body: {
