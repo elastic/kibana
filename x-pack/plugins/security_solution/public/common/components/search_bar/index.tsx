@@ -38,7 +38,6 @@ import { hostsActions } from '../../../hosts/store';
 import { networkActions } from '../../../network/store';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
-import { dataViewToIndexPattern } from '../../utils/data_view_to_index_pattern';
 
 const APP_STATE_STORAGE_KEY = 'securitySolution.searchBar.appState';
 
@@ -268,7 +267,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const indexPatterns = useMemo(() => [dataViewToIndexPattern(indexPattern)], [indexPattern]);
+    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
     return (
       <SearchBarContainer data-test-subj={`${id}DatePicker`}>
