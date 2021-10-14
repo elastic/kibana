@@ -52,19 +52,28 @@ export class ScreenshotObservableHandler {
     label: 'render complete',
   };
 
+  private readonly timeouts: {
+    openUrl: number;
+    waitForElements: number;
+  };
+
   constructor(
     private readonly driver: HeadlessChromiumDriver,
-    private readonly captureConfig: CaptureConfig,
+    private captureConfig: CaptureConfig,
     opts: ScreenshotObservableOpts
   ) {
     this.conditionalHeaders = opts.conditionalHeaders;
     this.layout = opts.layout;
     this.logger = opts.logger;
+    this.timeouts = {
+      openUrl: durationToNumber(captureConfig.timeouts.openUrl),
+      waitForElements: durationToNumber(captureConfig.timeouts.waitForElements),
+    };
   }
 
   /*
-   * This wraps a chain of observable operators in a timeout, and decorates a
-   * timeout error to specify which phase of page capture has timed out.
+   * This "external timeout" wraps a chain of observable operators in a
+   * timeout, and decorates a TimeoutError to specify which phase of page capture has timed out.
    */
   private waitUntil<O, P>(phase: PhaseInstance, chain: Rx.OperatorFunction<O, P>) {
     const { timeoutValue, label, configValue } = phase;
@@ -101,7 +110,7 @@ export class ScreenshotObservableHandler {
       return initial.pipe(
         mergeMap(() =>
           openUrl(
-            durationToNumber(this.captureConfig.timeouts.openUrl),
+            this.timeouts.openUrl, // internal timeout
             this.driver,
             index,
             urlOrUrlLocatorTuple,
@@ -119,7 +128,7 @@ export class ScreenshotObservableHandler {
       return withPageOpen.pipe(
         mergeMap(() =>
           getNumberOfItems(
-            durationToNumber(this.captureConfig.timeouts.waitForElements),
+            this.timeouts.waitForElements, // internal timeout
             driver,
             this.layout,
             this.logger
@@ -131,7 +140,7 @@ export class ScreenshotObservableHandler {
           await Promise.all([
             driver.setViewport(viewport, this.logger),
             waitForVisualizations(
-              durationToNumber(this.captureConfig.timeouts.renderComplete),
+              this.timeouts.waitForElements, // internal timeout
               driver,
               itemsCount,
               this.layout,
