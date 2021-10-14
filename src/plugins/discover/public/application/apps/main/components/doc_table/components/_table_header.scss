@@ -1,7 +1,8 @@
 .kbnDocTableHeader {
   white-space: nowrap;
 }
-.kbnDocTableHeader button {
+.kbnDocTableHeader button, 
+.kbnDocTableHeader svg {
   margin-left: $euiSizeXS * .5;
 }
 .kbnDocTableHeader__move,

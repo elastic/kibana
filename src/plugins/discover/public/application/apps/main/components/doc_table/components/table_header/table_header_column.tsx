@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { SortOrder } from './helpers';
 import { DocViewTableScoreSortWarning } from './score_sort_warning';
 
@@ -18,6 +18,7 @@ interface Props {
   displayName?: string;
   isRemoveable: boolean;
   isSortable: boolean;
+  isTimeColumn: boolean;
   name: string;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, idx: number) => void;
@@ -54,6 +55,7 @@ export function TableHeaderColumn({
   displayName,
   isRemoveable,
   isSortable,
+  isTimeColumn,
   name,
   onChangeSortOrder,
   onMoveColumn,
@@ -184,6 +186,16 @@ export function TableHeaderColumn({
       <span data-test-subj={`docTableHeader-${name}`} className="kbnDocTableHeader__actions">
         {showScoreSortWarning && <DocViewTableScoreSortWarning />}
         {displayName}
+        {isTimeColumn && (
+          <EuiToolTip
+            key="time-column"
+            content={i18n.translate('discover.docTable.tableHeader.timeFieldIconTooltip', {
+              defaultMessage: 'This column represents primary time field of the data view',
+            })}
+          >
+            <EuiIcon type="clock" color="primary" size="s" />
+          </EuiToolTip>
+        )}
         {buttons
           .filter((button) => button.active)
           .map((button, idx) => (

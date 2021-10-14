@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiDataGridColumn, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
 import type { IndexPattern } from '../../../../../data/common';
@@ -57,9 +57,6 @@ export function buildEuiGridColumn(
   defaultColumns: boolean,
   isSortEnabled: boolean
 ) {
-  const timeString = i18n.translate('discover.timeLabel', {
-    defaultMessage: 'Time',
-  });
   const indexPatternField = indexPattern.getFieldByName(columnName);
   const column: EuiDataGridColumn = {
     id: columnName,
@@ -88,7 +85,19 @@ export function buildEuiGridColumn(
   };
 
   if (column.id === indexPattern.timeFieldName) {
-    column.display = `${timeString} (${indexPattern.timeFieldName})`;
+    column.display = (
+      <Fragment>
+        {indexPattern.timeFieldName}{' '}
+        <EuiToolTip
+          key="time-column"
+          content={i18n.translate('discover.docTable.tableHeader.timeFieldIconTooltip', {
+            defaultMessage: 'This column represents primary time field of the data view',
+          })}
+        >
+          <EuiIcon type="clock" color="primary" size="s" />
+        </EuiToolTip>
+      </Fragment>
+    );
     column.initialWidth = defaultTimeColumnWidth;
   }
   if (columnWidth > 0) {

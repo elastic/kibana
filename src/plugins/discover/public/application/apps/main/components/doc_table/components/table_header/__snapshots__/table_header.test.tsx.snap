@@ -15,7 +15,15 @@ exports[`TableHeader with time column renders correctly 1`] = `
       class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-time"
     >
-      Time
+      time
+      <span
+        class="euiToolTipAnchor"
+      >
+        <span
+          color="primary"
+          data-euiicon-type="clock"
+        />
+      </span>
       <span
         class="euiToolTipAnchor"
       >
