@@ -31,6 +31,13 @@ export interface Deps {
   packageInfo: PackageInfo;
 }
 
+function getDeprecationTitle() {
+  return i18n.translate('xpack.security.deprecations.kibanaDashboardOnlyUser.deprecationTitle', {
+    defaultMessage: 'The "{roleName}" role is deprecated',
+    values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
+  });
+}
+
 export const registerKibanaDashboardOnlyRoleDeprecation = ({
   deprecationsService,
   logger,
@@ -84,13 +91,7 @@ async function getUsersDeprecations(
 
   return [
     {
-      title: i18n.translate(
-        'xpack.security.deprecations.kibanaDashboardOnlyUser.deprecationTitle',
-        {
-          defaultMessage: 'The "{roleName}" role is deprecated',
-          values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
-        }
-      ),
+      title: getDeprecationTitle(),
       message: i18n.translate(
         'xpack.security.deprecations.kibanaDashboardOnlyUser.usersDeprecationMessage',
         {
@@ -101,7 +102,7 @@ async function getUsersDeprecations(
       ),
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/${packageInfo.branch}/xpack-dashboard-only-mode.html`,
+      documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${packageInfo.branch}/built-in-roles.html`,
       correctiveActions: {
         manualSteps: [
           i18n.translate(
@@ -160,13 +161,7 @@ async function getRoleMappingsDeprecations(
 
   return [
     {
-      title: i18n.translate(
-        'xpack.security.deprecations.kibanaDashboardOnlyUser.deprecationTitle',
-        {
-          defaultMessage: 'The "{roleName}" role is deprecated',
-          values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
-        }
-      ),
+      title: getDeprecationTitle(),
       message: i18n.translate(
         'xpack.security.deprecations.kibanaDashboardOnlyUser.roleMappingsDeprecationMessage',
         {
@@ -177,7 +172,7 @@ async function getRoleMappingsDeprecations(
       ),
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/${packageInfo.branch}/xpack-dashboard-only-mode.html`,
+      documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${packageInfo.branch}/built-in-roles.html`,
       correctiveActions: {
         manualSteps: [
           i18n.translate(
@@ -205,13 +200,7 @@ async function getRoleMappingsDeprecations(
 }
 
 function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsDetails[] {
-  const title = i18n.translate(
-    'xpack.security.deprecations.kibanaDashboardOnlyUser.deprecationTitle',
-    {
-      defaultMessage: 'The "{roleName}" role is deprecated',
-      values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
-    }
-  );
+  const title = getDeprecationTitle();
 
   if (getErrorStatusCode(error) === 403) {
     return [

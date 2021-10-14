@@ -107,7 +107,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security.html#_required_permissions_7",
                 "level": "fetch_error",
                 "message": "You do not have enough permissions to fix this deprecation.",
-                "title": "The \\"kibana_user\\" role is deprecated. Use \\"kibana_admin\\" role instead.",
+                "title": "The \\"kibana_user\\" role is deprecated",
               },
             ]
           `);
@@ -132,7 +132,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "deprecationType": "feature",
                 "level": "fetch_error",
                 "message": "Failed to perform deprecation check. Check Kibana logs for more details.",
-                "title": "The \\"kibana_user\\" role is deprecated. Use \\"kibana_admin\\" role instead.",
+                "title": "The \\"kibana_user\\" role is deprecated",
               },
             ]
           `);
@@ -158,7 +158,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security.html#_required_permissions_7",
                 "level": "fetch_error",
                 "message": "You do not have enough permissions to fix this deprecation.",
-                "title": "The \\"kibana_user\\" role is deprecated. Use \\"kibana_admin\\" role instead.",
+                "title": "The \\"kibana_user\\" role is deprecated",
               },
             ]
           `);
@@ -183,7 +183,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "deprecationType": "feature",
                 "level": "fetch_error",
                 "message": "Failed to perform deprecation check. Check Kibana logs for more details.",
-                "title": "The \\"kibana_user\\" role is deprecated. Use \\"kibana_admin\\" role instead.",
+                "title": "The \\"kibana_user\\" role is deprecated",
               },
             ]
           `);
@@ -218,10 +218,10 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                   ],
                 },
                 "deprecationType": "feature",
-                "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security-authorization.html",
+                "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use a \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
-                "title": "The \\"kibana_user\\" role is deprecated. Use \\"kibana_admin\\" role instead.",
+                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
+                "title": "The \\"kibana_user\\" role is deprecated",
               },
             ]
           `);
@@ -256,10 +256,10 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                   ],
                 },
                 "deprecationType": "feature",
-                "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security-authorization.html",
+                "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use a \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
-                "title": "The \\"kibana_user\\" role is deprecated. Use \\"kibana_admin\\" role instead.",
+                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
+                "title": "The \\"kibana_user\\" role is deprecated",
               },
             ]
           `);
@@ -301,10 +301,10 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                   ],
                 },
                 "deprecationType": "feature",
-                "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security-authorization.html",
+                "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use a \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
-                "title": "The \\"kibana_user\\" role is deprecated. Use \\"kibana_admin\\" role instead.",
+                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
+                "title": "The \\"kibana_user\\" role is deprecated",
               },
               Object {
                 "correctiveActions": Object {
@@ -317,10 +317,10 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                   ],
                 },
                 "deprecationType": "feature",
-                "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security-authorization.html",
+                "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use a \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
-                "title": "The \\"kibana_user\\" role is deprecated. Use \\"kibana_admin\\" role instead.",
+                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in 8.0.",
+                "title": "The \\"kibana_user\\" role is deprecated",
               },
             ]
           `);

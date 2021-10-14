@@ -32,6 +32,13 @@ interface Deps {
   packageInfo: PackageInfo;
 }
 
+function getDeprecationTitle() {
+  return i18n.translate('xpack.security.deprecations.kibanaUser.deprecationTitle', {
+    defaultMessage: 'The "{userRoleName}" role is deprecated',
+    values: { userRoleName: KIBANA_USER_ROLE_NAME },
+  });
+}
+
 export const registerKibanaUserRoleDeprecation = ({
   deprecationsService,
   logger,
@@ -85,19 +92,15 @@ async function getUsersDeprecations(
 
   return [
     {
-      title: i18n.translate('xpack.security.deprecations.kibanaUser.deprecationTitle', {
-        defaultMessage:
-          'The "{userRoleName}" role is deprecated. Use "{adminRoleName}" role instead.',
-        values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
-      }),
+      title: getDeprecationTitle(),
       message: i18n.translate('xpack.security.deprecations.kibanaUser.usersDeprecationMessage', {
         defaultMessage:
-          'Use a "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in 8.0.',
+          'Use the "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in 8.0.',
         values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
       }),
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/${packageInfo.branch}/xpack-security-authorization.html`,
+      documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${packageInfo.branch}/built-in-roles.html`,
       correctiveActions: {
         api: {
           method: 'POST',
@@ -154,22 +157,18 @@ async function getRoleMappingsDeprecations(
 
   return [
     {
-      title: i18n.translate('xpack.security.deprecations.kibanaUser.deprecationTitle', {
-        defaultMessage:
-          'The "{userRoleName}" role is deprecated. Use "{adminRoleName}" role instead.',
-        values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
-      }),
+      title: getDeprecationTitle(),
       message: i18n.translate(
         'xpack.security.deprecations.kibanaUser.roleMappingsDeprecationMessage',
         {
           defaultMessage:
-            'Use a "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in 8.0.',
+            'Use the "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in 8.0.',
           values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
         }
       ),
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/${packageInfo.branch}/xpack-security-authorization.html`,
+      documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${packageInfo.branch}/built-in-roles.html`,
       correctiveActions: {
         api: {
           method: 'POST',
@@ -195,10 +194,7 @@ async function getRoleMappingsDeprecations(
 }
 
 function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsDetails[] {
-  const title = i18n.translate('xpack.security.deprecations.kibanaUser.deprecationTitle', {
-    defaultMessage: 'The "{userRoleName}" role is deprecated. Use "{adminRoleName}" role instead.',
-    values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
-  });
+  const title = getDeprecationTitle();
 
   if (getErrorStatusCode(error) === 403) {
     return [
