@@ -23,6 +23,7 @@ import {
   EuiIconTip,
   EuiTitle,
 } from '@elastic/eui';
+import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
@@ -213,10 +214,11 @@ export function AlertInstances({
     <>
       <EuiHorizontalRule />
       <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={1}>
           <EuiPanel color="subdued" hasBorder={false}>
             <EuiStat
               data-test-subj={`ruleStatus-${alert.executionStatus.status}`}
+              titleSize="xs"
               title={
                 <EuiHealth
                   data-test-subj={`ruleStatus-${alert.executionStatus.status}`}
@@ -235,7 +237,7 @@ export function AlertInstances({
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={1}>
           <EuiPanel
             data-test-subj="avgExecutionDurationPanel"
             color={showDurationWarning ? 'warning' : 'subdued'}
@@ -243,8 +245,9 @@ export function AlertInstances({
           >
             <EuiStat
               data-test-subj="avgExecutionDurationStat"
+              titleSize="xs"
               title={
-                <EuiFlexGroup gutterSize="xs" className="ruleDurationStat">
+                <EuiFlexGroup gutterSize="xs">
                   {showDurationWarning && (
                     <EuiFlexItem grow={false}>
                       <EuiIconTip
@@ -276,11 +279,11 @@ export function AlertInstances({
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={4}>
           <EuiPanel data-test-subj="executionDurationChartPanel" hasBorder={true}>
-            <EuiFlexGroup gutterSize="xs">
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
+                <EuiTitle size="xxs">
                   <h4>
                     <FormattedMessage
                       id="xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.recentDurationsTitle"
@@ -291,7 +294,6 @@ export function AlertInstances({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiIconTip
-                  anchorClassName="executionDurationChartTitleIcon"
                   color="subdued"
                   type="questionInCircle"
                   content={i18n.translate(
@@ -316,7 +318,7 @@ export function AlertInstances({
                     theme={{
                       lineSeriesStyle: {
                         point: { visible: false },
-                        line: { stroke: '#DD0A73' },
+                        line: { stroke: lightEuiTheme.euiColorAccent },
                       },
                     }}
                   />
