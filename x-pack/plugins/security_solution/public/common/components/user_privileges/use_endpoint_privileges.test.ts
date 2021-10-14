@@ -13,6 +13,8 @@ import { appRoutesService } from '../../../../../fleet/common';
 import { AuthenticatedUser } from '../../../../../security/common';
 import { licenseService } from '../../hooks/use_license';
 import { fleetGetCheckPermissionsHttpMock } from '../../../management/pages/mocks';
+import { getAllEndpointPrivilegesMock } from './__mocks__/get_all_endpoint_privileges_mock';
+import { LicenseService } from '../../../../common/license';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_license', () => {
@@ -26,6 +28,8 @@ jest.mock('../../hooks/use_license', () => {
     },
   };
 });
+
+const licenseServiceMock: jest.Mocked<ReturnType<LicenseService>> = licenseService;
 
 describe('When using useEndpointPrivileges hook', () => {
   let authenticatedUser: AuthenticatedUser;
@@ -45,7 +49,7 @@ describe('When using useEndpointPrivileges hook', () => {
     fleetApiMock = fleetGetCheckPermissionsHttpMock(
       useHttp() as Parameters<typeof fleetGetCheckPermissionsHttpMock>[0]
     );
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
     render = () => {
       const hookRenderResponse = renderHook(() => useEndpointPrivileges());
@@ -137,4 +141,14 @@ describe('When using useEndpointPrivileges hook', () => {
       isPlatinumPlus: true,
     });
   });
+
+  it.each([['canIsolateHost'], ['canCreateArtifactsByPolicy']])(
+    'should set %s to false if license is not PlatinumPlus',
+    async (privilege) => {
+      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+      render();
+      await waitForNextUpdate();
+      expect(result.current).toEqual(expect.objectContaining({ [privilege]: false }));
+    }
+  );
 });

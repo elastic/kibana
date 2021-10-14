@@ -16,6 +16,11 @@ export interface EndpointPrivileges {
   canAccessFleet: boolean;
   /** If user has permissions to access Endpoint management (includes check to ensure they also have access to fleet) */
   canAccessEndpointManagement: boolean;
+  /** if user has permissions to create Artifacts by Policy */
+  canCreateArtifactsByPolicy: boolean;
+  /** If user has permissions to use the Host isolation feature */
+  canIsolateHost: boolean;
+  /** @deprecated do not use. instead, use one of the other privileges defiened */
   isPlatinumPlus: boolean;
 }
 
@@ -29,7 +34,7 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
   const http = useHttp();
   const user = useCurrentUser();
   const isMounted = useRef<boolean>(true);
-  const license = useLicense();
+  const isPlatinumPlusLicense = useLicense().isPlatinumPlus();
   const [canAccessFleet, setCanAccessFleet] = useState<boolean>(false);
   const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
 
@@ -61,13 +66,19 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
   }, [user?.roles]);
 
   const privileges = useMemo(() => {
-    return {
+    const privilegeList: EndpointPrivileges = {
       loading: !fleetCheckDone || !user,
       canAccessFleet,
       canAccessEndpointManagement: canAccessFleet && isSuperUser,
-      isPlatinumPlus: license.isPlatinumPlus(),
+      canCreateArtifactsByPolicy: isPlatinumPlusLicense,
+      canIsolateHost: isPlatinumPlusLicense,
+      // FIXME: Remove usages of the property below
+      /** @deprecated */
+      isPlatinumPlus: isPlatinumPlusLicense,
     };
-  }, [canAccessFleet, fleetCheckDone, isSuperUser, user, license]);
+
+    return privilegeList;
+  }, [canAccessFleet, fleetCheckDone, isSuperUser, user, isPlatinumPlusLicense]);
 
   // Capture if component is unmounted
   useEffect(
