@@ -6,7 +6,7 @@
         "is_write_index": true
       }
     },
-    "index": "filebeat-7.12.0-2021.03.10-000001",
+    "index": "logs-ti_abusech.malware",
     "mappings": {
       "_meta": {
         "beat": "filebeat",
@@ -194,7 +194,7 @@
             }
           }
         },
-        "threatintel": {
+        "threat": {
           "properties": {
             "abusemalware": {
               "properties": {
