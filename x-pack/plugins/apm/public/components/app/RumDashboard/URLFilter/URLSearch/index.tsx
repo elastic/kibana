@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { map } from 'lodash';
+import { isEqual, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { I18LABELS } from '../../translations';
@@ -162,6 +162,25 @@ export function URLSearch({
     setSearchValue('');
   };
 
+  const hasChanged = () => {
+    const { includedItems, excludedItems, includedWildcards } =
+      processItems(items);
+
+    let isWildcardChanged =
+      (includedWildcards.length > 0 && !searchTerm) ||
+      (includedWildcards.length === 0 && searchTerm);
+
+    if (includedWildcards.length > 0) {
+      isWildcardChanged = includedWildcards[0] !== searchTerm;
+    }
+
+    return (
+      isWildcardChanged ||
+      !isEqual(includedItems.sort(), (transactionUrl ?? []).sort()) ||
+      !isEqual(excludedItems.sort(), (transactionUrlExcluded ?? []).sort())
+    );
+  };
+
   return (
     <SelectableUrlList
       loading={isLoading}
@@ -174,7 +193,7 @@ export function URLSearch({
       onSelectionApply={onApply}
       renderOption={selectableRenderOptions}
       rowHeight={64}
-      hasChanged={() => true}
+      hasChanged={hasChanged}
     />
   );
 }
