@@ -151,10 +151,6 @@ export function loadInitial(
               initialInput.savedObjectId
             );
           }
-          // Don't overwrite any pinned filters
-          data.query.filterManager.setAppFilters(
-            injectFilterReferences(doc.state.filters, doc.references)
-          );
 
           const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
             (stateMap, [datasourceId, datasourceState]) => ({
@@ -166,6 +162,10 @@ export function loadInitial(
             }),
             {}
           );
+
+          const filters = injectFilterReferences(doc.state.filters, doc.references);
+          // Don't overwrite any pinned filters
+          data.query.filterManager.setAppFilters(filters);
 
           initializeDatasources(
             datasourceMap,
@@ -180,8 +180,8 @@ export function loadInitial(
               store.dispatch(
                 setState({
                   isSaveable: true,
-                  filters: doc.state.filters,
                   sharingSavedObjectProps,
+                  filters,
                   query: doc.state.query,
                   searchSessionId:
                     dashboardFeatureFlag.allowByValueEmbeddables &&
