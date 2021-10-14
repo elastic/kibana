@@ -30,7 +30,7 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../lib/kibana'); // , () => ({
+jest.mock('../../lib/kibana');
 
 describe('source/index.tsx', () => {
   describe('getBrowserFields', () => {
@@ -39,11 +39,11 @@ describe('source/index.tsx', () => {
       expect(fields).toEqual({});
     });
 
-    test('it returns the same input with the same title', () => {
-      getBrowserFields('title 1', []);
-      // Since it is memoized it will return the same output which is empty object given 'title 1' a second time
-      const fields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
-      expect(fields).toEqual({});
+    test('it returns the same input given the same title and same fields length', () => {
+      const oldFields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
+      const newFields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
+      // Since it is memoized it will return the same object instance
+      expect(newFields).toBe(oldFields);
     });
 
     test('it transforms input into output as expected', () => {
@@ -279,6 +279,45 @@ describe('source/index.tsx', () => {
         expect(payload.indicesExist).toEqual(true);
         expect(payload.indexPattern.title).toEqual(
           'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*'
+        );
+      });
+    });
+
+    it('doesnt set source when `autoCall` is false', async () => {
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(
+          () => useIndexFields(SourcererScopeName.default, false),
+          {
+            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          }
+        );
+        await waitForNextUpdate();
+        rerender();
+        expect(mockDispatch).not.toBeCalled();
+      });
+    });
+
+    it('sets source when `autoCall` is false and when indexFieldsSearch is called', async () => {
+      await act(async () => {
+        const { rerender, waitForNextUpdate, result } = renderHook<
+          string,
+          ReturnType<typeof useIndexFields>
+        >(() => useIndexFields(SourcererScopeName.default, false), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+
+        result.current.indexFieldsSearch(sourcererState.defaultDataView.id);
+
+        expect(mockDispatch).toHaveBeenCalledTimes(2);
+        expect(mockDispatch.mock.calls[0][0]).toHaveProperty(
+          'type',
+          'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING'
+        );
+        expect(mockDispatch.mock.calls[1][0]).toHaveProperty(
+          'type',
+          'x-pack/security_solution/local/sourcerer/SET_SOURCE'
         );
       });
     });

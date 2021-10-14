@@ -208,7 +208,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {CreateField && <CreateField onClick={closeAndRestoreFocus} />}
+              {CreateField && <CreateField onClick={onHide} />}
             </EuiFlexItem>
           </EuiFlexGroup>
 

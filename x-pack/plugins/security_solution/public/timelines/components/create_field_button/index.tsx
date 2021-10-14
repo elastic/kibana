@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
@@ -46,7 +46,6 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       if (dataView) {
         indexPatternFieldEditor?.openEditor({
           ctx: { indexPattern: dataView },
-          // fieldName: item.fieldName, edit?
           onSave: () => {
             indexFieldsSearch(selectedDataViewId);
           },
@@ -76,22 +75,3 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
 );
 
 CreateFieldButton.displayName = 'CreateFieldButton';
-
-// MUST HAVE
-// [x] alerts - Fix scope id bug. When I call useIndexFields it fetch the data and set t-grid loading state...
-// [x] Close modal
-// [x] refetch data after creating field
-// [x] check user permissions
-// [x] timeline
-// [x] display flyout over timeline (z-index issue)
-// [x] Fix create field loading state
-
-// TODO
-// Add cypress test
-// Fix unit tests
-
-// NICE TO HAVE
-// Change "create field" flyout subtitle
-// edit field
-// delete field
-// automaticaly display the added field? (it shows on one mockup)

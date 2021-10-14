@@ -45,7 +45,7 @@ import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { CreateFieldButton } from '../../create_runtime_field';
+import { CreateFieldButton } from '../../create_field_button';
 import { SelectedDataView } from '../../../../common/store/sourcerer/selectors';
 
 interface OwnProps {
@@ -234,11 +234,11 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     );
 
     const createFieldComponent = useMemo(() => {
-      // It has to receive onClick props from TGrid in order to close browserFields modal.
+      // It receives onClick props from field browser in order to close the modal.
       const CreateFieldButtonComponent: CreateFieldComponentType = ({ onClick }) => (
         <CreateFieldButton
           selectedDataViewId={dataViewId}
-          onClick={onClick} // close browserField and make sure create field modal is on top of timeline modal
+          onClick={onClick}
           scopeId={SourcererScopeName.timeline}
         />
       );

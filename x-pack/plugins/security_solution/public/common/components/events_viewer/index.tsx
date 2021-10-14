@@ -7,8 +7,8 @@
 
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
-import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
+import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -31,7 +31,7 @@ import { defaultControlColumn } from '../../../timelines/components/timeline/bod
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import { CreateFieldButton } from '../../../timelines/components/create_runtime_field';
+import { CreateFieldButton } from '../../../timelines/components/create_field';
 import { CreateFieldComponentType } from '../../../../../timelines/public';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
@@ -176,7 +176,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
 
   const createFieldComponent = useMemo(() => {
-    // It has to receive onClick props from TGrid in order to close browserFields modal.
+    // It receives onClick props from field browser in order to close the modal.
     const CreateFieldButtonComponent: CreateFieldComponentType = ({ onClick }) => (
       <CreateFieldButton
         selectedDataViewId={selectedDataViewId}
