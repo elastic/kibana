@@ -89,7 +89,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       elasticAgent: {
         category: 'security',
         title: i18n.translate('kibanaOverview.noDataConfig.title', {
-          defaultMessage: 'Add an integration',
+          defaultMessage: 'Add integrations',
         }),
         description: i18n.translate('kibanaOverview.noDataConfig.description', {
           defaultMessage:
