@@ -81,9 +81,10 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
   } = props;
   const [query, setQuery] = useState<Query>({ language: 'kuery', query: urlQuery || '' });
 
-  useEffect(() => setQuery((prev) => ({ language: prev.language, query: urlQuery || '' })), [
-    urlQuery,
-  ]);
+  useEffect(
+    () => setQuery((prev) => ({ language: prev.language, query: urlQuery || '' })),
+    [urlQuery]
+  );
 
   useEffect(() => {
     async function fetchPattern() {

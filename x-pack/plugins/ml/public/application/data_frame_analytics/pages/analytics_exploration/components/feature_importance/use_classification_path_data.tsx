@@ -295,23 +295,25 @@ export const buildClassificationDecisionPathData = ({
 }): DecisionPathPlotData | undefined => {
   if (currentClass === undefined || !(Array.isArray(baselines) && baselines.length >= 2)) return [];
 
-  const mappedFeatureImportance: Array<
-    ExtendedFeatureImportance | undefined
-  > = featureImportance.map((feature) => {
-    const classFeatureImportance = Array.isArray(feature.classes)
-      ? feature.classes.find(
-          (c) => getStringBasedClassName(c.class_name) === getStringBasedClassName(currentClass)
-        )
-      : feature;
-    if (classFeatureImportance && typeof classFeatureImportance[FEATURE_IMPORTANCE] === 'number') {
-      return {
-        [FEATURE_NAME]: feature[FEATURE_NAME],
-        [FEATURE_IMPORTANCE]: classFeatureImportance[FEATURE_IMPORTANCE],
-        absImportance: Math.abs(classFeatureImportance[FEATURE_IMPORTANCE] as number),
-      };
-    }
-    return undefined;
-  });
+  const mappedFeatureImportance: Array<ExtendedFeatureImportance | undefined> =
+    featureImportance.map((feature) => {
+      const classFeatureImportance = Array.isArray(feature.classes)
+        ? feature.classes.find(
+            (c) => getStringBasedClassName(c.class_name) === getStringBasedClassName(currentClass)
+          )
+        : feature;
+      if (
+        classFeatureImportance &&
+        typeof classFeatureImportance[FEATURE_IMPORTANCE] === 'number'
+      ) {
+        return {
+          [FEATURE_NAME]: feature[FEATURE_NAME],
+          [FEATURE_IMPORTANCE]: classFeatureImportance[FEATURE_IMPORTANCE],
+          absImportance: Math.abs(classFeatureImportance[FEATURE_IMPORTANCE] as number),
+        };
+      }
+      return undefined;
+    });
 
   // get the baseline for the current class from the trained_models metadata
   const baselineClass = baselines.find(

@@ -80,6 +80,55 @@ export const TITLE_LABEL = i18n.translate(
   }
 );
 
+export const URL_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.url.label',
+  {
+    defaultMessage: 'URL',
+  }
+);
+
+export const COLOR_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.color.label',
+  {
+    defaultMessage: 'Color',
+  }
+);
+
+export const TYPE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.type.label',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const MEDIA_TYPE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.mediaType.label',
+  {
+    defaultMessage: 'Media Type',
+  }
+);
+
+export const CREATED_BY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.createdBy.label',
+  {
+    defaultMessage: 'Created By',
+  }
+);
+
+export const UPDATED_BY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.updatedBy.label',
+  {
+    defaultMessage: 'Updated By',
+  }
+);
+
+export const OPTIONAL_AREA_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.optionalArea.text',
+  {
+    defaultMessage: 'This area is optional',
+  }
+);
+
 export const EMPTY_FIELDS_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.emptyFields.description',
   {

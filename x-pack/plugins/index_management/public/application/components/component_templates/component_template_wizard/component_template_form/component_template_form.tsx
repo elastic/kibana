@@ -160,22 +160,21 @@ export const ComponentTemplateForm = ({
   };
 
   const buildComponentTemplateObject = useCallback(
-    (initialTemplate: ComponentTemplateDeserialized) => (
-      wizardData: WizardContent
-    ): ComponentTemplateDeserialized => {
-      const outputComponentTemplate = {
-        ...initialTemplate,
-        name: wizardData.logistics.name,
-        version: wizardData.logistics.version,
-        _meta: wizardData.logistics._meta,
-        template: {
-          settings: wizardData.settings,
-          mappings: wizardData.mappings,
-          aliases: wizardData.aliases,
-        },
-      };
-      return cleanupComponentTemplateObject(outputComponentTemplate);
-    },
+    (initialTemplate: ComponentTemplateDeserialized) =>
+      (wizardData: WizardContent): ComponentTemplateDeserialized => {
+        const outputComponentTemplate = {
+          ...initialTemplate,
+          name: wizardData.logistics.name,
+          version: wizardData.logistics.version,
+          _meta: wizardData.logistics._meta,
+          template: {
+            settings: wizardData.settings,
+            mappings: wizardData.mappings,
+            aliases: wizardData.aliases,
+          },
+        };
+        return cleanupComponentTemplateObject(outputComponentTemplate);
+      },
     []
   );
 

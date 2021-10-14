@@ -9,6 +9,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import {
   Chart,
   ElementClickListener,
+  BrushEndListener,
   Heatmap,
   HeatmapBrushEvent,
   HeatmapElementEvent,
@@ -125,7 +126,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const tableId = Object.keys(data.tables)[0];
   const table = data.tables[tableId];
 
-  const paletteParams = args.palette?.params as CustomPaletteState;
+  const paletteParams = args.palette?.params;
 
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === args.xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === args.yAccessor);
@@ -134,10 +135,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const yAxisColumn = table.columns[yAxisColumnIndex];
   const valueColumn = table.columns.find((v) => v.id === args.valueAccessor);
 
-  const minMaxByColumnId = useMemo(() => findMinMaxByColumnId([args.valueAccessor!], table), [
-    args.valueAccessor,
-    table,
-  ]);
+  const minMaxByColumnId = useMemo(
+    () => findMinMaxByColumnId([args.valueAccessor!], table),
+    [args.valueAccessor, table]
+  );
 
   if (!xAxisColumn || !valueColumn) {
     // Chart is not ready
@@ -270,7 +271,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   };
 
   const config: HeatmapSpec['config'] = {
-    onBrushEnd,
     grid: {
       stroke: {
         width:
@@ -338,6 +338,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
             labelOptions: { maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0 },
           },
         }}
+        onBrushEnd={onBrushEnd as BrushEndListener}
       />
       <Heatmap
         id={tableId}

@@ -15,7 +15,7 @@ import {
 import { Timeslice } from '../../../common/descriptor_types';
 
 export interface TimesliceMaskConfig {
-  timesiceMaskField: string;
+  timesliceMaskField: string;
   timeslice: Timeslice;
 }
 
@@ -34,15 +34,15 @@ function getFilterExpression(
   }
 
   if (timesliceMaskConfig) {
-    allFilters.push(['has', timesliceMaskConfig.timesiceMaskField]);
+    allFilters.push(['has', timesliceMaskConfig.timesliceMaskField]);
     allFilters.push([
       '>=',
-      ['get', timesliceMaskConfig.timesiceMaskField],
+      ['get', timesliceMaskConfig.timesliceMaskField],
       timesliceMaskConfig.timeslice.from,
     ]);
     allFilters.push([
       '<',
-      ['get', timesliceMaskConfig.timesiceMaskField],
+      ['get', timesliceMaskConfig.timesliceMaskField],
       timesliceMaskConfig.timeslice.to,
     ]);
   }

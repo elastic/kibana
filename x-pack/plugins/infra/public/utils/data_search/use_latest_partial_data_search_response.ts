@@ -16,9 +16,8 @@ import { useDataSearchResponseState } from './use_data_search_response_state';
 export const useLatestPartialDataSearchResponse = <Request extends IKibanaSearchRequest, Response>(
   requests$: Observable<ParsedDataSearchRequestDescriptor<Request, Response>>
 ) => {
-  const latestResponse$: Observable<
-    ParsedDataSearchResponseDescriptor<Request, Response>
-  > = useOperator(requests$, flattenLatestDataSearchResponse);
+  const latestResponse$: Observable<ParsedDataSearchResponseDescriptor<Request, Response>> =
+    useOperator(requests$, flattenLatestDataSearchResponse);
 
   const {
     cancelRequest,

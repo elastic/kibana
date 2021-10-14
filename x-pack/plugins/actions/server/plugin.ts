@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -84,7 +84,7 @@ import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
-import { AlertHistoryEsIndexConnectorId } from '../common';
+import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 
 export interface PluginSetupContract {
@@ -151,6 +151,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private isESOCanEncrypt?: boolean;
+  private usageCounter?: UsageCounter;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly kibanaIndexConfig: { kibana: { index: string } };
@@ -259,12 +260,20 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         this.telemetryLogger,
         plugins.taskManager,
         core,
-        this.kibanaIndexConfig.kibana.index
+        this.kibanaIndexConfig.kibana.index,
+        this.preconfiguredActions
       );
     }
 
+    // Usage counter for telemetry
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(ACTIONS_FEATURE_ID);
+
     // Routes
-    defineRoutes(core.http.createRouter<ActionsRequestHandlerContext>(), this.licenseState);
+    defineRoutes(
+      core.http.createRouter<ActionsRequestHandlerContext>(),
+      this.licenseState,
+      this.usageCounter
+    );
 
     // Cleanup failed execution task definition
     if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
@@ -360,6 +369,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           preconfiguredActions,
         }),
         auditLogger: this.security?.audit.asScoped(request),
+        usageCounter: this.usageCounter,
       });
     };
 
@@ -490,6 +500,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionExecutor,
       instantiateAuthorization,
       security,
+      usageCounter,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -526,6 +537,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               preconfiguredActions,
             }),
             auditLogger: security?.audit.asScoped(request),
+            usageCounter,
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),

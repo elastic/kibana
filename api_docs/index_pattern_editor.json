@@ -26,9 +26,9 @@
             "signature": [
               "(indexPattern: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -48,9 +48,9 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "data",
+                    "pluginId": "dataViews",
                     "scope": "common",
-                    "docId": "kibDataIndexPatternsPluginApi",
+                    "docId": "kibDataViewsPluginApi",
                     "section": "def-common.IndexPattern",
                     "text": "IndexPattern"
                   }
@@ -194,7 +194,7 @@
           "children": [
             {
               "parentPluginId": "indexPatternEditor",
-              "id": "def-public.props",
+              "id": "def-public.PluginStart.IndexPatternEditorComponent.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "props",
@@ -207,7 +207,7 @@
             },
             {
               "parentPluginId": "indexPatternEditor",
-              "id": "def-public.context",
+              "id": "def-public.PluginStart.IndexPatternEditorComponent.$2",
               "type": "Any",
               "tags": [],
               "label": "context",

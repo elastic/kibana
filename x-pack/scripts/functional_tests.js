@@ -54,6 +54,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/security_api_integration/session_lifespan.config.ts'),
   require.resolve('../test/security_api_integration/login_selector.config.ts'),
   require.resolve('../test/security_api_integration/audit.config.ts'),
+  require.resolve('../test/security_api_integration/http_bearer.config.ts'),
   require.resolve('../test/security_api_integration/kerberos.config.ts'),
   require.resolve('../test/security_api_integration/kerberos_anonymous_access.config.ts'),
   require.resolve('../test/security_api_integration/pki.config.ts'),
@@ -90,6 +91,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/saved_object_tagging/api_integration/tagging_api/config.ts'),
   require.resolve('../test/examples/config.ts'),
   require.resolve('../test/performance/config.ts'),
+  require.resolve('../test/functional_execution_context/config.ts'),
 ];
 
 require('../../src/setup_node_env');

@@ -48,11 +48,11 @@ const stories: Meta<{}> = {
   component: Cytoscape,
   decorators: [
     (StoryComponent, { globals }) => {
-      const KibanaReactContext = createKibanaReactContext(({
+      const KibanaReactContext = createKibanaReactContext({
         uiSettings: {
           get: () => globals.euiTheme && globals.euiTheme.includes('dark'),
         },
-      } as unknown) as Partial<CoreStart>);
+      } as unknown as Partial<CoreStart>);
 
       return (
         <KibanaReactContext.Provider>

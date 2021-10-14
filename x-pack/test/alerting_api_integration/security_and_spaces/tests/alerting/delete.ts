@@ -23,8 +23,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FLAKY https://github.com/elastic/kibana/issues/111001
-  describe.skip('delete', () => {
+  describe('delete', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());

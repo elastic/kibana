@@ -20,6 +20,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
+import styled from 'styled-components';
+
 import type {
   AgentPolicy,
   PackageInfo,
@@ -35,8 +37,17 @@ import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';
 import { PackagePolicyInputVarField } from './components';
 
+// on smaller screens, fields should be displayed in one column
+const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
+  @media (max-width: 767px) {
+    .euiFlexGroup--responsive {
+      align-items: flex-start;
+    }
+  }
+`;
+
 export const StepDefinePackagePolicy: React.FunctionComponent<{
-  agentPolicy: AgentPolicy;
+  agentPolicy?: AgentPolicy;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
   integrationToEnable?: string;
@@ -81,15 +92,17 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       if (currentPkgKey !== pkgKey) {
         // Existing package policies on the agent policy using the package name, retrieve highest number appended to package policy name
         const pkgPoliciesNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
-        const pkgPoliciesWithMatchingNames = (agentPolicy.package_policies as PackagePolicy[])
-          .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-          .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-          .sort((a, b) => a - b);
+        const pkgPoliciesWithMatchingNames = agentPolicy
+          ? (agentPolicy.package_policies as PackagePolicy[])
+              .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+              .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
+              .sort((a, b) => a - b)
+          : [];
 
         updatePackagePolicy(
           packageToPackagePolicy(
             packageInfo,
-            agentPolicy.id,
+            agentPolicy?.id || '',
             packagePolicy.output_id,
             packagePolicy.namespace,
             `${packageInfo.name}-${
@@ -104,7 +117,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       }
 
       // If agent policy has changed, update package policy's agent policy ID and namespace
-      if (packagePolicy.policy_id !== agentPolicy.id) {
+      if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
         updatePackagePolicy({
           policy_id: agentPolicy.id,
           namespace: agentPolicy.namespace,
@@ -113,7 +126,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy, integrationToEnable]);
 
     return validationResults ? (
-      <EuiDescribedFormGroup
+      <FormGroupResponsiveFields
         title={
           <h4>
             <FormattedMessage
@@ -329,7 +342,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-      </EuiDescribedFormGroup>
+      </FormGroupResponsiveFields>
     ) : (
       <Loading />
     );

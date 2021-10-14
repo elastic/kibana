@@ -5,14 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import ReactDOM from 'react-dom';
-
-import { AppMountParameters } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../kibana_services';
 import { discoverRouter } from './discover_router';
+import { toMountPoint } from '../../../kibana_react/public';
 
-export const renderApp = ({ element }: AppMountParameters) => {
+export const renderApp = (element: HTMLElement) => {
   const services = getServices();
   const { history: getHistory, capabilities, chrome, data } = services;
 
@@ -28,11 +26,10 @@ export const renderApp = ({ element }: AppMountParameters) => {
       iconType: 'glasses',
     });
   }
-  const app = discoverRouter(services, history);
-  ReactDOM.render(app, element);
+  const unmount = toMountPoint(discoverRouter(services, history))(element);
 
   return () => {
+    unmount();
     data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(element);
   };
 };

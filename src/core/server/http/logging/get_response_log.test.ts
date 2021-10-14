@@ -40,7 +40,7 @@ function createMockHapiRequest({
   query = {},
   response = { headers: {}, statusCode: 200 },
 }: RequestFixtureOptions = {}): Request {
-  return ({
+  return {
     auth,
     body,
     headers,
@@ -50,7 +50,7 @@ function createMockHapiRequest({
     path,
     query,
     response,
-  } as unknown) as Request;
+  } as unknown as Request;
 }
 
 describe('getEcsResponseLog', () => {

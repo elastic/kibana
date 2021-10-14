@@ -6,9 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+
+import { IKibanaSearchRequest } from '../../../../../src/plugins/data/common';
+
+import type { LatencyCorrelationsParams } from '../../../../plugins/apm/common/search_strategies/latency_correlations/types';
+import type { SearchStrategyClientParams } from '../../../../plugins/apm/common/search_strategies/types';
+import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import { PartialSearchRequest } from '../../../../plugins/apm/server/lib/search_strategies/correlations/search_strategy';
 import { parseBfetchResponse } from '../../common/utils/parse_b_fetch';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -16,21 +22,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const getRequestBody = () => {
-    const partialSearchRequest: PartialSearchRequest = {
+    const request: IKibanaSearchRequest<LatencyCorrelationsParams & SearchStrategyClientParams> = {
       params: {
         environment: 'ENVIRONMENT_ALL',
         start: '2020',
         end: '2021',
-        percentileThreshold: 95,
         kuery: '',
+        percentileThreshold: 95,
+        analyzeCorrelations: true,
       },
     };
 
     return {
       batch: [
         {
-          request: partialSearchRequest,
-          options: { strategy: 'apmCorrelationsSearchStrategy' },
+          request,
+          options: { strategy: APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS },
         },
       ],
     };
@@ -122,7 +129,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(typeof finalRawResponse?.took).to.be('number');
         expect(finalRawResponse?.percentileThresholdValue).to.be(undefined);
         expect(finalRawResponse?.overallHistogram).to.be(undefined);
-        expect(finalRawResponse?.values.length).to.be(0);
+        expect(finalRawResponse?.latencyCorrelations.length).to.be(0);
         expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
           'Fetched 95th percentile value of undefined based on 0 documents.',
           'Abort service since percentileThresholdValue could not be determined.',
@@ -132,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Correlations latency_ml with data and opbeans-node args',
+    'correlations latency with data and opbeans-node args',
     { config: 'trial', archives: ['8.0.0'] },
     () => {
       // putting this into a single `it` because the responses depend on each other
@@ -176,7 +183,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { rawResponse } = result;
 
         expect(typeof rawResponse?.took).to.be('number');
-        expect(rawResponse?.values).to.eql([]);
+        expect(rawResponse?.latencyCorrelations).to.eql([]);
 
         // follow up request body including search strategy ID
         const reqBody = getRequestBody();
@@ -230,9 +237,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
         expect(finalRawResponse?.overallHistogram.length).to.be(101);
 
-        expect(finalRawResponse?.values.length).to.eql(
+        expect(finalRawResponse?.latencyCorrelations.length).to.eql(
           13,
-          `Expected 13 identified correlations, got ${finalRawResponse?.values.length}.`
+          `Expected 13 identified correlations, got ${finalRawResponse?.latencyCorrelations.length}.`
         );
         expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
           'Fetched 95th percentile value of 1309695.875 based on 1244 documents.',
@@ -245,10 +252,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           'Identified 13 significant correlations out of 379 field/value pairs.',
         ]);
 
-        const correlation = finalRawResponse?.values[0];
+        const correlation = finalRawResponse?.latencyCorrelations[0];
         expect(typeof correlation).to.be('object');
-        expect(correlation?.field).to.be('transaction.result');
-        expect(correlation?.value).to.be('success');
+        expect(correlation?.fieldName).to.be('transaction.result');
+        expect(correlation?.fieldValue).to.be('success');
         expect(correlation?.correlation).to.be(0.6275246559191225);
         expect(correlation?.ksTest).to.be(4.806503252860024e-13);
         expect(correlation?.histogram.length).to.be(101);

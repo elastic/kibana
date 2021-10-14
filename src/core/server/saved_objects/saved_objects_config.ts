@@ -39,11 +39,12 @@ const migrationDeprecations: ConfigDeprecationProvider = () => [
   },
 ];
 
-export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> = {
-  path: 'migrations',
-  schema: migrationSchema,
-  deprecations: migrationDeprecations,
-};
+export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> =
+  {
+    path: 'migrations',
+    schema: migrationSchema,
+    deprecations: migrationDeprecations,
+  };
 
 const soSchema = schema.object({
   maxImportPayloadBytes: schema.byteSize({ defaultValue: 26_214_400 }),

@@ -78,7 +78,7 @@ describe('Vislib VisConfig Class Test Suite', function () {
 
     visConfig = new VisConfig(
       {
-        type: 'point_series',
+        type: 'heatmap',
       },
       data,
       getMockUiState(),

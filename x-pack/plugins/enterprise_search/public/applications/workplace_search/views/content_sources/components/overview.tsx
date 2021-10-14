@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
+  EuiButton,
+  EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiListGroup,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -29,7 +32,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiPanelTo } from '../../../../shared/react_router_helpers';
+import { CANCEL_BUTTON_LABEL, START_BUTTON_LABEL } from '../../../../shared/constants';
+import { EuiListGroupItemTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import aclImage from '../../../assets/supports_acl.svg';
 import { ComponentLoader } from '../../../components/shared/component_loader';
@@ -47,12 +51,16 @@ import {
   DOCUMENT_PERMISSIONS_DOCS_URL,
   ENT_SEARCH_LICENSE_MANAGEMENT,
   EXTERNAL_IDENTITIES_DOCS_URL,
+  SYNC_FREQUENCY_PATH,
+  BLOCKED_TIME_WINDOWS_PATH,
   getGroupPath,
+  getContentSourcePath,
 } from '../../../routes';
 import {
   SOURCES_NO_CONTENT_TITLE,
   SOURCE_OVERVIEW_TITLE,
   CONTENT_SUMMARY_TITLE,
+  CONTENT_SUMMARY_LOADING_TEXT,
   CONTENT_TYPE_HEADER,
   ITEMS_HEADER,
   EVENT_HEADER,
@@ -75,6 +83,12 @@ import {
   LEARN_CUSTOM_FEATURES_BUTTON,
   DOC_PERMISSIONS_DESCRIPTION,
   CUSTOM_CALLOUT_TITLE,
+  SOURCE_SYNCHRONIZATION_TITLE,
+  SOURCE_SYNC_FREQUENCY_LINK_LABEL,
+  SOURCE_BLOCKED_TIME_WINDOWS_LINK_LABEL,
+  SOURCE_SYNCHRONIZATION_BUTTON_LABEL,
+  SOURCE_SYNC_CONFIRM_TITLE,
+  SOURCE_SYNC_CONFIRM_MESSAGE,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 
@@ -82,6 +96,7 @@ import { SourceLayout } from './source_layout';
 
 export const Overview: React.FC = () => {
   const { contentSource } = useValues(SourceLogic);
+  const { initializeSourceSynchronization } = useActions(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   const {
@@ -97,7 +112,20 @@ export const Overview: React.FC = () => {
     indexPermissions,
     hasPermissions,
     isFederatedSource,
+    isIndexedSource,
   } = contentSource;
+
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const closeModal = () => setIsModalVisible(false);
+  const handleSyncClick = () => setIsModalVisible(true);
+  const showSyncTriggerCallout = !custom && isIndexedSource && isOrganization;
+
+  const onSyncConfirm = () => {
+    initializeSourceSynchronization(id);
+    setIsSyncing(true);
+    closeModal();
+  };
 
   const DocumentSummary = () => {
     let totalDocuments = 0;
@@ -137,7 +165,7 @@ export const Overview: React.FC = () => {
           <h3>{CONTENT_SUMMARY_TITLE}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {!summary && <ComponentLoader text="Loading summary details..." />}
+        {!summary && <ComponentLoader text={CONTENT_SUMMARY_LOADING_TEXT} />}
         {!!summary &&
           (totalDocuments === 0 ? (
             emptyState
@@ -233,22 +261,18 @@ export const Overview: React.FC = () => {
         <h5>{GROUP_ACCESS_TITLE}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="GroupsSummary">
-        {groups.map((group, index) => (
-          <EuiFlexItem key={index}>
-            <EuiPanelTo
-              hasShadow={false}
-              color="subdued"
+      <EuiPanel color="subdued">
+        <EuiListGroup flush maxWidth={false} data-test-subj="GroupsSummary">
+          {groups.map((group, index) => (
+            <EuiListGroupItemTo
+              label={group.name}
+              key={index}
               to={getGroupPath(group.id)}
               data-test-subj="SourceGroupLink"
-            >
-              <EuiText size="s" className="eui-textTruncate">
-                <strong>{group.name}</strong>
-              </EuiText>
-            </EuiPanelTo>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+            />
+          ))}
+        </EuiListGroup>
+      </EuiPanel>
     </>
   );
 
@@ -453,9 +477,57 @@ export const Overview: React.FC = () => {
     </EuiPanel>
   );
 
+  const syncTriggerCallout = (
+    <EuiFlexItem>
+      <EuiSpacer />
+      <EuiTitle size="xs">
+        <h5>{SOURCE_SYNCHRONIZATION_TITLE}</h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiPanel color="subdued">
+        <EuiButton fill isLoading={isSyncing} onClick={handleSyncClick} data-test-subj="SyncButton">
+          {SOURCE_SYNCHRONIZATION_BUTTON_LABEL}
+        </EuiButton>
+        <EuiSpacer size="m" />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.enterpriseSearch.workplaceSearch.sources.synchronizationCallout"
+            defaultMessage="Configure {syncFrequencyLink} or {blockTimeWindowsLink}."
+            values={{
+              syncFrequencyLink: (
+                <EuiLinkTo to={getContentSourcePath(SYNC_FREQUENCY_PATH, id, isOrganization)}>
+                  {SOURCE_SYNC_FREQUENCY_LINK_LABEL}
+                </EuiLinkTo>
+              ),
+              blockTimeWindowsLink: (
+                <EuiLinkTo to={getContentSourcePath(BLOCKED_TIME_WINDOWS_PATH, id, isOrganization)}>
+                  {SOURCE_BLOCKED_TIME_WINDOWS_LINK_LABEL}
+                </EuiLinkTo>
+              ),
+            }}
+          />
+        </EuiText>
+      </EuiPanel>
+    </EuiFlexItem>
+  );
+
+  const syncConfirmModal = (
+    <EuiConfirmModal
+      title={SOURCE_SYNC_CONFIRM_TITLE}
+      onCancel={closeModal}
+      onConfirm={onSyncConfirm}
+      cancelButtonText={CANCEL_BUTTON_LABEL}
+      confirmButtonText={START_BUTTON_LABEL}
+      defaultFocusedButton="confirm"
+    >
+      <p>{SOURCE_SYNC_CONFIRM_MESSAGE}</p>
+    </EuiConfirmModal>
+  );
+
   return (
     <SourceLayout pageViewTelemetry="source_overview">
       <ViewContentHeader title={SOURCE_OVERVIEW_TITLE} />
+      {isModalVisible && syncConfirmModal}
 
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem grow={8}>
@@ -515,6 +587,7 @@ export const Overview: React.FC = () => {
                 )}
               </>
             )}
+            {showSyncTriggerCallout && syncTriggerCallout}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

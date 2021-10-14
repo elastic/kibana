@@ -53,7 +53,8 @@ const CHUNK_PARSED_OBJECT_SIZE = 50;
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.post(
     {
@@ -103,7 +104,7 @@ export const importRulesRoute = (
         }
         const signalsIndex = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
-        if (!indexExists) {
+        if (!isRuleRegistryEnabled && !indexExists) {
           return siemResponse.error({
             statusCode: 400,
             body: `To create a rule, the index must exist first. Index ${signalsIndex} does not exist`,
@@ -205,6 +206,7 @@ export const importRulesRoute = (
                       const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
                       throwHttpError(await mlAuthz.validateRuleType(type));
                       const rule = await readRules({
+                        isRuleRegistryEnabled,
                         rulesClient,
                         ruleId,
                         id: undefined,
@@ -212,6 +214,7 @@ export const importRulesRoute = (
 
                       if (rule == null) {
                         await createRules({
+                          isRuleRegistryEnabled,
                           rulesClient,
                           anomalyThreshold,
                           author,

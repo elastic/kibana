@@ -11,13 +11,14 @@ import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { getServiceNodeIds } from './get_service_node_ids';
-import { createSupertestClient } from '../../common/apm_api_supertest';
+import { createApmApiClient } from '../../common/apm_api_supertest';
 
-type ServiceOverviewInstanceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
+type ServiceOverviewInstanceDetails =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
-  const apmApiSupertest = createSupertestClient(supertest);
+  const apmApiSupertest = createApmApiClient(supertest);
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -30,7 +31,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('handles empty state', async () => {
           const response = await supertest.get(
             url.format({
-              pathname: '/api/apm/services/opbeans-java/service_overview_instances/details/foo',
+              pathname:
+                '/internal/apm/services/opbeans-java/service_overview_instances/details/foo',
               query: {
                 start,
                 end,
@@ -61,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceNodeIds = await getServiceNodeIds({ apmApiSupertest, start, end });
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/service_overview_instances/details/${serviceNodeIds[0]}`,
+              pathname: `/internal/apm/services/opbeans-java/service_overview_instances/details/${serviceNodeIds[0]}`,
               query: {
                 start,
                 end,
@@ -88,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles empty state when instance id not found', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: '/api/apm/services/opbeans-java/service_overview_instances/details/foo',
+            pathname: '/internal/apm/services/opbeans-java/service_overview_instances/details/foo',
             query: {
               start,
               end,

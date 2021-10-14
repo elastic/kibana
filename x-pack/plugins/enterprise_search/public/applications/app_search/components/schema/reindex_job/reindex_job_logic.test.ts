@@ -103,7 +103,7 @@ describe('ReindexJobLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/reindex_job/some-job-id'
+          '/internal/app_search/engines/some-engine/reindex_job/some-job-id'
         );
         expect(ReindexJobLogic.actions.onLoadSuccess).toHaveBeenCalledWith(MOCK_RESPONSE);
       });

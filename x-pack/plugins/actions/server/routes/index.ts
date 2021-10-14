@@ -6,6 +6,7 @@
  */
 
 import { IRouter } from 'kibana/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { ILicenseState } from '../lib';
 import { ActionsRequestHandlerContext } from '../types';
 import { createActionRoute } from './create';
@@ -20,9 +21,10 @@ import { defineLegacyRoutes } from './legacy';
 
 export function defineRoutes(
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) {
-  defineLegacyRoutes(router, licenseState);
+  defineLegacyRoutes(router, licenseState, usageCounter);
 
   createActionRoute(router, licenseState);
   deleteActionRoute(router, licenseState);

@@ -119,9 +119,10 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
       ? ' '
       : kqlQueryTimeline;
-  const kqlQueryTest = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
-    kqlQueryExpression,
-  ]);
+  const kqlQueryTest = useMemo(
+    () => ({ query: kqlQueryExpression, language: 'kuery' }),
+    [kqlQueryExpression]
+  );
 
   const combinedQueries = useMemo(
     () =>
@@ -377,9 +378,10 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
       ? ' '
       : kqlQueryTimeline;
-  const kqlQuery = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
-    kqlQueryExpression,
-  ]);
+  const kqlQuery = useMemo(
+    () => ({ query: kqlQueryExpression, language: 'kuery' }),
+    [kqlQueryExpression]
+  );
 
   const combinedQueries = useMemo(
     () =>

@@ -11,7 +11,7 @@ import { History } from 'history';
 import { getState } from './discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../../build_services';
-import { SavedSearch } from '../../../../saved_searches';
+import { SavedSearch, getSavedSearch } from '../../../../saved_searches';
 import { loadIndexPattern } from '../utils/resolve_index_pattern';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
@@ -96,6 +96,7 @@ export function useDiscoverState({
 
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
+
     return () => stopSync();
   }, [stateContainer, filterManager, data, indexPattern]);
 
@@ -147,8 +148,14 @@ export function useDiscoverState({
    */
   const resetSavedSearch = useCallback(
     async (id?: string) => {
-      const newSavedSearch = await services.getSavedSearchById(id);
-      newSavedSearch.searchSource.setField('index', indexPattern);
+      const newSavedSearch = await getSavedSearch(id, {
+        search: services.data.search,
+        savedObjectsClient: services.core.savedObjects.client,
+        spaces: services.spaces,
+      });
+
+      const newIndexPattern = newSavedSearch.searchSource.getField('index') || indexPattern;
+      newSavedSearch.searchSource.setField('index', newIndexPattern);
       const newAppState = getStateDefaults({
         config,
         data,
@@ -157,7 +164,7 @@ export function useDiscoverState({
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
-    [services, indexPattern, config, data, stateContainer]
+    [indexPattern, services, config, data, stateContainer]
   );
 
   /**
@@ -208,16 +215,13 @@ export function useDiscoverState({
   }, [config, data, savedSearch, reset, stateContainer]);
 
   /**
-   * Initial data fetching, also triggered when index pattern changes
+   * Trigger data fetching on indexPattern or savedSearch changes
    */
   useEffect(() => {
-    if (!indexPattern) {
-      return;
-    }
-    if (initialFetchStatus === FetchStatus.LOADING) {
+    if (indexPattern) {
       refetch$.next();
     }
-  }, [initialFetchStatus, refetch$, indexPattern]);
+  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
   return {
     data$,

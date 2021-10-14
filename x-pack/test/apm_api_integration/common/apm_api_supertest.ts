@@ -11,11 +11,11 @@ import request from 'superagent';
 import { parseEndpoint } from '../../../plugins/apm/common/apm_api/parse_endpoint';
 import type {
   APIReturnType,
-  APIEndpoint,
   APIClientRequestParamsOf,
 } from '../../../plugins/apm/public/services/rest/createCallApmApi';
+import type { APIEndpoint } from '../../../plugins/apm/server';
 
-export function createSupertestClient(st: supertest.SuperTest<supertest.Test>) {
+export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       endpoint: TEndpoint;
@@ -41,7 +41,7 @@ export function createSupertestClient(st: supertest.SuperTest<supertest.Test>) {
   };
 }
 
-export type ApmApiSupertest = ReturnType<typeof createSupertestClient>;
+export type ApmApiSupertest = ReturnType<typeof createApmApiClient>;
 
 export class ApmApiError extends Error {
   res: request.Response;

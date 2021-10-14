@@ -28,14 +28,12 @@ const { emptyField, isJsonField } = fieldValidators;
 
 const INFERENCE_CONFIG_DOCS = {
   regression: {
-    path: 'inference-processor.html#inference-processor-regression-opt',
     linkLabel: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.inferenceForm.inferenceConfigField.regressionLinkLabel',
       { defaultMessage: 'regression' }
     ),
   },
   classification: {
-    path: 'inference-processor.html#inference-processor-classification-opt',
     linkLabel: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.inferenceForm.inferenceConfigField.classificationLinkLabel',
       { defaultMessage: 'classification' }
@@ -43,27 +41,22 @@ const INFERENCE_CONFIG_DOCS = {
   },
 };
 
-const getInferenceConfigHelpText = (esDocsBasePath: string): React.ReactNode => {
+const getInferenceConfigHelpText = (
+  regressionDocsLink: string,
+  classificationDocsLink: string
+): React.ReactNode => {
   return (
     <FormattedMessage
       id="xpack.ingestPipelines.pipelineEditor.inferenceForm.inferenceConfigurationHelpText"
       defaultMessage="Contains the inference type and its options. There are two types: {regression} and {classification}."
       values={{
         regression: (
-          <EuiLink
-            external
-            target="_blank"
-            href={`${esDocsBasePath}/${INFERENCE_CONFIG_DOCS.regression.path}`}
-          >
+          <EuiLink external target="_blank" href={regressionDocsLink}>
             {INFERENCE_CONFIG_DOCS.regression.linkLabel}
           </EuiLink>
         ),
         classification: (
-          <EuiLink
-            external
-            target="_blank"
-            href={`${esDocsBasePath}/${INFERENCE_CONFIG_DOCS.classification.path}`}
-          >
+          <EuiLink external target="_blank" href={classificationDocsLink}>
             {INFERENCE_CONFIG_DOCS.classification.linkLabel}
           </EuiLink>
         ),
@@ -158,7 +151,8 @@ const fieldsConfig: FieldsConfig = {
 
 export const Inference: FunctionComponent = () => {
   const { services } = useKibana();
-  const esDocUrl = services.documentation.getEsDocsBasePath();
+  const regressionDocsLink = services.documentation.getRegressionUrl();
+  const classificationDocsLink = services.documentation.getClassificationUrl();
   return (
     <>
       <UseField config={fieldsConfig.model_id} component={Field} path="fields.model_id" />
@@ -188,7 +182,7 @@ export const Inference: FunctionComponent = () => {
       <UseField
         config={{
           ...fieldsConfig.inference_config,
-          helpText: getInferenceConfigHelpText(esDocUrl),
+          helpText: getInferenceConfigHelpText(regressionDocsLink, classificationDocsLink),
         }}
         component={XJsonEditor}
         componentProps={{

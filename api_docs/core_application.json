@@ -444,7 +444,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue",
+                "id": "def-public.ScopedHistory.createHref.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "{ prependBasePath = true }",
@@ -454,7 +454,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue.prependBasePath",
+                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePath",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "prependBasePath",
@@ -715,7 +715,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.params",
+                "id": "def-public.App.mount.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -1203,7 +1203,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.ApplicationStart.getUrlForApp.$2.options",
+                "id": "def-public.ApplicationStart.getUrlForApp.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1213,7 +1213,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.path",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.path",
                     "type": "string",
                     "tags": [],
                     "label": "path",
@@ -1226,7 +1226,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.absolute",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.absolute",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "absolute",
@@ -1239,7 +1239,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.deepLinkId",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.deepLinkId",
                     "type": "string",
                     "tags": [],
                     "label": "deepLinkId",
@@ -1392,10 +1392,6 @@
               {
                 "plugin": "kibanaOverview",
                 "path": "src/plugins/kibana_overview/public/application.tsx"
-              },
-              {
-                "plugin": "timelion",
-                "path": "src/plugins/timelion/public/application.ts"
               },
               {
                 "plugin": "management",
@@ -1668,7 +1664,7 @@
             "tags": [],
             "label": "euiIconType",
             "description": [
-              "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precendence over the `icon` property."
+              "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precedence over the `icon` property."
             ],
             "signature": [
               "string | undefined"
@@ -2004,7 +2000,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-public.factory",
+            "id": "def-public.AppLeaveHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "factory",
@@ -2017,7 +2013,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.nextAppId",
+            "id": "def-public.AppLeaveHandler.$2",
             "type": "string",
             "tags": [],
             "label": "nextAppId",
@@ -2075,7 +2071,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-public.params",
+            "id": "def-public.AppMount.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -2188,7 +2184,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-public.app",
+            "id": "def-public.AppUpdater.$1",
             "type": "Object",
             "tags": [],
             "label": "app",
@@ -2227,7 +2223,7 @@
             "section": "def-public.AppDeepLink",
             "text": "AppDeepLink"
           },
-          ", \"title\" | \"id\" | \"order\" | \"path\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { deepLinks: ",
+          ", \"id\" | \"title\" | \"order\" | \"path\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { deepLinks: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2267,7 +2263,7 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>, \"status\" | \"title\" | \"id\" | \"order\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"capabilities\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
+          "<unknown>, \"status\" | \"id\" | \"title\" | \"order\" | \"capabilities\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
           {
             "pluginId": "core",
             "scope": "public",

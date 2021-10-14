@@ -24,7 +24,7 @@ interface AppActions {
   initializeAppData(props: InitialAppData): InitialAppData;
   setContext(isOrganization: boolean): boolean;
   setOrgName(name: string): string;
-  setSourceRestriction(canCreatePersonalSources: boolean): boolean;
+  setSourceRestriction(canCreatePrivateSources: boolean): boolean;
 }
 
 const emptyOrg = {} as Organization;
@@ -40,7 +40,7 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
     }),
     setContext: (isOrganization) => isOrganization,
     setOrgName: (name: string) => name,
-    setSourceRestriction: (canCreatePersonalSources: boolean) => canCreatePersonalSources,
+    setSourceRestriction: (canCreatePrivateSources: boolean) => canCreatePrivateSources,
   },
   reducers: {
     hasInitialized: [
@@ -69,9 +69,9 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
       emptyAccount,
       {
         initializeAppData: (_, { workplaceSearch }) => workplaceSearch?.account || emptyAccount,
-        setSourceRestriction: (state, canCreatePersonalSources) => ({
+        setSourceRestriction: (state, canCreatePrivateSources) => ({
           ...state,
-          canCreatePersonalSources,
+          canCreatePrivateSources,
         }),
       },
     ],

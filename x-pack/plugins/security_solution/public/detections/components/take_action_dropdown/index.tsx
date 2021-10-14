@@ -23,7 +23,6 @@ import { Status } from '../../../../common/detection_engine/schemas/common/schem
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
-
 interface ActionsData {
   alertStatus: Status;
   eventId: string;
@@ -82,9 +81,10 @@ export const TakeActionDropdown = React.memo(
       [detailsData]
     );
 
-    const alertIds = useMemo(() => (isEmpty(actionsData.eventId) ? null : [actionsData.eventId]), [
-      actionsData.eventId,
-    ]);
+    const alertIds = useMemo(
+      () => (isEmpty(actionsData.eventId) ? null : [actionsData.eventId]),
+      [actionsData.eventId]
+    );
     const isEvent = actionsData.eventKind === 'event';
 
     const togglePopoverHandler = useCallback(() => {

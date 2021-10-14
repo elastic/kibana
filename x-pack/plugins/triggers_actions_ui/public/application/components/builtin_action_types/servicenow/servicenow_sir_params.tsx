@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiSwitch,
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
@@ -21,14 +22,23 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
-import { ServiceNowSIRActionParams, Fields, Choice } from './types';
-import { choicesToEuiOptions } from './helpers';
+import { ServiceNowSIRActionParams, Fields, Choice, ServiceNowActionConnector } from './types';
+import { choicesToEuiOptions, isLegacyConnector } from './helpers';
+import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
   category: [],
   subcategory: [],
   priority: [],
+};
+
+const valuesToString = (value: string | string[] | null): string | undefined => {
+  if (Array.isArray(value)) {
+    return value.join(',');
+  }
+
+  return value ?? undefined;
 };
 
 const ServiceNowSIRParamsFields: React.FunctionComponent<
@@ -39,18 +49,25 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
+  const isOldConnector = isLegacyConnector(actionConnector as unknown as ServiceNowActionConnector);
+
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
-      (({
+      ({
         incident: {},
         comments: [],
-      } as unknown) as ServiceNowSIRActionParams['subActionParams']),
+      } as unknown as ServiceNowSIRActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
 
+  const hasUpdateIncident =
+    incident.correlation_id != null && incident.correlation_id === UPDATE_INCIDENT_VARIABLE;
+  const [updateIncident, setUpdateIncident] = useState<boolean>(hasUpdateIncident);
   const [choices, setChoices] = useState<Fields>(defaultFields);
+
+  const correlationID = updateIncident ? UPDATE_INCIDENT_VARIABLE : NOT_UPDATE_INCIDENT_VARIABLE;
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -87,6 +104,14 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     );
   }, []);
 
+  const onUpdateIncidentSwitchChange = useCallback(() => {
+    const newCorrelationID = !updateIncident
+      ? UPDATE_INCIDENT_VARIABLE
+      : NOT_UPDATE_INCIDENT_VARIABLE;
+    editSubActionProperty('correlation_id', newCorrelationID);
+    setUpdateIncident(!updateIncident);
+  }, [editSubActionProperty, updateIncident]);
+
   const { isLoading: isLoadingChoices } = useGetChoices({
     http,
     toastNotifications: toasts,
@@ -115,7 +140,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: correlationID, correlation_display: 'Alerting' },
           comments: [],
         },
         index
@@ -132,7 +157,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: correlationID, correlation_display: 'Alerting' },
           comments: [],
         },
         index
@@ -162,48 +187,48 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'short_description'}
-          inputTargetValue={incident?.short_description ?? undefined}
+          inputTargetValue={incident?.short_description}
           errors={errors['subActionParams.incident.short_description'] as string[]}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.SOURCE_IP_LABEL}>
+      <EuiFormRow fullWidth label={i18n.SOURCE_IP_LABEL} helpText={i18n.SOURCE_IP_HELP_TEXT}>
         <TextFieldWithMessageVariables
           index={index}
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'source_ip'}
-          inputTargetValue={incident?.source_ip ?? undefined}
+          inputTargetValue={valuesToString(incident?.source_ip)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.DEST_IP_LABEL}>
+      <EuiFormRow fullWidth label={i18n.DEST_IP_LABEL} helpText={i18n.DEST_IP_HELP_TEXT}>
         <TextFieldWithMessageVariables
           index={index}
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'dest_ip'}
-          inputTargetValue={incident?.dest_ip ?? undefined}
+          inputTargetValue={valuesToString(incident?.dest_ip)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.MALWARE_URL_LABEL}>
+      <EuiFormRow fullWidth label={i18n.MALWARE_URL_LABEL} helpText={i18n.MALWARE_URL_HELP_TEXT}>
         <TextFieldWithMessageVariables
           index={index}
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'malware_url'}
-          inputTargetValue={incident?.malware_url ?? undefined}
+          inputTargetValue={valuesToString(incident?.malware_url)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.MALWARE_HASH_LABEL}>
+      <EuiFormRow fullWidth label={i18n.MALWARE_HASH_LABEL} helpText={i18n.MALWARE_HASH_HELP_TEXT}>
         <TextFieldWithMessageVariables
           index={index}
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'malware_hash'}
-          inputTargetValue={incident?.malware_hash ?? undefined}
+          inputTargetValue={valuesToString(incident?.malware_hash)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -277,6 +302,18 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.COMMENTS_LABEL}
       />
+      <EuiSpacer size="m" />
+      {!isOldConnector && (
+        <EuiFormRow id="update-incident-form-row" fullWidth label={i18n.UPDATE_INCIDENT_LABEL}>
+          <EuiSwitch
+            label={updateIncident ? i18n.ON : i18n.OFF}
+            name="update-incident-switch"
+            checked={updateIncident}
+            onChange={onUpdateIncidentSwitchChange}
+            aria-describedby="update-incident-form-row"
+          />
+        </EuiFormRow>
+      )}
     </>
   );
 };

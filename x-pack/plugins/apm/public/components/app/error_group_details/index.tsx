@@ -103,13 +103,13 @@ export function ErrorGroupDetails() {
   const {
     path: { groupId },
     query: { rangeFrom, rangeTo, environment, kuery },
-  } = useApmParams('/services/:serviceName/errors/:groupId');
+  } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   useBreadcrumb({
     title: groupId,
-    href: apmRouter.link('/services/:serviceName/errors/:groupId', {
+    href: apmRouter.link('/services/{serviceName}/errors/{groupId}', {
       path: {
         serviceName,
         groupId,
@@ -127,7 +127,7 @@ export function ErrorGroupDetails() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
+          endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
           params: {
             path: {
               serviceName,

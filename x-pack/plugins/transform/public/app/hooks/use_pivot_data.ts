@@ -98,10 +98,8 @@ export const usePivotData = (
   requestPayload: StepDefineExposedState['previewRequest'],
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
 ): UseIndexDataReturnType => {
-  const [
-    previewMappingsProperties,
-    setPreviewMappingsProperties,
-  ] = useState<PreviewMappingsProperties>({});
+  const [previewMappingsProperties, setPreviewMappingsProperties] =
+    useState<PreviewMappingsProperties>({});
   const api = useApi();
   const {
     ml: {

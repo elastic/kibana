@@ -98,7 +98,12 @@ describe('heatmap', () => {
       };
     });
 
-    test('resolves configuration from complete state', () => {
+    afterEach(() => {
+      // some tests manipulate it, so restore a pristine version
+      frame = createMockFramePublicAPI();
+    });
+
+    test('resolves configuration from complete state and available data', () => {
       const state: HeatmapVisualizationState = {
         ...exampleState(),
         layerId: 'first',
@@ -106,6 +111,8 @@ describe('heatmap', () => {
         yAccessor: 'y-accessor',
         valueAccessor: 'v-accessor',
       };
+
+      frame.activeData = { first: { type: 'datatable', columns: [], rows: [] } };
 
       expect(
         getHeatmapVisualization({
@@ -197,6 +204,63 @@ describe('heatmap', () => {
             accessors: [],
             filterOperations: isCellValueSupported,
             supportsMoreColumns: true,
+            required: true,
+            dataTestSubj: 'lnsHeatmap_cellPanel',
+            enableDimensionEditor: true,
+          },
+        ],
+      });
+    });
+
+    test("resolves configuration when there's no access to active data in frame", () => {
+      const state: HeatmapVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        xAccessor: 'x-accessor',
+        yAccessor: 'y-accessor',
+        valueAccessor: 'v-accessor',
+      };
+
+      frame.activeData = undefined;
+
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).getConfiguration({ state, frame, layerId: 'first' })
+      ).toEqual({
+        groups: [
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.X,
+            groupLabel: 'Horizontal axis',
+            accessors: [{ columnId: 'x-accessor' }],
+            filterOperations: filterOperationsAxis,
+            supportsMoreColumns: false,
+            required: true,
+            dataTestSubj: 'lnsHeatmap_xDimensionPanel',
+          },
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.Y,
+            groupLabel: 'Vertical axis',
+            accessors: [{ columnId: 'y-accessor' }],
+            filterOperations: filterOperationsAxis,
+            supportsMoreColumns: false,
+            required: false,
+            dataTestSubj: 'lnsHeatmap_yDimensionPanel',
+          },
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.CELL,
+            groupLabel: 'Cell value',
+            accessors: [
+              {
+                columnId: 'v-accessor',
+                triggerIcon: 'none',
+              },
+            ],
+            filterOperations: isCellValueSupported,
+            supportsMoreColumns: false,
             required: true,
             dataTestSubj: 'lnsHeatmap_cellPanel',
             enableDimensionEditor: true,

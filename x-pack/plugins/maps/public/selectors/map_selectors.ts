@@ -9,6 +9,7 @@ import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import { Adapters } from 'src/plugins/inspector/public';
+import type { Query } from 'src/plugins/data/common';
 import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
 // @ts-ignore
 import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
@@ -45,7 +46,6 @@ import {
   LayerDescriptor,
   MapCenter,
   MapExtent,
-  MapQuery,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
@@ -179,7 +179,7 @@ export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
 
 export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
 
-export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.mapState.query;
+export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
@@ -200,9 +200,6 @@ export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
 
 export const getEditState = ({ map }: MapStoreState): EditState | undefined =>
   map.mapState.editState;
-
-export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string | undefined =>
-  map.mapState.refreshTimerLastTriggeredAt;
 
 function getLayerDescriptor(state: MapStoreState, layerId: string) {
   const layerListRaw = getLayerListRaw(state);
@@ -225,7 +222,6 @@ export const getDataFilters = createSelector(
   getMapZoom,
   getTimeFilters,
   getTimeslice,
-  getRefreshTimerLastTriggeredAt,
   getQuery,
   getFilters,
   getSearchSessionId,
@@ -237,7 +233,6 @@ export const getDataFilters = createSelector(
     mapZoom,
     timeFilters,
     timeslice,
-    refreshTimerLastTriggeredAt,
     query,
     filters,
     searchSessionId,
@@ -250,7 +245,6 @@ export const getDataFilters = createSelector(
       zoom: mapZoom,
       timeFilters,
       timeslice,
-      refreshTimerLastTriggeredAt,
       query,
       filters,
       searchSessionId,

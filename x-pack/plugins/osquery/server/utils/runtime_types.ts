@@ -30,11 +30,10 @@ export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) =>
   throw createError(failure(errors).join('\n'));
 };
 
-export const decodeOrThrow = <A, O, I>(
-  runtimeType: rt.Type<A, O, I>,
-  createError: ErrorFactory = createPlainError
-) => (inputValue: I) =>
-  pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+export const decodeOrThrow =
+  <A, O, I>(runtimeType: rt.Type<A, O, I>, createError: ErrorFactory = createPlainError) =>
+  (inputValue: I) =>
+    pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
 
 const getProps = (
   codec:

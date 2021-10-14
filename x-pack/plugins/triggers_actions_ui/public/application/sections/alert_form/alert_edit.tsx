@@ -24,10 +24,17 @@ import {
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Alert, AlertFlyoutCloseReason, AlertEditProps, IErrorObject } from '../../../types';
-import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
+import {
+  Alert,
+  AlertFlyoutCloseReason,
+  AlertEditProps,
+  IErrorObject,
+  AlertType,
+} from '../../../types';
+import { AlertForm } from './alert_form';
+import { getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_errors';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
-import { updateAlert } from '../../lib/alert_api';
+import { updateAlert, loadAlertTypes } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
@@ -43,6 +50,7 @@ export const AlertEdit = ({
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
+  ...props
 }: AlertEditProps) => {
   const onSaveHandler = onSave ?? reloadAlerts;
   const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
@@ -50,12 +58,14 @@ export const AlertEdit = ({
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
-  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(
-    false
-  );
+  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
+    useState<boolean>(false);
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
   const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [serverRuleType, setServerRuleType] = useState<AlertType<string, string> | undefined>(
+    props.ruleType
+  );
 
   const {
     http,
@@ -76,9 +86,23 @@ export const AlertEdit = ({
     })();
   }, [alert, actionTypeRegistry]);
 
+  useEffect(() => {
+    if (!props.ruleType && !serverRuleType) {
+      (async () => {
+        const serverRuleTypes = await loadAlertTypes({ http });
+        for (const _serverRuleType of serverRuleTypes) {
+          if (alertType.id === _serverRuleType.id) {
+            setServerRuleType(_serverRuleType);
+          }
+        }
+      })();
+    }
+  }, [props.ruleType, alertType.id, serverRuleType, http]);
+
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
-    alertType
+    alertType,
+    serverRuleType
   );
 
   const checkForChangesAndCloseFlyout = () => {

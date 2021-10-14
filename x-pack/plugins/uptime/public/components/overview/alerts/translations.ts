@@ -197,6 +197,15 @@ export const ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ENTER_ANY_AVAILABILITY_THRESHOLD_DESCRIPTION = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.threshold.anyMonitorDescription',
+  {
+    defaultMessage: 'any monitor is up in',
+    description:
+      'This fragment explains that an alert will fire for monitors matching user-specified criteria',
+  }
+);
+
 export const ENTER_AVAILABILITY_THRESHOLD_VALUE = (value: string) =>
   i18n.translate('xpack.uptime.alerts.monitorStatus.availability.threshold.value', {
     defaultMessage: '< {value}% of checks',

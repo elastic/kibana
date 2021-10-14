@@ -60,7 +60,7 @@ interface SecurityActions {
   resetState(): void;
 }
 
-const route = '/api/workplace_search/org/security/source_restrictions';
+const route = '/internal/workplace_search/org/security/source_restrictions';
 
 export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>({
   path: ['enterprise_search', 'workplace_search', 'security_logic'],

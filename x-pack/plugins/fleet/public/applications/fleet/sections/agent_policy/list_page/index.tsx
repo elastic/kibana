@@ -78,7 +78,11 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   );
 
   // Fetch agent policies
-  const { isLoading, data: agentPolicyData, resendRequest } = useGetAgentPolicies({
+  const {
+    isLoading,
+    data: agentPolicyData,
+    resendRequest,
+  } = useGetAgentPolicies({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     sortField: sorting?.field,

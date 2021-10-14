@@ -178,11 +178,11 @@ describe(`EsQueryParser.injectQueryContextVars`, () => {
   );
   test(
     `%autointerval% = true`,
-    check({ interval: { '%autointerval%': true } }, { interval: `1h` }, ctxObj)
+    check({ interval: { '%autointerval%': true } }, { calendar_interval: `1h` }, ctxObj)
   );
   test(
     `%autointerval% = 10`,
-    check({ interval: { '%autointerval%': 10 } }, { interval: `3h` }, ctxObj)
+    check({ interval: { '%autointerval%': 10 } }, { fixed_interval: `3h` }, ctxObj)
   );
   test(`%timefilter% = min`, check({ a: { '%timefilter%': 'min' } }, { a: rangeStart }));
   test(`%timefilter% = max`, check({ a: { '%timefilter%': 'max' } }, { a: rangeEnd }));

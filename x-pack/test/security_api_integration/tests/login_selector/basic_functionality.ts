@@ -117,6 +117,30 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
+    it('preserves auth_provider_hint when accessing Kibana with intermediate authentication cookie', async () => {
+      const handshakeResponse = await supertest
+        .post('/internal/security/login')
+        .ca(CA_CERT)
+        .set('kbn-xsrf', 'xxx')
+        .send({ providerType: 'saml', providerName: 'saml1', currentURL: 'https://kibana.com/' })
+        .expect(200);
+
+      // The cookie that includes some state of the in-progress authentication, that doesn't allow
+      // to fully authenticate user yet.
+      const intermediateAuthCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+
+      // When user tries to access any other page in Kibana.
+      const response = await supertest
+        .get('/abc/xyz/handshake?one=two three&auth_provider_hint=saml1')
+        .ca(CA_CERT)
+        .set('Cookie', intermediateAuthCookie.cookieString())
+        .expect(302);
+      expect(response.headers['set-cookie']).to.be(undefined);
+      expect(response.headers.location).to.be(
+        '/login?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three%26auth_provider_hint%3Dsaml1&auth_provider_hint=saml1'
+      );
+    });
+
     describe('SAML', () => {
       function createSAMLResponse(options = {}) {
         return getSAMLResponse({

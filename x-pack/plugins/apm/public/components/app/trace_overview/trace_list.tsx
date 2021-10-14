@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
@@ -14,13 +14,13 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { truncate, unit } from '../../../utils/style';
+import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 
-type TraceGroup = APIReturnType<'GET /api/apm/traces'>['items'][0];
+type TraceGroup = APIReturnType<'GET /internal/apm/traces'>['items'][0];
 
 const StyledTransactionLink = euiStyled(TransactionDetailLink)`
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
@@ -30,6 +30,7 @@ const StyledTransactionLink = euiStyled(TransactionDetailLink)`
 interface Props {
   items: TraceGroup[];
   isLoading: boolean;
+  isFailure: boolean;
 }
 
 const traceListColumns: Array<ITableColumn<TraceGroup>> = [
@@ -110,8 +111,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
         </>
       </EuiToolTip>
     ),
-    width: `${unit * 6}px`,
-    align: 'left',
+    align: RIGHT_ALIGNMENT,
     sortable: true,
     render: (_, { impact }) => <ImpactBar value={impact} />,
   },
@@ -125,10 +125,11 @@ const noItemsMessage = (
   />
 );
 
-export function TraceList({ items = [], isLoading }: Props) {
+export function TraceList({ items = [], isLoading, isFailure }: Props) {
   return (
     <ManagedTable
       isLoading={isLoading}
+      error={isFailure}
       columns={traceListColumns}
       items={items}
       initialSortField="impact"

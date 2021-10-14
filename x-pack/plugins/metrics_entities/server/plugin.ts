@@ -25,7 +25,8 @@ import { MetricsEntitiesClient } from './services/metrics_entities_client';
 import { deleteTransforms } from './routes/delete_transforms';
 
 export class MetricsEntitiesPlugin
-  implements Plugin<MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart> {
+  implements Plugin<MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart>
+{
   private readonly logger: Logger;
   private kibanaVersion: string;
 

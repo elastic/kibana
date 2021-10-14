@@ -11,6 +11,7 @@ import {
 } from './policy_config';
 import {
   DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
   policyFactory,
   policyFactoryWithSupportedFeatures,
   policyFactoryWithoutPaidFeatures,
@@ -367,7 +368,7 @@ describe('policy_config and licenses', () => {
       expect(retPolicy.windows.popup.memory_protection.message).not.toEqual(popupMessage);
 
       // need to invert the test, since it could be either value
-      expect(['', DefaultPolicyNotificationMessage]).toContain(
+      expect(['', DefaultPolicyRuleNotificationMessage]).toContain(
         retPolicy.windows.popup.memory_protection.message
       );
     });
@@ -391,7 +392,7 @@ describe('policy_config and licenses', () => {
       expect(retPolicy.windows.popup.behavior_protection.message).not.toEqual(popupMessage);
 
       // need to invert the test, since it could be either value
-      expect(['', DefaultPolicyNotificationMessage]).toContain(
+      expect(['', DefaultPolicyRuleNotificationMessage]).toContain(
         retPolicy.windows.popup.behavior_protection.message
       );
 
@@ -402,7 +403,7 @@ describe('policy_config and licenses', () => {
       expect(retPolicy.mac.popup.behavior_protection.message).not.toEqual(popupMessage);
 
       // need to invert the test, since it could be either value
-      expect(['', DefaultPolicyNotificationMessage]).toContain(
+      expect(['', DefaultPolicyRuleNotificationMessage]).toContain(
         retPolicy.mac.popup.behavior_protection.message
       );
 
@@ -415,7 +416,7 @@ describe('policy_config and licenses', () => {
       expect(retPolicy.linux.popup.behavior_protection.message).not.toEqual(popupMessage);
 
       // need to invert the test, since it could be either value
-      expect(['', DefaultPolicyNotificationMessage]).toContain(
+      expect(['', DefaultPolicyRuleNotificationMessage]).toContain(
         retPolicy.linux.popup.behavior_protection.message
       );
     });

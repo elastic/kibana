@@ -12,6 +12,7 @@ import { configSchema, SnapshotRestoreConfig } from './config';
 export const plugin = (ctx: PluginInitializerContext) => new SnapshotRestoreServerPlugin(ctx);
 
 export const config: PluginConfigDescriptor<SnapshotRestoreConfig> = {
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: configSchema,
   exposeToBrowser: {
     slm_ui: true,

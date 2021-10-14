@@ -59,6 +59,7 @@ export interface AlertSummaryRow {
   description: {
     data: FieldsData;
     eventId: string;
+    isDraggable?: boolean;
     fieldFromBrowserField?: BrowserField;
     linkValue: string | undefined;
     timelineId: string;

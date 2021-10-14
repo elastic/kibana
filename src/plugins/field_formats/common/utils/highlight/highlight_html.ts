@@ -10,7 +10,10 @@ import _ from 'lodash';
 import { highlightTags } from './highlight_tags';
 import { htmlTags } from './html_tags';
 
-export function getHighlightHtml(fieldValue: any, highlights: any) {
+export function getHighlightHtml(
+  fieldValue: string | object,
+  highlights: string[] | undefined | null
+) {
   let highlightHtml = typeof fieldValue === 'object' ? JSON.stringify(fieldValue) : fieldValue;
 
   _.each(highlights, function (highlight) {

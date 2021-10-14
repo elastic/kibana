@@ -115,15 +115,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should properly clean up session expired because of idle timeout when providers override global session config', async function () {
       this.timeout(60000);
 
-      const [
-        samlDisableSessionCookie,
-        samlOverrideSessionCookie,
-        samlFallbackSessionCookie,
-      ] = await Promise.all([
-        loginWithSAML('saml_disable'),
-        loginWithSAML('saml_override'),
-        loginWithSAML('saml_fallback'),
-      ]);
+      const [samlDisableSessionCookie, samlOverrideSessionCookie, samlFallbackSessionCookie] =
+        await Promise.all([
+          loginWithSAML('saml_disable'),
+          loginWithSAML('saml_override'),
+          loginWithSAML('saml_fallback'),
+        ]);
 
       const response = await supertest
         .post('/internal/security/login')

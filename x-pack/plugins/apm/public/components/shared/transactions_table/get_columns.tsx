@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
@@ -16,30 +21,33 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { unit } from '../../../utils/style';
-import { SparkPlot } from '../charts/spark_plot';
 import { ImpactBar } from '../ImpactBar';
 import { TransactionDetailLink } from '../Links/apm/transaction_detail_link';
+import { ListMetric } from '../list_metric';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { getLatencyColumnLabel } from './get_latency_column_label';
 
-type TransactionGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+type TransactionGroupMainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 type ServiceTransactionGroupItem = ValuesType<
   TransactionGroupMainStatistics['transactionGroups']
 >;
-type TransactionGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
+type TransactionGroupDetailedStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export function getColumns({
   serviceName,
   latencyAggregationType,
   transactionGroupDetailedStatistics,
   comparisonEnabled,
+  shouldShowSparkPlots = true,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
   transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
   comparisonEnabled?: boolean;
+  shouldShowSparkPlots?: boolean;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
@@ -71,16 +79,17 @@ export function getColumns({
       field: 'latency',
       sortable: true,
       name: getLatencyColumnLabel(latencyAggregationType),
-      width: `${unit * 11}px`,
+      align: RIGHT_ALIGNMENT,
       render: (_, { latency, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.latency;
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.latency;
         return (
-          <SparkPlot
+          <ListMetric
             color="euiColorVis1"
             compact
+            hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
@@ -97,7 +106,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: `${unit * 11}px`,
+      align: RIGHT_ALIGNMENT,
       render: (_, { throughput, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.throughput;
@@ -105,9 +114,10 @@ export function getColumns({
           transactionGroupDetailedStatistics?.previousPeriod?.[name]
             ?.throughput;
         return (
-          <SparkPlot
+          <ListMetric
             color="euiColorVis0"
             compact
+            hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
@@ -124,16 +134,17 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
         { defaultMessage: 'Failed transaction rate' }
       ),
-      width: `${unit * 8}px`,
+      align: RIGHT_ALIGNMENT,
       render: (_, { errorRate, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.errorRate;
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.errorRate;
         return (
-          <SparkPlot
+          <ListMetric
             color="euiColorVis7"
             compact
+            hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
@@ -150,7 +161,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnImpact',
         { defaultMessage: 'Impact' }
       ),
-      width: `${unit * 5}px`,
+      align: RIGHT_ALIGNMENT,
       render: (_, { name }) => {
         const currentImpact =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.impact ??
@@ -158,7 +169,7 @@ export function getColumns({
         const previousImpact =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.impact;
         return (
-          <EuiFlexGroup gutterSize="xs" direction="column">
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" direction="column">
             <EuiFlexItem>
               <ImpactBar value={currentImpact} size="m" />
             </EuiFlexItem>

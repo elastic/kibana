@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns';
+import type { IndexPattern } from '../../../../../src/plugins/data/common';
 import {
   Embeddable,
   EmbeddableInput,

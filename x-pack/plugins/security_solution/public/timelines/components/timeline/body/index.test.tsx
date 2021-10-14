@@ -97,8 +97,9 @@ jest.mock('../../graph_overlay');
 
 jest.mock(
   'react-visibility-sensor',
-  () => ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
-    children({ isVisible: true })
+  () =>
+    ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
+      children({ isVisible: true })
 );
 
 jest.mock('../../../../common/lib/helpers/scheduler', () => ({
@@ -121,7 +122,7 @@ describe('Body', () => {
   const props: StatefulBodyProps = {
     activePage: 0,
     browserFields: mockBrowserFields,
-    clearSelected: (jest.fn() as unknown) as StatefulBodyProps['clearSelected'],
+    clearSelected: jest.fn() as unknown as StatefulBodyProps['clearSelected'],
     columnHeaders: defaultHeaders,
     data: mockTimelineData,
     eventIdToNoteIds: {},
@@ -134,7 +135,7 @@ describe('Body', () => {
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
     selectedEventIds: {},
-    setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
+    setSelected: jest.fn() as unknown as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
     tabType: TimelineTabs.query,

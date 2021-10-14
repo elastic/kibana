@@ -13,9 +13,9 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { getWaterfall } from './waterfall_with_summary/waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
 
 const INITIAL_DATA = {
-  root: undefined,
-  trace: { items: [], exceedsMax: false, errorDocs: [] },
-  errorsPerTransaction: {},
+  errorDocs: [],
+  traceDocs: [],
+  exceedsMax: false,
 };
 
 export function useWaterfallFetcher() {
@@ -24,15 +24,19 @@ export function useWaterfallFetcher() {
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/transactions/view');
+  } = useApmParams('/services/{serviceName}/transactions/view');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { data = INITIAL_DATA, status, error } = useFetcher(
+  const {
+    data = INITIAL_DATA,
+    status,
+    error,
+  } = useFetcher(
     (callApmApi) => {
       if (traceId && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/traces/{traceId}',
+          endpoint: 'GET /internal/apm/traces/{traceId}',
           params: {
             path: { traceId },
             query: {
@@ -46,10 +50,10 @@ export function useWaterfallFetcher() {
     [traceId, start, end]
   );
 
-  const waterfall = useMemo(() => getWaterfall(data, transactionId), [
-    data,
-    transactionId,
-  ]);
+  const waterfall = useMemo(
+    () => getWaterfall(data, transactionId),
+    [data, transactionId]
+  );
 
-  return { waterfall, status, error, exceedsMax: data.trace.exceedsMax };
+  return { waterfall, status, error };
 }

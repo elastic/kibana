@@ -24,7 +24,8 @@ import type {
 import { registerReportingUsageCollector } from './usage';
 
 export class ReportingPlugin
-  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
+  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
+{
   private logger: LevelLogger;
   private reportingCore?: ReportingCore;
 

@@ -7,6 +7,7 @@
 
 import { FeatureCollection } from 'geojson';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
+import type { Query } from 'src/plugins/data/common';
 import {
   EMPTY_FEATURE_COLLECTION,
   SOURCE_BOUNDS_DATA_REQUEST_ID,
@@ -14,9 +15,8 @@ import {
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import {
-  DataMeta,
+  DataRequestMeta,
   MapExtent,
-  MapQuery,
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -68,24 +68,21 @@ export async function syncVectorSource({
   source: IVectorSource;
   getUpdateDueToTimeslice: (timeslice?: Timeslice) => boolean;
 }): Promise<{ refreshed: boolean; featureCollection: FeatureCollection }> {
-  const {
-    startLoading,
-    stopLoading,
-    onLoadError,
-    registerCancelCallback,
-    isRequestStillActive,
-  } = syncContext;
+  const { startLoading, stopLoading, onLoadError, registerCancelCallback, isRequestStillActive } =
+    syncContext;
   const dataRequestId = SOURCE_DATA_REQUEST_ID;
   const requestToken = Symbol(`${layerId}-${dataRequestId}`);
-  const canSkipFetch = syncContext.forceRefresh
+
+  const canSkipFetch = syncContext.forceRefreshDueToDrawing
     ? false
     : await canSkipSourceUpdate({
         source,
         prevDataRequest,
-        nextMeta: requestMeta,
+        nextRequestMeta: requestMeta,
         extentAware: source.isFilterByMapBounds(),
         getUpdateDueToTimeslice,
       });
+
   if (canSkipFetch) {
     return {
       refreshed: false,
@@ -113,11 +110,11 @@ export async function syncVectorSource({
     ) {
       layerFeatureCollection.features.push(...getCentroidFeatures(layerFeatureCollection));
     }
-    const responseMeta: DataMeta = meta ? { ...meta } : {};
+    const responseMeta: DataRequestMeta = meta ? { ...meta } : {};
     if (requestMeta.applyGlobalTime && (await source.isTimeAware())) {
-      const timesiceMaskField = await source.getTimesliceMaskFieldName();
-      if (timesiceMaskField) {
-        responseMeta.timesiceMaskField = timesiceMaskField;
+      const timesliceMaskField = await source.getTimesliceMaskFieldName();
+      if (timesliceMaskField) {
+        responseMeta.timesliceMaskField = timesliceMaskField;
       }
     }
     stopLoading(dataRequestId, requestToken, layerFeatureCollection, responseMeta);
@@ -142,7 +139,7 @@ export async function getVectorSourceBounds({
   layerId: string;
   syncContext: DataRequestContext;
   source: IVectorSource;
-  sourceQuery: MapQuery | null;
+  sourceQuery: Query | null;
 }): Promise<MapExtent | null> {
   const { startLoading, stopLoading, registerCancelCallback, dataFilters } = syncContext;
 

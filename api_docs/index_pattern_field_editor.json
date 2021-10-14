@@ -249,7 +249,7 @@
             "children": [
               {
                 "parentPluginId": "indexPatternFieldEditor",
-                "id": "def-public.FormatEditorProps.onChange.$1.newParams",
+                "id": "def-public.FormatEditorProps.onChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "newParams",
@@ -259,7 +259,7 @@
                 "children": [
                   {
                     "parentPluginId": "indexPatternFieldEditor",
-                    "id": "def-public.FormatEditorProps.onChange.$1.newParams.Unnamed",
+                    "id": "def-public.FormatEditorProps.onChange.$1.Unnamed",
                     "type": "Any",
                     "tags": [],
                     "label": "Unnamed",
@@ -291,7 +291,7 @@
             "children": [
               {
                 "parentPluginId": "indexPatternFieldEditor",
-                "id": "def-public.error",
+                "id": "def-public.FormatEditorProps.onError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "error",
@@ -327,9 +327,9 @@
             "signature": [
               "{ indexPattern: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -404,9 +404,9 @@
             "signature": [
               "{ indexPattern: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -425,9 +425,9 @@
             "signature": [
               "((field: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPatternField",
                 "text": "IndexPatternField"
               },
@@ -445,9 +445,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "data",
+                    "pluginId": "dataViews",
                     "scope": "common",
-                    "docId": "kibDataIndexPatternsPluginApi",
+                    "docId": "kibDataViewsPluginApi",
                     "section": "def-common.IndexPatternField",
                     "text": "IndexPatternField"
                   }
@@ -731,7 +731,7 @@
           "children": [
             {
               "parentPluginId": "indexPatternFieldEditor",
-              "id": "def-public.props",
+              "id": "def-public.PluginStart.DeleteRuntimeFieldProvider.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "props",
@@ -744,7 +744,7 @@
             },
             {
               "parentPluginId": "indexPatternFieldEditor",
-              "id": "def-public.context",
+              "id": "def-public.PluginStart.DeleteRuntimeFieldProvider.$2",
               "type": "Any",
               "tags": [],
               "label": "context",

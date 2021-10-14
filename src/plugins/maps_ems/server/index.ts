@@ -19,7 +19,6 @@ export const config: PluginConfigDescriptor<MapsEmsConfig> = {
     tilemap: true,
     includeElasticMapsService: true,
     proxyElasticMapsServiceInMaps: true,
-    manifestServiceUrl: true,
     emsUrl: true,
     emsFileApiUrl: true,
     emsTileApiUrl: true,

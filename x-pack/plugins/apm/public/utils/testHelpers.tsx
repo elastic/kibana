@@ -114,21 +114,17 @@ export function expectTextsInDocument(output: any, texts: string[]) {
 }
 
 interface MockSetup {
-  start: number;
-  end: number;
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
   uiFilters: UxUIFilters;
   indices: {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.sourcemapIndices': string;
-    'apm_oss.errorIndices': string;
-    'apm_oss.onboardingIndices': string;
-    'apm_oss.spanIndices': string;
-    'apm_oss.transactionIndices': string;
-    'apm_oss.metricsIndices': string;
-    /* eslint-enable @typescript-eslint/naming-convention */
+    sourcemap: string;
+    error: string;
+    onboarding: string;
+    span: string;
+    transaction: string;
+    metric: string;
     apmAgentConfigurationIndex: string;
     apmCustomLinkIndex: string;
   };
@@ -162,8 +158,6 @@ export async function inspectSearchParams(
   let error;
 
   const mockSetup = {
-    start: 1528113600000,
-    end: 1528977600000,
     apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
     config: new Proxy(
@@ -182,14 +176,12 @@ export async function inspectSearchParams(
     ) as APMConfig,
     uiFilters: {},
     indices: {
-      /* eslint-disable @typescript-eslint/naming-convention */
-      'apm_oss.sourcemapIndices': 'myIndex',
-      'apm_oss.errorIndices': 'myIndex',
-      'apm_oss.onboardingIndices': 'myIndex',
-      'apm_oss.spanIndices': 'myIndex',
-      'apm_oss.transactionIndices': 'myIndex',
-      'apm_oss.metricsIndices': 'myIndex',
-      /* eslint-enable @typescript-eslint/naming-convention */
+      sourcemap: 'myIndex',
+      error: 'myIndex',
+      onboarding: 'myIndex',
+      span: 'myIndex',
+      transaction: 'myIndex',
+      metric: 'myIndex',
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },

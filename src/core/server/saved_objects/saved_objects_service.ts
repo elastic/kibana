@@ -22,6 +22,7 @@ import {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from '../elasticsearch';
+import { InternalDeprecationsServiceSetup } from '../deprecations';
 import { KibanaConfigType } from '../kibana_config';
 import {
   SavedObjectsConfigType,
@@ -44,6 +45,7 @@ import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
+import { getSavedObjectsDeprecationsProvider } from './deprecations';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -251,6 +253,7 @@ export interface SavedObjectsSetupDeps {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
+  deprecations: InternalDeprecationsServiceSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -266,7 +269,8 @@ export interface SavedObjectsStartDeps {
 }
 
 export class SavedObjectsService
-  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
+  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart>
+{
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;
@@ -286,7 +290,7 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
-    const { http, elasticsearch, coreUsageData } = setupDeps;
+    const { http, elasticsearch, coreUsageData, deprecations } = setupDeps;
 
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
@@ -298,6 +302,20 @@ export class SavedObjectsService
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
 
+    const kibanaConfig = await this.coreContext.configService
+      .atPath<KibanaConfigType>('kibana')
+      .pipe(first())
+      .toPromise();
+
+    deprecations.getRegistry('savedObjects').registerDeprecations(
+      getSavedObjectsDeprecationsProvider({
+        kibanaConfig,
+        savedObjectsConfig: this.config,
+        kibanaVersion: this.coreContext.env.packageInfo.version,
+        typeRegistry: this.typeRegistry,
+      })
+    );
+
     coreUsageData.registerType(this.typeRegistry);
 
     registerRoutes({
@@ -306,6 +324,8 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
+      kibanaConfig,
+      kibanaVersion: this.coreContext.env.packageInfo.version,
     });
 
     registerCoreObjectTypes(this.typeRegistry);

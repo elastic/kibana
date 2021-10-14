@@ -7,20 +7,22 @@
 
 import { useEffect, useReducer, useCallback, useRef } from 'react';
 
-import { Case } from './types';
+import { Case, ResolvedCase } from './types';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
-import { getCase, getSubCase } from './api';
+import { resolveCase, getSubCase } from './api';
 
 interface CaseState {
   data: Case | null;
+  resolveOutcome: ResolvedCase['outcome'] | null;
+  resolveAliasId?: string;
   isLoading: boolean;
   isError: boolean;
 }
 
 type Action =
   | { type: 'FETCH_INIT'; payload: { silent: boolean } }
-  | { type: 'FETCH_SUCCESS'; payload: Case }
+  | { type: 'FETCH_SUCCESS'; payload: ResolvedCase }
   | { type: 'FETCH_FAILURE' }
   | { type: 'UPDATE_CASE'; payload: Case };
 
@@ -40,7 +42,9 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
         ...state,
         isLoading: false,
         isError: false,
-        data: action.payload,
+        data: action.payload.case,
+        resolveOutcome: action.payload.outcome,
+        resolveAliasId: action.payload.aliasTargetId,
       };
     case 'FETCH_FAILURE':
       return {
@@ -72,6 +76,7 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
     isLoading: false,
     isError: false,
     data: null,
+    resolveOutcome: null,
   });
   const toasts = useToasts();
   const isCancelledRef = useRef(false);
@@ -89,9 +94,12 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT', payload: { silent } });
 
-        const response = await (subCaseId
-          ? getSubCase(caseId, subCaseId, true, abortCtrlRef.current.signal)
-          : getCase(caseId, true, abortCtrlRef.current.signal));
+        const response: ResolvedCase = subCaseId
+          ? {
+              case: await getSubCase(caseId, subCaseId, true, abortCtrlRef.current.signal),
+              outcome: 'exactMatch', // sub-cases are not resolved, forced to exactMatch always
+            }
+          : await resolveCase(caseId, true, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
           dispatch({ type: 'FETCH_SUCCESS', payload: response });

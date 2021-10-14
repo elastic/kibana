@@ -29,7 +29,9 @@ import { OpenSearchPanel } from './open_search_panel';
 
 describe('OpenSearchPanel', () => {
   test('render', () => {
-    const component = shallow(<OpenSearchPanel onClose={jest.fn()} makeUrl={jest.fn()} />);
+    const component = shallow(
+      <OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />
+    );
     expect(component).toMatchSnapshot();
   });
 
@@ -40,7 +42,9 @@ describe('OpenSearchPanel', () => {
         delete: false,
       },
     });
-    const component = shallow(<OpenSearchPanel onClose={jest.fn()} makeUrl={jest.fn()} />);
+    const component = shallow(
+      <OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />
+    );
     expect(component.find('[data-test-subj="manageSearches"]').exists()).toBe(false);
   });
 });

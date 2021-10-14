@@ -46,8 +46,9 @@ import {
   APP_PATH,
   MANAGEMENT_PATH,
   DEFAULT_TIMEPICKER_QUICK_RANGES,
+  TRANSFORM_STATES,
 } from '../../../../../common/constants';
-import { TransformStats, TRANSFORM_STATE } from '../types';
+import { TransformStats } from '../types';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -472,7 +473,7 @@ describe('when on the endpoint list page', () => {
         const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink'))[0];
         expect(firstPolicyName).not.toBeNull();
         expect(firstPolicyName.getAttribute('href')).toEqual(
-          `${APP_PATH}${MANAGEMENT_PATH}/policy/${firstPolicyID}`
+          `${APP_PATH}${MANAGEMENT_PATH}/policy/${firstPolicyID}/settings`
         );
       });
 
@@ -710,7 +711,7 @@ describe('when on the endpoint list page', () => {
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
-        `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}/settings`
       );
     });
 
@@ -732,7 +733,7 @@ describe('when on the endpoint list page', () => {
       });
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.pathname).toEqual(
-        `${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}/settings`
       );
     });
 
@@ -1403,7 +1404,7 @@ describe('when on the endpoint list page', () => {
       const transforms: TransformStats[] = [
         {
           id: `${metadataTransformPrefix}-0.20.0`,
-          state: TRANSFORM_STATE.STARTED,
+          state: TRANSFORM_STATES.STARTED,
         } as TransformStats,
       ];
       setEndpointListApiMockImplementation(coreStart.http, { transforms });
@@ -1414,7 +1415,7 @@ describe('when on the endpoint list page', () => {
 
     it('is not displayed when non-relevant transform is failing', () => {
       const transforms: TransformStats[] = [
-        { id: 'not-metadata', state: TRANSFORM_STATE.FAILED } as TransformStats,
+        { id: 'not-metadata', state: TRANSFORM_STATES.FAILED } as TransformStats,
       ];
       setEndpointListApiMockImplementation(coreStart.http, { transforms });
       render();
@@ -1426,7 +1427,7 @@ describe('when on the endpoint list page', () => {
       const transforms: TransformStats[] = [
         {
           id: `${metadataTransformPrefix}-0.20.0`,
-          state: TRANSFORM_STATE.FAILED,
+          state: TRANSFORM_STATES.FAILED,
         } as TransformStats,
       ];
       setEndpointListApiMockImplementation(coreStart.http, { transforms });

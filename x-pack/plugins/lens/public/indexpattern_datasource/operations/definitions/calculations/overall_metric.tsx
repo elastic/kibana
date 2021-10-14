@@ -193,8 +193,8 @@ Example: Percentage of range
   }),
 });
 
-export const overallAverageOperation = buildOverallMetricOperation<OverallAverageIndexPatternColumn>(
-  {
+export const overallAverageOperation =
+  buildOverallMetricOperation<OverallAverageIndexPatternColumn>({
     type: 'overall_average',
     displayName: i18n.translate('xpack.lens.indexPattern.overallMax', {
       defaultMessage: 'Overall max',
@@ -223,5 +223,4 @@ Example: Divergence from the mean:
 \`sum(bytes) - overall_average(sum(bytes))\`
       `,
     }),
-  }
-);
+  });

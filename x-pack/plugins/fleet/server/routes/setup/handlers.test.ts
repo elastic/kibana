@@ -11,17 +11,17 @@ import type { PostFleetSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services/app_context';
-import { setupIngestManager } from '../../services/setup';
+import { setupFleet } from '../../services/setup';
 
 import { fleetSetupHandler } from './handlers';
 
 jest.mock('../../services/setup', () => {
   return {
-    setupIngestManager: jest.fn(),
+    setupFleet: jest.fn(),
   };
 });
 
-const mockSetupIngestManager = setupIngestManager as jest.MockedFunction<typeof setupIngestManager>;
+const mockSetupFleet = setupFleet as jest.MockedFunction<typeof setupFleet>;
 
 describe('FleetSetupHandler', () => {
   let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
@@ -45,7 +45,7 @@ describe('FleetSetupHandler', () => {
   });
 
   it('POST /setup succeeds w/200 and body of resolved value', async () => {
-    mockSetupIngestManager.mockImplementation(() =>
+    mockSetupFleet.mockImplementation(() =>
       Promise.resolve({
         isInitialized: true,
         nonFatalErrors: [],
@@ -59,9 +59,7 @@ describe('FleetSetupHandler', () => {
   });
 
   it('POST /setup fails w/500 on custom error', async () => {
-    mockSetupIngestManager.mockImplementation(() =>
-      Promise.reject(new Error('SO method mocked to throw'))
-    );
+    mockSetupFleet.mockImplementation(() => Promise.reject(new Error('SO method mocked to throw')));
     await fleetSetupHandler(context, request, response);
 
     expect(response.customError).toHaveBeenCalledTimes(1);
@@ -74,7 +72,7 @@ describe('FleetSetupHandler', () => {
   });
 
   it('POST /setup fails w/502 on RegistryError', async () => {
-    mockSetupIngestManager.mockImplementation(() =>
+    mockSetupFleet.mockImplementation(() =>
       Promise.reject(new RegistryError('Registry method mocked to throw'))
     );
 

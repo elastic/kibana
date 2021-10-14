@@ -19,12 +19,12 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/console'),
       require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
+      require.resolve('./apps/dashboard_elements'),
       require.resolve('./apps/discover'),
       require.resolve('./apps/getting_started'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
-      require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
     ],
     pageObjects,
@@ -56,7 +56,6 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'visualization:visualize:legacyChartsLibrary': true,
         'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
@@ -90,9 +89,6 @@ export default async function ({ readConfigFile }) {
       /** @obsolete "management" should be instead of "settings" **/
       settings: {
         pathname: '/app/management',
-      },
-      timelion: {
-        pathname: '/app/timelion',
       },
       console: {
         pathname: '/app/dev_tools',
@@ -286,7 +282,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['message_with_newline'],
+                names: ['newline-test'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

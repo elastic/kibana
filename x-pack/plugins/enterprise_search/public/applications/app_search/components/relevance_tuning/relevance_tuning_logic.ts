@@ -245,7 +245,7 @@ export const RelevanceTuningLogic = kea<
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
-      const url = `/api/app_search/engines/${engineName}/search_settings/details`;
+      const url = `/internal/app_search/engines/${engineName}/search_settings/details`;
 
       try {
         const response = await http.get(url);
@@ -269,7 +269,7 @@ export const RelevanceTuningLogic = kea<
       const { engineName } = EngineLogic.values;
       const { http } = HttpLogic.values;
       const { search_fields: searchFields, boosts } = removeBoostStateProps(values.searchSettings);
-      const url = `/api/app_search/engines/${engineName}/search`;
+      const url = `/internal/app_search/engines/${engineName}/search`;
 
       actions.setResultsLoading(true);
 
@@ -307,7 +307,7 @@ export const RelevanceTuningLogic = kea<
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
-      const url = `/api/app_search/engines/${engineName}/search_settings`;
+      const url = `/internal/app_search/engines/${engineName}/search_settings`;
 
       try {
         const response = await http.put(url, {
@@ -331,7 +331,7 @@ export const RelevanceTuningLogic = kea<
         const { http } = HttpLogic.values;
         const { engineName } = EngineLogic.values;
 
-        const url = `/api/app_search/engines/${engineName}/search_settings/reset`;
+        const url = `/internal/app_search/engines/${engineName}/search_settings/reset`;
 
         try {
           const response = await http.post(url);

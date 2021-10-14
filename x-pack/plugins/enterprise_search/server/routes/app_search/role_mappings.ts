@@ -23,7 +23,7 @@ export function registerEnableRoleMappingsRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/app_search/role_mappings/enable_role_based_access',
+      path: '/internal/app_search/role_mappings/enable_role_based_access',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -38,7 +38,7 @@ export function registerRoleMappingsRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/role_mappings',
+      path: '/internal/app_search/role_mappings',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -48,7 +48,7 @@ export function registerRoleMappingsRoute({
 
   router.post(
     {
-      path: '/api/app_search/role_mappings',
+      path: '/internal/app_search/role_mappings',
       validate: {
         body: schema.object(roleMappingBaseSchema),
       },
@@ -65,7 +65,7 @@ export function registerRoleMappingRoute({
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/app_search/role_mappings/{id}',
+      path: '/internal/app_search/role_mappings/{id}',
       validate: {
         body: schema.object(roleMappingBaseSchema),
         params: schema.object({
@@ -80,7 +80,7 @@ export function registerRoleMappingRoute({
 
   router.delete(
     {
-      path: '/api/app_search/role_mappings/{id}',
+      path: '/internal/app_search/role_mappings/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -96,7 +96,7 @@ export function registerRoleMappingRoute({
 export function registerUserRoute({ router, enterpriseSearchRequestHandler }: RouteDependencies) {
   router.post(
     {
-      path: '/api/app_search/single_user_role_mapping',
+      path: '/internal/app_search/single_user_role_mapping',
       validate: {
         body: schema.object({
           roleMapping: schema.object({

@@ -28,6 +28,14 @@ import {
   SEARCH_RESULTS_TITLE,
   SEARCH_RESULTS_ROW_HELP_TEXT,
   PREVIEW_TITLE,
+  TITLE_LABEL,
+  URL_LABEL,
+  COLOR_LABEL,
+  TYPE_LABEL,
+  MEDIA_TYPE_LABEL,
+  CREATED_BY_LABEL,
+  UPDATED_BY_LABEL,
+  OPTIONAL_AREA_TEXT,
   FEATURED_RESULTS_TITLE,
   FEATURED_RESULTS_DESCRIPTION,
   STANDARD_RESULTS_TITLE,
@@ -85,7 +93,7 @@ export const SearchResults: React.FC = () => {
           <EuiSpacer size="s" />
           <EuiForm>
             <EuiFormRow
-              label="Title"
+              label={TITLE_LABEL}
               onMouseOver={toggleTitleFieldHover}
               onMouseOut={toggleTitleFieldHover}
               onFocus={toggleTitleFieldHover}
@@ -102,7 +110,7 @@ export const SearchResults: React.FC = () => {
                 onChange={(e) => setTitleField(e.target.value)}
               />
             </EuiFormRow>
-            <EuiFormRow label="URL">
+            <EuiFormRow label={URL_LABEL}>
               <EuiSelect
                 options={fieldOptions}
                 required
@@ -113,7 +121,7 @@ export const SearchResults: React.FC = () => {
                 onChange={(e) => setUrlField(e.target.value)}
               />
             </EuiFormRow>
-            <EuiFormRow label="Color">
+            <EuiFormRow label={COLOR_LABEL}>
               <EuiColorPicker color={color} onChange={setColorField} />
             </EuiFormRow>
             <EuiFormRow
@@ -155,8 +163,8 @@ export const SearchResults: React.FC = () => {
               />
             </EuiFormRow>
             <EuiFormRow
-              label="Type"
-              helpText="This area is optional"
+              label={TYPE_LABEL}
+              helpText={OPTIONAL_AREA_TEXT}
               onMouseOver={toggleTypeFieldHover}
               onFocus={toggleTypeFieldHover}
               onMouseOut={toggleTypeFieldHover}
@@ -174,8 +182,8 @@ export const SearchResults: React.FC = () => {
               />
             </EuiFormRow>
             <EuiFormRow
-              label="Media Type"
-              helpText="This area is optional"
+              label={MEDIA_TYPE_LABEL}
+              helpText={OPTIONAL_AREA_TEXT}
               onMouseOver={toggleMediaTypeFieldHover}
               onFocus={toggleMediaTypeFieldHover}
               onMouseOut={toggleMediaTypeFieldHover}
@@ -193,8 +201,8 @@ export const SearchResults: React.FC = () => {
               />
             </EuiFormRow>
             <EuiFormRow
-              label="Created By"
-              helpText="This area is optional"
+              label={CREATED_BY_LABEL}
+              helpText={OPTIONAL_AREA_TEXT}
               onMouseOver={toggleCreatedByFieldHover}
               onFocus={toggleCreatedByFieldHover}
               onMouseOut={toggleCreatedByFieldHover}
@@ -212,8 +220,8 @@ export const SearchResults: React.FC = () => {
               />
             </EuiFormRow>
             <EuiFormRow
-              label="Updated By"
-              helpText="This area is optional"
+              label={UPDATED_BY_LABEL}
+              helpText={OPTIONAL_AREA_TEXT}
               onMouseOver={toggleUpdatedByFieldHover}
               onFocus={toggleUpdatedByFieldHover}
               onMouseOut={toggleUpdatedByFieldHover}

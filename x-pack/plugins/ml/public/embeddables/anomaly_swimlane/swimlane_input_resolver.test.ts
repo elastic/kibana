@@ -32,14 +32,14 @@ describe('useSwimlaneInputResolver', () => {
     refresh = new Subject();
     services = [
       {
-        uiSettings: ({
+        uiSettings: {
           get: jest.fn(() => {
             return null;
           }),
-        } as unknown) as IUiSettingsClient,
+        } as unknown as IUiSettingsClient,
       } as CoreStart,
-      (null as unknown) as MlStartDependencies,
-      ({
+      null as unknown as MlStartDependencies,
+      {
         anomalyTimelineService: {
           setTimeRange: jest.fn(),
           loadOverallData: jest.fn(() =>
@@ -74,7 +74,7 @@ describe('useSwimlaneInputResolver', () => {
             ]);
           }),
         },
-      } as unknown) as AnomalySwimlaneServices,
+      } as unknown as AnomalySwimlaneServices,
     ];
     onInputChange = jest.fn();
   });

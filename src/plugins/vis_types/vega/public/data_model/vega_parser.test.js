@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { cloneDeep } from 'lodash';
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
+import 'jest-canvas-mock';
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
@@ -81,6 +81,20 @@ describe(`VegaParser.parseAsync`, () => {
       })
     )
   );
+
+  test(`should return a specific error in case of $schema URL not valid`, async () => {
+    const vp = new VegaParser({
+      $schema: 'https://vega.github.io/schema/vega-lite/v4.jsonanythingtobreakthis',
+      mark: 'circle',
+      encoding: { row: { field: 'a' } },
+    });
+
+    await vp.parseAsync();
+
+    expect(vp.error).toBe(
+      'The URL for the JSON "$schema" is incorrect. Correct the URL, then click Update.'
+    );
+  });
 });
 
 describe(`VegaParser._setDefaultValue`, () => {

@@ -138,7 +138,7 @@ describe('MetaEnginesTableLogic', () => {
 
         expect(mockRecursivelyFetchEngines).toHaveBeenCalledWith(
           expect.objectContaining({
-            endpoint: '/api/app_search/engines/test-engine-1/source_engines',
+            endpoint: '/internal/app_search/engines/test-engine-1/source_engines',
           })
         );
         expect(MetaEnginesTableLogic.actions.addSourceEngines).toHaveBeenCalledWith({

@@ -22,7 +22,7 @@ export function useErrorGroupDistributionFetcher({
 }) {
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -30,7 +30,8 @@ export function useErrorGroupDistributionFetcher({
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/errors/distribution',
+          endpoint:
+            'GET /internal/apm/services/{serviceName}/errors/distribution',
           params: {
             path: { serviceName },
             query: {

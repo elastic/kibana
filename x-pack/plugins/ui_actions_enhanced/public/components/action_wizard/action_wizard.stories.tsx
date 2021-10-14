@@ -11,13 +11,13 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { Demo, dashboardFactory, urlFactory } from './test_data';
 import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
 
-const dashboard = (dashboardFactory as unknown) as ActionFactory<
+const dashboard = dashboardFactory as unknown as ActionFactory<
   SerializableRecord,
   object,
   BaseActionFactoryContext
 >;
 
-const url = (urlFactory as unknown) as ActionFactory<
+const url = urlFactory as unknown as ActionFactory<
   SerializableRecord,
   object,
   BaseActionFactoryContext

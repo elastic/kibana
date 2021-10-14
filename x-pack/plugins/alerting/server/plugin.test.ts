@@ -38,6 +38,7 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 10,
+        defaultRuleTaskTimeout: '5m',
       });
       plugin = new AlertingPlugin(context);
 
@@ -71,6 +72,7 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 10,
+        defaultRuleTaskTimeout: '5m',
       });
       plugin = new AlertingPlugin(context);
 
@@ -142,6 +144,15 @@ describe('Alerting Plugin', () => {
           minimumLicenseRequired: 'basic',
         });
       });
+
+      it('should apply default config value for ruleTaskTimeout', async () => {
+        const ruleType = {
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+        } as AlertType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.ruleTaskTimeout).toBe('5m');
+      });
     });
   });
 
@@ -157,6 +168,7 @@ describe('Alerting Plugin', () => {
             removalDelay: '1h',
           },
           maxEphemeralActionsPerAlert: 10,
+          defaultRuleTaskTimeout: '5m',
         });
         const plugin = new AlertingPlugin(context);
 
@@ -197,6 +209,7 @@ describe('Alerting Plugin', () => {
             removalDelay: '1h',
           },
           maxEphemeralActionsPerAlert: 10,
+          defaultRuleTaskTimeout: '5m',
         });
         const plugin = new AlertingPlugin(context);
 
@@ -222,7 +235,7 @@ describe('Alerting Plugin', () => {
           taskManager: taskManagerMock.createStart(),
         });
 
-        const fakeRequest = ({
+        const fakeRequest = {
           headers: {},
           getBasePath: () => '',
           path: '/',
@@ -236,7 +249,7 @@ describe('Alerting Plugin', () => {
             },
           },
           getSavedObjectsClient: jest.fn(),
-        } as unknown) as KibanaRequest;
+        } as unknown as KibanaRequest;
         startContract.getRulesClientWithRequest(fakeRequest);
       });
     });
@@ -251,6 +264,7 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '5m',
       });
       const plugin = new AlertingPlugin(context);
 
@@ -276,7 +290,7 @@ describe('Alerting Plugin', () => {
         taskManager: taskManagerMock.createStart(),
       });
 
-      const fakeRequest = ({
+      const fakeRequest = {
         headers: {},
         getBasePath: () => '',
         path: '/',
@@ -290,7 +304,7 @@ describe('Alerting Plugin', () => {
           },
         },
         getSavedObjectsClient: jest.fn(),
-      } as unknown) as KibanaRequest;
+      } as unknown as KibanaRequest;
       startContract.getAlertingAuthorizationWithRequest(fakeRequest);
     });
   });

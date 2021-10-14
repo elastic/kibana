@@ -33,11 +33,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+          `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
         );
 
         expect(response.status).to.be(200);
-        expect(response.body.hasHistoricalData).to.be(false);
         expect(response.body.hasLegacyData).to.be(false);
         expect(response.body.items.length).to.be(0);
       });
@@ -50,24 +49,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: {
         status: number;
-        body: APIReturnType<'GET /api/apm/services'>;
+        body: APIReturnType<'GET /internal/apm/services'>;
       };
 
       let sortedItems: typeof response.body.items;
 
       before(async () => {
         response = await supertest.get(
-          `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+          `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
         );
         sortedItems = sortBy(response.body.items, 'serviceName');
       });
 
       it('the response is successful', () => {
         expect(response.status).to.eql(200);
-      });
-
-      it('returns hasHistoricalData: true', () => {
-        expect(response.body.hasHistoricalData).to.be(true);
       });
 
       it('returns hasLegacyData: false', () => {
@@ -197,15 +192,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('includes services that only report metric data', async () => {
         interface Response {
           status: number;
-          body: APIReturnType<'GET /api/apm/services'>;
+          body: APIReturnType<'GET /internal/apm/services'>;
         }
 
         const [unfilteredResponse, filteredResponse] = await Promise.all([
           supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+            `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
           ) as Promise<Response>,
           supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=${encodeURIComponent(
+            `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=${encodeURIComponent(
               'not (processor.event:transaction)'
             )}`
           ) as Promise<Response>,
@@ -236,12 +231,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('and fetching a list of services', () => {
           let response: {
             status: number;
-            body: APIReturnType<'GET /api/apm/services'>;
+            body: APIReturnType<'GET /internal/apm/services'>;
           };
 
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+              `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
             );
           });
 
@@ -287,7 +282,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertestAsApmReadUserWithoutMlAccess.get(
-            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+            `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
           );
         });
 
@@ -312,7 +307,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services?environment=ENVIRONMENT_ALL&start=${start}&end=${end}&kuery=${encodeURIComponent(
+            `/internal/apm/services?environment=ENVIRONMENT_ALL&start=${start}&end=${end}&kuery=${encodeURIComponent(
               'service.name:opbeans-java'
             )}`
           );

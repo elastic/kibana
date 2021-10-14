@@ -8,6 +8,7 @@
 
 import _ from 'lodash';
 import d3 from 'd3';
+import $ from 'jquery';
 import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
@@ -23,6 +24,7 @@ import { getVis } from '../visualizations/_vis_fixture';
 let mockedHTMLElementClientSizes;
 let mockedSVGElementGetBBox;
 let mockedSVGElementGetComputedTextLength;
+let mockWidth;
 
 describe('Vislib Dispatch Class Test Suite', function () {
   function destroyVis(vis) {
@@ -37,22 +39,43 @@ describe('Vislib Dispatch Class Test Suite', function () {
     mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
     mockedSVGElementGetBBox = setSVGElementGetBBox(100);
     mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+    mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
   });
 
   afterAll(() => {
     mockedHTMLElementClientSizes.mockRestore();
     mockedSVGElementGetBBox.mockRestore();
     mockedSVGElementGetComputedTextLength.mockRestore();
+    mockWidth.mockRestore();
   });
 
   describe('', function () {
     let vis;
     let mockUiState;
 
-    beforeEach(() => {
-      vis = getVis();
+    const vislibParams = {
+      type: 'heatmap',
+      addLegend: true,
+      addTooltip: true,
+      colorsNumber: 4,
+      colorSchema: 'Greens',
+      setColorRange: false,
+      percentageMode: true,
+      percentageFormatPattern: '0.0%',
+      invertColors: false,
+      colorsRange: [],
+    };
+
+    function generateVis(opts = {}) {
+      const config = _.defaultsDeep({}, opts, vislibParams);
+      vis = getVis(config);
       mockUiState = getMockUiState();
+      vis.on('brush', _.noop);
       vis.render(data, mockUiState);
+    }
+
+    beforeEach(() => {
+      generateVis();
     });
 
     afterEach(function () {
@@ -74,11 +97,29 @@ describe('Vislib Dispatch Class Test Suite', function () {
     let vis;
     let mockUiState;
 
-    beforeEach(() => {
+    const vislibParams = {
+      type: 'heatmap',
+      addLegend: true,
+      addTooltip: true,
+      colorsNumber: 4,
+      colorSchema: 'Greens',
+      setColorRange: false,
+      percentageMode: true,
+      percentageFormatPattern: '0.0%',
+      invertColors: false,
+      colorsRange: [],
+    };
+
+    function generateVis(opts = {}) {
+      const config = _.defaultsDeep({}, opts, vislibParams);
+      vis = getVis(config);
       mockUiState = getMockUiState();
-      vis = getVis();
       vis.on('brush', _.noop);
       vis.render(data, mockUiState);
+    }
+
+    beforeEach(() => {
+      generateVis();
     });
 
     afterEach(function () {
@@ -183,9 +224,22 @@ describe('Vislib Dispatch Class Test Suite', function () {
   });
 
   describe('Custom event handlers', function () {
+    const vislibParams = {
+      type: 'heatmap',
+      addLegend: true,
+      addTooltip: true,
+      colorsNumber: 4,
+      colorSchema: 'Greens',
+      setColorRange: false,
+      percentageMode: true,
+      percentageFormatPattern: '0.0%',
+      invertColors: false,
+      colorsRange: [],
+    };
+    const config = _.defaultsDeep({}, vislibParams);
+    const vis = getVis(config);
+    const mockUiState = getMockUiState();
     test('should attach whatever gets passed on vis.on() to chart.events', function (done) {
-      const vis = getVis();
-      const mockUiState = getMockUiState();
       vis.on('someEvent', _.noop);
       vis.render(data, mockUiState);
 
@@ -198,8 +252,6 @@ describe('Vislib Dispatch Class Test Suite', function () {
     });
 
     test('can be added after rendering', function () {
-      const vis = getVis();
-      const mockUiState = getMockUiState();
       vis.render(data, mockUiState);
       vis.on('someEvent', _.noop);
 

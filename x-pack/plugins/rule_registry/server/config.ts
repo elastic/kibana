@@ -6,8 +6,13 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'src/core/server';
 
-export const config = {
+export const config: PluginConfigDescriptor = {
+  deprecations: ({ deprecate, unused }) => [
+    deprecate('enabled', '8.0.0'),
+    unused('unsafe.indexUpgrade.enabled'),
+  ],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     write: schema.object({

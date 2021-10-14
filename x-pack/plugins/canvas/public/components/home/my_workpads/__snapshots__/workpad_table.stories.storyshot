@@ -54,7 +54,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
           >
             <input
               accept="application/json"
-              aria-describedby="generated-id"
+              aria-describedby="generated-id-filePicker__prompt"
               aria-label="Import workpad JSON file"
               className="euiFilePicker__input"
               disabled={false}
@@ -66,7 +66,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
             />
             <div
               className="euiFilePicker__prompt"
-              id="generated-id"
+              id="generated-id-filePicker__prompt"
             >
               <span
                 aria-hidden="true"
@@ -109,7 +109,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                   checked={false}
                   className="euiCheckbox__input"
                   disabled={false}
-                  id="_selection_column-checkbox_generated-id"
+                  id="_selection_column-checkbox_generated-id_mobile"
                   onChange={[Function]}
                   type="checkbox"
                 />
@@ -118,7 +118,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 />
                 <label
                   className="euiCheckbox__label"
-                  htmlFor="_selection_column-checkbox_generated-id"
+                  htmlFor="_selection_column-checkbox_generated-id_mobile"
                 >
                   Select all rows
                 </label>
@@ -166,7 +166,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
         </div>
         <table
           className="euiTable euiTable--responsive"
-          id="generated-id"
+          id="__table_generated-id"
           tabIndex={-1}
         >
           <caption
@@ -195,7 +195,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       className="euiCheckbox__input"
                       data-test-subj="checkboxSelectAll"
                       disabled={false}
-                      id="_selection_column-checkbox_generated-id"
+                      id="_selection_column-checkbox_generated-id_desktop"
                       onChange={[Function]}
                       type="checkbox"
                     />
@@ -443,7 +443,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       >
                         <span
                           className="euiToolTipAnchor"
-                          onKeyUp={[Function]}
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
@@ -471,7 +470,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       >
                         <span
                           className="euiToolTipAnchor"
-                          onKeyUp={[Function]}
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
@@ -619,7 +617,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       >
                         <span
                           className="euiToolTipAnchor"
-                          onKeyUp={[Function]}
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
@@ -647,7 +644,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       >
                         <span
                           className="euiToolTipAnchor"
-                          onKeyUp={[Function]}
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
@@ -795,7 +791,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       >
                         <span
                           className="euiToolTipAnchor"
-                          onKeyUp={[Function]}
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
@@ -823,7 +818,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       >
                         <span
                           className="euiToolTipAnchor"
-                          onKeyUp={[Function]}
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
@@ -927,7 +921,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                   className="euiPagination__item"
                 >
                   <button
-                    aria-controls="generated-id"
+                    aria-controls="__table_generated-id"
                     aria-current={true}
                     aria-label="Page 1 of 1"
                     className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"

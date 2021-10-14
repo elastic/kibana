@@ -56,7 +56,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
     </div>
     <table
       className="euiTable euiTable--responsive"
-      id="generated-id"
+      id="__table_generated-id"
       tabIndex={-1}
     >
       <caption
@@ -86,7 +86,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                  
                 <span
                   className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -353,7 +352,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
     </div>
     <table
       className="euiTable euiTable--responsive"
-      id="generated-id"
+      id="__table_generated-id"
       tabIndex={-1}
     >
       <caption
@@ -383,7 +382,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                  
                 <span
                   className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -552,7 +550,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                
               <span
                 className="euiToolTipAnchor"
-                onKeyUp={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
@@ -627,7 +624,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -644,7 +640,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <br />
                 <span
                   className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -708,7 +703,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <span
                 className="euiToolTipAnchor"
-                onKeyUp={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
@@ -735,7 +729,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                
               <span
                 className="euiToolTipAnchor"
-                onKeyUp={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
@@ -810,7 +803,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -827,7 +819,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <br />
                 <span
                   className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -891,7 +882,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <span
                 className="euiToolTipAnchor"
-                onKeyUp={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
@@ -918,7 +908,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                
               <span
                 className="euiToolTipAnchor"
-                onKeyUp={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
@@ -993,7 +982,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1010,7 +998,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <br />
                 <span
                   className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1074,7 +1061,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <span
                 className="euiToolTipAnchor"
-                onKeyUp={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
@@ -1101,7 +1087,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                
               <span
                 className="euiToolTipAnchor"
-                onKeyUp={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
@@ -1176,7 +1161,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1193,7 +1177,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <br />
                 <span
                   className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1257,7 +1240,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <span
                 className="euiToolTipAnchor"
-                onKeyUp={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
@@ -1308,7 +1290,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               className="euiPagination__item"
             >
               <button
-                aria-controls="generated-id"
+                aria-controls="__table_generated-id"
                 aria-current={true}
                 aria-label="Page 1 of 1"
                 className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"

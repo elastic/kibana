@@ -43,12 +43,10 @@ export interface LensAppState extends EditorFrameState {
   savedQuery?: SavedQuery;
   searchSessionId: string;
   resolvedDateRange: DateRange;
-  sharingSavedObjectProps?: Omit<SharingSavedObjectProps, 'errorJSON'>;
+  sharingSavedObjectProps?: Omit<SharingSavedObjectProps, 'sourceId'>;
 }
 
-export type DispatchSetState = (
-  state: Partial<LensAppState>
-) => {
+export type DispatchSetState = (state: Partial<LensAppState>) => {
   payload: Partial<LensAppState>;
   type: string;
 };

@@ -27,9 +27,8 @@ export const QueryDetail: React.FC = () => {
   const { query } = useDecodedParams();
   const queryTitle = query === '""' ? query : `"${query}"`;
 
-  const { totalQueriesForQuery, queriesPerDayForQuery, startDate, topClicksForQuery } = useValues(
-    AnalyticsLogic
-  );
+  const { totalQueriesForQuery, queriesPerDayForQuery, startDate, topClicksForQuery } =
+    useValues(AnalyticsLogic);
 
   return (
     <AnalyticsLayout isQueryView title={queryTitle} breadcrumbs={[QUERY_DETAIL_TITLE, query]}>

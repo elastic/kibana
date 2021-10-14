@@ -11,7 +11,7 @@ import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { maybe } from '../../../../common/utils/maybe';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
 import { getMLJobIds } from '../../service_map/get_service_anomalies';
 import { ANOMALY_THRESHOLD } from '../../../../common/ml_constants';
@@ -25,16 +25,20 @@ export async function getAnomalySeries({
   kuery,
   setup,
   logger,
+  start,
+  end,
 }: {
   environment: string;
   serviceName: string;
   transactionType: string;
   transactionName?: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   logger: Logger;
+  start: number;
+  end: number;
 }) {
-  const { start, end, ml } = setup;
+  const { ml } = setup;
 
   // don't fetch anomalies if the ML plugin is not setup
   if (!ml) {
@@ -77,50 +81,51 @@ export async function getAnomalySeries({
       getMLJobIds(ml.anomalyDetectors, environment),
     ]);
 
-    const scoreSeriesCollection = anomaliesResponse?.aggregations?.job_id.buckets
-      .filter((bucket) => jobIds.includes(bucket.key as string))
-      .map((bucket) => {
-        const dateBuckets = bucket.ml_avg_response_times.buckets;
+    const scoreSeriesCollection =
+      anomaliesResponse?.aggregations?.job_id.buckets
+        .filter((bucket) => jobIds.includes(bucket.key as string))
+        .map((bucket) => {
+          const dateBuckets = bucket.ml_avg_response_times.buckets;
 
-        return {
-          jobId: bucket.key as string,
-          anomalyScore: compact(
-            dateBuckets.map((dateBucket) => {
-              const metrics = maybe(dateBucket.anomaly_score.top[0])?.metrics;
-              const score = metrics?.record_score;
+          return {
+            jobId: bucket.key as string,
+            anomalyScore: compact(
+              dateBuckets.map((dateBucket) => {
+                const metrics = maybe(dateBucket.anomaly_score.top[0])?.metrics;
+                const score = metrics?.record_score;
 
-              if (
-                !metrics ||
-                !isFiniteNumber(score) ||
-                score < ANOMALY_THRESHOLD.CRITICAL
-              ) {
-                return null;
-              }
+                if (
+                  !metrics ||
+                  !isFiniteNumber(score) ||
+                  score < ANOMALY_THRESHOLD.CRITICAL
+                ) {
+                  return null;
+                }
 
-              const anomalyStart = Date.parse(metrics.timestamp as string);
-              const anomalyEnd =
-                anomalyStart + (metrics.bucket_span as number) * 1000;
+                const anomalyStart = Date.parse(metrics.timestamp as string);
+                const anomalyEnd =
+                  anomalyStart + (metrics.bucket_span as number) * 1000;
 
-              return {
-                x0: anomalyStart,
-                x: anomalyEnd,
-                y: score,
-              };
-            })
-          ),
-          anomalyBoundaries: dateBuckets
-            .filter(
-              (dateBucket) =>
-                dateBucket.lower.value !== null &&
-                dateBucket.upper.value !== null
-            )
-            .map((dateBucket) => ({
-              x: dateBucket.key,
-              y0: dateBucket.lower.value as number,
-              y: dateBucket.upper.value as number,
-            })),
-        };
-      });
+                return {
+                  x0: anomalyStart,
+                  x: anomalyEnd,
+                  y: score,
+                };
+              })
+            ),
+            anomalyBoundaries: dateBuckets
+              .filter(
+                (dateBucket) =>
+                  dateBucket.lower.value !== null &&
+                  dateBucket.upper.value !== null
+              )
+              .map((dateBucket) => ({
+                x: dateBucket.key,
+                y0: dateBucket.lower.value as number,
+                y: dateBucket.upper.value as number,
+              })),
+          };
+        });
 
     if ((scoreSeriesCollection?.length ?? 0) > 1) {
       logger.warn(

@@ -33,9 +33,10 @@ const presentationUtil = getStubPluginServices();
 
 const ExitFullScreenButton = () => <div data-test-subj="exitFullScreenModeText">EXIT</div>;
 
-function getProps(
-  props?: Partial<DashboardViewportProps>
-): { props: DashboardViewportProps; options: DashboardContainerServices } {
+function getProps(props?: Partial<DashboardViewportProps>): {
+  props: DashboardViewportProps;
+  options: DashboardContainerServices;
+} {
   const { setup, doStart } = embeddablePluginMock.createInstance();
   setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,

@@ -58,22 +58,9 @@ describe('findThresholdSignals', () => {
               min_doc_count: 100,
             },
             aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
                 },
               },
             },
@@ -108,22 +95,9 @@ describe('findThresholdSignals', () => {
               size: 10000,
             },
             aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
                 },
               },
             },
@@ -166,22 +140,9 @@ describe('findThresholdSignals', () => {
                   size: 10000,
                 },
                 aggs: {
-                  top_threshold_hits: {
-                    top_hits: {
-                      sort: [
-                        {
-                          '@timestamp': {
-                            order: 'desc',
-                          },
-                        },
-                      ],
-                      fields: [
-                        {
-                          field: '*',
-                          include_unmapped: true,
-                        },
-                      ],
-                      size: 1,
+                  max_timestamp: {
+                    max: {
+                      field: '@timestamp',
                     },
                   },
                 },
@@ -227,6 +188,7 @@ describe('findThresholdSignals', () => {
               'threshold_1:user.name': {
                 terms: {
                   field: 'user.name',
+                  order: { cardinality_count: 'desc' },
                   min_doc_count: 100,
                   size: 10000,
                 },
@@ -244,22 +206,9 @@ describe('findThresholdSignals', () => {
                       script: 'params.cardinalityCount >= 2',
                     },
                   },
-                  top_threshold_hits: {
-                    top_hits: {
-                      sort: [
-                        {
-                          '@timestamp': {
-                            order: 'desc',
-                          },
-                        },
-                      ],
-                      fields: [
-                        {
-                          field: '*',
-                          include_unmapped: true,
-                        },
-                      ],
-                      size: 1,
+                  max_timestamp: {
+                    max: {
+                      field: '@timestamp',
                     },
                   },
                 },
@@ -302,6 +251,7 @@ describe('findThresholdSignals', () => {
                 lang: 'painless',
               },
               min_doc_count: 200,
+              order: { cardinality_count: 'desc' },
             },
             aggs: {
               cardinality_count: {
@@ -317,22 +267,9 @@ describe('findThresholdSignals', () => {
                   script: 'params.cardinalityCount >= 5',
                 },
               },
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
                 },
               },
             },

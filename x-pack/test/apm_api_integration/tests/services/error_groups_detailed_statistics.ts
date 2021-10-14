@@ -12,14 +12,15 @@ import archives_metadata from '../../common/fixtures/es_archiver/archives_metada
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { createSupertestClient } from '../../common/apm_api_supertest';
+import { createApmApiClient } from '../../common/apm_api_supertest';
 import { getErrorGroupIds } from './get_error_group_ids';
 
-type ErrorGroupsDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
+type ErrorGroupsDetailedStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
-  const apmApiSupertest = createSupertestClient(supertest);
+  const apmApiSupertest = createApmApiClient(supertest);
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -34,7 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/error_groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -62,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/error_groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -97,7 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns an empty state when requested groupIds are not available in the given time range', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/error_groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -132,7 +133,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
+              pathname: `/internal/apm/services/opbeans-java/error_groups/detailed_statistics`,
               query: {
                 numBuckets: 20,
                 transactionType: 'request',
@@ -178,7 +179,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns an empty state when requested groupIds are not available in the given time range', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/error_groups/detailed_statistics`,
             query: {
               numBuckets: 20,
               transactionType: 'request',

@@ -12,6 +12,9 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
+  const browser = getService('browser');
+  const queryBar = getService('queryBar');
+  const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -19,9 +22,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   let originalPanelCount = 0;
   let unsavedPanelCount = 0;
+  const testQuery = 'Test Query';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/91191
-  describe.skip('dashboard unsaved panels', () => {
+  // FLAKY https://github.com/elastic/kibana/issues/112812
+  describe.skip('dashboard unsaved state', () => {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
@@ -31,79 +35,123 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
       originalPanelCount = await PageObjects.dashboard.getPanelCount();
     });
 
-    it('does not show unsaved changes badge when there are no unsaved changes', async () => {
-      await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+    describe('view mode state', () => {
+      before(async () => {
+        await queryBar.setQuery(testQuery);
+        await filterBar.addFilter('bytes', 'exists');
+        await queryBar.submitQuery();
+      });
+
+      const validateQueryAndFilter = async () => {
+        const query = await queryBar.getQueryString();
+        expect(query).to.eql(testQuery);
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.eql(1);
+      };
+
+      it('persists after navigating to the listing page and back', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.loadSavedDashboard('few panels');
+        await PageObjects.dashboard.waitForRenderComplete();
+        await validateQueryAndFilter();
+      });
+
+      it('persists after navigating to Visualize and back', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.navigateToApp('dashboards');
+        await PageObjects.dashboard.loadSavedDashboard('few panels');
+        await PageObjects.dashboard.waitForRenderComplete();
+        await validateQueryAndFilter();
+      });
+
+      it('persists after a hard refresh', async () => {
+        await browser.refresh();
+        const alert = await browser.getAlert();
+        await alert?.accept();
+        await PageObjects.dashboard.waitForRenderComplete();
+        await validateQueryAndFilter();
+      });
+
+      after(async () => {
+        // discard changes made in view mode
+        await PageObjects.dashboard.switchToEditMode();
+        await PageObjects.dashboard.clickCancelOutOfEditMode();
+      });
     });
 
-    it('shows the unsaved changes badge after adding panels', async () => {
-      await PageObjects.dashboard.switchToEditMode();
-      // add an area chart by value
-      await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAggBasedVisualizations();
-      await PageObjects.visualize.clickAreaChart();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.visualize.saveVisualizationAndReturn();
+    describe('edit mode state', () => {
+      const addPanels = async () => {
+        // add an area chart by value
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAggBasedVisualizations();
+        await PageObjects.visualize.clickAreaChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.visualize.saveVisualizationAndReturn();
 
-      // add a metric by reference
-      await dashboardAddPanel.addVisualization('Rendering-Test: metric');
+        // add a metric by reference
+        await dashboardAddPanel.addVisualization('Rendering-Test: metric');
+      };
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
-    });
+      it('does not show unsaved changes badge when there are no unsaved changes', async () => {
+        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      });
 
-    it('has correct number of panels', async () => {
-      unsavedPanelCount = await PageObjects.dashboard.getPanelCount();
-      expect(unsavedPanelCount).to.eql(originalPanelCount + 2);
-    });
+      it('shows the unsaved changes badge after adding panels', async () => {
+        await PageObjects.dashboard.switchToEditMode();
+        await addPanels();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      });
 
-    it('retains unsaved panel count after navigating to listing page and back', async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
-      await PageObjects.dashboard.switchToEditMode();
-      const currentPanelCount = await PageObjects.dashboard.getPanelCount();
-      expect(currentPanelCount).to.eql(unsavedPanelCount);
-    });
+      it('has correct number of panels', async () => {
+        unsavedPanelCount = await PageObjects.dashboard.getPanelCount();
+        expect(unsavedPanelCount).to.eql(originalPanelCount + 2);
+      });
 
-    it('retains unsaved panel count after navigating to another app and back', async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.common.navigateToApp('dashboards');
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
-      await PageObjects.dashboard.switchToEditMode();
-      const currentPanelCount = await PageObjects.dashboard.getPanelCount();
-      expect(currentPanelCount).to.eql(unsavedPanelCount);
-    });
+      it('retains unsaved panel count after navigating to listing page and back', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.loadSavedDashboard('few panels');
+        const currentPanelCount = await PageObjects.dashboard.getPanelCount();
+        expect(currentPanelCount).to.eql(unsavedPanelCount);
+      });
 
-    it('resets to original panel count upon entering view mode', async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.clickCancelOutOfEditMode();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const currentPanelCount = await PageObjects.dashboard.getPanelCount();
-      expect(currentPanelCount).to.eql(originalPanelCount);
-    });
+      it('retains unsaved panel count after navigating to another app and back', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.navigateToApp('dashboards');
+        await PageObjects.dashboard.loadSavedDashboard('few panels');
+        const currentPanelCount = await PageObjects.dashboard.getPanelCount();
+        expect(currentPanelCount).to.eql(unsavedPanelCount);
+      });
 
-    it('shows unsaved changes badge in view mode if changes have not been discarded', async () => {
-      await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
-    });
+      it('resets to original panel count after discarding changes', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.clickCancelOutOfEditMode();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const currentPanelCount = await PageObjects.dashboard.getPanelCount();
+        expect(currentPanelCount).to.eql(originalPanelCount);
+        expect(PageObjects.dashboard.getIsInViewMode()).to.eql(true);
+      });
 
-    it('retains unsaved panel count after returning to edit mode', async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.switchToEditMode();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const currentPanelCount = await PageObjects.dashboard.getPanelCount();
-      expect(currentPanelCount).to.eql(unsavedPanelCount);
-    });
-
-    it('does not show unsaved changes badge after saving', async () => {
-      await PageObjects.dashboard.saveDashboard('Unsaved State Test');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      it('does not show unsaved changes badge after saving', async () => {
+        await PageObjects.dashboard.switchToEditMode();
+        await addPanels();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.saveDashboard('Unsaved State Test');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      });
     });
   });
 }

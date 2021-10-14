@@ -1,0 +1,259 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getFullAgentPolicy should support a different data output 1`] = `
+Object {
+  "agent": Object {
+    "monitoring": Object {
+      "enabled": true,
+      "logs": false,
+      "metrics": true,
+      "namespace": "default",
+      "use_output": "default",
+    },
+  },
+  "fleet": Object {
+    "hosts": Array [
+      "http://fleetserver:8220",
+    ],
+  },
+  "id": "agent-policy",
+  "inputs": Array [],
+  "output_permissions": Object {
+    "data-output-id": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_fallback": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+        "indices": Array [
+          Object {
+            "names": Array [
+              "logs-*",
+              "metrics-*",
+              "traces-*",
+              "synthetics-*",
+              ".logs-endpoint.diagnostic.collection-*",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+        ],
+      },
+    },
+    "default": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [
+          Object {
+            "names": Array [
+              "metrics-default",
+            ],
+            "privileges": Array [],
+          },
+        ],
+      },
+    },
+  },
+  "outputs": Object {
+    "data-output-id": Object {
+      "api_key": undefined,
+      "ca_sha256": undefined,
+      "hosts": Array [
+        "http://es-data.co:9201",
+      ],
+      "type": "elasticsearch",
+    },
+    "default": Object {
+      "api_key": undefined,
+      "ca_sha256": undefined,
+      "hosts": Array [
+        "http://127.0.0.1:9201",
+      ],
+      "type": "elasticsearch",
+    },
+  },
+  "revision": 1,
+}
+`;
+
+exports[`getFullAgentPolicy should support a different monitoring output 1`] = `
+Object {
+  "agent": Object {
+    "monitoring": Object {
+      "enabled": true,
+      "logs": false,
+      "metrics": true,
+      "namespace": "default",
+      "use_output": "monitoring-output-id",
+    },
+  },
+  "fleet": Object {
+    "hosts": Array [
+      "http://fleetserver:8220",
+    ],
+  },
+  "id": "agent-policy",
+  "inputs": Array [],
+  "output_permissions": Object {
+    "default": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_fallback": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+        "indices": Array [
+          Object {
+            "names": Array [
+              "logs-*",
+              "metrics-*",
+              "traces-*",
+              "synthetics-*",
+              ".logs-endpoint.diagnostic.collection-*",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+        ],
+      },
+    },
+    "monitoring-output-id": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [
+          Object {
+            "names": Array [
+              "metrics-default",
+            ],
+            "privileges": Array [],
+          },
+        ],
+      },
+    },
+  },
+  "outputs": Object {
+    "default": Object {
+      "api_key": undefined,
+      "ca_sha256": undefined,
+      "hosts": Array [
+        "http://127.0.0.1:9201",
+      ],
+      "type": "elasticsearch",
+    },
+    "monitoring-output-id": Object {
+      "api_key": undefined,
+      "ca_sha256": undefined,
+      "hosts": Array [
+        "http://es-monitoring.co:9201",
+      ],
+      "type": "elasticsearch",
+    },
+  },
+  "revision": 1,
+}
+`;
+
+exports[`getFullAgentPolicy should support both different outputs for data and monitoring  1`] = `
+Object {
+  "agent": Object {
+    "monitoring": Object {
+      "enabled": true,
+      "logs": false,
+      "metrics": true,
+      "namespace": "default",
+      "use_output": "monitoring-output-id",
+    },
+  },
+  "fleet": Object {
+    "hosts": Array [
+      "http://fleetserver:8220",
+    ],
+  },
+  "id": "agent-policy",
+  "inputs": Array [],
+  "output_permissions": Object {
+    "data-output-id": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_fallback": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+        "indices": Array [
+          Object {
+            "names": Array [
+              "logs-*",
+              "metrics-*",
+              "traces-*",
+              "synthetics-*",
+              ".logs-endpoint.diagnostic.collection-*",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+        ],
+      },
+    },
+    "monitoring-output-id": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [
+          Object {
+            "names": Array [
+              "metrics-default",
+            ],
+            "privileges": Array [],
+          },
+        ],
+      },
+    },
+  },
+  "outputs": Object {
+    "data-output-id": Object {
+      "api_key": undefined,
+      "ca_sha256": undefined,
+      "hosts": Array [
+        "http://es-data.co:9201",
+      ],
+      "type": "elasticsearch",
+    },
+    "monitoring-output-id": Object {
+      "api_key": undefined,
+      "ca_sha256": undefined,
+      "hosts": Array [
+        "http://es-monitoring.co:9201",
+      ],
+      "type": "elasticsearch",
+    },
+  },
+  "revision": 1,
+}
+`;

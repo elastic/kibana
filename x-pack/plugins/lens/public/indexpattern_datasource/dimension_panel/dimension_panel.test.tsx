@@ -7,7 +7,7 @@
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import 'jest-canvas-mock';
-import React, { ChangeEvent, MouseEvent } from 'react';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import {
   EuiComboBox,
@@ -52,6 +52,13 @@ jest.mock('lodash', () => {
   };
 });
 jest.mock('../../id_generator');
+// Mock the Monaco Editor component
+jest.mock('../operations/definitions/formula/editor/formula_editor', () => {
+  return {
+    WrappedFormulaEditor: () => <div />,
+    FormulaEditor: () => <div />,
+  };
+});
 
 const fields = [
   {
@@ -192,8 +199,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
-      data: ({
-        fieldFormats: ({
+      data: {
+        fieldFormats: {
           getType: jest.fn().mockReturnValue({
             id: 'number',
             title: 'Number',
@@ -205,12 +212,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
           deserialize: jest.fn().mockReturnValue({
             convert: () => 'formatted',
           }),
-        } as unknown) as DataPublicPluginStart['fieldFormats'],
-      } as unknown) as DataPublicPluginStart,
+        } as unknown as DataPublicPluginStart['fieldFormats'],
+      } as unknown as DataPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
       groupId: 'a',
       isFullscreen: false,
+      supportStaticValue: false,
       toggleFullscreen: jest.fn(),
     };
 
@@ -402,8 +410,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
-    expect(items.find(({ id }) => id === 'math')).toBeUndefined();
-    expect(items.find(({ id }) => id === 'formula')).toBeUndefined();
+    ['math', 'formula', 'static_value'].forEach((hiddenOp) => {
+      expect(items.some(({ id }) => id === hiddenOp)).toBe(false);
+    });
   });
 
   it('should indicate that reference-based operations are not compatible when they are incomplete', () => {
@@ -504,7 +513,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...initialState,
       layers: {
@@ -536,7 +548,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
       layers: {
@@ -1028,7 +1043,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
 
       expect(setState.mock.calls.length).toEqual(2);
-      expect(setState.mock.calls[1]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+      expect(setState.mock.calls[1]).toEqual([
+        expect.any(Function),
+        { isDimensionComplete: true, forceRender: false },
+      ]);
       expect(setState.mock.calls[1][0](state)).toEqual({
         ...state,
         layers: {
@@ -1204,15 +1222,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
       const props = getProps({ timeScale: 's', label: 'Count of records per second' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       wrapper
-        .find('[data-test-subj="indexPattern-advanced-popover"]')
+        .find('button[data-test-subj="indexPattern-advanced-popover"]')
         .hostNodes()
         .simulate('click');
-      wrapper
-        .find('[data-test-subj="indexPattern-time-scaling-unit"]')
-        .find(EuiSelect)
-        .prop('onChange')!(({
+
+      wrapper.find('[data-test-subj="indexPattern-time-scaling-unit"] select').simulate('change', {
         target: { value: 'h' },
-      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      });
+
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1234,12 +1251,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should not adjust label if it is custom', () => {
       const props = getProps({ timeScale: 's', customLabel: true, label: 'My label' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('[data-test-subj="indexPattern-time-scaling-unit"]')
-        .find(EuiSelect)
-        .prop('onChange')!(({
+      wrapper.find('[data-test-subj="indexPattern-time-scaling-unit"] select').simulate('change', {
         target: { value: 'h' },
-      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      });
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1261,13 +1275,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should allow to remove time scaling', () => {
       const props = getProps({ timeScale: 's', label: 'Count of records per second' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('[data-test-subj="indexPattern-time-scaling-remove"]')
-        .find(EuiButtonIcon)
-        .prop('onClick')!(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        {} as any
-      );
+      wrapper.find('[data-test-subj="indexPattern-time-scaling-remove"] button').simulate('click');
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1382,7 +1390,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .find(AdvancedOptions)
         .dive()
         .find('[data-test-subj="indexPattern-time-shift-enable"]')
-        .prop('onClick')!({} as MouseEvent);
+        .simulate('click');
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1456,10 +1464,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('[data-test-subj="indexPattern-time-shift-remove"]')
         .find(EuiButtonIcon)
-        .prop('onClick')!(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        {} as any
-      );
+        .simulate('click');
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1648,10 +1653,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('[data-test-subj="indexPattern-filter-by-remove"]')
         .find(EuiButtonIcon)
-        .prop('onClick')!(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        {} as any
-      );
+        .simulate('click');
+
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1927,7 +1930,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
       layers: {
@@ -1954,11 +1960,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
     wrapper = mount(
       <IndexPatternDimensionEditorComponent {...defaultProps} state={initialState} />
     );
-
     act(() => {
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-min"]').first().prop('onClick')!(
-        {} as MouseEvent
-      );
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-min"]')
+        .first()
+        .simulate('click');
     });
 
     expect(replaceColumn).toHaveBeenCalledWith(
@@ -2216,5 +2222,155 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(wrapper.find('[data-test-subj="lns-indexPatternDimension-differences"]')).toHaveLength(
       0
     );
+  });
+
+  it('should not show tabs when formula and static_value operations are not available', () => {
+    const stateWithInvalidCol: IndexPatternPrivateState = getStateWithColumns({
+      col1: {
+        label: 'Average of memory',
+        dataType: 'number',
+        isBucketed: false,
+        // Private
+        operationType: 'average',
+        sourceField: 'memory',
+        params: {
+          format: { id: 'bytes', params: { decimals: 2 } },
+        },
+      },
+    });
+
+    const props = {
+      ...defaultProps,
+      filterOperations: jest.fn((op) => {
+        // the formula operation will fall into this metadata category
+        return !(op.dataType === 'number' && op.scale === 'ratio');
+      }),
+    };
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent {...props} state={stateWithInvalidCol} />
+    );
+
+    expect(wrapper.find('[data-test-subj="lens-dimensionTabs"]').exists()).toBeFalsy();
+  });
+
+  it('should show the formula tab when supported', () => {
+    const stateWithFormulaColumn: IndexPatternPrivateState = getStateWithColumns({
+      col1: {
+        label: 'Formula',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'formula',
+        references: ['ref1'],
+        params: {},
+      },
+    });
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithFormulaColumn} />
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="lens-dimensionTabs-formula"]').first().prop('isSelected')
+    ).toBeTruthy();
+  });
+
+  it('should not show the static_value tab when not supported', () => {
+    const stateWithFormulaColumn: IndexPatternPrivateState = getStateWithColumns({
+      col1: {
+        label: 'Formula',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'formula',
+        references: ['ref1'],
+        params: {},
+      },
+    });
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithFormulaColumn} />
+    );
+
+    expect(wrapper.find('[data-test-subj="lens-dimensionTabs-static_value"]').exists()).toBeFalsy();
+  });
+
+  it('should show the static value tab when supported', () => {
+    const staticWithFormulaColumn: IndexPatternPrivateState = getStateWithColumns({
+      col1: {
+        label: 'Formula',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'formula',
+        references: ['ref1'],
+        params: {},
+      },
+    });
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        supportStaticValue
+        state={staticWithFormulaColumn}
+      />
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="lens-dimensionTabs-static_value"]').exists()
+    ).toBeTruthy();
+  });
+
+  it('should select the quick function tab by default', () => {
+    const stateWithNoColumn: IndexPatternPrivateState = getStateWithColumns({});
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithNoColumn} />
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="lens-dimensionTabs-quickFunctions"]')
+        .first()
+        .prop('isSelected')
+    ).toBeTruthy();
+  });
+
+  it('should select the static value tab when supported by default', () => {
+    const stateWithNoColumn: IndexPatternPrivateState = getStateWithColumns({});
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        supportStaticValue
+        state={stateWithNoColumn}
+      />
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="lens-dimensionTabs-static_value"]').first().prop('isSelected')
+    ).toBeTruthy();
+  });
+
+  it('should not show any tab when formula is in full screen mode', () => {
+    const stateWithFormulaColumn: IndexPatternPrivateState = getStateWithColumns({
+      col1: {
+        label: 'Formula',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'formula',
+        references: ['ref1'],
+        params: {},
+      },
+    });
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={stateWithFormulaColumn}
+        supportStaticValue
+        isFullscreen
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="lens-dimensionTabs"]').exists()).toBeFalsy();
   });
 });

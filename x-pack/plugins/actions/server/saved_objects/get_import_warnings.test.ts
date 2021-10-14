@@ -46,7 +46,7 @@ describe('getImportWarnings', () => {
       },
     ];
     const warnings = getImportWarnings(
-      (savedObjectConnectors as unknown) as Array<SavedObject<RawAction>>
+      savedObjectConnectors as unknown as Array<SavedObject<RawAction>>
     );
     expect(warnings[0].message).toBe('1 connector has sensitive information that require updates.');
   });
@@ -89,7 +89,7 @@ describe('getImportWarnings', () => {
       },
     ];
     const warnings = getImportWarnings(
-      (savedObjectConnectors as unknown) as Array<SavedObject<RawAction>>
+      savedObjectConnectors as unknown as Array<SavedObject<RawAction>>
     );
     expect(warnings.length).toBe(0);
   });

@@ -10,14 +10,14 @@ import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks_
 import { registerCrawlerRoutes } from './crawler';
 
 describe('crawler routes', () => {
-  describe('GET /api/app_search/engines/{name}/crawler', () => {
+  describe('GET /internal/app_search/engines/{name}/crawler', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}/crawler',
+        path: '/internal/app_search/engines/{name}/crawler',
       });
 
       registerCrawlerRoutes({
@@ -43,14 +43,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{name}/crawler/crawl_requests', () => {
+  describe('GET /internal/app_search/engines/{name}/crawler/crawl_requests', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}/crawler/crawl_requests',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_requests',
       });
 
       registerCrawlerRoutes({
@@ -76,14 +76,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{name}/crawler/crawl_requests', () => {
+  describe('POST /internal/app_search/engines/{name}/crawler/crawl_requests', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{name}/crawler/crawl_requests',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_requests',
       });
 
       registerCrawlerRoutes({
@@ -109,14 +109,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{name}/crawler/crawl_requests/cancel', () => {
+  describe('POST /internal/app_search/engines/{name}/crawler/crawl_requests/cancel', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{name}/crawler/crawl_requests/cancel',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_requests/cancel',
       });
 
       registerCrawlerRoutes({
@@ -142,14 +142,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{name}/crawler/domains', () => {
+  describe('POST /internal/app_search/engines/{name}/crawler/domains', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{name}/crawler/domains',
+        path: '/internal/app_search/engines/{name}/crawler/domains',
       });
 
       registerCrawlerRoutes({
@@ -198,14 +198,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{name}/crawler/domains/{id}', () => {
+  describe('DELETE /internal/app_search/engines/{name}/crawler/domains/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+        path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
       });
 
       registerCrawlerRoutes({
@@ -244,14 +244,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{name}/crawler/domains/{id}', () => {
+  describe('PUT /internal/app_search/engines/{name}/crawler/domains/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+        path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
       });
 
       registerCrawlerRoutes({
@@ -302,14 +302,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{name}/crawler/domains/{id}', () => {
+  describe('GET /internal/app_search/engines/{name}/crawler/domains/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+        path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
       });
 
       registerCrawlerRoutes({
@@ -340,14 +340,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('POST /api/app_search/crawler/validate_url', () => {
+  describe('POST /internal/app_search/crawler/validate_url', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/crawler/validate_url',
+        path: '/internal/app_search/crawler/validate_url',
       });
 
       registerCrawlerRoutes({
@@ -377,14 +377,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{name}/crawler/process_crawls', () => {
+  describe('POST /internal/app_search/engines/{name}/crawler/process_crawls', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{name}/crawler/process_crawls',
+        path: '/internal/app_search/engines/{name}/crawler/process_crawls',
       });
 
       registerCrawlerRoutes({
@@ -424,14 +424,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{name}/crawler/crawl_schedule', () => {
+  describe('GET /internal/app_search/engines/{name}/crawler/crawl_schedule', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
       });
 
       registerCrawlerRoutes({
@@ -461,14 +461,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{name}/crawler/crawl_schedule', () => {
+  describe('PUT /internal/app_search/engines/{name}/crawler/crawl_schedule', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
       });
 
       registerCrawlerRoutes({
@@ -516,14 +516,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{name}/crawler/crawl_schedule', () => {
+  describe('DELETE /internal/app_search/engines/{name}/crawler/crawl_schedule', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
       });
 
       registerCrawlerRoutes({

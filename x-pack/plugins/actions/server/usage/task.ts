@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import {
-  Logger,
-  CoreSetup,
-  SavedObjectsBulkGetObject,
-  SavedObjectsBaseOptions,
-} from 'kibana/server';
+import { Logger, CoreSetup } from 'kibana/server';
 import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../task_manager/server';
-import { ActionResult } from '../types';
+import { PreConfiguredAction } from '../types';
 import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
@@ -28,9 +23,10 @@ export function initializeActionsTelemetry(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string
+  kibanaIndex: string,
+  preconfiguredActions: PreConfiguredAction[]
 ) {
-  registerActionsTelemetryTask(logger, taskManager, core, kibanaIndex);
+  registerActionsTelemetryTask(logger, taskManager, core, kibanaIndex, preconfiguredActions);
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -41,13 +37,14 @@ function registerActionsTelemetryTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string
+  kibanaIndex: string,
+  preconfiguredActions: PreConfiguredAction[]
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
+      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, preconfiguredActions),
     },
   });
 }
@@ -65,7 +62,12 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
+export function telemetryTaskRunner(
+  logger: Logger,
+  core: CoreSetup,
+  kibanaIndex: string,
+  preconfiguredActions: PreConfiguredAction[]
+) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     const getEsClient = () =>
@@ -76,22 +78,12 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
           },
         ]) => client.asInternalUser
       );
-    const actionsBulkGet = (
-      objects?: SavedObjectsBulkGetObject[],
-      options?: SavedObjectsBaseOptions
-    ) => {
-      return core
-        .getStartServices()
-        .then(([{ savedObjects }]) =>
-          savedObjects.createInternalRepository(['action']).bulkGet<ActionResult>(objects, options)
-        );
-    };
     return {
       async run() {
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCount(esClient, kibanaIndex),
-          getInUseTotalCount(esClient, actionsBulkGet, kibanaIndex),
+          getTotalCount(esClient, kibanaIndex, preconfiguredActions),
+          getInUseTotalCount(esClient, kibanaIndex),
         ])
           .then(([totalAggegations, totalInUse]) => {
             return {

@@ -58,9 +58,9 @@ export function createUptimeESClient({
 
   return {
     baseESClient: esClient,
-    async search<TParams extends estypes.SearchRequest>(
+    async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
       params: TParams
-    ): Promise<{ body: ESSearchResponse<unknown, TParams> }> {
+    ): Promise<{ body: ESSearchResponse<DocumentSource, TParams> }> {
       let res: any;
       let esError: any;
       const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
@@ -154,8 +154,4 @@ export function debugESCall({
     console.log(formatObj(params));
   }
   console.log(`\n`);
-}
-
-export function createEsQuery<T extends estypes.SearchRequest>(params: T): T {
-  return params;
 }

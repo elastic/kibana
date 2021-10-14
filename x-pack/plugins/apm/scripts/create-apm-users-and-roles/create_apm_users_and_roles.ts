@@ -28,6 +28,14 @@ export async function createApmUsersAndRoles({
   kibana: Kibana;
   elasticsearch: Elasticsearch;
 }) {
+  const isCredentialsValid = await getIsCredentialsValid({
+    elasticsearch,
+    kibana,
+  });
+  if (!isCredentialsValid) {
+    throw new AbortError('Invalid username/password');
+  }
+
   const isSecurityEnabled = await getIsSecurityEnabled({
     elasticsearch,
     kibana,
@@ -79,6 +87,28 @@ async function getIsSecurityEnabled({
       kibana,
       options: {
         url: `/internal/security/me`,
+      },
+    });
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+async function getIsCredentialsValid({
+  elasticsearch,
+  kibana,
+}: {
+  elasticsearch: Elasticsearch;
+  kibana: Kibana;
+}) {
+  try {
+    await callKibana({
+      elasticsearch,
+      kibana,
+      options: {
+        validateStatus: (status) => status >= 200 && status < 400,
+        url: `/`,
       },
     });
     return true;

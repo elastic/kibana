@@ -16,6 +16,7 @@ import {
   SavedObjectsFindResult,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsUpdateResponse,
+  SavedObjectsResolveResponse,
 } from 'kibana/server';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -738,6 +739,27 @@ export class CasesService {
       throw error;
     }
   }
+
+  public async getResolveCase({
+    unsecuredSavedObjectsClient,
+    id: caseId,
+  }: GetCaseArgs): Promise<SavedObjectsResolveResponse<CaseAttributes>> {
+    try {
+      this.log.debug(`Attempting to resolve case ${caseId}`);
+      const resolveCaseResult = await unsecuredSavedObjectsClient.resolve<ESCaseAttributes>(
+        CASE_SAVED_OBJECT,
+        caseId
+      );
+      return {
+        ...resolveCaseResult,
+        saved_object: transformSavedObjectToExternalModel(resolveCaseResult.saved_object),
+      };
+    } catch (error) {
+      this.log.error(`Error on resolve case ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
   public async getSubCase({
     unsecuredSavedObjectsClient,
     id,

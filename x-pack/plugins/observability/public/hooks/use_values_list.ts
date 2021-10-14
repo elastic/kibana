@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { capitalize, union } from 'lodash';
+import { capitalize, uniqBy } from 'lodash';
 import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { ESFilter } from '../../../../../src/core/types/elasticsearch';
@@ -18,12 +18,17 @@ export interface Props {
   filters?: ESFilter[];
   time?: { from: string; to: string };
   keepHistory?: boolean;
+  cardinalityField?: string;
 }
 
 export interface ListItem {
   label: string;
   count: number;
 }
+
+const uniqueValues = (values: ListItem[], prevValues: ListItem[]) => {
+  return uniqBy([...values, ...prevValues], 'label');
+};
 
 export const useValuesList = ({
   sourceField,
@@ -32,6 +37,7 @@ export const useValuesList = ({
   filters,
   time,
   keepHistory,
+  cardinalityField,
 }: Props): { values: ListItem[]; loading?: boolean } => {
   const [debouncedQuery, setDebounceQuery] = useState<string>(query);
   const [values, setValues] = useState<ListItem[]>([]);
@@ -93,26 +99,46 @@ export const useValuesList = ({
           values: {
             terms: {
               field: sourceField,
-              size: 100,
+              size: 50,
               ...(query ? { include: includeClause } : {}),
             },
+            ...(cardinalityField
+              ? {
+                  aggs: {
+                    count: {
+                      cardinality: {
+                        field: cardinalityField,
+                      },
+                    },
+                  },
+                }
+              : {}),
           },
         },
       },
     }),
-    [debouncedQuery, from, to, JSON.stringify(filters), indexPatternTitle]
+    [debouncedQuery, from, to, JSON.stringify(filters), indexPatternTitle, sourceField]
   );
 
   useEffect(() => {
+    const valueBuckets = data?.aggregations?.values.buckets;
     const newValues =
-      data?.aggregations?.values.buckets.map(({ key: value, doc_count: count }) => ({
-        count,
-        label: String(value),
-      })) ?? [];
+      valueBuckets?.map(({ key: value, doc_count: count, count: aggsCount }) => {
+        if (aggsCount) {
+          return {
+            count: aggsCount.value,
+            label: String(value),
+          };
+        }
+        return {
+          count,
+          label: String(value),
+        };
+      }) ?? [];
 
-    if (keepHistory && query) {
+    if (keepHistory) {
       setValues((prevState) => {
-        return union(newValues, prevState);
+        return uniqueValues(newValues, prevState);
       });
     } else {
       setValues(newValues);

@@ -15,7 +15,7 @@ export const ApmBackendContext = createContext<
   | {
       backendName: string;
       metadata: {
-        data?: APIReturnType<'GET /api/apm/backends/{backendName}/metadata'>;
+        data?: APIReturnType<'GET /internal/apm/backends/{backendName}/metadata'>;
         status?: FETCH_STATUS;
       };
     }
@@ -30,7 +30,7 @@ export function ApmBackendContextProvider({
   const {
     path: { backendName },
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/backends/:backendName/overview');
+  } = useApmParams('/backends/{backendName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -41,7 +41,7 @@ export function ApmBackendContextProvider({
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/backends/{backendName}/metadata',
+        endpoint: 'GET /internal/apm/backends/{backendName}/metadata',
         params: {
           path: {
             backendName,

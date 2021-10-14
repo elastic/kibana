@@ -9,10 +9,11 @@
 import { AccessorFn, Accessor } from '@elastic/charts';
 import { BUCKET_TYPES } from '../../../../data/public';
 import { FakeParams } from '../../../../visualizations/public';
-import { Aspect } from '../types';
+import type { Aspect } from '../types';
 
 export const COMPLEX_X_ACCESSOR = '__customXAccessor__';
 export const COMPLEX_SPLIT_ACCESSOR = '__complexSplitAccessor__';
+const SHARD_DELAY = 'shard_delay';
 
 export const getXAccessor = (aspect: Aspect): Accessor | AccessorFn => {
   return (
@@ -35,33 +36,32 @@ export const isRangeAggType = (type: string | null) =>
  * @param aspect
  * @param isComplex - forces to be functional/complex accessor
  */
-export const getComplexAccessor = (fieldName: string, isComplex: boolean = false) => (
-  aspect: Aspect,
-  index?: number
-): Accessor | AccessorFn | undefined => {
-  if (!aspect.accessor) {
-    return;
-  }
-
-  if (!((isComplex || isRangeAggType(aspect.aggType)) && aspect.formatter)) {
-    return aspect.accessor;
-  }
-
-  const formatter = aspect.formatter;
-  const accessor = aspect.accessor;
-  const fn: AccessorFn = (d) => {
-    const v = d[accessor];
-    if (v === undefined) {
+export const getComplexAccessor =
+  (fieldName: string, isComplex: boolean = false) =>
+  (aspect: Aspect, index?: number): Accessor | AccessorFn | undefined => {
+    if (!aspect.accessor || aspect.aggType === SHARD_DELAY) {
       return;
     }
-    const f = formatter(v);
-    return f;
+
+    if (!((isComplex || isRangeAggType(aspect.aggType)) && aspect.formatter)) {
+      return aspect.accessor;
+    }
+
+    const formatter = aspect.formatter;
+    const accessor = aspect.accessor;
+    const fn: AccessorFn = (d) => {
+      const v = d[accessor];
+      if (v === undefined) {
+        return;
+      }
+      const f = formatter(v);
+      return f;
+    };
+
+    fn.fieldName = getFieldName(fieldName, index);
+
+    return fn;
   };
-
-  fn.fieldName = getFieldName(fieldName, index);
-
-  return fn;
-};
 
 export const getSplitSeriesAccessorFnMap = (
   splitSeriesAccessors: Array<Accessor | AccessorFn>
@@ -77,3 +77,11 @@ export const getSplitSeriesAccessorFnMap = (
 
   return m;
 };
+
+// For percentile, the aggregation id is coming in the form %s.%d, where %s is agg_id and %d - percents
+export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
+  columnId.toString().split('.')[0] === seriesColumnId;
+
+export const isValidSeriesForDimension = (seriesColumnId: string, { aggId, accessor }: Aspect) =>
+  (aggId === seriesColumnId || isPercentileIdEqualToSeriesId(aggId ?? '', seriesColumnId)) &&
+  accessor !== null;

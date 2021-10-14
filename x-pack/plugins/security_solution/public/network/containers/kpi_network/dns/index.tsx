@@ -60,10 +60,8 @@ export const useNetworkKpiDns = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    networkKpiDnsRequest,
-    setNetworkKpiDnsRequest,
-  ] = useState<NetworkKpiDnsRequestOptions | null>(null);
+  const [networkKpiDnsRequest, setNetworkKpiDnsRequest] =
+    useState<NetworkKpiDnsRequestOptions | null>(null);
   const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [networkKpiDnsResponse, setNetworkKpiDnsResponse] = useState<NetworkKpiDnsArgs>({

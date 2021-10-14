@@ -247,7 +247,7 @@ export async function getTile({
 
     if (
       isTotalHitsGreaterThan(
-        (countResponse.rawResponse.hits.total as unknown) as TotalHits,
+        countResponse.rawResponse.hits.total as unknown as TotalHits,
         requestBody.size
       )
     ) {

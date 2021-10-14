@@ -377,7 +377,7 @@ describe('DisplaySettingsLogic', () => {
         DisplaySettingsLogic.actions.initializeDisplaySettings();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/display_settings/config'
+          '/internal/workplace_search/org/sources/source123/display_settings/config'
         );
         await nextTick();
         expect(onInitializeDisplaySettingsSpy).toHaveBeenCalledWith({
@@ -397,7 +397,7 @@ describe('DisplaySettingsLogic', () => {
         DisplaySettingsLogic.actions.initializeDisplaySettings();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/display_settings/config'
+          '/internal/workplace_search/account/sources/source123/display_settings/config'
         );
         await nextTick();
         expect(onInitializeDisplaySettingsSpy).toHaveBeenCalledWith({

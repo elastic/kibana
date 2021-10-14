@@ -20,6 +20,7 @@ import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { PartialFilter, RuleTypeParams } from '../types';
 import { transformToAlertThrottle, transformToNotifyWhen } from './utils';
+import { ruleTypeMappings } from '../signals/utils';
 
 export const createRules = async ({
   rulesClient,
@@ -68,16 +69,18 @@ export const createRules = async ({
   to,
   type,
   references,
+  namespace,
   note,
   version,
   exceptionsList,
   actions,
+  isRuleRegistryEnabled,
 }: CreateRulesOptions): Promise<SanitizedAlert<RuleTypeParams>> => {
   const rule = await rulesClient.create<RuleTypeParams>({
     data: {
       name,
       tags: addTags(tags, ruleId, immutable),
-      alertTypeId: SIGNALS_ID,
+      alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[type] : SIGNALS_ID,
       consumer: SERVER_APP_ID,
       params: {
         anomalyThreshold,
@@ -125,6 +128,7 @@ export const createRules = async ({
         to,
         type,
         references,
+        namespace,
         note,
         version,
         exceptionsList,

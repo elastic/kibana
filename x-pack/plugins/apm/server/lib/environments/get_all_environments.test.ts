@@ -21,9 +21,10 @@ describe('getAllEnvironments', () => {
   it('fetches all environments', async () => {
     mock = await inspectSearchParams((setup) =>
       getAllEnvironments({
-        serviceName: 'test',
         searchAggregatedTransactions: false,
+        serviceName: 'test',
         setup,
+        size: 50,
       })
     );
 
@@ -33,10 +34,11 @@ describe('getAllEnvironments', () => {
   it('fetches all environments with includeMissing', async () => {
     mock = await inspectSearchParams((setup) =>
       getAllEnvironments({
+        includeMissing: true,
+        searchAggregatedTransactions: false,
         serviceName: 'test',
         setup,
-        searchAggregatedTransactions: false,
-        includeMissing: true,
+        size: 50,
       })
     );
 

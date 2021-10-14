@@ -182,9 +182,8 @@ describe('hooks', () => {
         }
       );
 
-      const { Provider, useState, useTransitions } = createStateContainerReactHelpers<
-        typeof stateContainer
-      >();
+      const { Provider, useState, useTransitions } =
+        createStateContainerReactHelpers<typeof stateContainer>();
       const Demo: React.FC<{}> = () => {
         const { cnt } = useState();
         const { increment } = useTransitions();

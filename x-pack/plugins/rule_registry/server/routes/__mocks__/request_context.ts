@@ -19,7 +19,7 @@ const createRequestContextMock = (
   clients: ReturnType<typeof createMockClients> = createMockClients()
 ) => {
   const coreContext = coreMock.createRequestHandlerContext();
-  return ({
+  return {
     rac: { getAlertsClient: jest.fn(() => clients.rac) },
     core: {
       ...coreContext,
@@ -29,7 +29,7 @@ const createRequestContextMock = (
       },
       savedObjects: { client: clients.savedObjectsClient },
     },
-  } as unknown) as RacRequestHandlerContext;
+  } as unknown as RacRequestHandlerContext;
 };
 
 const createTools = () => {

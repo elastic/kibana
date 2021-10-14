@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import {
@@ -30,6 +30,7 @@ const names = ['series', 'columns', 'rows', 'stackedSeries'];
 let mockedHTMLElementClientSizes;
 let mockedSVGElementGetBBox;
 let mockedSVGElementGetComputedTextLength;
+let mockWidth;
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Layout Class Test Suite for ' + names[i] + ' Data', function () {
@@ -42,10 +43,24 @@ dateHistogramArray.forEach(function (data, i) {
       mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
       mockedSVGElementGetBBox = setSVGElementGetBBox(100);
       mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+      mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
     });
 
     beforeEach(() => {
-      vis = getVis();
+      const vislibParams = {
+        type: 'heatmap',
+        addLegend: true,
+        addTooltip: true,
+        colorsNumber: 4,
+        colorSchema: 'Greens',
+        setColorRange: false,
+        percentageMode: true,
+        percentageFormatPattern: '0.0%',
+        invertColors: false,
+        colorsRange: [],
+      };
+      const config = _.defaultsDeep({}, vislibParams);
+      vis = getVis(config);
       mockUiState = getMockUiState();
       vis.render(data, mockUiState);
       numberOfCharts = vis.handler.charts.length;
@@ -59,6 +74,7 @@ dateHistogramArray.forEach(function (data, i) {
       mockedHTMLElementClientSizes.mockRestore();
       mockedSVGElementGetBBox.mockRestore();
       mockedSVGElementGetComputedTextLength.mockRestore();
+      mockWidth.mockRestore();
     });
 
     describe('createLayout Method', function () {
@@ -81,7 +97,7 @@ dateHistogramArray.forEach(function (data, i) {
       beforeEach(function () {
         const visConfig = new VisConfig(
           {
-            type: 'histogram',
+            type: 'heatmap',
           },
           data,
           mockUiState,
@@ -125,7 +141,7 @@ dateHistogramArray.forEach(function (data, i) {
 
         expect(function () {
           testLayout.layout({
-            parent: 'histogram',
+            parent: 'heatmap',
             type: 'div',
           });
         }).toThrowError();

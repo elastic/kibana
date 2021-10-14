@@ -7,9 +7,9 @@
  */
 
 import { useMemo } from 'react';
+import type { IndexPattern, IndexPatternsContract } from 'src/plugins/data/common';
 
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
-import { IndexPattern, IndexPatternsContract } from '../../kibana_services';
 import {
   AppState as DiscoverState,
   GetStateReturn as DiscoverGetStateReturn,

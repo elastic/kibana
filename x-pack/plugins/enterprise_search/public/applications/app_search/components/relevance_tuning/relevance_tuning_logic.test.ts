@@ -300,7 +300,7 @@ describe('RelevanceTuningLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/search_settings/details'
+          '/internal/app_search/engines/test-engine/search_settings/details'
         );
         expect(RelevanceTuningLogic.actions.onInitializeRelevanceTuning).toHaveBeenCalledWith({
           ...relevanceTuningProps,
@@ -388,7 +388,7 @@ describe('RelevanceTuningLogic', () => {
         await nextTick();
 
         expect(RelevanceTuningLogic.actions.setResultsLoading).toHaveBeenCalledWith(true);
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/test-engine/search', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines/test-engine/search', {
           body: JSON.stringify(searchSettingsWithoutNewBoostProp),
           query: {
             query: 'foo',
@@ -418,7 +418,7 @@ describe('RelevanceTuningLogic', () => {
         jest.runAllTimers();
         await nextTick();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/test-engine/search', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines/test-engine/search', {
           body: '{}',
           query: {
             query: 'foo',
@@ -528,7 +528,7 @@ describe('RelevanceTuningLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/search_settings',
+          '/internal/app_search/engines/test-engine/search_settings',
           {
             body: JSON.stringify(searchSettingsWithoutNewBoostProp),
           }
@@ -587,7 +587,7 @@ describe('RelevanceTuningLogic', () => {
         await nextTick();
 
         expect(http.post).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/search_settings/reset'
+          '/internal/app_search/engines/test-engine/search_settings/reset'
         );
         expect(flashSuccessToast).toHaveBeenCalledWith('Relevance was reset to default values', {
           text: 'The changes will impact your results shortly.',

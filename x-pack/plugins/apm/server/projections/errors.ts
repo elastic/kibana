@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   ERROR_GROUP_ID,
@@ -17,16 +16,16 @@ import { ProcessorEvent } from '../../common/processor_event';
 export function getErrorGroupsProjection({
   environment,
   kuery,
-  setup,
   serviceName,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
   serviceName: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
-
   return {
     apm: {
       events: [ProcessorEvent.error as const],

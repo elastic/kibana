@@ -197,14 +197,11 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   const hasData = series.length > 0;
   const { yMin, yMax, xMin, xMax } = getDomain(filteredSeries, isStacked);
   const chartDomain = {
-    max:
-      showThreshold && threshold && threshold.value
-        ? Math.max(yMax, threshold.value) * 1.1
-        : yMax * 1.1, // Add 10% headroom.
-    min: showThreshold && threshold && threshold.value ? Math.min(yMin, threshold.value) : yMin,
+    max: showThreshold && threshold ? Math.max(yMax, threshold.value) * 1.1 : yMax * 1.1, // Add 10% headroom.
+    min: showThreshold && threshold ? Math.min(yMin, threshold.value) : yMin,
   };
 
-  if (showThreshold && threshold && threshold.value && chartDomain.min === threshold.value) {
+  if (showThreshold && threshold && chartDomain.min === threshold.value) {
     chartDomain.min = chartDomain.min * 0.9; // Allow some padding so the threshold annotation has better visibility
   }
 
@@ -246,7 +243,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             }}
             color={!isGrouped ? colorTransformer(Color.color0) : undefined}
           />
-          {showThreshold && threshold && threshold.value ? (
+          {showThreshold && threshold ? (
             <LineAnnotation
               id={`threshold-line`}
               domainType={AnnotationDomainType.YDomain}
@@ -260,7 +257,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               }}
             />
           ) : null}
-          {showThreshold && threshold && threshold.value && isBelow ? (
+          {showThreshold && threshold && isBelow ? (
             <RectAnnotation
               id="below-threshold"
               style={{
@@ -279,7 +276,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               ]}
             />
           ) : null}
-          {showThreshold && threshold && threshold.value && isAbove ? (
+          {showThreshold && threshold && isAbove ? (
             <RectAnnotation
               id="above-threshold"
               style={{

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { combineLatest } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
@@ -19,8 +18,7 @@ import { isEmpty, mapValues } from 'lodash';
 import { SavedObjectsClient } from '../../../../src/core/server';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
-import { APMConfig, APMXPackConfig, APM_SERVER_FEATURE_ID } from '.';
-import { mergeConfigs } from './index';
+import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
@@ -28,7 +26,7 @@ import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
-import { apmCorrelationsSearchStrategyProvider } from './lib/search_strategies/correlations';
+import { registerSearchStrategies } from './lib/search_strategies';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
@@ -51,10 +49,7 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
-import {
-  apmFailedTransactionsCorrelationsSearchStrategyProvider,
-  FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
-} from './lib/search_strategies/failed_transactions_correlations';
+import { getDeprecations } from './deprecations';
 
 export class APMPlugin
   implements
@@ -63,7 +58,8 @@ export class APMPlugin
       void,
       APMPluginSetupDependencies,
       APMPluginStartDependencies
-    > {
+    >
+{
   private currentConfig?: APMConfig;
   private logger?: Logger;
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -75,29 +71,23 @@ export class APMPlugin
     plugins: Omit<APMPluginSetupDependencies, 'core'>
   ) {
     this.logger = this.initContext.logger.get();
-    const config$ = this.initContext.config.create<APMXPackConfig>();
-    const mergedConfig$ = combineLatest(plugins.apmOss.config$, config$).pipe(
-      map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
-    );
+    const config$ = this.initContext.config.create<APMConfig>();
 
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
 
-    const currentConfig = mergeConfigs(
-      plugins.apmOss.config,
-      this.initContext.config.get<APMXPackConfig>()
-    );
+    const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
 
     if (
       plugins.taskManager &&
       plugins.usageCollection &&
-      currentConfig['xpack.apm.telemetryCollectionEnabled']
+      currentConfig.telemetryCollectionEnabled
     ) {
       createApmTelemetry({
         core,
-        config$: mergedConfig$,
+        config$,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
@@ -158,7 +148,7 @@ export class APMPlugin
     const boundGetApmIndices = async () =>
       getApmIndices({
         savedObjectsClient: await getInternalSavedObjectsClient(core),
-        config: await mergedConfig$.pipe(take(1)).toPromise(),
+        config: await config$.pipe(take(1)).toPromise(),
       });
 
     boundGetApmIndices().then((indices) => {
@@ -172,9 +162,10 @@ export class APMPlugin
       );
     });
 
-    const telemetryUsageCounter = resourcePlugins.usageCollection?.setup.createUsageCounter(
-      APM_SERVER_FEATURE_ID
-    );
+    const telemetryUsageCounter =
+      resourcePlugins.usageCollection?.setup.createUsageCounter(
+        APM_SERVER_FEATURE_ID
+      );
 
     registerRoutes({
       core: {
@@ -194,7 +185,7 @@ export class APMPlugin
         ruleDataClient,
         alerting: plugins.alerting,
         ml: plugins.ml,
-        config$: mergedConfig$,
+        config$,
         logger: this.logger!.get('rule'),
       });
     }
@@ -217,28 +208,22 @@ export class APMPlugin
           .asScopedToClient(savedObjectsClient)
           .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
 
-        // Register APM latency correlations search strategy
-        plugins.data.search.registerSearchStrategy(
-          'apmCorrelationsSearchStrategy',
-          apmCorrelationsSearchStrategyProvider(
-            boundGetApmIndices,
-            includeFrozen
-          )
-        );
-
-        // Register APM failed transactions correlations search strategy
-        plugins.data.search.registerSearchStrategy(
-          FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
-          apmFailedTransactionsCorrelationsSearchStrategyProvider(
-            boundGetApmIndices,
-            includeFrozen
-          )
+        registerSearchStrategies(
+          plugins.data.search.registerSearchStrategy,
+          boundGetApmIndices,
+          includeFrozen
         );
       })();
     });
+    core.deprecations.registerDeprecations({
+      getDeprecations: getDeprecations({
+        cloudSetup: plugins.cloud,
+        fleet: resourcePlugins.fleet,
+      }),
+    });
 
     return {
-      config$: mergedConfig$,
+      config$,
       getApmIndices: boundGetApmIndices,
       createApmEventClient: async ({
         request,

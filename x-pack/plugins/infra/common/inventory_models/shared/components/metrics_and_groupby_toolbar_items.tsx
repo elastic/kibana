@@ -34,9 +34,10 @@ export const MetricsAndGroupByToolbarItems = (props: Props) => {
     [props.metricTypes]
   );
 
-  const groupByOptions = useMemo(() => props.groupByFields.map(toGroupByOpt), [
-    props.groupByFields,
-  ]);
+  const groupByOptions = useMemo(
+    () => props.groupByFields.map(toGroupByOpt),
+    [props.groupByFields]
+  );
 
   return (
     <>

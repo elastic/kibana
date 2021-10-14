@@ -15,7 +15,8 @@ import {
 import { isScreenshotMode } from './is_screenshot_mode';
 
 export class ScreenshotModePlugin
-  implements Plugin<ScreenshotModePluginSetup, ScreenshotModePluginStart> {
+  implements Plugin<ScreenshotModePluginSetup, ScreenshotModePluginStart>
+{
   public setup(core: CoreSetup): ScreenshotModePluginSetup {
     core.http.registerRouteHandlerContext<ScreenshotModeRequestHandlerContext, 'screenshotMode'>(
       'screenshotMode',

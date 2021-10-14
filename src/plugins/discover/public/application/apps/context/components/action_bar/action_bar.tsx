@@ -9,7 +9,7 @@
 import './_action_bar.scss';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiFieldNumber,
@@ -84,84 +84,78 @@ export function ActionBar({
     }
   }, [docCount, newDocCount]);
   return (
-    <I18nProvider>
-      <form onSubmit={onSubmit}>
-        {isSuccessor && <EuiSpacer size="s" />}
-        {isSuccessor && showWarning && (
-          <ActionBarWarning docCount={docCountAvailable} type={type} />
-        )}
-        {isSuccessor && showWarning && <EuiSpacer size="s" />}
-        <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj={`${type}LoadMoreButton`}
-              iconType={isSuccessor ? 'arrowDown' : 'arrowUp'}
-              isDisabled={isDisabled}
-              isLoading={isLoading}
-              onClick={() => {
-                const value = newDocCount + defaultStepSize;
-                if (isValid(value)) {
-                  setNewDocCount(value);
-                  onChangeCount(type, value);
+    <form onSubmit={onSubmit}>
+      {isSuccessor && <EuiSpacer size="s" />}
+      {isSuccessor && showWarning && <ActionBarWarning docCount={docCountAvailable} type={type} />}
+      {isSuccessor && showWarning && <EuiSpacer size="s" />}
+      <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj={`${type}LoadMoreButton`}
+            iconType={isSuccessor ? 'arrowDown' : 'arrowUp'}
+            isDisabled={isDisabled}
+            isLoading={isLoading}
+            onClick={() => {
+              const value = newDocCount + defaultStepSize;
+              if (isValid(value)) {
+                setNewDocCount(value);
+                onChangeCount(type, value);
+              }
+            }}
+            flush="right"
+          >
+            <FormattedMessage id="discover.context.loadButtonLabel" defaultMessage="Load" />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow display="center">
+            <EuiFieldNumber
+              aria-label={
+                isSuccessor
+                  ? i18n.translate('discover.context.olderDocumentsAriaLabel', {
+                      defaultMessage: 'Number of older documents',
+                    })
+                  : i18n.translate('discover.context.newerDocumentsAriaLabel', {
+                      defaultMessage: 'Number of newer documents',
+                    })
+              }
+              compressed
+              className="cxtSizePicker"
+              data-test-subj={`${type}CountPicker`}
+              disabled={isDisabled}
+              min={MIN_CONTEXT_SIZE}
+              max={MAX_CONTEXT_SIZE}
+              onChange={(ev) => {
+                setNewDocCount(ev.target.valueAsNumber);
+              }}
+              onBlur={() => {
+                if (newDocCount !== docCount && isValid(newDocCount)) {
+                  onChangeCount(type, newDocCount);
                 }
               }}
-              flush="right"
-            >
-              <FormattedMessage id="discover.context.loadButtonLabel" defaultMessage="Load" />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow display="center">
-              <EuiFieldNumber
-                aria-label={
-                  isSuccessor
-                    ? i18n.translate('discover.context.olderDocumentsAriaLabel', {
-                        defaultMessage: 'Number of older documents',
-                      })
-                    : i18n.translate('discover.context.newerDocumentsAriaLabel', {
-                        defaultMessage: 'Number of newer documents',
-                      })
-                }
-                compressed
-                className="cxtSizePicker"
-                data-test-subj={`${type}CountPicker`}
-                disabled={isDisabled}
-                min={MIN_CONTEXT_SIZE}
-                max={MAX_CONTEXT_SIZE}
-                onChange={(ev) => {
-                  setNewDocCount(ev.target.valueAsNumber);
-                }}
-                onBlur={() => {
-                  if (newDocCount !== docCount && isValid(newDocCount)) {
-                    onChangeCount(type, newDocCount);
-                  }
-                }}
-                type="number"
-                value={newDocCount >= 0 ? newDocCount : ''}
+              type="number"
+              value={newDocCount >= 0 ? newDocCount : ''}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow display="center">
+            {isSuccessor ? (
+              <FormattedMessage
+                id="discover.context.olderDocumentsDescription"
+                defaultMessage="older documents"
               />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow display="center">
-              {isSuccessor ? (
-                <FormattedMessage
-                  id="discover.context.olderDocumentsDescription"
-                  defaultMessage="older documents"
-                />
-              ) : (
-                <FormattedMessage
-                  id="discover.context.newerDocumentsDescription"
-                  defaultMessage="newer documents"
-                />
-              )}
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {!isSuccessor && showWarning && (
-          <ActionBarWarning docCount={docCountAvailable} type={type} />
-        )}
-        {!isSuccessor && <EuiSpacer size="s" />}
-      </form>
-    </I18nProvider>
+            ) : (
+              <FormattedMessage
+                id="discover.context.newerDocumentsDescription"
+                defaultMessage="newer documents"
+              />
+            )}
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {!isSuccessor && showWarning && <ActionBarWarning docCount={docCountAvailable} type={type} />}
+      {!isSuccessor && <EuiSpacer size="s" />}
+    </form>
   );
 }

@@ -75,11 +75,14 @@ export function CustomizablePalette({
   showContinuity = true,
 }: {
   palettes: PaletteRegistry;
-  activePalette: PaletteOutput<CustomPaletteParams>;
+  activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
-  dataBounds: { min: number; max: number };
+  dataBounds?: { min: number; max: number };
   showContinuity?: boolean;
 }) {
+  if (!dataBounds || !activePalette) {
+    return null;
+  }
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
   const colorStopsToShow = roundStopValues(

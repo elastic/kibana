@@ -50,7 +50,8 @@ export class RuleRegistryPlugin
       RuleRegistryPluginStartContract,
       RuleRegistryPluginSetupDependencies,
       RuleRegistryPluginStartDependencies
-    > {
+    >
+{
   private readonly config: RuleRegistryPluginConfig;
   private readonly legacyConfig: SharedGlobalConfig;
   private readonly logger: Logger;
@@ -103,7 +104,6 @@ export class RuleRegistryPlugin
       logger,
       kibanaVersion,
       isWriteEnabled: isWriteEnabled(this.config, this.legacyConfig),
-      isIndexUpgradeEnabled: this.config.unsafe.indexUpgrade.enabled,
       getClusterClient: async () => {
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;

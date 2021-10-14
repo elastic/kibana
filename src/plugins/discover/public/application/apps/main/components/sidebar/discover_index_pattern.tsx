@@ -7,12 +7,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
 import { SavedObject } from 'kibana/public';
 import { IndexPattern, IndexPatternAttributes } from 'src/plugins/data/public';
-
 import { IndexPatternRef } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
+
 export interface DiscoverIndexPatternProps {
   /**
    * list of available index patterns, if length > 1, component offers a "change" link
@@ -55,23 +54,21 @@ export function DiscoverIndexPattern({
   }
 
   return (
-    <I18nProvider>
-      <ChangeIndexPattern
-        trigger={{
-          label: selected.title,
-          title: selected.title,
-          'data-test-subj': 'indexPattern-switch-link',
-        }}
-        indexPatternId={selected.id}
-        indexPatternRefs={options}
-        onChangeIndexPattern={(id) => {
-          const indexPattern = options.find((pattern) => pattern.id === id);
-          if (indexPattern) {
-            onChangeIndexPattern(id);
-            setSelected(indexPattern);
-          }
-        }}
-      />
-    </I18nProvider>
+    <ChangeIndexPattern
+      trigger={{
+        label: selected.title,
+        title: selected.title,
+        'data-test-subj': 'indexPattern-switch-link',
+      }}
+      indexPatternId={selected.id}
+      indexPatternRefs={options}
+      onChangeIndexPattern={(id) => {
+        const indexPattern = options.find((pattern) => pattern.id === id);
+        if (indexPattern) {
+          onChangeIndexPattern(id);
+          setSelected(indexPattern);
+        }
+      }}
+    />
   );
 }

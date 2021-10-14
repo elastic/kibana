@@ -38,8 +38,8 @@ export const TimelinesPageComponent: React.FC = () => {
   }, [setImportDataModalToggle]);
   const { indicesExist } = useSourcererScope();
 
-  const capabilitiesCanUserCRUD: boolean = !!useKibana().services.application.capabilities.siem
-    .crud;
+  const capabilitiesCanUserCRUD: boolean =
+    !!useKibana().services.application.capabilities.siem.crud;
 
   return (
     <>

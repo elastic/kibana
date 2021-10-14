@@ -30,9 +30,10 @@ describe('GET /internal/global_search/searchable_types', () => {
       'globalSearch'
     >(pluginId, 'globalSearch', () => globalSearchHandlerContext);
 
-    const router = httpSetup.createRouter<
-      ReturnType<typeof globalSearchPluginMock.createRequestHandlerContext>
-    >('/');
+    const router =
+      httpSetup.createRouter<ReturnType<typeof globalSearchPluginMock.createRequestHandlerContext>>(
+        '/'
+      );
 
     registerInternalSearchableTypesRoute(router);
 

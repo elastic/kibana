@@ -15,7 +15,7 @@ To access an elasticsearch instance that has live data you have two options:
 
 #### A. Connect to Elasticsearch on Cloud (internal devs only)
 
-Find the credentials for the cluster [here](https://github.com/elastic/apm-dev/blob/master/docs/credentials/apm-ui-clusters.md#apmelstcco)
+Find the credentials for the cluster [here](https://github.com/elastic/observability-dev/blob/master/docs/observability-clusters.md)
 
 #### B. Start Elastic Stack and APM data generators
 
@@ -43,8 +43,7 @@ This will create:
 
 ## Debugging Elasticsearch queries
 
-All APM api endpoints accept `_inspect=true` as a query param that will result in the underlying ES query being outputted in the Kibana backend process.
+All APM api endpoints accept `_inspect=true` as a query param that will output all Elasticsearch queries performed in that request. It will be available in the browser response and on localhost it is also available in the Kibana Node.js process output.
 
 Example:
-`/api/apm/services/my_service?_inspect=true`
-diff --git a/x-pack/plugins/apm/dev_docs/linting.md b/x-pack/plugins/apm/dev_docs/linting.md
+`/internal/apm/services/my_service?_inspect=true`

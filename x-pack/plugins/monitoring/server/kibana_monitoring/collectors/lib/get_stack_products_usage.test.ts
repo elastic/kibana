@@ -16,7 +16,7 @@ describe('getStackProductsUsage', () => {
   };
   const clusterUuid = '1abcde2';
   const availableCcs: string[] = [];
-  const callCluster = ({
+  const callCluster = {
     search: jest.fn().mockImplementation(() => ({
       body: {
         hits: {
@@ -24,7 +24,7 @@ describe('getStackProductsUsage', () => {
         },
       },
     })),
-  } as unknown) as ElasticsearchClient;
+  } as unknown as ElasticsearchClient;
 
   it('should get all stack products', async () => {
     const result = await getStackProductsUsage(config, callCluster, availableCcs, clusterUuid);

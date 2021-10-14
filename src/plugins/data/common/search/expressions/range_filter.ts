@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { KibanaField, KibanaFilter } from './kibana_context_type';
-import { IndexPattern } from '../../index_patterns/index_patterns';
+import { IndexPattern } from '../..';
 import { KibanaRange } from './range';
 
 interface Arguments {
@@ -61,7 +61,7 @@ export const rangeFilterFunction: ExpressionFunctionRangeFilter = {
     return {
       type: 'kibana_filter',
       ...buildFilter(
-        ({} as any) as IndexPattern,
+        {} as any as IndexPattern,
         args.field.spec,
         FILTERS.RANGE,
         args.negate || false,

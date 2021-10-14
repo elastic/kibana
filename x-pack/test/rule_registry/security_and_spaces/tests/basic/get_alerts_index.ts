@@ -24,13 +24,12 @@ export default ({ getService }: FtrProviderContext) => {
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
 
   const getAPMIndexName = async (user: User, space: string, expected: number = 200) => {
-    const {
-      body: indexNames,
-    }: { body: { index_name: string[] | undefined } } = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}?features=apm`)
-      .auth(user.username, user.password)
-      .set('kbn-xsrf', 'true')
-      .expect(expected);
+    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
+      await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}?features=apm`)
+        .auth(user.username, user.password)
+        .set('kbn-xsrf', 'true')
+        .expect(expected);
     return indexNames;
   };
 
@@ -39,13 +38,12 @@ export default ({ getService }: FtrProviderContext) => {
     space: string,
     expectedStatusCode: number = 200
   ) => {
-    const {
-      body: indexNames,
-    }: { body: { index_name: string[] | undefined } } = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}?features=siem`)
-      .auth(user.username, user.password)
-      .set('kbn-xsrf', 'true')
-      .expect(expectedStatusCode);
+    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
+      await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}?features=siem`)
+        .auth(user.username, user.password)
+        .set('kbn-xsrf', 'true')
+        .expect(expectedStatusCode);
     return indexNames;
   };
 

@@ -1,4 +1,8 @@
-# Vislib general overview
+# Charts supported
+
+Vislib supports the heatmap and gauge/goal charts from the aggregation-based visualizations. It also contains the legacy implemementation of the pie chart (enabled by the visualization:visualize:legacyPieChartsLibrary advanced setting).
+
+# General overview
 
 `vis.js` constructor accepts vis parameters and render method accepts data. it exposes event emitter interface so we can listen to certain events like 'renderComplete'.
 
@@ -19,6 +23,3 @@ All base visualizations extend from `visualizations/_chart`
 ### Point series chart
 
 `visualizations/point_series` takes care of drawing the point series chart (no axes or titles, just the chart itself). It creates all the series defined and calls render method on them.
-
-currently there are 3 series types available (line, area, bars), they all extend from `visualizations/point_series/_point_series`.
-

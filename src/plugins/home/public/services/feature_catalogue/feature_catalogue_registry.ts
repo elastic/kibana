@@ -120,12 +120,14 @@ export class FeatureCatalogueRegistry {
 
 export type FeatureCatalogueRegistrySetup = ReturnType<FeatureCatalogueRegistry['setup']>;
 
-const compareByKey = <T>(key: keyof T) => (left: T, right: T) => {
-  if (left[key] < right[key]) {
-    return -1;
-  } else if (left[key] > right[key]) {
-    return 1;
-  } else {
-    return 0;
-  }
-};
+const compareByKey =
+  <T>(key: keyof T) =>
+  (left: T, right: T) => {
+    if (left[key] < right[key]) {
+      return -1;
+    } else if (left[key] > right[key]) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };

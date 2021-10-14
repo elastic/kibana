@@ -21,20 +21,19 @@ interface Props {
   formatter: InfraFormatter;
 }
 
-const createTickRender = (bounds: InfraWaffleMapBounds, formatter: InfraFormatter) => (
-  rule: InfraWaffleMapGradientRule,
-  index: number
-) => {
-  const value = rule.value === 0 ? bounds.min : bounds.max * rule.value;
-  const style = { left: `${rule.value * 100}%` };
-  const label = formatter(value);
-  return (
-    <GradientLegendTick style={style} key={`legend-rule-${index}`}>
-      <GradientLegendTickLine />
-      <GradientLegendTickLabel>{label}</GradientLegendTickLabel>
-    </GradientLegendTick>
-  );
-};
+const createTickRender =
+  (bounds: InfraWaffleMapBounds, formatter: InfraFormatter) =>
+  (rule: InfraWaffleMapGradientRule, index: number) => {
+    const value = rule.value === 0 ? bounds.min : bounds.max * rule.value;
+    const style = { left: `${rule.value * 100}%` };
+    const label = formatter(value);
+    return (
+      <GradientLegendTick style={style} key={`legend-rule-${index}`}>
+        <GradientLegendTickLine />
+        <GradientLegendTickLabel>{label}</GradientLegendTickLabel>
+      </GradientLegendTick>
+    );
+  };
 
 export const GradientLegend: React.FC<Props> = ({ legend, bounds, formatter }) => {
   const maxValue = legend.rules.reduce((acc, rule) => {

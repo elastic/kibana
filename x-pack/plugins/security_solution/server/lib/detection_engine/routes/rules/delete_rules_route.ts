@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -23,7 +22,7 @@ import { readRules } from '../../rules/read_rules';
 
 export const deleteRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: IRuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ) => {
   router.delete(
     {
@@ -54,7 +53,7 @@ export const deleteRulesRoute = (
         }
 
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
-        const rule = await readRules({ rulesClient, id, ruleId });
+        const rule = await readRules({ isRuleRegistryEnabled, rulesClient, id, ruleId });
         if (!rule) {
           const error = getIdError({ id, ruleId });
           return siemResponse.error({
@@ -74,7 +73,7 @@ export const deleteRulesRoute = (
           ruleStatuses,
           id: rule.id,
         });
-        const transformed = transform(rule, ruleStatuses[0]);
+        const transformed = transform(rule, ruleStatuses[0], isRuleRegistryEnabled);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
         } else {

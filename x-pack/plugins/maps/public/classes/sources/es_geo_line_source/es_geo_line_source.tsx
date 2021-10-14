@@ -40,6 +40,8 @@ import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
+type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
+
 const MAX_TRACKS = 250;
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
@@ -99,7 +101,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     );
   }
 
-  getSyncMeta() {
+  getSyncMeta(): ESGeoLineSourceSyncMeta {
     return {
       splitField: this._descriptor.splitField,
       sortField: this._descriptor.sortField,

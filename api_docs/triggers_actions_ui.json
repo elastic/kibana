@@ -187,7 +187,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ActionForm.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -221,7 +221,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.AlertConditions.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -255,7 +255,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.AlertConditionsGroup.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -287,7 +287,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ConnectorAddFlyout.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -319,7 +319,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ConnectorEditFlyout.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -351,7 +351,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ForLastExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -668,7 +668,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.GroupByExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -713,7 +713,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadActionTypes.$1.http",
+            "id": "def-public.loadActionTypes.$1",
             "type": "Object",
             "tags": [],
             "label": "{ http }",
@@ -723,7 +723,7 @@
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadActionTypes.$1.http.http",
+                "id": "def-public.loadActionTypes.$1.http",
                 "type": "Object",
                 "tags": [],
                 "label": "http",
@@ -764,7 +764,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.OfExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -796,7 +796,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ThresholdExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -828,7 +828,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ValueExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -860,7 +860,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.WhenExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -1196,7 +1196,7 @@
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.props",
+                "id": "def-public.AlertTypeModel.alertParamsExpression.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1353,7 +1353,7 @@
             "label": "setAlertProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
+              "<Prop extends \"enabled\" | \"id\" | \"name\" | \"tags\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -1361,7 +1361,7 @@
                 "section": "def-common.Alert",
                 "text": "Alert"
               },
-              "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null) => void"
+              "<Params>, \"enabled\" | \"id\" | \"name\" | \"tags\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null) => void"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -1396,7 +1396,7 @@
                     "section": "def-common.Alert",
                     "text": "Alert"
                   },
-                  "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null"
+                  "<Params>, \"enabled\" | \"id\" | \"name\" | \"tags\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
@@ -1799,6 +1799,16 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.isCloud",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloud",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.TriggersAndActionsUiServices.setBreadcrumbs",
             "type": "Function",
             "tags": [],
@@ -1840,11 +1850,11 @@
             "signature": [
               "{ get: (id: string) => ",
               "ActionTypeModel",
-              "<unknown, unknown, any>; register: (objectType: ",
+              "<unknown, unknown, any>; list: () => ",
               "ActionTypeModel",
-              "<unknown, unknown, any>) => void; has: (id: string) => boolean; list: () => ",
+              "<unknown, unknown, any>[]; register: (objectType: ",
               "ActionTypeModel",
-              "<unknown, unknown, any>[]; }"
+              "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
@@ -1865,7 +1875,7 @@
                 "section": "def-public.AlertTypeModel",
                 "text": "AlertTypeModel"
               },
-              "<Record<string, unknown>>; register: (objectType: ",
+              "<Record<string, unknown>>; list: () => ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -1873,7 +1883,7 @@
                 "section": "def-public.AlertTypeModel",
                 "text": "AlertTypeModel"
               },
-              "<Record<string, unknown>>) => void; has: (id: string) => boolean; list: () => ",
+              "<Record<string, unknown>>[]; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -1881,7 +1891,7 @@
                 "section": "def-public.AlertTypeModel",
                 "text": "AlertTypeModel"
               },
-              "<Record<string, unknown>>[]; }"
+              "<Record<string, unknown>>) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
@@ -2073,11 +2083,11 @@
         "signature": [
           "{ get: (id: string) => ",
           "ActionTypeModel",
-          "<ActionConnector, ActionParams, any>; register: (objectType: ",
+          "<ActionConnector, ActionParams, any>; list: () => ",
           "ActionTypeModel",
-          "<ActionConnector, ActionParams, any>) => void; has: (id: string) => boolean; list: () => ",
+          "<ActionConnector, ActionParams, any>[]; register: (objectType: ",
           "ActionTypeModel",
-          "<ActionConnector, ActionParams, any>[]; }"
+          "<ActionConnector, ActionParams, any>) => void; has: (id: string) => boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -2105,7 +2115,7 @@
         "label": "Alert",
         "description": [],
         "signature": [
-          "{ enabled: boolean; id: string; name: string; params: Record<string, unknown>; actions: ",
+          "{ enabled: boolean; id: string; name: string; tags: string[]; params: Record<string, unknown>; actions: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2113,7 +2123,7 @@
             "section": "def-common.AlertAction",
             "text": "AlertAction"
           },
-          "[]; throttle: string | null; tags: string[]; alertTypeId: string; consumer: string; schedule: ",
+          "[]; throttle: string | null; alertTypeId: string; consumer: string; schedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2207,7 +2217,7 @@
             "section": "def-public.AlertTypeModel",
             "text": "AlertTypeModel"
           },
-          "<Record<string, unknown>>; register: (objectType: ",
+          "<Record<string, unknown>>; list: () => ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -2215,7 +2225,7 @@
             "section": "def-public.AlertTypeModel",
             "text": "AlertTypeModel"
           },
-          "<Record<string, unknown>>) => void; has: (id: string) => boolean; list: () => ",
+          "<Record<string, unknown>>[]; register: (objectType: ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -2223,7 +2233,7 @@
             "section": "def-public.AlertTypeModel",
             "text": "AlertTypeModel"
           },
-          "<Record<string, unknown>>[]; }"
+          "<Record<string, unknown>>) => void; has: (id: string) => boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -3434,7 +3444,13 @@
               "// name of the indices to search"
             ],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<string | string[]>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
@@ -3450,7 +3466,13 @@
               "// field in index used for date/time"
             ],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<string>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
@@ -3466,7 +3488,13 @@
               "// aggregation type"
             ],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<string>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
@@ -3482,7 +3510,13 @@
               "// aggregation field"
             ],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<string | undefined>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
@@ -3498,7 +3532,13 @@
               "// how to group"
             ],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<string>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
@@ -3514,7 +3554,13 @@
               "// field to group on (for groupBy: top)"
             ],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<string | undefined>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
@@ -3530,7 +3576,13 @@
               "// limit on number of groups returned"
             ],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<number | undefined>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
@@ -3546,7 +3598,13 @@
               "// size of time window for date range aggregations"
             ],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<number>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
@@ -3562,7 +3620,13 @@
               "// units of time window for date range aggregations"
             ],
             "signature": [
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<string>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",

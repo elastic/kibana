@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiCode } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -36,7 +37,11 @@ export function FailedTransactionsCorrelationsHelpPopover() {
       <p>
         <FormattedMessage
           id="xpack.apm.correlations.failedTransactions.helpPopover.basicExplanation"
-          defaultMessage="Correlations help you discover which attributes are contributing to failed transactions. Transactions are considered a failure when it returns a status code >= 5xx."
+          defaultMessage="Correlations help you discover which attributes are most influential in distinguishing between transaction failures and successes. Transactions are considered a failure when their {field} value is {value}."
+          values={{
+            field: <EuiCode>event.outcome</EuiCode>,
+            value: <EuiCode>failure</EuiCode>,
+          }}
         />
       </p>
       <p>

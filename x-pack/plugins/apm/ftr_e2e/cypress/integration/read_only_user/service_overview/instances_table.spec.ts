@@ -18,22 +18,17 @@ const serviceOverviewHref = url.format({
 const apisToIntercept = [
   {
     endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/main_statistics',
+      '/internal/apm/services/opbeans-java/service_overview_instances/main_statistics?*',
     name: 'instancesMainRequest',
   },
   {
     endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/detailed_statistics',
+      '/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics?*',
     name: 'instancesDetailsRequest',
   },
   {
     endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/details/31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad',
-    name: 'instanceDetailsRequest',
-  },
-  {
-    endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/details/31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad',
+      '/internal/apm/services/opbeans-java/service_overview_instances/details/31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad?*',
     name: 'instanceDetailsRequest',
   },
 ];

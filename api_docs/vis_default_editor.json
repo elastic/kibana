@@ -901,7 +901,7 @@
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
-            "id": "def-public.paramName",
+            "id": "def-public.SetColorRangeValue.$1",
             "type": "string",
             "tags": [],
             "label": "paramName",
@@ -911,7 +911,7 @@
           },
           {
             "parentPluginId": "visDefaultEditor",
-            "id": "def-public.value",
+            "id": "def-public.SetColorRangeValue.$2",
             "type": "Array",
             "tags": [],
             "label": "value",
@@ -943,9 +943,9 @@
           "<T extends \"colorSchema\" | \"invertColors\">(paramName: T, value: ",
           {
             "pluginId": "charts",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibChartsPluginApi",
-            "section": "def-public.ColorSchemaParams",
+            "section": "def-common.ColorSchemaParams",
             "text": "ColorSchemaParams"
           },
           "[T]) => void"
@@ -956,7 +956,7 @@
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
-            "id": "def-public.paramName",
+            "id": "def-public.SetColorSchemaOptionsValue.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "paramName",
@@ -969,7 +969,7 @@
           },
           {
             "parentPluginId": "visDefaultEditor",
-            "id": "def-public.value",
+            "id": "def-public.SetColorSchemaOptionsValue.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
@@ -977,9 +977,9 @@
             "signature": [
               {
                 "pluginId": "charts",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibChartsPluginApi",
-                "section": "def-public.ColorSchemaParams",
+                "section": "def-common.ColorSchemaParams",
                 "text": "ColorSchemaParams"
               },
               "[T]"

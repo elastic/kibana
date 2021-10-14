@@ -12,3 +12,5 @@
 export async function loadSharingDataHelpers() {
   return await import('../application/apps/main/utils/get_sharing_data');
 }
+
+export { DeferredSpinner } from './components';

@@ -14,20 +14,10 @@ import { ValidationVisOptionsProps } from '../common';
 const PointSeriesOptionsLazy = lazy(() => import('./point_series'));
 const MetricsAxisOptionsLazy = lazy(() => import('./metrics_axes'));
 
-export const PointSeriesOptions = (
-  props: ValidationVisOptionsProps<
-    VisParams,
-    {
-      showElasticChartsOptions: boolean;
-    }
-  >
-) => <PointSeriesOptionsLazy {...props} />;
+export const PointSeriesOptions = (props: ValidationVisOptionsProps<VisParams>) => (
+  <PointSeriesOptionsLazy {...props} />
+);
 
-export const MetricsAxisOptions = (
-  props: ValidationVisOptionsProps<
-    VisParams,
-    {
-      showElasticChartsOptions: boolean;
-    }
-  >
-) => <MetricsAxisOptionsLazy {...props} />;
+export const MetricsAxisOptions = (props: ValidationVisOptionsProps<VisParams>) => (
+  <MetricsAxisOptionsLazy {...props} />
+);

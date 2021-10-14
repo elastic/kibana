@@ -39,9 +39,10 @@ export const AgentsApp: React.FunctionComponent = () => {
     perPage: 1000,
   });
 
-  const agentPolicies = useMemo(() => agentPoliciesRequest.data?.items || [], [
-    agentPoliciesRequest.data,
-  ]);
+  const agentPolicies = useMemo(
+    () => agentPoliciesRequest.data?.items || [],
+    [agentPoliciesRequest.data]
+  );
 
   const fleetStatus = useFleetStatus();
 

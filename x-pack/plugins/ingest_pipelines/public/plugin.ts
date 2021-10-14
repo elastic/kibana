@@ -14,7 +14,8 @@ import { SetupDependencies, StartDependencies } from './types';
 import { IngestPipelinesLocatorDefinition } from './locator';
 
 export class IngestPipelinesPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   public setup(coreSetup: CoreSetup<StartDependencies>, plugins: SetupDependencies): void {
     const { management, usageCollection, share } = plugins;
     const { http, getStartServices } = coreSetup;
@@ -24,7 +25,7 @@ export class IngestPipelinesPlugin
     apiService.setup(http, uiMetricService);
 
     const pluginName = i18n.translate('xpack.ingestPipelines.appTitle', {
-      defaultMessage: 'Ingest Node Pipelines',
+      defaultMessage: 'Ingest Pipelines',
     });
 
     management.sections.section.ingest.registerApp({

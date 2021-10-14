@@ -12,30 +12,29 @@ import { Story } from '@storybook/react';
 import { StoryFnReactReturnType } from '@storybook/react/dist/client/preview/types';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-export const waitFor = (
-  waitTarget: Promise<any>,
-  spinner: ReactElement | null = <EuiLoadingSpinner />
-) => (CurrentStory: Story) => {
-  const [storyComponent, setStory] = useState<StoryFnReactReturnType>();
-  const componentIsMounted = useRef(false);
+export const waitFor =
+  (waitTarget: Promise<any>, spinner: ReactElement | null = <EuiLoadingSpinner />) =>
+  (CurrentStory: Story) => {
+    const [storyComponent, setStory] = useState<StoryFnReactReturnType>();
+    const componentIsMounted = useRef(false);
 
-  useEffect(() => {
-    componentIsMounted.current = true;
-    return () => {
-      componentIsMounted.current = false;
-    };
-  }, []);
+    useEffect(() => {
+      componentIsMounted.current = true;
+      return () => {
+        componentIsMounted.current = false;
+      };
+    }, []);
 
-  useEffect(() => {
-    if (!storyComponent) {
-      waitTarget.then((waitedTarget: any) => {
-        if (!componentIsMounted.current) return;
-        act(() => {
-          setStory(<CurrentStory {...waitedTarget} />);
+    useEffect(() => {
+      if (!storyComponent) {
+        waitTarget.then((waitedTarget: any) => {
+          if (!componentIsMounted.current) return;
+          act(() => {
+            setStory(<CurrentStory {...waitedTarget} />);
+          });
         });
-      });
-    }
-  }, [CurrentStory, storyComponent]);
+      }
+    }, [CurrentStory, storyComponent]);
 
-  return storyComponent ?? spinner;
-};
+    return storyComponent ?? spinner;
+  };

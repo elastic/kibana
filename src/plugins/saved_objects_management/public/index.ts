@@ -18,8 +18,6 @@ export {
   SavedObjectsManagementColumnServiceStart,
   SavedObjectsManagementColumn,
   SavedObjectsManagementRecord,
-  ISavedObjectsManagementServiceRegistry,
-  SavedObjectsManagementServiceRegistryEntry,
 } from './services';
 export { ProcessedImportResponse, processImportResponse, FailedImport } from './lib';
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';

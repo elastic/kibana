@@ -6,6 +6,7 @@
  */
 
 export interface TaskManagerUsage {
+  task_type_exclusion: string[];
   ephemeral_tasks_enabled: boolean;
   ephemeral_request_capacity: number;
   ephemeral_stats: {

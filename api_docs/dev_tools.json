@@ -86,7 +86,7 @@
               },
               {
                 "parentPluginId": "devTools",
-                "id": "def-public.DevToolsPlugin.setup.$2.urlForwarding",
+                "id": "def-public.DevToolsPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "{ urlForwarding }",
@@ -96,7 +96,7 @@
                 "children": [
                   {
                     "parentPluginId": "devTools",
-                    "id": "def-public.DevToolsPlugin.setup.$2.urlForwarding.urlForwarding",
+                    "id": "def-public.DevToolsPlugin.setup.$2.urlForwarding",
                     "type": "Object",
                     "tags": [],
                     "label": "urlForwarding",

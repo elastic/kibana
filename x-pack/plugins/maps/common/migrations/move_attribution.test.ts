@@ -18,7 +18,7 @@ test('Should handle missing layerListJSON attribute', () => {
 });
 
 test('Should migrate source attribution to layer attribution', () => {
-  const layerListJSON = JSON.stringify(([
+  const layerListJSON = JSON.stringify([
     {
       sourceDescriptor: {
         attributionText: 'myLabel',
@@ -26,7 +26,7 @@ test('Should migrate source attribution to layer attribution', () => {
         id: 'mySourceId',
       },
     },
-  ] as unknown) as LayerDescriptor[]);
+  ] as unknown as LayerDescriptor[]);
 
   const attributes = {
     title: 'my map',
@@ -44,13 +44,13 @@ test('Should migrate source attribution to layer attribution', () => {
 });
 
 test('Should not add attribution to layer when source does not provide attribution', () => {
-  const layerListJSON = JSON.stringify(([
+  const layerListJSON = JSON.stringify([
     {
       sourceDescriptor: {
         id: 'mySourceId',
       },
     },
-  ] as unknown) as LayerDescriptor[]);
+  ] as unknown as LayerDescriptor[]);
 
   const attributes = {
     title: 'my map',

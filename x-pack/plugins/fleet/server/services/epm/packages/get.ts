@@ -53,7 +53,6 @@ export async function getPackages(
   });
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
-
   // filter out any internal packages
   const savedObjectsVisible = packageSavedObjects.saved_objects.filter(
     (o) => !o.attributes.internal
@@ -137,6 +136,7 @@ export async function getPackageInfo(options: {
     assets: Registry.groupPathsByService(paths || []),
     removable: !isUnremovablePackage(pkgName),
     notice: Registry.getNoticePath(paths || []),
+    keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
   const updated = { ...packageInfo, ...additions };
 

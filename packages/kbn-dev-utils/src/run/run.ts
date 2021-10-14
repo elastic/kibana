@@ -12,11 +12,13 @@ import { Flags, getFlags, FlagOptions } from './flags';
 import { ProcRunner, withProcRunner } from '../proc_runner';
 import { getHelp } from './help';
 import { CleanupTask, Cleanup } from './cleanup';
+import { Metrics, MetricsMeta } from './metrics';
 
 export interface RunContext {
   log: ToolingLog;
   flags: Flags;
   procRunner: ProcRunner;
+  statsMeta: MetricsMeta;
   addCleanupTask: (task: CleanupTask) => void;
 }
 export type RunFn = (context: RunContext) => Promise<void> | void;
@@ -32,18 +34,19 @@ export interface RunOptions {
 
 export async function run(fn: RunFn, options: RunOptions = {}) {
   const flags = getFlags(process.argv.slice(2), options.flags, options.log?.defaultLevel);
-  const helpText = getHelp({
-    description: options.description,
-    usage: options.usage,
-    flagHelp: options.flags?.help,
-    defaultLogLevel: options.log?.defaultLevel,
-  });
-
   const log = new ToolingLog({
     level: pickLevelFromFlags(flags, {
       default: options.log?.defaultLevel,
     }),
     writeTo: process.stdout,
+  });
+
+  const metrics = new Metrics(log);
+  const helpText = getHelp({
+    description: options.description,
+    usage: options.usage,
+    flagHelp: options.flags?.help,
+    defaultLogLevel: options.log?.defaultLevel,
   });
 
   if (flags.help) {
@@ -65,14 +68,18 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
         log,
         flags,
         procRunner,
+        statsMeta: metrics.meta,
         addCleanupTask: cleanup.add.bind(cleanup),
       });
     });
   } catch (error) {
     cleanup.execute(error);
+    await metrics.reportError(error?.message);
     // process.exitCode is set by `cleanup` when necessary
     process.exit();
   } finally {
     cleanup.execute();
   }
+
+  await metrics.reportSuccess();
 }

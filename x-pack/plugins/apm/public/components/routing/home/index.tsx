@@ -63,12 +63,14 @@ export const home = {
         rangeTo: t.string,
         kuery: t.string,
       }),
+      t.partial({
+        refreshPaused: t.union([t.literal('true'), t.literal('false')]),
+        refreshInterval: t.string,
+      }),
     ]),
   }),
   defaults: {
     query: {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
       environment: ENVIRONMENT_ALL.value,
       kuery: '',
     },
@@ -104,7 +106,7 @@ export const home = {
       }),
       children: [
         {
-          path: '/:backendName/overview',
+          path: '/backends/{backendName}/overview',
           element: <BackendDetailOverview />,
           params: t.type({
             path: t.type({
@@ -113,7 +115,7 @@ export const home = {
           }),
         },
         page({
-          path: '/',
+          path: '/backends',
           title: DependenciesInventoryTitle,
           element: <BackendInventory />,
         }),

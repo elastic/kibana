@@ -14,7 +14,7 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { useUiTracker } from '../../../../../observability/public';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import { getComparisonTypes } from './get_comparison_types';
@@ -117,10 +117,10 @@ export function getSelectOptions({
 export function TimeComparison() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
-  const { isSmall } = useBreakPoints();
+  const { isSmall } = useBreakpoints();
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services', '/backends/*', '/services/:serviceName');
+  } = useApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const { exactStart, exactEnd } = useTimeRange({
     rangeFrom,

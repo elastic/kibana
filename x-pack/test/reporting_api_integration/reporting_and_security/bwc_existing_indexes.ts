@@ -19,6 +19,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
+  const kibanaServer = getService('kibanaServer');
 
   describe('BWC report generation into existing indexes', () => {
     let cleanupIndexAlias: () => Promise<void>;
@@ -28,7 +29,8 @@ export default function ({ getService }: FtrProviderContext) {
         await reportingAPI.deleteAllReports();
         // data to report on
         await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
-        await esArchiver.load('test/functional/fixtures/es_archiver/discover'); // includes index pattern for logstash_functional
+        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+
         // archive with reporting index mappings v6.2
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/bwc/6_2');
 
@@ -41,8 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after('remove index alias', async () => {
-        await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
-        await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
 
         await cleanupIndexAlias();
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/bwc/6_2');

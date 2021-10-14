@@ -12,6 +12,7 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import {
   Embeddable,
   IContainer,
@@ -66,6 +67,7 @@ import {
   getCoreI18n,
   getHttp,
   getChartsPaletteServiceGetColor,
+  getSpacesApi,
   getSearchService,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
@@ -94,7 +96,8 @@ function getIsRestore(searchSessionId?: string) {
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>
+{
   type = MAP_SAVED_OBJECT_TYPE;
   deferEmbeddableLoad = true;
 
@@ -352,23 +355,39 @@ export class MapEmbeddable
       return;
     }
 
-    const I18nContext = getCoreI18n().Context;
+    const sharingSavedObjectProps = this._savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    const content =
+      sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
+        <div className="mapEmbeddedError">
+          <EuiEmptyPrompt
+            iconType="alert"
+            iconColor="danger"
+            data-test-subj="embeddable-maps-failure"
+            body={spaces.ui.components.getEmbeddableLegacyUrlConflict({
+              targetType: MAP_SAVED_OBJECT_TYPE,
+              sourceId: sharingSavedObjectProps.sourceId!,
+            })}
+          />
+        </div>
+      ) : (
+        <MapContainer
+          onSingleValueTrigger={this.onSingleValueTrigger}
+          addFilters={this.input.hideFilterActions ? null : this.addFilters}
+          getFilterActions={this.getFilterActions}
+          getActionContext={this.getActionContext}
+          renderTooltipContent={this._renderTooltipContent}
+          title={this.getTitle()}
+          description={this.getDescription()}
+          waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
+          isSharable={this._isSharable}
+        />
+      );
 
+    const I18nContext = getCoreI18n().Context;
     render(
       <Provider store={this._savedMap.getStore()}>
-        <I18nContext>
-          <MapContainer
-            onSingleValueTrigger={this.onSingleValueTrigger}
-            addFilters={this.input.hideFilterActions ? null : this.addFilters}
-            getFilterActions={this.getFilterActions}
-            getActionContext={this.getActionContext}
-            renderTooltipContent={this._renderTooltipContent}
-            title={this.getTitle()}
-            description={this.getDescription()}
-            waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
-            isSharable={this._isSharable}
-          />
-        </I18nContext>
+        <I18nContext>{content}</I18nContext>
       </Provider>,
       this._domNode
     );

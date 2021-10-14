@@ -315,9 +315,9 @@ describe('Duration Format', () => {
     showSuffix: boolean | undefined;
     useShortSuffix?: boolean;
     includeSpaceWithSuffix?: boolean;
-    fixtures: any[];
+    fixtures: Array<{ input: number; output: string }>;
   }) {
-    fixtures.forEach((fixture: Record<string, any>) => {
+    fixtures.forEach((fixture: { input: number; output: string }) => {
       const input = fixture.input;
       const output = fixture.output;
 

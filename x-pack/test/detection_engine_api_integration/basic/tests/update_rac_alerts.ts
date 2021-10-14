@@ -105,13 +105,12 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: signalIds, status: 'closed', index: '.siem-signals-default' })
           .expect(200);
 
-        const {
-          body: signalsClosed,
-        }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(signalIds))
-          .expect(200);
+        const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+          await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds(signalIds))
+            .expect(200);
         expect(signalsClosed.hits.hits.length).to.equal(10);
       });
 
@@ -132,13 +131,12 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: signalIds, status: 'closed', index: '.siem-signals-default' })
           .expect(200);
 
-        const {
-          body: signalsClosed,
-        }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(signalIds))
-          .expect(200);
+        const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+          await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds(signalIds))
+            .expect(200);
 
         const everySignalClosed = signalsClosed.hits.hits.every(
           (hit) => hit._source?.signal?.status === 'closed'
@@ -163,13 +161,12 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: signalIds, status: 'acknowledged', index: '.siem-signals-default' })
           .expect(200);
 
-        const {
-          body: acknowledgedSignals,
-        }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(signalIds))
-          .expect(200);
+        const { body: acknowledgedSignals }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+          await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds(signalIds))
+            .expect(200);
 
         const everyAcknowledgedSignal = acknowledgedSignals.hits.hits.every(
           (hit) => hit._source?.signal?.status === 'acknowledged'

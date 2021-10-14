@@ -8,13 +8,14 @@
     "target/**/*"
   ],
   "compilerOptions": {
+    "target": "ES2019",
     "outDir": "target/types",
     "types": [
       "cypress",
       "cypress-pipe",
-      "node"
+      "node",
+      "resize-observer-polyfill",
     ],
-    "resolveJsonModule": true,
   },
   "references": [
     { "path": "../tsconfig.json" }

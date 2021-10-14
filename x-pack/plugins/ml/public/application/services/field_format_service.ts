@@ -8,7 +8,7 @@
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { getIndexPatternById, getIndexPatternIdFromName } from '../util/index_utils';
 import { mlJobService } from './job_service';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
 type FormatsByJobId = Record<string, any>;
 type IndexPatternIdsByJob = Record<string, any>;
@@ -66,11 +66,7 @@ class FieldFormatService {
 
   // Utility for returning the FieldFormat from a full populated Kibana index pattern object
   // containing the list of fields by name with their formats.
-  getFieldFormatFromIndexPattern(
-    fullIndexPattern: IndexPattern,
-    fieldName: string,
-    esAggName: string
-  ) {
+  getFieldFormatFromIndexPattern(fullIndexPattern: DataView, fieldName: string, esAggName: string) {
     // Don't use the field formatter for distinct count detectors as
     // e.g. distinct_count(clientip) should be formatted as a count, not as an IP address.
     let fieldFormat;
@@ -105,9 +101,8 @@ class FieldFormatService {
               if (dtr.field_name !== undefined && esAgg !== 'cardinality') {
                 const field = fieldList.getByName(dtr.field_name);
                 if (field !== undefined) {
-                  formatsByDetector[dtr.detector_index!] = indexPatternData.getFormatterForField(
-                    field
-                  );
+                  formatsByDetector[dtr.detector_index!] =
+                    indexPatternData.getFormatterForField(field);
                 }
               }
             });

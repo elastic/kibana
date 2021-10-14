@@ -122,7 +122,7 @@ describe('SettingsLogic', () => {
         http.get.mockReturnValue(Promise.resolve(configuredSources));
         SettingsLogic.actions.initializeSettings();
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/settings');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/settings');
         await nextTick();
         expect(setServerPropsSpy).toHaveBeenCalledWith(configuredSources);
       });
@@ -145,7 +145,7 @@ describe('SettingsLogic', () => {
         http.get.mockReturnValue(Promise.resolve(serverProps));
         SettingsLogic.actions.initializeConnectors();
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/settings/connectors');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/settings/connectors');
         await nextTick();
         expect(onInitializeConnectorsSpy).toHaveBeenCalledWith(serverProps);
       });
@@ -168,7 +168,7 @@ describe('SettingsLogic', () => {
 
         SettingsLogic.actions.updateOrgName();
 
-        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/org/settings/customize', {
+        expect(http.put).toHaveBeenCalledWith('/internal/workplace_search/org/settings/customize', {
           body: JSON.stringify({ name: NAME }),
         });
         await nextTick();
@@ -194,9 +194,12 @@ describe('SettingsLogic', () => {
 
         SettingsLogic.actions.updateOrgIcon();
 
-        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/org/settings/upload_images', {
-          body: JSON.stringify({ icon: ICON }),
-        });
+        expect(http.put).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/settings/upload_images',
+          {
+            body: JSON.stringify({ icon: ICON }),
+          }
+        );
         await nextTick();
         expect(flashSuccessToast).toHaveBeenCalledWith(ORG_UPDATED_MESSAGE);
         expect(setIconSpy).toHaveBeenCalledWith(ICON);
@@ -220,9 +223,12 @@ describe('SettingsLogic', () => {
 
         SettingsLogic.actions.updateOrgLogo();
 
-        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/org/settings/upload_images', {
-          body: JSON.stringify({ logo: LOGO }),
-        });
+        expect(http.put).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/settings/upload_images',
+          {
+            body: JSON.stringify({ logo: LOGO }),
+          }
+        );
         await nextTick();
         expect(flashSuccessToast).toHaveBeenCalledWith(ORG_UPDATED_MESSAGE);
         expect(setLogoSpy).toHaveBeenCalledWith(LOGO);
@@ -273,7 +279,7 @@ describe('SettingsLogic', () => {
         expect(clearFlashMessages).toHaveBeenCalled();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/api/workplace_search/org/settings/oauth_application',
+          '/internal/workplace_search/org/settings/oauth_application',
           {
             body: JSON.stringify({
               oauth_application: { name, confidential, redirect_uri: redirectUri },

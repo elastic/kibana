@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { PolicySelectionItem, PoliciesSelector } from '../policies_selector';
 import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
+import { useEndpointPrivileges } from '../../../common/components/user_privileges/use_endpoint_privileges';
 
 export interface SearchExceptionsProps {
   defaultValue?: string;
@@ -31,6 +32,7 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     defaultIncludedPolicies,
     defaultExcludedPolicies,
   }) => {
+    const { isPlatinumPlus } = useEndpointPrivileges();
     const [query, setQuery] = useState<string>(defaultValue);
     const [includedPolicies, setIncludedPolicies] = useState<string>(defaultIncludedPolicies || '');
     const [excludedPolicies, setExcludedPolicies] = useState<string>(defaultExcludedPolicies || '');
@@ -58,12 +60,10 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
       (ev: React.ChangeEvent<HTMLInputElement>) => setQuery(ev.target.value),
       [setQuery]
     );
-    const handleOnSearch = useCallback(() => onSearch(query, includedPolicies, excludedPolicies), [
-      onSearch,
-      query,
-      includedPolicies,
-      excludedPolicies,
-    ]);
+    const handleOnSearch = useCallback(
+      () => onSearch(query, includedPolicies, excludedPolicies),
+      [onSearch, query, includedPolicies, excludedPolicies]
+    );
 
     const handleOnSearchQuery = useCallback(
       (value) => {
@@ -90,7 +90,7 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
             data-test-subj="searchField"
           />
         </EuiFlexItem>
-        {hasPolicyFilter && policyList ? (
+        {isPlatinumPlus && hasPolicyFilter && policyList ? (
           <EuiFlexItem grow={false}>
             <PoliciesSelector
               policies={policyList}

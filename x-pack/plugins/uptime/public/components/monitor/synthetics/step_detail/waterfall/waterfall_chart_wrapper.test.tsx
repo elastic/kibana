@@ -31,7 +31,11 @@ describe('WaterfallChartWrapper', () => {
 
   it('renders the correct sidebar items', () => {
     const { getAllByTestId } = render(
-      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
+      <WaterfallChartWrapper
+        data={extractItems(NETWORK_EVENTS.events)}
+        total={1000}
+        markerItems={[{ id: 'domContentLoaded', offset: 2352353 }]}
+      />
     );
 
     const sideBarItems = getAllByTestId('middleTruncatedTextSROnly');
@@ -201,8 +205,7 @@ const NETWORK_EVENTS = {
     {
       timestamp: '2021-01-21T10:31:21.537Z',
       method: 'GET',
-      url:
-        'https://apv-static.minute.ly/videos/v-c2a526c7-450d-428e-1244649-a390-fb639ffead96-s45.746-54.421m.mp4',
+      url: 'https://apv-static.minute.ly/videos/v-c2a526c7-450d-428e-1244649-a390-fb639ffead96-s45.746-54.421m.mp4',
       status: 206,
       mimeType: 'video/mp4',
       requestSentTime: 241114127.474,

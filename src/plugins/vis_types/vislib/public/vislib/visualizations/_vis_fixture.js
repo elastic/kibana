@@ -51,7 +51,7 @@ export function getVis(vislibParams, element) {
       defaultYExtents: false,
       setYExtents: false,
       yAxis: {},
-      type: 'histogram',
+      type: 'heatmap',
     }),
     coreMock.createSetup(),
     chartPluginMock.createStartContract()
