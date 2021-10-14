@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,
   EuiFlexItem,
-  EuiLink,
   EuiTitle,
   EuiPanel,
   EuiDescriptionList,
@@ -123,18 +122,13 @@ export function EnterpriseSearchPanel(props) {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
-                    <EuiLink
-                      href={getSafeForExternalLink('#/enterprise_search')}
-                      data-test-subj="entSearchNodes"
-                    >
-                      <FormattedMessage
-                        id="xpack.monitoring.cluster.overview.entSearchPanel.nodesTotalLinkLabel"
-                        defaultMessage="Nodes: {nodesTotal}"
-                        values={{
-                          nodesTotal: formatNumber(props.stats.totalInstances, 'int_commas'),
-                        }}
-                      />
-                    </EuiLink>
+                    <FormattedMessage
+                      id="xpack.monitoring.cluster.overview.entSearchPanel.nodesTotalLinkLabel"
+                      defaultMessage="Nodes: {nodesTotal}"
+                      values={{
+                        nodesTotal: formatNumber(props.stats.totalInstances, 'int_commas'),
+                      }}
+                    />
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
