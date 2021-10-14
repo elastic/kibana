@@ -168,8 +168,9 @@ export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuer
   cy.get(TIMELINE_DATA_PROVIDER_FIELD)
     .find(COMBO_BOX_INPUT)
     .type(`${filter.field}{downarrow}{enter}`);
-  cy.get(TIMELINE_DATA_PROVIDER_OPERATOR).find(COMBO_BOX_INPUT).type(filter.operator);
-  cy.get(COMBO_BOX).contains(filter.operator).click();
+  cy.get(TIMELINE_DATA_PROVIDER_OPERATOR)
+    .find(COMBO_BOX_INPUT)
+    .type(`${filter.operator}{downarrow}{enter}`);
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_DATA_PROVIDER_VALUE).type(`${filter.value}{enter}`);
   }
