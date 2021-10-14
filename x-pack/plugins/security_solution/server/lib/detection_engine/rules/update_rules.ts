@@ -17,6 +17,8 @@ import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
 import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRuleActionsSavedObjectType } from '../rule_actions/legacy_saved_object_mappings';
 
 export const updateRules = async ({
   isRuleRegistryEnabled,
@@ -25,6 +27,7 @@ export const updateRules = async ({
   ruleStatusClient,
   defaultOutputIndex,
   ruleUpdate,
+  savedObjectsClient,
 }: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   const existingRule = await readRules({
     isRuleRegistryEnabled,
@@ -34,6 +37,44 @@ export const updateRules = async ({
   });
   if (existingRule == null) {
     return null;
+  }
+
+  /**
+   * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
+   * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actualy value (1hr etc..)
+   * Then use the rules client to delete the siem.notification
+   * Then with the legacy Rule Actions saved object type, just delete it.
+   */
+
+  // find it using the references array, not params.ruleAlertId
+  let migratedRule = false;
+  if (existingRule != null) {
+    const siemNotification = await rulesClient.find({
+      options: {
+        hasReference: {
+          type: 'alert',
+          id: existingRule.id,
+        },
+      },
+    });
+
+    await rulesClient.delete({ id: siemNotification.data[0].id });
+
+    const thing2 = await savedObjectsClient.find({ type: legacyRuleActionsSavedObjectType });
+
+    console.error(
+      'DID WE FIND THE SIEM NOTIFICATION FOR THIS ALERT?',
+      JSON.stringify(siemNotification, null, 2)
+    );
+
+    console.error('RULE SIDE CAR', JSON.stringify(thing2, null, 2));
+
+    if (existingRule?.actions != null) {
+      existingRule.actions = siemNotification.data[0].actions;
+      existingRule.throttle = siemNotification.data[0].schedule.interval;
+      existingRule.notifyWhen = transformToNotifyWhen(siemNotification.data[0].throttle);
+      migratedRule = true;
+    }
   }
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
@@ -77,9 +118,13 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
-    throttle: transformToAlertThrottle(ruleUpdate.throttle),
-    notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
+    actions: migratedRule
+      ? existingRule.actions
+      : ruleUpdate.actions != null
+      ? ruleUpdate.actions.map(transformRuleToAlertAction)
+      : [],
+    throttle: migratedRule ? existingRule.throttle : transformToAlertThrottle(ruleUpdate.throttle),
+    notifyWhen: migratedRule ? existingRule.notifyWhen : transformToNotifyWhen(ruleUpdate.throttle),
   };
 
   const update = await rulesClient.update({

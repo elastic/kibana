@@ -8,7 +8,13 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import { SavedObject, SavedObjectAttributes, SavedObjectsFindResult } from 'kibana/server';
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from 'kibana/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -273,6 +279,7 @@ export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   defaultOutputIndex: string;
   ruleUpdate: UpdateRulesSchema;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export interface PatchRulesOptions {
