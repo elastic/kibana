@@ -67,19 +67,19 @@ const deprecations7x: PluginConfigDescriptor<RollupConfig7x>['deprecations'] = (
     }
 
     addDeprecation({
-      title: i18n.translate('xpack.rollup.deprecations.enabledTitle', {
+      title: i18n.translate('xpack.rollupJobs.deprecations.enabledTitle', {
         defaultMessage: 'Setting "xpack.rollup.enabled" is deprecated',
       }),
-      message: i18n.translate('xpack.rollup.deprecations.enabledMessage', {
+      message: i18n.translate('xpack.rollupJobs.deprecations.enabledMessage', {
         defaultMessage:
           'Use the "xpack.rollup.ui.enabled" setting instead of "xpack.rollup.enabled".',
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('xpack.rollup.deprecations.enabled.manualStepOneMessage', {
+          i18n.translate('xpack.rollupJobs.deprecations.enabled.manualStepOneMessage', {
             defaultMessage: 'Open the kibana.yml config file.',
           }),
-          i18n.translate('xpack.rollup.deprecations.enabled.manualStepTwoMessage', {
+          i18n.translate('xpack.rollupJobs.deprecations.enabled.manualStepTwoMessage', {
             defaultMessage:
               'Change the "xpack.rollup.enabled" setting to "xpack.rollup.ui.enabled".',
           }),
