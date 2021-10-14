@@ -61,7 +61,7 @@ export function emsBoundariesSpecProvider({
   return () => ({
     id: 'emsBoundaries',
     name: i18n.translate('xpack.maps.tutorials.ems.nameTitle', {
-      defaultMessage: 'EMS Boundaries',
+      defaultMessage: 'Elastic Maps Service',
     }),
     category: TutorialsCategory.OTHER,
     shortDescription: i18n.translate('xpack.maps.tutorials.ems.shortDescription', {

@@ -47,7 +47,7 @@ export function getSourceTitle() {
     });
   } else {
     return i18n.translate('xpack.maps.source.emsFileTitle', {
-      defaultMessage: 'EMS Boundaries',
+      defaultMessage: 'Elastic Maps Service Boundaries',
     });
   }
 }
