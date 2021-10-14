@@ -174,6 +174,14 @@ export class EnterpriseSearchPlugin implements Plugin {
         indexName: '.ent-search-*',
       },
     });
+
+    infra.defineInternalSourceConfiguration('suggestions', {
+      name: 'Enterprise Search relevance suggestion logs',
+      logIndices: {
+        type: 'index_name',
+        indexName: '.ent-search-search-relevance-suggestions-ecs*',
+      },
+    });
   }
 
   public start() {}
