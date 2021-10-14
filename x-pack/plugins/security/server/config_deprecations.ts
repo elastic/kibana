@@ -166,7 +166,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     }
   },
   // Default values for session expiration timeouts.
-  (settings, fromPath, addDeprecation, { branch }) => {
+  (settings, fromPath, addDeprecation) => {
     if (settings?.xpack?.security?.session?.idleTimeout === undefined) {
       addDeprecation({
         level: 'warning',
@@ -177,11 +177,11 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage:
             'User sessions will automatically time out after 1 hour of inactivity starting in 8.0. Override this value to change the timeout.',
         }),
-        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/xpack-security-session-management.html#session-idle-timeout`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.idleTimeout.manualStepOneMessage', {
-              defaultMessage: `To configure a custom timeout, set "xpack.security.session.idleTimeout". A value of 0 disables the timeout.`,
+              defaultMessage:
+                'To configure a custom timeout, set "xpack.security.session.idleTimeout". Use the format <count>[ms|s|m|h|d|w|M|Y], for example, 20m, 24h, 7d, 1w. A value of 0 disables the timeout.',
             }),
           ],
         },
@@ -198,11 +198,11 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage:
             'Users are automatically required to log in again after 30 days starting in 8.0. Override this value to change the timeout.',
         }),
-        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/xpack-security-session-management.html#session-lifespan`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.lifespan.manualStepOneMessage', {
-              defaultMessage: `To configure a custom timeout, set "xpack.security.session.lifespan". A value of 0 disables the timeout.`,
+              defaultMessage:
+                'To configure a custom timeout, set "xpack.security.session.lifespan". Use the format <count>[ms|s|m|h|d|w|M|Y], for example, 20m, 24h, 7d, 1w. A value of 0 disables the timeout.',
             }),
           ],
         },
