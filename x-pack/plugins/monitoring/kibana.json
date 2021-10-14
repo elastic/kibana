@@ -27,5 +27,5 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaUtils", "home", "alerting", "kibanaReact", "licenseManagement"]
+  "requiredBundles": ["kibanaUtils", "home", "alerting", "kibanaReact"]
 }
