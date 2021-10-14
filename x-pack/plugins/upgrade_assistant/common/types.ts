@@ -126,8 +126,6 @@ export interface ReindexWarning {
 }
 
 // Telemetry types
-export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
-export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';
 export type UIOpenOption = 'overview' | 'elasticsearch' | 'kibana';
 export type UIReindexOption = 'close' | 'open' | 'start' | 'stop';
 
