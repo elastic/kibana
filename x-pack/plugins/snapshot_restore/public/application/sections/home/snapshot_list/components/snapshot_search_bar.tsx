@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -56,6 +57,15 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
   onSnapshotDeleted,
   repositories,
 }) => {
+  const [debouncedValue, setDebouncedValue] = useState<SnapshotListParams>(listParams);
+  useDebounce(
+    () => {
+      setListParams(debouncedValue);
+    },
+    500,
+    [debouncedValue]
+  );
+
   const deleteButton = selectedItems.length ? (
     <SnapshotDeleteProvider>
       {(
@@ -126,7 +136,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
       if (changedQuery.ast.clauses.length > 1) {
         setError({ name: onlyOneClauseMessage, message: onlyOneClauseMessage });
       } else {
-        setListParams(getListParams(listParams, changedQuery));
+        setDebouncedValue(getListParams(listParams, changedQuery));
       }
     }
   };
@@ -139,7 +149,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
         onChange={onSearchBarChange}
         toolsLeft={deleteButton}
         toolsRight={reloadButton}
-        box={{ schema: searchSchema }}
+        box={{ schema: searchSchema, incremental: true }}
       />
       <EuiSpacer />
       {error ? (
