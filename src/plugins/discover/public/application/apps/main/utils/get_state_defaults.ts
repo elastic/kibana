@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
-import { DEFAULT_COLUMNS_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../../../../common';
 import { SavedSearch } from '../../../../saved_searches';
 import { DataPublicPluginStart } from '../../../../../../data/public';
 
@@ -18,6 +22,9 @@ import { getDefaultSort, getSortArray } from '../components/doc_table';
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
     return [...savedSearch.columns];
+  }
+  if (config.get(SEARCH_FIELDS_FROM_SOURCE) && isEqual(config.get(DEFAULT_COLUMNS_SETTING), [])) {
+    return ['_source'];
   }
   return [...config.get(DEFAULT_COLUMNS_SETTING)];
 }
