@@ -57,7 +57,7 @@ interface PluginsSetup {
   security: SecurityPluginSetup;
   features: FeaturesPluginSetup;
   infra: InfraPluginSetup;
-  customIntegrations: CustomIntegrationsPluginSetup;
+  customIntegrations?: CustomIntegrationsPluginSetup;
 }
 
 interface PluginsStart {
