@@ -9,9 +9,8 @@ import { Logger } from 'kibana/server';
 
 import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 
-import { sampleDocNoSortId } from '../../../signals/__mocks__/es_results';
+import { sampleDocNoSortId, sampleRuleGuid } from '../../../signals/__mocks__/es_results';
 import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import {
   ALERT_ANCESTORS,
   ALERT_BUILDING_BLOCK_TYPE,
@@ -19,7 +18,8 @@ import {
   ALERT_GROUP_ID,
 } from '../../field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
-import { getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
+import { getCompleteRuleMock, getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
+import { QueryRuleParams } from '../../../schemas/rule_schemas';
 
 const SPACE_ID = 'space';
 
@@ -40,23 +40,7 @@ describe('buildAlert', () => {
   });
 
   test('it builds an alert as expected without original_event if event does not exist', () => {
-    const rule = getRulesSchemaMock();
-    const ruleSO = {
-      attributes: {
-        actions: [],
-        createdAt: new Date().toISOString(),
-        createdBy: 'gandalf',
-        params: getQueryRuleParams(),
-        schedule: { interval: '1m' },
-        throttle: 'derp',
-        updatedAt: new Date().toISOString(),
-        updatedBy: 'galadriel',
-        ...rule,
-      },
-      id: 'abcd',
-      references: [],
-      type: 'rule',
-    };
+    const completeRule = getCompleteRuleMock<QueryRuleParams>(getQueryRuleParams());
     const eqlSequence = {
       join_keys: [],
       events: [
@@ -67,7 +51,7 @@ describe('buildAlert', () => {
     const alertGroup = buildAlertGroupFromSequence(
       loggerMock,
       eqlSequence,
-      ruleSO,
+      completeRule,
       'allFields',
       SPACE_ID,
       jest.fn()
@@ -127,14 +111,14 @@ describe('buildAlert', () => {
               depth: 1,
               id: alertGroup[0]._id,
               index: '',
-              rule: 'abcd',
+              rule: sampleRuleGuid,
               type: 'signal',
             },
             {
               depth: 1,
               id: alertGroup[1]._id,
               index: '',
-              rule: 'abcd',
+              rule: sampleRuleGuid,
               type: 'signal',
             },
           ]),
