@@ -6,16 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../common/types';
 import { LevelLogger, startTrace } from '../';
-import { durationToNumber } from '../../../common/schema_utils';
+import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ConditionalHeaders } from '../../export_types/common';
-import { CaptureConfig } from '../../types';
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
 
 export const openUrl = async (
-  captureConfig: CaptureConfig,
+  timeout: number,
   browser: HeadlessChromiumDriver,
   index: number,
   urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
@@ -38,7 +36,6 @@ export const openUrl = async (
   }
 
   try {
-    const timeout = durationToNumber(captureConfig.timeouts.openUrl);
     await browser.open(url, { conditionalHeaders, waitForSelector, timeout, locator }, logger);
   } catch (err) {
     logger.error(err);

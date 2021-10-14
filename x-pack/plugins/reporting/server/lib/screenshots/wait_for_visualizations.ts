@@ -6,10 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { durationToNumber } from '../../../common/schema_utils';
 import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
-import { CaptureConfig } from '../../types';
 import { LayoutInstance } from '../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
 
@@ -25,7 +23,7 @@ const getCompletedItemsCount = ({ renderCompleteSelector }: SelectorArgs) => {
  * 3. Wait for the render complete event to be fired once for each item
  */
 export const waitForVisualizations = async (
-  captureConfig: CaptureConfig,
+  timeout: number,
   browser: HeadlessChromiumDriver,
   toEqual: number,
   layout: LayoutInstance,
@@ -42,7 +40,6 @@ export const waitForVisualizations = async (
   );
 
   try {
-    const timeout = durationToNumber(captureConfig.timeouts.renderComplete);
     await browser.waitFor(
       { fn: getCompletedItemsCount, args: [{ renderCompleteSelector }], toEqual, timeout },
       { context: CONTEXT_WAITFORELEMENTSTOBEINDOM },

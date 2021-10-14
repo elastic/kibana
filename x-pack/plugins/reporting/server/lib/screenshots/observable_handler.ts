@@ -101,7 +101,7 @@ export class ScreenshotObservableHandler {
       return initial.pipe(
         mergeMap(() =>
           openUrl(
-            this.captureConfig,
+            durationToNumber(this.captureConfig.timeouts.openUrl),
             this.driver,
             index,
             urlOrUrlLocatorTuple,
@@ -117,13 +117,26 @@ export class ScreenshotObservableHandler {
     const driver = this.driver;
     return (withPageOpen: Rx.Observable<void>) => {
       return withPageOpen.pipe(
-        mergeMap(() => getNumberOfItems(this.captureConfig, driver, this.layout, this.logger)),
+        mergeMap(() =>
+          getNumberOfItems(
+            durationToNumber(this.captureConfig.timeouts.waitForElements),
+            driver,
+            this.layout,
+            this.logger
+          )
+        ),
         mergeMap(async (itemsCount) => {
           // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
           const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
           await Promise.all([
             driver.setViewport(viewport, this.logger),
-            waitForVisualizations(this.captureConfig, driver, itemsCount, this.layout, this.logger),
+            waitForVisualizations(
+              durationToNumber(this.captureConfig.timeouts.renderComplete),
+              driver,
+              itemsCount,
+              this.layout,
+              this.logger
+            ),
           ]);
         })
       );
@@ -149,7 +162,12 @@ export class ScreenshotObservableHandler {
           }
           if (apmPositionElements) apmPositionElements.end();
 
-          await waitForRenderComplete(this.captureConfig, driver, layout, logger);
+          await waitForRenderComplete(
+            durationToNumber(this.captureConfig.loadDelay),
+            driver,
+            layout,
+            logger
+          );
         }),
         mergeMap(async () => {
           return await Promise.all([

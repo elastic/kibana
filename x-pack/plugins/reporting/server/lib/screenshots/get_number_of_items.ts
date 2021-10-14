@@ -6,15 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { durationToNumber } from '../../../common/schema_utils';
 import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
-import { CaptureConfig } from '../../types';
 import { LayoutInstance } from '../layouts';
 import { CONTEXT_GETNUMBEROFITEMS, CONTEXT_READMETADATA } from './constants';
 
 export const getNumberOfItems = async (
-  captureConfig: CaptureConfig,
+  timeout: number,
   browser: HeadlessChromiumDriver,
   layout: LayoutInstance,
   logger: LevelLogger
@@ -33,7 +31,6 @@ export const getNumberOfItems = async (
     // the dashboard is using the `itemsCountAttribute` attribute to let us
     // know how many items to expect since gridster incrementally adds panels
     // we have to use this hint to wait for all of them
-    const timeout = durationToNumber(captureConfig.timeouts.waitForElements);
     await browser.waitForSelector(
       `${renderCompleteSelector},[${itemsCountAttribute}]`,
       { timeout },
