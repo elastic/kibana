@@ -1225,7 +1225,7 @@ export class RulesClient {
     for (const instanceId of recoveredAlertInstanceIds) {
       const { group: actionGroup, subgroup: actionSubgroup } =
         recoveredAlertInstances[instanceId].getLastScheduledActions() ?? {};
-      const inststate = recoveredAlertInstances[instanceId].getState();
+      const instance = recoveredAlertInstances[instanceId].getState();
       const message = `instance '${instanceId}' has recovered`;
 
       const event = createAlertEventLogRecordObject({
@@ -1235,7 +1235,7 @@ export class RulesClient {
         instanceId,
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         message,
-        state: inststate,
+        state: instance,
         group: actionGroup,
         subgroup: actionSubgroup,
         namespace: this.namespace,
