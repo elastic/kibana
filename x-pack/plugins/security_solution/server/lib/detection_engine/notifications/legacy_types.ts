@@ -141,6 +141,13 @@ export type LegacyNotificationAlertTypeDefinition = Omit<
  */
 export const legacyRulesNotificationParams = schema.object({
   ruleAlertId: schema.string(),
+  references: schema.arrayOf(
+    schema.object({
+      name: schema.string(),
+      type: schema.string(),
+      id: schema.string(),
+    })
+  ),
 });
 
 /**

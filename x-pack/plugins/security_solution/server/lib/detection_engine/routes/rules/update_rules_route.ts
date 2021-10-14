@@ -19,6 +19,8 @@ import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRules } from '../../rules/update_rules';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRuleActionsSavedObjectType } from '../../rule_actions/legacy_saved_object_mappings';
 
 export const updateRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -67,6 +69,55 @@ export const updateRulesRoute = (
           ruleUpdate: request.body,
           spaceId: context.securitySolution.getSpaceId(),
         });
+
+        /**
+         * ,
+            {
+              term: {
+                'alert.params.ruleAlertId': rule?.id,
+              },
+            },
+         */
+
+        // const thing = await savedObjectsClient.find({
+        //   type: 'action',
+        // });
+
+        /**
+         * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
+         * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actualy value (1hr etc..)
+         * Then use the rules client to delete the siem.notification
+         * Then with the legacy Rule Actions saved object type, just delete it.
+         */
+
+        // find it using the references array, not params.ruleAlertId
+        if (rule != null) {
+          const siemNotification = await rulesClient.find({
+            options: {
+              hasReference: {
+                type: 'alert',
+                id: rule.id,
+              },
+            },
+          });
+
+          const thing2 = await savedObjectsClient.find({ type: legacyRuleActionsSavedObjectType });
+
+          console.error(
+            'DID WE FIND THE SIEM NOTIFICATION FOR THIS ALERT?',
+            JSON.stringify(siemNotification, null, 2)
+          );
+
+          console.error('RULE SIDE CAR', JSON.stringify(thing2, null, 2));
+
+          if (rule?.actions != null) {
+            rule.actions = siemNotification.data[0].actions;
+            rule.throttle = siemNotification.data[0].schedule.interval;
+            rule.notifyWhen = 'onThrottleInterval';
+          }
+        }
+
+        // use alert.references[] in find filter ^^^
 
         if (rule != null) {
           const ruleStatuses = await ruleStatusClient.find({

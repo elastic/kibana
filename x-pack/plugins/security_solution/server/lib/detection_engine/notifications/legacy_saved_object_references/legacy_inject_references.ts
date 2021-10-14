@@ -48,6 +48,7 @@ export const legacyInjectReferences = ({
   const ruleParamsWithSavedObjectReferences: LegacyRulesNotificationParams = {
     ...params,
     ruleAlertId,
+    // references: savedObjectReferences,
   };
   return ruleParamsWithSavedObjectReferences;
 };
