@@ -40,9 +40,7 @@ export function getScreenshots$(
       return Rx.from(opts.urlsOrUrlLocatorTuples).pipe(
         concatMap((urlOrUrlLocatorTuple, index) => {
           return Rx.of(1).pipe(
-            screen.waitUntil(screen.OPEN_URL, screen.openUrl(index, urlOrUrlLocatorTuple)),
-            screen.waitUntil(screen.WAIT_FOR_ELEMENTS, screen.waitForElements()),
-            screen.waitUntil(screen.RENDER_COMPLETE, screen.completeRender(apmTrans)),
+            screen.setupPage(index, urlOrUrlLocatorTuple, apmTrans),
             catchError((err) => {
               screen.checkPageIsOpen(); // this fails the job if the browser has closed
 

@@ -36,17 +36,17 @@ export class ScreenshotObservableHandler {
   private logger: ScreenshotObservableOpts['logger'];
   private waitErrorRegistered = false;
 
-  public readonly OPEN_URL: PhaseInstance = {
+  private readonly OPEN_URL: PhaseInstance = {
     timeoutValue: this.captureConfig.timeouts.openUrl,
     configValue: `xpack.reporting.capture.timeouts.openUrl`,
     label: 'open URL',
   };
-  public readonly WAIT_FOR_ELEMENTS: PhaseInstance = {
+  private readonly WAIT_FOR_ELEMENTS: PhaseInstance = {
     timeoutValue: this.captureConfig.timeouts.waitForElements,
     configValue: `xpack.reporting.capture.timeouts.waitForElements`,
     label: 'wait for elements',
   };
-  public readonly RENDER_COMPLETE: PhaseInstance = {
+  private readonly RENDER_COMPLETE: PhaseInstance = {
     timeoutValue: this.captureConfig.timeouts.renderComplete,
     configValue: `xpack.reporting.capture.timeouts.renderComplete`,
     label: 'render complete',
@@ -66,7 +66,7 @@ export class ScreenshotObservableHandler {
    * This wraps a chain of observable operators in a timeout, and decorates a
    * timeout error to specify which phase of page capture has timed out.
    */
-  public waitUntil<O, P>(phase: PhaseInstance, chain: Rx.OperatorFunction<O, P>) {
+  private waitUntil<O, P>(phase: PhaseInstance, chain: Rx.OperatorFunction<O, P>) {
     const { timeoutValue, label, configValue } = phase;
     return (o: Rx.Observable<O>) => {
       return o.pipe(
@@ -96,7 +96,7 @@ export class ScreenshotObservableHandler {
     };
   }
 
-  public openUrl(index: number, urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple) {
+  private openUrl(index: number, urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple) {
     return (initial: Rx.Observable<unknown>) => {
       return initial.pipe(
         mergeMap(() =>
@@ -113,7 +113,7 @@ export class ScreenshotObservableHandler {
     };
   }
 
-  public waitForElements() {
+  private waitForElements() {
     const driver = this.driver;
     return (withPageOpen: Rx.Observable<void>) => {
       return withPageOpen.pipe(
@@ -130,7 +130,7 @@ export class ScreenshotObservableHandler {
     };
   }
 
-  public completeRender(apmTrans: apm.Transaction | null) {
+  private completeRender(apmTrans: apm.Transaction | null) {
     const driver = this.driver;
     const layout = this.layout;
     const logger = this.logger;
@@ -161,6 +161,20 @@ export class ScreenshotObservableHandler {
             timeRange,
           }));
         })
+      );
+    };
+  }
+
+  public setupPage(
+    index: number,
+    urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
+    apmTrans: apm.Transaction | null
+  ) {
+    return (initial: Rx.Observable<unknown>) => {
+      return initial.pipe(
+        this.waitUntil(this.OPEN_URL, this.openUrl(index, urlOrUrlLocatorTuple)),
+        this.waitUntil(this.WAIT_FOR_ELEMENTS, this.waitForElements()),
+        this.waitUntil(this.RENDER_COMPLETE, this.completeRender(apmTrans))
       );
     };
   }
