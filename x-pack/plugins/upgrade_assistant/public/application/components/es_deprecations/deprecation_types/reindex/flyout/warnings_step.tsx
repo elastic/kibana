@@ -95,7 +95,7 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
                   defaultMessage="This index requires destructive changes that cannot be reversed"
                 />
               }
-              color="danger"
+              color="warning"
               iconType="alert"
             >
               <p>
