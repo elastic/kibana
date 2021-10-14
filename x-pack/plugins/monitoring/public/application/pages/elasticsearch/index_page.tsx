@@ -23,7 +23,7 @@ import { indicesByNodes } from '../../../components/elasticsearch/shard_allocati
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
+import { RULE_LARGE_SHARD_SIZE, ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) => {
@@ -114,6 +114,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
       pageType="indices"
     >
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
