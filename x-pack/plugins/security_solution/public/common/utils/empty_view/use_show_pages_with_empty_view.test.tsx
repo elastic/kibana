@@ -29,7 +29,7 @@ describe('use show pages with empty view', () => {
       const { result, waitForNextUpdate } = renderHook(() => useShowPagesWithEmptyView());
       await waitForNextUpdate();
       const emptyResult = result.current;
-      expect(emptyResult).toEqual([true]);
+      expect(emptyResult).toEqual(true);
     });
   });
   it('does not show empty view when on an inelligible page and indices do not exist', async () => {
@@ -37,7 +37,7 @@ describe('use show pages with empty view', () => {
       const { result, waitForNextUpdate } = renderHook(() => useShowPagesWithEmptyView());
       await waitForNextUpdate();
       const emptyResult = result.current;
-      expect(emptyResult).toEqual([false]);
+      expect(emptyResult).toEqual(false);
     });
   });
   it('shows empty view when on an elligible page and indices do exist', async () => {
@@ -45,7 +45,7 @@ describe('use show pages with empty view', () => {
       const { result, waitForNextUpdate } = renderHook(() => useShowPagesWithEmptyView());
       await waitForNextUpdate();
       const emptyResult = result.current;
-      expect(emptyResult).toEqual([true]);
+      expect(emptyResult).toEqual(true);
     });
   });
 });

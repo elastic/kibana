@@ -37,5 +37,5 @@ export const useShowPagesWithEmptyView = () => {
     }
   }, [pageName, indicesExist]);
 
-  return [showEmptyState];
+  return showEmptyState;
 };
