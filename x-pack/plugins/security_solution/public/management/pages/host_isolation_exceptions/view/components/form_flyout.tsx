@@ -26,7 +26,6 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Dispatch } from 'redux';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { Loader } from '../../../../../common/components/loader';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
