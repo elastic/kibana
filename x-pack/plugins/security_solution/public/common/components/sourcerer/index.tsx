@@ -9,7 +9,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -34,10 +33,10 @@ import * as i18n from './translations';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
-import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { SecurityPageName } from '../../../../common/constants';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { usePickIndexPatterns } from './use_pick_index_patterns';
 
 const FormRow = styled(EuiFormRow)<EuiFormRowProps & { $expandAdvancedOptions: boolean }>`
   display: ${({ $expandAdvancedOptions }) => ($expandAdvancedOptions ? 'flex' : 'none')};
@@ -101,25 +100,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const defaultSelectedDataView = selectedDataViewId ?? defaultDataView.id;
   const [dataViewId, setDataViewId] = useState<string>(defaultSelectedDataView);
 
-  const { patternList, selectablePatterns } = useMemo(() => {
-    if (isOnlyDetectionAlerts && signalIndexName) {
-      return {
-        patternList: [signalIndexName],
-        selectablePatterns: [signalIndexName],
-      };
-    }
-    const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
-    return theDataView != null
-      ? {
-          patternList: theDataView.title
-            .split(',')
-            // remove duplicates patterns from selector
-            .filter((pattern, i, self) => self.indexOf(pattern) === i),
-          selectablePatterns: theDataView.patternList,
-        }
-      : { patternList: [], selectablePatterns: [] };
-  }, [isOnlyDetectionAlerts, kibanaDataViews, signalIndexName, dataViewId]);
-
   const alertsOptions = useMemo(
     () =>
       signalIndexName
@@ -133,53 +113,24 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     [signalIndexName]
   );
 
-  const selectableOptions = useMemo(
-    () =>
-      patternList.map((indexName) => ({
-        label: indexName,
-        value: indexName,
-        disabled: !selectablePatterns.includes(indexName),
-      })),
-    [patternList, selectablePatterns]
-  );
-
-  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    isOnlyDetectionAlerts
-      ? alertsOptions
-      : selectedPatterns.map((indexName) => ({
-          label: indexName,
-          value: indexName,
-        }))
-  );
-
-  const getDefaultSelectedOptionsByDataView = useCallback(
-    (id: string) =>
-      isOnlyDetectionAlerts
-        ? alertsOptions
-        : getScopePatternListSelection(
-            kibanaDataViews.find((dataView) => dataView.id === id),
-            scopeId,
-            signalIndexName
-          ).map((indexSelected: string) => ({
-            label: indexSelected,
-            value: indexSelected,
-          })),
-    [alertsOptions, isOnlyDetectionAlerts, kibanaDataViews, scopeId, signalIndexName]
-  );
-
-  const defaultSelectedOptions = useMemo(
-    () => getDefaultSelectedOptionsByDataView(dataViewId),
-    [dataViewId, getDefaultSelectedOptionsByDataView]
-  );
+  const {
+    isModified,
+    onChangeCombo,
+    renderOption,
+    selectableOptions,
+    selectedOptions,
+    setIndexPatternsByDataView,
+  } = usePickIndexPatterns({
+    alertsOptions,
+    dataViewId,
+    isOnlyDetectionAlerts,
+    kibanaDataViews,
+    scopeId,
+    selectedPatterns,
+    signalIndexName,
+  });
 
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
-  const isModified = useMemo(
-    () =>
-      !defaultSelectedOptions.every((option) =>
-        selectedOptions.find((selectedOption) => option.value === selectedOption.value)
-      ),
-    [defaultSelectedOptions, selectedOptions]
-  );
 
   const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
   const onChangeDataView = useCallback(
@@ -195,27 +146,18 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     [dispatch, scopeId]
   );
 
-  const renderOption = useCallback(
-    ({ value }) => <span data-test-subj="sourcerer-combo-option">{value}</span>,
-    []
-  );
-
-  const onChangeCombo = useCallback((newSelectedOptions) => {
-    setSelectedOptions(newSelectedOptions);
-  }, []);
-
   const onChangeSuper = useCallback(
     (newSelectedOption) => {
       setDataViewId(newSelectedOption);
-      setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedOption));
+      setIndexPatternsByDataView(newSelectedOption);
     },
-    [getDefaultSelectedOptionsByDataView]
+    [setIndexPatternsByDataView]
   );
 
   const resetDataSources = useCallback(() => {
     setDataViewId(defaultSelectedDataView);
-    setSelectedOptions(getDefaultSelectedOptionsByDataView(defaultSelectedDataView));
-  }, [defaultSelectedDataView, getDefaultSelectedOptionsByDataView]);
+    setIndexPatternsByDataView(defaultSelectedDataView);
+  }, [defaultSelectedDataView, setIndexPatternsByDataView]);
 
   const handleSaveIndices = useCallback(() => {
     onChangeDataView(
@@ -294,17 +236,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         : prevSelectedOption
     );
   }, [isOnlyDetectionAlerts, selectedDataViewId]);
-
-  useEffect(() => {
-    setSelectedOptions(
-      isOnlyDetectionAlerts
-        ? alertsOptions
-        : selectedPatterns.map((indexName) => ({
-            label: indexName,
-            value: indexName,
-          }))
-    );
-  }, [alertsOptions, isOnlyDetectionAlerts, selectedPatterns]);
 
   const tooltipContent = useMemo(
     () =>
