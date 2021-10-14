@@ -144,7 +144,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     signalIndexName,
     sourcererScope: { loading, selectedPatterns, selectedDataViewId },
   }: sourcererSelectors.SourcererScopeSelector = useDeepEqualSelector((state) =>
-    sourcererScopeSelector(state, SourcererScopeName.default)
+    sourcererScopeSelector(state, SourcererScopeName.timeline)
   );
 
   const [dataViewId, setDataViewId] = useState<string>(selectedDataViewId ?? '');
