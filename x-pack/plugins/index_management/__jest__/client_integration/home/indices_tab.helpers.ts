@@ -22,14 +22,6 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-export enum ContextMenuOption {
-  CloseIndex = 0,
-  ForceMerge = 1,
-  RefreshIndex = 2,
-  ClearIndexCache = 3,
-  FlushIndex = 4,
-}
-
 export interface IndicesTestBed extends TestBed<TestSubjects> {
   actions: {
     selectIndexDetailsTab: (tab: 'settings' | 'mappings' | 'stats' | 'edit_settings') => void;
@@ -37,7 +29,7 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;
     clickManageContextMenuButton: () => void;
-    clickContextMenuOption: (option: ContextMenuOption) => void;
+    clickContextMenuOption: (optionDataTestSubject: string) => void;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
@@ -53,13 +45,10 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
   /**
    * User Actions
    */
-  const clickContextMenuOption = async (option: ContextMenuOption) => {
+  const clickContextMenuOption = async (optionDataTestSubject: string) => {
     const { find } = testBed;
     const contextMenu = find('indexContextMenu');
-    contextMenu
-      .find('button[data-test-subj="indexTableContextMenuButton"]')
-      .at(option)
-      .simulate('click');
+    contextMenu.find(`button[data-test-subj="${optionDataTestSubject}"]`).simulate('click');
   };
   const clickIncludeHiddenIndicesToggle = () => {
     const { find } = testBed;

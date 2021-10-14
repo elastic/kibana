@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, nextTick } from '../helpers';
-import { IndicesTestBed, setup, ContextMenuOption } from './indices_tab.helpers';
+import { IndicesTestBed, setup } from './indices_tab.helpers';
 import { createDataStreamPayload } from './data_streams_tab.helpers';
 
 /**
@@ -189,7 +189,7 @@ describe('<IndexManagementHome />', () => {
       const { actions } = testBed;
 
       await actions.clickManageContextMenuButton();
-      await actions.clickContextMenuOption(ContextMenuOption.CloseIndex);
+      await actions.clickContextMenuOption('closeIndexMenuButton');
 
       const latestRequest = server.requests[server.requests.length - 1];
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/close`);
