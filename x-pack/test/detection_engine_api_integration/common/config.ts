@@ -76,6 +76,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`, // See tests within the file "ignore_fields.ts" which use these values in "alertIgnoreFields"
           '--xpack.ruleRegistry.enabled=true',
           '--xpack.ruleRegistry.write.enabled=true',
+          '--xpack.ruleRegistry.write.cache.enabled=false',
           '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
           '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
