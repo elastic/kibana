@@ -136,6 +136,7 @@ describe.each([
 
   describe('mergeStatuses', () => {
     it('merges statuses and converts from camelCase saved object to snake_case HTTP response', () => {
+      //
       const statusOne = exampleRuleStatus();
       statusOne.attributes.status = RuleExecutionStatus.failed;
       const statusTwo = exampleRuleStatus();
@@ -145,7 +146,6 @@ describe.each([
       const res = mergeStatuses(currentStatus.references[0].id, foundRules, {
         'myfakealertid-8cfac': {
           current_status: {
-            alert_id: 'myfakealertid-8cfac',
             status_date: '2020-03-27T22:55:59.517Z',
             status: RuleExecutionStatus.succeeded,
             last_failure_at: null,
@@ -163,7 +163,6 @@ describe.each([
       expect(res).toEqual({
         'myfakealertid-8cfac': {
           current_status: {
-            alert_id: 'myfakealertid-8cfac',
             status_date: '2020-03-27T22:55:59.517Z',
             status: 'succeeded',
             last_failure_at: null,
@@ -179,7 +178,6 @@ describe.each([
         },
         'f4b8e31d-cf93-4bde-a265-298bde885cd7': {
           current_status: {
-            alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
             status_date: '2020-03-27T22:55:59.517Z',
             status: 'succeeded',
             last_failure_at: null,
@@ -193,7 +191,6 @@ describe.each([
           },
           failures: [
             {
-              alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
               status_date: '2020-03-27T22:55:59.517Z',
               status: 'failed',
               last_failure_at: null,
@@ -206,7 +203,6 @@ describe.each([
               last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
             },
             {
-              alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
               status_date: '2020-03-27T22:55:59.517Z',
               status: 'failed',
               last_failure_at: null,
