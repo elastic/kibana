@@ -73,6 +73,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
                 'status_start_date',
                 'status_end_date',
                 'last_run',
+                'execution_duration',
               ]);
               expect(stableBody).to.eql({
                 name: 'abc',
@@ -85,10 +86,6 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
                 enabled: true,
                 error_messages: [],
                 alerts: {},
-                execution_duration: {
-                  average: 0,
-                  values: [],
-                },
               });
               break;
             default:
