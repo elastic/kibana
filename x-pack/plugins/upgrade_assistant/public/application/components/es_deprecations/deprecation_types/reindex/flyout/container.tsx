@@ -46,7 +46,12 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
     <ChecklistFlyoutStep
       closeFlyout={closeFlyout}
       startReindex={() => {
-        if (reindexWarnings && reindexWarnings.length > 0 && status === undefined) {
+        if (
+          reindexWarnings &&
+          reindexWarnings.length > 0 &&
+          status !== ReindexStatus.inProgress &&
+          status !== ReindexStatus.completed
+        ) {
           setShowWarningsStep(true);
         } else {
           startReindex();
@@ -62,7 +67,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
       <EuiFlyoutHeader hasBorder>
         <DeprecationBadge
           isCritical={deprecation.isCritical}
-          isResolved={reindexState.status === ReindexStatus.completed}
+          isResolved={status === ReindexStatus.completed}
         />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
