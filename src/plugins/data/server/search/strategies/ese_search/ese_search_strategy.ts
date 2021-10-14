@@ -68,12 +68,9 @@ export const enhancedEsSearchStrategyProvider = (
             ...request.params,
           };
       const { body, headers } = id
-        ? await client.asyncSearch.get(
-            { ...params, id },
-            { abortController: { signal: options.abortSignal } }
-          )
+        ? await client.asyncSearch.get({ ...params, id }, { signal: options.abortSignal })
         : await client.asyncSearch.submit(params, {
-            abortController: { signal: options.abortSignal },
+            signal: options.abortSignal,
           });
 
       const response = shimHitsTotal(body.response, options);
@@ -126,7 +123,7 @@ export const enhancedEsSearchStrategyProvider = (
           querystring,
         },
         {
-          abortController: { signal: options?.abortSignal },
+          signal: options?.abortSignal,
         }
       );
 

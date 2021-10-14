@@ -44,7 +44,7 @@ export const esSearchStrategyProvider = (
           ...request.params,
         };
         const { body } = await esClient.asCurrentUser.search(params, {
-          abortController: { signal: abortSignal },
+          signal: abortSignal,
         });
         const response = shimHitsTotal(body, options);
         return toKibanaSearchResponse(response);

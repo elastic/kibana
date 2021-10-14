@@ -50,7 +50,7 @@ export async function termsEnumSuggestions(
       },
     },
     {
-      abortController: { signal: abortSignal },
+      signal: abortSignal,
     }
   );
 
