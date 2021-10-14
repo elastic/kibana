@@ -25238,7 +25238,6 @@
     "xpack.upgradeAssistant.overview.observe.observabilityDescription": "使用中のAPIのうち廃止予定のAPIと、更新が必要なアプリケーションを特定できます。",
     "xpack.upgradeAssistant.overview.pageDescription": "次のバージョンのElastic Stackをお待ちください。",
     "xpack.upgradeAssistant.overview.pageTitle": "アップグレードアシスタント",
-    "xpack.upgradeAssistant.overview.reviewStepTitle": "廃止予定設定を確認し、問題を解決",
     "xpack.upgradeAssistant.overview.toggleTitle": "Elasticsearch廃止予定警告をログに出力",
     "xpack.upgradeAssistant.overview.upgradeGuideLink": "アップグレードガイドを表示",
     "xpack.upgradeAssistant.overview.upgradeStepCloudLink": "クラウドでアップグレード",
