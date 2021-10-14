@@ -22,13 +22,19 @@ import {
   ExecutorSubActionGetChoicesParamsSchema,
   ExecutorParamsSchemaITOM,
   ExecutorSubActionAddEventParamsSchema,
+  ExternalIncidentServiceConfigurationBaseSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
 
+export type ServiceNowPublicConfigurationBaseType = TypeOf<
+  typeof ExternalIncidentServiceConfigurationBaseSchema
+>;
+
 export type ServiceNowPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema
 >;
+
 export type ServiceNowSecretConfigurationType = TypeOf<
   typeof ExternalIncidentServiceSecretConfigurationSchema
 >;

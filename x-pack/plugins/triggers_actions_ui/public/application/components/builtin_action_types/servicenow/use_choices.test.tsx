@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionConnector } from '../../../../types';
-import { useGetChoices, UseGetChoices, UseGetChoicesProps } from './use_get_choices';
+import { useChoices, UseChoices, UseChoicesProps } from './use_choices';
 import { getChoices } from './api';
 
 jest.mock('./api');
@@ -17,7 +17,6 @@ jest.mock('../../../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const getChoicesMock = getChoices as jest.Mock;
-const onSuccess = jest.fn();
 
 const actionConnector = {
   secrets: {
@@ -54,7 +53,12 @@ const getChoicesResponse = [
   },
 ];
 
-describe('useGetChoices', () => {
+const useChoicesResponse = {
+  isLoading: false,
+  choices: { category: getChoicesResponse },
+};
+
+describe('UseChoices', () => {
   const { services } = useKibanaMock();
   getChoicesMock.mockResolvedValue({
     data: getChoicesResponse,
@@ -64,16 +68,30 @@ describe('useGetChoices', () => {
     jest.clearAllMocks();
   });
 
-  const fields = ['priority'];
+  const fields = ['category'];
 
   it('init', async () => {
-    const { result, waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
-      useGetChoices({
+    const { result, waitForNextUpdate } = renderHook<UseChoicesProps, UseChoices>(() =>
+      useChoices({
         http: services.http,
         actionConnector,
         toastNotifications: services.notifications.toasts,
         fields,
-        onSuccess,
+      })
+    );
+
+    await waitForNextUpdate();
+
+    expect(result.current).toEqual(useChoicesResponse);
+  });
+
+  it('returns an empty array if the field is not in response', async () => {
+    const { result, waitForNextUpdate } = renderHook<UseChoicesProps, UseChoices>(() =>
+      useChoices({
+        http: services.http,
+        actionConnector,
+        toastNotifications: services.notifications.toasts,
+        fields: ['priority'],
       })
     );
 
@@ -81,41 +99,24 @@ describe('useGetChoices', () => {
 
     expect(result.current).toEqual({
       isLoading: false,
-      choices: getChoicesResponse,
+      choices: { priority: [], category: getChoicesResponse },
     });
   });
 
   it('returns an empty array when connector is not presented', async () => {
-    const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
-      useGetChoices({
+    const { result } = renderHook<UseChoicesProps, UseChoices>(() =>
+      useChoices({
         http: services.http,
         actionConnector: undefined,
         toastNotifications: services.notifications.toasts,
         fields,
-        onSuccess,
       })
     );
 
     expect(result.current).toEqual({
       isLoading: false,
-      choices: [],
+      choices: { category: [] },
     });
-  });
-
-  it('it calls onSuccess', async () => {
-    const { waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
-      useGetChoices({
-        http: services.http,
-        actionConnector,
-        toastNotifications: services.notifications.toasts,
-        fields,
-        onSuccess,
-      })
-    );
-
-    await waitForNextUpdate();
-
-    expect(onSuccess).toHaveBeenCalledWith(getChoicesResponse);
   });
 
   it('it displays an error when service fails', async () => {
@@ -124,13 +125,12 @@ describe('useGetChoices', () => {
       service_message: 'An error occurred',
     });
 
-    const { waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
-      useGetChoices({
+    const { waitForNextUpdate } = renderHook<UseChoicesProps, UseChoices>(() =>
+      useChoices({
         http: services.http,
         actionConnector,
         toastNotifications: services.notifications.toasts,
         fields,
-        onSuccess,
       })
     );
 
@@ -147,41 +147,18 @@ describe('useGetChoices', () => {
       throw new Error('An error occurred');
     });
 
-    renderHook<UseGetChoicesProps, UseGetChoices>(() =>
-      useGetChoices({
+    renderHook<UseChoicesProps, UseChoices>(() =>
+      useChoices({
         http: services.http,
         actionConnector,
         toastNotifications: services.notifications.toasts,
         fields,
-        onSuccess,
       })
     );
 
     expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
       text: 'An error occurred',
       title: 'Unable to get choices',
-    });
-  });
-
-  it('returns an empty array if the response is not an array', async () => {
-    getChoicesMock.mockResolvedValue({
-      status: 'ok',
-      data: {},
-    });
-
-    const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
-      useGetChoices({
-        http: services.http,
-        actionConnector: undefined,
-        toastNotifications: services.notifications.toasts,
-        fields,
-        onSuccess,
-      })
-    );
-
-    expect(result.current).toEqual({
-      isLoading: false,
-      choices: [],
     });
   });
 });

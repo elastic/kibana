@@ -12,7 +12,7 @@ import { ActionConnector } from '../../../../types';
 import { Choice, Fields } from './types';
 import { useGetChoices } from './use_get_choices';
 
-export interface UseGetChoicesProps {
+export interface UseChoicesProps {
   http: HttpSetup;
   toastNotifications: Pick<
     ToastsApi,
@@ -22,7 +22,7 @@ export interface UseGetChoicesProps {
   fields: string[];
 }
 
-export interface UseGetChoices {
+export interface UseChoices {
   choices: Fields;
   isLoading: boolean;
 }
@@ -32,7 +32,7 @@ export const useChoices = ({
   actionConnector,
   toastNotifications,
   fields,
-}: UseGetChoicesProps): UseGetChoices => {
+}: UseChoicesProps): UseChoices => {
   const defaultFields: Record<string, Choice[]> = useMemo(
     () => fields.reduce((acc, field) => ({ ...acc, [field]: [] }), {}),
     [fields]

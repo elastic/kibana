@@ -113,7 +113,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
       </EuiTitle>
       <EuiSpacer size="m" />
       {fields.map((field) => (
-        <>
+        <React.Fragment key={field.fieldKey}>
           <EuiFormRow fullWidth label={field.label}>
             <TextFieldWithMessageVariables
               index={index}
@@ -124,7 +124,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
-        </>
+        </React.Fragment>
       ))}
       <EuiFormRow
         fullWidth
@@ -140,6 +140,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
           options={severityOptions}
           value={severity ?? ''}
           onChange={(e) => editSubActionProperty('severity', e.target.value)}
+          isInvalid={isFieldInvalid(severity, errors.severity)}
         />
       </EuiFormRow>
       <TextAreaWithMessageVariables

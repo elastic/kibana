@@ -11,6 +11,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { validate } from './validators';
 import {
   ExternalIncidentServiceConfiguration,
+  ExternalIncidentServiceConfigurationBase,
   ExternalIncidentServiceSecretConfiguration,
   ExecutorParamsSchemaITSM,
   ExecutorParamsSchemaSIR,
@@ -37,6 +38,7 @@ import {
   ExecutorSubActionAddEventParams,
   ExternalServiceApiITOM,
   ExternalServiceITOM,
+  ServiceNowPublicConfigurationBaseType,
 } from './types';
 import {
   ServiceNowITOMActionTypeId,
@@ -69,25 +71,20 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-export type ServiceNowActionType<T extends Record<string, unknown> = ExecutorParams> = ActionType<
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
-  T,
-  PushToServiceResponse | {}
->;
+export type ServiceNowActionType<
+  C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
+  T extends Record<string, unknown> = ExecutorParams
+> = ActionType<C, ServiceNowSecretConfigurationType, T, PushToServiceResponse | {}>;
 
 export type ServiceNowActionTypeExecutorOptions<
+  C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
   T extends Record<string, unknown> = ExecutorParams
-> = ActionTypeExecutorOptions<
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
-  T
->;
+> = ActionTypeExecutorOptions<C, ServiceNowSecretConfigurationType, T>;
 
 // action type definition
 export function getServiceNowITSMActionType(
   params: GetActionTypeParams
-): ServiceNowActionType<ExecutorParams> {
+): ServiceNowActionType<ServiceNowPublicConfigurationType, ExecutorParams> {
   const { logger, configurationUtilities } = params;
   return {
     id: ServiceNowITSMActionTypeId,
@@ -114,7 +111,7 @@ export function getServiceNowITSMActionType(
 
 export function getServiceNowSIRActionType(
   params: GetActionTypeParams
-): ServiceNowActionType<ExecutorParams> {
+): ServiceNowActionType<ServiceNowPublicConfigurationType, ExecutorParams> {
   const { logger, configurationUtilities } = params;
   return {
     id: ServiceNowSIRActionTypeId,
@@ -141,14 +138,14 @@ export function getServiceNowSIRActionType(
 
 export function getServiceNowITOMActionType(
   params: GetActionTypeParams
-): ServiceNowActionType<ExecutorParamsITOM> {
+): ServiceNowActionType<ServiceNowPublicConfigurationBaseType, ExecutorParamsITOM> {
   const { logger, configurationUtilities } = params;
   return {
     id: ServiceNowITOMActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_ITOM,
     validate: {
-      config: schema.object(ExternalIncidentServiceConfiguration, {
+      config: schema.object(ExternalIncidentServiceConfigurationBase, {
         validate: curry(validate.config)(configurationUtilities),
       }),
       secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
@@ -182,7 +179,10 @@ async function executor(
     createService: ServiceFactory;
     api: ExternalServiceAPI;
   },
-  execOptions: ServiceNowActionTypeExecutorOptions<ExecutorParams>
+  execOptions: ServiceNowActionTypeExecutorOptions<
+    ServiceNowPublicConfigurationType,
+    ExecutorParams
+  >
 ): Promise<ActionTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;
@@ -253,7 +253,10 @@ async function executorITOM(
     createService: ServiceFactory<ExternalServiceITOM>;
     api: ExternalServiceApiITOM;
   },
-  execOptions: ServiceNowActionTypeExecutorOptions<ExecutorParamsITOM>
+  execOptions: ServiceNowActionTypeExecutorOptions<
+    ServiceNowPublicConfigurationBaseType,
+    ExecutorParamsITOM
+  >
 ): Promise<ActionTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;

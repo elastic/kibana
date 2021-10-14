@@ -35,6 +35,7 @@ const enabledActionTypes = [
   '.server-log',
   '.servicenow',
   '.servicenow-sir',
+  '.servicenow-itom',
   '.jira',
   '.resilient',
   '.slack',
