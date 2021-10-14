@@ -316,8 +316,8 @@ export class DynamicStyleProperty<T>
     }
 
     const mbFieldName = this.getMbFieldName();
-    let min = this._field?.isCountable() ? 0 : Infinity;
-    let max = this._field?.isCountable() ? 0 : -Infinity;
+    let min = Infinity;
+    let max = -Infinity;
     for (let i = 0; i < metaFeatures.length; i++) {
       const fieldMeta = metaFeatures[i].properties;
       const minField = `aggregations.${mbFieldName}.min`;
@@ -331,11 +331,14 @@ export class DynamicStyleProperty<T>
         max = Math.max(fieldMeta[maxField] as number, max);
       }
     }
-    return {
-      min,
-      max,
-      delta: max - min,
-    };
+
+    return min === Infinity || max === -Infinity
+      ? null
+      : {
+          min,
+          max,
+          delta: max - min,
+        };
   }
 
   pluckCategoricalStyleMetaFromTileMetaFeatures(

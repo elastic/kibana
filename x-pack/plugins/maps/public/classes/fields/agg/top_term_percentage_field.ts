@@ -27,10 +27,6 @@ export class TopTermPercentageField implements IESAggField {
     return this.getName();
   }
 
-  isCountable(): boolean {
-    return false;
-  }
-
   getOrigin(): FIELD_ORIGIN {
     return this._topTermAggField.getOrigin();
   }

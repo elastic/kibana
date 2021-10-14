@@ -47,10 +47,6 @@ export class AggField extends CountAggField {
     return !isMetricCountable(this._getAggType());
   }
 
-  isCountable(): boolean {
-    return isMetricCountable(this._getAggType());
-  }
-
   canValueBeFormatted(): boolean {
     return this._getAggType() !== AGG_TYPE.UNIQUE_COUNT;
   }

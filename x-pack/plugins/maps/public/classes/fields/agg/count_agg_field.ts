@@ -39,10 +39,6 @@ export class CountAggField implements IESAggField {
     return this._origin;
   }
 
-  isCountable(): boolean {
-    return true;
-  }
-
   getName(): string {
     return this._source.getAggKey(this._getAggType(), this.getRootName());
   }
