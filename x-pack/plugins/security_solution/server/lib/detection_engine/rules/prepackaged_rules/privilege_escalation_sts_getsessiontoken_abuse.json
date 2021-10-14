@@ -1,0 +1,74 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies the suspicious use of GetSessionToken. Tokens could be created and used by attackers to move laterally and escalate privileges.",
+  "false_positives": [
+    "GetSessionToken may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. GetSessionToken from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS STS GetSessionToken Abuse",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:sts.amazonaws.com and event.action:GetSessionToken and \naws.cloudtrail.user_identity.type:IAMUser and event.outcome:success\n",
+  "references": [
+    "https://docs.aws.amazon.com/STS/latest/APIReference/API_GetSessionToken.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "b45ab1d2-712f-4f01-a751-df3826969807",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1550",
+          "name": "Use Alternate Authentication Material",
+          "reference": "https://attack.mitre.org/techniques/T1550/",
+          "subtechnique": [
+            {
+              "id": "T1550.001",
+              "name": "Application Access Token",
+              "reference": "https://attack.mitre.org/techniques/T1550/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}
