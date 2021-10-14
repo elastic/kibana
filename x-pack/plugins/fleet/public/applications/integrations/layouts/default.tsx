@@ -5,15 +5,11 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { i18n } from '@kbn/i18n';
 
 import { useLink } from '../../../hooks';
 import type { Section } from '../sections';
-
-import { useStartServices } from '../hooks';
 
 import { WithHeaderLayout } from './';
 
@@ -24,7 +20,6 @@ interface Props {
 
 export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, children }) => {
   const { getHref } = useLink();
-  const { docLinks } = useStartServices();
 
   return (
     <WithHeaderLayout
