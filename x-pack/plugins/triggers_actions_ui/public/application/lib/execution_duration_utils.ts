@@ -29,7 +29,10 @@ export function shouldShowDurationWarning(
   ruleType: RuleType | undefined,
   avgDurationMillis: number
 ) {
-  const ruleTypeTimeout: string | undefined = ruleType?.ruleTaskTimeout;
+  if (!ruleType || !ruleType.ruleTaskTimeout) {
+    return false;
+  }
+  const ruleTypeTimeout: string = ruleType.ruleTaskTimeout;
   const ruleTypeTimeoutMillis: number | undefined = ruleTypeTimeout
     ? parseDuration(ruleTypeTimeout)
     : undefined;
