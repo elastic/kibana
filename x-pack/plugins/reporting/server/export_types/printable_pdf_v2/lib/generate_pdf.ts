@@ -120,6 +120,9 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
             if (current.error) {
               found.push(current.error.message);
             }
+            if (current.renderErrors) {
+              found.push(...current.renderErrors);
+            }
             return found;
           }, [] as string[]),
         };

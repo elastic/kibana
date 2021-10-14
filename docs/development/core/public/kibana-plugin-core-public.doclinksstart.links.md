@@ -9,6 +9,7 @@
 ```typescript
 readonly links: {
         readonly settings: string;
+        readonly elasticStackGetStarted: string;
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
@@ -145,6 +146,9 @@ readonly links: {
             readonly networkMap: string;
             readonly troubleshootGaps: string;
         };
+        readonly securitySolution: {
+            readonly trustedApps: string;
+        };
         readonly query: {
             readonly eql: string;
             readonly kueryQuerySyntax: string;
@@ -236,6 +240,7 @@ readonly links: {
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
+            apiKeysLearnMore: string;
         }>;
         readonly ecs: {
             readonly guide: string;
