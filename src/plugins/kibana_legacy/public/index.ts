@@ -15,6 +15,5 @@ export const plugin = () => new KibanaLegacyPlugin();
 
 export * from './plugin';
 
-export * from './angular';
 export * from './notify';
 export * from './utils';
