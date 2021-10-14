@@ -37,6 +37,7 @@ const formatOptions = (
 
   return urlItems.map((item) => ({
     label: item.url,
+    title: item.url,
     key: item.url,
     meta: [
       I18LABELS.pageViews + ': ' + item.count,
@@ -193,7 +194,7 @@ export function URLSearch({
       onSelectionApply={onApply}
       renderOption={selectableRenderOptions}
       rowHeight={64}
-      hasChanged={hasChanged}
+      hasChanged={() => Boolean(hasChanged())}
     />
   );
 }

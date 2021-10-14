@@ -26,6 +26,7 @@ const StyledListSpan = styled.span`
 `;
 export type UrlOption<T = { [key: string]: any }> = {
   meta?: string[];
+  title: string;
 } & EuiSelectableOption<T>;
 
 export function selectableRenderOptions(
