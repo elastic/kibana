@@ -95,7 +95,7 @@ async function getUsersDeprecations(
       title: getDeprecationTitle(),
       message: i18n.translate('xpack.security.deprecations.kibanaUser.usersDeprecationMessage', {
         defaultMessage:
-          'Use the "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in 8.0.',
+          'Use the "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in a future release.',
         values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
       }),
       level: 'warning',
@@ -162,7 +162,7 @@ async function getRoleMappingsDeprecations(
         'xpack.security.deprecations.kibanaUser.roleMappingsDeprecationMessage',
         {
           defaultMessage:
-            'Use the "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in 8.0.',
+            'Use the "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in a future release.',
           values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
         }
       ),
