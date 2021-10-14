@@ -64,7 +64,6 @@ export const usePrimaryNavigationItems = ({
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
-  // console.log('can see?', canSeeHostIsolationExceptions);
   return useMemo(() => {
     return [
       {
