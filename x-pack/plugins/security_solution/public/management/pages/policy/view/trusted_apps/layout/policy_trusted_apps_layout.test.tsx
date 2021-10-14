@@ -104,6 +104,6 @@ describe('Policy trusted apps layout', () => {
 
     await waitForAction('assignedTrustedAppsListStateChanged');
 
-    expect(component.getByTestId('policyDetailsTrustedAppsCount')).not.toBeNull();
+    expect(component.getAllByTestId('policyTrustedAppsGrid-card')).toHaveLength(10);
   });
 });
