@@ -101,7 +101,7 @@ pageLoadAssetSize:
   bfetch: 22837
   kibanaUtils: 102808
   data: 491273
-  dataViews: 54532
+  dataViews: 41532
   expressions: 140958
   fieldFormats: 65209
   kibanaReact: 111422
@@ -112,7 +112,7 @@ pageLoadAssetSize:
   embeddableEnhanced: 22107
   uiActionsEnhanced: 38494
   urlDrilldown: 30063
-  indexPatternEditor: 27123
+  indexPatternEditor: 19123
   indexPatternFieldEditor: 34448
   indexPatternManagement: 19165
   reporting: 57003
