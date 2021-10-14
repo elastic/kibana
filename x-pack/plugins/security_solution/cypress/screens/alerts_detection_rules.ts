@@ -21,13 +21,9 @@ export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]
 
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
 
-export const REFRESH_BTN = '[data-test-subj="refreshRulesAction"] button';
-
 export const ACTIVATE_RULE_BULK_BTN = '[data-test-subj="activateRuleBulk"]';
 
 export const DEACTIVATE_RULE_BULK_BTN = '[data-test-subj="deactivateRuleBulk"]';
-
-export const EXPORT_RULE_BULK_BTN = '[data-test-subj="exportRuleBulk"]';
 
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
@@ -36,8 +32,6 @@ export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
 export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
-
-export const FIFTH_RULE = 4;
 
 export const FIRST_RULE = 0;
 
@@ -72,8 +66,6 @@ export const RULES_ROW = '.euiTableRow';
 
 export const RULES_MONIROTING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
 
-export const SEVENTH_RULE = 6;
-
 export const SEVERITY = '[data-test-subj="severity"]';
 
 export const SHOWING_RULES_TEXT = '[data-test-subj="showingRules"]';
@@ -91,8 +83,6 @@ export const rowsPerPageSelector = (count: number) =>
 
 export const pageSelector = (pageNumber: number) =>
   `[data-test-subj="pagination-button-${pageNumber - 1}"]`;
-
-export const NEXT_BTN = '[data-test-subj="pagination-button-next"]';
 
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 
