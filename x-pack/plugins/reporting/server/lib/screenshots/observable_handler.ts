@@ -14,7 +14,6 @@ import { HeadlessChromiumDriver } from '../../browsers';
 import { getChromiumDisconnectedError } from '../../browsers/chromium';
 import { CaptureConfig } from '../../types';
 import { PageSetupResults, ScreenshotObservableOpts, ScreenshotResults } from './';
-import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getRenderErrors } from './get_render_errors';
@@ -100,22 +99,16 @@ export class ScreenshotObservableHandler {
   public openUrl(index: number, urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple) {
     return (initial: Rx.Observable<unknown>) => {
       return initial.pipe(
-        mergeMap(() => {
-          // If we're moving to another page in the app, we'll want to wait for the app to tell us
-          // it's loaded the next page.
-          const page = index + 1;
-          const pageLoadSelector =
-            page > 1 ? `[data-shared-page="${page}"]` : DEFAULT_PAGELOAD_SELECTOR;
-
-          return openUrl(
+        mergeMap(() =>
+          openUrl(
             this.captureConfig,
             this.driver,
+            index,
             urlOrUrlLocatorTuple,
-            pageLoadSelector,
             this.conditionalHeaders,
             this.logger
-          );
-        })
+          )
+        )
       );
     };
   }
