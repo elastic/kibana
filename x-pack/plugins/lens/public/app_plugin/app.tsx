@@ -66,7 +66,7 @@ export function App({
     data,
     chrome,
     uiSettings,
-    inspector,
+    inspector: lensInspector,
     application,
     notifications,
     savedObjectsTagging,
@@ -100,8 +100,6 @@ export function App({
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
-
-  const lensInspector = inspector;
 
   useEffect(() => {
     if (currentDoc) {
