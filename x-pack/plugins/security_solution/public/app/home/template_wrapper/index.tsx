@@ -24,9 +24,9 @@ import {
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { gutterTimeline } from '../../../common/lib/helpers';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
-import { OverviewEmpty } from '../../../overview/components/overview_empty';
-import { ENDPOINT_METADATA_INDEX } from '../../../../common/constants';
-import { useFetchIndex } from '../../../common/containers/source';
+import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
+import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
+import { SecurityPageName } from '../../../app/types';
 
 /* eslint-disable react/display-name */
 
@@ -77,16 +77,24 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
-    const endpointMetadataIndex = useMemo<string[]>(() => {
-      return [ENDPOINT_METADATA_INDEX];
-    }, []);
-    const [, { indexExists: metadataIndexExists }] = useFetchIndex(endpointMetadataIndex, true);
     const { indicesExist } = useSourcererScope();
-    const securityIndicesExist = indicesExist || metadataIndexExists;
+    const [{ pageName }] = useRouteSpy();
+    const [showEmptyState] = useShowPagesWithEmptyView();
+
+    // Used to detect if we're on a top level page that is empty and set page background color to match the subdued Empty State
+    const isPageNameWithEmptyView = (currentName: string) => {
+      const pageNamesWithEmptyView: string[] = [
+        SecurityPageName.hosts,
+        SecurityPageName.network,
+        SecurityPageName.timelines,
+        SecurityPageName.overview,
+      ];
+      return pageNamesWithEmptyView.includes(currentName);
+    };
 
     // StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop, which may account for any style discrepancies, such as the bottom border not extending the full width of the page, between EuiPageTemplate and the security solution pages.
 
-    return securityIndicesExist ? (
+    return (
       <StyledKibanaPageTemplate
         $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
@@ -103,11 +111,10 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
           data-test-subj="pageContainer"
           hasShadow={false}
           paddingSize="l"
+          color={showEmptyState ? 'subdued' : 'plain'}
         >
           {children}
         </EuiPanel>
       </StyledKibanaPageTemplate>
-    ) : (
-      <OverviewEmpty />
     );
   });

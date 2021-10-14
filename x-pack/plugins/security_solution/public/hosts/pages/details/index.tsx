@@ -219,8 +219,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         </>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage border title={detailName} />
-
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}
