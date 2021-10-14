@@ -171,19 +171,17 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       addDeprecation({
         level: 'warning',
         title: i18n.translate('xpack.security.deprecations.idleTimeoutTitle', {
-          defaultMessage: 'The "xpack.security.session.idleTimeout" default is changing',
+          defaultMessage: '"xpack.security.session.idleTimeout" is now 1 hour',
         }),
         message: i18n.translate('xpack.security.deprecations.idleTimeoutMessage', {
-          defaultMessage: 'The session idle timeout will default to 1 hour in 8.0.',
+          defaultMessage:
+            'User sessions will automatically time out after 1 hour of inactivity starting in 8.0. Override this value to change the timeout.',
         }),
         documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/xpack-security-session-management.html#session-idle-timeout`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.idleTimeout.manualStepOneMessage', {
-              defaultMessage: `Set "xpack.security.session.idleTimeout" in your Kibana configuration to override the default session idle timeout.`,
-            }),
-            i18n.translate('xpack.security.deprecations.idleTimeout.manualStepTwoMessage', {
-              defaultMessage: `To disable the session idle timeout, set "xpack.security.session.idleTimeout" to 0.`,
+              defaultMessage: `To configure a custom timeout, set "xpack.security.session.idleTimeout". A value of 0 disables the timeout.`,
             }),
           ],
         },
@@ -194,19 +192,17 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       addDeprecation({
         level: 'warning',
         title: i18n.translate('xpack.security.deprecations.lifespanTitle', {
-          defaultMessage: 'The "xpack.security.session.lifespan" default is changing',
+          defaultMessage: '"xpack.security.session.lifespan" is now 30 days',
         }),
         message: i18n.translate('xpack.security.deprecations.lifespanMessage', {
-          defaultMessage: 'The session lifespan will default to 30 days in 8.0.',
+          defaultMessage:
+            'Users are automatically required to log in again after 30 days starting in 8.0. Override this value to change the timeout.',
         }),
         documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/xpack-security-session-management.html#session-lifespan`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.lifespan.manualStepOneMessage', {
-              defaultMessage: `Set "xpack.security.session.lifespan" in your Kibana configuration to override the default session lifespan.`,
-            }),
-            i18n.translate('xpack.security.deprecations.lifespan.manualStepTwoMessage', {
-              defaultMessage: `To disable the session lifespan, set "xpack.security.session.lifespan" to 0.`,
+              defaultMessage: `To configure a custom timeout, set "xpack.security.session.lifespan". A value of 0 disables the timeout.`,
             }),
           ],
         },

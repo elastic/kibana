@@ -48,8 +48,8 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(defaultConfig);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "The session idle timeout will default to 1 hour in 8.0.",
-        "The session lifespan will default to 30 days in 8.0.",
+        "User sessions will automatically time out after 1 hour of inactivity starting in 8.0. Override this value to change the timeout.",
+        "Users are automatically required to log in again after 30 days starting in 8.0. Override this value to change the timeout.",
       ]
     `);
   });
@@ -60,7 +60,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(defaultConfig);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "The session idle timeout will default to 1 hour in 8.0.",
+        "User sessions will automatically time out after 1 hour of inactivity starting in 8.0. Override this value to change the timeout.",
       ]
     `);
   });
@@ -71,7 +71,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(defaultConfig);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "The session lifespan will default to 30 days in 8.0.",
+        "Users are automatically required to log in again after 30 days starting in 8.0. Override this value to change the timeout.",
       ]
     `);
   });
@@ -90,7 +90,7 @@ describe('Config Deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting \\"xpack.security.sessionTimeout\\" has been replaced by \\"xpack.security.session.idleTimeout\\"",
-        "The session lifespan will default to 30 days in 8.0.",
+        "Users are automatically required to log in again after 30 days starting in 8.0. Override this value to change the timeout.",
       ]
     `);
   });
