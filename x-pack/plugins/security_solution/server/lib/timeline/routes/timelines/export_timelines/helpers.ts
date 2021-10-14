@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash/fp';
+import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
 import {
   ExportedTimelines,
@@ -14,8 +15,6 @@ import {
 } from '../../../../../../common/types/timeline';
 import { NoteSavedObject } from '../../../../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../../../../common/types/timeline/pinned_event';
-
-import { transformDataToNdjson } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 
 import { FrameworkRequest } from '../../../../framework';
 import * as noteLib from '../../../saved_object/notes';

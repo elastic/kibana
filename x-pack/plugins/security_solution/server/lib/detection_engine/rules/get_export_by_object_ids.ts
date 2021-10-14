@@ -6,13 +6,13 @@
  */
 
 import { chunk } from 'lodash';
+import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { RulesClient } from '../../../../../alerting/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { isAlertType } from '../rules/types';
 import { transformAlertToRule } from '../routes/rules/utils';
-import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
 
