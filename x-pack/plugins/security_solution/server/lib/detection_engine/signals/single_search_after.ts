@@ -76,6 +76,7 @@ export const singleSearchAfter = async ({
     const end = performance.now();
 
     const searchErrors = createErrorsFromShard({
+      // @ts-expect-error is not compatile with ErrorCause | string;
       errors: nextSearchAfterResult._shards.failures ?? [],
     });
 

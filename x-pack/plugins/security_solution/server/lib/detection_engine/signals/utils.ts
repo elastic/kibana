@@ -505,13 +505,17 @@ export const errorAggregator = (
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
     if (item.create?.error != null && !ignoreStatusCodes.includes(item.create.status)) {
+      // @ts-expect-error error is not comptible with error: ErrorCause | string
       if (accum[item.create.error.reason] == null) {
+        // @ts-expect-error error is not comptible with error: ErrorCause | string
         accum[item.create.error.reason] = {
           count: 1,
           statusCode: item.create.status,
         };
       } else {
+        // @ts-expect-error error is not comptible with error: ErrorCause | string
         accum[item.create.error.reason] = {
+          // @ts-expect-error error is not comptible with error: ErrorCause | string
           count: accum[item.create.error.reason].count + 1,
           statusCode: item.create.status,
         };
@@ -728,9 +732,11 @@ export const createSearchAfterReturnTypeFromResponse = ({
       searchResult._shards.failed === 0 ||
       searchResult._shards.failures?.every((failure) => {
         return (
+          // @ts-expect-error reason is not comptible with error: ErrorCause | string
           failure.reason?.reason?.includes(
             'No mapping found for [@timestamp] in order to sort on'
           ) ||
+          // @ts-expect-error reason is not comptible with error: ErrorCause | string
           failure.reason?.reason?.includes(
             `No mapping found for [${timestampOverride}] in order to sort on`
           )

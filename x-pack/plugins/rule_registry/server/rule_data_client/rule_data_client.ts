@@ -129,9 +129,11 @@ export class RuleDataClient implements IRuleDataClient {
             if (
               response.body.items.length > 0 &&
               (response.body.items.every(
+                // @ts-expect-error error_details is not comptible with error: ErrorCause | string
                 (item) => item.index?.error?.type === 'index_not_found_exception'
               ) ||
                 response.body.items.every(
+                  // @ts-expect-error error_details is not comptible with error: ErrorCause | string
                   (item) => item.index?.error?.type === 'illegal_argument_exception'
                 ))
             ) {

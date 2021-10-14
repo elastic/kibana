@@ -97,7 +97,6 @@ export async function fetchAndTransformGcMetrics({
                 // get the derivative, which is the delta y
                 derivative: {
                   derivative: {
-                    // @ts-expect-error AggregationsBucketsPath is not valid
                     buckets_path: 'max',
                   },
                 },
@@ -105,7 +104,6 @@ export async function fetchAndTransformGcMetrics({
                 // needs to be excluded
                 value: {
                   bucket_script: {
-                    // @ts-expect-error AggregationsBucketsPath is not valid
                     buckets_path: { value: 'derivative' },
                     script: 'params.value > 0.0 ? params.value : 0.0',
                   },
@@ -117,7 +115,7 @@ export async function fetchAndTransformGcMetrics({
       },
     },
   });
-  // @ts-expect-error AggregationsBucketsPath is not valid
+
   const response = await apmEventClient.search(operationName, params);
 
   const { aggregations } = response;
@@ -129,11 +127,11 @@ export async function fetchAndTransformGcMetrics({
       series: [],
     };
   }
-  // @ts-expect-error aggregations is unknown
+
   const series = aggregations.per_pool.buckets.map((poolBucket, i) => {
     const label = poolBucket.key as string;
     const timeseriesData = poolBucket.timeseries;
-    // @ts-expect-error bucket has any type
+
     const data = timeseriesData.buckets.map((bucket) => {
       // derivative/value will be undefined for the first hit and if the `max` value is null
       const bucketValue = bucket.value?.value;
@@ -155,9 +153,7 @@ export async function fetchAndTransformGcMetrics({
     });
 
     const values = data
-      // @ts-expect-error coordinate has any type
       .map((coordinate) => coordinate.y)
-      // @ts-expect-error y has any type
       .filter((y) => y !== null);
 
     const overallValue = sum(values) / values.length;
