@@ -26,7 +26,6 @@ kibana_vars=(
     console.enabled
     console.proxyConfig
     console.proxyFilter
-    csp.rules
     csp.strict
     csp.warnLegacyBrowsers
     csp.script_src
@@ -212,6 +211,12 @@ kibana_vars=(
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
     xpack.apm.enabled
+    xpack.apm.indices.error
+    xpack.apm.indices.metric
+    xpack.apm.indices.onboarding
+    xpack.apm.indices.sourcemap
+    xpack.apm.indices.span
+    xpack.apm.indices.transaction
     xpack.apm.maxServiceEnvironments
     xpack.apm.searchAggregatedTransactions
     xpack.apm.serviceMapEnabled
