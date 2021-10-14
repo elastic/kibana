@@ -918,6 +918,25 @@ export const createRule = async (
 
 /**
  * Helper to cut down on the noise in some of the tests. This checks for
+ * an expected 200 still and does not try to any retries.
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const createRuleWithAuth = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  rule: CreateRulesSchema,
+  auth: { user: string; pass: string }
+): Promise<FullResponseSchema> => {
+  const { body } = await supertest
+    .post(DETECTION_ENGINE_RULES_URL)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user, auth.pass)
+    .send(rule);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This checks for
  * an expected 200 still and does not do any retries.
  * @param supertest The supertest deps
  * @param rule The rule to create
