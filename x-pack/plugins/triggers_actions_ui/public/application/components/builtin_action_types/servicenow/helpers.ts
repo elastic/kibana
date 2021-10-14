@@ -23,7 +23,7 @@ export const isRESTApiError = (res: AppInfo | RESTApiError): res is RESTApiError
 export const isFieldInvalid = (
   field: string | undefined | null,
   error: string | IErrorObject | string[]
-): boolean => error !== undefined && error.length > 0 && field !== undefined;
+): boolean => error !== undefined && error.length > 0 && field != null;
 
 // TODO: Remove when the applications are certified
 export const isLegacyConnector = (connector: ServiceNowActionConnector) => {

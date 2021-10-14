@@ -22,6 +22,7 @@ import {
 import { getJiraActionType } from './jira';
 import { getResilientActionType } from './resilient';
 import { getTeamsActionType } from './teams';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ENABLE_ITOM } from '../../../../../actions/server/constants/connectors';
 
 export function registerBuiltInActionTypes({
@@ -42,6 +43,7 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getResilientActionType());
   actionTypeRegistry.register(getTeamsActionType());
 
+  // TODO: Remove when ITOM is ready
   if (ENABLE_ITOM) {
     actionTypeRegistry.register(getServiceNowITOMActionType());
   }

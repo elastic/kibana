@@ -41,8 +41,8 @@ describe('config', () => {
   test('ITOM: the config are correct', async () => {
     const snConfig = snExternalServiceConfig['.servicenow-itom'];
     expect(snConfig).toEqual({
-      importSetTable: 'x_elas2_sir_int_elastic_si_incident',
-      appScope: 'x_elas2_sir_int',
+      importSetTable: 'x_elas2_inc_int_elastic_incident',
+      appScope: 'x_elas2_inc_int',
       table: 'em_event',
       useImportAPI: true,
       commentFieldKey: 'work_notes',
