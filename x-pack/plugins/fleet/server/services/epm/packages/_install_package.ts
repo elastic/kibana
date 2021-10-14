@@ -168,7 +168,9 @@ export async function _installPackage({
       savedObjectsClient
     );
 
-    // if this is an update or retrying an update, delete the previous version's pipelines
+    // If this is an update or retrying an update, delete the previous version's pipelines
+    // Top-level pipeline assets will not be removed on upgrade as of ml model package addition which requires previous
+    // assets to remain installed. This is a temporary solution - more robust solution tracked here https://github.com/elastic/kibana/issues/115035
     if (
       paths.filter((path) => isTopLevelPipeline(path)).length === 0 &&
       (installType === 'update' || installType === 'reupdate') &&
