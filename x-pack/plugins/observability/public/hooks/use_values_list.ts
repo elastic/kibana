@@ -32,20 +32,22 @@ const uniqueValues = (values: ListItem[], prevValues: ListItem[]) => {
 };
 
 const getIncludeClause = (sourceField: string, query?: string) => {
+  if (!query) {
+    return '';
+  }
+
   let includeClause = '';
 
-  if (query) {
-    if (sourceField === TRANSACTION_URL) {
-      // for the url we also match leading text
-      includeClause = `*.${query.toLowerCase()}.*`;
+  if (sourceField === TRANSACTION_URL) {
+    // for the url we also match leading text
+    includeClause = `*.${query.toLowerCase()}.*`;
+  } else {
+    if (query[0].toLowerCase() === query[0]) {
+      // if first letter is lowercase we also add the capitalize option
+      includeClause = `(${query}|${capitalize(query)}).*`;
     } else {
-      if (query[0].toLowerCase() === query[0]) {
-        // if first letter is lowercase we also add the capitalize option
-        includeClause = `(${query}|${capitalize(query)}).*`;
-      } else {
-        // otherwise we add lowercase option prefix
-        includeClause = `(${query}|${query.toLowerCase()}).*`;
-      }
+      // otherwise we add lowercase option prefix
+      includeClause = `(${query}|${query.toLowerCase()}).*`;
     }
   }
 
