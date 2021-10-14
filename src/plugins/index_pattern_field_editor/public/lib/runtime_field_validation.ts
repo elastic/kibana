@@ -68,7 +68,7 @@ export const parseEsError = (
     return null;
   }
 
-  const scriptError = isScriptError ? error : getScriptExceptionError(error.caused_by);
+  const scriptError = isScriptError ? error : getScriptExceptionError(error.caused_by ?? error);
 
   if (scriptError === null) {
     return null;

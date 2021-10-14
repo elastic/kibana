@@ -335,6 +335,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       document: params.document!,
       context: `${params.type!}_field` as FieldPreviewContext,
       script: params.script!,
+      documentId: currentDocId,
     });
 
     if (currentApiCall !== previewCount.current) {
@@ -368,7 +369,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
       setPreviewResponse({
         fields: [],
-        error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error, true) ?? fallBackError },
+        error: {
+          code: 'PAINLESS_SCRIPT_ERROR',
+          error: parseEsError(error, false) ?? fallBackError,
+        },
       });
     } else {
       const [value] = values;
