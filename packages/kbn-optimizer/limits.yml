@@ -106,7 +106,7 @@ pageLoadAssetSize:
   bfetch: 22837
   kibanaUtils: 97808
   data: 491273
-  dataViews: 41532
+  dataViews: 42532
   fieldFormats: 65209
   kibanaReact: 99422
   uiActions: 35121
