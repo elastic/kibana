@@ -17,7 +17,11 @@ import {
 import { loginAndWaitForPage } from '../../tasks/login';
 import { OVERVIEW_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
+import { changeSpace } from '../../tasks/kibana_navigation';
+import { createSpace, removeSpace } from '../../tasks/api_calls/spaces';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+
+const testSpaceName = 'test';
 
 describe('Risky Hosts Link Panel', () => {
   before(() => {
@@ -40,10 +44,12 @@ describe('Risky Hosts Link Panel', () => {
   describe('enabled module', () => {
     before(() => {
       esArchiverLoad('risky_hosts');
+      createSpace(testSpaceName);
     });
 
     after(() => {
       esArchiverUnload('risky_hosts');
+      removeSpace(testSpaceName);
     });
 
     it('renders disabled dashboard module as expected when there are no hosts in the selected time period', () => {
@@ -57,13 +63,19 @@ describe('Risky Hosts Link Panel', () => {
       cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
     });
 
-    it('renders dashboard module as expected when there are hosts in the selected time period', () => {
+    it('renders space aware dashboard module as expected when there are hosts in the selected time period', () => {
       loginAndWaitForPage(OVERVIEW_URL);
       cy.get(
         `${OVERVIEW_RISKY_HOSTS_LINKS} ${OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL}`
       ).should('not.exist');
       cy.get(`${OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
       cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 host');
+
+      changeSpace(testSpaceName);
+      cy.visit(`/s/${testSpaceName}${OVERVIEW_URL}`);
+      cy.get(`${OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
+      cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
+      cy.get(`${OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON}`).should('exist');
     });
   });
 });

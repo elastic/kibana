@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Write Bazel cache for Linux
-.buildkite/scripts/common/setup_bazel.sh
+.buildkite/scripts/common/persist_bazel_cache.sh
 
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/build_kibana.sh
