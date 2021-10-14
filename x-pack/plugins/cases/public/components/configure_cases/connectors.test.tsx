@@ -123,11 +123,11 @@ describe('Connectors', () => {
     ).toBe('Update My Connector');
   });
 
-  test('it shows the deprecated callout when the connector is legacy', async () => {
+  test('it shows the deprecated callout when the connector is uses the old API', async () => {
     render(
       <Connectors
         {...props}
-        selectedConnector={{ id: 'servicenow-legacy', type: ConnectorTypes.serviceNowITSM }}
+        selectedConnector={{ id: 'servicenow-uses-old-api', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
         // wrapper: TestProviders produces a TS error

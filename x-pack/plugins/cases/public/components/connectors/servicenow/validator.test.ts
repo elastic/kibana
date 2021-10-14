@@ -10,7 +10,7 @@ import { connectorValidator } from './validator';
 
 describe('ServiceNow validator', () => {
   describe('connectorValidator', () => {
-    test('it returns an error message if the connector is legacy', () => {
+    test('it returns an error message if the connector uses the old API', () => {
       const invalidConnector = {
         ...connector,
         config: {
@@ -22,7 +22,7 @@ describe('ServiceNow validator', () => {
       expect(connectorValidator(invalidConnector)).toEqual({ message: 'Deprecated connector' });
     });
 
-    test('it does not returns an error message if the connector is not legacy', () => {
+    test('it does not returns an error message if the connector does not uses the old API', () => {
       const invalidConnector = {
         ...connector,
         config: {

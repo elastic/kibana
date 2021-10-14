@@ -18,14 +18,14 @@ describe('DeprecatedCallout', () => {
         'This connector type is deprecated. Create a new connector or update this connector'
       )
     ).toBeInTheDocument();
-    expect(screen.getByTestId('legacy-connector-warning-callout')).toHaveClass(
+    expect(screen.getByTestId('deprecated-connector-warning-callout')).toHaveClass(
       'euiCallOut euiCallOut--warning'
     );
   });
 
   test('it renders a danger flyout correctly', () => {
     render(<DeprecatedCallout type="danger" />);
-    expect(screen.getByTestId('legacy-connector-warning-callout')).toHaveClass(
+    expect(screen.getByTestId('deprecated-connector-warning-callout')).toHaveClass(
       'euiCallOut euiCallOut--danger'
     );
   });

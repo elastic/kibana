@@ -409,7 +409,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
       });
 
       describe('Execution', () => {
-        // New connectors
+        // Connectors that use the Import set API
         describe('Import set API', () => {
           it('should handle creating an incident without comments', async () => {
             const { body: result } = await supertest
@@ -440,7 +440,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
           });
         });
 
-        // Legacy connectors
+        // Connectors that use the Table API
         describe('Table API', () => {
           before(async () => {
             const { body } = await supertest

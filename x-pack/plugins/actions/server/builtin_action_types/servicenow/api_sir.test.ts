@@ -132,7 +132,7 @@ describe('api_sir', () => {
   });
 
   describe('prepareParams', () => {
-    test('it prepares the params correctly when the connector is legacy', async () => {
+    test('it prepares the params correctly when the connector uses the old API', async () => {
       expect(prepareParams(true, sirParams)).toEqual({
         ...sirParams,
         incident: {
@@ -145,7 +145,7 @@ describe('api_sir', () => {
       });
     });
 
-    test('it prepares the params correctly when the connector is not legacy', async () => {
+    test('it prepares the params correctly when the connector does not uses the old API', async () => {
       expect(prepareParams(false, sirParams)).toEqual({
         ...sirParams,
         incident: {
@@ -158,7 +158,7 @@ describe('api_sir', () => {
       });
     });
 
-    test('it prepares the params correctly when the connector is legacy and the observables are undefined', async () => {
+    test('it prepares the params correctly when the connector uses the old API and the observables are undefined', async () => {
       const {
         dest_ip: destIp,
         source_ip: sourceIp,
@@ -244,7 +244,7 @@ describe('api_sir', () => {
       );
     });
 
-    test('it does not call bulkAddObservableToIncident if it a legacy connector', async () => {
+    test('it does not call bulkAddObservableToIncident if the connector uses the old API', async () => {
       const params = { ...sirParams, incident: { ...sirParams.incident, externalId: null } };
       await apiSIR.pushToService({
         externalService,

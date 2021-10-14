@@ -9,7 +9,7 @@ import { ValidationConfig } from '../../../common/shared_imports';
 import { CaseActionConnector } from '../../types';
 
 /**
- * The user can not use a legacy connector
+ * The user can not use a connector that uses the old API
  */
 
 export const connectorValidator = (

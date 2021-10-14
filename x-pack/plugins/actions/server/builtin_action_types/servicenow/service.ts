@@ -106,7 +106,7 @@ export const createExternalService: ServiceFactory = (
 
   /**
    * Gets the Elastic SN Application information including the current version.
-   * It should not be used on legacy connectors.
+   * It should not be used on connectors that use the old API.
    */
   const getApplicationInformation = async (): Promise<GetApplicationInfoResponse> => {
     try {

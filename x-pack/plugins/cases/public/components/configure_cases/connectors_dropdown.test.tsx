@@ -171,7 +171,7 @@ describe('ConnectorsDropdown', () => {
           "value": "servicenow-sir",
         },
         Object {
-          "data-test-subj": "dropdown-connector-servicenow-legacy",
+          "data-test-subj": "dropdown-connector-servicenow-uses-old-api",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
             gutterSize="s"
@@ -205,7 +205,7 @@ describe('ConnectorsDropdown', () => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>,
-          "value": "servicenow-legacy",
+          "value": "servicenow-uses-old-api",
         },
       ]
     `);
@@ -288,8 +288,8 @@ describe('ConnectorsDropdown', () => {
     ).not.toThrowError();
   });
 
-  test('it shows the deprecated tooltip when the connector is legacy', () => {
-    render(<ConnectorsDropdown {...props} selectedConnector="servicenow-legacy" />, {
+  test('it shows the deprecated tooltip when the connector uses the old API', () => {
+    render(<ConnectorsDropdown {...props} selectedConnector="servicenow-uses-old-api" />, {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 

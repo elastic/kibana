@@ -176,7 +176,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         const itemConfig = (
           item as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
         ).config;
-        const showLegacyTooltip =
+        const showDeprecatedTooltip =
           itemConfig?.usesTableApi &&
           // TODO: Remove when applications are certified
           ((ENABLE_NEW_SN_ITSM_CONNECTOR && item.actionTypeId === '.servicenow') ||
@@ -204,18 +204,18 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                 position="right"
               />
             ) : null}
-            {showLegacyTooltip && (
+            {showDeprecatedTooltip && (
               <EuiIconTip
                 aria-label="Warning"
                 size="m"
                 type="alert"
                 color="warning"
                 title={i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.legacyConnectorTitle',
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deprecatedConnectorTitle',
                   { defaultMessage: 'Deprecated connector' }
                 )}
                 content={i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isLegacyDescription',
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isDeprecatedDescription',
                   { defaultMessage: 'Please update your connector' }
                 )}
                 position="right"

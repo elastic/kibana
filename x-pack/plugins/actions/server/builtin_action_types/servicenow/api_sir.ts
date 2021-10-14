@@ -65,7 +65,7 @@ export const prepareParams = (
   if (usesTableApi) {
     /**
      * The schema has change to accept an array of observables
-     * or a string. In the case of a legacy connector we need to
+     * or a string. In the case of connector that uses the old API we need to
      * convert the observables to a string
      */
     return {
@@ -81,8 +81,8 @@ export const prepareParams = (
   }
 
   /**
-   * For non legacy connectors the observables
-   * will be added in a different call.
+   * For connectors that do not use the old API
+   * the observables will be added in a different call.
    * They need to be set to null when sending the fields
    * to ServiceNow
    */
