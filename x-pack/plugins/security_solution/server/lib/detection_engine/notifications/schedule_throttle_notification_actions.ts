@@ -95,6 +95,11 @@ export const scheduleThrottledNotificationActions = async ({
       ruleId,
       esClient,
     });
+
+    // This will give us counts up to the max of 10k from tracking total hits.
+    const signalsCountFromResults =
+      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
+
     const resultsFlattened = results.hits.hits.map((hit) => {
       return {
         _id: hit._id,
@@ -102,23 +107,32 @@ export const scheduleThrottledNotificationActions = async ({
         ...hit._source,
       };
     });
+
     const deconflicted = deconflictSignalsAndResults({
       logger,
       signals,
       querySignals: resultsFlattened,
     });
+
+    // Difference of how many deconflicted results we have to subtract from our signals count.
+    const deconflictedDiff = resultsFlattened.length + signals.length - deconflicted.length;
+
+    // Subtract any deconflicted differences from the total count.
+    const signalsCount = signalsCountFromResults + signals.length - deconflictedDiff;
     logger.debug(
       [
-        `The notification throttle query result size before deconflicting duplicates is: ${results.hits.hits.length}.`,
+        `The notification throttle query result size before deconflicting duplicates is: ${resultsFlattened.length}.`,
         ` The notification throttle passed in signals size before deconflicting duplicates is: ${signals.length}.`,
         ` The deconflicted size and size of the signals sent into throttle notification is: ${deconflicted.length}.`,
+        ` The signals count from results size is: ${signalsCountFromResults}.`,
+        ` The final signals count being sent to the notification is: ${signalsCount}.`,
       ].join('')
     );
 
     if (deconflicted.length !== 0) {
       scheduleNotificationActions({
         alertInstance,
-        signalsCount: deconflicted.length,
+        signalsCount,
         signals: deconflicted,
         resultsLink,
         ruleParams: notificationRuleParams,
@@ -127,7 +141,7 @@ export const scheduleThrottledNotificationActions = async ({
   } else {
     logger.error(
       [
-        'The notification throttle "from" and/or "to" range values could be constructed as valid. Tried to construct the values of',
+        'The notification throttle "from" and/or "to" range values could not be constructed as valid. Tried to construct the values of',
         ` "from": now-${throttle}`,
         ` "to": ${startedAt.toISOString()}.`,
         ' This will cause a reset of the notification throttle. Expect either missing alert notifications or alert notifications happening earlier than expected.',
