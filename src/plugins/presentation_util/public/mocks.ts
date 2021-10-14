@@ -17,6 +17,7 @@ const createStartContract = (coreStart: CoreStart): PresentationUtilPluginStart 
   const startContract: PresentationUtilPluginStart = {
     ContextProvider: pluginServices.getContextProvider(),
     labsService: pluginServices.getServices().labs,
+    controlsService: pluginServices.getServices().controls,
   };
   return startContract;
 };
