@@ -6,11 +6,28 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
-import { i18n } from '@kbn/i18n';
 import { StartDeps, SetupDeps } from './types';
 import { dataVisualizerRoutes } from './routes';
+import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
+import { applicationPath, featureDescription, featureId, featureTitle } from '../common';
 
-const FILE_DATA_VIS_TAB_ID = 'fileDataViz';
+function registerWithCustomIntegrations(customIntegrations: CustomIntegrationsPluginSetup) {
+  customIntegrations.registerCustomIntegration({
+    id: featureId,
+    title: featureTitle,
+    description: featureDescription,
+    uiInternalPath: applicationPath,
+    isBeta: false,
+    icons: [
+      {
+        type: 'eui',
+        src: 'addDataApp',
+      },
+    ],
+    categories: ['upload_file'],
+    shipper: 'add_data',
+  });
+}
 
 export class DataVisualizerPlugin implements Plugin {
   constructor() {}
@@ -20,25 +37,7 @@ export class DataVisualizerPlugin implements Plugin {
 
     // home-plugin required
     if (plugins.home && plugins.customIntegrations) {
-      plugins.customIntegrations.registerCustomIntegration({
-        id: 'file_data_visualizer',
-        title: i18n.translate('xpack.dataVisualizer.title', {
-          defaultMessage: 'Upload a file',
-        }),
-        description: i18n.translate('xpack.dataVisualizer.description', {
-          defaultMessage: 'Import your own CSV, NDJSON, or log file.',
-        }),
-        uiInternalPath: `/app/home#/tutorial_directory/${FILE_DATA_VIS_TAB_ID}`,
-        isBeta: false,
-        icons: [
-          {
-            type: 'eui',
-            src: 'addDataApp',
-          },
-        ],
-        categories: ['upload_file'],
-        shipper: 'add_data',
-      });
+      registerWithCustomIntegrations(plugins.customIntegrations);
     }
   }
 
