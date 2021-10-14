@@ -41,7 +41,6 @@ const warningToComponentMap: {
 
 export const idForWarning = (id: number) => `reindexWarning-${id}`;
 interface WarningsConfirmationFlyoutProps {
-  renderGlobalCallouts: () => React.ReactNode;
   closeFlyout: () => void;
   warnings: ReindexWarning[];
   advanceNextStep: () => void;
@@ -53,7 +52,6 @@ interface WarningsConfirmationFlyoutProps {
  */
 export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFlyoutProps> = ({
   warnings,
-  renderGlobalCallouts,
   closeFlyout,
   advanceNextStep,
 }) => {
@@ -88,8 +86,6 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
   return (
     <>
       <EuiFlyoutBody>
-        {renderGlobalCallouts()}
-
         <EuiCallOut
           title={
             <FormattedMessage
