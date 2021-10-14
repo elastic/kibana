@@ -16,11 +16,6 @@ import { ChecklistFlyoutStep } from './checklist_step';
 import { WarningsFlyoutStep } from './warnings_step';
 import { DeprecationBadge } from '../../../../shared';
 
-enum ReindexFlyoutStep {
-  reindexWarnings,
-  checklist,
-}
-
 export interface ReindexFlyoutProps extends ReindexStateContext {
   deprecation: EnrichedDeprecationInfo;
   closeFlyout: () => void;
@@ -36,38 +31,31 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
   const { status, reindexWarnings } = reindexState;
   const { index } = deprecation;
 
-  // If there are any warnings and we haven't started reindexing, show the warnings step first.
-  const [currentFlyoutStep, setCurrentFlyoutStep] = useState<ReindexFlyoutStep>(
-    reindexWarnings && reindexWarnings.length > 0 && status === undefined
-      ? ReindexFlyoutStep.reindexWarnings
-      : ReindexFlyoutStep.checklist
+  const [showWarningsStep, setShowWarningsStep] = useState(false);
+
+  const flyoutContents = showWarningsStep ? (
+    <WarningsFlyoutStep
+      warnings={reindexState.reindexWarnings ?? []}
+      hideWarningsStep={() => setShowWarningsStep(false)}
+      continueReindex={() => {
+        setShowWarningsStep(false);
+        startReindex();
+      }}
+    />
+  ) : (
+    <ChecklistFlyoutStep
+      closeFlyout={closeFlyout}
+      startReindex={() => {
+        if (reindexWarnings && reindexWarnings.length > 0 && status === undefined) {
+          setShowWarningsStep(true);
+        } else {
+          startReindex();
+        }
+      }}
+      reindexState={reindexState}
+      cancelReindex={cancelReindex}
+    />
   );
-
-  let flyoutContents: React.ReactNode;
-
-  switch (currentFlyoutStep) {
-    case ReindexFlyoutStep.reindexWarnings:
-      flyoutContents = (
-        <WarningsFlyoutStep
-          closeFlyout={closeFlyout}
-          warnings={reindexState.reindexWarnings!}
-          advanceNextStep={() => setCurrentFlyoutStep(ReindexFlyoutStep.checklist)}
-        />
-      );
-      break;
-    case ReindexFlyoutStep.checklist:
-      flyoutContents = (
-        <ChecklistFlyoutStep
-          closeFlyout={closeFlyout}
-          reindexState={reindexState}
-          startReindex={startReindex}
-          cancelReindex={cancelReindex}
-        />
-      );
-      break;
-    default:
-      throw new Error(`Invalid flyout step: ${currentFlyoutStep}`);
-  }
 
   return (
     <>

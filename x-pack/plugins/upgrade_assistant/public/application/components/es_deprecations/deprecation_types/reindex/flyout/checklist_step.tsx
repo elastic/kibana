@@ -16,6 +16,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -115,31 +116,21 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             </EuiCallOut>
           </>
         )}
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.calloutTitle"
-              defaultMessage="Index is unable to ingest, update, or delete documents while reindexing"
-            />
-          }
-          color="warning"
-          iconType="alert"
-        >
+        <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.cantStopDetail"
-              defaultMessage="If you can’t stop document updates or need to reindex into a new cluster,
-                consider using a different upgrade strategy."
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+              defaultMessage="Index is unable to ingest, update, or delete documents while reindexing. If you can’t stop document updates or need to reindex into a new cluster, consider using a different upgrade strategy."
             />
           </p>
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
-              defaultMessage="Reindexing will continue in the background, but if Kibana shuts down or restarts you will
-                need to return to this page to resume reindexing."
+              defaultMessage="You can close this page while reindexing is in progress, it will continue in the background. If Kibana shuts down or restarts, return
+              to this page to resume reindexing."
             />
           </p>
-        </EuiCallOut>
+        </EuiText>
         <EuiSpacer />
         <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
       </EuiFlyoutBody>
