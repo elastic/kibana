@@ -23,7 +23,7 @@ import {
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 
 export type PolicyDetailsGetTrustedAppsListHttpMocksInterface = ResponseProvidersInterface<{
-  policyTrustedAppsList: (options: HttpFetchOptionsWithPath) => GetTrustedAppsListResponse;
+  trustedAppsList: (options: HttpFetchOptionsWithPath) => GetTrustedAppsListResponse;
 }>;
 /**
  * HTTP mock for retrieving list of Trusted Apps
@@ -31,7 +31,7 @@ export type PolicyDetailsGetTrustedAppsListHttpMocksInterface = ResponseProvider
 export const trustedAppsGetListHttpMocks =
   httpHandlerMockFactory<PolicyDetailsGetTrustedAppsListHttpMocksInterface>([
     {
-      id: 'policyTrustedAppsList',
+      id: 'trustedAppsList',
       path: TRUSTED_APPS_LIST_API,
       method: 'get',
       handler: ({ query }): GetTrustedAppsListResponse => {
@@ -70,7 +70,7 @@ export const trustedAppPutHttpMocks = httpHandlerMockFactory<TrustedAppPutHttpMo
   {
     id: 'trustedAppUpdate',
     path: TRUSTED_APPS_UPDATE_API,
-    method: 'get',
+    method: 'put',
     handler: ({ body, path }): PutTrustedAppUpdateResponse => {
       const response: PutTrustedAppUpdateResponse = {
         data: {
