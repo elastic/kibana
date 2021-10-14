@@ -29,12 +29,12 @@ import {
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
-import { IRuleDataPluginService } from '../rule_execution_log/types';
 import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 import { BuildRuleMessage } from '../signals/rule_messages';
 import { BulkCreate, WrapHits, WrapSequences } from '../signals/types';
 import { AlertsFieldMap, RulesFieldMap } from './field_maps';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { IEventLogService } from '../../../../../event_log/server';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
@@ -97,10 +97,9 @@ type SecurityAlertTypeWithExecutor<
 export type CreateSecurityRuleTypeFactory = (options: {
   lists: SetupPlugins['lists'];
   logger: Logger;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ignoreFields: ConfigType['alertIgnoreFields'];
+  config: ConfigType;
   ruleDataClient: IRuleDataClient;
-  ruleDataService: IRuleDataPluginService;
+  eventLogService: IEventLogService;
 }) => <
   TParams extends RuleParams & { index?: string[] | undefined },
   TAlertInstanceContext extends AlertInstanceContext,
@@ -126,12 +125,11 @@ export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
   lists: SetupPlugins['lists'];
   logger: Logger;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ignoreFields: ConfigType['alertIgnoreFields'];
+  config: ConfigType;
   ml?: SetupPlugins['ml'];
   ruleDataClient: IRuleDataClient;
   version: string;
-  ruleDataService: IRuleDataPluginService;
+  eventLogService: IEventLogService;
 }
 
 export type PreviewRuleOptions = CreateRuleOptions & { indexNameOverride: string };

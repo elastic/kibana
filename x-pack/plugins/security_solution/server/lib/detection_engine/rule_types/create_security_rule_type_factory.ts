@@ -40,8 +40,9 @@ import { scheduleThrottledNotificationActions } from '../notifications/schedule_
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
-  ({ lists, logger, mergeStrategy, ignoreFields, ruleDataClient, ruleDataService }) =>
+  ({ lists, logger, config, ruleDataClient, eventLogService }) =>
   (type) => {
+    const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeFactory({ ruleDataClient, logger });
     return persistenceRuleType({
       ...type,
@@ -66,12 +67,14 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
 
         const ruleStatusClient = new RuleExecutionLogClient({
           savedObjectsClient,
-          ruleDataService,
+          eventLogService,
+          underlyingClient: config.ruleExecutionLog.underlyingClient,
         });
 
         const {
           actions,
           name,
+          alertTypeId,
           schedule: { interval },
         } = rule;
         const refresh = actions.length ? 'wait_for' : false;
@@ -93,9 +96,14 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
         logger.debug(buildRuleMessage(`interval: ${interval}`));
 
         let wroteWarningStatus = false;
-        await ruleStatusClient.logStatusChange({
+        const basicLogArguments = {
           spaceId,
           ruleId: alertId,
+          ruleName: name,
+          ruleType: alertTypeId,
+        };
+        await ruleStatusClient.logStatusChange({
+          ...basicLogArguments,
           newStatus: RuleExecutionStatus['going to run'],
         });
 
@@ -131,8 +139,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
                   tryCatch(
                     () =>
                       hasReadIndexPrivileges({
-                        spaceId,
-                        ruleId: alertId,
+                        ...basicLogArguments,
                         privileges,
                         logger,
                         buildRuleMessage,
@@ -144,8 +151,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
                   tryCatch(
                     () =>
                       hasTimestampFields({
-                        spaceId,
-                        ruleId: alertId,
+                        ...basicLogArguments,
                         wroteStatus: wroteStatus as boolean,
                         timestampField: hasTimestampOverride
                           ? (timestampOverride as string)
@@ -187,11 +193,10 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           logger.warn(gapMessage);
           hasError = true;
           await ruleStatusClient.logStatusChange({
-            spaceId,
-            ruleId: alertId,
+            ...basicLogArguments,
             newStatus: RuleExecutionStatus.failed,
             message: gapMessage,
-            metrics: { gap: gapString },
+            metrics: { executionGap: remainingGap },
           });
         }
 
@@ -270,8 +275,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           if (result.warningMessages.length) {
             const warningMessage = buildRuleMessage(result.warningMessages.join());
             await ruleStatusClient.logStatusChange({
-              spaceId,
-              ruleId: alertId,
+              ...basicLogArguments,
               newStatus: RuleExecutionStatus['partial failure'],
               message: warningMessage,
             });
@@ -335,13 +339,12 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
 
             if (!hasError && !wroteWarningStatus && !result.warning) {
               await ruleStatusClient.logStatusChange({
-                spaceId,
-                ruleId: alertId,
+                ...basicLogArguments,
                 newStatus: RuleExecutionStatus.succeeded,
                 message: 'succeeded',
                 metrics: {
-                  bulkCreateTimeDurations: result.bulkCreateTimes,
-                  searchAfterTimeDurations: result.searchAfterTimes,
+                  indexingDurations: result.bulkCreateTimes,
+                  searchDurations: result.searchAfterTimes,
                   lastLookBackDate: result.lastLookbackDate?.toISOString(),
                 },
               });
@@ -364,13 +367,12 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
             );
             logger.error(errorMessage);
             await ruleStatusClient.logStatusChange({
-              spaceId,
-              ruleId: alertId,
+              ...basicLogArguments,
               newStatus: RuleExecutionStatus.failed,
               message: errorMessage,
               metrics: {
-                bulkCreateTimeDurations: result.bulkCreateTimes,
-                searchAfterTimeDurations: result.searchAfterTimes,
+                indexingDurations: result.bulkCreateTimes,
+                searchDurations: result.searchAfterTimes,
                 lastLookBackDate: result.lastLookbackDate?.toISOString(),
               },
             });
@@ -384,13 +386,12 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
 
           logger.error(message);
           await ruleStatusClient.logStatusChange({
-            spaceId,
-            ruleId: alertId,
+            ...basicLogArguments,
             newStatus: RuleExecutionStatus.failed,
             message,
             metrics: {
-              bulkCreateTimeDurations: result.bulkCreateTimes,
-              searchAfterTimeDurations: result.searchAfterTimes,
+              indexingDurations: result.bulkCreateTimes,
+              searchDurations: result.searchAfterTimes,
               lastLookBackDate: result.lastLookbackDate?.toISOString(),
             },
           });
