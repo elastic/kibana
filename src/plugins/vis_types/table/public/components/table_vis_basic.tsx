@@ -52,7 +52,10 @@ export const TableVisBasic = memo(
     );
 
     const rowHeightsOptions = useMemo(
-      () => (visConfig.autoFitRowToContent ? { defaultHeight: 'auto' } : undefined),
+      () =>
+        visConfig.autoFitRowToContent
+          ? ({ defaultHeight: 'auto' } as unknown as EuiDataGridProps['rowHeightsOptions'])
+          : undefined,
       [visConfig.autoFitRowToContent]
     );
 

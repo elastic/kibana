@@ -13,7 +13,7 @@ import { DatatableRow } from 'src/plugins/expressions';
 import { FormattedColumns } from '../types';
 
 export const createTableVisCell =
-  (rows: DatatableRow[], formattedColumns: FormattedColumns, autoFitRowToContent: boolean) =>
+  (rows: DatatableRow[], formattedColumns: FormattedColumns, autoFitRowToContent?: boolean) =>
   ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
     const rowValue = rows[rowIndex][columnId];
     const column = formattedColumns[columnId];
