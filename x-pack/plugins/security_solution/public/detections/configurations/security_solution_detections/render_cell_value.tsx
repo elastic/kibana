@@ -18,37 +18,41 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
  */
 export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> =
   ({
+    browserFields,
     columnId,
     data,
+    ecsData,
     eventId,
-    isDraggable,
+    globalFilters,
     header,
     isDetails,
+    isDraggable,
     isExpandable,
     isExpanded,
     linkValues,
     rowIndex,
+    rowRenderers,
     setCellProps,
     timelineId,
-    ecsData,
-    rowRenderers,
-    browserFields,
+    truncate,
   }) => (
     <DefaultCellRenderer
+      browserFields={browserFields}
       columnId={columnId}
       data={data}
+      ecsData={ecsData}
       eventId={eventId}
-      isDraggable={isDraggable}
+      globalFilters={globalFilters}
       header={header}
       isDetails={isDetails}
+      isDraggable={isDraggable}
       isExpandable={isExpandable}
       isExpanded={isExpanded}
       linkValues={linkValues}
       rowIndex={rowIndex}
+      rowRenderers={rowRenderers}
       setCellProps={setCellProps}
       timelineId={timelineId}
-      ecsData={ecsData}
-      rowRenderers={rowRenderers}
-      browserFields={browserFields}
+      truncate={truncate}
     />
   );

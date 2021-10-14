@@ -15,6 +15,8 @@ import { defaultHeaders, mockBrowserFields, mockTimelineData, TestProviders } fr
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { TestCellRenderer } from '../../../mock/cell_renderer';
 import { mockGlobalState } from '../../../mock/global_state';
+import { EuiDataGridColumn } from '@elastic/eui';
+import { defaultColumnHeaderType } from '../../../store/t_grid/defaults';
 
 const mockSort: Sort[] = [
   {
@@ -151,5 +153,124 @@ describe('Body', () => {
           .text()
       ).toEqual(mockTimelineData[0].ecs.timestamp);
     });
+
+    test("timestamp column doesn't render cell actions", () => {
+      const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
+      const testProps = {
+        ...props,
+        columnHeaders: headersJustTimestamp,
+        data: mockTimelineData.slice(0, 1),
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <BodyComponent {...testProps} />
+        </TestProviders>
+      );
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('[data-test-subj="body-data-grid"]')
+          .first()
+          .prop<EuiDataGridColumn[]>('columns')
+          .find((c) => c.id === '@timestamp')?.cellActions
+      ).toBeUndefined();
+    });
+
+    test("signal.rule.risk_score column doesn't render cell actions", () => {
+      const columnHeaders = [
+        {
+          category: 'signal',
+          columnHeaderType: defaultColumnHeaderType,
+          id: 'signal.rule.risk_score',
+          type: 'number',
+          aggregatable: true,
+          initialWidth: 105,
+        },
+      ];
+      const testProps = {
+        ...props,
+        columnHeaders,
+        data: mockTimelineData.slice(0, 1),
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <BodyComponent {...testProps} />
+        </TestProviders>
+      );
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('[data-test-subj="body-data-grid"]')
+          .first()
+          .prop<EuiDataGridColumn[]>('columns')
+          .find((c) => c.id === 'signal.rule.risk_score')?.cellActions
+      ).toBeUndefined();
+    });
+
+    test("signal.reason column doesn't render cell actions", () => {
+      const columnHeaders = [
+        {
+          category: 'signal',
+          columnHeaderType: defaultColumnHeaderType,
+          id: 'signal.reason',
+          type: 'string',
+          aggregatable: true,
+          initialWidth: 450,
+        },
+      ];
+      const testProps = {
+        ...props,
+        columnHeaders,
+        data: mockTimelineData.slice(0, 1),
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <BodyComponent {...testProps} />
+        </TestProviders>
+      );
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('[data-test-subj="body-data-grid"]')
+          .first()
+          .prop<EuiDataGridColumn[]>('columns')
+          .find((c) => c.id === 'signal.reason')?.cellActions
+      ).toBeUndefined();
+    });
+  });
+
+  test("signal.rule.risk_score column doesn't render cell actions", () => {
+    const columnHeaders = [
+      {
+        category: 'signal',
+        columnHeaderType: defaultColumnHeaderType,
+        id: 'signal.rule.risk_score',
+        type: 'number',
+        aggregatable: true,
+        initialWidth: 105,
+      },
+    ];
+    const testProps = {
+      ...props,
+      columnHeaders,
+      data: mockTimelineData.slice(0, 1),
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <BodyComponent {...testProps} />
+      </TestProviders>
+    );
+    wrapper.update();
+
+    expect(
+      wrapper
+        .find('[data-test-subj="body-data-grid"]')
+        .first()
+        .prop<EuiDataGridColumn[]>('columns')
+        .find((c) => c.id === 'signal.rule.risk_score')?.cellActions
+    ).toBeUndefined();
   });
 });
