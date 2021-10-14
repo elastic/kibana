@@ -128,29 +128,22 @@ function getAccessorCriteriaForGroup(
           ...rest,
           accessors: [xAccessor] as string[],
         })),
-        // need the untouched ones for some checks later on
+        // need the untouched ones to check if there are invalid layers from the filtered ones
+        // to perform the checks the original accessor structure needs to be accessed
         untouchedDataLayers: filteredDataLayers,
         accessors: filteredDataLayers.map(({ xAccessor }) => xAccessor) as string[],
       };
     }
-    case 'yLeft': {
-      const { left } = groupAxesByType(dataLayers, activeData);
-      const leftIds = new Set(left.map(({ layer }) => layer));
-      const filteredDataLayers = dataLayers.filter(({ layerId }) => leftIds.has(layerId));
-      return {
-        dataLayers: filteredDataLayers,
-        untouchedDataLayers: filteredDataLayers,
-        accessors: left.map(({ accessor }) => accessor),
-      };
-    }
+    case 'yLeft':
     case 'yRight': {
-      const { right } = groupAxesByType(dataLayers, activeData);
-      const rightIds = new Set(right.map(({ layer }) => layer));
+      const prop = groupId === 'yLeft' ? 'left' : 'right';
+      const { [prop]: axis } = groupAxesByType(dataLayers, activeData);
+      const rightIds = new Set(axis.map(({ layer }) => layer));
       const filteredDataLayers = dataLayers.filter(({ layerId }) => rightIds.has(layerId));
       return {
         dataLayers: filteredDataLayers,
         untouchedDataLayers: filteredDataLayers,
-        accessors: right.map(({ accessor }) => accessor),
+        accessors: axis.map(({ accessor }) => accessor),
       };
     }
   }
