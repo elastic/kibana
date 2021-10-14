@@ -9,6 +9,7 @@ import type { IScopedClusterClient } from 'kibana/server';
 import type {
   NodeDeploymentStatsResponse,
   PipelineDefinition,
+  NodesOverviewResponse,
 } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 
@@ -46,7 +47,7 @@ export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient)
       return modelIdsMap;
     },
 
-    async getNodesOverview(): Promise<{ count: number; nodes: NodeDeploymentStatsResponse[] }> {
+    async getNodesOverview(): Promise<NodesOverviewResponse> {
       const { body: deploymentStats } = await mlClient.getTrainedModelsDeploymentStats();
 
       const nodesR = deploymentStats.deployment_stats.reduce((acc, curr) => {

@@ -173,3 +173,8 @@ export interface NodeDeploymentStatsResponse {
     model_size: string;
   }>;
 }
+
+export interface NodesOverviewResponse {
+  count: number;
+  nodes: NodeDeploymentStatsResponse[];
+}

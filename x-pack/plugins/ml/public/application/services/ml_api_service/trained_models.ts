@@ -14,6 +14,7 @@ import {
   TrainedModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
+  NodesOverviewResponse,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -133,7 +134,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     },
 
     getTrainedModelsNodesOverview() {
-      return httpService.http({
+      return httpService.http<NodesOverviewResponse>({
         path: `${apiBasePath}/trained_models/nodes_overview`,
         method: 'GET',
       });

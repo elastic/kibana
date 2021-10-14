@@ -18,7 +18,7 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { i18n } from '@kbn/i18n';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { getDefaultModelsListState } from '../models_management';
-import { ModelPipelines } from '../../../../common/types/trained_models';
+import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
@@ -26,15 +26,7 @@ import { useTableSettings } from '../../data_frame_analytics/pages/analytics_man
 import { ExpandedRow } from './expanded_row';
 import { useRefreshAnalyticsList } from '../../data_frame_analytics/common';
 
-export interface NodeItem {
-  name: string;
-  id: string;
-  roles: string[];
-  allocated_models: any[];
-  total_inference_count: number;
-  avg_inference_time: number;
-  pipelines?: ModelPipelines['pipelines'] | null;
-}
+export type NodeItem = NodeDeploymentStatsResponse;
 
 export interface NodeItemWithStats extends NodeItem {
   stats: any;
@@ -104,15 +96,13 @@ export const NodesList: FC = () => {
     },
     {
       field: 'allocated_models',
-      // width: '350px',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.allocatedModelsHeader', {
         defaultMessage: 'Allocated models',
       }),
       sortable: false,
       truncateText: false,
       'data-test-subj': 'mlModelsTableColumnDescription',
-      render: (v) => {
-        console.log(v, '___v___');
+      render: (v: NodeItem['allocated_models']) => {
         return v.map((m) => <EuiBadge color="hollow">{m.model_id}</EuiBadge>);
       },
     },
