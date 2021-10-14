@@ -35,11 +35,7 @@ export class AggField extends CountAggField {
   }
 
   getMbFieldName(): string {
-    if (this._source.isMvt()) {
-      return this.getName() + '.value';
-    } else {
-      return this.getName();
-    }
+    return this._source.isMvt() ? this.getName() + '.value' : this.getName();
   }
 
   supportsFieldMeta(): boolean {

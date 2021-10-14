@@ -63,7 +63,7 @@ import { INITIAL_LOCATION } from '../../common/constants';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { VectorLayer } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE } from './ui_actions';
-import { expandToTileBoundaries } from '../../common/geo_tile_utils';
+import { expandToTileBoundaries } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
 
 export function setMapInitError(errorMessage: string) {

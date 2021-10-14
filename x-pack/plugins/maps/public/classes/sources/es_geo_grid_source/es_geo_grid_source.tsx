@@ -11,11 +11,8 @@ import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 import { Feature } from 'geojson';
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  convertCompositeRespToGeoJson,
-  convertRegularRespToGeoJson,
-  makeESBbox,
-} from '../../../../common/elasticsearch_util';
+import { makeESBbox } from '../../../../common/elasticsearch_util';
+import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,

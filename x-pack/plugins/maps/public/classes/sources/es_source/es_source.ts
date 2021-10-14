@@ -19,7 +19,7 @@ import {
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
-import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
+import { expandToTileBoundaries } from '../../util/geo_tile_utils';
 import { IVectorSource } from '../vector_source';
 import { TimeRange } from '../../../../../../../src/plugins/data/common';
 import {
