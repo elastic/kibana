@@ -32,10 +32,11 @@ import { mlExecutor } from './executors/ml';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
-import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { eventLogServiceMock } from '../../../../../event_log/server/mocks';
+import { createMockConfig } from '../routes/__mocks__';
 
 jest.mock('./utils', () => {
   const original = jest.requireActual('./utils');
@@ -124,12 +125,12 @@ describe('signal_rule_alert_type', () => {
   let alert: ReturnType<typeof signalRulesAlertType>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
-  let ruleDataService: ReturnType<typeof ruleRegistryMocks.createRuleDataPluginService>;
+  let eventLogService: ReturnType<typeof eventLogServiceMock.create>;
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
     logger = loggingSystemMock.createLogger();
-    ruleDataService = ruleRegistryMocks.createRuleDataPluginService();
+    eventLogService = eventLogServiceMock.create();
     (getListsClient as jest.Mock).mockReturnValue({
       listClient: getListClientMock(),
       exceptionsClient: getExceptionListClientMock(),
@@ -194,9 +195,8 @@ describe('signal_rule_alert_type', () => {
       version,
       ml: mlMock,
       lists: listMock.createSetup(),
-      mergeStrategy: 'missingFields',
-      ignoreFields: [],
-      ruleDataService,
+      config: createMockConfig(),
+      eventLogService,
     });
 
     mockRuleExecutionLogClient.logStatusChange.mockClear();
@@ -217,11 +217,18 @@ describe('signal_rule_alert_type', () => {
       payload.previousStartedAt = moment(payload.startedAt).subtract(100, 'm').toDate();
       await alert.executor(payload);
       expect(logger.warn).toHaveBeenCalled();
-      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus['going to run'],
+        })
+      );
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
           newStatus: RuleExecutionStatus.failed,
           metrics: {
-            gap: 'an hour',
+            executionGap: expect.any(Object),
           },
         })
       );

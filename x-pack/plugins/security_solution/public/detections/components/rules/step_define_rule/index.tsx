@@ -57,6 +57,7 @@ import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
 import { PreviewQuery } from '../query_preview';
+import { usePreviewIndex } from '../../../containers/detection_engine/alerts/use_preview_index';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -136,6 +137,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   onSubmit,
   setForm,
 }) => {
+  usePreviewIndex();
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);

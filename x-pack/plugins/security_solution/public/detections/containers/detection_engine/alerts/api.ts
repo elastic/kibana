@@ -14,6 +14,7 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
   ALERTS_AS_DATA_FIND_URL,
+  DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -130,6 +131,18 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
   KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_INDEX_URL, {
     method: 'POST',
     signal,
+  });
+
+/**
+ * Create Signal Index if needed it
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const createPreviewIndex = async (): Promise<AlertsIndex> =>
+  KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL, {
+    method: 'POST',
   });
 
 /**

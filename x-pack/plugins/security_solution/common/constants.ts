@@ -248,6 +248,7 @@ export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 export const DETECTION_ENGINE_RULES_BULK_ACTION = `${DETECTION_ENGINE_RULES_URL}/_bulk_action`;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview`;
+export const DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL = `${DETECTION_ENGINE_RULES_PREVIEW}/index`;
 
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve';
 export const TIMELINE_URL = '/api/timeline';
@@ -303,6 +304,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.swimlane',
   '.webhook',
   '.servicenow',
+  '.servicenow-sir',
   '.jira',
   '.resilient',
   '.teams',
@@ -336,7 +338,7 @@ export const ELASTIC_NAME = 'estc';
 
 export const METADATA_TRANSFORM_STATS_URL = `/api/transform/transforms/${METADATA_TRANSFORMS_PATTERN}/_stats`;
 
-export const HOST_RISK_SCORES_INDEX = 'ml_host_risk_score_latest';
+export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_latest_';
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',

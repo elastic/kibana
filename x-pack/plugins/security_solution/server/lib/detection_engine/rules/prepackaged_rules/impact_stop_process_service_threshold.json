@@ -1,0 +1,51 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule identifies a high number (10) of process terminations (stop, delete, or suspend) from the same host within a short time period.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "High Number of Process and/or Service Terminations",
+  "query": "event.category:process and event.type:start and process.name:(net.exe or sc.exe or taskkill.exe) and\n process.args:(stop or pause or delete or \"/PID\" or \"/IM\" or \"/T\" or \"/F\" or \"/t\" or \"/f\" or \"/im\" or \"/pid\")\n",
+  "risk_score": 47,
+  "rule_id": "035889c4-2686-4583-a7df-67f89c292f2c",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Impact"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1489",
+          "name": "Service Stop",
+          "reference": "https://attack.mitre.org/techniques/T1489/"
+        }
+      ]
+    }
+  ],
+  "threshold": {
+    "field": [
+      "host.id"
+    ],
+    "value": 10
+  },
+  "type": "threshold",
+  "version": 3
+}

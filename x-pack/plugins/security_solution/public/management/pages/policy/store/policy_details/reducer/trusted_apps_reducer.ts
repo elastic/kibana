@@ -90,5 +90,25 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
     };
   }
 
+  if (action.type === 'policyDetailsTrustedAppsRemoveListStateChanged') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        removeList: action.payload,
+      },
+    };
+  }
+
+  if (action.type === 'policyDetailsArtifactsResetRemove') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        removeList: initialPolicyDetailsState().artifacts.removeList,
+      },
+    };
+  }
+
   return state;
 };
