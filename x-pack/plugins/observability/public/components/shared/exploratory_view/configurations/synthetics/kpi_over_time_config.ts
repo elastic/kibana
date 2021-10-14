@@ -6,7 +6,13 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
+import {
+  FieldLabels,
+  OPERATION_COLUMN,
+  REPORT_METRIC_FIELD,
+  PERCENTILE,
+  ReportTypes,
+} from '../constants';
 import {
   CLS_LABEL,
   DCL_LABEL,
@@ -44,7 +50,7 @@ export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesCon
     ],
     hasOperationType: false,
     filterFields: ['observer.geo.name', 'monitor.type', 'tags'],
-    breakdownFields: ['observer.geo.name', 'monitor.type', 'monitor.name'],
+    breakdownFields: ['observer.geo.name', 'monitor.type', 'monitor.name', PERCENTILE],
     baseFilters: [],
     palette: { type: 'palette', name: 'status' },
     definitionFields: ['monitor.name', 'url.full'],
@@ -98,6 +104,6 @@ export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesCon
         columnType: OPERATION_COLUMN,
       },
     ],
-    labels: { ...FieldLabels },
+    labels: { ...FieldLabels, [SUMMARY_UP]: UP_LABEL, [SUMMARY_DOWN]: DOWN_LABEL },
   };
 }
