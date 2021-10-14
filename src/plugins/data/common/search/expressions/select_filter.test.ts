@@ -14,6 +14,7 @@ import { KibanaContext } from './kibana_context_type';
 describe('interpreter/functions#selectFilter', () => {
   const fn = functionWrapper(selectFilterFunction);
   const kibanaContext: KibanaContext = {
+    type: 'kibana_context',
     filters: [
       {
         meta: {
