@@ -86,8 +86,8 @@ export async function getInUseTotalCount(
   countTotal: number;
   countByType: Record<string, number>;
   countByAlertHistoryConnectorType: number;
-  countByNamespace: Record<string, number>;
   countEmailByService: Record<string, number>;
+  countNamespaces: number;
 }> {
   const scriptedMetric = {
     scripted_metric: {
@@ -291,16 +291,15 @@ export async function getInUseTotalCount(
     {}
   );
 
-  const countByNamespace = actions.hits.reduce((namespaceCount: Record<string, number>, action) => {
+  const namespacesList = actions.hits.reduce((_namespaces: Set<string>, action) => {
     const actionSource = action._source!;
     actionSource.namespaces.forEach((namespace) => {
-      const namespaceCl = replaceFirstAndLastDotSymbols(namespace);
-      const currentCount =
-        namespaceCount[namespaceCl] !== undefined ? namespaceCount[namespaceCl] : 0;
-      namespaceCount[namespaceCl] = currentCount + 1;
+      if (!_namespaces.has(namespace)) {
+        _namespaces.add(namespace);
+      }
     });
-    return namespaceCount;
-  }, {});
+    return _namespaces;
+  }, new Set<string>());
 
   const countEmailByService = actions.hits
     .filter((action) => action._source!.action.actionTypeId === '.email')
@@ -331,7 +330,7 @@ export async function getInUseTotalCount(
     countByType: countByActionTypeId,
     countByAlertHistoryConnectorType: preconfiguredAlertHistoryConnectors,
     countEmailByService,
-    countByNamespace,
+    countNamespaces: namespacesList.size,
   };
 }
 

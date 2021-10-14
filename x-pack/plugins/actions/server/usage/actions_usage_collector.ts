@@ -40,10 +40,6 @@ const byServiceProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_active_em
     ses: { type: 'long' },
   };
 
-const byNamespaceSchema: MakeSchemaFrom<ActionsUsage>['count_active_by_namespace'] = {
-  DYNAMIC_KEY: { type: 'long' },
-};
-
 export function createActionsUsageCollector(
   usageCollection: UsageCollectionSetup,
   config: ActionsConfig,
@@ -71,7 +67,7 @@ export function createActionsUsageCollector(
       count_by_type: byTypeSchema,
       count_active_by_type: byTypeSchema,
       count_active_email_connectors_by_service_type: byServiceProviderTypeSchema,
-      count_active_by_namespace: byNamespaceSchema,
+      count_actions_namespaces: { type: 'long' },
     },
     fetch: async () => {
       try {
@@ -92,7 +88,7 @@ export function createActionsUsageCollector(
           count_active_by_type: {},
           count_by_type: {},
           count_active_email_connectors_by_service_type: {},
-          count_active_by_namespace: {},
+          count_actions_namespaces: 0,
         };
       }
     },

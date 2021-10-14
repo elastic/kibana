@@ -15,7 +15,9 @@ const alertTypeMetric = {
       String alertType = doc['alert.alertTypeId'].value;
       String namespace = doc['namespaces'].value;
       state.ruleTypes.put(alertType, state.ruleTypes.containsKey(alertType) ? state.ruleTypes.get(alertType) + 1 : 1);
-      state.namespaces.put(namespace, state.namespaces.containsKey(namespace) ? state.namespaces.get(namespace) + 1 : 1);
+      if (state.namespaces.containsKey(namespace) === false) {
+        state.namespaces.put(namespace, 1);
+      }
     `,
     // Combine script is executed per cluster, but we already have a key-value pair per cluster.
     // Despite docs that say this is optional, this script can't be blank.
@@ -47,7 +49,7 @@ export async function getTotalCountAggregations(
     | 'throttle_time'
     | 'schedule_time'
     | 'connectors_per_alert'
-    | 'count_active_by_namespace'
+    | 'count_rules_namespaces'
   >
 > {
   const throttleTimeMetric = {
@@ -307,7 +309,7 @@ export async function getTotalCountAggregations(
           : 0,
       max: aggregations.connectorsAgg.connectors.value.max,
     },
-    count_active_by_namespace: {},
+    count_rules_namespaces: 0,
   };
 }
 
@@ -347,15 +349,7 @@ export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaIn
       }),
       {}
     ),
-    countByNamespace: Object.keys(aggregations.byAlertTypeId.value.namespaces).reduce(
-      // ES DSL aggregations are returned as `any` by esClient.search
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obj: any, key: string) => ({
-        ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.namespaces[key],
-      }),
-      {}
-    ),
+    countNamespaces: Object.keys(aggregations.byAlertTypeId.value.namespaces).length,
   };
 }
 

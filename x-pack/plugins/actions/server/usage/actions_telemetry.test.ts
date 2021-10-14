@@ -151,7 +151,7 @@ Object {
         },
       ],
     });
-    const telemetry = await getInUseTotalCount(mockEsClient, actionsBulkGet, 'test');
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(actionsBulkGet).toHaveBeenCalledTimes(1);
@@ -219,7 +219,7 @@ Object {
         },
       ],
     });
-    const telemetry = await getInUseTotalCount(mockEsClient, actionsBulkGet, 'test');
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(actionsBulkGet).toHaveBeenCalledTimes(1);
@@ -422,7 +422,7 @@ Object {
         },
       ],
     });
-    const telemetry = await getInUseTotalCount(mockEsClient, actionsBulkGet, 'test');
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(actionsBulkGet).toHaveBeenCalledTimes(1);

@@ -50,10 +50,6 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   xpack__ml__anomaly_detection_jobs_health: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
 };
 
-const byNamespaceSchema: MakeSchemaFrom<AlertsUsage>['count_active_by_namespace'] = {
-  DYNAMIC_KEY: { type: 'long' },
-};
-
 export function createAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
@@ -95,7 +91,7 @@ export function createAlertsUsageCollector(
           },
           count_active_by_type: {},
           count_by_type: {},
-          count_active_by_namespace: {},
+          count_rules_namespaces: 0,
         };
       }
     },
@@ -120,7 +116,7 @@ export function createAlertsUsageCollector(
       },
       count_active_by_type: byTypeSchema,
       count_by_type: byTypeSchema,
-      count_active_by_namespace: byNamespaceSchema,
+      count_rules_namespaces: { type: 'long' },
     },
   });
 }
