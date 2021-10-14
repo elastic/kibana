@@ -14,7 +14,7 @@ import {
 } from '../../../common/components/link_to/redirect_to_case';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { APP_UI_ID } from '../../../../common/constants';
+import { APP_ID, APP_UI_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 import { AllCasesNavProps } from '../../../cases/components/all_cases';
 
@@ -60,7 +60,7 @@ const RecentCasesComponent = () => {
     },
     hasWritePermissions,
     maxCasesToShow: MAX_CASES_TO_SHOW,
-    owner: [APP_UI_ID],
+    owner: [APP_ID],
   });
 };
 

@@ -15,7 +15,7 @@ import {
 } from '../../../common/components/link_to';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
-import { APP_UI_ID } from '../../../../common/constants';
+import { APP_ID, APP_UI_ID } from '../../../../common/constants';
 
 export interface AllCasesNavProps {
   detailName: string;
@@ -76,7 +76,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       onClick: goToCreateCase,
     },
     userCanCrud,
-    owner: [APP_UI_ID],
+    owner: [APP_ID],
   });
 });
 

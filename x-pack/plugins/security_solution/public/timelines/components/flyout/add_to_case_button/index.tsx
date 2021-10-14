@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { Case, SubCase } from '../../../../../../cases/common';
-import { APP_UI_ID } from '../../../../../common/constants';
+import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -180,7 +180,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
           },
           onRowClick,
           userCanCrud: userPermissions?.crud ?? false,
-          owner: [APP_UI_ID],
+          owner: [APP_ID],
         })}
     </>
   );

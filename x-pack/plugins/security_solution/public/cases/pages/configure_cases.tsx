@@ -18,7 +18,7 @@ import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
 import { WhitePageWrapper, SectionWrapper } from '../components/wrappers';
 import * as i18n from './translations';
-import { APP_UI_ID } from '../../../common/constants';
+import { APP_ID, APP_UI_ID } from '../../../common/constants';
 
 const ConfigureCasesPageComponent: React.FC = () => {
   const {
@@ -61,7 +61,7 @@ const ConfigureCasesPageComponent: React.FC = () => {
         <WhitePageWrapper>
           {cases.getConfigureCases({
             userCanCrud: userPermissions?.crud ?? false,
-            owner: [APP_UI_ID],
+            owner: [APP_ID],
           })}
         </WhitePageWrapper>
       </SecuritySolutionPageWrapper>

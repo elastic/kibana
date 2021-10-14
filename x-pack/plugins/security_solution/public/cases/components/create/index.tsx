@@ -12,7 +12,7 @@ import { getCaseDetailsUrl, getCaseUrl } from '../../../common/components/link_t
 import { useKibana } from '../../../common/lib/kibana';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { useInsertTimeline } from '../use_insert_timeline';
-import { APP_UI_ID } from '../../../../common/constants';
+import { APP_ID, APP_UI_ID } from '../../../../common/constants';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 import { navTabs } from '../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../app/types';
@@ -55,7 +55,7 @@ export const Create = React.memo(() => {
             useInsertTimeline,
           },
         },
-        owner: [APP_UI_ID],
+        owner: [APP_ID],
       })}
     </EuiPanel>
   );
