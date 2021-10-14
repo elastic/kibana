@@ -20,6 +20,7 @@ import {
   CASE,
   CLOSE_TIMELINE_BTN,
   COMBO_BOX,
+  COMBO_BOX_INPUT,
   CREATE_NEW_TIMELINE,
   FIELD_BROWSER,
   ID_HEADER_FIELD,
@@ -164,8 +165,10 @@ export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuer
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
   cy.get(TIMELINE_DATA_PROVIDER_VALUE).should('have.focus'); // make sure the focus is ready before start typing
 
-  cy.get(TIMELINE_DATA_PROVIDER_FIELD).type(`${filter.field}{downarrow}{enter}`);
-  cy.get(TIMELINE_DATA_PROVIDER_OPERATOR).type(filter.operator);
+  cy.get(TIMELINE_DATA_PROVIDER_FIELD)
+    .find(COMBO_BOX_INPUT)
+    .type(`${filter.field}{downarrow}{enter}`);
+  cy.get(TIMELINE_DATA_PROVIDER_OPERATOR).find(COMBO_BOX_INPUT).type(filter.operator);
   cy.get(COMBO_BOX).contains(filter.operator).click();
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_DATA_PROVIDER_VALUE).type(`${filter.value}{enter}`);
