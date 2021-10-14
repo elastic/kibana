@@ -21,7 +21,6 @@ const COMMON_HEADERS = {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
-  const kibanaClient = convertToKibanaClient(es);
 
   async function assertExpectedSavedObjects(num: number) {
     // Make sure that new/deleted docs are available to search
@@ -38,6 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('lens telemetry', () => {
+    const kibanaClient = convertToKibanaClient(es);
     beforeEach(async () => {
       await es.deleteByQuery({
         index: '.kibana',

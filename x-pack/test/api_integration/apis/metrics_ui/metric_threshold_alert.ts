@@ -26,7 +26,6 @@ const { gauge, rate } = DATES['alert-test-data'];
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
-  const kbnClient = convertToKibanaClient(esClient);
 
   const baseParams: EvaluatedAlertParams = {
     groupBy: void 0,
@@ -83,6 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Metric Threshold Alerts Executor', () => {
+    const kbnClient = convertToKibanaClient(esClient);
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
 
