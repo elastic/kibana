@@ -638,7 +638,7 @@ describe('deprecations', () => {
             metadata: {
               _reserved: true,
             },
-            name: 'first_role',
+            name: 'role_siem_all',
             transient_metadata: {
               enabled: true,
             },
@@ -663,7 +663,7 @@ describe('deprecations', () => {
             metadata: {
               _reserved: true,
             },
-            name: 'second_role',
+            name: 'role_siem_read',
             transient_metadata: {
               enabled: true,
             },
@@ -688,7 +688,7 @@ describe('deprecations', () => {
             metadata: {
               _reserved: true,
             },
-            name: 'third_role',
+            name: 'role_siem_minimal_all_cases_all_cases_read',
             transient_metadata: {
               enabled: true,
             },
@@ -713,7 +713,7 @@ describe('deprecations', () => {
             metadata: {
               _reserved: true,
             },
-            name: 'fourth_role',
+            name: 'role_siem_minimal_read_cases_read',
             transient_metadata: {
               enabled: true,
             },
@@ -738,7 +738,7 @@ describe('deprecations', () => {
             metadata: {
               _reserved: true,
             },
-            name: 'fifth_role',
+            name: 'role_siem_minimal_all',
             transient_metadata: {
               enabled: true,
             },
@@ -763,7 +763,7 @@ describe('deprecations', () => {
             metadata: {
               _reserved: true,
             },
-            name: 'sixth_role',
+            name: 'role_siem_minimal_read',
             transient_metadata: {
               enabled: true,
             },
@@ -771,173 +771,17 @@ describe('deprecations', () => {
         ],
       });
       const response = await getDeprecations(mockContext);
-      expect(response).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "correctiveActions": Object {
-              "api": Object {
-                "body": Object {
-                  "elasticsearch": Object {
-                    "cluster": Array [],
-                    "indices": Array [],
-                    "run_as": Array [],
-                  },
-                  "kibana": Array [
-                    Object {
-                      "base": Array [],
-                      "feature": Object {
-                        "securitySolutionCases": Array [
-                          "all",
-                        ],
-                        "siem": Array [
-                          "all",
-                        ],
-                      },
-                      "spaces": Array [
-                        "securitySolution_1",
-                      ],
-                    },
-                  ],
-                  "metadata": Object {
-                    "_reserved": true,
-                  },
-                },
-                "method": "PUT",
-                "omitContextFromBody": true,
-                "path": "/api/security/role/first_role",
-              },
-              "manualSteps": Array [],
-            },
-            "deprecationType": "feature",
-            "level": "warning",
-            "message": "The \\"Security\\" feature will be split into two separate features in 8.0. The \\"first_role\\" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.",
-            "title": "The \\"first_role\\" role needs to be updated",
-          },
-          Object {
-            "correctiveActions": Object {
-              "api": Object {
-                "body": Object {
-                  "elasticsearch": Object {
-                    "cluster": Array [],
-                    "indices": Array [],
-                    "run_as": Array [],
-                  },
-                  "kibana": Array [
-                    Object {
-                      "base": Array [],
-                      "feature": Object {
-                        "securitySolutionCases": Array [
-                          "read",
-                        ],
-                        "siem": Array [
-                          "read",
-                        ],
-                      },
-                      "spaces": Array [
-                        "securitySolution_2",
-                      ],
-                    },
-                  ],
-                  "metadata": Object {
-                    "_reserved": true,
-                  },
-                },
-                "method": "PUT",
-                "omitContextFromBody": true,
-                "path": "/api/security/role/second_role",
-              },
-              "manualSteps": Array [],
-            },
-            "deprecationType": "feature",
-            "level": "warning",
-            "message": "The \\"Security\\" feature will be split into two separate features in 8.0. The \\"second_role\\" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.",
-            "title": "The \\"second_role\\" role needs to be updated",
-          },
-          Object {
-            "correctiveActions": Object {
-              "api": Object {
-                "body": Object {
-                  "elasticsearch": Object {
-                    "cluster": Array [],
-                    "indices": Array [],
-                    "run_as": Array [],
-                  },
-                  "kibana": Array [
-                    Object {
-                      "base": Array [],
-                      "feature": Object {
-                        "securitySolutionCases": Array [
-                          "all",
-                        ],
-                        "siem": Array [
-                          "minimal_all",
-                          "cases_all",
-                          "cases_read",
-                        ],
-                      },
-                      "spaces": Array [
-                        "securitySolution_3",
-                      ],
-                    },
-                  ],
-                  "metadata": Object {
-                    "_reserved": true,
-                  },
-                },
-                "method": "PUT",
-                "omitContextFromBody": true,
-                "path": "/api/security/role/third_role",
-              },
-              "manualSteps": Array [],
-            },
-            "deprecationType": "feature",
-            "level": "warning",
-            "message": "The \\"Security\\" feature will be split into two separate features in 8.0. The \\"third_role\\" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.",
-            "title": "The \\"third_role\\" role needs to be updated",
-          },
-          Object {
-            "correctiveActions": Object {
-              "api": Object {
-                "body": Object {
-                  "elasticsearch": Object {
-                    "cluster": Array [],
-                    "indices": Array [],
-                    "run_as": Array [],
-                  },
-                  "kibana": Array [
-                    Object {
-                      "base": Array [],
-                      "feature": Object {
-                        "securitySolutionCases": Array [
-                          "read",
-                        ],
-                        "siem": Array [
-                          "minimal_read",
-                          "cases_read",
-                        ],
-                      },
-                      "spaces": Array [
-                        "securitySolution_4",
-                      ],
-                    },
-                  ],
-                  "metadata": Object {
-                    "_reserved": true,
-                  },
-                },
-                "method": "PUT",
-                "omitContextFromBody": true,
-                "path": "/api/security/role/fourth_role",
-              },
-              "manualSteps": Array [],
-            },
-            "deprecationType": "feature",
-            "level": "warning",
-            "message": "The \\"Security\\" feature will be split into two separate features in 8.0. The \\"fourth_role\\" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.",
-            "title": "The \\"fourth_role\\" role needs to be updated",
-          },
-        ]
-      `);
+      expect(response).toEqual([
+        expect.objectContaining({ title: 'The "role_siem_all" role needs to be updated' }),
+        expect.objectContaining({ title: 'The "role_siem_read" role needs to be updated' }),
+        expect.objectContaining({
+          title: 'The "role_siem_minimal_all_cases_all_cases_read" role needs to be updated',
+        }),
+        expect.objectContaining({
+          title: 'The "role_siem_minimal_read_cases_read" role needs to be updated',
+        }),
+        // the fifth_role and sixth_role have been filtered out because they do not grant access to Cases
+      ]);
     });
   });
 });
