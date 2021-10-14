@@ -599,7 +599,7 @@ export const tasks: TelemetryTask[] = [
     executor: async ({ search, indices }) => {
       const response = await search({
         index: [indices.transaction, indices.span, indices.error],
-        terminateAfter: 1,
+        terminate_after: 1,
         body: {
           query: {
             exists: {
