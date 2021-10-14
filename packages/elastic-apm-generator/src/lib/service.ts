@@ -14,6 +14,7 @@ export class Service extends Entity {
     return new Instance({
       ...this.fields,
       ['service.node.name']: instanceName,
+      'container.id': instanceName,
     });
   }
 }
