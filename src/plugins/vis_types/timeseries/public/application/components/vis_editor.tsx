@@ -26,6 +26,7 @@ import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { PanelConfig } from './panel_config';
 import { extractIndexPatternValues } from '../../../common/index_patterns_utils';
+import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
 import { VisPicker } from './vis_picker';
 import { fetchFields, VisFields } from '../lib/fetch_fields';
 import { getDataStart, getCoreStart } from '../../services';
@@ -69,8 +70,24 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       autoApply: true,
       dirty: false,
       model: {
-        isNew: !this.props.vis.id,
+        // we should set default value for 'time_range_mode' in model so that when user save visualization
+        // we set right mode in savedObject
+        // ternary operator needed because old visualization have 'time_range_mode' as undefined for 'last_value'
+        // but for creating new visaulization we should use 'entire_timerange' as default.
+        [TIME_RANGE_MODE_KEY]:
+          this.props.vis.title && this.props.vis.params.type !== 'timeseries'
+            ? TIME_RANGE_DATA_MODES.LAST_VALUE
+            : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
         ...this.props.vis.params,
+        series: this.props.vis.params.series.map((val) => ({
+          [TIME_RANGE_MODE_KEY]:
+            this.props.vis.title &&
+            this.props.vis.params.type !== 'timeseries' &&
+            val.override_index_pattern
+              ? TIME_RANGE_DATA_MODES.LAST_VALUE
+              : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+          ...val,
+        })),
       },
       extractedIndexPatterns: [''],
     };

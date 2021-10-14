@@ -169,6 +169,5 @@ export interface Panel {
   time_range_mode?: string;
   tooltip_mode?: TOOLTIP_MODES;
   type: PANEL_TYPES;
-  isNew?: boolean;
   use_kibana_indexes?: boolean;
 }
