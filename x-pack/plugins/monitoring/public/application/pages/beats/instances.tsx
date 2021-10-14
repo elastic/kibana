@@ -71,12 +71,7 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   ]);
 
   return (
-    <BeatsTemplate
-      title={title}
-      pageTitle={pageTitle}
-      getPageData={getPageData}
-      data-test-subj="beatsListingPage"
-    >
+    <BeatsTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
       <div data-test-subj="monitoringBeatsInstancesApp">
         <SetupModeRenderer
           productName={BEATS_SYSTEM_ID}
