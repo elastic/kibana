@@ -517,7 +517,7 @@ export class RulesClient {
       entity: AlertingAuthorizationEntity.Rule,
     });
 
-    // default duration of instance summary is 60 * alert interval, but no longer than 5 mins
+    // default duration of instance summary is 60 * alert interval
     const dateNow = new Date();
     const durationMillis = parseDuration(alert.schedule.interval) * 60;
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
