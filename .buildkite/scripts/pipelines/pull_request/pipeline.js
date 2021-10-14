@@ -55,17 +55,21 @@ const uploadPipeline = (pipelineContent) => {
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (
-      await doAnyChangesMatch([
+      (await doAnyChangesMatch([
         /^x-pack\/plugins\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
-      ])
+      ])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/apm/])) {
+    if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/apm/])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
     }
 
