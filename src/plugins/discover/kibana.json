@@ -15,8 +15,8 @@
     "savedObjects",
     "indexPatternFieldEditor"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection"],
-  "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "fieldFormats"],
+  "optionalPlugins": ["home", "share", "usageCollection", "spaces"],
+  "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "fieldFormats", "dataViews"],
   "extraPublicDirs": ["common"],
   "owner": {
     "name": "Data Discovery",

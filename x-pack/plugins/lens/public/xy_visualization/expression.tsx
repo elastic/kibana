@@ -927,6 +927,7 @@ export function XYChart({
             right: Boolean(yAxesMap.right),
           }}
           isHorizontal={shouldRotate}
+          thresholdPaddingMap={thresholdPaddings}
         />
       ) : null}
     </Chart>

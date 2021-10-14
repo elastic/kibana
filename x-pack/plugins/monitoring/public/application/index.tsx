@@ -32,6 +32,8 @@ import {
 import { BeatsInstancePage } from './pages/beats/instance';
 import { ApmOverviewPage, ApmInstancesPage, ApmInstancePage } from './pages/apm';
 import { KibanaOverviewPage } from './pages/kibana/overview';
+import { KibanaInstancesPage } from './pages/kibana/instances';
+import { KibanaInstancePage } from './pages/kibana/instance';
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
 import { ElasticsearchIndexPage } from './pages/elasticsearch/index_page';
@@ -57,9 +59,15 @@ import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
 export const renderApp = (
   core: CoreStart,
   plugins: MonitoringStartPluginDependencies,
-  { element, setHeaderActionMenu }: AppMountParameters,
+  { element, history, setHeaderActionMenu }: AppMountParameters,
   externalConfig: ExternalConfig
 ) => {
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlistenParentHistory = history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+
   ReactDOM.render(
     <MonitoringApp
       core={core}
@@ -72,6 +80,7 @@ export const renderApp = (
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
+    unlistenParentHistory();
   };
 };
 
@@ -186,6 +195,20 @@ const MonitoringApp: React.FC<{
                     />
 
                     {/* Kibana Views */}
+                    <RouteInit
+                      path="/kibana/instances/:instance"
+                      component={KibanaInstancePage}
+                      codePaths={[CODE_PATH_KIBANA]}
+                      fetchAllClusters={false}
+                    />
+
+                    <RouteInit
+                      path="/kibana/instances"
+                      component={KibanaInstancesPage}
+                      codePaths={[CODE_PATH_KIBANA]}
+                      fetchAllClusters={false}
+                    />
+
                     <RouteInit
                       path="/kibana"
                       component={KibanaOverviewPage}
