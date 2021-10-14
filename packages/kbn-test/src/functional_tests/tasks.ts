@@ -169,7 +169,7 @@ export async function startServers({ ...options }: StartServerOptions) {
         ...opts,
         extraKbnOpts: [
           ...options.extraKbnOpts,
-          ...(options.installDir ? [] : ['--dev', '--no-dev-config']),
+          ...(options.installDir ? [] : ['--dev', '--no-dev-config', '--no-dev-credentials']),
         ],
       },
     });
