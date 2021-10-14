@@ -8,10 +8,11 @@
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
 
-import { setupEnvironment, kibanaDeprecationsServiceHelpers } from '../helpers';
-import { KibanaTestBed, setupKibanaPage } from './kibana_deprecations.helpers';
+import { setupEnvironment } from '../../helpers';
+import { kibanaDeprecationsServiceHelpers } from '../service.mock';
+import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
 
-describe('Kibana deprecation details flyout', () => {
+describe('Kibana deprecations - Deprecation details flyout', () => {
   let testBed: KibanaTestBed;
   const { server } = setupEnvironment();
   const {
@@ -73,6 +74,17 @@ describe('Kibana deprecation details flyout', () => {
       expect(exists('manualStepsListItem')).toBe(false);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(manualDeprecation.title);
     });
+  });
+
+  test('Shows documentationUrl when present', async () => {
+    const { find, actions } = testBed;
+    const deprecation = mockedKibanaDeprecations[1];
+
+    await actions.table.clickDeprecationAt(1);
+
+    expect(find('kibanaDeprecationDetails.documentationLink').props().href).toBe(
+      deprecation.documentationUrl
+    );
   });
 
   describe('Deprecation with automatic resolution', () => {
