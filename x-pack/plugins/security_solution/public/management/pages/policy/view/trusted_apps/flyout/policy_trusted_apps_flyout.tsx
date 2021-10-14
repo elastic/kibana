@@ -182,6 +182,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
               defaultMessage: 'Search trusted applications',
             }
           )}
+          hideRefreshButton
         />
         <EuiSpacer size="m" />
 
