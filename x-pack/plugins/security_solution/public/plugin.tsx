@@ -46,7 +46,7 @@ import {
 } from '../common/constants';
 
 import { getDeepLinks } from './app/deep_links';
-import { manageOldSiemRoutes } from './helpers';
+import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -153,7 +153,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           services: await startServices,
           store: await this.store(coreStart, startPlugins, subPlugins),
           usageCollection: plugins.usageCollection,
-          subPlugins,
+          subPluginRoutes: getSubPluginRoutesByCapabilities(
+            subPlugins,
+            coreStart.application.capabilities
+          ),
         });
       },
     });
@@ -382,9 +385,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...subPlugins.exceptions.storageTimelines!.timelineById,
             ...subPlugins.hosts.storageTimelines!.timelineById,
             ...subPlugins.network.storageTimelines!.timelineById,
-            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-              ? subPlugins.ueba.storageTimelines!.timelineById
-              : {}),
+            ...subPlugins.ueba.storageTimelines!.timelineById,
           },
         },
       };
@@ -415,9 +416,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         {
           ...subPlugins.hosts.store.reducer,
           ...subPlugins.network.store.reducer,
-          ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-            ? subPlugins.ueba.store.reducer
-            : {}),
+          ...subPlugins.ueba.store.reducer,
           timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
           ...tGridReducer,

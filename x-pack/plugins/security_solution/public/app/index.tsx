@@ -22,12 +22,8 @@ export const renderApp = ({
   services,
   store,
   usageCollection,
-  subPlugins,
+  subPluginRoutes,
 }: RenderAppProps): (() => void) => {
-  const allRoutes = Object.entries(subPlugins).reduce<RouteProps[]>(
-    (acc, [, value]) => [...acc, ...value.routes],
-    []
-  );
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   render(
@@ -40,7 +36,7 @@ export const renderApp = ({
     >
       <ApplicationUsageTrackingProvider>
         <Switch>
-          {allRoutes.map((route, index) => {
+          {subPluginRoutes.map((route, index) => {
             return <Route key={`route-${index}`} {...route} />;
           })}
           <Route path="" exact>

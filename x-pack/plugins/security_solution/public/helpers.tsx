@@ -6,9 +6,10 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { matchPath } from 'react-router-dom';
+import React from 'react';
+import { matchPath, RouteProps } from 'react-router-dom';
 
-import { CoreStart } from '../../../../src/core/public';
+import { Capabilities, CoreStart } from '../../../../src/core/public';
 import {
   ALERTS_PATH,
   APP_UI_ID,
@@ -16,14 +17,17 @@ import {
   RULES_PATH,
   UEBA_PATH,
   RISKY_HOSTS_INDEX_PREFIX,
+  SERVER_APP_ID,
+  CASES_FEATURE_ID,
 } from '../common/constants';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
 } from '../common/search_strategy/security_solution';
 import { TimelineEqlResponse } from '../common/search_strategy/timeline';
+import { NoPrivilegesPage } from './app/no_privileges';
 import { SecurityPageName } from './app/types';
-import { InspectResponse } from './types';
+import { CASES_SUB_PLUGIN_KEY, InspectResponse, StartedSubPlugins } from './types';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -157,4 +161,29 @@ export const isDetectionsPath = (pathname: string): boolean => {
 
 export const getHostRiskIndex = (spaceId: string): string => {
   return `${RISKY_HOSTS_INDEX_PREFIX}${spaceId}`;
+};
+
+export const getSubPluginRoutesByCapabilities = (
+  subPlugins: StartedSubPlugins,
+  capabilities: Capabilities
+): RouteProps[] => {
+  return Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
+    if (isSubPluginAvailable(key, capabilities)) {
+      return [...acc, ...value.routes];
+    }
+    return [
+      ...acc,
+      ...value.routes.map((route: RouteProps) => ({
+        path: route.path,
+        component: <NoPrivilegesPage subPluginKey={key} />,
+      })),
+    ];
+  }, []);
+};
+
+const isSubPluginAvailable = (pluginKey: string, capabilities: Capabilities): boolean => {
+  if (CASES_SUB_PLUGIN_KEY === pluginKey) {
+    return capabilities[CASES_FEATURE_ID].read_cases === true;
+  }
+  return capabilities[SERVER_APP_ID].show === true;
 };

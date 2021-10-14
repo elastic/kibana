@@ -44,6 +44,7 @@ import {
   UEBA_PATH,
   CASES_FEATURE_ID,
   HOST_ISOLATION_EXCEPTIONS_PATH,
+  SERVER_APP_ID,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
@@ -365,7 +366,7 @@ export function getDeepLinks(
         if (deepLink.id === SecurityPageName.investigate) {
           return true;
         }
-        return capabilities?.siem.show ?? false;
+        return capabilities == null || capabilities[SERVER_APP_ID].show === true;
       })
       .map((deepLink) => {
         if (
