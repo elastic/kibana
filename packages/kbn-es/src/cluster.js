@@ -36,7 +36,7 @@ const first = (stream, map) =>
 
 exports.Cluster = class Cluster {
   constructor({ log = defaultLog, ssl = false } = {}) {
-    this._log = log;
+    this._log = log.withType('@kbn/es Cluster');
     this._ssl = ssl;
     this._caCertPromise = ssl ? readFile(CA_CERT_PATH) : undefined;
   }
@@ -257,9 +257,13 @@ exports.Cluster = class Cluster {
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
-      esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
-      esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
-      esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
+
+      // Include default keystore settings only if keystore isn't configured.
+      if (!esArgs.some((arg) => arg.startsWith('xpack.security.http.ssl.keystore'))) {
+        esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+        esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
+        esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
+      }
     }
 
     const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {
