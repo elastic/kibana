@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
 
   // FLAKY: https://github.com/elastic/kibana/issues/105171
-  describe.skip('Dashboard', () => {
+  describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
     const clonedDashboardName = 'Dashboard Listing A11y Copy';
 

@@ -92,8 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.saveCurrentSavedQuery();
     });
 
-    // issue - https://github.com/elastic/kibana/issues/78488
-    it.skip('a11y test on saved queries list panel', async () => {
+    it('a11y test on saved queries list panel', async () => {
       await PageObjects.discover.clickSavedQueriesPopOver();
       await testSubjects.moveMouseTo(
         'saved-query-list-item load-saved-query-test-button saved-query-list-item-selected saved-query-list-item-selected'
