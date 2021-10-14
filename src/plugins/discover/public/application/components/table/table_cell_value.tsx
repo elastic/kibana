@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Fragment, useState } from 'react';
 import { IgnoredReason } from '../../helpers/get_ignored_reason';
@@ -13,6 +14,28 @@ import { FieldRecord } from './table';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 
 const COLLAPSE_LINE_LENGTH = 350;
+
+interface IgnoreWarningProps {
+  reason: IgnoredReason;
+  rawValue: unknown;
+}
+
+const IgnoreWarning: React.FC<IgnoreWarningProps> = ({ rawValue, reason }) => {
+  const multiValue = Array.isArray(rawValue) && rawValue.length > 1;
+
+  // TODO: Add tooltip with a bit more information
+  // TODO: Differentiate between single value and multi value in wording
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="alert" color="warning" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTextColor color="warning">Ignored value</EuiTextColor>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 type TableFieldValueProps = Pick<FieldRecord['field'], 'field'> & {
   formattedValue: FieldRecord['value']['formattedValue'];
@@ -40,18 +63,13 @@ export const TableFieldValue = ({
 
   const onToggleCollapse = () => setFieldOpen((fieldOpenPrev) => !fieldOpenPrev);
 
-  const multiValue = Array.isArray(rawValue) && rawValue.length > 1;
-
   return (
     <Fragment>
+      {/* TODO: collapse those two into one line if both are showing */}
       {isCollapsible && (
         <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
       )}
-      {ignoreReason && (
-        <em>
-          {ignoreReason.toString()} (multiValue: {String(multiValue)})
-        </em>
-      )}
+      {ignoreReason && <IgnoreWarning reason={ignoreReason} rawValue={rawValue} />}
       <div
         className={valueClassName}
         data-test-subj={`tableDocViewRow-${field}-value`}
