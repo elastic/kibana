@@ -33,8 +33,6 @@ export function shouldShowDurationWarning(
     return false;
   }
   const ruleTypeTimeout: string = ruleType.ruleTaskTimeout;
-  const ruleTypeTimeoutMillis: number | undefined = ruleTypeTimeout
-    ? parseDuration(ruleTypeTimeout)
-    : undefined;
-  return ruleTypeTimeoutMillis ? avgDurationMillis > ruleTypeTimeoutMillis : false;
+  const ruleTypeTimeoutMillis: number = parseDuration(ruleTypeTimeout);
+  return avgDurationMillis > ruleTypeTimeoutMillis;
 }

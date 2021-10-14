@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { formatMillisForDisplay } from './execution_duration_utils';
+import { formatMillisForDisplay, shouldShowDurationWarning } from './execution_duration_utils';
+import { AlertType as RuleType } from '../../types';
 
 describe('formatMillisForDisplay', () => {
   it('should return 0 for undefined', () => {
@@ -28,3 +29,40 @@ describe('formatMillisForDisplay', () => {
     expect(formatMillisForDisplay(3634601)).toEqual('01:00:34.601');
   });
 });
+
+describe('shouldShowDurationWarning', () => {
+  it('should return false if rule type or ruleTaskTimeout is undefined', () => {
+    expect(shouldShowDurationWarning(undefined, 1000)).toEqual(false);
+    expect(shouldShowDurationWarning(mockRuleType(), 1000)).toEqual(false);
+  });
+
+  it('should return false if average duration is less than rule task timeout', () => {
+    expect(shouldShowDurationWarning(mockRuleType({ ruleTaskTimeout: '1m' }), 1000)).toEqual(false);
+  });
+
+  it('should return true if average duration is greater than rule task timeout', () => {
+    expect(shouldShowDurationWarning(mockRuleType({ ruleTaskTimeout: '1m' }), 120000)).toEqual(
+      true
+    );
+  });
+});
+
+function mockRuleType(overwrites: Partial<RuleType> = {}): RuleType {
+  return {
+    id: 'test.testRuleType',
+    name: 'My Test Rule Type',
+    actionGroups: [{ id: 'default', name: 'Default Action Group' }],
+    actionVariables: {
+      context: [],
+      state: [],
+      params: [],
+    },
+    defaultActionGroupId: 'default',
+    recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    authorizedConsumers: {},
+    producer: 'alerts',
+    minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
+    ...overwrites,
+  };
+}
