@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mapValues } from 'lodash';
+import { flow, identity, mapValues } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { SavedQueryAttributes } from '../../../common';
 import { extract, getAllMigrations } from '../../../common/query/persistable_state';
@@ -24,7 +24,7 @@ const extractFilterReferences: SavedObjectMigrationFn<SavedQueryAttributes, Save
     };
   };
 
-const migrations = mapValues(
+const filterMigrations = mapValues(
   getAllMigrations(),
   (migrate): SavedObjectMigrationFn<SavedQueryAttributes> => {
     return (doc) => ({
@@ -38,6 +38,6 @@ const migrations = mapValues(
 );
 
 export const savedQueryMigrations = {
-  ...migrations,
-  '7.16.0': extractFilterReferences,
+  ...filterMigrations,
+  '7.16.0': flow(filterMigrations['7.16.0'] ?? identity, extractFilterReferences),
 };
