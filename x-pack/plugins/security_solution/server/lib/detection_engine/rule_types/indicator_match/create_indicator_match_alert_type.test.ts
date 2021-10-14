@@ -156,11 +156,11 @@ describe('Indicator Match Alerts', () => {
               ...sampleDocNoSortId(v4()),
               _source: {
                 ...sampleDocNoSortId(v4())._source,
-                'threatintel.indicator.file.hash.md5': 'a1b2c3',
+                'threat.indicator.file.hash.md5': 'a1b2c3',
               },
               fields: {
                 ...sampleDocNoSortId(v4()).fields,
-                'threatintel.indicator.file.hash.md5': ['a1b2c3'],
+                'threat.indicator.file.hash.md5': ['a1b2c3'],
               },
             },
           ],
