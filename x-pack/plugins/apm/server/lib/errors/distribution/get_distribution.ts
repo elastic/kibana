@@ -31,8 +31,8 @@ export async function getErrorDistribution({
   setup: Setup;
   start: number;
   end: number;
-  comparisonStart: number;
-  comparisonEnd: number;
+  comparisonStart?: number;
+  comparisonEnd?: number;
 }) {
   const bucketSize = getBucketSize({ start, end });
   const commonProps = {
@@ -43,21 +43,29 @@ export async function getErrorDistribution({
     setup,
     bucketSize,
   };
-  const currentPeriodPromise = await getBuckets({
+  const currentPeriodPromise = getBuckets({
     ...commonProps,
     start,
     end,
   });
-  const previousPeriodPromise = await getBuckets({
-    ...commonProps,
-    start: comparisonStart,
-    end: comparisonEnd,
-  });
+  const previousPeriodPromise =
+    comparisonStart && comparisonEnd
+      ? getBuckets({
+          ...commonProps,
+          start: comparisonStart,
+          end: comparisonEnd,
+        })
+      : { noHits: true, buckets: [], bucketSize: null };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    currentPeriodPromise,
+    previousPeriodPromise,
+  ]);
 
   return {
-    noHits: [currentPeriodPromise.noHits, previousPeriodPromise.noHits],
-    currentPeriod: currentPeriodPromise.buckets,
-    previousPeriod: previousPeriodPromise.buckets,
+    noHits: [currentPeriod.noHits, previousPeriod.noHits],
+    currentPeriod: currentPeriod.buckets,
+    previousPeriod: previousPeriod.buckets,
     bucketSize,
   };
 }
