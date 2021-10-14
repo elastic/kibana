@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
+import { find } from 'lodash';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { IndexReact } from '../../../components/elasticsearch/index/index_react';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useCharts } from '../../hooks/use_charts';
 import { ItemTemplate } from './item_template';
@@ -23,15 +24,11 @@ import { labels } from '../../../components/elasticsearch/shard_allocation/lib/l
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
-
-export const ElasticsearchIndexPage: React.FC<ComponentProps> = () => {
+export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const { services } = useKibana<{ data: any }>();
   const { index }: { index: string } = useParams();
   const { zoomInfo, onBrush } = useCharts();
@@ -40,6 +37,19 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = () => {
   const [indexLabel, setIndexLabel] = useState(labels.index as any);
   const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
   const [alerts, setAlerts] = useState<AlertsByName>({});
+  const cluster = find(clusters, {
+    cluster_uuid: clusterUuid,
+  }) as any;
+
+  useEffect(() => {
+    if (cluster) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inElasticsearch: true,
+        name: 'indices',
+        instance: index,
+      });
+    }
+  }, [cluster, generateBreadcrumbs, index]);
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.index.overview.title', {
     defaultMessage: 'Elasticsearch - Indices - {indexName} - Overview',
