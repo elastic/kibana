@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
-import expect from '../../../../../../../../private/var/tmp/_bazel_quynhnguyen/bd5cc7ce3740c1abb2c63a2609d8bb9f/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-expect';
 
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
