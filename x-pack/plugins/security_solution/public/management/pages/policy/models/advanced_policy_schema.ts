@@ -748,7 +748,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'mac.advanced.memory_protection.memory_scan_collect_sample',
-    first_supported_version: '7.15',
+    first_supported_version: '7.16',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.memory_scan_collect_sample',
       {
@@ -759,7 +759,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'mac.advanced.memory_protection.memory_scan',
-    first_supported_version: '7.15',
+    first_supported_version: '7.16',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.memory_scan',
       {
@@ -770,7 +770,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'linux.advanced.memory_protection.memory_scan_collect_sample',
-    first_supported_version: '7.15',
+    first_supported_version: '7.16',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.memory_scan_collect_sample',
       {
@@ -781,7 +781,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'linux.advanced.memory_protection.memory_scan',
-    first_supported_version: '7.15',
+    first_supported_version: '7.16',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.memory_scan',
       {
