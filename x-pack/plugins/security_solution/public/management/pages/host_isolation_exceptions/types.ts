@@ -6,8 +6,10 @@
  */
 
 import type {
+  CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { AsyncResourceState } from '../../state/async_resource_state';
 
@@ -26,5 +28,9 @@ export interface HostIsolationExceptionsPageState {
   deletion: {
     item?: ExceptionListItemSchema;
     status: AsyncResourceState<ExceptionListItemSchema>;
+  };
+  form: {
+    entry?: CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
+    status: AsyncResourceState<CreateExceptionListItemSchema | UpdateExceptionListItemSchema>;
   };
 }
