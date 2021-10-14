@@ -67,19 +67,19 @@ const deprecations7x: PluginConfigDescriptor<IndexManagementConfig7x>['deprecati
     }
 
     addDeprecation({
-      title: i18n.translate('xpack.index_management.deprecations.enabledTitle', {
+      title: i18n.translate('xpack.idxMgmt.deprecations.enabledTitle', {
         defaultMessage: 'Setting "xpack.index_management.enabled" is deprecated',
       }),
-      message: i18n.translate('xpack.index_management.deprecations.enabledMessage', {
+      message: i18n.translate('xpack.idxMgmt.deprecations.enabledMessage', {
         defaultMessage:
           'Use the "xpack.index_management.ui.enabled" setting instead of "xpack.index_management.enabled".',
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('xpack.index_management.deprecations.enabled.manualStepOneMessage', {
+          i18n.translate('xpack.idxMgmt.deprecations.enabled.manualStepOneMessage', {
             defaultMessage: 'Open the kibana.yml config file.',
           }),
-          i18n.translate('xpack.index_management.deprecations.enabled.manualStepTwoMessage', {
+          i18n.translate('xpack.idxMgmt.deprecations.enabled.manualStepTwoMessage', {
             defaultMessage:
               'Change the "xpack.index_management.enabled" setting to "xpack.index_management.ui.enabled".',
           }),
