@@ -44,6 +44,7 @@ import {
   _applyIndexPrivileges,
 } from './package_policy';
 import { appContextService } from './app_context';
+import { fetchInfo } from './epm/registry';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
@@ -89,7 +90,7 @@ hosts:
   ];
 }
 
-function mockedRegistryInfo() {
+function mockedRegistryInfo(): RegistryPackage {
   return {} as RegistryPackage;
 }
 
@@ -105,11 +106,7 @@ jest.mock('./epm/packages', () => {
   };
 });
 
-jest.mock('./epm/registry', () => {
-  return {
-    fetchInfo: () => ({}),
-  };
-});
+jest.mock('./epm/registry');
 
 jest.mock('./agent_policy', () => {
   return {
@@ -131,9 +128,14 @@ jest.mock('./agent_policy', () => {
   };
 });
 
+const mockedFetchInfo = fetchInfo as jest.Mock<ReturnType<typeof fetchInfo>>;
+
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
 describe('Package policy service', () => {
+  beforeEach(() => {
+    mockedFetchInfo.mockResolvedValue({} as RegistryPackage);
+  });
   describe('_compilePackagePolicyInputs', () => {
     it('should work with config variables from the stream', async () => {
       const inputs = await packagePolicyService._compilePackagePolicyInputs(
@@ -846,6 +848,59 @@ describe('Package policy service', () => {
       const [modifiedStream] = modifiedInput.streams;
       expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
       expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+
+    it('should update elasticsearch.priviles.cluster when updating', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+
+      mockedFetchInfo.mockResolvedValue({
+        elasticsearch: {
+          privileges: {
+            cluster: ['monitor'],
+          },
+        },
+      } as RegistryPackage);
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: [] }
+      );
+
+      expect(result.elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
     });
   });
 

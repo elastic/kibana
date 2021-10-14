@@ -333,7 +333,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         package: { name: 'test-package', version: '0.0.0', title: 'Test Package' },
         elasticsearch: {
           privileges: {
-            cluster: ['monitor/main'],
+            cluster: ['monitor'],
           },
         },
         inputs: [
@@ -369,7 +369,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
             privileges: ['auto_configure', 'create_doc'],
           },
         ],
-        cluster: ['monitor/main'],
+        cluster: ['monitor'],
       },
     });
   });
