@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
-import { BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
+import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
@@ -339,6 +339,11 @@ export function AlertInstances({
                       alertInstanceSummary.executionDuration.average,
                     ])}
                     curve={CurveType.CURVE_NATURAL}
+                  />
+                  <Axis
+                    id="left-axis"
+                    position="left"
+                    tickFormat={(d) => formatMillisForDisplay(d)}
                   />
                 </Chart>
               </>
