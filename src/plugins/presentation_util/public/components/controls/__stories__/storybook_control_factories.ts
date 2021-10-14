@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ControlsService } from '../controls_service';
-import { InputControlFactory } from '../../../services/controls';
 import { flightFields, getEuiSelectableOptions } from './flights';
 import { OptionsListEmbeddableFactory } from '../control_types/options_list';
+import { InputControlFactory, PresentationControlsService } from '../../../services/controls';
 
-export const getControlsServiceStub = () => {
-  const controlsServiceStub = new ControlsService();
-
+export const populateStorybookControlFactories = (
+  controlsServiceStub: PresentationControlsService
+) => {
   const optionsListFactoryStub = new OptionsListEmbeddableFactory(
     ({ field, search }) =>
       new Promise((r) => setTimeout(() => r(getEuiSelectableOptions(field, search)), 500)),
@@ -25,5 +24,4 @@ export const getControlsServiceStub = () => {
   const optionsListControlFactory = optionsListFactoryStub as unknown as InputControlFactory;
   optionsListControlFactory.getDefaultInput = () => ({});
   controlsServiceStub.registerInputControlType(optionsListControlFactory);
-  return controlsServiceStub;
 };
