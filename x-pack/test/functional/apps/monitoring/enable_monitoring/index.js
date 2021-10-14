@@ -11,7 +11,6 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring', 'common', 'header']);
   const esSupertest = getService('esSupertest');
   const noData = getService('monitoringNoData');
-  const testSubjects = getService('testSubjects');
   const clusterOverview = getService('monitoringClusterOverview');
   const retry = getService('retry');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
