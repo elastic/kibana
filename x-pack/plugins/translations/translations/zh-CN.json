@@ -10984,7 +10984,6 @@
     "xpack.fleet.epm.packageDetailsNav.packageCustomLinkText": "高级",
     "xpack.fleet.epm.packageDetailsNav.packagePoliciesLinkText": "策略",
     "xpack.fleet.epm.packageDetailsNav.settingsLinkText": "设置",
-    "xpack.fleet.epm.pageSubtitle": "使用 Elastic 代理从热门应用和服务中收集数据",
     "xpack.fleet.epm.releaseBadge.betaDescription": "在生产环境中不推荐使用此集成。",
     "xpack.fleet.epm.releaseBadge.betaLabel": "公测版",
     "xpack.fleet.epm.releaseBadge.experimentalDescription": "此集成可能有重大更改或将在未来版本中移除。",
