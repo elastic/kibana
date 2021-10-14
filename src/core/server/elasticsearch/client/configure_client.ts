@@ -8,7 +8,7 @@
 
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { Client, errors, Transport, HttpConnection } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import type {
   TransportRequestParams,
   TransportRequestOptions,
@@ -16,6 +16,7 @@ import type {
   DiagnosticResult,
 } from '@elastic/elasticsearch';
 import type { RequestBody } from '@elastic/transport/lib/types';
+import { Transport, HttpConnection } from '@elastic/transport';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import type { ElasticsearchErrorDetails } from './types';
