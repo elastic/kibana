@@ -8,12 +8,30 @@
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import {
+  EndpointPrivileges,
+  useEndpointPrivileges,
+} from '../../../common/components/user_privileges/use_endpoint_privileges';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
 import { SearchExceptions, SearchExceptionsProps } from '.';
 
 let onSearchMock: jest.Mock;
+const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
 
-jest.mock('../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../common/components/user_privileges/use_endpoint_privileges', () => {
+  return {
+    ...jest.requireActual('../../../common/components/user_privileges/use_endpoint_privileges'),
+    useEndpointPrivileges: jest.fn(() => {
+      return {
+        loading: false,
+        canAccessEndpointManagement: true,
+        canAccessFleet: false,
+        isPlatinumPlus: true,
+      };
+    }),
+  };
+});
 
 describe('Search exceptions', () => {
   let appTestContext: AppContextTestRender;
@@ -21,6 +39,16 @@ describe('Search exceptions', () => {
   let render: (
     props?: Partial<SearchExceptionsProps>
   ) => ReturnType<AppContextTestRender['render']>;
+
+  const loadedUserEndpointPrivilegesState = (
+    endpointOverrides: Partial<EndpointPrivileges> = {}
+  ): EndpointPrivileges => ({
+    loading: false,
+    canAccessFleet: true,
+    canAccessEndpointManagement: true,
+    isPlatinumPlus: false,
+    ...endpointOverrides,
+  });
 
   beforeEach(() => {
     onSearchMock = jest.fn();
@@ -36,6 +64,12 @@ describe('Search exceptions', () => {
       renderResult = appTestContext.render(<SearchExceptions {...props} />);
       return renderResult;
     };
+
+    mockUseEndpointPrivileges.mockReturnValue(loadedUserEndpointPrivilegesState());
+  });
+
+  afterAll(() => {
+    mockUseEndpointPrivileges.mockReset();
   });
 
   it('should have a default value', () => {
@@ -77,5 +111,27 @@ describe('Search exceptions', () => {
     const element = render({ hideRefreshButton: true });
 
     expect(element.queryByTestId('searchButton')).toBeNull();
+  });
+
+  it('should hide policies selector when no license', () => {
+    const generator = new EndpointDocGenerator('policy-list');
+    const policy = generator.generatePolicyPackagePolicy();
+    mockUseEndpointPrivileges.mockReturnValue(
+      loadedUserEndpointPrivilegesState({ isPlatinumPlus: false })
+    );
+    const element = render({ policyList: [policy], hasPolicyFilter: true });
+
+    expect(element.queryByTestId('policiesSelectorButton')).toBeNull();
+  });
+
+  it('should display policies selector when right license', () => {
+    const generator = new EndpointDocGenerator('policy-list');
+    const policy = generator.generatePolicyPackagePolicy();
+    mockUseEndpointPrivileges.mockReturnValue(
+      loadedUserEndpointPrivilegesState({ isPlatinumPlus: true })
+    );
+    const element = render({ policyList: [policy], hasPolicyFilter: true });
+
+    expect(element.queryByTestId('policiesSelectorButton')).not.toBeNull();
   });
 });
