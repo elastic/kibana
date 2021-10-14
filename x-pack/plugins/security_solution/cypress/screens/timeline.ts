@@ -28,8 +28,6 @@ export const CELL = '[data-test-subj="statefulCell"]';
 
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
-export const COLUMN_HEADERS = '[data-test-subj="column-headers"] [data-test-subj^=header-text]';
-
 export const COMBO_BOX = '.euiComboBoxOption__content';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
@@ -55,19 +53,9 @@ export const FAVORITE_TIMELINE = '[data-test-subj="timeline-favorite-filled-star
 
 export const FIELD_BROWSER = '[data-test-subj="show-field-browser"]';
 
-export const GRAPH_TAB_BUTTON = '[data-test-subj="timelineTabs-graph"]';
-
-export const HEADER = '[data-test-subj="header"]';
-
-export const HEADERS_GROUP =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"]';
-
 export const HOST_KPI = '[data-test-subj="siem-timeline-host-kpi"]';
 
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
-
-export const ID_FIELD =
-  '[data-test-subj="timeline"] [datatimelineTabs-notes-test-subj="field-name-_id"]';
 
 export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 
@@ -86,11 +74,6 @@ export const EVENT_NOTE = '[data-test-subj="timeline-notes-button-small"]';
 export const NOTE_DESCRIPTION = '[data-test-subj="note-preview-description"]';
 
 export const NOTE_PREVIEW = '[data-test-subj^="note-preview"]';
-
-export const NOTE_BY_NOTE_ID = (noteId: string) =>
-  `[data-test-subj="note-preview-${noteId}"] .euiMarkdownFormat`;
-
-export const NOTE_CONTENT = (noteId: string) => `${NOTE_BY_NOTE_ID(noteId)} p`;
 
 export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
@@ -117,13 +100,9 @@ export const OPEN_TIMELINE_TEMPLATE_ICON =
 
 export const PIN_EVENT = '[data-test-subj="pin"]';
 
-export const PINNED_TAB_BUTTON = '[data-test-subj="timelineTabs-pinned"]';
-
 export const PROCESS_KPI = '[data-test-subj="siem-timeline-process-kpi"';
 
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
-
-export const REMOVE_COLUMN = '[data-test-subj="remove-column"]';
 
 export const RESET_FIELDS =
   '[data-test-subj="fields-browser-container"] [data-test-subj="reset-fields"]';
@@ -134,18 +113,6 @@ export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
 
 export const INDICATOR_MATCH_ROW_RENDER = '[data-test-subj="threat-match-row"]';
-
-export const QUERY_TAB_EVENTS_TABLE = '[data-test-subj="query-events-table"]';
-
-export const QUERY_TAB_EVENTS_BODY = '[data-test-subj="query-tab-flyout-body"]';
-
-export const QUERY_TAB_EVENTS_FOOTER = '[data-test-subj="query-tab-flyout-footer"]';
-
-export const PINNED_TAB_EVENTS_TABLE = '[data-test-subj="pinned-events-table"]';
-
-export const PINNED_TAB_EVENTS_BODY = '[data-test-subj="pinned-tab-flyout-body"]';
-
-export const PINNED_TAB_EVENTS_FOOTER = '[data-test-subj="pinned-tab-flyout-footer"]';
 
 export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 
@@ -169,8 +136,6 @@ export const TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN = '[data-test-subj="crea
 export const TIMELINE_CORRELATION_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 
 export const TIMELINE_CORRELATION_TAB = '[data-test-subj="timelineTabs-eql"]';
-
-export const TIMELINE_BOTTOM_BAR_CONTAINER = '[data-test-subj="timeline-bottom-bar-container"]';
 
 export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerActions"]';
 
@@ -238,8 +203,6 @@ export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-plus-in-circle"
 
 export const TIMELINE_SEARCH_OR_FILTER = '[data-test-subj="timeline-select-search-or-filter"]';
 
-export const TIMELINE_SEARCH_OR_FILTER_CONTENT = '.searchOrFilterPopover';
-
 export const TIMELINE_KQLMODE_SEARCH = '[data-test-subj="kqlModePopoverSearch"]';
 
 export const TIMELINE_KQLMODE_FILTER = '[data-test-subj="kqlModePopoverFilter"]';
@@ -281,10 +244,6 @@ export const TIMELINE_SHOW_ROW_RENDERERS_GEAR = '[data-test-subj="show-row-rende
 export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
 
 export const TIMELINE_TAB_CONTENT_EQL = '[data-test-subj="timeline-tab-content-eql"]';
-
-export const TIMELINE_TAB_CONTENT_QUERY = '[data-test-subj="timeline-tab-content-query"]';
-
-export const TIMELINE_TAB_CONTENT_PINNED = '[data-test-subj="timeline-tab-content-pinned"]';
 
 export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
   '[data-test-subj="timeline-tab-content-graph-notes"]';

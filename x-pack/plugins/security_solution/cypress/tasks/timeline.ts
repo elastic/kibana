@@ -24,7 +24,6 @@ import {
   DELETE_TIMELINE_BTN,
   DELETION_CONFIRMATION,
   FIELD_BROWSER,
-  ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
   ID_HOVER_ACTION_OVERFLOW_BTN,
@@ -71,8 +70,6 @@ import {
   PINNED_TAB_BUTTON,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
-
-import { drag, drop } from '../tasks/common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from '../tasks/fields_browser';
 
@@ -122,10 +119,6 @@ export const goToCorrelationTab = () => {
     })
     .should('be.visible');
   return cy.root().find(TIMELINE_CORRELATION_TAB);
-};
-
-export const getNotePreviewByNoteId = (noteId: string) => {
-  return cy.get(`[data-test-subj="note-preview-${noteId}"]`);
 };
 
 export const goToQueryTab = () => {
@@ -320,10 +313,6 @@ export const populateTimeline = () => {
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
 };
 
-export const unpinFirstEvent = () => {
-  cy.get(PIN_EVENT).first().click({ force: true });
-};
-
 const clickTimestampHoverActionOverflowButton = () => {
   cy.get(TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN).should('exist');
 
@@ -336,16 +325,6 @@ export const clickTimestampToggleField = () => {
   cy.get(TIMESTAMP_TOGGLE_FIELD).should('exist');
 
   cy.get(TIMESTAMP_TOGGLE_FIELD).click({ force: true });
-};
-
-export const dragAndDropIdToggleFieldToTimeline = () => {
-  cy.get(ID_HEADER_FIELD).should('not.exist');
-
-  cy.get(ID_FIELD).then((field) => drag(field));
-
-  cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`)
-    .first()
-    .then((headersDropArea) => drop(headersDropArea));
 };
 
 export const removeColumn = (columnName: string) => {
@@ -366,10 +345,6 @@ export const selectCase = (caseId: string) => {
 export const waitForTimelineChanges = () => {
   cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('exist');
   cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('not.exist');
-};
-
-export const waitForEventsPanelToBeLoaded = () => {
-  cy.get(QUERY_TAB_BUTTON).find('.euiBadge').should('exist');
 };
 
 /**
