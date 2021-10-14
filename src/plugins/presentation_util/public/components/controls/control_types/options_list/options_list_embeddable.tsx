@@ -16,7 +16,7 @@ import { tap, debounceTime, map, distinctUntilChanged } from 'rxjs/operators';
 import { esFilters } from '../../../../../../data/public';
 import { OptionsListStrings } from './options_list_strings';
 import { Embeddable, IContainer } from '../../../../../../embeddable/public';
-import { InputControlInput, InputControlOutput } from '../../types';
+import { InputControlInput, InputControlOutput } from '../../../../services/controls';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 
 const toggleAvailableOptions = (
