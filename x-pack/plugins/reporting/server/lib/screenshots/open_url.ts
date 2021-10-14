@@ -12,15 +12,21 @@ import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ConditionalHeaders } from '../../export_types/common';
 import { CaptureConfig } from '../../types';
+import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
 
 export const openUrl = async (
   captureConfig: CaptureConfig,
   browser: HeadlessChromiumDriver,
+  index: number,
   urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
-  waitForSelector: string,
   conditionalHeaders: ConditionalHeaders,
   logger: LevelLogger
 ): Promise<void> => {
+  // If we're moving to another page in the app, we'll want to wait for the app to tell us
+  // it's loaded the next page.
+  const page = index + 1;
+  const waitForSelector = page > 1 ? `[data-shared-page="${page}"]` : DEFAULT_PAGELOAD_SELECTOR;
+
   const endTrace = startTrace('open_url', 'wait');
   let url: string;
   let locator: undefined | LocatorParams;
