@@ -27,9 +27,9 @@ export interface FetchDataParams {
   absoluteTime: { start: number; end: number };
   relativeTime: { start: string; end: string };
   serviceName?: string;
-  // Size of the bucket in seconds calculated based on a time range. e.g. 60
+  // Bucket size in seconds (number)
   bucketSize: number;
-  // String representing the interval in seconds that is calculated based on a time range. e.g. '60s'
+  // Bucket size in seconds (string)
   intervalString: string;
 }
 

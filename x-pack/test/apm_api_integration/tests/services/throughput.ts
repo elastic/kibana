@@ -10,7 +10,11 @@ import expect from '@kbn/expect';
 import { first, last, meanBy } from 'lodash';
 import moment from 'moment';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import {
+  APIClientRequestParamsOf,
+  APIReturnType,
+} from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { RecursivePartial } from '../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { roundNumber } from '../../utils';
@@ -25,20 +29,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function callApi(overrides?: {
-    path?: {
-      serviceName?: string;
-    };
-    query?: {
-      start?: string;
-      end?: string;
-      transactionType?: string;
-      environment?: string;
-      kuery?: string;
-      comparisonStart?: string;
-      comparisonEnd?: string;
-    };
-  }) {
+  async function callApi(
+    overrides?: RecursivePartial<
+      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/throughput'>['params']
+    >
+  ) {
     const response = await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
       params: {
@@ -170,7 +165,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('switch environment', () => {
+      describe('production environment', () => {
         let throughput: ThroughputReturn;
 
         before(async () => {
@@ -184,7 +179,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(hasData).to.equal(true);
         });
 
-        it('returns throughput related to production environment', () => {
+        it('returns correct average throughput', () => {
           const throughputMean = meanBy(throughput.currentPeriod, 'y');
           expect(roundNumber(throughputMean)).to.be.equal(roundNumber(GO_PROD_RATE));
         });
@@ -232,23 +227,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const hasCurrentPeriodData = throughputResponse.currentPeriod.some(({ y }) =>
             isFiniteNumber(y)
           );
-          const hasPreivousPeriodData = throughputResponse.previousPeriod.some(({ y }) =>
+          const hasPreviousPeriodData = throughputResponse.previousPeriod.some(({ y }) =>
             isFiniteNumber(y)
           );
 
           expect(hasCurrentPeriodData).to.equal(true);
-          expect(hasPreivousPeriodData).to.equal(true);
+          expect(hasPreviousPeriodData).to.equal(true);
         });
 
         it('has same start time for both periods', () => {
-          expect(
-            new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-          ).to.equal(new Date(first(throughputResponse.previousPeriod)?.x ?? NaN).toISOString());
+          expect(first(throughputResponse.currentPeriod)?.x).to.equal(
+            first(throughputResponse.previousPeriod)?.x
+          );
         });
 
         it('has same end time for both periods', () => {
-          expect(new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()).to.equal(
-            new Date(last(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
+          expect(last(throughputResponse.currentPeriod)?.x).to.equal(
+            last(throughputResponse.previousPeriod)?.x
           );
         });
 
