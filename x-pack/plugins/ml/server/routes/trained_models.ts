@@ -57,7 +57,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
               )
             );
 
-            const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
+            const pipelinesResponse = await modelsProvider(client, mlClient).getModelsPipelines(
               modelIdsAndAliases
             );
             for (const model of result) {
@@ -136,10 +136,12 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
       try {
         const { modelId } = request.params;
-        const result = await modelsProvider(client).getModelsPipelines(modelId.split(','));
+        const result = await modelsProvider(client, mlClient).getModelsPipelines(
+          modelId.split(',')
+        );
         return response.ok({
           body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
         });
@@ -174,6 +176,33 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         });
         return response.ok({
           body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /api/ml/trained_models/nodes_overview Get node overview about the models allocation
+   * @apiName GetTrainedModelsNodesOverview
+   * @apiDescription Retrieves the list of nodes with allocated models info
+   */
+  router.get(
+    {
+      path: '/api/ml/trained_models/nodes_overview',
+      validate: {},
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const result = await modelsProvider(client, mlClient).getNodesOverview();
+        return response.ok({
+          body: result,
         });
       } catch (e) {
         return response.customError(wrapError(e));

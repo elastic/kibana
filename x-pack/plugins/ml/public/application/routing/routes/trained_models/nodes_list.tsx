@@ -16,18 +16,18 @@ import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { Page } from '../../../trained_models';
 
-export const modelsListRouteFactory = (
+export const nodesListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/trained_models',
+  path: '/trained_models/nodes',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.modelsListLabel', {
-        defaultMessage: 'Model Management',
+      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.nodesListLabel', {
+        defaultMessage: 'Nodes Overview',
       }),
       href: '',
     },

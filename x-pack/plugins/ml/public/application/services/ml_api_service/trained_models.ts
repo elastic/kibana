@@ -119,6 +119,25 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         method: 'DELETE',
       });
     },
+
+    getTrainedModelDeploymentStats(modelId?: string) {
+      let model = modelId ?? '*';
+      if (Array.isArray(modelId)) {
+        model = modelId.join(',');
+      }
+
+      return httpService.http<any>({
+        path: `${apiBasePath}/trained_models/${model}/deployment/_stats`,
+        method: 'GET',
+      });
+    },
+
+    getTrainedModelsNodesOverview() {
+      return httpService.http({
+        path: `${apiBasePath}/trained_models/nodes_overview`,
+        method: 'GET',
+      });
+    },
   };
 }
 

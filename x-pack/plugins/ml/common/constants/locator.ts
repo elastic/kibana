@@ -14,6 +14,7 @@ export const ML_PAGES = {
   DATA_FRAME_ANALYTICS_JOBS_MANAGE: 'data_frame_analytics',
   DATA_FRAME_ANALYTICS_CREATE_JOB: 'data_frame_analytics/new_job',
   TRAINED_MODELS_MANAGE: 'trained_models',
+  TRAINED_MODELS_NODES: 'trained_models/nodes',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
   DATA_FRAME_ANALYTICS_MAP: 'data_frame_analytics/map',
   /**

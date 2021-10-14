@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { PipelineDefinition } from '../../../common/types/trained_models';
+import type { IScopedClusterClient } from 'kibana/server';
+import type { PipelineDefinition } from '../../../common/types/trained_models';
+import type { MlClient } from '../../lib/ml_client';
 
-export function modelsProvider(client: IScopedClusterClient) {
+export type ModelService = ReturnType<typeof modelsProvider>;
+
+export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   return {
     /**
      * Retrieves the map of model ids and aliases with associated pipelines.
@@ -38,6 +41,30 @@ export function modelsProvider(client: IScopedClusterClient) {
       }
 
       return modelIdsMap;
+    },
+
+    async getNodesOverview() {
+      const { body: deploymentStats } = await mlClient.getTrainedModelsDeploymentStats();
+
+      const nodesR = deploymentStats.deployment_stats.reduce((acc, curr) => {
+        const { nodes, ...modelAttrs } = curr;
+        nodes.forEach((n) => {
+          Object.entries(n.node).forEach(([id, o]) => {
+            if (acc.has(id)) {
+              const d = acc.get(id);
+              d.allocated_models.push(modelAttrs);
+            } else {
+              acc.set(id, { ...o, id, allocated_models: [modelAttrs] });
+            }
+          });
+        });
+        return acc;
+      }, new Map<string, object>());
+
+      return {
+        count: nodesR.size,
+        nodes: Array.from(nodesR.values()),
+      };
     },
   };
 }

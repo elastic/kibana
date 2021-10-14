@@ -1,0 +1,100 @@
+{
+  "count" : 2,
+  "deployment_stats" : [
+    {
+      "model_id" : "dslim__bert-base-ner",
+      "model_size" : "411.2mb",
+      "inference_threads" : 1,
+      "model_threads" : 1,
+      "state" : "started",
+      "allocation_status" : {
+        "allocation_count" : 1,
+        "target_allocation_count" : 1,
+        "state" : "fully_allocated"
+      },
+      "nodes" : [
+        {
+          "node" : {
+            "8R0Oo3Y7RVGvgRMdYqPG2A" : {
+              "name" : "node-0",
+              "ephemeral_id" : "YYf8r2gVR1CR--1DwOMxCg",
+              "transport_address" : "10.2.42.194:9300",
+              "attributes" : {
+                "ml.machine_memory" : "34359738368",
+                "xpack.installed" : "true",
+                "ml.max_open_jobs" : "512",
+                "ml.max_jvm_size" : "1073741824"
+              },
+              "roles" : [
+                "data",
+                "data_cold",
+                "data_content",
+                "data_frozen",
+                "data_hot",
+                "data_warm",
+                "ingest",
+                "master",
+                "ml",
+                "remote_cluster_client",
+                "transform"
+              ]
+            }
+          },
+          "routing_state" : {
+            "routing_state" : "started"
+          },
+          "inference_count" : 1,
+          "average_inference_time_ms" : 559.0,
+          "last_access" : 1633608853970
+        }
+      ]
+    },
+    {
+      "model_id" : "elastic__distilbert-base-uncased-finetuned-conll03-english",
+      "model_size" : "253.3mb",
+      "inference_threads" : 1,
+      "model_threads" : 1,
+      "state" : "started",
+      "allocation_status" : {
+        "allocation_count" : 1,
+        "target_allocation_count" : 1,
+        "state" : "fully_allocated"
+      },
+      "nodes" : [
+        {
+          "node" : {
+            "8R0Oo3Y7RVGvgRMdYqPG2A" : {
+              "name" : "node-0",
+              "ephemeral_id" : "YYf8r2gVR1CR--1DwOMxCg",
+              "transport_address" : "10.2.42.194:9300",
+              "attributes" : {
+                "ml.machine_memory" : "34359738368",
+                "xpack.installed" : "true",
+                "ml.max_open_jobs" : "512",
+                "ml.max_jvm_size" : "1073741824"
+              },
+              "roles" : [
+                "data",
+                "data_cold",
+                "data_content",
+                "data_frozen",
+                "data_hot",
+                "data_warm",
+                "ingest",
+                "master",
+                "ml",
+                "remote_cluster_client",
+                "transform"
+              ]
+            }
+          },
+          "routing_state" : {
+            "routing_state" : "started"
+          },
+          "inference_count" : 0,
+          "average_inference_time_ms" : 0.0
+        }
+      ]
+    }
+  ]
+}

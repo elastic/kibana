@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './models_list';
-export * from './nodes_list';
+export { NodesList } from './nodes_list';

@@ -380,6 +380,12 @@ export function getMlClient(
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
       return mlClient.getTrainedModelsStats(...p);
     },
+    async getTrainedModelsDeploymentStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
+      return client.asCurrentUser.transport.request({
+        method: 'GET',
+        path: `/_ml/trained_models/${p[0]?.model_id ?? '*'}/deployment/_stats`,
+      });
+    },
     async info(...p: Parameters<MlClient['info']>) {
       return mlClient.info(...p);
     },

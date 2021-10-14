@@ -28,6 +28,7 @@ import { RefreshAnalyticsListButton } from '../data_frame_analytics/pages/analyt
 import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wrapper';
 import { useRefreshAnalyticsList } from '../data_frame_analytics/common';
 import { useRefreshInterval } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_refresh_interval';
+import { NodesList } from './nodes_overview';
 
 export const Page: FC = () => {
   useRefreshInterval(() => {});
@@ -35,11 +36,12 @@ export const Page: FC = () => {
   useRefreshAnalyticsList({ isLoading: () => {} });
   const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
+  console.log(selectedTabId, '___selectedTabId___');
 
   return (
     <Fragment>
       <NavigationMenu tabId="trained_models" />
-      <EuiPage data-test-subj="mlPageDataFrameAnalytics">
+      <EuiPage data-test-subj="mlPageTrainedModels">
         <EuiPageBody>
           <EuiPageHeader>
             <EuiPageHeaderSection>
@@ -67,6 +69,7 @@ export const Page: FC = () => {
           <EuiPageContent>
             <TrainedModelsNavigationBar selectedTabId={selectedTabId} />
             {selectedTabId === 'trained_models' ? <ModelsList /> : null}
+            {selectedTabId === 'nodes' ? <NodesList /> : null}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

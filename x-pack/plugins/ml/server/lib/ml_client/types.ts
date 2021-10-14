@@ -12,6 +12,7 @@ type OrigMlClient = ElasticsearchClient['ml'];
 
 export interface MlClient extends OrigMlClient {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
+  getTrainedModelsDeploymentStats: () => any;
 }
 
 export type MlClientParams =
