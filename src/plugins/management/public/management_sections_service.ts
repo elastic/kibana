@@ -77,7 +77,7 @@ export class ManagementSectionsService {
           if (sectionCapabilities.hasOwnProperty(app.id) && sectionCapabilities[app.id] !== true) {
             app.disable();
           }
-          // app is now named dataViews but capabiities are still 'indexPattern'
+          // app is now named dataViews but capabiities are still 'indexPatterns'
           if (
             app.id === 'dataViews' &&
             sectionCapabilities.hasOwnProperty('indexPatterns') &&
