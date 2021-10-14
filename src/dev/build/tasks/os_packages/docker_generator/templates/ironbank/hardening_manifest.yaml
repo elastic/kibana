@@ -56,3 +56,7 @@ maintainers:
     name: 'Alexander Klepal'
     username: 'alexander.klepal'
     cht_member: true
+  - email: "yalabe.dukuly@anchore.com"
+    name: "Yalabe Dukuly"
+    username: "yalabe.dukuly"
+    cht_member: true
