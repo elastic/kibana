@@ -18,6 +18,8 @@ import { DataPublicPluginStart } from '../../../../../../data/public';
 
 import { AppState } from '../services/discover_state';
 import { getDefaultSort, getSortArray } from '../components/doc_table';
+import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
+import { Storage } from '../../../../../../kibana_utils/public';
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -33,10 +35,12 @@ export function getStateDefaults({
   config,
   data,
   savedSearch,
+  storage,
 }: {
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
   savedSearch: SavedSearch;
+  storage: Storage;
 }) {
   const { searchSource } = savedSearch;
   const indexPattern = searchSource.getField('index');
@@ -44,6 +48,7 @@ export function getStateDefaults({
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const sort = getSortArray(savedSearch.sort ?? [], indexPattern!);
   const columns = getDefaultColumns(savedSearch, config);
+  const chartHidden = Boolean(storage.get(CHART_HIDDEN_KEY));
 
   const defaultState = {
     query,
@@ -54,7 +59,7 @@ export function getStateDefaults({
     index: indexPattern?.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')),
-    hideChart: undefined,
+    hideChart: chartHidden ? chartHidden : undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
@@ -62,7 +67,7 @@ export function getStateDefaults({
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
   }
-  if (savedSearch.hideChart) {
+  if (savedSearch.hideChart !== undefined) {
     defaultState.hideChart = savedSearch.hideChart;
   }
   if (savedSearch.viewMode) {

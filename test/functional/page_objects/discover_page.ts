@@ -179,6 +179,17 @@ export class DiscoverPageObject extends FtrService {
     return await this.globalNav.getLastBreadcrumb();
   }
 
+  public async isChartVisible() {
+    return await this.testSubjects.exists('discoverChart');
+  }
+
+  public async toggleChartVisibility() {
+    await this.testSubjects.click('discoverChartOptionsToggle');
+    await this.testSubjects.exists('discoverChartToggle');
+    await this.testSubjects.click('discoverChartToggle');
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async getChartInterval() {
     await this.testSubjects.click('discoverChartOptionsToggle');
     await this.testSubjects.click('discoverTimeIntervalPanel');
