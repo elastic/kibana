@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+require('../src/setup_node_env');
+
 // eslint-disable-next-line no-restricted-syntax
 const alwaysImportedTests = [
   require.resolve('../test/functional/config.js'),
@@ -20,7 +22,6 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/examples/config.js'),
 ];
 
-require('../src/setup_node_env');
 require('@kbn/test').runTestsCli([
   // eslint-disable-next-line no-restricted-syntax
   ...alwaysImportedTests,
