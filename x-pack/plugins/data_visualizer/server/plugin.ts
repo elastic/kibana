@@ -8,26 +8,7 @@
 import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
 import { StartDeps, SetupDeps } from './types';
 import { dataVisualizerRoutes } from './routes';
-import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
-import { applicationPath, featureDescription, featureId, featureTitle } from '../common';
-
-function registerWithCustomIntegrations(customIntegrations: CustomIntegrationsPluginSetup) {
-  customIntegrations.registerCustomIntegration({
-    id: featureId,
-    title: featureTitle,
-    description: featureDescription,
-    uiInternalPath: applicationPath,
-    isBeta: false,
-    icons: [
-      {
-        type: 'eui',
-        src: 'addDataApp',
-      },
-    ],
-    categories: ['upload_file'],
-    shipper: 'other',
-  });
-}
+import { registerWithCustomIntegrations } from './register_custom_integration';
 
 export class DataVisualizerPlugin implements Plugin {
   constructor() {}
