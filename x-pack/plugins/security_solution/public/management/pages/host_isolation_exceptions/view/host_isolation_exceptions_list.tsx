@@ -57,7 +57,7 @@ export const HostIsolationExceptionsList = () => {
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
   const history = useHistory();
   const license = useLicense();
-  const showFlyout = !!location.show;
+  const showFlyout = license.isPlatinumPlus() && !!location.show;
 
   useEffect(() => {
     if (!isLoading && listItems.length === 0 && !license.isPlatinumPlus()) {

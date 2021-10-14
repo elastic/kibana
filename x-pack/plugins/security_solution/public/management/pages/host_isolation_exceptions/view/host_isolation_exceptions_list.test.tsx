@@ -135,7 +135,13 @@ describe('When on the host isolation exceptions page', () => {
       beforeEach(() => {
         isPlatinumPlusMock.mockReturnValue(false);
       });
-      it('should show the create flyout when the add button is pressed', () => {
+      it('should not show the create flyout if the user navigates to the create url', () => {
+        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
+        render();
+        expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
+      });
+      it('should not show the create flyout if the user navigates to the edit url', () => {
+        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=edit`);
         render();
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
       });

@@ -64,7 +64,6 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const exceptionToEdit = useHostIsolationExceptionsSelector(getExceptionToEdit);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
   const history = useHistory();
-  const license = useLicense();
 
   const [formHasError, setFormHasError] = useState(true);
   const [exception, setException] = useState<
@@ -79,12 +78,6 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
       }),
     [navigateCallback]
   );
-
-  useEffect(() => {
-    if (!license.isPlatinumPlus()) {
-      onCancel();
-    }
-  }, [license, onCancel]);
 
   // load data to edit or create
   useEffect(() => {
