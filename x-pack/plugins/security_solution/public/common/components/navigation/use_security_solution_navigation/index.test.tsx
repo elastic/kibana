@@ -18,14 +18,14 @@ import { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { TestProviders } from '../../../mock';
-import { useLicense } from '../../../hooks/use_license';
+import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_selector');
-jest.mock('../../../hooks/use_license');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
+jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
 
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
@@ -78,6 +78,7 @@ describe('useSecuritySolutionNavigation', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ urlState: mockUrlState });
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
+    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
 
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -267,8 +268,8 @@ describe('useSecuritySolutionNavigation', () => {
     expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.ueba);
   });
 
-  it('should omit host isolation exceptions if license is less than platimum', () => {
-    (useLicense().isPlatinumPlus as jest.Mock).mockReturnValueOnce(false);
+  it('should omit host isolation exceptions if hook reports false', () => {
+    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValueOnce(false);
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
