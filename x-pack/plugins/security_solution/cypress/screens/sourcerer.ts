@@ -28,4 +28,3 @@ export const SOURCERER_TIMELINE = {
   radioCustomLabel:
     '[data-test-subj="timeline-sourcerer-radio"] label.euiRadio__label[for="custom"]',
 };
-export const SOURCERER_TIMELINE_ADVANCED = '[data-test-subj="advanced-settings"]';

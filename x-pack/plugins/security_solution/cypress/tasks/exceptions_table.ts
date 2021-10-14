@@ -6,7 +6,6 @@
  */
 
 import {
-  EXCEPTIONS_TABLE_TAB,
   EXCEPTIONS_TABLE,
   EXCEPTIONS_TABLE_SEARCH,
   EXCEPTIONS_TABLE_DELETE_BTN,
@@ -15,10 +14,6 @@ import {
   EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN,
   EXCEPTIONS_TABLE_EXPORT_BTN,
 } from '../screens/exceptions';
-
-export const goToExceptionsTable = () => {
-  cy.get(EXCEPTIONS_TABLE_TAB).should('exist').click({ force: true });
-};
 
 export const waitForExceptionsTableToBeLoaded = () => {
   cy.get(EXCEPTIONS_TABLE).should('exist');
