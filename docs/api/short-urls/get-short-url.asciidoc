@@ -1,0 +1,56 @@
+[[short-urls-api-get]]
+=== Get short URL API
+++++
+<titleabbrev>Get short URL</titleabbrev>
+++++
+
+experimental[] Retrieve a single {kib} short URL.
+
+[[short-urls-api-get-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/short_url/<id>`
+
+
+[[short-urls-api-get-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the short URL.
+
+
+[[short-urls-api-get-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+
+[[short-urls-api-get-example]]
+==== Example
+
+Retrieve the short URL with the `12345` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/short_url/12345
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "12345",
+  "slug": "adjective-adjective-noun",
+  "locator": {
+    "id": "LOCATOR_ID",
+    "version": "x.x.x",
+    "state": {}
+  },
+  "accessCount": 0,
+  "accessDate": 1632680100000,
+  "createDate": 1632680100000
+}
+--------------------------------------------------

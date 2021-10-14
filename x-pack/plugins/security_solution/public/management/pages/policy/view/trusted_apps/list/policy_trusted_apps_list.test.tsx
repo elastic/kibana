@@ -13,11 +13,19 @@ import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing
 import { PolicyTrustedAppsList } from './policy_trusted_apps_list';
 import React from 'react';
 import { policyDetailsPageAllApiHttpMocks } from '../../../test_utils';
-import { isFailedResourceState, isLoadedResourceState } from '../../../../../state';
+import {
+  createLoadingResourceState,
+  createUninitialisedResourceState,
+  isFailedResourceState,
+  isLoadedResourceState,
+} from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_ID } from '../../../../../../../common/constants';
 
 describe('when rendering the PolicyTrustedAppsList', () => {
+  // The index (zero based) of the card created by the generator that is policy specific
+  const POLICY_SPECIFIC_CARD_INDEX = 2;
+
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: (waitForLoadedState?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -84,8 +92,19 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     };
   });
 
-  // FIXME: implement this test once PR #113802 is merged
-  it.todo('should show loading spinner if checking to see if trusted apps exist');
+  it('should show loading spinner if checking to see if trusted apps exist', async () => {
+    await render();
+    act(() => {
+      appTestContext.store.dispatch({
+        type: 'policyArtifactsDeosAnyTrustedAppExists',
+        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+        // @ts-ignore
+        payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+      });
+    });
+
+    expect(renderResult.getByTestId('policyTrustedAppsGrid-loading')).not.toBeNull();
+  });
 
   it('should show total number of of items being displayed', async () => {
     await render();
@@ -163,40 +182,68 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     );
   });
 
-  it('should display policy names on assignment context menu', async () => {
-    const retrieveAllPolicies = waitForAction('policyDetailsListOfAllPoliciesStateChanged', {
-      validate({ payload }) {
-        return isLoadedResourceState(payload);
-      },
-    });
+  it('should show dialog when remove action is clicked', async () => {
     await render();
-    await retrieveAllPolicies;
+    await toggleCardActionMenu(POLICY_SPECIFIC_CARD_INDEX);
     act(() => {
-      fireEvent.click(
-        within(getCardByIndexPosition(2)).getByTestId(
-          'policyTrustedAppsGrid-card-header-effectScope-popupMenu-button'
-        )
-      );
+      fireEvent.click(renderResult.getByTestId('policyTrustedAppsGrid-removeAction'));
     });
-    await waitFor(() =>
-      expect(
-        renderResult.getByTestId(
-          'policyTrustedAppsGrid-card-header-effectScope-popupMenu-popoverPanel'
-        )
-      )
-    );
 
-    expect(
-      renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-0')
-        .textContent
-    ).toEqual('Endpoint Policy 0');
-    expect(
-      renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-1')
-        .textContent
-    ).toEqual('Endpoint Policy 1');
+    await waitFor(() => expect(renderResult.getByTestId('confirmModalBodyText')));
   });
 
-  it.todo('should navigate to policy details when clicking policy on assignment context menu');
+  describe('and artifact is policy specific', () => {
+    const renderAndClickOnEffectScopePopupButton = async () => {
+      const retrieveAllPolicies = waitForAction('policyDetailsListOfAllPoliciesStateChanged', {
+        validate({ payload }) {
+          return isLoadedResourceState(payload);
+        },
+      });
+      await render();
+      await retrieveAllPolicies;
+      act(() => {
+        fireEvent.click(
+          within(getCardByIndexPosition(POLICY_SPECIFIC_CARD_INDEX)).getByTestId(
+            'policyTrustedAppsGrid-card-header-effectScope-popupMenu-button'
+          )
+        );
+      });
+      await waitFor(() =>
+        expect(
+          renderResult.getByTestId(
+            'policyTrustedAppsGrid-card-header-effectScope-popupMenu-popoverPanel'
+          )
+        )
+      );
+    };
+
+    it('should display policy names on assignment context menu', async () => {
+      await renderAndClickOnEffectScopePopupButton();
+
+      expect(
+        renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-0')
+          .textContent
+      ).toEqual('Endpoint Policy 0');
+      expect(
+        renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-1')
+          .textContent
+      ).toEqual('Endpoint Policy 1');
+    });
+
+    it('should navigate to policy details when clicking policy on assignment context menu', async () => {
+      await renderAndClickOnEffectScopePopupButton();
+
+      act(() => {
+        fireEvent.click(
+          renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-0')
+        );
+      });
+
+      expect(appTestContext.history.location.pathname).toEqual(
+        '/administration/policy/ddf6570b-9175-4a6d-b288-61a09771c647/settings'
+      );
+    });
+  });
 
   it('should handle pagination changes', async () => {
     await render();
@@ -235,7 +282,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   it('should show toast message if trusted app list api call fails', async () => {
     const error = new Error('oh no');
     // @ts-expect-error
-    mockedApis.responseProvider.policyTrustedAppsList.mockRejectedValue(error);
+    mockedApis.responseProvider.trustedAppsList.mockRejectedValue(error);
     await render(false);
     await act(async () => {
       await waitForAction('assignedTrustedAppsListStateChanged', {
