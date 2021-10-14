@@ -52,6 +52,40 @@ const formatterDictionary: Record<string, (value: any) => JSX.Element | string |
   timestamp: timeFormatter,
 };
 
+export function formatToListItems(
+  items: Record<string, unknown>
+): EuiDescriptionListProps['listItems'] {
+  return Object.entries(items)
+    .filter(([, value]) => isDefined(value))
+    .map(([title, value]) => {
+      if (title in formatterDictionary) {
+        return {
+          title,
+          description: formatterDictionary[title](value),
+        };
+      }
+      return {
+        title,
+        description:
+          typeof value === 'object' ? (
+            <EuiCodeBlock
+              language="json"
+              fontSize="s"
+              fontSize="s"
+              paddingSize="s"
+              overflowHeight={300}
+              isCopyable={false}
+            >
+              {JSON.stringify(value, null, 2)}
+            </EuiCodeBlock>
+          ) : (
+            // @ts-ignore
+            value.toString()
+          ),
+      };
+    });
+}
+
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const {
     inference_config: inferenceConfig,
@@ -82,36 +116,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     default_field_map,
     license_level,
   };
-
-  function formatToListItems(items: Record<string, any>): EuiDescriptionListProps['listItems'] {
-    return Object.entries(items)
-      .filter(([, value]) => isDefined(value))
-      .map(([title, value]) => {
-        if (title in formatterDictionary) {
-          return {
-            title,
-            description: formatterDictionary[title](value),
-          };
-        }
-        return {
-          title,
-          description:
-            typeof value === 'object' ? (
-              <EuiCodeBlock
-                language="json"
-                fontSize="s"
-                paddingSize="s"
-                overflowHeight={300}
-                isCopyable={false}
-              >
-                {JSON.stringify(value, null, 2)}
-              </EuiCodeBlock>
-            ) : (
-              value.toString()
-            ),
-        };
-      });
-  }
 
   const {
     services: { share },
