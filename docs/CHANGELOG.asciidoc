@@ -68,8 +68,6 @@ Review important information about the {kib} 7.x releases.
 [[release-notes-7.15.1]]
 == {kib} 7.15.1
 
-coming::[7.15.1]
-
 Review the following information about the 7.15.1 release.
 
 [float]
