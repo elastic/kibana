@@ -11,8 +11,8 @@ import React, {
   useState,
   KeyboardEvent,
   useEffect,
-  FormEvent,
   ReactNode,
+  FormEventHandler,
 } from 'react';
 import {
   EuiFlexGroup,
@@ -39,7 +39,7 @@ export type UrlOption<T = { [key: string]: any }> = {
   title: string;
 } & EuiSelectableOption<T>;
 
-interface Props {
+export interface SelectableUrlListProps {
   data: {
     items: UrlOption[];
     total?: number;
@@ -76,7 +76,7 @@ export function SelectableUrlList({
   renderOption,
   rowHeight,
   hasChanged,
-}: Props) {
+}: SelectableUrlListProps) {
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
 
   const titleRef = useRef<HTMLDivElement>(null);
@@ -97,8 +97,8 @@ export function SelectableUrlList({
     }
   };
 
-  const onSearchInput = (e: React.FormEvent<HTMLInputElement>) => {
-    onInputChange(e.target.value);
+  const onSearchInput: FormEventHandler<HTMLInputElement> = (e) => {
+    onInputChange((e.target as HTMLInputElement).value);
     setPopoverIsOpen(true);
   };
 
