@@ -71,19 +71,19 @@ const deprecations7x: PluginConfigDescriptor<SnapshotRestoreConfig7x>['deprecati
     }
 
     addDeprecation({
-      title: i18n.translate('xpack.snapshot_restore.deprecations.enabledTitle', {
+      title: i18n.translate('xpack.snapshotRestore.deprecations.enabledTitle', {
         defaultMessage: 'Setting "xpack.snapshot_restore.enabled" is deprecated',
       }),
-      message: i18n.translate('xpack.snapshot_restore.deprecations.enabledMessage', {
+      message: i18n.translate('xpack.snapshotRestore.deprecations.enabledMessage', {
         defaultMessage:
           'Use the "xpack.snapshot_restore.ui.enabled" setting instead of "xpack.snapshot_restore.enabled".',
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('xpack.snapshot_restore.deprecations.enabled.manualStepOneMessage', {
+          i18n.translate('xpack.snapshotRestore.deprecations.enabled.manualStepOneMessage', {
             defaultMessage: 'Open the kibana.yml config file.',
           }),
-          i18n.translate('xpack.snapshot_restore.deprecations.enabled.manualStepTwoMessage', {
+          i18n.translate('xpack.snapshotRestore.deprecations.enabled.manualStepTwoMessage', {
             defaultMessage:
               'Change the "xpack.snapshot_restore.enabled" setting to "xpack.snapshot_restore.ui.enabled".',
           }),
