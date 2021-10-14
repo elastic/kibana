@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -153,14 +154,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: `${alertName}Index threshold`,
-          tags: '',
-          interval: '1 min',
-          duration: '00:00:00.000',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Index threshold`,
+        tags: '',
+        interval: '1 min',
+      });
+      expect(searchResultAfterSave.duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
@@ -204,14 +204,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Always Firing',
-          interval: '1m',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Always Firing`,
+        tags: '',
+        interval: '1 min',
+      });
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
@@ -238,14 +236,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Always Firing',
-          interval: '1m',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Always Firing`,
+        tags: '',
+        interval: '1 min',
+      });
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
