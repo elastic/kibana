@@ -77,7 +77,7 @@ export enum ConfigKeys {
   APM_SERVICE_NAME = 'service.name',
   HOSTS = 'hosts',
   MAX_REDIRECTS = 'max_redirects',
-  METADATA = 'metadata',
+  METADATA = '__ui',
   MONITOR_TYPE = 'type',
   NAME = 'name',
   PASSWORD = 'password',
