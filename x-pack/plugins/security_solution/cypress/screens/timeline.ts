@@ -53,6 +53,8 @@ export const FAVORITE_TIMELINE = '[data-test-subj="timeline-favorite-filled-star
 
 export const FIELD_BROWSER = '[data-test-subj="show-field-browser"]';
 
+export const GRAPH_TAB_BUTTON = '[data-test-subj="timelineTabs-graph"]';
+
 export const HOST_KPI = '[data-test-subj="siem-timeline-host-kpi"]';
 
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
@@ -99,6 +101,8 @@ export const OPEN_TIMELINE_TEMPLATE_ICON =
   '[data-test-subj="open-timeline-modal-body-filter-template"]';
 
 export const PIN_EVENT = '[data-test-subj="pin"]';
+
+export const PINNED_TAB_BUTTON = '[data-test-subj="timelineTabs-pinned"]';
 
 export const PROCESS_KPI = '[data-test-subj="siem-timeline-process-kpi"';
 
