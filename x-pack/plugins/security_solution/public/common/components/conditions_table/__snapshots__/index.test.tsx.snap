@@ -58,7 +58,12 @@ exports[`conditions_table ConditionsTable should render multi item table with an
           },
         ]
       }
-      noItemsMessage="No items found"
+      noItemsMessage={
+        <EuiI18n
+          default="No items found"
+          token="euiBasicTable.noItemsMessage"
+        />
+      }
       responsive={true}
       tableLayout="fixed"
     />
@@ -124,7 +129,12 @@ exports[`conditions_table ConditionsTable should render multi item table with or
           },
         ]
       }
-      noItemsMessage="No items found"
+      noItemsMessage={
+        <EuiI18n
+          default="No items found"
+          token="euiBasicTable.noItemsMessage"
+        />
+      }
       responsive={true}
       tableLayout="fixed"
     />
@@ -165,7 +175,12 @@ exports[`conditions_table ConditionsTable should render single item table correc
           },
         ]
       }
-      noItemsMessage="No items found"
+      noItemsMessage={
+        <EuiI18n
+          default="No items found"
+          token="euiBasicTable.noItemsMessage"
+        />
+      }
       responsive={true}
       tableLayout="fixed"
     />

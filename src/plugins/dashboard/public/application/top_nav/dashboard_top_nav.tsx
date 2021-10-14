@@ -543,7 +543,6 @@ export function DashboardTopNav({
           createType: title,
           onClick: createNewVisType(visType as VisTypeAlias),
           'data-test-subj': `dashboardQuickButton${name}`,
-          isDarkModeEnabled: IS_DARK_THEME,
         };
       } else {
         const { name, icon, title, titleInWizard } = visType as BaseVisType;
@@ -553,7 +552,6 @@ export function DashboardTopNav({
           createType: titleInWizard || title,
           onClick: createNewVisType(visType as BaseVisType),
           'data-test-subj': `dashboardQuickButton${name}`,
-          isDarkModeEnabled: IS_DARK_THEME,
         };
       }
     }
