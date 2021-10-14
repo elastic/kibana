@@ -16,7 +16,9 @@ import {
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
+  getEventLog,
 } from '../../../common/lib';
+import { validateEvent } from '../../../spaces_only/tests/alerting/event_log';
 
 // eslint-disable-next-line import/no-default-export
 export default function createDisableAlertTests({ getService }: FtrProviderContext) {
@@ -375,6 +377,64 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
+        });
+
+        it('should create recovered-instance events for all alert instances', async () => {
+          const { body: createdRule } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                rule_type_id: 'test.noop',
+                consumer: 'alerts',
+                enabled: true,
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+          const ruleId = createdRule.id;
+
+          await alertUtils.getDisableRequest(ruleId);
+
+          const events = await retry.try(async () => {
+            // there can be a successful execute before the error one
+            const someEvents = await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: ruleId,
+              provider: 'alerting',
+              actions: new Map([['recovered-instance', { equal: 2 }]]),
+            });
+            const errorEvents = someEvents.filter(
+              (event) => event?.kibana?.alerting?.status === 'error'
+            );
+            if (errorEvents.length === 0) {
+              throw new Error('no execute/error events yet');
+            }
+            return errorEvents;
+          });
+
+          const event = events[0];
+          expect(event).to.be.ok();
+
+          validateEvent(event, {
+            spaceId: space.id,
+            savedObjects: [{ type: 'alert', id: ruleId, rel: 'primary', type_id: 'test.noop' }],
+            outcome: 'failure',
+            message: `test.noop:${ruleId}: execution failed`,
+            errorMessage: 'Unable to decrypt attribute "apiKey"',
+            status: 'error',
+            reason: 'decrypt',
+            shouldHaveTask: true,
+            rule: {
+              id: ruleId,
+              category: createdRule.body.rule_type_id,
+              license: 'basic',
+              ruleset: 'alertsFixture',
+            },
+          });
         });
       });
     }
