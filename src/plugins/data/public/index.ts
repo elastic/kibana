@@ -52,7 +52,6 @@ import {
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
   validateDataView,
-  flattenHitWrapper,
 } from './data_views';
 
 export type { IndexPatternsService } from './data_views';
@@ -69,7 +68,6 @@ export const indexPatterns = {
   getFieldSubtypeMulti,
   getFieldSubtypeNested,
   validate: validateDataView,
-  flattenHitWrapper,
 };
 
 export {
