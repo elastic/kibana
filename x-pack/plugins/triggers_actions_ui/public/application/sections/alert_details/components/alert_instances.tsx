@@ -297,7 +297,10 @@ export function AlertInstances({
                   content={i18n.translate(
                     'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.recentDurationsTooltip',
                     {
-                      defaultMessage: `Recent rule executions include up to the last 30 executions.`,
+                      defaultMessage: `Recent rule executions include up to the last {numExecutions} executions.`,
+                      values: {
+                        numExecutions: DESIRED_NUM_EXECUTION_DURATIONS,
+                      },
                     }
                   )}
                   position="top"
