@@ -15,23 +15,10 @@ import {
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
 import { SearchExceptions, SearchExceptionsProps } from '.';
+jest.mock('../../../common/components/user_privileges/use_endpoint_privileges');
 
 let onSearchMock: jest.Mock;
 const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
-
-jest.mock('../../../common/components/user_privileges/use_endpoint_privileges', () => {
-  return {
-    ...jest.requireActual('../../../common/components/user_privileges/use_endpoint_privileges'),
-    useEndpointPrivileges: jest.fn(() => {
-      return {
-        loading: false,
-        canAccessEndpointManagement: true,
-        canAccessFleet: false,
-        isPlatinumPlus: true,
-      };
-    }),
-  };
-});
 
 describe('Search exceptions', () => {
   let appTestContext: AppContextTestRender;
