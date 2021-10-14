@@ -19,7 +19,7 @@ import { ServiceProfilingFlamegraph } from './service_profiling_flamegraph';
 import { ServiceProfilingTimeline } from './service_profiling_timeline';
 
 type ApiResponse =
-  APIReturnType<'GET /api/apm/services/{serviceName}/profiling/timeline'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/profiling/timeline'>;
 const DEFAULT_DATA: ApiResponse = { profilingTimeline: [] };
 
 export function ServiceProfiling() {
@@ -38,7 +38,7 @@ export function ServiceProfiling() {
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/profiling/timeline',
+        endpoint: 'GET /internal/apm/services/{serviceName}/profiling/timeline',
         params: {
           path: { serviceName },
           query: {
