@@ -37,7 +37,7 @@ Object {
         },
       },
     },
-    "size": "myIndex",
+    "size": 1000,
   },
 }
 `;

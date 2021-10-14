@@ -99,7 +99,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
           date_histogram: getMetricsDateHistogramParams({
             start,
             end,
-            metricsInterval: config['xpack.apm.metricsInterval'],
+            metricsInterval: config.metricsInterval,
           }),
           aggs,
         },

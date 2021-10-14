@@ -9,7 +9,7 @@ import React from 'react';
 
 import { action } from '@storybook/addon-actions';
 
-import type { ListProps } from './package_list_grid';
+import type { Props } from './package_list_grid';
 import { PackageListGrid } from './package_list_grid';
 
 export default {
@@ -17,7 +17,7 @@ export default {
   title: 'Sections/EPM/Package List Grid',
 };
 
-type Args = Pick<ListProps, 'title' | 'isLoading' | 'showMissingIntegrationMessage'>;
+type Args = Pick<Props, 'title' | 'isLoading' | 'showMissingIntegrationMessage'>;
 
 const args: Args = {
   title: 'Installed integrations',
@@ -47,6 +47,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
       {
         title: 'Package Two',
@@ -58,6 +59,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
       {
         title: 'Package Three',
@@ -69,6 +71,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
       {
         title: 'Package Four',
@@ -80,6 +83,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
       {
         title: 'Package Five',
@@ -91,6 +95,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
       {
         title: 'Package Six',
@@ -102,6 +107,7 @@ export const List = (props: Args) => (
         url: 'https://example.com',
         icons: [],
         integration: 'integation',
+        categories: ['web'],
       },
     ]}
     onSearchChange={action('onSearchChange')}
