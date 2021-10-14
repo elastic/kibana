@@ -38,9 +38,34 @@
           "reference": "https://attack.mitre.org/techniques/T1047/"
         }
       ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1518",
+          "name": "Software Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1518/"
+        },
+        {
+          "id": "T1087",
+          "name": "Account Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1087/"
+        },
+        {
+          "id": "T1018",
+          "name": "Remote System Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1018/"
+        }
+      ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

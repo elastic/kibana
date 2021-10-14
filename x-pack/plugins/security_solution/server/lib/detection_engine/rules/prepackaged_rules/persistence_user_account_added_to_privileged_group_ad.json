@@ -36,21 +36,14 @@
       },
       "technique": [
         {
-          "id": "T1136",
-          "name": "Create Account",
-          "reference": "https://attack.mitre.org/techniques/T1136/",
-          "subtechnique": [
-            {
-              "id": "T1136.001",
-              "name": "Local Account",
-              "reference": "https://attack.mitre.org/techniques/T1136/001/"
-            }
-          ]
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

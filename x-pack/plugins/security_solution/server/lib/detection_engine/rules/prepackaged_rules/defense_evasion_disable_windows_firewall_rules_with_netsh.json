@@ -38,9 +38,9 @@
           "reference": "https://attack.mitre.org/techniques/T1562/",
           "subtechnique": [
             {
-              "id": "T1562.001",
-              "name": "Disable or Modify Tools",
-              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+              "id": "T1562.004",
+              "name": "Disable or Modify System Firewall",
+              "reference": "https://attack.mitre.org/techniques/T1562/004/"
             }
           ]
         }
@@ -49,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 10
 }

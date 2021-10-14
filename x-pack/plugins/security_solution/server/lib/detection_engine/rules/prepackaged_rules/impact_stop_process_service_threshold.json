@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "This rule identifies a high number (10) of process terminations (stop, delete, or suspend) from the same host within a short time period. This may indicate a defense evasion attempt.",
+  "description": "This rule identifies a high number (10) of process terminations (stop, delete, or suspend) from the same host within a short time period.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -21,28 +21,21 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Defense Evasion"
+    "Impact"
   ],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
-        "id": "TA0005",
-        "name": "Defense Evasion",
-        "reference": "https://attack.mitre.org/tactics/TA0005/"
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
       },
       "technique": [
         {
-          "id": "T1562",
-          "name": "Impair Defenses",
-          "reference": "https://attack.mitre.org/techniques/T1562/",
-          "subtechnique": [
-            {
-              "id": "T1562.001",
-              "name": "Disable or Modify Tools",
-              "reference": "https://attack.mitre.org/techniques/T1562/001/"
-            }
-          ]
+          "id": "T1489",
+          "name": "Service Stop",
+          "reference": "https://attack.mitre.org/techniques/T1489/"
         }
       ]
     }
@@ -54,5 +47,5 @@
     "value": 10
   },
   "type": "threshold",
-  "version": 2
+  "version": 3
 }
