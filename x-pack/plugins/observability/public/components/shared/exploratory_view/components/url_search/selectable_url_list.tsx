@@ -146,7 +146,7 @@ export function SelectableUrlList({
             <EuiButtonIcon
               color="text"
               onClick={() => closePopover()}
-              aria-label={i18n.translate('xpack.observability.csm.search.url.close', {
+              aria-label={i18n.translate('xpack.observability.search.url.close', {
                 defaultMessage: 'Close',
               })}
               iconType={'cross'}

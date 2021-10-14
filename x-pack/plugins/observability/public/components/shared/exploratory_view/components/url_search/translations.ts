@@ -8,27 +8,27 @@
 import { i18n } from '@kbn/i18n';
 
 export const I18LABELS = {
-  filterByUrl: i18n.translate('xpack.observability.rum.filters.filterByUrl', {
+  filterByUrl: i18n.translate('xpack.observability.filters.filterByUrl', {
     defaultMessage: 'Filter by URL',
   }),
   getSearchResultsLabel: (total: number) =>
-    i18n.translate('xpack.observability.rum.filters.searchResults', {
+    i18n.translate('xpack.observability.filters.searchResults', {
       defaultMessage: '{total} Search results',
       values: { total },
     }),
-  topPages: i18n.translate('xpack.observability.rum.filters.topPages', {
+  topPages: i18n.translate('xpack.observability.filters.topPages', {
     defaultMessage: 'Top pages',
   }),
-  select: i18n.translate('xpack.observability.rum.filters.select', {
+  select: i18n.translate('xpack.observability.filters.select', {
     defaultMessage: 'Select',
   }),
-  url: i18n.translate('xpack.observability.rum.filters.url', {
+  url: i18n.translate('xpack.observability.filters.url', {
     defaultMessage: 'Url',
   }),
-  loadingResults: i18n.translate('xpack.observability.rum.filters.url.loadingResults', {
+  loadingResults: i18n.translate('xpack.observability.filters.url.loadingResults', {
     defaultMessage: 'Loading results',
   }),
-  noResults: i18n.translate('xpack.observability.rum.filters.url.noResults', {
+  noResults: i18n.translate('xpack.observability.filters.url.noResults', {
     defaultMessage: 'No results available',
   }),
 };

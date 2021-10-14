@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { fireEvent, waitFor, waitForElementToBeRemoved, screen } from '@testing-library/react';
+import { fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import * as fetcherHook from '../../../../../hooks/use_fetcher';
 import { SelectableUrlList } from './selectable_url_list';
