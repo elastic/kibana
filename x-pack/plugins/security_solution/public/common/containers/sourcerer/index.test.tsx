@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
-import { getScopeFromPath, useInitSourcerer } from '.';
+import { getScopeFromPath, useInitSourcerer, useSourcererDataView } from '.';
 import { mockPatterns } from './mocks';
 import { RouteSpyState } from '../../utils/route/types';
 import {
@@ -32,6 +32,7 @@ import {
 } from '../../mock';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { postSourcererDataView } from './api';
+import { cloneDeep } from 'lodash/fp';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -260,5 +261,70 @@ describe('getScopeFromPath', () => {
     expect(getScopeFromPath('/alerts')).toBe(SourcererScopeName.detections);
     expect(getScopeFromPath('/rules/id/foo')).toBe(SourcererScopeName.detections);
     expect(getScopeFromPath('/rules/id/foo/edit')).toBe(SourcererScopeName.detections);
+  });
+});
+
+describe('useSourcererDataView', () => {
+  // TODO: Steph/sourcerer fix these
+  it.skip('Should exclude elastic cloud alias when selected patterns include "logs-*" as an alias', () => {
+    const mapStateToProps = jest.fn((a, b) => useSourcererDataView()); // useSourcererDataView();
+    expect(mapStateToProps(mockGlobalState, SourcererScopeName.default).selectedPatterns).toEqual([
+      '-*elastic-cloud-logs-*',
+      ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
+    ]);
+  });
+
+  // TODO: Steph/sourcerer fix these
+  it.skip('Should NOT exclude elastic cloud alias when selected patterns does NOT include "logs-*" as an alias', () => {
+    const mapStateToProps = jest.fn(); // useSourcererDataView();
+    const myMockGlobalState = cloneDeep(mockGlobalState);
+    myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = [
+      'apm-*-transaction*',
+      'auditbeat-*',
+      'endgame-*',
+      'filebeat-*',
+      'packetbeat-*',
+      'traces-apm*',
+      'winlogbeat-*',
+    ];
+    expect(mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns).toEqual(
+      [
+        'apm-*-transaction*',
+        'auditbeat-*',
+        'endgame-*',
+        'filebeat-*',
+        'packetbeat-*',
+        'traces-apm*',
+        'winlogbeat-*',
+      ]
+    );
+  });
+
+  // TODO: Steph/sourcerer fix these
+  it.skip('Should NOT exclude elastic cloud alias when selected patterns include "logs-endpoint.event-*" as an alias', () => {
+    const mapStateToProps = jest.fn(); // useSourcererDataView();
+    const myMockGlobalState = cloneDeep(mockGlobalState);
+    myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = [
+      'apm-*-transaction*',
+      'auditbeat-*',
+      'endgame-*',
+      'filebeat-*',
+      'packetbeat-*',
+      'traces-apm*',
+      'winlogbeat-*',
+      'logs-endpoint.event-*',
+    ];
+    expect(mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns).toEqual(
+      [
+        'apm-*-transaction*',
+        'auditbeat-*',
+        'endgame-*',
+        'filebeat-*',
+        'logs-endpoint.event-*',
+        'packetbeat-*',
+        'traces-apm*',
+        'winlogbeat-*',
+      ]
+    );
   });
 });

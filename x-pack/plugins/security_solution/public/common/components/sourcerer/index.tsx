@@ -22,14 +22,13 @@ import {
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
-import { sourcererActions, sourcererModel } from '../../store/sourcerer';
-import { State } from '../../store';
-import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
+import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -44,12 +43,14 @@ interface SourcererComponentProps {
 
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
-  const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { defaultDataView, kibanaDataViews, signalIndexName, sourcererScope } = useSelector<
-    State,
-    SourcererScopeSelector
-  >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
-  const { selectedDataViewId, selectedPatterns, loading } = sourcererScope;
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
+  const {
+    defaultDataView,
+    kibanaDataViews,
+    signalIndexName,
+    sourcererScope: { selectedDataViewId, selectedPatterns, loading },
+  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
   const [dataViewId, setDataViewId] = useState<string>(selectedDataViewId ?? defaultDataView.id);

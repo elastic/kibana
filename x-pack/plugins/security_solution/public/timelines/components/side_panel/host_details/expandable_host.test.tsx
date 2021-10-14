@@ -11,7 +11,7 @@ import React from 'react';
 import '../../../../common/mock/match_media';
 import { mockGlobalState, TestProviders } from '../../../../common/mock';
 import { ExpandableHostDetails } from './expandable_host';
-import { EXCLUDE_ELASTIC_CLOUD_INDEX } from '../../../../common/store/sourcerer/selectors';
+import { EXCLUDE_ELASTIC_CLOUD_INDEX } from '../../../../common/containers/sourcerer';
 
 describe('Expandable Host Component', () => {
   const mockProps = {

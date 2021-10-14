@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { State } from '../types';
-import { SourcererDataView, SourcererScope, SourcererScopeById, SourcererScopeName } from './model';
-import { FieldSpec } from '../../../../../../../src/plugins/data_views/common';
-import { SecuritySolutionDataViewBase } from '../../types';
+import {
+  SourcererDataView,
+  SourcererModel,
+  SourcererScope,
+  SourcererScopeById,
+  SourcererScopeName,
+} from './model';
 
 export const sourcererKibanaDataViewsSelector = ({ sourcerer }: State): SourcererDataView[] =>
   sourcerer.kibanaDataViews;
@@ -21,7 +24,7 @@ export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string |
 export const sourcererDefaultDataViewSelector = ({ sourcerer }: State): SourcererDataView =>
   sourcerer.defaultDataView;
 
-export const sourcererDataViewSelector = ({ sourcerer }: State, id: string): SourcererDataView =>
+export const dataViewSelector = ({ sourcerer }: State, id: string): SourcererDataView =>
   sourcerer.kibanaDataViews.find((dataView) => dataView.id === id) ?? sourcerer.defaultDataView;
 
 export const sourcererScopeIdSelector = (
@@ -45,78 +48,34 @@ export const signalIndexNameSelector = () =>
 export const defaultDataViewSelector = () =>
   createSelector(sourcererDefaultDataViewSelector, (dataViews) => dataViews);
 
-export const sourcererDataView = () =>
-  createSelector(sourcererDataViewSelector, (dataView) => dataView);
+export const sourcererDataViewSelector = () =>
+  createSelector(dataViewSelector, (dataView) => dataView);
 
-export interface SelectedDataView {
-  browserFields: SourcererDataView['browserFields'];
-  dataViewId: SourcererDataView['id'];
-  docValueFields: SourcererDataView['docValueFields'];
-  indexPattern: SecuritySolutionDataViewBase;
-  indicesExist: boolean;
-  loading: boolean;
-  patternList: string[];
-  runtimeMappings: SourcererDataView['runtimeMappings'];
-  selectedPatterns: string[];
+export interface SourcererScopeSelector extends Omit<SourcererModel, 'sourcererScopes'> {
+  sourcererDataView: SourcererDataView;
+  sourcererScope: SourcererScope;
 }
 
-export const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
-// tested via containers/source/index.test.tsx
-export const getSelectedDataViewSelector = () => {
-  const getScopeSelector = scopeIdSelector();
-  const getDefaultDataViewSelector = defaultDataViewSelector();
+export const getSourcererScopeSelector = () => {
   const getKibanaDataViewsSelector = kibanaDataViewsSelector();
+  const getDefaultDataViewSelector = defaultDataViewSelector();
   const getSignalIndexNameSelector = signalIndexNameSelector();
-  return (
-    state: State,
-    scopeId: SourcererScopeName = SourcererScopeName.default
-  ): SelectedDataView => {
-    const {
-      selectedDataViewId,
-      selectedPatterns: scopeSelectedPatterns,
-      loading,
-    } = getScopeSelector(state, scopeId);
-    const defaultDataView = getDefaultDataViewSelector(state);
+  const getSourcererDataViewSelector = sourcererDataViewSelector();
+  const getScopeSelector = scopeIdSelector();
+
+  return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
     const kibanaDataViews = getKibanaDataViewsSelector(state);
+    const defaultDataView = getDefaultDataViewSelector(state);
     const signalIndexName = getSignalIndexNameSelector(state);
-    const dataViewId = selectedDataViewId === null ? defaultDataView.id : selectedDataViewId;
-    const theDataView: SourcererDataView =
-      kibanaDataViews.find((dataView) => dataView.id === dataViewId) ?? defaultDataView;
+    const scope = getScopeSelector(state, scopeId);
+    const sourcererDataView = getSourcererDataViewSelector(state, scope.selectedDataViewId);
 
-    const patternList = theDataView != null ? theDataView.title.split(',') : [];
-
-    const getSelectedPatterns = memoizeOne((patterns: string[]): string[] =>
-      patterns.some((index) => index === 'logs-*')
-        ? [...patterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
-        : patterns
-    );
-    const getDataView = memoizeOne(
-      (title: string, indexFields: FieldSpec[]) => ({
-        fields: indexFields,
-        title,
-      }),
-      (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
-    );
-    const { browserFields, docValueFields, runtimeMappings, indexFields } =
-      theDataView != null ? theDataView : defaultDataView;
-    const selectedPatterns = getSelectedPatterns(scopeSelectedPatterns);
     return {
-      browserFields,
-      dataViewId,
-      docValueFields,
-      indexPattern: getDataView(selectedPatterns.join(','), indexFields),
-      indicesExist:
-        scopeId === SourcererScopeName.detections
-          ? theDataView.patternList.includes(`${signalIndexName}`)
-          : scopeId === SourcererScopeName.default
-          ? theDataView.patternList.filter((i) => i !== signalIndexName).length > 0
-          : theDataView.patternList.length > 0,
-      loading,
-      runtimeMappings,
-      // all patterns in DATA_VIEW
-      patternList,
-      // selected patterns in DATA_VIEW
-      selectedPatterns,
+      defaultDataView,
+      kibanaDataViews,
+      signalIndexName,
+      sourcererDataView,
+      sourcererScope: scope,
     };
   };
 };

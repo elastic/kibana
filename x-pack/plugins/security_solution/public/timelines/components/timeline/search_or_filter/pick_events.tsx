@@ -25,19 +25,18 @@ import {
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { State } from '../../../../common/store';
+import { sourcererSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineEventsType } from '../../../../../common';
-import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import * as i18n from './translations';
 import {
   getScopePatternListSelection,
   isSignalIndex,
 } from '../../../../common/store/sourcerer/helpers';
 import { SIEM_DATA_VIEW_LABEL } from '../../../../common/components/sourcerer/translations';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -138,15 +137,14 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const [isPopoverOpen, setPopover] = useState(false);
   const [showAdvanceSettings, setAdvanceSettings] = useState(eventType === 'custom');
   const [filterEventType, setFilterEventType] = useState<TimelineEventsType>(eventType);
-  const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
     defaultDataView,
     kibanaDataViews,
     signalIndexName,
     sourcererScope: { loading, selectedPatterns, selectedDataViewId },
-  } = useSelector<State, SourcererScopeSelector>(
-    (state) => sourcererScopeSelector(state, SourcererScopeName.timeline),
-    deepEqual
+  }: sourcererSelectors.SourcererScopeSelector = useDeepEqualSelector((state) =>
+    sourcererScopeSelector(state, SourcererScopeName.default)
   );
 
   const [dataViewId, setDataViewId] = useState<string>(selectedDataViewId ?? '');

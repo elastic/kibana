@@ -9,7 +9,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
-import memoizeOne from 'memoize-one';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { SourcererDataView, SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
@@ -21,8 +20,7 @@ import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
-import { EXCLUDE_ELASTIC_CLOUD_INDEX } from '../../store/sourcerer/selectors';
-import { FieldSpec } from '../../../../../../../src/plugins/data_views/common';
+import { SecuritySolutionDataViewBase } from '../../types';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -232,39 +230,30 @@ export const useInitSourcerer = (
     signalIndexNameSelector,
   ]);
 };
+export const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
+
+export interface SelectedDataView {
+  browserFields: SourcererDataView['browserFields'];
+  dataViewId: SourcererDataView['id'];
+  docValueFields: SourcererDataView['docValueFields'];
+  indexPattern: SecuritySolutionDataViewBase;
+  indicesExist: boolean;
+  loading: boolean;
+  patternList: string[];
+  runtimeMappings: SourcererDataView['runtimeMappings'];
+  selectedPatterns: string[];
+}
 
 export const useSourcererDataView = (
-  sourcererScope: SourcererScopeName = SourcererScopeName.default
-) => {
+  scopeId: SourcererScopeName = SourcererScopeName.default
+): SelectedDataView => {
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
-    defaultDataViewSelector,
-    kibanaDataViewsSelector,
-    scopeIdSelector,
-    signalIndexNameSelector,
-  } = useMemo(
-    () => ({
-      scopeIdSelector: sourcererSelectors.scopeIdSelector(),
-      defaultDataViewSelector: sourcererSelectors.defaultDataViewSelector(),
-      kibanaDataViewsSelector: sourcererSelectors.kibanaDataViewsSelector(),
-      signalIndexNameSelector: sourcererSelectors.signalIndexNameSelector(),
-    }),
-    []
-  );
-  const {
-    sourcererScope: { selectedDataViewId, selectedPatterns: scopeSelectedPatterns, loading },
-    defaultDataView,
-    kibanaDataViews,
     signalIndexName,
-  } = useDeepEqualSelector((state) => ({
-    defaultDataView: defaultDataViewSelector(state),
-    kibanaDataViews: kibanaDataViewsSelector(state),
-    signalIndexName: signalIndexNameSelector(state),
-    sourcererScope: scopeIdSelector(state, sourcererScope),
-  }));
-
-  const theDataView: SourcererDataView = useMemo(
-    () => kibanaDataViews.find((dataView) => dataView.id === selectedDataViewId) ?? defaultDataView,
-    [selectedDataViewId, defaultDataView, kibanaDataViews]
+    sourcererDataView: selectedDataView,
+    sourcererScope: { selectedPatterns: scopeSelectedPatterns, loading },
+  }: sourcererSelectors.SourcererScopeSelector = useDeepEqualSelector((state) =>
+    sourcererScopeSelector(state, scopeId)
   );
 
   const selectedPatterns = useMemo(
@@ -277,27 +266,27 @@ export const useSourcererDataView = (
 
   return useMemo(
     () => ({
-      browserFields: theDataView.browserFields,
-      dataViewId: theDataView.id,
-      docValueFields: theDataView.docValueFields,
+      browserFields: selectedDataView.browserFields,
+      dataViewId: selectedDataView.id,
+      docValueFields: selectedDataView.docValueFields,
       indexPattern: {
-        fields: theDataView.indexFields,
+        fields: selectedDataView.indexFields,
         title: selectedPatterns.join(','),
       },
       indicesExist:
-        sourcererScope === SourcererScopeName.detections
-          ? theDataView.patternList.includes(`${signalIndexName}`)
-          : sourcererScope === SourcererScopeName.default
-          ? theDataView.patternList.filter((i) => i !== signalIndexName).length > 0
-          : theDataView.patternList.length > 0,
-      loading,
-      runtimeMappings: theDataView.runtimeMappings,
-      // all patterns in DATA_VIEW
-      patternList: theDataView.title.split(','),
+        scopeId === SourcererScopeName.detections
+          ? selectedDataView.patternList.includes(`${signalIndexName}`)
+          : scopeId === SourcererScopeName.default
+          ? selectedDataView.patternList.filter((i) => i !== signalIndexName).length > 0
+          : selectedDataView.patternList.length > 0,
+      loading: loading || selectedDataView.loading,
+      runtimeMappings: selectedDataView.runtimeMappings,
+      // all active & inactive patterns in DATA_VIEW
+      patternList: selectedDataView.title.split(','),
       // selected patterns in DATA_VIEW
       selectedPatterns,
     }),
-    [loading, selectedPatterns, signalIndexName, sourcererScope, theDataView]
+    [loading, selectedPatterns, signalIndexName, scopeId, selectedDataView]
   );
 };
 

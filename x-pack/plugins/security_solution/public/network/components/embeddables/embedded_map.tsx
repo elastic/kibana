@@ -11,7 +11,6 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
-import { useSelector } from 'react-redux';
 import {
   ErrorEmbeddable,
   isErrorEmbeddable,
@@ -30,12 +29,9 @@ import { MapEmbeddable } from '../../../../../../plugins/maps/public/embeddable'
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../common/lib/kibana';
 import { getLayerList } from './map_config';
-import {
-  getSourcererScopeSelector,
-  SourcererScopeSelector,
-} from '../../../timelines/components/timeline/search_or_filter/selectors';
-import { State } from '../../../common/store';
+import { sourcererSelectors } from '../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -100,11 +96,11 @@ export const EmbeddedMapComponent = ({
   const [isIndexError, setIsIndexError] = useState(false);
 
   const [, dispatchToaster] = useStateToaster();
-  const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { kibanaDataViews, sourcererScope } = useSelector<State, SourcererScopeSelector>(
-    (state) => sourcererScopeSelector(state, SourcererScopeName.default),
-    deepEqual
-  );
+
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
+  const { kibanaDataViews, sourcererScope }: sourcererSelectors.SourcererScopeSelector =
+    useDeepEqualSelector((state) => sourcererScopeSelector(state, SourcererScopeName.default));
+
   const [mapIndexPatterns, setMapIndexPatterns] = useState(
     kibanaDataViews.filter((dataView) => sourcererScope.selectedPatterns.includes(dataView.title))
   );
