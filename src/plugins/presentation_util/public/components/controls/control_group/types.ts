@@ -7,7 +7,8 @@
  */
 
 import { PanelState, EmbeddableInput } from '../../../../../embeddable/public';
-import { ControlStyle, ControlWidth, InputControlInput } from '../types';
+import { InputControlInput } from '../../../services/controls';
+import { ControlStyle, ControlWidth } from '../types';
 
 export interface ControlGroupInput
   extends EmbeddableInput,
@@ -17,6 +18,7 @@ export interface ControlGroupInput
     useQuery: boolean;
     useTimerange: boolean;
   };
+  defaultControlWidth?: ControlWidth;
   controlStyle: ControlStyle;
   panels: ControlsPanels;
 }
