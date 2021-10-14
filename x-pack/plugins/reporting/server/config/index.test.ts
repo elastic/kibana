@@ -39,11 +39,9 @@ describe('deprecations', () => {
   ['.foo', '.reporting'].forEach((index) => {
     it('logs a warning if index is set', () => {
       const { messages } = applyReportingDeprecations({ index, roles: { enabled: false } });
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Multitenancy by changing \\"kibana.index\\" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details",
-        ]
-      `);
+      expect(messages).toMatchObject([
+        'Multitenancy by changing "xpack.reporting.index" will not be supported in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details',
+      ]);
     });
   });
 
@@ -51,7 +49,7 @@ describe('deprecations', () => {
     const { messages } = applyReportingDeprecations({ roles: { enabled: true } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Granting reporting privilege through a \\"reporting_user\\" role will not be supported starting in 8.0. Please set \\"xpack.reporting.roles.enabled\\" to \\"false\\" and grant reporting privileges to users using Kibana application privileges **Management > Security > Roles**.",
+        "Use Kibana application privileges to grant reporting privileges. Using  \\"xpack.reporting.roles.allow\\" to grant reporting privileges prevents users from using API Keys to create reports. The \\"xpack.reporting.roles.enabled\\" setting will default to false in a future release.",
       ]
     `);
   });

@@ -105,6 +105,7 @@ import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
+import { registerPrivilegeDeprecations } from './deprecation_privileges';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
 // eslint-disable-next-line no-restricted-imports
@@ -390,6 +391,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       endpointAppContext: endpointContext,
       core,
       taskManager: plugins.taskManager!,
+    });
+
+    registerPrivilegeDeprecations({
+      deprecationsService: core.deprecations,
+      getKibanaRolesByFeatureId:
+        plugins.security?.privilegeDeprecationsService.getKibanaRolesByFeatureId,
+      logger: this.logger.get('deprecations'),
     });
 
     return {};
