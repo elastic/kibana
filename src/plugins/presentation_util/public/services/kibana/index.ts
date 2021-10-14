@@ -18,6 +18,7 @@ import {
 } from '../create';
 import { PresentationUtilPluginStartDeps } from '../../types';
 import { PresentationUtilServices } from '..';
+import { controlsServiceFactory } from './controls';
 
 export { capabilitiesServiceFactory } from './capabilities';
 export { dashboardsServiceFactory } from './dashboards';
@@ -32,6 +33,7 @@ export const providers: PluginServiceProviders<
   labs: new PluginServiceProvider(labsServiceFactory),
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
+  controls: new PluginServiceProvider(controlsServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<
