@@ -17,6 +17,7 @@ const rewriteBodyRes: RewriteRequestCase<AlertInstanceSummary> = ({
   status_end_date: statusEndDate,
   error_messages: errorMessages,
   last_run: lastRun,
+  execution_duration: executionDuration,
   ...rest
 }: any) => ({
   ...rest,
@@ -27,6 +28,7 @@ const rewriteBodyRes: RewriteRequestCase<AlertInstanceSummary> = ({
   errorMessages,
   lastRun,
   instances: alerts,
+  executionDuration,
 });
 
 export async function loadAlertInstanceSummary({
