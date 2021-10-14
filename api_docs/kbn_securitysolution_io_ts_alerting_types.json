@@ -818,7 +818,7 @@
         "label": "Type",
         "description": [],
         "signature": [
-          "\"query\" | \"eql\" | \"threshold\" | \"threat_match\" | \"machine_learning\" | \"saved_query\""
+          "\"query\" | \"eql\" | \"threat_match\" | \"threshold\" | \"machine_learning\" | \"saved_query\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
@@ -832,7 +832,7 @@
         "label": "TypeOrUndefined",
         "description": [],
         "signature": [
-          "\"query\" | \"eql\" | \"threshold\" | \"threat_match\" | \"machine_learning\" | \"saved_query\" | undefined"
+          "\"query\" | \"eql\" | \"threat_match\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,

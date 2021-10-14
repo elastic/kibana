@@ -1881,7 +1881,7 @@
             },
             {
               "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
+              "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
             },
             {
               "plugin": "osquery",

@@ -3240,9 +3240,6 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
             "path": "packages/kbn-es-query/src/es_query/types.ts",
             "deprecated": false
           }

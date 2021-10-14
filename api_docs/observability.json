@@ -652,6 +652,39 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.SelectableUrlList",
+        "type": "Function",
+        "tags": [],
+        "label": "SelectableUrlList",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "SelectableUrlListProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SelectableUrlList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "SelectableUrlListProps"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.useBreadcrumbs",
         "type": "Function",
         "tags": [],
@@ -1500,16 +1533,6 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.FetchDataParams.bucketSize",
-            "type": "string",
-            "tags": [],
-            "label": "bucketSize",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "observability",
             "id": "def-public.FetchDataParams.serviceName",
             "type": "string",
             "tags": [],
@@ -1518,6 +1541,26 @@
             "signature": [
               "string | undefined"
             ],
+            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.FetchDataParams.bucketSize",
+            "type": "number",
+            "tags": [],
+            "label": "bucketSize",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.FetchDataParams.intervalString",
+            "type": "string",
+            "tags": [],
+            "label": "intervalString",
+            "description": [],
             "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false
           }
