@@ -21,10 +21,6 @@ import { createUserAndRole, deleteUserAndRole } from '../../../common/services/s
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { ThresholdCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -35,20 +31,20 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
+      await createSignalsIndex(supertest);
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
+      await deleteSignalsIndex(supertest);
     });
 
     beforeEach(async () => {
       await deleteAllAlerts(supertest);
-      await createSignalsIndex(supertest);
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
     });
 
@@ -60,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
         ['host_alias*', 'auditbeat-*'],
       ];
       indexTestCases.forEach((index) => {
-        it.skip(`for KQL rule with index param: ${index}`, async () => {
+        it(`for KQL rule with index param: ${index}`, async () => {
           const rule = getRuleForSignalTesting(index);
           await createUserAndRole(getService, ROLES.detections_admin);
           const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
@@ -68,7 +64,6 @@ export default ({ getService }: FtrProviderContext) => {
             pass: 'changeme',
           });
           await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-          await sleep(5000);
           const { body } = await supertest
             .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
             .set('kbn-xsrf', 'true')
@@ -95,7 +90,6 @@ export default ({ getService }: FtrProviderContext) => {
             pass: 'changeme',
           });
           await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-          await sleep(5000);
           const { body } = await supertest
             .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
             .set('kbn-xsrf', 'true')

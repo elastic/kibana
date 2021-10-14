@@ -66,8 +66,11 @@ const getTransformedHits = (
   timestampOverride: TimestampOverrideOrUndefined,
   signalHistory: ThresholdSignalHistory
 ) => {
+  if (results.aggregations == null) {
+    return [];
+  }
   const aggParts = threshold.field.length
-    ? results.aggregations && getThresholdAggregationParts(results.aggregations)
+    ? getThresholdAggregationParts(results.aggregations)
     : {
         field: null,
         index: 0,
@@ -131,7 +134,7 @@ const getTransformedHits = (
   };
 
   return getCombinations(
-    (results.aggregations![aggParts.name] as { buckets: TermAggregationBucket[] }).buckets,
+    (results.aggregations[aggParts.name] as { buckets: TermAggregationBucket[] }).buckets,
     0,
     aggParts.field
   ).reduce((acc: Array<BaseHit<SignalSource>>, bucket) => {
