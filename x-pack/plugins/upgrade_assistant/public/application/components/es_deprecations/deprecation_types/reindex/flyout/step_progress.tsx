@@ -34,7 +34,7 @@ const StepStatus: React.FunctionComponent<{ status: STATUS; idx: number }> = ({ 
   } else if (status === 'cancelled') {
     return (
       <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-cancelled">
-        <EuiIcon type="indexClose" />
+        <EuiIcon type="cross" size="s" />
       </span>
     );
   } else if (status === 'failed') {

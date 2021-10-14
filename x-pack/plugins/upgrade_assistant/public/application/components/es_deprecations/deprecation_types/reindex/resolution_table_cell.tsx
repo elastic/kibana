@@ -154,17 +154,6 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case ReindexStatus.cancelled:
-      return (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="indexClose" color="warning" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexCanceledText}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
   }
 
   return (
