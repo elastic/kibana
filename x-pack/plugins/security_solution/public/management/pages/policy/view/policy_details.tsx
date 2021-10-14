@@ -8,8 +8,9 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
+import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { usePolicyDetailsSelector } from './policy_hooks';
-import { policyDetails, agentStatusSummary } from '../store/policy_details/selectors';
+import { policyDetails, agentStatusSummary, isLoading } from '../store/policy_details/selectors';
 import { AgentsSummary } from './agents_summary';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { PolicyTabs } from './tabs';
@@ -33,6 +34,7 @@ export const PolicyDetails = React.memo(() => {
   const { getAppUrl } = useAppUrl();
 
   // Store values
+  const loading = usePolicyDetailsSelector(isLoading);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const policyAgentStatusSummary = usePolicyDetailsSelector(agentStatusSummary);
 
@@ -91,7 +93,15 @@ export const PolicyDetails = React.memo(() => {
       restrictWidth={true}
       hasBottomBorder={!isTrustedAppsByPolicyEnabled} // TODO: Remove this and related code when removing FF
     >
-      {isTrustedAppsByPolicyEnabled ? (
+      {loading ? (
+        <EuiPageTemplate template="centeredContent">
+          <EuiLoadingSpinner
+            className="essentialAnimation"
+            size="xl"
+            data-test-subj="policyDetailsLoading"
+          />
+        </EuiPageTemplate>
+      ) : isTrustedAppsByPolicyEnabled ? (
         <PolicyTabs />
       ) : (
         // TODO: Remove this and related code when removing FF
