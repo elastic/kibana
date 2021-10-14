@@ -36,7 +36,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     value: [],
     description: i18n.translate('discover.advancedSettings.defaultColumnsText', {
       defaultMessage:
-        'Columns displayed by default in the Discover app. If empty, `Document` column will be displayed.',
+        'Columns displayed by default in the Discover app. If empty, a summary of the document will be displayed.',
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
