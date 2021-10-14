@@ -164,8 +164,10 @@ export const useDashboardAppState = ({
         if (screenshotModeService?.isScreenshotMode()) {
           scopedHistory().replace(path);
         } else {
-          spacesService?.ui.redirectLegacyUrl(path);
+          await spacesService?.ui.redirectLegacyUrl(path);
         }
+        // Return so we don't run any more of the hook and let it rerun after the redirect that just happened
+        return;
       }
 
       /**
