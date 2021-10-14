@@ -91,22 +91,6 @@ describe('TutorialService', () => {
     });
   });
 
-  describe('getDirectoryNotices', () => {
-    test('returns empty array', () => {
-      const service = new TutorialService();
-      expect(service.getDirectoryNotices()).toEqual([]);
-    });
-
-    test('returns last state of register calls', () => {
-      const service = new TutorialService();
-      const setup = service.setup();
-      const notices = [() => <div />, () => <span />];
-      setup.registerDirectoryNotice('abc', notices[0]);
-      setup.registerDirectoryNotice('def', notices[1]);
-      expect(service.getDirectoryNotices()).toEqual(notices);
-    });
-  });
-
   describe('getDirectoryHeaderLinks', () => {
     test('returns empty array', () => {
       const service = new TutorialService();
