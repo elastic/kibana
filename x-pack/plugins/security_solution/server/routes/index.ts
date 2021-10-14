@@ -61,6 +61,7 @@ import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_
 import { PreviewRuleOptions } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
+import { createPreviewIndexRoute } from '../lib/detection_engine/routes/index/create_preview_index_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -133,6 +134,9 @@ export const initRoutes = (
   createIndexRoute(router, ruleDataService, config);
   readIndexRoute(router, config);
   deleteIndexRoute(router);
+
+  // Detection Engine Preview Index  /api/detection_engine/preview/index
+  createPreviewIndexRoute(router, config);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
   readTagsRoute(router, isRuleRegistryEnabled);
