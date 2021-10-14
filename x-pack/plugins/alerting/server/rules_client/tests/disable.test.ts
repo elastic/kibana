@@ -52,6 +52,21 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
+  taskManager.get.mockResolvedValue({
+    id: 'task-123',
+    taskType: 'alerting:123',
+    scheduledAt: new Date(),
+    attempts: 1,
+    status: TaskStatus.Idle,
+    runAt: new Date(),
+    startedAt: null,
+    retryAt: null,
+    state: {},
+    params: {
+      alertId: '1',
+    },
+    ownerId: null,
+  });
   (auditLogger.log as jest.Mock).mockClear();
 });
 
@@ -255,7 +270,9 @@ describe('disable()', () => {
           },
         },
       },
-      params: {},
+      params: {
+        alertId: '1',
+      },
       ownerId: null,
     });
     await rulesClient.disable({ id: '1' });
@@ -300,41 +317,37 @@ describe('disable()', () => {
       (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
     ).toBe('123');
 
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-    expect(eventLogger.logEvent.mock.calls[0][0]).toMatchInlineSnapshot(`
-      Object {
-        "@timestamp": "1970-01-01T00:00:00.000Z",
-        "event": Object {
-          "action": "execute-start",
-          "category": Array [
-            "alerts",
-          ],
-          "kind": "alert",
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls[0][0]).toStrictEqual({
+      event: {
+        action: 'recovered-instance',
+        category: ['alerts'],
+        kind: 'alert',
+      },
+      kibana: {
+        alerting: {
+          action_group_id: 'default',
+          action_subgroup: 'newSubgroup',
+          instance_id: '1',
         },
-        "kibana": Object {
-          "saved_objects": Array [
-            Object {
-              "id": "1",
-              "namespace": undefined,
-              "rel": "primary",
-              "type": "alert",
-              "type_id": "test",
-            },
-          ],
-          "task": Object {
-            "schedule_delay": 0,
-            "scheduled": "1970-01-01T00:00:00.000Z",
+        saved_objects: [
+          {
+            id: '1',
+            namespace: 'default',
+            rel: 'primary',
+            type: 'alert',
+            type_id: 'myType',
           },
-        },
-        "message": "alert execution start: \\"1\\"",
-        "rule": Object {
-          "category": "test",
-          "id": "1",
-          "license": "basic",
-          "ruleset": "alerts",
-        },
-      }
-    `);
+        ],
+      },
+      message: 'instance \'1\' has recovered',
+      rule: {
+        category: '123',
+        id: '1',
+        license: 'basic',
+        ruleset: 'alerts',
+      },
+    });
   });
 
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {

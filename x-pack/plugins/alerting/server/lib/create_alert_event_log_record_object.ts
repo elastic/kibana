@@ -70,7 +70,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       })),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),
     },
-    message,
+    ...(message ? { message } : {}),
     rule: {
       id: ruleId,
       license: ruleType.minimumLicenseRequired,

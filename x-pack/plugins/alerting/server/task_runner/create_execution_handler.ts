@@ -10,7 +10,7 @@ import {
   asSavedObjectExecutionSource,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../../actions/server';
-import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
 import {
@@ -215,7 +215,7 @@ export function createExecutionHandler<
             type: 'alert',
             id: alertId,
             typeId: alertType.id,
-            relation: SAVED_OBJECT_REL_PRIMARY
+            relation: SAVED_OBJECT_REL_PRIMARY,
           },
           {
             type: 'action',

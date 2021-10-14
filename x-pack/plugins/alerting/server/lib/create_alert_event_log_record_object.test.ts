@@ -38,10 +38,11 @@ describe('createAlertEventLogRecordObject', () => {
             id: '1',
             type: 'alert',
             typeId: ruleType.id,
+            relation: 'primary',
           },
         ],
       })
-    ).toBe({
+    ).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-start',
@@ -58,8 +59,11 @@ describe('createAlertEventLogRecordObject', () => {
             type_id: 'test',
           },
         ],
+        task: {
+          schedule_delay: 0,
+          scheduled: '1970-01-01T00:00:00.000Z',
+        },
       },
-      message: 'alert execution start',
       rule: {
         category: 'test',
         id: '1',
@@ -91,16 +95,25 @@ describe('createAlertEventLogRecordObject', () => {
             id: '1',
             type: 'alert',
             typeId: ruleType.id,
+            relation: 'primary',
           },
         ],
       })
-    ).toBe({
+    ).toStrictEqual({
       event: {
         action: 'recovered-instance',
         category: ['alerts'],
+        duration: 5,
+        end: '1970-01-01T00:05:00.000Z',
         kind: 'alert',
+        start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alerting: {
+          action_group_id: 'group 1',
+          action_subgroup: 'subgroup value',
+          instance_id: 'test1',
+        },
         saved_objects: [
           {
             id: '1',
@@ -110,12 +123,8 @@ describe('createAlertEventLogRecordObject', () => {
             type_id: 'test',
           },
         ],
-        task: {
-          schedule_delay: 0,
-          scheduled: '1970-01-01T00:00:00.000Z',
-        },
       },
-      message: 'alert execution start',
+      message: 'message text here',
       rule: {
         category: 'test',
         id: '1',
@@ -148,21 +157,30 @@ describe('createAlertEventLogRecordObject', () => {
             id: '1',
             type: 'alert',
             typeId: ruleType.id,
+            relation: 'primary',
           },
           {
             id: '2',
-            type: 'acion',
+            type: 'action',
             typeId: '.email',
           },
         ],
       })
-    ).toBe({
+    ).toStrictEqual({
       event: {
         action: 'recovered-instance',
         category: ['alerts'],
+        duration: 5,
+        end: '1970-01-01T00:05:00.000Z',
         kind: 'alert',
+        start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alerting: {
+          action_group_id: 'group 1',
+          action_subgroup: 'subgroup value',
+          instance_id: 'test1',
+        },
         saved_objects: [
           {
             id: '1',
@@ -174,15 +192,10 @@ describe('createAlertEventLogRecordObject', () => {
           {
             id: '2',
             namespace: 'default',
-            rel: 'primary',
             type: 'action',
             type_id: '.email',
           },
         ],
-        task: {
-          schedule_delay: 0,
-          scheduled: '1970-01-01T00:00:00.000Z',
-        },
       },
       message: 'action execution start',
       rule: {
