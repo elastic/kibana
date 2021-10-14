@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiIcon,
+  EuiPopover,
+  EuiContextMenu,
+  EuiButton,
+} from '@elastic/eui';
 import { LegendAction, SeriesIdentifier } from '@elastic/charts';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { PieVisParams } from '../types';
@@ -30,6 +36,7 @@ export const getLegendActions = (
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isfilterable, setIsfilterable] = useState(true);
     const filterData = useMemo(() => getFilterEventData(pieSeries), [pieSeries]);
+    const containerRef = useRef<HTMLButtonElement | null>(null);
 
     useEffect(() => {
       (async () => setIsfilterable(await canFilter(filterData, actions)))();
@@ -80,8 +87,8 @@ export const getLegendActions = (
     ];
 
     const Button = (
-      <div
-        tabIndex={0}
+      <EuiButton
+        buttonRef={containerRef}
         role="button"
         aria-pressed="false"
         style={{
@@ -97,7 +104,7 @@ export const getLegendActions = (
         onClick={() => setPopoverOpen(!popoverOpen)}
       >
         <EuiIcon size="s" type="boxesVertical" />
-      </div>
+      </EuiButton>
     );
 
     return (
@@ -105,7 +112,12 @@ export const getLegendActions = (
         id="contextMenuNormal"
         button={Button}
         isOpen={popoverOpen}
-        closePopover={() => setPopoverOpen(false)}
+        closePopover={() => {
+          setPopoverOpen(false);
+          if (containerRef.current) {
+            requestAnimationFrame(() => containerRef?.current?.focus?.());
+          }
+        }}
         panelPaddingSize="none"
         anchorPosition="upLeft"
         title={i18n.translate('visTypePie.legend.filterOptionsLegend', {

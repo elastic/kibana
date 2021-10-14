@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiIcon,
+  EuiPopover,
+  EuiContextMenu,
+  EuiButton,
+} from '@elastic/eui';
 import { LegendAction, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 
 import { ClickTriggerEvent } from '../../../../charts/public';
@@ -25,6 +31,7 @@ export const getLegendActions = (
     const [isfilterable, setIsfilterable] = useState(false);
     const series = xySeries as XYChartSeriesIdentifier;
     const filterData = useMemo(() => getFilterEventData(series), [series]);
+    const containerRef = useRef<HTMLButtonElement | null>(null);
 
     useEffect(() => {
       (async () => setIsfilterable(await canFilter(filterData)))();
@@ -67,9 +74,9 @@ export const getLegendActions = (
     ];
 
     const Button = (
-      <div
-        tabIndex={0}
+      <EuiButton
         role="button"
+        buttonRef={containerRef}
         aria-pressed="false"
         style={{
           display: 'flex',
@@ -84,7 +91,7 @@ export const getLegendActions = (
         onClick={() => setPopoverOpen(!popoverOpen)}
       >
         <EuiIcon size="s" type="boxesVertical" />
-      </div>
+      </EuiButton>
     );
 
     return (
@@ -92,7 +99,12 @@ export const getLegendActions = (
         id="contextMenuNormal"
         button={Button}
         isOpen={popoverOpen}
-        closePopover={() => setPopoverOpen(false)}
+        closePopover={() => {
+          setPopoverOpen(false);
+          if (containerRef.current) {
+            requestAnimationFrame(() => containerRef?.current?.focus?.());
+          }
+        }}
         panelPaddingSize="none"
         anchorPosition="upLeft"
         title={i18n.translate('visTypeXy.legend.filterOptionsLegend', {

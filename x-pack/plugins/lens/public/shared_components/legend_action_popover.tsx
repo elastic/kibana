@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import type { LensFilterEvent } from '../types';
@@ -31,6 +31,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   context,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const containerRef = useRef(null);
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 'main',
@@ -65,6 +66,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   const Button = (
     <div
       tabIndex={0}
+      ref={containerRef}
       role="button"
       aria-pressed="false"
       style={{
@@ -87,7 +89,10 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
       id="contextMenuNormal"
       button={Button}
       isOpen={popoverOpen}
-      closePopover={() => setPopoverOpen(false)}
+      closePopover={() => {
+        setPopoverOpen(false);
+        requestAnimationFrame(() => containerRef.current.focus());
+      }}
       panelPaddingSize="none"
       anchorPosition="upLeft"
       title={i18n.translate('xpack.lens.shared.legend.filterOptionsLegend', {
