@@ -26,12 +26,12 @@ export interface RuleStatusSavedObjectsClient {
   findBulk: (ids: string[], statusesPerId: number) => Promise<FindBulkResponse>;
   create: (
     attributes: IRuleStatusSOAttributes,
-    options?: SavedObjectsCreateOptions
+    options: SavedObjectsCreateOptions
   ) => Promise<SavedObject<IRuleStatusSOAttributes>>;
   update: (
     id: string,
     attributes: Partial<IRuleStatusSOAttributes>,
-    options?: SavedObjectsCreateOptions
+    options: SavedObjectsCreateOptions
   ) => Promise<SavedObjectsUpdateResponse<IRuleStatusSOAttributes>>;
   delete: (id: string) => Promise<{}>;
 }
