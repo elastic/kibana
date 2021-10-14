@@ -18,4 +18,6 @@ export {
   BoolQuery,
   DataViewBase,
   DataViewFieldBase,
+  IFieldSubTypeMulti,
+  IFieldSubTypeNested,
 } from './types';

@@ -25,9 +25,12 @@ import {
   LayoutDirection,
   ElementClickListener,
   BrushEndListener,
+  XYBrushEvent,
   CurveType,
   LegendPositionConfig,
   LabelOverflowConstraint,
+  DisplayValueStyle,
+  RecursivePartial,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import type {
@@ -64,6 +67,7 @@ import {
   getThresholdRequiredPaddings,
   ThresholdAnnotations,
 } from './expression_thresholds';
+import { computeOverallDataDomain } from './threshold_helpers';
 
 declare global {
   interface Window {
@@ -169,7 +173,9 @@ export const getXyChartRenderer = (dependencies: {
   },
 });
 
-function getValueLabelsStyling(isHorizontal: boolean) {
+function getValueLabelsStyling(isHorizontal: boolean): {
+  displayValue: RecursivePartial<DisplayValueStyle>;
+} {
   const VALUE_LABELS_MAX_FONTSIZE = 12;
   const VALUE_LABELS_MIN_FONTSIZE = 10;
   const VALUE_LABELS_VERTICAL_OFFSET = -10;
@@ -178,11 +184,9 @@ function getValueLabelsStyling(isHorizontal: boolean) {
   return {
     displayValue: {
       fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
-      fill: { textContrast: true, textInverted: false, textBorder: 0 },
+      fill: { textBorder: 0 },
       alignment: isHorizontal
-        ? {
-            vertical: VerticalAlignment.Middle,
-          }
+        ? { vertical: VerticalAlignment.Middle }
         : { horizontal: HorizontalAlignment.Center },
       offsetX: isHorizontal ? VALUE_LABELS_HORIZONTAL_OFFSET : 0,
       offsetY: isHorizontal ? 0 : VALUE_LABELS_VERTICAL_OFFSET,
@@ -247,6 +251,10 @@ export function XYChart({
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
+  const layersById = filteredLayers.reduce((memo, layer) => {
+    memo[layer.layerId] = layer;
+    return memo;
+  }, {} as Record<string, LayerArgs>);
 
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
     datatables: Object.values(data.tables),
@@ -383,19 +391,19 @@ export function XYChart({
     const extent = axis.groupId === 'left' ? yLeftExtent : yRightExtent;
     const hasBarOrArea = Boolean(
       axis.series.some((series) => {
-        const seriesType = filteredLayers.find((l) => l.layerId === series.layer)?.seriesType;
+        const seriesType = layersById[series.layer]?.seriesType;
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
     );
     const fit = !hasBarOrArea && extent.mode === 'dataBounds';
-    let min: undefined | number;
-    let max: undefined | number;
+    let min: number = NaN;
+    let max: number = NaN;
 
     if (extent.mode === 'custom') {
       const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
       if (!inclusiveZeroError && !boundaryError) {
-        min = extent.lowerBound;
-        max = extent.upperBound;
+        min = extent.lowerBound ?? NaN;
+        max = extent.upperBound ?? NaN;
       }
     } else {
       const axisHasThreshold = thresholdLayers.some(({ yConfig }) =>
@@ -403,20 +411,15 @@ export function XYChart({
       );
       if (!fit && axisHasThreshold) {
         // Remove this once the chart will support automatic annotation fit for other type of charts
-        for (const series of axis.series) {
-          const table = data.tables[series.layer];
-          for (const row of table.rows) {
-            for (const column of table.columns) {
-              if (column.id === series.accessor) {
-                const value = row[column.id];
-                if (typeof value === 'number') {
-                  // keep the 0 in view
-                  max = Math.max(value, max || 0, 0);
-                  min = Math.min(value, min || 0, 0);
-                }
-              }
-            }
-          }
+        const { min: computedMin, max: computedMax } = computeOverallDataDomain(
+          filteredLayers,
+          axis.series.map(({ accessor }) => accessor),
+          data.tables
+        );
+
+        if (computedMin != null && computedMax != null) {
+          max = Math.max(computedMax, max || 0);
+          min = Math.min(computedMin, min || 0);
         }
         for (const { layerId, yConfig } of thresholdLayers) {
           const table = data.tables[layerId];
@@ -517,7 +520,7 @@ export function XYChart({
     onClickValue(context);
   };
 
-  const brushHandler: BrushEndListener = ({ x }) => {
+  const brushHandler = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
     }
@@ -592,7 +595,7 @@ export function XYChart({
         allowBrushingLastHistogramBucket={Boolean(isTimeViz)}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={interactive ? brushHandler : undefined}
+        onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={getLegendAction(
           filteredLayers,
@@ -924,6 +927,7 @@ export function XYChart({
             right: Boolean(yAxesMap.right),
           }}
           isHorizontal={shouldRotate}
+          thresholdPaddingMap={thresholdPaddings}
         />
       ) : null}
     </Chart>
