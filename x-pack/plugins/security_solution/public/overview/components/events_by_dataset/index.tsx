@@ -45,8 +45,10 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   indexPattern: DataViewBase;
   indexNames: string[];
   onlyField?: string;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
+  showLegend?: boolean;
   showSpacer?: boolean;
   timelineId?: string;
   toggleTopN?: () => void;
@@ -66,9 +68,11 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   indexPattern,
   indexNames,
   onlyField,
+  paddingSize,
   query,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
+  showLegend,
   showSpacer = true,
   timelineId,
   to,
@@ -173,9 +177,11 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       id={uniqueQueryId}
       indexNames={indexNames}
       onError={toggleTopN}
+      paddingSize={paddingSize}
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
       setQuery={setQuery}
       showSpacer={showSpacer}
+      showLegend={showLegend}
       skip={filterQuery === undefined}
       startDate={from}
       timelineId={timelineId}
