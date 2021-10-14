@@ -6,7 +6,7 @@
  */
 
 import { AlertInstanceState } from '../types';
-import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { IEvent } from '../../../event_log/server';
 import { UntypedNormalizedAlertType } from '../rule_type_registry';
 
 export type Event = Exclude<IEvent, undefined>;

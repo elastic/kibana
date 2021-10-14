@@ -340,7 +340,7 @@ describe('disable()', () => {
           },
         ],
       },
-      message: 'instance \'1\' has recovered',
+      message: "instance '1' has recovered",
       rule: {
         category: '123',
         id: '1',
