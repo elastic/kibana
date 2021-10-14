@@ -101,7 +101,7 @@
     "@elastic/charts": "37.0.0",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.21",
-    "@elastic/ems-client": "7.15.0",
+    "@elastic/ems-client": "7.16.0",
     "@elastic/eui": "39.0.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/maki": "6.3.0",
