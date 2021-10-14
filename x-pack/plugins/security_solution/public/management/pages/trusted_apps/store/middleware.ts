@@ -412,8 +412,8 @@ const fetchEditTrustedAppIfNeeded = async (
         dispatch({
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
-            type: 'LoadingResourceState',
             // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
+            type: 'LoadingResourceState',
             previousState: editItemState(currentState)!,
           },
         });
