@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
+import {
+  Axis,
+  BarSeries,
+  niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
+  XYBrushEvent,
+} from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiSpacer, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -125,7 +133,7 @@ export function LogsSection({ bucketSize }: Props) {
       </EuiFlexGroup>
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
           theme={chartTheme}
           showLegend
           legendPosition={Position.Right}

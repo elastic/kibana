@@ -13,6 +13,7 @@ import {
   ScaleType,
   Settings,
   TickFormatter,
+  XYBrushEvent,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -124,7 +125,7 @@ export function UptimeSection({ bucketSize }: Props) {
       {/* Chart section */}
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
           theme={chartTheme}
           showLegend={false}
           legendPosition={Position.Right}
