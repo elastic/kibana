@@ -45,7 +45,7 @@ export const CreateEditField = withRouter(
             name: undefined,
           } as unknown as IndexPatternField);
 
-    const url = `/patterns/${indexPattern.id}`;
+    const url = `/dataView/${indexPattern.id}`;
 
     if (mode === 'edit' && !spec) {
       const message = i18n.translate(
