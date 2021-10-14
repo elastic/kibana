@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
-
 import expect from '@kbn/expect';
 import { getUrl, kibanaServerTestUser } from '@kbn/test';
 
+import { hasKibanaBooted } from '../fixtures/test_helpers';
 import { getElasticsearchCaCertificate } from '../fixtures/tls_tools';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const log = getService('log');
+export default function (context: FtrProviderContext) {
+  const supertest = context.getService('supertest');
+  const log = context.getService('log');
+  const config = context.getService('config');
 
   describe('Interactive setup APIs - Manual configuration flow', function () {
     this.tags(['skipCloud', 'ciGroup2']);
@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     let kibanaVerificationCode: string;
     let elasticsearchCaCertificate: string;
     before(async () => {
-      const esServerConfig = getService('config').get('servers.elasticsearch');
+      const esServerConfig = config.get('servers.elasticsearch');
       elasticsearchCaCertificate = (
         await getElasticsearchCaCertificate(esServerConfig.host, esServerConfig.port)
       ).raw.toString('base64');
@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('fails to configure with invalid authentication code', async () => {
-      const esServerConfig = getService('config').get('servers.elasticsearch');
+      const esServerConfig = config.get('servers.elasticsearch');
       const configurePayload = {
         host: getUrl.baseUrl(esServerConfig),
         code: '000000',
@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('fails to configure with invalid CA certificate', async () => {
-      const esServerConfig = getService('config').get('servers.elasticsearch');
+      const esServerConfig = config.get('servers.elasticsearch');
       const configurePayload = {
         host: getUrl.baseUrl(esServerConfig),
         code: kibanaVerificationCode,
@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('fails to configure with invalid credentials', async function () {
-      const esServerConfig = getService('config').get('servers.elasticsearch');
+      const esServerConfig = config.get('servers.elasticsearch');
       const configurePayload = {
         host: getUrl.baseUrl(esServerConfig),
         code: kibanaVerificationCode,
@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should be able to configure with valid authentication code', async function () {
       this.timeout(60000);
 
-      const esServerConfig = getService('config').get('servers.elasticsearch');
+      const esServerConfig = config.get('servers.elasticsearch');
       const configurePayload = {
         host: getUrl.baseUrl(esServerConfig),
         code: kibanaVerificationCode,
@@ -130,26 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
           attributes: { type: 'outside_preboot_stage' },
         });
 
-      // Run 30 consequent requests with 1.5s delay to check if Kibana is up and running.
-      let kibanaHasBooted = false;
-      for (const counter of [...Array(30).keys()]) {
-        await delay(1500);
-
-        try {
-          expect((await supertest.get('/api/status').expect(200)).body).to.have.keys([
-            'version',
-            'status',
-          ]);
-
-          log.debug(`Kibana has booted after ${(counter + 1) * 1.5}s.`);
-          kibanaHasBooted = true;
-          break;
-        } catch (err) {
-          log.debug(`Kibana is still booting after ${(counter + 1) * 1.5}s due to: ${err.message}`);
-        }
-      }
-
-      expect(kibanaHasBooted).to.be(true);
+      expect(await hasKibanaBooted(context)).to.be(true);
     });
   });
 }
