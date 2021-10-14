@@ -14,6 +14,7 @@ import { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon, isLegacyConnector } from '../utils';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 export interface Props {
   connectors: ActionConnector[];
@@ -57,8 +58,8 @@ const addNewConnector = {
   'data-test-subj': 'dropdown-connector-add-connector',
 };
 
-const StyledEuiIconTip = styled(EuiIconTip)`
-  margin-left: 8px;
+const StyledEuiIconTip = euiStyled(EuiIconTip)`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS}
   margin-bottom: 0 !important;
 `;
 
