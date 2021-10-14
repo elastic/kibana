@@ -22,7 +22,7 @@ interface CreateAlertEventLogRecordParams {
   group?: string;
   subgroup?: string;
   namespace?: string;
-  runDateString?: string;
+  timestamp?: string;
   task?: {
     scheduled?: string;
     scheduleDelay?: number;
@@ -48,9 +48,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
         }
       : undefined;
   const event: Event = {
-    // explicitly set execute timestamp so it will be before other events
-    // generated here (new-instance, schedule-action, etc)
-    ...(params.runDateString ? { '@timestamp': params.runDateString } : {}),
+    ...(params.timestamp ? { '@timestamp': params.timestamp } : {}),
     event: {
       action,
       kind: 'alert',

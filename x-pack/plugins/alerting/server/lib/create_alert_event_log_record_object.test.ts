@@ -28,7 +28,7 @@ describe('createAlertEventLogRecordObject', () => {
         ruleId: '1',
         ruleType,
         action: 'execute-start',
-        runDateString: '1970-01-01T00:00:00.000Z',
+        timestamp: '1970-01-01T00:00:00.000Z',
         task: {
           scheduled: '1970-01-01T00:00:00.000Z',
           scheduleDelay: 0,
