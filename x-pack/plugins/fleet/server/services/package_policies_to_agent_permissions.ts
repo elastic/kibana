@@ -121,12 +121,25 @@ export async function storedPackagePoliciesToAgentPermissions(
             });
       }
 
+      let clusterRoleDescriptor = {};
+      if (
+        packagePolicy.elasticsearch &&
+        packagePolicy.elasticsearch.privileges &&
+        packagePolicy.elasticsearch.privileges.cluster &&
+        packagePolicy.elasticsearch.privileges.cluster.length > 0
+      ) {
+        clusterRoleDescriptor = {
+          cluster: packagePolicy.elasticsearch.privileges.cluster,
+        };
+      }
+
       return [
         packagePolicy.name,
         {
           indices: dataStreamsForPermissions.map((ds) =>
             getDataStreamPrivileges(ds, packagePolicy.namespace)
           ),
+          ...clusterRoleDescriptor,
         },
       ];
     }
