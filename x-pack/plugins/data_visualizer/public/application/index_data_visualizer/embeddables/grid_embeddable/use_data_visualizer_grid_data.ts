@@ -582,5 +582,6 @@ export const useDataVisualizerGridData = (
     extendedColumns,
     documentCountStats,
     metricsStats,
+    loaded: metricsLoaded && nonMetricsLoaded,
   };
 };

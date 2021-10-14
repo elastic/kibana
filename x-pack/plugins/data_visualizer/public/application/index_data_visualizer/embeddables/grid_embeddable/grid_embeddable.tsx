@@ -10,7 +10,7 @@ import { CoreStart } from 'kibana/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -79,10 +79,8 @@ export const EmbeddableWrapper = ({
     },
     [dataVisualizerListState, onOutputChange]
   );
-  const { configs, searchQueryLanguage, searchString, extendedColumns } = useDataVisualizerGridData(
-    input,
-    dataVisualizerListState
-  );
+  const { configs, searchQueryLanguage, searchString, extendedColumns, loaded } =
+    useDataVisualizerGridData(input, dataVisualizerListState);
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
       return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
@@ -103,6 +101,34 @@ export const EmbeddableWrapper = ({
     [input, searchQueryLanguage, searchString]
   );
 
+  if (
+    loaded &&
+    (configs.length === 0 ||
+      // FIXME: Configs might have a placeholder document count stats field
+      // This will be removed in the future
+      (configs.length === 1 && configs[0].fieldName === undefined))
+  ) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          flex: '1 0 100%',
+          textAlign: 'center',
+        }}
+      >
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="visualizeApp" size="m" color="subdued" />
+          <EuiSpacer size="m" />
+          <FormattedMessage
+            id="xpack.dataVisualizer.index.embeddableNoResultsMessage"
+            defaultMessage="No results found"
+          />
+        </EuiText>
+      </div>
+    );
+  }
   return (
     <DataVisualizerTable<FieldVisConfig>
       items={configs}

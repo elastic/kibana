@@ -154,10 +154,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       runTests(farequoteIndexPatternTestData);
       runTests(farequoteKQLSearchTestData);
-      // runTests(farequoteLuceneSearchTestData);
-      // runTests(farequoteKQLFiltersSearchTestData);
-      // runTests(farequoteLuceneFiltersSearchTestData);
-      // runTests(sampleLogTestData);
+      runTests(farequoteLuceneSearchTestData);
+      runTests(farequoteKQLFiltersSearchTestData);
+      runTests(farequoteLuceneFiltersSearchTestData);
+      runTests(sampleLogTestData);
     });
 
     describe('when disabled', function () {
