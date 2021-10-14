@@ -28,7 +28,7 @@ describe('SampleDataRegistry', () => {
   });
 
   describe('setup', () => {
-    test('should register the three sample datasets', () => {
+    test('should register the three sample datasets as single card', () => {
       const initContext = coreMock.createPluginInitializerContext();
       const plugin = new SampleDataRegistry(initContext);
       plugin.setup(
@@ -41,7 +41,7 @@ describe('SampleDataRegistry', () => {
         mockCustomIntegrationsPluginSetup.registerCustomIntegration.mock.calls.map((args) => {
           return args[0].id;
         });
-      expect(ids).toEqual(['flights', 'logs', 'ecommerce']);
+      expect(ids).toEqual(['sample_data_all']);
     });
   });
 });
