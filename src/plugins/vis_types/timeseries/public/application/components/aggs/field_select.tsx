@@ -119,18 +119,10 @@ export function FieldSelect({
     }
   });
 
-  let isInvalid;
+  let isInvalid = Boolean(value && fields[fieldsSelector] && !selectedOptions.length);
 
-  if (Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY])) {
-    isInvalid = Boolean(value && fields[fieldsSelector] && !selectedOptions.length);
-
-    if (value && !selectedOptions.length) {
-      selectedOptions = [{ label: value!, id: 'INVALID_FIELD' }];
-    }
-  } else {
-    if (value && fields[fieldsSelector] && !selectedOptions.length) {
-      onChange([]);
-    }
+  if (value && !selectedOptions.length) {
+    selectedOptions = [{ label: value!, id: 'INVALID_FIELD' }];
   }
 
   return (
