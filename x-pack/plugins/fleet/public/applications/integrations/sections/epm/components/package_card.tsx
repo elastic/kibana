@@ -16,7 +16,8 @@ import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from './release_badge'
 
 export type PackageCardProps = IntegrationCardItem;
 
-// Min-height is roughly 4
+// Min-height is roughly 3 lines of content.
+// This keeps the cards from looking overly unbalanced because of content differences.
 const Card = styled(EuiCard)`
   min-height: 127px;
 `;
