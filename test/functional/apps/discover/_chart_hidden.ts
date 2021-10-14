@@ -33,7 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
       await kibanaServer.uiSettings.unset('defaultIndex');
     });
 
