@@ -8,20 +8,22 @@
 import React, { PureComponent } from 'react';
 import {
   EuiPage,
-  EuiPanel,
   EuiPageBody,
   EuiPageContent,
+  EuiScreenReaderOnly,
+  EuiPanel,
   EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { MonitoringTimeseriesContainer } from '../../chart';
 import { FormattedMessage } from '@kbn/i18n/react';
+// @ts-ignore
+import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
 
 export class EnterpriseSearchOverview extends PureComponent {
   render() {
+    // @ts-ignore
     const { metrics, stats, ...props } = this.props;
 
     const lowLevelUsageMetrics = [

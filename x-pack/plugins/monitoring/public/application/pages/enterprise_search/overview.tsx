@@ -13,7 +13,6 @@ import { EntSearchTemplate } from './ent_search_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-// @ts-ignore
 import { EnterpriseSearchOverview } from '../../../components/enterprise_search/overview';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
