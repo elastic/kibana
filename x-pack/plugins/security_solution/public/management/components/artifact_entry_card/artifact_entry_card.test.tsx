@@ -10,12 +10,12 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../../common
 import { ArtifactEntryCard, ArtifactEntryCardProps } from './artifact_entry_card';
 import { act, fireEvent, getByTestId } from '@testing-library/react';
 import { AnyArtifact } from './types';
-import { isTrustedApp } from './hooks/use_normalized_artifact';
-import { getTrustedAppProvider, getExceptionProvider } from './test_utils';
+import { isTrustedApp } from './utils';
+import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 
 describe.each([
-  ['trusted apps', getTrustedAppProvider],
-  ['exceptions/event filters', getExceptionProvider],
+  ['trusted apps', getTrustedAppProviderMock],
+  ['exceptions/event filters', getExceptionProviderMock],
 ])('when using the ArtifactEntryCard component with %s', (_, generateItem) => {
   let item: AnyArtifact;
   let appTestContext: AppContextTestRender;
@@ -25,7 +25,7 @@ describe.each([
   ) => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
-    item = generateItem();
+    item = generateItem() as AnyArtifact;
     appTestContext = createAppRootMockRenderer();
     render = (props = {}) => {
       renderResult = appTestContext.render(
@@ -48,10 +48,10 @@ describe.each([
       'some internal app'
     );
     expect(renderResult.getByTestId('testCard-subHeader-touchedBy-createdBy').textContent).toEqual(
-      'Created byJJusta'
+      'Created byMMarty'
     );
     expect(renderResult.getByTestId('testCard-subHeader-touchedBy-updatedBy').textContent).toEqual(
-      'Updated byMMara'
+      'Updated byEEllamae'
     );
   });
 
@@ -77,11 +77,29 @@ describe.each([
     expect(renderResult.getByTestId('testCard-description').textContent).toEqual(item.description);
   });
 
+  it("shouldn't display description", async () => {
+    render({ hideDescription: true });
+    expect(renderResult.queryByTestId('testCard-description')).toBeNull();
+  });
+
   it('should display default empty value if description does not exist', async () => {
     item.description = undefined;
     render();
-
     expect(renderResult.getByTestId('testCard-description').textContent).toEqual('—');
+  });
+
+  it('should display comments if one exists', async () => {
+    render();
+    if (isTrustedApp(item)) {
+      expect(renderResult.queryByTestId('testCard-comments')).toBeNull();
+    } else {
+      expect(renderResult.queryByTestId('testCard-comments')).not.toBeNull();
+    }
+  });
+
+  it("shouldn't display comments", async () => {
+    render({ hideComments: true });
+    expect(renderResult.queryByTestId('testCard-comments')).toBeNull();
   });
 
   it('should display OS and criteria conditions', () => {

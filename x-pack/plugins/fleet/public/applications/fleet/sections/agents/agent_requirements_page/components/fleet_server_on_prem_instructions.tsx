@@ -31,7 +31,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DownloadStep } from '../../../../components';
 import {
   useStartServices,
-  useGetOutputs,
+  useDefaultOutput,
   sendGenerateServiceToken,
   usePlatform,
   PLATFORM_OPTIONS,
@@ -185,7 +185,7 @@ export const FleetServerCommandStep = ({
                 >
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.setupGuideLink"
-                    defaultMessage="Fleet User Guide"
+                    defaultMessage="Fleet and Elastic Agent Guide"
                   />
                 </EuiLink>
               ),
@@ -242,7 +242,7 @@ export const FleetServerCommandStep = ({
 };
 
 export const useFleetServerInstructions = (policyId?: string) => {
-  const outputsRequest = useGetOutputs();
+  const { output, refresh: refreshOutputs } = useDefaultOutput();
   const { notifications } = useStartServices();
   const [serviceToken, setServiceToken] = useState<string>();
   const [isLoadingServiceToken, setIsLoadingServiceToken] = useState<boolean>(false);
@@ -250,9 +250,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const [deploymentMode, setDeploymentMode] = useState<DeploymentMode>('production');
   const { data: settings, resendRequest: refreshSettings } = useGetSettings();
   const fleetServerHost = settings?.item.fleet_server_hosts?.[0];
-  const output = outputsRequest.data?.items?.[0];
   const esHost = output?.hosts?.[0];
-  const refreshOutputs = outputsRequest.resendRequest;
 
   const installCommand = useMemo((): string => {
     if (!serviceToken || !esHost) {
@@ -757,7 +755,7 @@ export const OnPremInstructions: React.FC = () => {
               >
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.setupGuideLink"
-                  defaultMessage="Fleet User Guide"
+                  defaultMessage="Fleet and Elastic Agent Guide"
                 />
               </EuiLink>
             ),

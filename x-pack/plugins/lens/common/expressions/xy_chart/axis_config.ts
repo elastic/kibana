@@ -30,6 +30,7 @@ interface AxisConfig {
 export type YAxisMode = 'auto' | 'left' | 'right' | 'bottom';
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
 export type FillStyle = 'none' | 'above' | 'below';
+export type IconPosition = 'auto' | 'left' | 'right' | 'above' | 'below';
 
 export interface YConfig {
   forAccessor: string;
@@ -39,6 +40,8 @@ export interface YConfig {
   lineWidth?: number;
   lineStyle?: LineStyle;
   fill?: FillStyle;
+  iconPosition?: IconPosition;
+  textVisibility?: boolean;
 }
 
 export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
@@ -179,6 +182,15 @@ export const yAxisConfig: ExpressionFunctionDefinition<
     icon: {
       types: ['string'],
       help: 'An optional icon used for threshold lines',
+    },
+    iconPosition: {
+      types: ['string'],
+      options: ['auto', 'above', 'below', 'left', 'right'],
+      help: 'The placement of the icon for the threshold line',
+    },
+    textVisibility: {
+      types: ['boolean'],
+      help: 'Visibility of the label on the threshold line',
     },
     fill: {
       types: ['string'],

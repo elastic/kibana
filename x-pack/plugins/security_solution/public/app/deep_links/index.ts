@@ -42,6 +42,7 @@ import {
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
   UEBA_PATH,
+  CASES_FEATURE_ID,
   HOST_ISOLATION_EXCEPTIONS_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';

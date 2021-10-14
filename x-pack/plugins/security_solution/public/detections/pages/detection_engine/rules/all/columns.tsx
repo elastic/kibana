@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
   EuiText,
   EuiHealth,
   EuiToolTip,
+  EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import * as H from 'history';
+import { sum } from 'lodash';
 import React, { Dispatch } from 'react';
 
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
@@ -38,10 +39,11 @@ import { RulesTableAction } from '../../../../containers/detection_engine/rules/
 import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
+import { PopoverTooltip } from './popover_tooltip';
 import { TagsDisplay } from './tag_display';
 import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 import { APP_UI_ID, SecurityPageName } from '../../../../../../common/constants';
-import { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
+import { DocLinksStart, NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 
 export const getActions = (
   dispatch: React.Dispatch<RulesTableAction>,
@@ -314,7 +316,8 @@ export const getColumns = ({
 
 export const getMonitoringColumns = (
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
-  formatUrl: FormatUrl
+  formatUrl: FormatUrl,
+  docLinks: DocLinksStart
 ): RulesStatusesColumns[] => {
   const cols: RulesStatusesColumns[] = [
     {
@@ -346,12 +349,17 @@ export const getMonitoringColumns = (
     },
     {
       field: 'current_status.bulk_create_time_durations',
-      name: i18n.COLUMN_INDEXING_TIMES,
+      name: (
+        <>
+          {i18n.COLUMN_INDEXING_TIMES}{' '}
+          <EuiToolTip content={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}>
+            <EuiIcon size="m" color="subdued" type="questionInCircle" style={{ margin: 4 }} />
+          </EuiToolTip>
+        </>
+      ),
       render: (value: RuleStatus['current_status']['bulk_create_time_durations']) => (
         <EuiText data-test-subj="bulk_create_time_durations" size="s">
-          {value != null && value.length > 0
-            ? Math.max(...value?.map((item) => Number.parseFloat(item)))
-            : getEmptyTagValue()}
+          {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
         </EuiText>
       ),
       truncateText: true,
@@ -359,12 +367,17 @@ export const getMonitoringColumns = (
     },
     {
       field: 'current_status.search_after_time_durations',
-      name: i18n.COLUMN_QUERY_TIMES,
+      name: (
+        <>
+          {i18n.COLUMN_QUERY_TIMES}{' '}
+          <EuiToolTip content={i18n.COLUMN_QUERY_TIMES_TOOLTIP}>
+            <EuiIcon size="m" color="subdued" type="questionInCircle" style={{ margin: 4 }} />
+          </EuiToolTip>
+        </>
+      ),
       render: (value: RuleStatus['current_status']['search_after_time_durations']) => (
         <EuiText data-test-subj="search_after_time_durations" size="s">
-          {value != null && value.length > 0
-            ? Math.max(...value?.map((item) => Number.parseFloat(item)))
-            : getEmptyTagValue()}
+          {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
         </EuiText>
       ),
       truncateText: true,
@@ -372,7 +385,28 @@ export const getMonitoringColumns = (
     },
     {
       field: 'current_status.gap',
-      name: i18n.COLUMN_GAP,
+      name: (
+        <>
+          {i18n.COLUMN_GAP}
+          <PopoverTooltip columnName={i18n.COLUMN_GAP}>
+            <EuiText style={{ width: 300 }}>
+              <p>
+                <FormattedMessage
+                  defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
+                  id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
+                  values={{
+                    seeDocs: (
+                      <EuiLink href={`${docLinks.links.siem.troubleshootGaps}`} target="_blank">
+                        {'see documentation'}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+          </PopoverTooltip>
+        </>
+      ),
       render: (value: RuleStatus['current_status']['gap']) => (
         <EuiText data-test-subj="gap" size="s">
           {value ?? getEmptyTagValue()}

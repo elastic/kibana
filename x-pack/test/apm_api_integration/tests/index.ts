@@ -37,6 +37,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./correlations/latency'));
     });
 
+    describe('metadata/event_metadata', function () {
+      loadTestFile(require.resolve('./metadata/event_metadata'));
+    });
+
     describe('metrics_charts/metrics_charts', function () {
       loadTestFile(require.resolve('./metrics_charts/metrics_charts'));
     });
@@ -146,7 +150,7 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     describe('traces/top_traces', function () {
       loadTestFile(require.resolve('./traces/top_traces'));
     });
-    describe('/api/apm/traces/{traceId}', function () {
+    describe('/internal/apm/traces/{traceId}', function () {
       loadTestFile(require.resolve('./traces/trace_by_id'));
     });
 

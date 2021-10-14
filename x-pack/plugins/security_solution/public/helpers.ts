@@ -15,6 +15,7 @@ import {
   EXCEPTIONS_PATH,
   RULES_PATH,
   UEBA_PATH,
+  RISKY_HOSTS_INDEX_PREFIX,
 } from '../common/constants';
 import {
   FactoryQueryTypes,
@@ -152,4 +153,8 @@ export const isDetectionsPath = (pathname: string): boolean => {
     path: `(${ALERTS_PATH}|${RULES_PATH}|${UEBA_PATH}|${EXCEPTIONS_PATH})`,
     strict: false,
   });
+};
+
+export const getHostRiskIndex = (spaceId: string): string => {
+  return `${RISKY_HOSTS_INDEX_PREFIX}${spaceId}`;
 };

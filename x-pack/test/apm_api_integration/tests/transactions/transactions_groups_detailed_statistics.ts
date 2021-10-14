@@ -16,7 +16,7 @@ import { registry } from '../../common/registry';
 import { removeEmptyCoordinates, roundNumber } from '../../utils';
 
 type TransactionsGroupsDetailedStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
@@ -32,7 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles the empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -59,7 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct data', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -113,7 +113,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct data for latency aggregation 99th percentile', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -161,7 +161,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns empty when transaction name is not found', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
             query: {
               start,
               end,
@@ -185,7 +185,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           const response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
+              pathname: `/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics`,
               query: {
                 numBuckets: 20,
                 transactionType: 'request',

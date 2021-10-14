@@ -44,6 +44,7 @@ import {
 } from './migrations/to_v7_13_0';
 import { migratePackagePolicyToV7140, migrateInstallationToV7140 } from './migrations/to_v7_14_0';
 import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
+import { migrateInstallationToV7160 } from './migrations/to_v7_16_0';
 
 /*
  * Saved object types and mappings
@@ -298,6 +299,7 @@ const getSavedObjectTypes = (
         version: { type: 'keyword' },
         internal: { type: 'boolean' },
         removable: { type: 'boolean' },
+        keep_policies_up_to_date: { type: 'boolean', index: false },
         es_index_patterns: {
           enabled: false,
           type: 'object',
@@ -332,6 +334,7 @@ const getSavedObjectTypes = (
     migrations: {
       '7.14.0': migrateInstallationToV7140,
       '7.14.1': migrateInstallationToV7140,
+      '7.16.0': migrateInstallationToV7160,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {

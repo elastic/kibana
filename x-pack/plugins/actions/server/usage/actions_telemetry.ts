@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  SavedObjectsBaseOptions,
-  SavedObjectsBulkGetObject,
-  SavedObjectsBulkResponse,
-} from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { ActionResult, PreConfiguredAction } from '../types';
 
@@ -78,7 +73,7 @@ export async function getTotalCount(
   }
   return {
     countTotal:
-      Object.keys(aggs).reduce((total: number, key: string) => parseInt(aggs[key], 0) + total, 0) +
+      Object.keys(aggs).reduce((total: number, key: string) => parseInt(aggs[key], 10) + total, 0) +
       (preconfiguredActions?.length ?? 0),
     countByType,
   };
@@ -86,10 +81,6 @@ export async function getTotalCount(
 
 export async function getInUseTotalCount(
   esClient: ElasticsearchClient,
-  actionsBulkGet: (
-    objects?: SavedObjectsBulkGetObject[] | undefined,
-    options?: SavedObjectsBaseOptions | undefined
-  ) => Promise<SavedObjectsBulkResponse<ActionResult<Record<string, unknown>>>>,
   kibanaIndex: string
 ): Promise<{
   countTotal: number;
@@ -259,15 +250,34 @@ export async function getInUseTotalCount(
   const preconfiguredActionsAggs =
     // @ts-expect-error aggegation type is not specified
     actionResults.aggregations.preconfigured_actions?.preconfiguredActionRefIds.value;
-  const bulkFilter = Object.entries(aggs.connectorIds).map(([key]) => ({
-    id: key,
-    type: 'action',
-    fields: ['id', 'actionTypeId'],
-  }));
-  const actions = await actionsBulkGet(bulkFilter);
-  const countByActionTypeId = actions.saved_objects.reduce(
+  const {
+    body: { hits: actions },
+  } = await esClient.search<{
+    action: ActionResult;
+  }>({
+    index: kibanaIndex,
+    _source_includes: ['action'],
+    body: {
+      query: {
+        bool: {
+          must: [
+            {
+              term: { type: 'action' },
+            },
+            {
+              terms: {
+                _id: Object.entries(aggs.connectorIds).map(([key]) => `action:${key}`),
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+  const countByActionTypeId = actions.hits.reduce(
     (actionTypeCount: Record<string, number>, action) => {
-      const alertTypeId = replaceFirstAndLastDotSymbols(action.attributes.actionTypeId);
+      const actionSource = action._source!;
+      const alertTypeId = replaceFirstAndLastDotSymbols(actionSource.action.actionTypeId);
       const currentCount =
         actionTypeCount[alertTypeId] !== undefined ? actionTypeCount[alertTypeId] : 0;
       actionTypeCount[alertTypeId] = currentCount + 1;

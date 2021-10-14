@@ -19,7 +19,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
 
-export type { Category, CategoryCount, CustomIntegration } from '../common';
+export type { IntegrationCategory, CustomIntegration } from '../common';
 
 export const config = {
   schema: schema.object({}),

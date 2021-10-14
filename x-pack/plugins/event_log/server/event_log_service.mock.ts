@@ -10,7 +10,6 @@ import { eventLoggerMock } from './event_logger.mock';
 
 const createEventLogServiceMock = () => {
   const mock: jest.Mocked<IEventLogService> = {
-    isEnabled: jest.fn(),
     isLoggingEntries: jest.fn(),
     isIndexingEntries: jest.fn(),
     registerProviderActions: jest.fn(),

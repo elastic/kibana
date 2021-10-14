@@ -584,19 +584,6 @@
           },
           {
             "parentPluginId": "discoverEnhanced",
-            "id": "def-public.DiscoverEnhancedSetupDependencies.kibanaLegacy",
-            "type": "Object",
-            "tags": [],
-            "label": "kibanaLegacy",
-            "description": [],
-            "signature": [
-              "{} | undefined"
-            ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedSetupDependencies.share",
             "type": "CompoundType",
             "tags": [],
@@ -709,19 +696,6 @@
                 "section": "def-public.EmbeddableStart",
                 "text": "EmbeddableStart"
               }
-            ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discoverEnhanced",
-            "id": "def-public.DiscoverEnhancedStartDependencies.kibanaLegacy",
-            "type": "Object",
-            "tags": [],
-            "label": "kibanaLegacy",
-            "description": [],
-            "signature": [
-              "{ loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; } | undefined"
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
             "deprecated": false
