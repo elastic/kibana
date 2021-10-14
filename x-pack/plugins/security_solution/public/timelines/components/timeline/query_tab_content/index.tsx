@@ -359,11 +359,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 <TimelineDatePickerLock />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <Sourcerer
-                  scope={SourcererScopeName.timeline}
-                  isTimelineSourcerer
-                  showAlertsOnlyCheckbox
-                />
+                <Sourcerer scope={SourcererScopeName.timeline} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">

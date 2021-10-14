@@ -61,13 +61,13 @@ describe('Sourcerer component', () => {
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeAll(() => {
-    useRouteSpy.mockImplementation(() => [
+    (useRouteSpy as jest.Mock).mockImplementation(() => [
       { pageName: SecurityPageName.overview, detailName: undefined },
     ]);
   });
 
   afterAll(() => {
-    useRouteSpy.mockImplementation(() => [
+    (useRouteSpy as jest.Mock).mockImplementation(() => [
       { pageName: SecurityPageName.overview, detailName: undefined },
     ]);
   });
@@ -87,22 +87,6 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     expect(wrapper.find(`[data-test-subj="sourcerer-title"]`).first().text()).toEqual(
       'Data view selection'
-    );
-  });
-
-  it('renders "alerts only" checkbox', () => {
-    const testProps = {
-      ...defaultProps,
-      showAlertsOnlyCheckbox: true,
-    };
-    const wrapper = mount(
-      <TestProviders store={store}>
-        <Sourcerer {...testProps} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
-    expect(wrapper.find(`[data-test-subj="sourcerer-alert-only-checkbox"]`).first().text()).toEqual(
-      'Show only detection alerts'
     );
   });
 
@@ -442,7 +426,7 @@ describe('sourcer on alerts page or rules details page', () => {
   };
 
   beforeAll(() => {
-    useRouteSpy.mockImplementation(() => [
+    (useRouteSpy as jest.Mock).mockImplementation(() => [
       { pageName: SecurityPageName.alerts, detailName: undefined },
     ]);
 
@@ -456,7 +440,7 @@ describe('sourcer on alerts page or rules details page', () => {
   });
 
   afterAll(() => {
-    useRouteSpy.mockImplementation(() => [
+    (useRouteSpy as jest.Mock).mockImplementation(() => [
       { pageName: SecurityPageName.overview, detailName: undefined },
     ]);
   });
@@ -479,10 +463,10 @@ describe('sourcer on alerts page or rules details page', () => {
     ).toBeTruthy();
   });
 
-  it.skip('data view selector is default to Security Data View', () => {
+  it('data view selector is default to Security Data View', () => {
     expect(
       wrapper.find(`[data-test-subj="sourcerer-select"]`).first().prop('valueOfSelected')
-    ).toEqual();
+    ).toEqual('security-solution');
   });
 
   it('renders an alert badge in data view selector', () => {
@@ -497,11 +481,101 @@ describe('sourcer on alerts page or rules details page', () => {
     ).toBeTruthy();
   });
 
+  it('shows signal index as index pettern option', () => {
+    expect(wrapper.find(`[data-test-subj="sourcerer-combo-box"]`).first().prop('options')).toEqual([
+      { disabled: false, label: '.siem-signals-spacename', value: '.siem-signals-spacename' },
+    ]);
+  });
+
   it('does not render reset button', () => {
     expect(wrapper.find(`[data-test-subj="sourcerer-reset"]`).exists()).toBeFalsy();
   });
 
   it('does not render save button', () => {
     expect(wrapper.find(`[data-test-subj="sourcerer-save"]`).exists()).toBeFalsy();
+  });
+});
+
+describe('timeline sourcer', () => {
+  let wrapper: ReactWrapper;
+  const state: State = mockGlobalState;
+  const { storage } = createSecuritySolutionStorageMock();
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const testProps = {
+    scope: sourcererModel.SourcererScopeName.timeline,
+  };
+
+  beforeAll(() => {
+    (useRouteSpy as jest.Mock).mockImplementation(() => [
+      { pageName: SecurityPageName.alerts, detailName: undefined },
+    ]);
+
+    wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer {...testProps} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+    wrapper
+      .find(
+        `[data-test-subj="timeline-sourcerer-popover"] [data-test-subj="sourcerer-advanced-options-toggle"]`
+      )
+      .first()
+      .simulate('click');
+  });
+
+  afterAll(() => {
+    (useRouteSpy as jest.Mock).mockImplementation(() => [
+      { pageName: SecurityPageName.overview, detailName: undefined },
+    ]);
+  });
+
+  it('renders "alerts only" checkbox', () => {
+    wrapper
+      .find(
+        `[data-test-subj="timeline-sourcerer-popover"] [data-test-subj="sourcerer-alert-only-checkbox"]`
+      )
+      .first()
+      .simulate('click');
+    expect(wrapper.find(`[data-test-subj="sourcerer-alert-only-checkbox"]`).first().text()).toEqual(
+      'Show only detection alerts'
+    );
+  });
+
+  it('data view selector is enabled', () => {
+    expect(
+      wrapper
+        .find(`[data-test-subj="timeline-sourcerer-popover"] [data-test-subj="sourcerer-select"]`)
+        .first()
+        .prop('disabled')
+    ).toBeFalsy();
+  });
+
+  it('data view selector is default to Security Default Data View', () => {
+    expect(
+      wrapper
+        .find(`[data-test-subj="timeline-sourcerer-popover"] [data-test-subj="sourcerer-select"]`)
+        .first()
+        .prop('valueOfSelected')
+    ).toEqual('security-solution');
+  });
+
+  it('index pattern selector is enabled', () => {
+    expect(
+      wrapper
+        .find(
+          `[data-test-subj="timeline-sourcerer-popover"] [data-test-subj="sourcerer-combo-box"]`
+        )
+        .first()
+        .prop('disabled')
+    ).toBeFalsy();
+  });
+
+  it('render reset button', () => {
+    expect(wrapper.find(`[data-test-subj="sourcerer-reset"]`).exists()).toBeTruthy();
+  });
+
+  it('render save button', () => {
+    expect(wrapper.find(`[data-test-subj="sourcerer-save"]`).exists()).toBeTruthy();
   });
 });
