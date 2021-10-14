@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { TransportResult } from '@elastic/transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 

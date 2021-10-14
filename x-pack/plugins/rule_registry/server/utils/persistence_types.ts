@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/logging';
 import {

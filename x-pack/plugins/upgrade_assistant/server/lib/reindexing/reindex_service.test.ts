@@ -7,7 +7,7 @@
 
 jest.mock('../es_indices_state_check', () => ({ esIndicesStateCheck: jest.fn() }));
 import { BehaviorSubject } from 'rxjs';
-import { TransportResult } from '@elastic/transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import { Logger } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

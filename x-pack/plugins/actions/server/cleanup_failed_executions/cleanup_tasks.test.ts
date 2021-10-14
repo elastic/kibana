@@ -11,7 +11,7 @@ import { spacesMock } from '../../../spaces/server/mocks';
 import { CleanupTasksOpts, cleanupTasks } from './cleanup_tasks';
 import { TaskInstance } from '../../../task_manager/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportResult } from '@elastic/transport';
+import { TransportResult } from '@elastic/elasticsearch';
 
 describe('cleanupTasks', () => {
   const logger = loggingSystemMock.create().get();

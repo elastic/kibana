@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
 import { SavedObject } from 'src/core/types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';

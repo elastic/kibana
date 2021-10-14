@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 type ResponseFailures = Array<Pick<estypes.BulkDeleteResponseItem, '_id' | 'status' | 'result'>>;
 

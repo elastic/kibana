@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { TaskInstanceWithDeprecatedFields } from '../../../../plugins/task_manager/server/task';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects';

@@ -10,13 +10,13 @@ import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
 import { errors } from '@elastic/elasticsearch';
-import type { Client } from '@elastic/elasticsearch';
 import type {
+  Client,
   TransportRequestOptions,
   TransportRequestParams,
   DiagnosticResult,
-} from '@elastic/transport';
-import type { RequestBody } from '@elastic/transport/lib/types';
+} from '@elastic/elasticsearch';
+import type { RequestBody } from '@elastic/elasticsearch/lib/types';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';

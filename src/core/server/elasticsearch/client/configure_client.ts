@@ -8,15 +8,13 @@
 
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { Client, errors } from '@elastic/elasticsearch';
-import { Transport, events } from '@elastic/transport';
-import { HttpConnection } from '@elastic/transport';
+import { Client, errors, Transport, events, HttpConnection } from '@elastic/elasticsearch';
 import type {
   TransportRequestParams,
   TransportRequestOptions,
   TransportResult,
   DiagnosticResult,
-} from '@elastic/transport';
+} from '@elastic/elasticsearch';
 import type { RequestBody } from '@elastic/transport/lib/types';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';

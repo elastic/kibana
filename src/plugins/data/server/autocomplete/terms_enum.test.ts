@@ -11,7 +11,7 @@ import { coreMock } from '../../../../core/server/mocks';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;

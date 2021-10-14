@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';

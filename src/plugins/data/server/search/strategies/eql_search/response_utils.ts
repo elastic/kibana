@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { EqlSearchResponse } from './types';
 import { EqlSearchStrategyResponse } from '../../../../common';
 

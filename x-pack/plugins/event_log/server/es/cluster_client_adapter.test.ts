@@ -17,7 +17,7 @@ import { delay } from '../lib/delay';
 import { times } from 'lodash';
 import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
 

@@ -7,7 +7,7 @@
  */
 
 import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult, TransportRequestOptions } from '@elastic/transport';
+import type { TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
 
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
