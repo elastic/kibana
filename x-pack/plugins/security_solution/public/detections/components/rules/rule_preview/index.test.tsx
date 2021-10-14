@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
