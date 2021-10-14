@@ -74,7 +74,6 @@ import {
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   EQL_RULE_TYPE_ID,
-  PREVIEW_SECONDARY_ALIAS,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -238,14 +237,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     let ruleDataClient: IRuleDataClient | null = null;
 
     // Register rule types via rule-registry
-    const ruleOptions: Omit<CreateRuleOptions, 'ruleDataClient'> = {
+    const ruleOptions: CreateRuleOptions = {
       experimentalFeatures,
-      lists: plugins.lists,
       logger: this.logger,
-      mergeStrategy: this.config.alertMergeStrategy,
-      ignoreFields: this.config.alertIgnoreFields,
       ml: plugins.ml,
-      ruleDataService,
       version: this.context.env.packageInfo.version,
     };
 
@@ -328,7 +323,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ),
           },
         ],
-        secondaryAlias: PREVIEW_SECONDARY_ALIAS,
       }),
     };
 

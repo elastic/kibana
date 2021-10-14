@@ -139,7 +139,6 @@ export const getThreatRuleParams = (): ThreatRuleParams => {
 
 export const getRuleConfigMock = (type: string = 'rule-type'): SanitizedRuleConfig => ({
   actions: [],
-  alertTypeId: 'siem.signals',
   enabled: true,
   name: 'rule-name',
   tags: ['some fake tag 1', 'some fake tag 2'],

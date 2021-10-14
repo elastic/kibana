@@ -37,9 +37,12 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExecutorType } from '../../../../../../alerting/server/types';
 import { AlertInstance } from '../../../../../../alerting/server';
+import { ConfigType } from '../../../../config';
+import { IEventLogService } from '../../../../../../event_log/server';
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
+  config: ConfigType,
   ml: SetupPlugins['ml'],
   previewRuleOptions: PreviewRuleOptions
 ) => {
@@ -154,8 +157,12 @@ export const previewRulesRoute = async (
         await runExecutors(
           signalRulesAlertType({
             ...previewRuleOptions,
+            lists: context.lists,
+            config,
             indexNameOverride: `${DEFAULT_PREVIEW_INDEX}-${spaceId}`,
             ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
+            // unused as we override the ruleExecutionLogClient
+            eventLogService: {} as unknown as IEventLogService,
           }).executor,
           previewRuleParams,
           previewAlertInstanceFactory

@@ -159,9 +159,11 @@ export const signalRulesAlertType = ({
       const {
         actions,
         name,
-        alertTypeId,
         schedule: { interval },
       } = completeRule.ruleConfig;
+
+      // TODO: confirm;
+      const alertTypeId = 'siem.signals';
 
       const refresh = actions.length ? 'wait_for' : false;
       const buildRuleMessage = buildRuleMessageFactory({

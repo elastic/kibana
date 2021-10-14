@@ -121,4 +121,4 @@ export interface CreateRuleOptions {
   version: string;
 }
 
-export type PreviewRuleOptions = CreateRuleOptions & { indexNameOverride: string };
+export type PreviewRuleOptions = CreateRuleOptions;
