@@ -6,7 +6,7 @@ This document describes routing in the APM plugin.
 
 ### Server-side
 
-Route definitions for APM's server-side API are in the [server/routes directory](../server/routes). Routes are created with [the `createRoute` function](../server/routes/create_route.ts). Routes are added to the API in [the `createApmApi` function](../server/routes/create_apm_api.ts), which is initialized in the plugin `start` lifecycle method.
+Route definitions for APM's server-side API are in the [server/routes directory](../server/routes). Routes are created with [the `createApmServerRoute` function](../server/routes/create_apm_server_route.ts). Routes are added to the API in [the `createApmApi` function](../server/routes/create_apm_api.ts), which is initialized in the plugin `start` lifecycle method.
 
 The path and query string parameters are defined in the calls to `createRoute` with io-ts types, so that each route has its parameters type checked.
 
