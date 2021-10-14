@@ -12,7 +12,7 @@ import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { Privilege } from './types';
 import { UseAlertsPrivelegesReturn, useAlertsPrivileges } from './use_alerts_privileges';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/__mocks__/get_endpoint_privileges_initial_state_mock';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');

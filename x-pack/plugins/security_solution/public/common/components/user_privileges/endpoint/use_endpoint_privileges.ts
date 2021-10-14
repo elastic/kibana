@@ -6,9 +6,9 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useCurrentUser, useHttp } from '../../lib/kibana';
-import { appRoutesService, CheckPermissionsResponse } from '../../../../../fleet/common';
-import { useLicense } from '../../hooks/use_license';
+import { useCurrentUser, useHttp } from '../../../lib/kibana';
+import { appRoutesService, CheckPermissionsResponse } from '../../../../../../fleet/common';
+import { useLicense } from '../../../hooks/use_license';
 
 export interface EndpointPrivileges {
   loading: boolean;
@@ -89,15 +89,4 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
   );
 
   return privileges;
-};
-
-export const getEndpointPrivilegesInitialState = (): EndpointPrivileges => {
-  return {
-    loading: true,
-    canAccessFleet: false,
-    canAccessEndpointManagement: false,
-    canIsolateHost: false,
-    canCreateArtifactsByPolicy: false,
-    isPlatinumPlus: false,
-  };
 };

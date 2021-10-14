@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-import { getEndpointPrivilegesInitialStateMock } from './get_endpoint_privileges_initial_state_mock';
-
-export const useEndpointPrivileges = jest.fn(getEndpointPrivilegesInitialStateMock);
+export * from './use_endpoint_privileges';
+export { getEndpointPrivilegesInitialState } from './utils';

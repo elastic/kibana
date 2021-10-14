@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EndpointPrivileges, getEndpointPrivilegesInitialState } from '../use_endpoint_privileges';
+import type { EndpointPrivileges } from './use_endpoint_privileges';
+import { getEndpointPrivilegesInitialState } from './utils';
 
 export const getEndpointPrivilegesInitialStateMock = (
   overrides: Partial<EndpointPrivileges> = {}
