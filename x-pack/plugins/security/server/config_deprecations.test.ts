@@ -16,7 +16,7 @@ const deprecationContext = configDeprecationsMock.createContext();
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);
-  const deprecationMessages: string[] = [];
+  const generatedDeprecations: Array<{ message: string; level?: 'warning' | 'critical' }> = [];
   const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
@@ -25,11 +25,11 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
       context: deprecationContext,
     })),
     () =>
-      ({ message }) =>
-        deprecationMessages.push(message)
+      ({ message, level }) =>
+        generatedDeprecations.push({ message, level })
   );
   return {
-    messages: deprecationMessages,
+    deprecations: generatedDeprecations,
     migrated,
   };
 };
@@ -37,41 +37,53 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
 describe('Config Deprecations', () => {
   it('does not report any deprecations if session timeouts are specified', () => {
     const defaultConfig = { xpack: { security: { session: { idleTimeout: 123, lifespan: 345 } } } };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
     expect(migrated).toEqual(defaultConfig);
-    expect(messages).toHaveLength(0);
+    expect(deprecations).toHaveLength(0);
   });
 
   it('reports that session idleTimeout and lifespan will have default values if none of them is specified', () => {
     const defaultConfig = { xpack: { security: {} } };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
     expect(migrated).toEqual(defaultConfig);
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "The session idle timeout will default to 1 hour in 8.0.",
-        "The session lifespan will default to 30 days in 8.0.",
+        Object {
+          "level": "warning",
+          "message": "The session idle timeout will default to 1 hour in 8.0.",
+        },
+        Object {
+          "level": "warning",
+          "message": "The session lifespan will default to 30 days in 8.0.",
+        },
       ]
     `);
   });
 
   it('reports that session idleTimeout will have a default value if it is not specified', () => {
     const defaultConfig = { xpack: { security: { session: { lifespan: 345 } } } };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
     expect(migrated).toEqual(defaultConfig);
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "The session idle timeout will default to 1 hour in 8.0.",
+        Object {
+          "level": "warning",
+          "message": "The session idle timeout will default to 1 hour in 8.0.",
+        },
       ]
     `);
   });
 
   it('reports that session lifespan will have a default value if it is not specified', () => {
     const defaultConfig = { xpack: { security: { session: { idleTimeout: 123 } } } };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
     expect(migrated).toEqual(defaultConfig);
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "The session lifespan will default to 30 days in 8.0.",
+        Object {
+          "level": "warning",
+          "message": "The session lifespan will default to 30 days in 8.0.",
+        },
       ]
     `);
   });
@@ -84,13 +96,19 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated.xpack.security.sessionTimeout).not.toBeDefined();
     expect(migrated.xpack.security.session.idleTimeout).toEqual(123);
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"xpack.security.sessionTimeout\\" has been replaced by \\"xpack.security.session.idleTimeout\\"",
-        "The session lifespan will default to 30 days in 8.0.",
+        Object {
+          "level": undefined,
+          "message": "Setting \\"xpack.security.sessionTimeout\\" has been replaced by \\"xpack.security.session.idleTimeout\\"",
+        },
+        Object {
+          "level": "warning",
+          "message": "The session lifespan will default to 30 days in 8.0.",
+        },
       ]
     `);
   });
@@ -108,12 +126,15 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated.xpack.security.audit.appender.kind).not.toBeDefined();
     expect(migrated.xpack.security.audit.appender.type).toEqual('console');
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"xpack.security.audit.appender.kind\\" has been replaced by \\"xpack.security.audit.appender.type\\"",
+        Object {
+          "level": undefined,
+          "message": "Setting \\"xpack.security.audit.appender.kind\\" has been replaced by \\"xpack.security.audit.appender.type\\"",
+        },
       ]
     `);
   });
@@ -131,12 +152,15 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated.xpack.security.audit.appender.layout.kind).not.toBeDefined();
     expect(migrated.xpack.security.audit.appender.layout.type).toEqual('pattern');
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"xpack.security.audit.appender.layout.kind\\" has been replaced by \\"xpack.security.audit.appender.layout.type\\"",
+        Object {
+          "level": undefined,
+          "message": "Setting \\"xpack.security.audit.appender.layout.kind\\" has been replaced by \\"xpack.security.audit.appender.layout.type\\"",
+        },
       ]
     `);
   });
@@ -154,12 +178,15 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated.xpack.security.audit.appender.policy.kind).not.toBeDefined();
     expect(migrated.xpack.security.audit.appender.policy.type).toEqual('time-interval');
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"xpack.security.audit.appender.policy.kind\\" has been replaced by \\"xpack.security.audit.appender.policy.type\\"",
+        Object {
+          "level": undefined,
+          "message": "Setting \\"xpack.security.audit.appender.policy.kind\\" has been replaced by \\"xpack.security.audit.appender.policy.type\\"",
+        },
       ]
     `);
   });
@@ -177,12 +204,15 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated.xpack.security.audit.appender.strategy.kind).not.toBeDefined();
     expect(migrated.xpack.security.audit.appender.strategy.type).toEqual('numeric');
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"xpack.security.audit.appender.strategy.kind\\" has been replaced by \\"xpack.security.audit.appender.strategy.type\\"",
+        Object {
+          "level": undefined,
+          "message": "Setting \\"xpack.security.audit.appender.strategy.kind\\" has been replaced by \\"xpack.security.audit.appender.strategy.type\\"",
+        },
       ]
     `);
   });
@@ -201,12 +231,15 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated.xpack.security.audit.appender.path).not.toBeDefined();
     expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+        Object {
+          "level": undefined,
+          "message": "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+        },
       ]
     `);
   });
@@ -222,17 +255,20 @@ describe('Config Deprecations', () => {
         showInsecureClusterWarning: false,
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated.security.showInsecureClusterWarning).not.toBeDefined();
     expect(migrated.xpack.security.showInsecureClusterWarning).toEqual(false);
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"security.showInsecureClusterWarning\\" has been replaced by \\"xpack.security.showInsecureClusterWarning\\"",
+        Object {
+          "level": undefined,
+          "message": "Setting \\"security.showInsecureClusterWarning\\" has been replaced by \\"xpack.security.showInsecureClusterWarning\\"",
+        },
       ]
     `);
   });
 
-  it('warns when using the legacy audit logger', () => {
+  it('warns when using the legacy audit logger on-prem', () => {
     const config = {
       xpack: {
         security: {
@@ -243,16 +279,19 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated.xpack.security.audit.appender).not.toBeDefined();
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.",
+        Object {
+          "level": undefined,
+          "message": "The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.",
+        },
       ]
     `);
   });
 
-  it('does not warn when using the ECS audit logger', () => {
+  it('does not warn when using the ECS audit logger on-prem', () => {
     const config = {
       xpack: {
         security: {
@@ -267,9 +306,58 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated).toEqual(config);
-    expect(messages).toHaveLength(0);
+    expect(deprecations).toHaveLength(0);
+  });
+
+  it('warns when using the legacy audit logger on cloud', () => {
+    const config = {
+      xpack: {
+        cloud: {
+          id: 'abc123',
+        },
+        security: {
+          session: { idleTimeout: 123, lifespan: 345 },
+          audit: {
+            enabled: true,
+          },
+        },
+      },
+    };
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.audit.appender).not.toBeDefined();
+    expect(deprecations).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "level": "warning",
+          "message": "The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.",
+        },
+      ]
+    `);
+  });
+
+  it('does not warn when using the ECS audit logger on cloud', () => {
+    const config = {
+      xpack: {
+        cloud: {
+          id: 'abc123',
+        },
+        security: {
+          session: { idleTimeout: 123, lifespan: 345 },
+          audit: {
+            enabled: true,
+            appender: {
+              type: 'file',
+              fileName: './audit.log',
+            },
+          },
+        },
+      },
+    };
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated).toEqual(config);
+    expect(deprecations).toHaveLength(0);
   });
 
   it('does not warn about using the legacy logger when using the ECS audit logger, even when using the deprecated ECS appender config', () => {
@@ -287,12 +375,15 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated.xpack.security.audit.appender.path).not.toBeDefined();
     expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+        Object {
+          "level": undefined,
+          "message": "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+        },
       ]
     `);
   });
@@ -310,10 +401,13 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages } = applyConfigDeprecations(cloneDeep(config));
-    expect(messages).toMatchInlineSnapshot(`
+    const { deprecations } = applyConfigDeprecations(cloneDeep(config));
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "You no longer need to configure \\"xpack.security.authorization.legacyFallback.enabled\\".",
+        Object {
+          "level": undefined,
+          "message": "You no longer need to configure \\"xpack.security.authorization.legacyFallback.enabled\\".",
+        },
       ]
     `);
   });
@@ -331,10 +425,13 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages } = applyConfigDeprecations(cloneDeep(config));
-    expect(messages).toMatchInlineSnapshot(`
+    const { deprecations } = applyConfigDeprecations(cloneDeep(config));
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "You no longer need to configure \\"xpack.security.authc.saml.maxRedirectURLSize\\".",
+        Object {
+          "level": undefined,
+          "message": "You no longer need to configure \\"xpack.security.authc.saml.maxRedirectURLSize\\".",
+        },
       ]
     `);
   });
@@ -356,10 +453,13 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages } = applyConfigDeprecations(cloneDeep(config));
-    expect(messages).toMatchInlineSnapshot(`
+    const { deprecations } = applyConfigDeprecations(cloneDeep(config));
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\\" is no longer used.",
+        Object {
+          "level": undefined,
+          "message": "\\"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\\" is no longer used.",
+        },
       ]
     `);
   });
@@ -375,11 +475,14 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated).toEqual(config);
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
+        Object {
+          "level": undefined,
+          "message": "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
+        },
       ]
     `);
   });
@@ -395,12 +498,18 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated).toEqual(config);
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
-        "Enabling both \\"basic\\" and \\"token\\" authentication providers in \\"xpack.security.authc.providers\\" is deprecated. Login page will only use \\"token\\" provider.",
+        Object {
+          "level": undefined,
+          "message": "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
+        },
+        Object {
+          "level": undefined,
+          "message": "Enabling both \\"basic\\" and \\"token\\" authentication providers in \\"xpack.security.authc.providers\\" is deprecated. Login page will only use \\"token\\" provider.",
+        },
       ]
     `);
   });
@@ -414,11 +523,14 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated).toEqual(config);
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
+        Object {
+          "level": undefined,
+          "message": "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
+        },
       ]
     `);
   });
@@ -432,11 +544,14 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated).toEqual(config);
-    expect(messages).toMatchInlineSnapshot(`
+    expect(deprecations).toMatchInlineSnapshot(`
       Array [
-        "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
+        Object {
+          "level": undefined,
+          "message": "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
+        },
       ]
     `);
   });
@@ -449,8 +564,8 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated).toEqual(config);
-    expect(messages).toHaveLength(0);
+    expect(deprecations).toHaveLength(0);
   });
 });
