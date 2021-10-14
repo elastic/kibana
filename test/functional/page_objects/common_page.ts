@@ -30,6 +30,7 @@ export class CommonPageObject extends FtrService {
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly loginPage = this.ctx.getPageObject('login');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -499,5 +500,13 @@ export class CommonPageObject extends FtrService {
     } else {
       await this.testSubjects.exists(validator);
     }
+  }
+
+  async time(time: { from: string; to: string }) {
+    await this.kibanaServer.uiSettings.replace({ 'timepicker:timeDefaults': JSON.stringify(time) });
+  }
+
+  async unsetTime() {
+    await this.kibanaServer.uiSettings.unset('timepicker:timeDefaults');
   }
 }
