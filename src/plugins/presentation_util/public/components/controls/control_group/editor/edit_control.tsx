@@ -20,6 +20,7 @@ import { ControlGroupStrings } from '../control_group_strings';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { EmbeddableFactoryNotFoundError } from '../../../../../../embeddable/public';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
+import { InputControlInput } from '../../../../services/controls';
 
 export const EditControlButton = ({ embeddableId }: { embeddableId: string }) => {
   // Presentation Services Context
@@ -54,13 +55,18 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     const factory = getControlFactory(panel.type);
     const embeddable = await untilEmbeddableLoaded(embeddableId);
 
+    let inputToReturn: Partial<InputControlInput> = {};
+
     if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
 
     let removed = false;
     const onCancel = (ref: OverlayRef) => {
       if (
         removed ||
-        (isEqual(latestPanelState.current.explicitInput, panel.explicitInput) &&
+        (isEqual(latestPanelState.current.explicitInput, {
+          ...panel.explicitInput,
+          ...inputToReturn,
+        }) &&
           isEqual(latestPanelState.current.width, panel.width))
       ) {
         ref.close();
@@ -73,7 +79,6 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         buttonColor: 'danger',
       }).then((confirmed) => {
         if (confirmed) {
-          updateInputForChild(embeddableId, panel.explicitInput);
           dispatch(setControlWidth({ width: panel.width, embeddableId }));
           ref.close();
         }
@@ -99,13 +104,18 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
               }
             });
           }}
-          updateTitle={(newTitle) => updateInputForChild(embeddableId, { title: newTitle })}
+          updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
           controlEditorComponent={(factory as IEditableControlFactory).getControlEditor?.({
-            onChange: (partialInput) => updateInputForChild(embeddableId, partialInput),
+            onChange: (partialInput) => {
+              inputToReturn = { ...inputToReturn, ...partialInput };
+            },
             initialInput: embeddable.getInput(),
           })}
           onCancel={() => onCancel(flyoutInstance)}
-          onSave={() => flyoutInstance.close()}
+          onSave={() => {
+            updateInputForChild(embeddableId, inputToReturn);
+            flyoutInstance.close();
+          }}
           updateWidth={(newWidth) => dispatch(setControlWidth({ width: newWidth, embeddableId }))}
         />,
         reduxContainerContext

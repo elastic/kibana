@@ -6,76 +6,165 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  EuiFieldSearch,
   EuiFilterSelectItem,
-  EuiIcon,
   EuiLoadingChart,
   EuiPopoverTitle,
-  EuiSelectableOption,
+  EuiFieldSearch,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiFormRow,
   EuiSpacer,
+  EuiIcon,
 } from '@elastic/eui';
 
-import { Subject } from 'rxjs';
 import { OptionsListStrings } from './options_list_strings';
-
-interface OptionsListPopoverProps {
-  loading: boolean;
-  typeaheadSubject: Subject<string>;
-  searchString?: string;
-  updateOption: (index: number) => void;
-  availableOptions?: EuiSelectableOption[];
-}
+import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
+import { OptionsListEmbeddableInput } from './options_list_embeddable';
+import { optionsListReducers } from './options_list_reducers';
+import { OptionsListComponentState } from './options_list_component';
 
 export const OptionsListPopover = ({
   loading,
-  updateOption,
   searchString,
-  typeaheadSubject,
   availableOptions,
-}: OptionsListPopoverProps) => {
+  updateSearchString,
+}: {
+  searchString: string;
+  loading: OptionsListComponentState['loading'];
+  updateSearchString: (newSearchString: string) => void;
+  availableOptions: OptionsListComponentState['availableOptions'];
+}) => {
+  // Redux embeddable container Context
+  const {
+    useEmbeddableSelector,
+    useEmbeddableDispatch,
+    actions: { selectOption, deselectOption, clearSelections },
+  } = useReduxEmbeddableContext<OptionsListEmbeddableInput, typeof optionsListReducers>();
+
+  const dispatch = useEmbeddableDispatch();
+  const { selectedOptions } = useEmbeddableSelector((state) => state);
+
+  // track selectedOptions in a set for more efficient lookup
+  const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
+  const [showOnlySelected, setShowOnlySelected] = useState(false);
+
   return (
     <>
       <EuiPopoverTitle paddingSize="s">
-        <EuiFieldSearch
-          compressed
-          onChange={(event) => {
-            typeaheadSubject.next(event.target.value);
-          }}
-          value={searchString}
-        />
+        <EuiFormRow>
+          <EuiFlexGroup gutterSize="xs" direction="row" justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiFieldSearch
+                compressed
+                disabled={showOnlySelected}
+                onChange={(event) => updateSearchString(event.target.value)}
+                value={searchString}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="top"
+                content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+              >
+                <EuiButtonIcon
+                  size="s"
+                  color="danger"
+                  iconType="eraser"
+                  aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                  onClick={() => dispatch(clearSelections({}))}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="top"
+                content={
+                  showOnlySelected
+                    ? OptionsListStrings.popover.getAllOptionsButtonTitle()
+                    : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
+                }
+              >
+                <EuiButtonIcon
+                  size="s"
+                  iconType="list"
+                  aria-pressed={showOnlySelected}
+                  color={showOnlySelected ? 'primary' : 'subdued'}
+                  aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                  onClick={() => setShowOnlySelected(!showOnlySelected)}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
       </EuiPopoverTitle>
-      <div className="optionsList--items">
-        {!loading &&
-          availableOptions &&
-          availableOptions.map((item, index) => (
-            <EuiFilterSelectItem
-              checked={item.checked}
-              key={index}
-              onClick={() => updateOption(index)}
-            >
-              {item.label}
-            </EuiFilterSelectItem>
-          ))}
-        {loading && (
-          <div className="euiFilterSelect__note">
-            <div className="euiFilterSelect__noteContent">
-              <EuiLoadingChart size="m" />
-              <EuiSpacer size="xs" />
-              <p>{OptionsListStrings.popover.getLoadingMessage()}</p>
-            </div>
-          </div>
-        )}
 
-        {!loading && (!availableOptions || availableOptions.length === 0) && (
-          <div className="euiFilterSelect__note">
-            <div className="euiFilterSelect__noteContent">
-              <EuiIcon type="minusInCircle" />
-              <EuiSpacer size="xs" />
-              <p>{OptionsListStrings.popover.getEmptyMessage()}</p>
-            </div>
-          </div>
+      <div className="optionsList--items">
+        {!showOnlySelected && (
+          <>
+            {availableOptions?.map((availableOption, index) => (
+              <EuiFilterSelectItem
+                checked={selectedOptionsSet?.has(availableOption) ? 'on' : undefined}
+                key={index}
+                onClick={() => {
+                  if (selectedOptionsSet.has(availableOption)) {
+                    dispatch(deselectOption(availableOption));
+                    return;
+                  }
+                  dispatch(selectOption(availableOption));
+                }}
+              >
+                {availableOption}
+              </EuiFilterSelectItem>
+            ))}
+            {loading && (
+              <div className="optionsList--loadingOverlay">
+                <div className="euiFilterSelect__note">
+                  <div className="euiFilterSelect__noteContent">
+                    <EuiLoadingChart size="m" />
+                    <EuiSpacer size="xs" />
+                    <p>{OptionsListStrings.popover.getLoadingMessage()}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!loading && (!availableOptions || availableOptions.length === 0) && (
+              <div className="euiFilterSelect__note">
+                <div className="euiFilterSelect__noteContent">
+                  <EuiIcon type="minusInCircle" />
+                  <EuiSpacer size="xs" />
+                  <p>{OptionsListStrings.popover.getEmptyMessage()}</p>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+        {showOnlySelected && (
+          <>
+            {selectedOptions &&
+              selectedOptions.map((availableOption, index) => (
+                <EuiFilterSelectItem
+                  checked="on"
+                  key={index}
+                  onClick={() => dispatch(deselectOption(availableOption))}
+                >
+                  {availableOption}
+                </EuiFilterSelectItem>
+              ))}
+            {(!selectedOptions || selectedOptions.length === 0) && (
+              <div className="euiFilterSelect__note">
+                <div className="euiFilterSelect__noteContent">
+                  <EuiIcon type="minusInCircle" />
+                  <EuiSpacer size="xs" />
+                  <p>{OptionsListStrings.popover.getSelectionsEmptyMessage()}</p>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>

@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { PropsWithChildren, useEffect, useMemo, useRef } from 'react';
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
-import { Draft } from 'immer/dist/types/types-external';
-import { isEqual } from 'lodash';
 import { SliceCaseReducers, PayloadAction, createSlice } from '@reduxjs/toolkit';
+import React, { PropsWithChildren, useEffect, useMemo, useRef } from 'react';
+import { Draft } from 'immer/dist/types/types-external';
+import { debounceTime } from 'rxjs/operators';
+import { isEqual } from 'lodash';
 
+import {
+  ReduxContainerContextServices,
+  ReduxEmbeddableContextServices,
+  ReduxEmbeddableWrapperProps,
+} from './types';
 import {
   IEmbeddable,
   EmbeddableInput,
@@ -19,11 +25,6 @@ import {
   IContainer,
 } from '../../../../embeddable/public';
 import { getManagedEmbeddablesStore } from './generic_embeddable_store';
-import {
-  ReduxContainerContextServices,
-  ReduxEmbeddableContextServices,
-  ReduxEmbeddableWrapperProps,
-} from './types';
 import { ReduxEmbeddableContext, useReduxEmbeddableContext } from './redux_embeddable_context';
 
 const getDefaultProps = <InputType extends EmbeddableInput = EmbeddableInput>(): Required<
@@ -139,18 +140,22 @@ const ReduxEmbeddableSync = <InputType extends EmbeddableInput = EmbeddableInput
   const currentState = useEmbeddableSelector((state) => state);
   const stateRef = useRef(currentState);
 
-  // When Embeddable Input changes, push differences to redux.
   useEffect(() => {
-    embeddable.getInput$().subscribe(() => {
-      const differences = diffInput(embeddable.getInput(), stateRef.current);
-      if (differences && Object.keys(differences).length > 0) {
-        dispatch(updateEmbeddableReduxState(differences));
-      }
-    });
+    // When Embeddable Input changes, push differences to redux.
+    const inputSubscription = embeddable
+      .getInput$()
+      // .pipe(debounceTime(0)) // debounce input changes to ensure that when many updates are made in one render the latest wins out
+      .subscribe(() => {
+        const differences = diffInput(embeddable.getInput(), stateRef.current);
+        if (differences && Object.keys(differences).length > 0) {
+          dispatch(updateEmbeddableReduxState(differences));
+        }
+      });
+    return () => inputSubscription.unsubscribe();
   }, [diffInput, dispatch, embeddable, updateEmbeddableReduxState]);
 
-  // When redux state changes, push differences to Embeddable Input.
   useEffect(() => {
+    // When redux state changes, push differences to Embeddable Input.
     stateRef.current = currentState;
     const differences = diffInput(currentState, embeddable.getInput());
     if (differences && Object.keys(differences).length > 0) {

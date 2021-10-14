@@ -9,6 +9,7 @@
 import { EuiFormRow, EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
+import { IFieldType, IIndexPattern } from '../../../../../../data/public';
 import { ControlEditorProps, GetControlEditorComponentProps } from '../../types';
 import {
   OptionsListEmbeddableInput,
@@ -25,10 +26,13 @@ interface OptionsListEditorProps extends ControlEditorProps {
 }
 
 interface OptionsListEditorState {
-  availableIndexPatterns: Array<EuiSuperSelectOption<string>>;
-  indexPattern?: string;
-  availableFields: Array<EuiSuperSelectOption<string>>;
-  field?: string;
+  indexPatternSelectOptions: Array<EuiSuperSelectOption<string>>;
+  availableIndexPatterns?: { [key: string]: IIndexPattern };
+  indexPattern?: IIndexPattern;
+
+  fieldSelectOptions: Array<EuiSuperSelectOption<string>>;
+  availableFields?: { [key: string]: IFieldType };
+  field?: IFieldType;
 }
 
 export const OptionsListEditor = ({
@@ -41,11 +45,17 @@ export const OptionsListEditor = ({
   const [state, setState] = useState<OptionsListEditorState>({
     indexPattern: initialInput?.indexPattern,
     field: initialInput?.field,
-    availableIndexPatterns: [],
-    availableFields: [],
+    indexPatternSelectOptions: [],
+    fieldSelectOptions: [],
   });
 
-  const applySelection = ({ field, indexPattern }: { field?: string; indexPattern?: string }) => {
+  const applySelection = ({
+    field,
+    indexPattern,
+  }: {
+    field?: IFieldType;
+    indexPattern?: IIndexPattern;
+  }) => {
     const newState = { ...(field ? { field } : {}), ...(indexPattern ? { indexPattern } : {}) };
     /**
      * apply state and run onChange concurrently. State is copied here rather than by subscribing to embeddable
@@ -60,24 +70,43 @@ export const OptionsListEditor = ({
 
   useMount(() => {
     (async () => {
-      const indexPatterns = (await fetchIndexPatterns()).map((indexPattern) => ({
-        value: indexPattern,
-        inputDisplay: indexPattern,
+      const newIndexPatterns = await fetchIndexPatterns();
+      const newAvailableIndexPatterns = newIndexPatterns.reduce(
+        (acc: { [key: string]: IIndexPattern }, curr) => ((acc[curr.title] = curr), acc),
+        {}
+      );
+      const newIndexPatternSelectOptions = newIndexPatterns.map((indexPattern) => ({
+        value: indexPattern.title,
+        inputDisplay: indexPattern.title,
       }));
-      setState((currentState) => ({ ...currentState, availableIndexPatterns: indexPatterns }));
+      setState((currentState) => ({
+        ...currentState,
+        availableIndexPatterns: newAvailableIndexPatterns,
+        indexPatternSelectOptions: newIndexPatternSelectOptions,
+      }));
     })();
   });
 
   useEffect(() => {
     (async () => {
-      let availableFields: Array<EuiSuperSelectOption<string>> = [];
+      let newFieldSelectOptions: Array<EuiSuperSelectOption<string>> = [];
+      let newAvailableFields: { [key: string]: IFieldType } = {};
       if (state.indexPattern) {
-        availableFields = (await fetchFields(state.indexPattern)).map((field) => ({
-          value: field,
-          inputDisplay: field,
+        const newFields = await fetchFields(state.indexPattern);
+        newAvailableFields = newFields.reduce(
+          (acc: { [key: string]: IFieldType }, curr) => ((acc[curr.name] = curr), acc),
+          {}
+        );
+        newFieldSelectOptions = newFields.map((field) => ({
+          value: field.name,
+          inputDisplay: field.displayName ?? field.name,
         }));
       }
-      setState((currentState) => ({ ...currentState, availableFields }));
+      setState((currentState) => ({
+        ...currentState,
+        fieldSelectOptions: newFieldSelectOptions,
+        availableFields: newAvailableFields,
+      }));
     })();
   }, [state.indexPattern, fetchFields]);
 
@@ -90,17 +119,19 @@ export const OptionsListEditor = ({
     <>
       <EuiFormRow label={OptionsListStrings.editor.getIndexPatternTitle()}>
         <EuiSuperSelect
-          options={state.availableIndexPatterns}
-          onChange={(indexPattern) => applySelection({ indexPattern })}
-          valueOfSelected={state.indexPattern}
+          options={state.indexPatternSelectOptions}
+          onChange={(patternTitle) =>
+            applySelection({ indexPattern: state.availableIndexPatterns?.[patternTitle] })
+          }
+          valueOfSelected={state.indexPattern?.title}
         />
       </EuiFormRow>
       <EuiFormRow label={OptionsListStrings.editor.getFieldTitle()}>
         <EuiSuperSelect
           disabled={!state.indexPattern}
-          options={state.availableFields}
-          onChange={(field) => applySelection({ field })}
-          valueOfSelected={state.field}
+          options={state.fieldSelectOptions}
+          onChange={(fieldName) => applySelection({ field: state.availableFields?.[fieldName] })}
+          valueOfSelected={state.field?.name}
         />
       </EuiFormRow>
     </>

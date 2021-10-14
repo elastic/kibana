@@ -78,6 +78,7 @@ export abstract class Container<
     if (!this.input.panels[id]) {
       throw new PanelNotFoundError();
     }
+
     const panels = {
       panels: {
         ...this.input.panels,

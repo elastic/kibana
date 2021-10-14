@@ -8,11 +8,14 @@
 
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 import { combineReducers, Reducer } from 'redux';
+import { enableMapSet } from 'immer';
 
 export interface InjectReducerProps<StateShape> {
   key: string;
   asyncReducer: Reducer<StateShape>;
 }
+
+enableMapSet();
 
 type ManagedEmbeddableReduxStore = EnhancedStore & {
   asyncReducers: { [key: string]: Reducer<unknown> };

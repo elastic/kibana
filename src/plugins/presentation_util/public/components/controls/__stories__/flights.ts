@@ -7,22 +7,17 @@
  */
 
 import { map, uniq } from 'lodash';
-import { EuiSelectableOption } from '@elastic/eui';
-
 import { flights } from '../../fixtures/flights';
 
 export type Flight = typeof flights[number];
 export type FlightField = keyof Flight;
 
-export const getOptions = (field: string) => uniq(map(flights, field)).sort();
+export const getFlightOptions = (field: string) => uniq(map(flights, field)).sort();
 
-export const getEuiSelectableOptions = (field: string, search?: string): EuiSelectableOption[] => {
-  const options = getOptions(field)
-    .map((option) => ({
-      label: option + '',
-      searchableLabel: option + '',
-    }))
-    .filter((option) => !search || option.label.toLowerCase().includes(search.toLowerCase()));
+export const getFlightSearchOptions = (field: string, search?: string): string[] => {
+  const options = getFlightOptions(field)
+    .map((option) => option + '')
+    .filter((option) => !search || option.toLowerCase().includes(search.toLowerCase()));
   if (options.length > 10) options.length = 10;
   return options;
 };
@@ -57,4 +52,8 @@ export const flightFieldLabels: Record<FlightField, string> = {
   timestamp: 'Timestamp',
 };
 
-export const flightFields = Object.keys(flightFieldLabels) as FlightField[];
+export const flightFields = Object.keys(flightFieldLabels).map((field) => ({
+  name: field,
+  type: 'string',
+  aggregatable: true,
+}));
