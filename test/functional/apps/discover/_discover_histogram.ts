@@ -40,10 +40,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/es_archiver/long_window_logstash_index_pattern'
       );
       await security.testUser.restoreDefaults();
+      await PageObjects.common.unsetTime();
     });
 
-    async function prepareTest(fromTime: string, toTime: string, interval?: string) {
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    async function prepareTest(from: string, to: string, interval?: string) {
+      await PageObjects.common.setTime({ from, to });
+      await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       if (interval) {
         await PageObjects.discover.setChartInterval(interval);
