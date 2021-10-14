@@ -25,8 +25,6 @@ export interface AlertInstanceSummary {
   instances: Record<string, AlertInstanceStatus>;
   executionDuration: {
     average: number;
-    max: number;
-    min: number;
     values: number[];
   };
 }

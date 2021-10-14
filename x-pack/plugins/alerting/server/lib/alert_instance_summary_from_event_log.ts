@@ -41,8 +41,6 @@ export function alertInstanceSummaryFromEventLog(
     instances: {},
     executionDuration: {
       average: 0,
-      min: 0,
-      max: 0,
       values: [],
     },
   };
@@ -128,8 +126,6 @@ export function alertInstanceSummaryFromEventLog(
   if (eventDurations.length > 0) {
     alertInstanceSummary.executionDuration = {
       average: Math.round(mean(eventDurations)),
-      max: Math.max(...eventDurations),
-      min: Math.min(...eventDurations),
       values: eventDurations,
     };
   }

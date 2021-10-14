@@ -66,6 +66,8 @@ type AlertInstancesProps = {
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
+const DESIRED_NUM_EXECUTION_DURATIONS = 30;
+
 export const alertInstancesTableColumns = (
   onMuteAction: (instance: AlertInstanceListItem) => Promise<void>,
   readOnly: boolean
@@ -195,9 +197,9 @@ export function AlertInstances({
     alertInstanceSummary.executionDuration.average
   );
 
-  const paddedExecutionDurations = assign(
-    fill(new Array(30), 0),
-    alertInstanceSummary.executionDuration.values
+  const paddedExecutionDurations = padOrTruncateDurations(
+    alertInstanceSummary.executionDuration.values,
+    DESIRED_NUM_EXECUTION_DURATIONS
   );
 
   const healthColor = getHealthColor(alert.executionStatus.status);
@@ -207,28 +209,40 @@ export function AlertInstances({
     ? ALERT_STATUS_LICENSE_ERROR
     : alertsStatusesTranslationsMapping[alert.executionStatus.status];
 
-  const health = (
-    <EuiHealth
-      textSize="inherit"
-      data-test-subj={`ruleStatus-${alert.executionStatus.status}`}
-      color={healthColor}
-    >
-      {statusMessage}
-    </EuiHealth>
-  );
-
   return (
     <>
       <EuiHorizontalRule />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiPanel color="subdued" hasBorder={false}>
-            <EuiStat title={health} description="Last response" />
+            <EuiStat
+              data-test-subj={`ruleStatus-${alert.executionStatus.status}`}
+              title={
+                <EuiHealth
+                  data-test-subj={`ruleStatus-${alert.executionStatus.status}`}
+                  textSize="inherit"
+                  color={healthColor}
+                >
+                  {statusMessage}
+                </EuiHealth>
+              }
+              description={i18n.translate(
+                'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.ruleLastExecutionDescription',
+                {
+                  defaultMessage: `Last response`,
+                }
+              )}
+            />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPanel color={showDurationWarning ? 'warning' : 'subdued'} hasBorder={false}>
+          <EuiPanel
+            data-test-subj="avgExecutionDurationPanel"
+            color={showDurationWarning ? 'warning' : 'subdued'}
+            hasBorder={false}
+          >
             <EuiStat
+              data-test-subj="avgExecutionDurationStat"
               title={
                 <EuiFlexGroup gutterSize="xs" className="ruleDurationStat">
                   {showDurationWarning && (
@@ -253,12 +267,17 @@ export function AlertInstances({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
-              description="Average duration"
+              description={i18n.translate(
+                'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.avgDurationDescription',
+                {
+                  defaultMessage: `Average duration`,
+                }
+              )}
             />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          <EuiPanel hasBorder={true}>
+          <EuiPanel data-test-subj="executionDurationChartPanel" hasBorder={true}>
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
@@ -289,7 +308,7 @@ export function AlertInstances({
             {alertInstanceSummary.executionDuration.values &&
             alertInstanceSummary.executionDuration.values.length > 0 ? (
               <>
-                <Chart size={{ height: 120 }}>
+                <Chart data-test-subj="executionDurationChart" size={{ height: 120 }}>
                   <Settings
                     theme={{
                       lineSeriesStyle: {
@@ -323,6 +342,7 @@ export function AlertInstances({
             ) : (
               <>
                 <EuiEmptyPrompt
+                  data-test-subj="executionDurationChartEmpty"
                   body={
                     <>
                       <p>
@@ -444,4 +464,15 @@ function getSortPriorityByStatus(status?: AlertInstanceStatusValues): number {
       return 1;
   }
   return 2;
+}
+
+export function padOrTruncateDurations(values: number[], desiredSize: number) {
+  if (values.length === desiredSize) {
+    return values;
+  } else if (values.length < desiredSize) {
+    return assign(fill(new Array(desiredSize), 0), values);
+  } else {
+    // oldest durations are at the start of the array, so take the last {desiredSize} values
+    return values.slice(-desiredSize);
+  }
 }

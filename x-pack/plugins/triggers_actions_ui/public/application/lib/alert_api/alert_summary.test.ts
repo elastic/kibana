@@ -30,8 +30,6 @@ describe('loadAlertInstanceSummary', () => {
       throttle: null,
       executionDuration: {
         average: 0,
-        max: 0,
-        min: 0,
         values: [],
       },
     };
@@ -53,8 +51,6 @@ describe('loadAlertInstanceSummary', () => {
       throttle: null,
       execution_duration: {
         average: 0,
-        max: 0,
-        min: 0,
         values: [],
       },
     });

@@ -34,8 +34,6 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "errorMessages": Array [],
         "executionDuration": Object {
           "average": 0,
-          "max": 0,
-          "min": 0,
           "values": Array [],
         },
         "id": "alert-123",
@@ -80,8 +78,6 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "errorMessages": Array [],
         "executionDuration": Object {
           "average": 0,
-          "max": 0,
-          "min": 0,
           "values": Array [],
         },
         "id": "alert-456",
@@ -159,7 +155,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       }
     `);
 
-    testExecutionDurations(events, executionDuration);
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('active alert with no instances but has errors', async () => {
@@ -197,7 +193,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       }
     `);
 
-    testExecutionDurations(events, executionDuration);
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently inactive instance', async () => {
@@ -236,7 +232,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       }
     `);
 
-    testExecutionDurations(events, executionDuration);
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('legacy alert with currently inactive instance', async () => {
@@ -275,7 +271,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       }
     `);
 
-    testExecutionDurations(events, executionDuration);
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently inactive instance, no new-instance', async () => {
@@ -313,7 +309,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       }
     `);
 
-    testExecutionDurations(events, executionDuration);
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently active instance', async () => {
@@ -352,7 +348,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       }
     `);
 
-    testExecutionDurations(events, executionDuration);
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently active instance with no action group in event log', async () => {
@@ -391,7 +387,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       }
     `);
 
-    testExecutionDurations(events, executionDuration);
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently active instance that switched action groups', async () => {
@@ -430,7 +426,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       }
     `);
 
-    testExecutionDurations(events, executionDuration);
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently active instance, no new-instance', async () => {
@@ -468,7 +464,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       }
     `);
 
-    testExecutionDurations(events, executionDuration);
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with active and inactive muted alerts', async () => {
@@ -517,7 +513,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       }
     `);
 
-    testExecutionDurations(events, executionDuration);
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with active and inactive alerts over many executes', async () => {
@@ -572,22 +568,16 @@ describe('alertInstanceSummaryFromEventLog', () => {
       }
     `);
 
-    testExecutionDurations(events, executionDuration);
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   const testExecutionDurations = (
-    events: IValidatedEvent[],
-    executionDuration?: { average?: number; max?: number; min?: number; values?: number[] }
+    actualDurations: number[],
+    executionDuration?: { average?: number; values?: number[] }
   ) => {
-    const durations: number[] = events
-      .filter((ev) => ev?.event?.action === 'execute' && ev?.event?.duration !== undefined)
-      .map((ev) => ev?.event?.duration! / (1000 * 1000)) as number[];
-
     expect(executionDuration).toEqual({
-      average: Math.round(mean(durations)),
-      max: Math.max(...durations),
-      min: Math.min(...durations),
-      values: durations,
+      average: Math.round(mean(actualDurations)),
+      values: actualDurations,
     });
   };
 });
@@ -685,6 +675,12 @@ export class EventsFactory {
       kibana: { alerting: { instance_id: instanceId } },
     });
     return this;
+  }
+
+  getExecutionDurations(): number[] {
+    return this.events
+      .filter((ev) => ev?.event?.action === 'execute' && ev?.event?.duration !== undefined)
+      .map((ev) => ev?.event?.duration! / (1000 * 1000));
   }
 }
 

@@ -87,8 +87,6 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
                 alerts: {},
                 execution_duration: {
                   average: 0,
-                  max: 0,
-                  min: 0,
                   values: [],
                 },
               });

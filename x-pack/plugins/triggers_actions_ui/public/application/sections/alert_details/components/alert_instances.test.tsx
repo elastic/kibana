@@ -8,9 +8,17 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
-import { AlertInstances, AlertInstanceListItem, alertInstanceToListItem } from './alert_instances';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { act } from 'react-dom/test-utils';
+import {
+  AlertInstances,
+  AlertInstanceListItem,
+  alertInstanceToListItem,
+  padOrTruncateDurations,
+} from './alert_instances';
 import { Alert, AlertInstanceSummary, AlertInstanceStatus, AlertType } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
+
 jest.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
@@ -271,6 +279,166 @@ describe('alertInstanceToListItem', () => {
   });
 });
 
+describe('execution duration overview', () => {
+  it('render last execution status', async () => {
+    const rule = mockAlert({
+      executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
+    });
+    const ruleType = mockAlertType();
+    const alertSummary = mockAlertInstanceSummary();
+
+    const wrapper = mountWithIntl(
+      <AlertInstances
+        {...mockAPIs}
+        alert={rule}
+        alertType={ruleType}
+        readOnly={false}
+        alertInstanceSummary={alertSummary}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const ruleExecutionStatusStat = wrapper.find('[data-test-subj="ruleStatus-ok"]');
+    expect(ruleExecutionStatusStat.exists()).toBeTruthy();
+    expect(ruleExecutionStatusStat.first().prop('description')).toEqual('Last response');
+    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').text()).toEqual('Ok');
+  });
+
+  it('renders average execution duration', async () => {
+    const rule = mockAlert();
+    const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
+    const alertSummary = mockAlertInstanceSummary({
+      executionDuration: { average: 60284, values: [] },
+    });
+
+    const wrapper = mountWithIntl(
+      <AlertInstances
+        {...mockAPIs}
+        alert={rule}
+        alertType={ruleType}
+        readOnly={false}
+        alertInstanceSummary={alertSummary}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
+    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
+    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
+    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+      'Average duration00:01:00.284'
+    );
+    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
+  });
+
+  it('renders warning when average execution duration exceeds rule timeout', async () => {
+    const rule = mockAlert();
+    const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
+    const alertSummary = mockAlertInstanceSummary({
+      executionDuration: { average: 60284345, values: [] },
+    });
+
+    const wrapper = mountWithIntl(
+      <AlertInstances
+        {...mockAPIs}
+        alert={rule}
+        alertType={ruleType}
+        readOnly={false}
+        alertInstanceSummary={alertSummary}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
+    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
+    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('warning');
+    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+      'Average duration16:44:44.345'
+    );
+    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeTruthy();
+  });
+
+  it('renders empty state when no execution duration values are available', async () => {
+    const rule = mockAlert();
+    const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
+    const alertSummary = mockAlertInstanceSummary();
+
+    const wrapper = mountWithIntl(
+      <AlertInstances
+        {...mockAPIs}
+        alert={rule}
+        alertType={ruleType}
+        readOnly={false}
+        alertInstanceSummary={alertSummary}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="executionDurationChartEmpty"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="executionDurationChart"]').exists()).toBeFalsy();
+  });
+
+  it('renders chart when execution duration values are available', async () => {
+    const rule = mockAlert();
+    const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
+    const alertSummary = mockAlertInstanceSummary({
+      executionDuration: { average: 10, values: [1, 2] },
+    });
+
+    const wrapper = mountWithIntl(
+      <AlertInstances
+        {...mockAPIs}
+        alert={rule}
+        alertType={ruleType}
+        readOnly={false}
+        alertInstanceSummary={alertSummary}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="executionDurationChartEmpty"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="executionDurationChart"]').exists()).toBeTruthy();
+  });
+});
+
+describe('padOrTruncateDurations', () => {
+  it('does nothing when array is the correct length', () => {
+    expect(padOrTruncateDurations([1, 2, 3], 3)).toEqual([1, 2, 3]);
+  });
+
+  it('pads execution duration values when there are fewer than display desires', () => {
+    expect(padOrTruncateDurations([1, 2, 3], 10)).toEqual([1, 2, 3, 0, 0, 0, 0, 0, 0, 0]);
+  });
+
+  it('truncates execution duration values when there are more than display desires', () => {
+    expect(padOrTruncateDurations([1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13], 10)).toEqual([
+      3, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+    ]);
+  });
+});
+
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
     id: uuid.v4(),
@@ -344,8 +512,6 @@ function mockAlertInstanceSummary(
     },
     executionDuration: {
       average: 0,
-      max: 0,
-      min: 0,
       values: [],
     },
   };

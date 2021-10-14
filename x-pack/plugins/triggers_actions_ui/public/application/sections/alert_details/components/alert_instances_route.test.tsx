@@ -181,8 +181,6 @@ function mockAlertInstanceSummary(overloads: Partial<any> = {}): any {
     },
     executionDuration: {
       average: 0,
-      max: 0,
-      min: 0,
       values: [],
     },
   };

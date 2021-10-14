@@ -139,9 +139,7 @@ describe('getAlertInstanceSummary()', () => {
 
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
-    const durations: number[] = events
-      .filter((ev) => ev?.event?.action === 'execute' && ev?.event?.duration !== undefined)
-      .map((ev) => ev?.event?.duration! / (1000 * 1000)) as number[];
+    const durations: number[] = eventsFactory.getExecutionDurations();
 
     const result = await rulesClient.getAlertInstanceSummary({ id: '1', dateStart });
     const resultWithoutExecutionDuration = omit(result, 'executionDuration');
@@ -191,9 +189,7 @@ describe('getAlertInstanceSummary()', () => {
 
     expect(result.executionDuration).toEqual({
       average: Math.round(mean(durations)),
-      max: Math.max(...durations),
-      min: Math.min(...durations),
-      values: durations.reverse(),
+      values: durations,
     });
   });
 
