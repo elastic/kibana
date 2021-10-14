@@ -200,6 +200,10 @@ const Wrapper = styled(EuiPanel)`
   width: 100%;
   overflow-x: auto;
   position: relative;
+
+  .echLegendItem__action {
+    display: none;
+  }
 `;
 
 const ShowPreview = styled(EuiButtonEmpty)`

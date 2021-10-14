@@ -19,8 +19,8 @@ import { useKibana } from '../../common/lib/kibana';
 import { StatusAll } from '../../containers/types';
 import { CaseStatuses, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { connectorsMock } from '../../containers/mock';
-import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
@@ -59,14 +59,10 @@ jest.mock('../../common/lib/kibana', () => {
 });
 
 describe('AllCasesGeneric ', () => {
-  const { createMockActionTypeModel } = actionTypeRegistryMock;
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
 
   beforeAll(() => {
-    connectorsMock.forEach((connector) =>
-      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
-        createMockActionTypeModel({ id: connector.actionTypeId, iconClass: 'logoSecurity' })
-      )
-    );
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
   beforeEach(() => {
