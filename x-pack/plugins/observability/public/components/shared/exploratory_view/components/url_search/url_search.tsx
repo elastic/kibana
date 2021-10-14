@@ -92,16 +92,16 @@ export function URLSearch({ series, seriesConfig, seriesId }: Props) {
           wildcards.includes(item.label) ||
           currValues.includes(item.label)
         ) {
-          return { checked: 'on', title: item.label, ...item };
+          return { ...item, checked: 'on', title: item.label };
         }
         if (
           excludedItems.includes(item.label) ||
           notWildcards.includes(item.label) ||
           currNotValues.includes(item.label)
         ) {
-          return { checked: 'off', title: item.label, ...item };
+          return { ...item, checked: 'off', title: item.label, ...item };
         }
-        return { ...item, title: item.label };
+        return { ...item, title: item.label, checked: undefined };
       });
 
       wildcards.forEach((wildcard) => {
@@ -139,6 +139,7 @@ export function URLSearch({ series, seriesConfig, seriesId }: Props) {
 
       return newItems;
     });
+    // we don't want to add series in the dependency, for that we have an extra side effect below
     // eslint-disable-next-line  react-hooks/exhaustive-deps
   }, [values, loading, query]);
 

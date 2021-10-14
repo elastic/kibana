@@ -146,7 +146,7 @@ export function SelectableUrlList({
             <EuiButtonIcon
               color="text"
               onClick={() => closePopover()}
-              aria-label={i18n.translate('xpack.apm.csm.search.url.close', {
+              aria-label={i18n.translate('xpack.observability.csm.search.url.close', {
                 defaultMessage: 'Close',
               })}
               iconType={'cross'}
@@ -214,7 +214,7 @@ export function SelectableUrlList({
                     }}
                     isDisabled={!hasChanged()}
                   >
-                    {i18n.translate('xpack.apm.apply.label', {
+                    {i18n.translate('xpack.observability.apply.label', {
                       defaultMessage: 'Apply',
                     })}
                   </EuiButton>
