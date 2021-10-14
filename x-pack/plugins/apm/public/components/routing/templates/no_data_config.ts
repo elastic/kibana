@@ -26,7 +26,7 @@ export function getNoDataConfig({
       actions: {
         beats: {
           title: i18n.translate('xpack.apm.noDataConfig.beatsCard.title', {
-            defaultMessage: 'Add data with APM agents',
+            defaultMessage: 'Add the APM integration',
           }),
           description: i18n.translate(
             'xpack.apm.noDataConfig.beatsCard.description',

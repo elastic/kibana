@@ -53,7 +53,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
         description={
           <EuiTextColor color="default">
             {i18n.translate('kibana-react.noDataPage.elasticAgentCard.noPermission.description', {
-              defaultMessage: `This application is not yet set up. If you’d like to use it please contact your Kibana administrator to add this integration.`,
+              defaultMessage: `This integration is not yet enabled. You do not have the permissions level to turn it on.`,
             })}
           </EuiTextColor>
         }
@@ -80,7 +80,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       paddingSize="l"
       image={image}
       href={href ?? addBasePath(`/app/integrations/browse${hasCategory}`)}
-      title={title || defaultCTAtitle}
+      title=""
       description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
         defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
       })}

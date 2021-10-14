@@ -25,11 +25,14 @@ export function getNoDataConfig({
       }),
       actions: {
         beats: {
+          title: i18n.translate('xpack.observability.noDataConfig.beatsCard.title', {
+            defaultMessage: 'Add an integration',
+          }),
           description: i18n.translate('xpack.observability.noDataConfig.beatsCard.description', {
             defaultMessage:
               'Use Beats and APM agents to send observability data to Elasticsearch. We make it easy with support for many popular systems, apps, and languages.',
           }),
-          href: basePath.prepend(`/app/home#/tutorial_directory/logging`),
+          href: basePath.prepend(`/app/integrations`),
         },
       },
       docsLink,

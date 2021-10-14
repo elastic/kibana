@@ -21,9 +21,12 @@ const OverviewEmptyComponent: React.FC = () => {
   const agentAction: NoDataPageActionsProps = {
     elasticAgent: {
       category: 'security',
+      title: i18n.translate('xpack.securitySolution.pages.emptyPage.beatsCard.title', {
+        defaultMessage: 'Add a Security integration',
+      }),
       description: i18n.translate('xpack.securitySolution.pages.emptyPage.beatsCard.description', {
         defaultMessage:
-          'Use Elastic Agent to collect security events and protect your endpoints from threats. Manage your agents in Fleet and add integrations with a single click.',
+          'Use Elastic Agent to collect security events and protect your endpoints from threats.',
       }),
     },
   };
