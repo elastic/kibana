@@ -17,13 +17,10 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: { poll: true, roles: true },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
-    unused('capture.browser.chromium.maxScreenshotDimension'),
-    unused('capture.concurrency'),
-    unused('capture.settleTime'),
-    unused('capture.timeout'),
-    unused('poll.jobCompletionNotifier.intervalErrorMultiplier'),
-    unused('poll.jobsRefresh.intervalErrorMultiplier'),
-    unused('kibanaApp'),
+    unused('capture.browser.chromium.maxScreenshotDimension'), // unused since 7.8
+    unused('poll.jobCompletionNotifier.intervalErrorMultiplier'), // unused since 7.10
+    unused('poll.jobsRefresh.intervalErrorMultiplier'), // unused since 7.10
+    unused('capture.viewport'), // deprecated as unused since 7.16
     (settings, fromPath, addDeprecation) => {
       const reporting = get(settings, fromPath);
       if (reporting?.index) {
@@ -33,15 +30,19 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
             values: { fromPath },
           }),
           message: i18n.translate('xpack.reporting.deprecations.reportingIndex.description', {
-            defaultMessage: `Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
+            defaultMessage:
+              `Multitenancy by changing "xpack.reporting.index" will not be supported in 8.0.` +
+              ` See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
           }),
           correctiveActions: {
             manualSteps: [
               i18n.translate('xpack.reporting.deprecations.reportingIndex.manualStepOne', {
-                defaultMessage: `If you rely on this setting to achieve multitenancy you should use Spaces, cross-cluster replication, or cross-cluster search instead.`,
+                defaultMessage: `Remove the "xpack.reporting.index" setting.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingIndex.manualStepTwo', {
-                defaultMessage: `To migrate to Spaces, we encourage using saved object management to export your saved objects from a tenant into the default tenant in a space.`,
+                defaultMessage:
+                  `Reindex reports stored in a custom reporting index into the default ".reporting-*"` +
+                  ` indices or regenerate the reports to be able to access them in 8.0.`,
               }),
             ],
           },

@@ -618,6 +618,9 @@ export interface DocLinksStart {
             readonly networkMap: string;
             readonly troubleshootGaps: string;
         };
+        readonly securitySolution: {
+            readonly trustedApps: string;
+        };
         readonly query: {
             readonly eql: string;
             readonly kueryQuerySyntax: string;
@@ -709,6 +712,7 @@ export interface DocLinksStart {
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
+            apiKeysLearnMore: string;
         }>;
         readonly ecs: {
             readonly guide: string;
