@@ -18,12 +18,15 @@ import { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { TestProviders } from '../../../mock';
+import { useLicense } from '../../../hooks/use_license';
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_selector');
+jest.mock('../../../hooks/use_license');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
+
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
     [CONSTANTS.appQuery]: { query: 'host.name:"security-solution-es"', language: 'kuery' },
@@ -240,7 +243,7 @@ describe('useSecuritySolutionNavigation', () => {
                 "href": "securitySolution/host_isolation_exceptions",
                 "id": "host_isolation_exceptions",
                 "isSelected": false,
-                "name": "Host Isolation Exceptions",
+                "name": "Host isolation exceptions",
                 "onClick": [Function],
               },
             ],
@@ -262,6 +265,19 @@ describe('useSecuritySolutionNavigation', () => {
 
     // @ts-ignore possibly undefined, but if undefined we want this test to fail
     expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.ueba);
+  });
+
+  it('should omit host isolation exceptions if license is less than platimum', () => {
+    (useLicense().isPlatinumPlus as jest.Mock).mockReturnValueOnce(false);
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
+    );
+    expect(
+      result.current?.items
+        .find((item) => item.id === 'manage')
+        ?.items?.find((item) => item.id === 'host_isolation_exceptions')
+    ).toBeUndefined();
   });
 
   describe('Permission gated routes', () => {
