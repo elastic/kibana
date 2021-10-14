@@ -33,14 +33,14 @@
       },
       "technique": [
         {
-          "id": "T1087",
-          "name": "Account Discovery",
-          "reference": "https://attack.mitre.org/techniques/T1087/"
+          "id": "T1033",
+          "name": "System Owner/User Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1033/"
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 8
 }
