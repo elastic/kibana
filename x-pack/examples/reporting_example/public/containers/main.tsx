@@ -354,7 +354,12 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
                         )}
                       </EuiFlexItem>
                       {logos.map((item, index) => (
-                        <EuiFlexItem key={index} data-shared-item>
+                        <EuiFlexItem
+                          key={index}
+                          data-shared-item
+                          data-shared-render-error
+                          data-render-error="This is an example error"
+                        >
                           <EuiCard
                             icon={<EuiIcon size="xxl" type={`logo${item}`} />}
                             title={`Elastic ${item}`}
