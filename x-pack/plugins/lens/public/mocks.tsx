@@ -56,6 +56,7 @@ import {
   DatasourceMap,
   VisualizationMap,
 } from './types';
+import { getLensInspectorService } from './lens_inspector_service';
 
 export function mockDatasourceStates() {
   return {
@@ -417,7 +418,11 @@ export function makeDefaultServices(
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),
-    inspector: inspectorPluginMock.createStartContract(),
+    inspector: {
+      adapters: getLensInspectorService(inspectorPluginMock.createStartContract()).adapters,
+      inspect: jest.fn(),
+      close: jest.fn(),
+    },
     dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
     savedObjectsClient: core.savedObjects.client,
