@@ -961,6 +961,33 @@ export default ({ getService }: FtrProviderContext) => {
         dashboards: [] as string[],
       },
     },
+    {
+      testTitleSuffix:
+        'for apm_transaction with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm_transaction',
+      indexPattern: { name: 'ft_module_apm_transaction', timeField: '@timestamp' },
+      module: 'apm_transaction',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf25_',
+        indexPatternName: 'ft_module_apm_transaction',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf25_apm_metrics',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
   ];
 
   const testDataListNegative = [
