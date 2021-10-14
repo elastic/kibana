@@ -28,6 +28,7 @@ import { YesNo } from './yes_no';
 import { LastValueModePopover } from './last_value_mode_popover';
 import { KBN_FIELD_TYPES } from '../../../../../data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
+import { PanelModelContext } from '../contexts/panel_model_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -76,6 +77,7 @@ export const IndexPattern = ({
   const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
   const updateControlValidity = useContext(FormValidationContext);
+  const panelModel = useContext(PanelModelContext);
 
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
   const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
@@ -116,7 +118,13 @@ export const IndexPattern = ({
     [intervalName]: AUTO_INTERVAL,
     [dropBucketName]: 0,
     [maxBarsName]: config.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-    [TIME_RANGE_MODE_KEY]: timeRangeOptions[0].value,
+    // we should set default value for 'time_range_mode' in model so that when user save visualization
+    // we set right mode in savedObject
+    // ternary operator needed because old visualization have 'time_range_mode' as undefined for 'last_value'
+    // but for creating new visaulization we should use 'entire_timerange' as default.
+    [TIME_RANGE_MODE_KEY]: panelModel.isNew
+      ? TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
+      : TIME_RANGE_DATA_MODES.LAST_VALUE,
   };
 
   const model = { ...defaults, ..._model };

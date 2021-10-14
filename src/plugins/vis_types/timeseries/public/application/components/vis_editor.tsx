@@ -70,15 +70,8 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       autoApply: true,
       dirty: false,
       model: {
-        // we should set default value for 'time_range_mode' in model so that when user save visualization
-        // we set right mode in savedObject
-        // ternary operator needed because old visualization have 'time_range_mode' as undefined for 'last_value'
-        // but for creating new visaulization we should use 'entire_timerange' as default.
-        [TIME_RANGE_MODE_KEY]:
-          this.props.vis.title && this.props.vis.params.type !== 'timeseries'
-            ? TIME_RANGE_DATA_MODES.LAST_VALUE
-            : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
-        ...this.props.vis.params,
+        isNew: !this.props.vis.id,
+        ...this.props.vis.params, 
       },
       extractedIndexPatterns: [''],
     };
