@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
 import { RollupPlugin } from './plugin';
+import { configSchema, RollupConfig } from './config';
 
 export const plugin = (pluginInitializerContext: PluginInitializerContext) =>
   new RollupPlugin(pluginInitializerContext);
+
+export const config: PluginConfigDescriptor<RollupConfig> = {
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
+  schema: configSchema,
+};
