@@ -28,31 +28,33 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Collection"
+    "Persistence"
   ],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
-        "id": "TA0009",
-        "name": "Collection",
-        "reference": "https://attack.mitre.org/tactics/TA0009/"
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
       },
       "technique": [
         {
-          "id": "T1114",
-          "name": "Email Collection",
-          "reference": "https://attack.mitre.org/techniques/T1114/"
-        },
-        {
-          "id": "T1005",
-          "name": "Data from Local System",
-          "reference": "https://attack.mitre.org/techniques/T1005/"
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/",
+          "subtechnique": [
+            {
+              "id": "T1098.002",
+              "name": "Exchange Email Delegate Permissions",
+              "reference": "https://attack.mitre.org/techniques/T1098/002/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

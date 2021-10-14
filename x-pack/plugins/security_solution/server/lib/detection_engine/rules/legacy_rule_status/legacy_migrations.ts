@@ -6,14 +6,30 @@
  */
 
 import {
+  SavedObjectMigrationFn,
   SavedObjectReference,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from 'kibana/server';
 import { isString } from 'lodash/fp';
+import { truncateMessage } from '../../rule_execution_log';
 import { IRuleSavedAttributesSavedObjectAttributes } from '../types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleReference } from './legacy_utils';
+
+export const truncateMessageFields: SavedObjectMigrationFn<Record<string, unknown>> = (doc) => {
+  const { lastFailureMessage, lastSuccessMessage, ...restAttributes } = doc.attributes;
+
+  return {
+    ...doc,
+    attributes: {
+      lastFailureMessage: truncateMessage(lastFailureMessage),
+      lastSuccessMessage: truncateMessage(lastSuccessMessage),
+      ...restAttributes,
+    },
+    references: doc.references ?? [],
+  };
+};
 
 /**
  * This side-car rule status SO is deprecated and is to be replaced by the RuleExecutionLog on Event-Log and
@@ -22,6 +38,7 @@ import { legacyGetRuleReference } from './legacy_utils';
  * @deprecated Remove this once we've fully migrated to event-log and no longer require addition status SO (8.x)
  */
 export const legacyRuleStatusSavedObjectMigration = {
+  '7.15.2': truncateMessageFields,
   '7.16.0': (
     doc: SavedObjectUnsanitizedDoc<IRuleSavedAttributesSavedObjectAttributes>
   ): SavedObjectSanitizedDoc<IRuleSavedAttributesSavedObjectAttributes> => {
