@@ -57,13 +57,20 @@ import { LogStashNodeAdvancedPage } from './pages/logstash/advanced';
 // import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
 import { LogStashNodePage } from './pages/logstash/node';
 import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
+import { AccessDeniedPage } from './pages/access_denied';
 
 export const renderApp = (
   core: CoreStart,
   plugins: MonitoringStartPluginDependencies,
-  { element, setHeaderActionMenu }: AppMountParameters,
+  { element, history, setHeaderActionMenu }: AppMountParameters,
   externalConfig: ExternalConfig
 ) => {
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlistenParentHistory = history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+
   ReactDOM.render(
     <MonitoringApp
       core={core}
@@ -76,6 +83,7 @@ export const renderApp = (
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
+    unlistenParentHistory();
   };
 };
 
@@ -96,6 +104,7 @@ const MonitoringApp: React.FC<{
               <BreadcrumbContainer.Provider history={history}>
                 <Router history={history}>
                   <Switch>
+                    <Route path="/access-denied" component={AccessDeniedPage} />
                     <Route path="/no-data" component={NoDataPage} />
                     <Route path="/loading" component={LoadingPage} />
                     <RouteInit
