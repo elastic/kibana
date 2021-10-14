@@ -272,8 +272,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
+    });
 
-      await testSubjects.waitForDeleted('testQuerySuccess');
+    it('should show error when es_query is invalid', async () => {
+      const alertName = generateUniqueKey();
+      await defineEsQueryAlert(alertName);
 
       // Invalid query
       await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
