@@ -380,14 +380,22 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
         });
 
         it('should create recovered-instance events for all alert instances', async () => {
+          // pattern of when the alert should fire
+          const pattern = {
+            instance: [false, true, true, false, false, true, true, true],
+          };
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                rule_type_id: 'test.noop',
-                consumer: 'alerts',
-                enabled: true,
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [],
               })
             )
             .expect(200);
@@ -398,22 +406,19 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           await alertUtils.getDisableRequest(ruleId);
 
           const events = await retry.try(async () => {
-            // there can be a successful execute before the error one
-            const someEvents = await getEventLog({
+            return await getEventLog({
               getService,
               spaceId: space.id,
               type: 'alert',
               id: ruleId,
               provider: 'alerting',
-              actions: new Map([['recovered-instance', { equal: 2 }]]),
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute', { gte: 9 }],
+                ['new-instance', { equal: 2 }],
+                ['recovered-instance', { equal: 2 }],
+              ]),
             });
-            const errorEvents = someEvents.filter(
-              (event) => event?.kibana?.alerting?.status === 'error'
-            );
-            if (errorEvents.length === 0) {
-              throw new Error('no execute/error events yet');
-            }
-            return errorEvents;
           });
 
           const event = events[0];
@@ -421,13 +426,10 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
           validateEvent(event, {
             spaceId: space.id,
-            savedObjects: [{ type: 'alert', id: ruleId, rel: 'primary', type_id: 'test.noop' }],
-            outcome: 'failure',
-            message: `test.noop:${ruleId}: execution failed`,
-            errorMessage: 'Unable to decrypt attribute "apiKey"',
-            status: 'error',
-            reason: 'decrypt',
-            shouldHaveTask: true,
+            savedObjects: [
+              { type: 'alert', id: ruleId, rel: 'primary', type_id: 'test.patternFiring' },
+            ],
+            message: '',
             rule: {
               id: ruleId,
               category: createdRule.body.rule_type_id,
