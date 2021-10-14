@@ -26,6 +26,7 @@ import {
   generateSelectedAgentsMessage,
   ALL_AGENTS_LABEL,
   AGENT_POLICY_LABEL,
+  AGENT_SELECTION_LABEL,
 } from './translations';
 
 import {
@@ -100,6 +101,22 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
           const defaultOptions = policyOptions.options?.filter((option) =>
             // @ts-expect-error update types
             agentSelection.policiesSelected.includes(option.key)
+          );
+
+          if (defaultOptions?.length) {
+            setSelectedOptions(defaultOptions);
+            defaultValueInitialized.current = true;
+          }
+        }
+      }
+
+      if (agentSelection.agents.length) {
+        const agentOptions = find(['label', AGENT_SELECTION_LABEL], options);
+
+        if (agentOptions) {
+          const defaultOptions = agentOptions.options?.filter((option) =>
+            // @ts-expect-error update types
+            agentSelection.agents.includes(option.key)
           );
 
           if (defaultOptions?.length) {

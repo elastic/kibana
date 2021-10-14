@@ -148,7 +148,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     options: {
       stripEmptyFields: false,
     },
-    serializer: (formData) => pickBy(formData),
+    serializer: ({ savedQueryId, ...formData }) =>
+      pickBy({ ...formData, saved_query_id: savedQueryId }),
     defaultValue: deepMerge(
       {
         agentSelection: {
