@@ -33,12 +33,17 @@ import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../services';
 
 import type { PackagePolicy } from '../../../common';
 
+import {
+  FLEET_KUBERNETES_PACKAGE,
+  KUBERNETES_RUN_INSTRUCTIONS,
+  STANDALONE_RUN_INSTRUCTIONS,
+} from '../../../common';
+
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 import type { BaseProps } from './types';
 
 type Props = BaseProps;
 
-export const elasticAgentPolicy = '';
 export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPolicies }) => {
   const { getHref } = useLink();
   const core = useStartServices();
@@ -46,10 +51,13 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
 
   const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(agentPolicy?.id);
   const [fullAgentPolicy, setFullAgentPolicy] = useState<any | undefined>();
-  const [isK8s, setIsK8s] = useState<string | undefined>('isLoading');
+  const [isK8s, setIsK8s] = useState<'IS_LOADING' | 'IS_KUBERNETES' | 'IS_NOT_KUBERNETES'>(
+    'IS_LOADING'
+  );
   const [yaml, setYaml] = useState<string | string>('');
-  const [runInstructions, setRunInstructions] = useState<string | string>('');
   const [downloadLink, setDownloadLink] = useState<string | undefined>();
+  const runInstructions =
+    isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS;
 
   useEffect(() => {
     async function checkifK8s() {
@@ -60,25 +68,15 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
       const agentPol = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
 
       if (!agentPol) {
-        setIsK8s('false');
+        setIsK8s('IS_NOT_KUBERNETES');
         return;
       }
-      let found = false;
-      (agentPol.package_policies as PackagePolicy[]).forEach(({ package: pkg }) => {
-        if (!pkg) {
-          return;
-        }
-        if (pkg.name === 'kubernetes') {
-          found = true;
-          return;
-        }
-      });
-
-      if (found) {
-        setIsK8s('true');
-      } else {
-        setIsK8s('false');
-      }
+      const k8s = (pkg: PackagePolicy) => pkg.name.includes(FLEET_KUBERNETES_PACKAGE);
+      setIsK8s(
+        (agentPol.package_policies as PackagePolicy[]).some(k8s)
+          ? 'IS_KUBERNETES'
+          : 'IS_NOT_KUBERNETES'
+      );
     }
     checkifK8s();
   }, [selectedPolicyId, notifications.toasts]);
@@ -93,7 +91,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
         let downloandLinkUrl = `${agentPolicyRouteService.getInfoFullDownloadPath(
           selectedPolicyId
         )}?standalone=true`;
-        if (isK8s === 'true') {
+        if (isK8s === 'IS_KUBERNETES') {
           query = { standalone: true, kubernetes: true };
           downloandLinkUrl = `${agentPolicyRouteService.getInfoFullDownloadPath(
             selectedPolicyId
@@ -115,58 +113,51 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
         });
       }
     }
-    if (isK8s !== 'isLoading') {
+    if (isK8s !== 'IS_LOADING') {
       fetchFullPolicy();
     }
   }, [selectedPolicyId, notifications.toasts, isK8s, core.http.basePath]);
 
   useMemo(() => {
-    if (isK8s === 'true') {
+    if (isK8s === 'IS_KUBERNETES') {
       if (typeof fullAgentPolicy === 'object') {
         return;
       }
       setYaml(fullAgentPolicy);
-      setRunInstructions('kubectl apply -f elastic-agent.yml');
     } else {
       if (typeof fullAgentPolicy === 'string') {
         return;
       }
       setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump));
-      setRunInstructions('./elastic-agent install');
     }
   }, [fullAgentPolicy, isK8s]);
 
-  function policyMsg() {
-    if (isK8s === 'true') {
-      return (
-        <FormattedMessage
-          id="xpack.fleet.agentEnrollment.stepConfigureAgentDescriptionk8s"
-          defaultMessage="Copy or download the Kubernetes manifest inside the Kubernetes cluster. Modify {ESUsernameVariable}, {ESPasswordVariable} and {ESHostVariable} in the Daemonset environment variables and apply the manifest."
-          values={{
-            ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
-            ESPasswordVariable: <EuiCode>ES_PASSWORD</EuiCode>,
-            ESHostVariable: <EuiCode>ES_HOST</EuiCode>,
-          }}
-        />
-      );
-    } else {
-      return (
-        <FormattedMessage
-          id="xpack.fleet.agentEnrollment.stepConfigureAgentDescription"
-          defaultMessage="Copy this policy to the {fileName} on the host where the Elastic Agent is installed. Modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of {fileName} to use your Elasticsearch credentials."
-          values={{
-            fileName: <EuiCode>elastic-agent.yml</EuiCode>,
-            ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
-            ESPasswordVariable: <EuiCode>ES_PASSWORD</EuiCode>,
-            outputSection: <EuiCode>outputs</EuiCode>,
-          }}
-        />
-      );
-    }
-  }
+  const policyMsg =
+    isK8s === 'IS_KUBERNETES' ? (
+      <FormattedMessage
+        id="xpack.fleet.agentEnrollment.stepConfigureAgentDescriptionk8s"
+        defaultMessage="Copy or download the Kubernetes manifest inside the Kubernetes cluster. Modify {ESUsernameVariable}, {ESPasswordVariable} and {ESHostVariable} in the Daemonset environment variables and apply the manifest."
+        values={{
+          ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
+          ESPasswordVariable: <EuiCode>ES_PASSWORD</EuiCode>,
+          ESHostVariable: <EuiCode>ES_HOST</EuiCode>,
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.fleet.agentEnrollment.stepConfigureAgentDescription"
+        defaultMessage="Copy this policy to the {fileName} on the host where the Elastic Agent is installed. Modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of {fileName} to use your Elasticsearch credentials."
+        values={{
+          fileName: <EuiCode>elastic-agent.yml</EuiCode>,
+          ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
+          ESPasswordVariable: <EuiCode>ES_PASSWORD</EuiCode>,
+          outputSection: <EuiCode>outputs</EuiCode>,
+        }}
+      />
+    );
 
   function downloadMsg() {
-    if (isK8s === 'true') {
+    if (isK8s === 'IS_KUBERNETES') {
       return (
         <FormattedMessage
           id="xpack.fleet.agentEnrollment.downloadPolicyButtonk8s"
@@ -184,7 +175,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
   }
 
   function applyMsg() {
-    if (isK8s === 'true') {
+    if (isK8s === 'IS_KUBERNETES') {
       return (
         <FormattedMessage
           id="xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s"
@@ -213,7 +204,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
       children: (
         <>
           <EuiText>
-            {policyMsg()}
+            <>{policyMsg}</>
             <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>

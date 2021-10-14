@@ -261,7 +261,7 @@ export const getFullAgentPolicy: RequestHandler<
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
         soClient,
         request.params.agentPolicyId,
-        { standalone: request.query.standalone === true }
+        { standalone: request.query.standalone === true, kubernetes: false }
       );
       if (fullAgentPolicy) {
         const body: GetFullAgentPolicyResponse = {
@@ -302,7 +302,7 @@ export const downloadFullAgentPolicy: RequestHandler<
         const body = fullAgentConfigMap;
         const headers: ResponseHeaders = {
           'content-type': 'text/x-yaml',
-          'content-disposition': `attachment; filename="elastic-agent.yml"`,
+          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yaml"`,
         };
         return response.ok({
           body,
@@ -321,6 +321,7 @@ export const downloadFullAgentPolicy: RequestHandler<
     try {
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
         standalone: request.query.standalone === true,
+        kubernetes: false,
       });
       if (fullAgentPolicy) {
         const body = fullAgentPolicyToYaml(fullAgentPolicy, safeDump);
