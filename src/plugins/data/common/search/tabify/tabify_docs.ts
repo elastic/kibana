@@ -116,8 +116,6 @@ export function flattenHit(hit: Hit, indexPattern?: IndexPattern, params?: Tabif
     flatten(hit._source as Record<string, any>);
   }
 
-  // TODO: pack behind a method parameter
-  // The values in `ignored_field_values` are guaranteed to always be wrapped in an array
   if (params?.includeIgnoredValues && hit.ignored_field_values) {
     Object.entries(hit.ignored_field_values).forEach(([fieldName, fieldValue]) => {
       if (flat[fieldName]) {
