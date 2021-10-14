@@ -72,10 +72,11 @@ export class ScreenshotObservableHandler {
   }
 
   /*
-   * This "external timeout" wraps a chain of observable operators in a
-   * timeout, and decorates a TimeoutError to specify which phase of page capture has timed out.
+   * This "external timeout" wraps a chain of observable operators, and
+   * decorates a TimeoutError to specify which phase of page capture has timed
+   * out.
    */
-  private waitUntil<O, P>(phase: PhaseInstance, chain: Rx.OperatorFunction<O, P>) {
+  public waitUntil<O, P>(phase: PhaseInstance, chain: Rx.OperatorFunction<O, P>) {
     const { timeoutValue, label, configValue } = phase;
     return (o: Rx.Observable<O>) => {
       return o.pipe(
@@ -91,9 +92,9 @@ export class ScreenshotObservableHandler {
 
           if (error instanceof Rx.TimeoutError) {
             throwError = new Error(
-              `The "${label}" phase took longer than ` +
-                `${numberToDuration(timeoutValue).asSeconds()}.` +
-                `You may need to increase "${configValue}": ${error}`
+              `The "${label}" phase took longer than` +
+                ` ${numberToDuration(timeoutValue).asSeconds()} seconds.` +
+                ` You may need to increase "${configValue}": ${error}`
             );
           }
 
