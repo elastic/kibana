@@ -54,7 +54,11 @@ export class RequestSelector extends Component<RequestSelectorProps> {
 
       return {
         'data-test-subj': `inspectorRequestChooser${testLabel}`,
-        label: hasFailed ? `${item.name} (failed)` : item.name,
+        label: hasFailed
+          ? `${item.name} ${i18n.translate('inspector.requests.failedLabel', {
+              defaultMessage: ' (failed)',
+            })}`
+          : item.name,
         value: item.id,
       };
     });
