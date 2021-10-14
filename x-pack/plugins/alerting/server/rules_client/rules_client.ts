@@ -1211,46 +1211,47 @@ export class RulesClient {
       version = alert.version;
     }
 
-    const { state } = taskInstanceToAlertTaskInstance(
-      await this.taskManager.get(attributes.scheduledTaskId!),
-      attributes as unknown as SanitizedAlert
-    );
+    if (this.eventLogger && attributes.scheduledTaskId) {
+      const { state } = taskInstanceToAlertTaskInstance(
+        await this.taskManager.get(attributes.scheduledTaskId),
+        attributes as unknown as SanitizedAlert
+      );
 
-    const recoveredAlertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(
-      state.alertInstances ?? {},
-      (rawAlertInstance) => new AlertInstance(rawAlertInstance)
-    );
-    const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
+      const recoveredAlertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(
+        state.alertInstances ?? {},
+        (rawAlertInstance) => new AlertInstance(rawAlertInstance)
+      );
+      const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
 
-    for (const instanceId of recoveredAlertInstanceIds) {
-      const { group: actionGroup, subgroup: actionSubgroup } =
-        recoveredAlertInstances[instanceId].getLastScheduledActions() ?? {};
-      const inststate = recoveredAlertInstances[instanceId].getState();
-      const message = `instance '${instanceId}' has recovered`;
+      for (const instanceId of recoveredAlertInstanceIds) {
+        const { group: actionGroup, subgroup: actionSubgroup } =
+          recoveredAlertInstances[instanceId].getLastScheduledActions() ?? {};
+        const inststate = recoveredAlertInstances[instanceId].getState();
+        const message = `instance '${instanceId}' has recovered`;
 
-      const event = createAlertEventLogRecordObject({
-        ruleId: id,
-        ruleName: attributes.name,
-        ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
-        instanceId,
-        action: EVENT_LOG_ACTIONS.recoveredInstance,
-        message,
-        state: inststate,
-        group: actionGroup,
-        subgroup: actionSubgroup,
-        namespace: this.namespace,
-        savedObjects: [
-          {
-            id,
-            type: 'alert',
-            typeId: attributes.alertTypeId,
-            relation: SAVED_OBJECT_REL_PRIMARY,
-          },
-        ],
-      });
-      this.eventLogger!.logEvent(event);
+        const event = createAlertEventLogRecordObject({
+          ruleId: id,
+          ruleName: attributes.name,
+          ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
+          instanceId,
+          action: EVENT_LOG_ACTIONS.recoveredInstance,
+          message,
+          state: inststate,
+          group: actionGroup,
+          subgroup: actionSubgroup,
+          namespace: this.namespace,
+          savedObjects: [
+            {
+              id,
+              type: 'alert',
+              typeId: attributes.alertTypeId,
+              relation: SAVED_OBJECT_REL_PRIMARY,
+            },
+          ],
+        });
+        this.eventLogger.logEvent(event);
+      }
     }
-
     try {
       await this.authorization.ensureAuthorized({
         ruleTypeId: attributes.alertTypeId,
