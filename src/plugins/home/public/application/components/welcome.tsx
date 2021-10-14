@@ -48,7 +48,7 @@ export class Welcome extends React.Component<Props> {
   };
 
   private redirecToAddData() {
-    const path = this.services.addBasePath('#/tutorial_directory');
+    const path = this.services.addBasePath('/app/integrations/browse');
     window.location.href = path;
   }
 

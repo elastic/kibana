@@ -69,7 +69,7 @@ describe('OverviewEmpty', () => {
       expect(wrapper.find('[data-test-subj="empty-page"]').prop('noDataConfig')).toEqual({
         actions: {
           beats: {
-            href: '/app/home#/tutorial_directory/security',
+            href: '/app/integrations/browse',
           },
         },
         docsLink: 'https://www.elastic.co/guide/en/security/mocked-test-branch/index.html',

@@ -61,7 +61,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
   // Home does not have a locator implemented, so hard-code it here.
-  const addDataHref = addBasePath('/app/home#/tutorial_directory');
+  const addDataHref = addBasePath('/app/integrations/browse');
   const devToolsHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
   const managementHref = share.url.locators
     .get('MANAGEMENT_APP_LOCATOR')
