@@ -99,12 +99,12 @@ pageLoadAssetSize:
   expressionMetricVis: 23121
   visTypeMetric: 23332
   bfetch: 22837
-  kibanaUtils: 102808
+  kibanaUtils: 97808
   data: 491273
   dataViews: 41532
   expressions: 140958
   fieldFormats: 65209
-  kibanaReact: 111422
+  kibanaReact: 99422
   share: 71239
   uiActions: 35121
   dataEnhanced: 24980
