@@ -37,7 +37,7 @@ import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/det
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { Alert } from '../../../../../../alerting/common';
+import { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -88,6 +88,13 @@ export const getReadRequest = () =>
     method: 'get',
     path: DETECTION_ENGINE_RULES_URL,
     query: { rule_id: 'rule-1' },
+  });
+
+export const getReadRequestWithId = (id: string) =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { id },
   });
 
 export const getFindRequest = () =>
@@ -372,7 +379,7 @@ export const nonRuleAlert = (isRuleRegistryEnabled: boolean) => ({
 export const getAlertMock = <T extends RuleParams>(
   isRuleRegistryEnabled: boolean,
   params: T
-): Alert<T> => ({
+): SanitizedAlert<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
@@ -388,7 +395,6 @@ export const getAlertMock = <T extends RuleParams>(
   notifyWhen: null,
   createdBy: 'elastic',
   updatedBy: 'elastic',
-  apiKey: null,
   apiKeyOwner: 'elastic',
   muteAll: false,
   mutedInstanceIds: [],
@@ -397,6 +403,14 @@ export const getAlertMock = <T extends RuleParams>(
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+});
+
+export const resolveAlertMock = <T extends RuleParams>(
+  isRuleRegistryEnabled: boolean,
+  params: T
+): ResolvedSanitizedRule<T> => ({
+  outcome: 'exactMatch',
+  ...getAlertMock(isRuleRegistryEnabled, params),
 });
 
 export const updateActionResult = (): ActionResult => ({

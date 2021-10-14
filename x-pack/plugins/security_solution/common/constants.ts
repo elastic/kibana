@@ -303,6 +303,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.swimlane',
   '.webhook',
   '.servicenow',
+  '.servicenow-sir',
   '.jira',
   '.resilient',
   '.teams',
