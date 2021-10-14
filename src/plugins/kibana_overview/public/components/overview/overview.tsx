@@ -86,8 +86,16 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     }),
     logo: 'logoKibana',
     actions: {
-      beats: {
-        href: addBasePath(`home#/tutorial_directory`),
+      elasticAgent: {
+        category: 'security',
+        title: i18n.translate('kibanaOverview.noDataConfig.title', {
+          defaultMessage: 'Add an integration',
+        }),
+        description: i18n.translate('kibanaOverview.noDataConfig.description', {
+          defaultMessage:
+            'Use Elastic Agent or Beats to collect data and build out Analytics solutions.',
+        }),
+        href: addBasePath(`/app/integrations/browse`),
       },
     },
     docsLink: docLinks.links.kibana,

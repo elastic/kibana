@@ -45,7 +45,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
               <h2 id="homDataAdd__title">
                 <FormattedMessage
                   id="home.addData.sectionTitle"
-                  defaultMessage="Get started by adding your data"
+                  defaultMessage="Get started by adding an integration"
                 />
               </h2>
             </EuiTitle>
@@ -70,16 +70,16 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
                   <EuiButton
                     data-test-subj="homeAddData"
                     fill
-                    href={addBasePath('/app/home#/tutorial_directory')}
+                    href={addBasePath('/app/integrations/browse')}
                     iconType="plusInCircle"
                     onClick={(event: MouseEvent) => {
                       trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
-                      createAppNavigationHandler('/app/home#/tutorial_directory')(event);
+                      createAppNavigationHandler('/app/integrations/browse')(event);
                     }}
                   >
                     <FormattedMessage
                       id="home.addData.addDataButtonLabel"
-                      defaultMessage="Add your data"
+                      defaultMessage="Add integrations"
                     />
                   </EuiButton>
                 </RedirectAppLinks>
