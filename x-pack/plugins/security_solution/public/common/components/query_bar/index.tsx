@@ -8,7 +8,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { Filter, Query } from '@kbn/es-query';
+import { Filter, Query, DataViewBase } from '@kbn/es-query';
 import {
   FilterManager,
   TimeHistory,
@@ -17,7 +17,6 @@ import {
   SearchBar,
   SavedQueryTimeFilter,
 } from '../../../../../../../src/plugins/data/public';
-import { DataView } from '../../../../../../../src/plugins/data/common';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export interface QueryBarComponentProps {
@@ -25,7 +24,7 @@ export interface QueryBarComponentProps {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
-  indexPattern: DataView;
+  indexPattern: DataViewBase;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
