@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body).to.be.an('array');
 
-        expect(resp.body.length).to.be(11);
+        expect(resp.body.length).to.be(12);
 
         ['flights', 'logs', 'ecommerce'].forEach((sampleData) => {
           expect(resp.body.findIndex((c: { id: string }) => c.id === sampleData)).to.be.above(-1);
