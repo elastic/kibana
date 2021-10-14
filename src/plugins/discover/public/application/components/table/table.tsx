@@ -9,7 +9,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { IndexPattern, IndexPatternField } from '../../../../../data/public';
-import { SHOW_MULTIFIELDS } from '../../../../common';
+import { SHOW_MULTIFIELDS, TRUNCATE_MAX_HEIGHT } from '../../../../common';
 import { getServices } from '../../../kibana_services';
 import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
 import {
@@ -44,6 +44,7 @@ export interface FieldRecord {
     fieldMapping?: IndexPatternField;
   };
   value: {
+    maxHeight: number;
     formattedValue: string;
   };
 }
@@ -56,7 +57,9 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
+  const services = getServices();
+  const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
+  const maxHeight = services.uiSettings.get(TRUNCATE_MAX_HEIGHT);
 
   const mapping = useCallback(
     (name: string) => indexPattern?.fields.getByName(name),
@@ -129,6 +132,7 @@ export const DocViewerTable = ({
           scripted: Boolean(fieldMapping?.scripted),
         },
         value: {
+          maxHeight,
           formattedValue: formattedHit[field],
         },
       };

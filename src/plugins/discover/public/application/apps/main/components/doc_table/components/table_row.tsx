@@ -19,6 +19,7 @@ import { getSingleDocUrl } from '../../../../../helpers/get_single_doc_url';
 import { TableRowDetails } from './table_row_details';
 import { formatRow, formatTopLevelObject } from '../lib/formatters/row_formatter';
 import { formatSource } from '../lib/formatters/source_formatter';
+import { getTruncateStyles } from '../../../../../helpers/truncate_styles';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -37,6 +38,7 @@ export interface TableRowProps {
   filterManager: FilterManager;
   addBasePath: (path: string) => string;
   fieldsToShow: string[];
+  maxHeight: number;
 }
 
 export const TableRow = ({
@@ -52,6 +54,7 @@ export const TableRow = ({
   onRemoveColumn,
   filterManager,
   addBasePath,
+  maxHeight,
 }: TableRowProps) => {
   const [open, setOpen] = useState(false);
   const docTableRowClassName = classNames('kbnDocTable__row', {
@@ -72,6 +75,7 @@ export const TableRow = ({
         hit: row,
         indexPattern,
         isShortDots,
+        maxHeight,
       });
     }
 
@@ -80,7 +84,7 @@ export const TableRow = ({
     // field formatters take care of escaping
     // eslint-disable-next-line react/no-danger
     const element = <span dangerouslySetInnerHTML={{ __html: formattedField }} />;
-    return <div className="truncate-by-height">{element}</div>;
+    return <div css={getTruncateStyles(maxHeight)}>{element}</div>;
   };
 
   const inlineFilter = useCallback(
@@ -133,7 +137,7 @@ export const TableRow = ({
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row, indexPattern, fieldsToShow);
+    const formatted = formatRow(row, indexPattern, fieldsToShow, maxHeight);
 
     rowCells.push(
       <TableCell
@@ -161,7 +165,7 @@ export const TableRow = ({
             key={column}
             timefield={false}
             sourcefield={true}
-            formatted={formatTopLevelObject(row, innerColumns, indexPattern)}
+            formatted={formatTopLevelObject(row, innerColumns, indexPattern, maxHeight)}
             filterable={false}
             column={column}
             inlineFilter={inlineFilter}

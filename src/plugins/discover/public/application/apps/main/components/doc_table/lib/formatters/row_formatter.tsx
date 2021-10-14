@@ -8,6 +8,7 @@
 
 import React, { Fragment } from 'react';
 import type { IndexPattern } from 'src/plugins/data/common';
+import { getTruncateStyles } from '../../../../../../helpers/truncate_styles';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../../common';
 import { getServices } from '../../../../../../../kibana_services';
 
@@ -15,10 +16,11 @@ import './row_formatter.scss';
 
 interface Props {
   defPairs: Array<[string, unknown]>;
+  maxHeight: number;
 }
-const TemplateComponent = ({ defPairs }: Props) => {
+const TemplateComponent = ({ defPairs, maxHeight }: Props) => {
   return (
-    <dl className="source truncate-by-height">
+    <dl className="source" css={getTruncateStyles(maxHeight)}>
       {defPairs.map((pair, idx) => (
         <Fragment key={idx}>
           <dt>{pair[0]}:</dt>
@@ -37,7 +39,8 @@ export const formatRow = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hit: Record<string, any>,
   indexPattern: IndexPattern,
-  fieldsToShow: string[]
+  fieldsToShow: string[],
+  maxHeight: number
 ) => {
   const highlights = hit?.highlight ?? {};
   // Keys are sorted in the hits object
@@ -57,7 +60,12 @@ export const formatRow = (
     }
   });
   const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
-  return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
+  return (
+    <TemplateComponent
+      defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)}
+      maxHeight={maxHeight}
+    />
+  );
 };
 
 export const formatTopLevelObject = (
@@ -65,7 +73,8 @@ export const formatTopLevelObject = (
   row: Record<string, any>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fields: Record<string, any>,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  maxHeight: number
 ) => {
   const highlights = row.highlight ?? {};
   const highlightPairs: Array<[string, unknown]> = [];
@@ -91,5 +100,10 @@ export const formatTopLevelObject = (
     pairs.push([displayKey ? displayKey : key, formatted]);
   });
   const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
-  return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
+  return (
+    <TemplateComponent
+      defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)}
+      maxHeight={maxHeight}
+    />
+  );
 };

@@ -11,14 +11,16 @@ import { escape } from 'lodash';
 import { DocTableRow } from '../../components/table_row';
 import { shortenDottedString } from '../../../../../../../../../field_formats/common';
 import { IndexPattern } from '../../../../../../../../../data/public';
+import { getTruncateStyles } from '../../../../../../helpers/truncate_styles';
 
 interface Props {
   defPairs: Array<[string, string]>;
+  maxHeight: number;
 }
 
-const TemplateComponent = ({ defPairs }: Props) => {
+const TemplateComponent = ({ maxHeight, defPairs }: Props) => {
   return (
-    <dl className="source truncate-by-height">
+    <dl className="source" css={getTruncateStyles(maxHeight)}>
       {defPairs.map((pair, idx) => (
         <Fragment key={idx}>
           <dt
@@ -37,10 +39,12 @@ export const formatSource = ({
   hit,
   indexPattern,
   isShortDots,
+  maxHeight,
 }: {
   hit: DocTableRow;
   indexPattern: IndexPattern;
   isShortDots: boolean;
+  maxHeight: number;
 }) => {
   const highlights: Record<string, string[]> = (hit && hit.highlight) || {};
   // TODO: remove index pattern dependency
@@ -55,5 +59,5 @@ export const formatSource = ({
     pairs.push([newField as string, val]);
   }, []);
 
-  return <TemplateComponent defPairs={highlightPairs.concat(sourcePairs)} />;
+  return <TemplateComponent defPairs={highlightPairs.concat(sourcePairs)} maxHeight={maxHeight} />;
 };

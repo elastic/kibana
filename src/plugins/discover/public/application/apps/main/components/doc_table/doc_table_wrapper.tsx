@@ -10,7 +10,6 @@ import React, { forwardRef, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { css, Global } from '@emotion/react';
 import { TableHeader } from './components/table_header/table_header';
 import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common';
 import {
@@ -100,8 +99,6 @@ export interface DocTableWrapperProps extends DocTableProps {
    */
   render: (params: DocTableRenderProps) => JSX.Element;
 }
-
-const TRUNCATE_GRADIENT_HEIGHT = 15;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -217,6 +214,7 @@ export const DocTableWrapper = forwardRef(
             filterManager={filterManager}
             addBasePath={addBasePath}
             fieldsToShow={fieldsToShow}
+            maxHeight={maxHeight}
           />
         ));
       },
@@ -232,24 +230,8 @@ export const DocTableWrapper = forwardRef(
         addBasePath,
         isShortDots,
         fieldsToShow,
+        maxHeight,
       ]
-    );
-
-    const truncateStyles = (
-      <Global
-        styles={css`
-          .truncate-by-height {
-            overflow: hidden;
-            max-height: ${maxHeight > 0 ? `${maxHeight}px !important` : 'none'};
-            display: inline-block;
-          }
-          .truncate-by-height:before {
-            top: ${maxHeight > 0
-              ? maxHeight - TRUNCATE_GRADIENT_HEIGHT
-              : TRUNCATE_GRADIENT_HEIGHT * -1}px;
-          }
-        `}
-      />
     );
 
     const noResultsError = (
@@ -275,7 +257,6 @@ export const DocTableWrapper = forwardRef(
         data-render-complete={!isLoading}
         ref={ref as React.MutableRefObject<HTMLDivElement>}
       >
-        {maxHeight !== 0 && truncateStyles}
         {rows.length !== 0 &&
           render({
             columnLength: columns.length,

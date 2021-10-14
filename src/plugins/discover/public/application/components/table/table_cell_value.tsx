@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import React, { Fragment, useState } from 'react';
+import { getTruncateStyles } from '../../helpers/truncate_styles';
 import { FieldRecord } from './table';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 
@@ -15,18 +15,12 @@ const COLLAPSE_LINE_LENGTH = 350;
 
 type TableFieldValueProps = FieldRecord['value'] & Pick<FieldRecord['field'], 'field'>;
 
-export const TableFieldValue = ({ formattedValue, field }: TableFieldValueProps) => {
+export const TableFieldValue = ({ maxHeight, formattedValue, field }: TableFieldValueProps) => {
   const [fieldOpen, setFieldOpen] = useState(false);
 
   const value = String(formattedValue);
   const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
   const isCollapsed = isCollapsible && !fieldOpen;
-
-  const valueClassName = classNames({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    kbnDocViewer__value: true,
-    'truncate-by-height': isCollapsible && isCollapsed,
-  });
 
   const onToggleCollapse = () => setFieldOpen((fieldOpenPrev) => !fieldOpenPrev);
 
@@ -36,7 +30,8 @@ export const TableFieldValue = ({ formattedValue, field }: TableFieldValueProps)
         <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
       )}
       <div
-        className={valueClassName}
+        className="kbnDocViewer__value"
+        css={isCollapsed && getTruncateStyles(maxHeight)}
         data-test-subj={`tableDocViewRow-${field}-value`}
         /*
          * Justification for dangerouslySetInnerHTML:

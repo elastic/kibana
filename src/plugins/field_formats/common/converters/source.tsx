@@ -8,7 +8,7 @@
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 /** @public */
 export class SourceFormat extends FieldFormat {
@@ -17,8 +17,4 @@ export class SourceFormat extends FieldFormat {
   static fieldType = KBN_FIELD_TYPES._SOURCE;
 
   textConvert: TextContextTypeConvert = (value: string) => JSON.stringify(value);
-
-  htmlConvert: HtmlContextTypeConvert = (value: string) => {
-    return JSON.stringify(value);
-  };
 }

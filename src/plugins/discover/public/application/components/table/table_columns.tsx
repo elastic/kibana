@@ -82,8 +82,13 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
         </strong>
       </EuiText>
     ),
-    render: ({ formattedValue }: FieldRecord['value'], { field: { field } }: FieldRecord) => {
-      return <TableFieldValue field={field} formattedValue={formattedValue} />;
+    render: (
+      { maxHeight, formattedValue }: FieldRecord['value'],
+      { field: { field } }: FieldRecord
+    ) => {
+      return (
+        <TableFieldValue maxHeight={maxHeight} field={field} formattedValue={formattedValue} />
+      );
     },
   },
 ];
