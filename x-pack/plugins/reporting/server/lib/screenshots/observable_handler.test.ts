@@ -6,7 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ReportingConfigType } from '../../config';
 import { ConditionalHeaders } from '../../export_types/common';
@@ -42,10 +42,6 @@ describe('ScreenshotObservableHandler', () => {
 
     layout = createMockLayoutInstance(captureConfig);
 
-    const reporting = await createMockReportingCore(createMockConfigSchema());
-    const driverFactory = await createMockBrowserDriverFactory(reporting, logger);
-    ({ driver } = await driverFactory.createPage({}, logger).pipe(first()).toPromise());
-
     conditionalHeaders = {
       headers: { testHeader: 'testHeadValue' },
       conditions: {} as unknown as ConditionalHeaders['conditions'],
@@ -59,12 +55,19 @@ describe('ScreenshotObservableHandler', () => {
     };
   });
 
+  beforeEach(async () => {
+    const reporting = await createMockReportingCore(createMockConfigSchema());
+    const driverFactory = await createMockBrowserDriverFactory(reporting, logger);
+    ({ driver } = await driverFactory.createPage({}, logger).pipe(first()).toPromise());
+    driver.isPageOpen = jest.fn().mockImplementation(() => true);
+  });
+
   it('instantiates', () => {
     const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
     expect(screenshots).not.toEqual(null);
   });
 
-  it('waitUntil catches TimeoutError and adds custom message', async () => {
+  it('waitUntil catches TimeoutError and references the timeout config in a custom message', async () => {
     const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
     const test$ = Rx.interval(1000).pipe(
       screenshots.waitUntil(
@@ -73,9 +76,7 @@ describe('ScreenshotObservableHandler', () => {
           configValue: 'test.config.value',
           label: 'Test Config',
         },
-        (outer: Rx.Observable<unknown>) => {
-          return outer.pipe();
-        }
+        (outer) => outer.pipe()
       )
     );
 
@@ -85,7 +86,7 @@ describe('ScreenshotObservableHandler', () => {
     );
   });
 
-  it('waitUntil does not add custom message if thrown error is not a TimeoutError', async () => {
+  it('waitUntil catches other Errors and explains where they were thrown', async () => {
     const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
     const test$ = Rx.throwError(new Error(`Test Error to Throw`)).pipe(
       screenshots.waitUntil(
@@ -94,9 +95,7 @@ describe('ScreenshotObservableHandler', () => {
           configValue: 'test.config.value',
           label: 'Test Config',
         },
-        (outer: Rx.Observable<unknown>) => {
-          return outer.pipe();
-        }
+        (outer) => outer.pipe()
       )
     );
 
@@ -106,23 +105,46 @@ describe('ScreenshotObservableHandler', () => {
     );
   });
 
-  it('waitUntil is a pass-through if there is no error', async () => {
+  it('waitUntil is a pass-through if there is no Error', async () => {
     const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
     const test$ = Rx.of('nice to see you').pipe(
       screenshots.waitUntil(
         {
           timeoutValue: 20,
-          configValue: 'test.config.value',
-          label: 'Test Config',
+          configValue: 'xxxxxxxxxxxxxxxxx',
+          label: 'xxxxxxxxxxx',
         },
-        (outer: Rx.Observable<unknown>) => {
-          return outer.pipe();
-        }
+        (outer) => outer.pipe()
       )
     );
 
-    await expect(test$.toPromise()).resolves.toMatchInlineSnapshot(`"nice to see you"`);
+    await expect(test$.toPromise()).resolves.toBe(`nice to see you`);
   });
 
-  // TODO: test ScreenshotObservableHandler.checkPageIsOpen
+  it('checkPageIsOpen throws a decorated Error when page is not open', async () => {
+    driver.isPageOpen = jest.fn().mockImplementation(() => false);
+    const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
+    const test$ = Rx.of(234455).pipe(
+      map((input) => {
+        screenshots.checkPageIsOpen();
+        return input;
+      })
+    );
+
+    await expect(test$.toPromise()).rejects.toMatchInlineSnapshot(
+      `[Error: Browser was closed unexpectedly! Check the server logs for more info.]`
+    );
+  });
+
+  it('checkPageIsOpen is a pass-through when the page is open', async () => {
+    const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
+    const test$ = Rx.of(234455).pipe(
+      map((input) => {
+        screenshots.checkPageIsOpen();
+        return input;
+      })
+    );
+
+    await expect(test$.toPromise()).resolves.toBe(234455);
+  });
 });
