@@ -19,6 +19,8 @@ import {
   EuiBetaBadge,
   EuiBadge,
   EuiToolTip,
+  EuiSwitch,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
@@ -42,7 +44,6 @@ import { useSearchStrategy } from '../../../hooks/use_search_strategy';
 
 import { ImpactBar } from '../../shared/ImpactBar';
 import { push } from '../../shared/Links/url_helpers';
-import { Summary } from '../../shared/Summary';
 
 import { CorrelationsTable } from './correlations_table';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
@@ -57,6 +58,8 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useTheme } from '../../../hooks/use_theme';
 import { CorrelationsContextPopover } from './context_popover';
 import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
 import { OnAddFilter } from './context_popover/top_values';
@@ -100,6 +103,15 @@ export function FailedTransactionsCorrelations({
     selectedSignificantTerm ?? response.failedTransactionsCorrelations?.[0];
 
   const history = useHistory();
+  const [showStats, setShowStats] = useLocalStorage(
+    'apmFailedTransactionsShowAdvancedStats',
+    false
+  );
+  const euiTheme = useTheme();
+
+  const toggleShowStats = useCallback(() => {
+    setShowStats(!showStats);
+  }, [setShowStats, showStats]);
 
   const onAddFilter = useCallback<OnAddFilter>(
     ({ fieldName, fieldValue, include }) => {
@@ -128,12 +140,38 @@ export function FailedTransactionsCorrelations({
   > = useMemo(() => {
     const percentageColumns: Array<
       EuiBasicTableColumn<FailedTransactionsCorrelation>
-    > = inspectEnabled
+    > = showStats
       ? [
           {
             width: '100px',
             field: 'pValue',
-            name: 'p-value',
+            name: (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.correlations.failedTransactions.correlationsTable.pValueDescription',
+                  {
+                    defaultMessage:
+                      'The chance of getting at least this amount of field name and value for failed transactions given its prevalence in successful transactions.',
+                  }
+                )}
+              >
+                <>
+                  {i18n.translate(
+                    'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
+                    {
+                      defaultMessage: 'p-value',
+                    }
+                  )}
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="questionInCircle"
+                    className="eui-alignTop"
+                  />
+                </>
+              </EuiToolTip>
+            ),
+
             render: (pValue: number) => pValue.toPrecision(3),
             sortable: true,
           },
@@ -213,7 +251,7 @@ export function FailedTransactionsCorrelations({
         name: (
           <>
             {i18n.translate(
-              'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
+              'xpack.apm.correlations.failedTransactions.correlationsTable.scoreLabel',
               {
                 defaultMessage: 'Score',
               }
@@ -327,7 +365,7 @@ export function FailedTransactionsCorrelations({
         ],
       },
     ] as Array<EuiBasicTableColumn<FailedTransactionsCorrelation>>;
-  }, [inspectEnabled, fieldStats, onAddFilter]);
+  }, [fieldStats, onAddFilter, showStats]);
 
   useEffect(() => {
     if (isErrorMessage(progress.error)) {
@@ -378,9 +416,6 @@ export function FailedTransactionsCorrelations({
   const showCorrelationsEmptyStatePrompt =
     correlationTerms.length < 1 &&
     (progressNormalized === 1 || !progress.isRunning);
-
-  const showSummaryBadge =
-    inspectEnabled && (progress.isRunning || correlationTerms.length > 0);
 
   const transactionDistributionChartData: TransactionDistributionChartData[] =
     [];
@@ -474,17 +509,51 @@ export function FailedTransactionsCorrelations({
 
       <EuiSpacer size="s" />
 
-      <EuiTitle size="xs">
-        <span data-test-subj="apmFailedTransactionsCorrelationsTablePanelTitle">
-          {i18n.translate(
-            'xpack.apm.correlations.failedTransactions.tableTitle',
-            {
-              defaultMessage: 'Correlations',
-            }
-          )}
-        </span>
-      </EuiTitle>
-
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiTitle size="xs">
+          <span data-test-subj="apmFailedTransactionsCorrelationsTablePanelTitle">
+            {i18n.translate(
+              'xpack.apm.correlations.failedTransactions.tableTitle',
+              {
+                defaultMessage: 'Correlations',
+              }
+            )}
+          </span>
+        </EuiTitle>
+        <EuiFlexItem
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            paddingLeft: euiTheme.eui.paddingSizes.s,
+          }}
+        >
+          <EuiSwitch
+            label={i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.advancedStatisticsLabel',
+              {
+                defaultMessage: 'Advanced statistics',
+              }
+            )}
+            checked={showStats}
+            onChange={toggleShowStats}
+            compressed
+          />
+          <EuiIconTip
+            size="m"
+            iconProps={{
+              style: { marginLeft: euiTheme.eui.paddingSizes.xs },
+            }}
+            content={i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.advancedStatisticsTooltipContent',
+              {
+                defaultMessage:
+                  'Enable additional statistical information for the correlation results.',
+              }
+            )}
+            type="questionInCircle"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
 
       <CorrelationsProgressControls
@@ -499,20 +568,6 @@ export function FailedTransactionsCorrelations({
           <EuiSpacer size="m" />
           {/* Failed transactions correlations uses ES aggs that are available since 7.15 */}
           <CrossClusterSearchCompatibilityWarning version="7.15" />
-        </>
-      )}
-
-      {showSummaryBadge && selectedTerm?.pValue && (
-        <>
-          <EuiSpacer size="m" />
-          <Summary
-            items={[
-              <EuiBadge color="hollow">
-                {`${selectedTerm.fieldName}: ${selectedTerm.fieldValue}`}
-              </EuiBadge>,
-              <>{`p-value: ${selectedTerm.pValue.toPrecision(3)}`}</>,
-            ]}
-          />
         </>
       )}
 
