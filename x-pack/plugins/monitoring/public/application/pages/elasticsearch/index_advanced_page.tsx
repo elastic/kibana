@@ -19,7 +19,7 @@ import { ItemTemplate } from './item_template';
 import { AdvancedIndex } from '../../../components/elasticsearch/index/advanced';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
+import { RULE_LARGE_SHARD_SIZE, ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clusters }) => {
@@ -89,6 +89,7 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clust
   return (
     <ItemTemplate title={title} getPageData={getPageData} id={index} pageType="indices">
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}

@@ -29,6 +29,7 @@ import {
   RULE_MISSING_MONITORING_DATA,
   RULE_DISK_USAGE,
   RULE_MEMORY_USAGE,
+  ELASTICSEARCH_SYSTEM_ID,
 } from '../../../../common/constants';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
@@ -138,6 +139,7 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
       pageType="nodes"
     >
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}

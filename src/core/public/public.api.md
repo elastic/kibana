@@ -479,6 +479,7 @@ export interface DocLinksStart {
     // (undocumented)
     readonly links: {
         readonly settings: string;
+        readonly elasticStackGetStarted: string;
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
