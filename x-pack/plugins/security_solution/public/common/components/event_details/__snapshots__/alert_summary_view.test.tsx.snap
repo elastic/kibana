@@ -208,7 +208,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                   class="eventFieldsTable__fieldValue"
                 >
                   <span
-                    class="euiToolTipAnchor"
+                    class="euiToolTipAnchor eui-textTruncate eui-alignMiddle"
                   >
                     Nov 25, 2020 @ 15:42:39.417
                   </span>
@@ -868,7 +868,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   class="eventFieldsTable__fieldValue"
                 >
                   <span
-                    class="euiToolTipAnchor"
+                    class="euiToolTipAnchor eui-textTruncate eui-alignMiddle"
                   >
                     Nov 25, 2020 @ 15:42:39.417
                   </span>

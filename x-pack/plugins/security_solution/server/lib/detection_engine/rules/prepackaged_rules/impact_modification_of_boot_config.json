@@ -21,33 +21,26 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Defense Evasion"
+    "Impact"
   ],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
-        "id": "TA0005",
-        "name": "Defense Evasion",
-        "reference": "https://attack.mitre.org/tactics/TA0005/"
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
       },
       "technique": [
         {
-          "id": "T1070",
-          "name": "Indicator Removal on Host",
-          "reference": "https://attack.mitre.org/techniques/T1070/",
-          "subtechnique": [
-            {
-              "id": "T1070.004",
-              "name": "File Deletion",
-              "reference": "https://attack.mitre.org/techniques/T1070/004/"
-            }
-          ]
+          "id": "T1490",
+          "name": "Inhibit System Recovery",
+          "reference": "https://attack.mitre.org/techniques/T1490/"
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 8
+  "version": 9
 }

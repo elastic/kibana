@@ -24,33 +24,26 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Defense Evasion"
+    "Command and Control"
   ],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
-        "id": "TA0005",
-        "name": "Defense Evasion",
-        "reference": "https://attack.mitre.org/tactics/TA0005/"
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
       },
       "technique": [
         {
-          "id": "T1562",
-          "name": "Impair Defenses",
-          "reference": "https://attack.mitre.org/techniques/T1562/",
-          "subtechnique": [
-            {
-              "id": "T1562.001",
-              "name": "Disable or Modify Tools",
-              "reference": "https://attack.mitre.org/techniques/T1562/001/"
-            }
-          ]
+          "id": "T1572",
+          "name": "Protocol Tunneling",
+          "reference": "https://attack.mitre.org/techniques/T1572/"
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }
