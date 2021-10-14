@@ -70,8 +70,8 @@ import { wrapSequencesFactory } from './wrap_sequences_factory';
 import { ConfigType } from '../../../config';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { injectReferences, extractReferences } from './saved_object_references';
-import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
 import { IRuleDataPluginService } from '../rule_execution_log/types';
+import { RuleExecutionLogClient, truncateMessageList } from '../rule_execution_log';
 
 export const signalRulesAlertType = ({
   logger,
@@ -362,7 +362,9 @@ export const signalRulesAlertType = ({
           throw new Error(`unknown rule type ${type}`);
         }
         if (result.warningMessages.length) {
-          const warningMessage = buildRuleMessage(result.warningMessages.join());
+          const warningMessage = buildRuleMessage(
+            truncateMessageList(result.warningMessages).join()
+          );
           await ruleStatusService.partialFailure(warningMessage);
         }
 
@@ -427,7 +429,7 @@ export const signalRulesAlertType = ({
         } else {
           const errorMessage = buildRuleMessage(
             'Bulk Indexing of signals failed:',
-            result.errors.join()
+            truncateMessageList(result.errors).join()
           );
           logger.error(errorMessage);
           await ruleStatusService.error(errorMessage, {
