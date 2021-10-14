@@ -41,7 +41,6 @@ import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './fact
 import { RuleExecutionLogClient, truncateMessageList } from '../rule_execution_log';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
-import { AlertAttributes } from '../signals/types';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -79,9 +78,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         const {
           actions,
           name,
-          alertTypeId,
           schedule: { interval },
         } = rule;
+
+        // TODO: fix
+        const alertTypeId = 'siem.alerts';
+
         const refresh = actions.length ? 'wait_for' : false;
 
         const completeRule = {

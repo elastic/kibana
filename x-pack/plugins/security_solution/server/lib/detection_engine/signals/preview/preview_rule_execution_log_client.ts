@@ -6,16 +6,15 @@
  */
 
 import { SavedObjectsFindResult } from 'kibana/server';
-import { RuleExecutionLogClient } from '../../rule_execution_log/rule_execution_log_client';
 import {
-  ExecutionMetric,
-  ExecutionMetricArgs,
+  LogExecutionMetricsArgs,
+  RuleExecutionLogClient,
   FindBulkExecutionLogArgs,
   FindBulkExecutionLogResponse,
   FindExecutionLogArgs,
   LogStatusChangeArgs,
   UpdateExecutionLogArgs,
-} from '../../rule_execution_log/types';
+} from '../../rule_execution_log';
 import { IRuleStatusSOAttributes } from '../../rules/types';
 
 export const createWarningsAndErrors = () => {
@@ -28,24 +27,22 @@ export const createWarningsAndErrors = () => {
     async delete(id: string): Promise<void> {
       return Promise.resolve(undefined);
     },
-    find(
+    async find(
       args: FindExecutionLogArgs
     ): Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>> {
       return Promise.resolve([]);
     },
-    findBulk(args: FindBulkExecutionLogArgs): Promise<FindBulkExecutionLogResponse> {
+    async findBulk(args: FindBulkExecutionLogArgs): Promise<FindBulkExecutionLogResponse> {
       return Promise.resolve({});
-    },
-    async logExecutionMetric<T extends ExecutionMetric>(
-      args: ExecutionMetricArgs<T>
-    ): Promise<void> {
-      return Promise.resolve(undefined);
     },
     async logStatusChange(args: LogStatusChangeArgs): Promise<void> {
       warningsAndErrorsStore.push(args);
       return Promise.resolve(undefined);
     },
     async update(args: UpdateExecutionLogArgs): Promise<void> {
+      return Promise.resolve(undefined);
+    },
+    async logExecutionMetrics(args: LogExecutionMetricsArgs): Promise<void> {
       return Promise.resolve(undefined);
     },
   };
