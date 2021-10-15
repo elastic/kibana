@@ -21,7 +21,6 @@ import {
 } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_ID } from '../../../../../../../common/constants';
-import { licenseService } from '../../../../../../common/hooks/use_license';
 
 jest.mock('../../../../../../common/components/user_privileges/use_endpoint_privileges');
 jest.mock('../../../../../../common/hooks/use_license', () => {

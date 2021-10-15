@@ -49,19 +49,21 @@ export const PolicyTrustedAppsEmptyUnassigned = memo<CommonProps>(({ policyId, p
           />
         }
         actions={[
-          isPlatinumPlus && (
-            <EuiButton
-              color="primary"
-              fill
-              onClick={onClickPrimaryButtonHandler}
-              data-test-subj="assign-ta-button"
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.trustedApps.empty.unassigned.primaryAction"
-                defaultMessage="Assign trusted applications"
-              />
-            </EuiButton>
-          ),
+          ...(isPlatinumPlus
+            ? [
+                <EuiButton
+                  color="primary"
+                  fill
+                  onClick={onClickPrimaryButtonHandler}
+                  data-test-subj="assign-ta-button"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.policy.trustedApps.empty.unassigned.primaryAction"
+                    defaultMessage="Assign trusted applications"
+                  />
+                </EuiButton>,
+              ]
+            : []),
           // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiLink onClick={onClickHandler} href={toRouteUrl}>
             <FormattedMessage
