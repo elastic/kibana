@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Fragment, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { IgnoredReason } from '../../helpers/get_ignored_reason';
 import { FieldRecord } from './table';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
@@ -20,22 +22,69 @@ interface IgnoreWarningProps {
   rawValue: unknown;
 }
 
-const IgnoreWarning: React.FC<IgnoreWarningProps> = ({ rawValue, reason }) => {
+const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reason }) => {
   const multiValue = Array.isArray(rawValue) && rawValue.length > 1;
 
-  // TODO: Add tooltip with a bit more information
-  // TODO: Differentiate between single value and multi value in wording
+  const getToolTipContent = (): string => {
+    switch (reason) {
+      case IgnoredReason.IGNORE_ABOVE:
+        return multiValue
+          ? i18n.translate('discover.docView.table.ignored.multiAboveTooltip', {
+              defaultMessage:
+                'This field contains one or more values that are too long and are thus not searchable or filterable.',
+            })
+          : i18n.translate('discover.docView.table.ignored.singleAboveTooltip', {
+              defaultMessage:
+                'The value in this field is too long and thus not searchable or filterable.',
+            });
+      case IgnoredReason.MALFORMED:
+        return multiValue
+          ? i18n.translate('discover.docView.table.ignored.multiMalformedTooltip', {
+              defaultMessage:
+                'This field contains one or more values that are malformed and are thus not searchable or filterable.',
+            })
+          : i18n.translate('discover.docView.table.ignored.singleMalformedTooltip', {
+              defaultMessage: `The value in this field is malformed and not parsable. It's not searchable or filterable.`,
+            });
+      case IgnoredReason.UNKNOWN:
+        return multiValue
+          ? i18n.translate('discover.docView.table.ignored.multiUnknownTooltip', {
+              defaultMessage:
+                'This field contains one or more values that are ignored by Elasticsearch and are thus not searchable or filterable.',
+            })
+          : i18n.translate('discover.docView.table.ignored.singleUnknownTooltip', {
+              defaultMessage: `The value in this field is ignored by Elasticsearch. It's not searchable or filterable.`,
+            });
+    }
+  };
+
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="alert" color="warning" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTextColor color="warning">Ignored value</EuiTextColor>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiToolTip content={getToolTipContent()}>
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        css={css`
+          cursor: help;
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="alert" color="warning" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTextColor color="warning">
+            {multiValue
+              ? i18n.translate('discover.docViews.table.ignored.multiValueLabel', {
+                  defaultMessage: 'Contains ignored values',
+                })
+              : i18n.translate('discover.docViews.table.ignored.singleValueLabel', {
+                  defaultMessage: 'Ignored value',
+                })}
+          </EuiTextColor>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
   );
-};
+});
 
 type TableFieldValueProps = Pick<FieldRecord['field'], 'field'> & {
   formattedValue: FieldRecord['value']['formattedValue'];
