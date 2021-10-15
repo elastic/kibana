@@ -12,6 +12,12 @@ import { unionWithNullType } from '../../../../common/utility_types';
 
 const status = t.keyof({ success: null, failure: null, pending: null });
 
+const signalsMigrationSOReference = {
+  name: t.string,
+  type: t.string,
+  id: t.string,
+};
+
 const signalsMigrationSOWriteAttributes = {
   destinationIndex: t.string,
   error: unionWithNullType(t.string),
@@ -69,6 +75,7 @@ export const signalsMigrationSO = t.intersection([
   t.type({
     id: t.string,
     attributes: signalsMigrationSOAttributes,
+    references: t.array(t.type(signalsMigrationSOReference)),
     type: t.string,
   }),
   t.partial({ error: t.type(signalsMigrationSOError) }),

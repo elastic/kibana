@@ -22,8 +22,11 @@ describe('getMigrationSavedObjectsById', () => {
   });
 
   it('resolves an array of objects, if valid', async () => {
-    // @ts-expect-error stubbing our SO call
-    soClient.bulkGet.mockResolvedValue({ saved_objects: [getSignalsMigrationSavedObjectMock()] });
+    soClient.bulkResolve.mockResolvedValue({
+      resolved_objects: [
+        { saved_object: getSignalsMigrationSavedObjectMock(), outcome: 'exactMatch' },
+      ],
+    });
     const result = await getMigrationSavedObjectsById({
       ids,
       soClient,
@@ -34,16 +37,21 @@ describe('getMigrationSavedObjectsById', () => {
 
   it('rejects if SO client throws', () => {
     const error = new Error('whoops');
-    soClient.bulkGet.mockRejectedValue(error);
+    soClient.bulkResolve.mockRejectedValue(error);
 
     return expect(getMigrationSavedObjectsById({ ids, soClient })).rejects.toThrow(error);
   });
 
   it('throws a 404 error if the response includes a 404', async () => {
-    soClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        // @ts-expect-error stubbing our SO call
-        getSignalsMigrationSavedObjectErrorMock({ statusCode: 404, message: 'not found' }),
+    soClient.bulkResolve.mockResolvedValue({
+      resolved_objects: [
+        {
+          saved_object: getSignalsMigrationSavedObjectErrorMock({
+            statusCode: 404,
+            message: 'not found',
+          }),
+          outcome: 'exactMatch',
+        },
       ],
     });
 
@@ -55,11 +63,44 @@ describe('getMigrationSavedObjectsById', () => {
   it('rejects if response is invalid', () => {
     // @ts-expect-error intentionally breaking the type
     const badSavedObject = getSignalsMigrationSavedObjectMock({ destinationIndex: 4 });
-    // @ts-expect-error stubbing our SO call
-    soClient.bulkGet.mockResolvedValue({ saved_objects: [badSavedObject] });
+    soClient.bulkResolve.mockResolvedValue({
+      resolved_objects: [{ saved_object: badSavedObject, outcome: 'exactMatch' }],
+    });
 
     return expect(() => getMigrationSavedObjectsById({ ids, soClient })).rejects.toThrow(
       'Invalid value "4" supplied to "attributes,destinationIndex"'
     );
+  });
+
+  describe('SO resolution error cases', () => {
+    it('returns a 409 if a conflict is found', async () => {
+      soClient.bulkResolve.mockResolvedValue({
+        resolved_objects: [
+          {
+            saved_object: getSignalsMigrationSavedObjectMock(),
+            outcome: 'conflict',
+            alias_target_id: 'alias-target-id',
+          },
+        ],
+      });
+      return expect(getMigrationSavedObjectsById({ ids, soClient })).rejects.toThrow(
+        expect.objectContaining({ statusCode: 409 })
+      );
+    });
+
+    it('returns a 422 if an alias match is found', () => {
+      soClient.bulkResolve.mockResolvedValue({
+        resolved_objects: [
+          {
+            saved_object: getSignalsMigrationSavedObjectMock(),
+            outcome: 'aliasMatch',
+            alias_target_id: 'alias-target-id',
+          },
+        ],
+      });
+      return expect(getMigrationSavedObjectsById({ ids, soClient })).rejects.toThrow(
+        expect.objectContaining({ statusCode: 422 })
+      );
+    });
   });
 });

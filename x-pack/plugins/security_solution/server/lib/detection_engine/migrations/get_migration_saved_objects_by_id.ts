@@ -50,7 +50,7 @@ export const getMigrationSavedObjectsById = async ({
     const legacyIds = resolvedConflicts.map((object) => object.saved_object.id);
     const newIds = resolvedConflicts.map((object) => object.alias_target_id!);
 
-    throw new MigrationResponseError(i18n.migrationConflictMessage(legacyIds, newIds), 400);
+    throw new MigrationResponseError(i18n.migrationConflictMessage(legacyIds, newIds), 409);
   }
 
   const resolvedAliases = bulkResponse.resolved_objects.filter(
@@ -60,7 +60,7 @@ export const getMigrationSavedObjectsById = async ({
     const legacyIds = resolvedAliases.map((object) => object.saved_object.id);
     const newIds = resolvedAliases.map((object) => object.alias_target_id!);
 
-    throw new MigrationResponseError(i18n.migrationAliasMessage(legacyIds, newIds), 400);
+    throw new MigrationResponseError(i18n.migrationAliasMessage(legacyIds, newIds), 422);
   }
 
   const error = migrations.find((migration) => migration.error)?.error;

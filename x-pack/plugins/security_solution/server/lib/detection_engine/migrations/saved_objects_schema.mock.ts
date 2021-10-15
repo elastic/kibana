@@ -13,6 +13,7 @@ export const getSignalsMigrationSavedObjectMock = (
 ): SignalsMigrationSO => ({
   id: '4a7ff78d-3055-4bb2-ba73-587b9c6c15a4',
   type: signalsMigrationType,
+  references: [],
   attributes: {
     destinationIndex: 'destinationIndex',
     sourceIndex: 'sourceIndex',
