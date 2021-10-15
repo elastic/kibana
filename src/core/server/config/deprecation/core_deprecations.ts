@@ -592,6 +592,45 @@ const logFilterDeprecation: ConfigDeprecation = (
   }
 };
 
+const patternLayoutDefaultLoggingDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
+  if (
+    settings.logging?.root?.appenders?.includes('console') &&
+    settings.logging?.appenders?.console === undefined
+  ) {
+    addDeprecation({
+      configPath: 'logging.root.appenders',
+      level: 'warning',
+      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#configuration`,
+      title: i18n.translate('core.deprecations.loggingPatternLayoutDefault.deprecationTitle', {
+        defaultMessage: `Kibana's default log format is changing to ECS JSON`,
+      }),
+      message: i18n.translate('core.deprecations.loggingPatternLayoutDefault.deprecationMessage', {
+        defaultMessage:
+          "It looks like you are using Kibana's built-in `console` appender, " +
+          'which uses the "pattern" layout by default. In 8.0, the default layout ' +
+          'will switch to JSON, which is ECS-compliant. If you are relying on the ' +
+          'default pattern layout for log ingestion, be sure to explicitly configure this ' +
+          'in your Kibana configuration to prevent any disruption when upgrading to 8.0.',
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate('core.deprecations.loggingPatternLayoutDefault.manualSteps1', {
+            defaultMessage: `[recommended] Update your log ingestion configuration to use ECS format.`,
+          }),
+          i18n.translate('core.deprecations.loggingPatternLayoutDefault.manualSteps2', {
+            defaultMessage: `Alternatively, you can preserve the existing format by configuring a custom appender with \`layout.type: 'pattern'\``,
+          }),
+        ],
+      },
+    });
+  }
+};
+
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   unusedFromRoot,
   renameFromRoot,
@@ -651,4 +690,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   logEventsLogDeprecation,
   logEventsErrorDeprecation,
   logFilterDeprecation,
+  patternLayoutDefaultLoggingDeprecation,
 ];
