@@ -12,8 +12,7 @@ export function MonitoringClusterOverviewProvider({ getService }) {
   const retry = getService('retry');
 
   const SUBJ_CLUSTER_ALERTS = `clusterAlertsContainer`;
-  const SUBJ_CLUSTER_OVERVIEW = 'clusterOverviewContainer';
-  const SUBJ_CLUSTER_NAME = `${SUBJ_CLUSTER_OVERVIEW} > clusterName`;
+  const SUBJ_CLUSTER_NAME = `overviewTabsclusterName`;
 
   const SUBJ_ES_PANEL = `clusterItemContainerElasticsearch`;
   const SUBJ_ES_STATUS = `${SUBJ_ES_PANEL} > statusIcon`;

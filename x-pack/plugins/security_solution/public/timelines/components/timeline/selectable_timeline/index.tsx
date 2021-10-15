@@ -110,8 +110,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         selectableListOuterRef.current &&
         selectableListInnerRef.current
       ) {
-        const clientHeight = selectableListOuterRef.current!.clientHeight;
-        const scrollHeight = selectableListInnerRef.current!.clientHeight;
+        const clientHeight = selectableListOuterRef.current.clientHeight;
+        const scrollHeight = selectableListInnerRef.current.clientHeight;
         const clientHeightTrigger = clientHeight * 1.2;
         if (
           scrollOffset > 10 &&
