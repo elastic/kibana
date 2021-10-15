@@ -37,22 +37,22 @@ export class ChromiumArchivePaths {
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-d163fd7-linux_x64.zip',
-      archiveChecksum: 'fba0a240d409228a3494aef415c300fc',
-      binaryChecksum: '99cfab472d516038b94ef86649e52871',
+      archiveFilename: 'chromium-70f5d88-linux_x64.zip',
+      archiveChecksum: 'tomato',
+      binaryChecksum: 'potato',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
-      revision: 856583, // FIXME: this is an older revision that is re-used from Puppeteer 8.0.0
+      revision: 901912,
     },
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-d163fd7-linux_arm64.zip',
-      archiveChecksum: '29834735bc2f0e0d9134c33bc0580fb6',
-      binaryChecksum: '13baccf2e5c8385cb9d9588db6a9e2c2',
+      archiveFilename: 'chromium-70f5d88-linux_arm64.zip',
+      archiveChecksum: 'cabbage',
+      binaryChecksum: 'leek',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
-      revision: 856583, // FIXME: this is an older revision that is re-used from Puppeteer 8.0.0
+      revision: 901912,
     },
     {
       platform: 'win32',
