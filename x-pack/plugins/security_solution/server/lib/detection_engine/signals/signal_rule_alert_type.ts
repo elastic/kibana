@@ -160,10 +160,8 @@ export const signalRulesAlertType = ({
         actions,
         name,
         schedule: { interval },
+        ruleTypeId,
       } = completeRule.ruleConfig;
-
-      // TODO: confirm;
-      const alertTypeId = 'siem.signals';
 
       const refresh = actions.length ? 'wait_for' : false;
       const buildRuleMessage = buildRuleMessageFactory({
@@ -180,7 +178,7 @@ export const signalRulesAlertType = ({
         spaceId,
         ruleId: alertId,
         ruleName: name,
-        ruleType: alertTypeId,
+        ruleType: ruleTypeId,
       };
 
       await ruleStatusClient.logStatusChange({

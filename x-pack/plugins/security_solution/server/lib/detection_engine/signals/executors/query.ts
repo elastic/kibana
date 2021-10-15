@@ -53,9 +53,6 @@ export const queryExecutor = async ({
   wrapHits: WrapHits;
 }) => {
   const ruleParams = completeRule.ruleParams;
-  const savedId = isSavedQueryCompleteRule(completeRule)
-    ? completeRule.ruleParams.savedId
-    : undefined;
 
   const inputIndex = await getInputIndex({
     experimentalFeatures,
@@ -69,7 +66,7 @@ export const queryExecutor = async ({
     filters: ruleParams.filters,
     language: ruleParams.language,
     query: ruleParams.query,
-    savedId,
+    savedId: ruleParams.savedId,
     services,
     index: inputIndex,
     lists: exceptionItems,
@@ -93,12 +90,4 @@ export const queryExecutor = async ({
     bulkCreate,
     wrapHits,
   });
-};
-
-const isSavedQueryCompleteRule = (
-  completeRule: CompleteRule<QueryRuleParams | SavedQueryRuleParams>
-): completeRule is CompleteRule<SavedQueryRuleParams> => {
-  return (
-    typeof (completeRule as CompleteRule<SavedQueryRuleParams>).ruleParams.savedId !== undefined
-  );
 };

@@ -9,7 +9,7 @@ import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildSiemResponse } from '../utils';
-import { convertPreviewAPIToInternalSchema } from '../../schemas/rule_converters';
+import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { PreviewRuleOptions } from '../../rule_types/types';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { signalRulesAlertType } from '../../signals/signal_rule_alert_type';
@@ -33,6 +33,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
+  parseDuration,
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExecutorType } from '../../../../../../alerting/server/types';
@@ -44,7 +45,8 @@ export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],
-  previewRuleOptions: PreviewRuleOptions
+  previewRuleOptions: PreviewRuleOptions,
+  security: SetupPlugins['security']
 ) => {
   router.post(
     {
@@ -69,7 +71,7 @@ export const previewRulesRoute = async (
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const internalRule = convertPreviewAPIToInternalSchema(request.body, siemClient);
+        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient, false);
         const previewRuleParams = internalRule.params;
 
         const mlAuthz = buildMlAuthz({
@@ -83,8 +85,9 @@ export const previewRulesRoute = async (
 
         const spaceId = siemClient.getSpaceId();
         const previewId = uuid.v4();
+        const username = security?.authc.getCurrentUser(request)?.username;
         const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
-        let invocationCount = internalRule.invocationCount;
+        let invocationCount = request.body.invocationCount;
         const runState: Record<string, unknown> = {};
 
         const runExecutors = async <
@@ -101,6 +104,8 @@ export const previewRulesRoute = async (
             TInstanceContext,
             TActionGroupIds
           >,
+          ruleTypeId: string,
+          ruleTypeName: string,
           params: TParams,
           alertInstanceFactory: (
             id: string
@@ -112,28 +117,27 @@ export const previewRulesRoute = async (
           let statePreview = runState as TState;
 
           const startedAt = moment();
-          for (let i = 0; i < invocationCount; i++) {
-            startedAt.subtract(parseInterval(internalRule.schedule.interval));
-          }
+          const parsedDuration = parseDuration(internalRule.schedule.interval) ?? 0;
+          startedAt.subtract(moment.duration(parsedDuration * invocationCount));
 
           let previousStartedAt = null;
 
           const rule = {
             ...internalRule,
             createdAt: new Date(),
-            createdBy: 'preview-created-by',
+            createdBy: username ?? 'preview-created-by',
             producer: 'preview-producer',
-            ruleTypeId: 'preview-rule-type-id',
-            ruleTypeName: 'preview-rule-type-name',
+            ruleTypeId,
+            ruleTypeName,
             updatedAt: new Date(),
-            updatedBy: 'preview-updated-by',
+            updatedBy: username ?? 'preview-updated-by',
           };
 
           while (invocationCount > 0) {
             statePreview = (await executor({
               alertId: previewId,
               createdBy: rule.createdBy,
-              name: 'preview',
+              name: rule.name,
               params,
               previousStartedAt,
               rule,
@@ -154,16 +158,20 @@ export const previewRulesRoute = async (
           }
         };
 
+        const signalRuleAlertType = signalRulesAlertType({
+          ...previewRuleOptions,
+          lists: context.lists,
+          config,
+          indexNameOverride: `${DEFAULT_PREVIEW_INDEX}-${spaceId}`,
+          ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
+          // unused as we override the ruleExecutionLogClient
+          eventLogService: {} as unknown as IEventLogService,
+        });
+
         await runExecutors(
-          signalRulesAlertType({
-            ...previewRuleOptions,
-            lists: context.lists,
-            config,
-            indexNameOverride: `${DEFAULT_PREVIEW_INDEX}-${spaceId}`,
-            ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
-            // unused as we override the ruleExecutionLogClient
-            eventLogService: {} as unknown as IEventLogService,
-          }).executor,
+          signalRuleAlertType.executor,
+          signalRuleAlertType.id,
+          signalRuleAlertType.name,
           previewRuleParams,
           previewAlertInstanceFactory
         );
@@ -178,16 +186,13 @@ export const previewRulesRoute = async (
             item.newStatus === RuleExecutionStatus.warning
         );
 
-        if (errors.length) {
-          return siemResponse.error({ statusCode: 500, body: errors });
-        } else {
-          return response.ok({
-            body: {
-              previewId,
-              warnings,
-            },
-          });
-        }
+        return response.ok({
+          body: {
+            previewId,
+            errors,
+            warnings,
+          },
+        });
       } catch (err) {
         const error = transformError(err as Error);
         return siemResponse.error({

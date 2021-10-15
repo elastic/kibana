@@ -82,7 +82,7 @@ export const initRoutes = (
   patchRulesRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesRoute(router, isRuleRegistryEnabled);
   findRulesRoute(router, logger, isRuleRegistryEnabled);
-  previewRulesRoute(router, config, ml, previewRuleOptions);
+  previewRulesRoute(router, config, ml, previewRuleOptions, security);
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
   legacyCreateLegacyNotificationRoute(router, logger);

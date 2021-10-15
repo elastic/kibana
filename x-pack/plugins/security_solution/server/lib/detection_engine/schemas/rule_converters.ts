@@ -172,55 +172,6 @@ export const convertCreateAPIToInternalSchema = (
   };
 };
 
-export const convertPreviewAPIToInternalSchema = (
-  input: PreviewRulesSchema,
-  siemClient: AppClient
-): InternalRulePreview => {
-  const typeSpecificParams = typeSpecificSnakeToCamel(input);
-  const newRuleId = input.rule_id ?? uuid.v4();
-  return {
-    name: input.name,
-    tags: addTags(input.tags ?? [], newRuleId, false),
-    alertTypeId: SIGNALS_ID,
-    consumer: SERVER_APP_ID,
-    invocationCount: input.invocationCount,
-    params: {
-      author: input.author ?? [],
-      buildingBlockType: input.building_block_type,
-      description: input.description,
-      ruleId: newRuleId,
-      falsePositives: input.false_positives ?? [],
-      from: input.from ?? 'now-6m',
-      immutable: false,
-      license: input.license,
-      outputIndex: input.output_index ?? siemClient.getSignalsIndex(),
-      timelineId: input.timeline_id,
-      timelineTitle: input.timeline_title,
-      meta: input.meta,
-      maxSignals: input.max_signals ?? DEFAULT_MAX_SIGNALS,
-      riskScore: input.risk_score,
-      riskScoreMapping: input.risk_score_mapping ?? [],
-      ruleNameOverride: input.rule_name_override,
-      severity: input.severity,
-      severityMapping: input.severity_mapping ?? [],
-      threat: input.threat ?? [],
-      timestampOverride: input.timestamp_override,
-      to: input.to ?? 'now',
-      references: input.references ?? [],
-      namespace: input.namespace,
-      note: input.note,
-      version: input.version ?? 1,
-      exceptionsList: input.exceptions_list ?? [],
-      ...typeSpecificParams,
-    },
-    schedule: { interval: input.interval ?? '5m' },
-    enabled: input.enabled ?? true,
-    actions: input.actions?.map(transformRuleToAlertAction) ?? [],
-    throttle: transformToAlertThrottle(input.throttle),
-    notifyWhen: transformToNotifyWhen(input.throttle),
-  };
-};
-
 // Converts the internal rule data structure to the response API schema
 export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): ResponseTypeSpecific => {
   switch (params.type) {

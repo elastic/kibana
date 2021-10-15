@@ -79,10 +79,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           actions,
           name,
           schedule: { interval },
+          ruleTypeId,
         } = rule;
-
-        // TODO: fix
-        const alertTypeId = 'siem.alerts';
 
         const refresh = actions.length ? 'wait_for' : false;
 
@@ -107,7 +105,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           spaceId,
           ruleId: alertId,
           ruleName: name,
-          ruleType: alertTypeId,
+          ruleType: ruleTypeId,
         };
         await ruleStatusClient.logStatusChange({
           ...basicLogArguments,
@@ -305,8 +303,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (actions.length) {
               const notificationRuleParams: NotificationRuleTypeParams = {
                 ...params,
-                name: name as string,
-                id: alertId as string,
+                name,
+                id: alertId,
               } as unknown as NotificationRuleTypeParams;
 
               const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
