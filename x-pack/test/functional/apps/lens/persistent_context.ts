@@ -21,7 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const appsMenu = getService('appsMenu');
   const security = getService('security');
-  const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const queryBar = getService('queryBar');
 
