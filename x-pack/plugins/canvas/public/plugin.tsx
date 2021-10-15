@@ -90,17 +90,6 @@ export class CanvasPlugin
   public setup(coreSetup: CoreSetup<CanvasStartDeps>, setupPlugins: CanvasSetupDeps) {
     const { api: canvasApi, registries } = getPluginApi(setupPlugins.expressions);
 
-    // Set the nav link to the last saved url if we have one in storage
-    const lastPath = getSessionStorage().get(
-      `${SESSIONSTORAGE_LASTPATH}:${coreSetup.http.basePath.get()}`
-    );
-
-    if (lastPath) {
-      this.appUpdater.next(() => ({
-        defaultPath: `#${lastPath}`,
-      }));
-    }
-
     coreSetup.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,
       id: CANVAS_APP,
@@ -172,5 +161,16 @@ export class CanvasPlugin
 
   public start(coreStart: CoreStart, startPlugins: CanvasStartDeps) {
     initLoadingIndicator(coreStart.http.addLoadingCountSource);
+
+    // Set the nav link to the last saved url if we have one in storage
+    const lastPath = getSessionStorage().get(
+      `${SESSIONSTORAGE_LASTPATH}:${coreStart.http.basePath.get()}`
+    );
+
+    if (lastPath) {
+      this.appUpdater.next(() => ({
+        defaultPath: `#${lastPath}`,
+      }));
+    }
   }
 }
