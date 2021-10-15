@@ -353,17 +353,22 @@ export const useIndexFields = (
   );
   const refDataViewId = useRef('');
   const refSelectedPatterns = useRef([] as string[]);
+  const refSourcererScopeName = useRef('');
 
   useEffect(() => {
     if (
-      (dataViewId != null && dataViewId !== refDataViewId.current && selectedPatterns.length > 0) ||
+      (dataViewId != null &&
+        // remove this when https://github.com/elastic/kibana/pull/114907 is merged
+        sourcererScopeName !== refSourcererScopeName.current) ||
+      (dataViewId !== refDataViewId.current && selectedPatterns.length > 0) ||
       (selectedPatterns.length > 0 && refSelectedPatterns.current.length === 0)
     ) {
       indexFieldsSearch(dataViewId);
     }
+    refSourcererScopeName.current = sourcererScopeName;
     refSelectedPatterns.current = selectedPatterns;
     refDataViewId.current = dataViewId;
-  }, [dataViewId, indexFieldsSearch, selectedPatterns]);
+  }, [dataViewId, indexFieldsSearch, selectedPatterns, sourcererScopeName]);
 
   useEffect(() => {
     return () => {
