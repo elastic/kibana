@@ -33,8 +33,6 @@ export function getSeverityColor(score: number) {
   return mlGetSeverityColor(score);
 }
 
-export const ML_TRANSACTION_LATENCY_DETECTOR_INDEX = 0;
-
 export const ML_ERRORS = {
   INVALID_LICENSE: i18n.translate(
     'xpack.apm.anomaly_detection.error.invalid_license',
