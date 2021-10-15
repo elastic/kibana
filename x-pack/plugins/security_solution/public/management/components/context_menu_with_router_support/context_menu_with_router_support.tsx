@@ -110,7 +110,9 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
       }
 
       if (scroll) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         newAdditionalProps.style!.overflowY = 'scroll';
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         newAdditionalProps.style!.maxHeight = '235px';
       }
 
