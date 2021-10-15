@@ -6,7 +6,7 @@
  */
 
 import { newJobCapsService } from './new_job_capabilities_service';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 
 // there is magic happening here. starting the include name with `mock..`
 // ensures it can be lazily loaded by the jest.mock function below.
@@ -23,7 +23,7 @@ jest.mock('../ml_api_service', () => ({
 const indexPattern = {
   id: 'cloudwatch-*',
   title: 'cloudwatch-*',
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 describe('new_job_capabilities_service', () => {
   describe('cloudwatch newJobCaps()', () => {

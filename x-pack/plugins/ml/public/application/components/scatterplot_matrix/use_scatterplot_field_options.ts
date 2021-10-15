@@ -7,12 +7,12 @@
 
 import { useMemo } from 'react';
 
-import type { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 
 import { ML__INCREMENTAL_ID } from '../../data_frame_analytics/common/fields';
 
 export const useScatterplotFieldOptions = (
-  indexPattern?: IndexPattern,
+  indexPattern?: DataView,
   includes?: string[],
   excludes?: string[],
   resultsField = ''
