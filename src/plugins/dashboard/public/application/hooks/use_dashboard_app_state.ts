@@ -92,6 +92,8 @@ export const useDashboardAppState = ({
     dashboardCapabilities,
     dashboardSessionStorage,
     scopedHistory,
+    spacesService,
+    screenshotModeService,
   } = services;
   const { docTitle } = chrome;
   const { notifications } = core;
@@ -148,6 +150,25 @@ export const useDashboardAppState = ({
       });
       if (canceled || !loadSavedDashboardResult) return;
       const { savedDashboard, savedDashboardState } = loadSavedDashboardResult;
+
+      // If the saved dashboard is an alias match, then we will redirect
+      if (savedDashboard.outcome === 'aliasMatch' && savedDashboard.id && savedDashboard.aliasId) {
+        // We want to keep the "query" params on our redirect.
+        // But, these aren't true query params, they are technically part of the hash
+        // So, to get the new path, we will just replace the current id in the hash
+        // with the alias id
+        const path = scopedHistory().location.hash.replace(
+          savedDashboard.id,
+          savedDashboard.aliasId
+        );
+        if (screenshotModeService?.isScreenshotMode()) {
+          scopedHistory().replace(path);
+        } else {
+          await spacesService?.ui.redirectLegacyUrl(path);
+        }
+        // Return so we don't run any more of the hook and let it rerun after the redirect that just happened
+        return;
+      }
 
       /**
        * Combine initial state from the saved object, session storage, and URL, then dispatch it to Redux.
@@ -340,6 +361,8 @@ export const useDashboardAppState = ({
     search,
     query,
     data,
+    spacesService?.ui,
+    screenshotModeService,
   ]);
 
   /**
