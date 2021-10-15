@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { CANVAS_APP } from '../../../../common/lib';
 import { encode } from '../../../../common/lib/embeddable_dataurl';
-import { useEmbeddablesService, useLabsService } from '../../../services';
+import { useEmbeddablesService } from '../../../services';
 // @ts-expect-error unconverted file
 import { addElement } from '../../../state/actions/elements';
 // @ts-expect-error unconverted file
@@ -23,16 +23,14 @@ import { clearValue } from '../../../state/actions/resolved_args';
 
 export const useIncomingEmbeddable = (pageId: string) => {
   const embeddablesService = useEmbeddablesService();
-  const labsService = useLabsService();
   const dispatch = useDispatch();
-  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
   const stateTransferService = embeddablesService.getStateTransfer();
 
   // fetch incoming embeddable from state transfer service.
   const incomingEmbeddable = stateTransferService.getIncomingEmbeddablePackage(CANVAS_APP, true);
 
   useEffect(() => {
-    if (isByValueEnabled && incomingEmbeddable) {
+    if (incomingEmbeddable) {
       const { embeddableId, input, type } = incomingEmbeddable;
 
       const config = encode(input);
@@ -59,5 +57,5 @@ export const useIncomingEmbeddable = (pageId: string) => {
         dispatch(addElement(pageId, { expression }));
       }
     }
-  }, [dispatch, pageId, incomingEmbeddable, isByValueEnabled]);
+  }, [dispatch, pageId, incomingEmbeddable]);
 };

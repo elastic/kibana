@@ -57,9 +57,6 @@ export const embeddableRendererFactory = (
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType }, handlers) => {
       const uniqueId = handlers.getElementId();
-      const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
-        'labs:canvas:byValueEmbeddable'
-      );
 
       if (!embeddablesRegistry[uniqueId]) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
@@ -103,7 +100,7 @@ export const embeddableRendererFactory = (
             updatedInput,
             embeddableType,
             palettes,
-            isByValueEnabled
+            true
           );
 
           if (updatedExpression) {

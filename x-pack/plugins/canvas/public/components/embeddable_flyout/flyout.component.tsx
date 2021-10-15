@@ -27,17 +27,11 @@ const strings = {
 };
 export interface Props {
   onClose: () => void;
-  onSelect: (id: string, embeddableType: string, isByValueEnabled?: boolean) => void;
+  onSelect: (id: string, embeddableType: string) => void;
   availableEmbeddables: string[];
-  isByValueEnabled?: boolean;
 }
 
-export const AddEmbeddableFlyout: FC<Props> = ({
-  onSelect,
-  availableEmbeddables,
-  onClose,
-  isByValueEnabled,
-}) => {
+export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables, onClose }) => {
   const embeddablesService = useEmbeddablesService();
   const platformService = usePlatformService();
   const { getEmbeddableFactories } = embeddablesService;
@@ -56,15 +50,14 @@ export const AddEmbeddableFlyout: FC<Props> = ({
 
       const foundEmbeddableType = found ? found.type : 'unknown';
 
-      onSelect(id, foundEmbeddableType, isByValueEnabled);
+      onSelect(id, foundEmbeddableType);
     },
-    [isByValueEnabled, getEmbeddableFactories, onSelect]
+    [getEmbeddableFactories, onSelect]
   );
 
   const embeddableFactories = getEmbeddableFactories();
 
   const availableSavedObjects = Array.from(embeddableFactories)
-    .filter((factory) => isByValueEnabled || availableEmbeddables.includes(factory.type))
     .map((factory) => factory.savedObjectMetaData)
     .filter<SavedObjectMetaData<{}>>(function (
       maybeSavedObjectMetaData
