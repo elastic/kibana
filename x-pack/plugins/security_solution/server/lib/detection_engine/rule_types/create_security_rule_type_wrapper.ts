@@ -35,7 +35,7 @@ import {
 import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
-import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
+import { RuleExecutionLogClient, truncateMessageList } from '../rule_execution_log';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 import { AlertAttributes } from '../signals/types';
@@ -260,7 +260,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           }
 
           if (result.warningMessages.length) {
-            const warningMessage = buildRuleMessage(result.warningMessages.join());
+            const warningMessage = buildRuleMessage(
+              truncateMessageList(result.warningMessages).join()
+            );
             await ruleStatusClient.logStatusChange({
               ...basicLogArguments,
               newStatus: RuleExecutionStatus['partial failure'],
@@ -350,7 +352,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           } else {
             const errorMessage = buildRuleMessage(
               'Bulk Indexing of signals failed:',
-              result.errors.join()
+              truncateMessageList(result.errors).join()
             );
             logger.error(errorMessage);
             await ruleStatusClient.logStatusChange({

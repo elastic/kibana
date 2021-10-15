@@ -33,6 +33,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
         return completeConfig;
       }
       addDeprecation({
+        configPath: 'map.proxyElasticMapsServiceInMaps',
         documentationUrl:
           'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html#elastic-maps-server',
         message: i18n.translate('xpack.maps.deprecation.proxyEMS.message', {
