@@ -1562,7 +1562,7 @@ export function getSplitByTermsLayer(
   dateField: IndexPatternField | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
-  const { termsParams, metrics } = layer;
+  const { termsParams, metrics, timeInterval } = layer;
   const copyMetricsArray = [...metrics];
   const computedLayer = computeLayerFromContext(
     metrics.length === 1,
@@ -1578,6 +1578,9 @@ export function getSplitByTermsLayer(
       field: dateField,
       indexPattern,
       visualizationGroups: [],
+      columnParams: {
+        interval: timeInterval,
+      },
     }),
     columnId: generateId(),
     field: splitField,
@@ -1592,7 +1595,7 @@ export function getSplitByFiltersLayer(
   dateField: IndexPatternField | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
-  const { splitFilters, metrics } = layer;
+  const { splitFilters, metrics, timeInterval } = layer;
   const filterParams = splitFilters?.map((param) => {
     const query = param.filter ? param.filter.query : '';
     const language = param.filter ? param.filter.language : 'kuery';
@@ -1619,6 +1622,9 @@ export function getSplitByFiltersLayer(
       field: dateField,
       indexPattern,
       visualizationGroups: [],
+      columnParams: {
+        interval: timeInterval,
+      },
     }),
     columnId: generateId(),
     field: undefined,

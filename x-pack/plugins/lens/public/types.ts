@@ -183,6 +183,7 @@ export interface VisualizeEditorLayersContext {
   splitFilters?: SplitFilters[];
   palette?: PaletteOutput;
   metrics: Metric[];
+  timeInterval?: string;
 }
 
 export interface VisualizeEditorContext {

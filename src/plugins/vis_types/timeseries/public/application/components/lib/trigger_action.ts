@@ -46,6 +46,7 @@ interface LayersSettings {
   splitFilters?: SplitFilters[];
   palette?: PaletteOutput;
   metrics: Metric[];
+  timeInterval?: string;
 }
 
 const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
@@ -122,6 +123,7 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
     const mathMetricIdx = layer.metrics.findIndex((metric) => metric.type === 'math');
     const aggregation = layer.metrics[mathMetricIdx > 0 ? mathMetricIdx : metricIdx].type;
     const fieldName = layer.metrics[metricIdx].field;
+    const timeShift = layer.offset_time;
     // translate to Lens seriesType
     const chartType = layer.chart_type === 'line' && layer.fill !== '0' ? 'area' : layer.chart_type;
     // find supported aggregations
@@ -140,7 +142,7 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
           isFullReference: false,
           color: percentile.color,
           fieldName: fieldName ?? 'document',
-          params: { percentile: percentile.value },
+          params: { percentile: percentile.value, shift: timeShift },
         });
       });
     } else if (aggregation === 'math') {
@@ -167,7 +169,7 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
           isFullReference: true,
           color: layer.color,
           fieldName: 'document',
-          params: { formula: finalScript },
+          params: { formula: finalScript, shift: timeShift },
         },
       ];
     } else {
@@ -178,6 +180,7 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
           isFullReference: aggregationMap.isFullReference,
           color: layer.color,
           fieldName: aggregation !== 'count' && fieldName ? fieldName : 'document',
+          params: { shift: timeShift },
         },
       ];
     }
@@ -199,6 +202,7 @@ export const triggerVisualizeToLensActions = async (model: Panel) => {
         termsParams: { size: layer.terms_size ?? 10, otherBucket: false },
       }),
       metrics: [...metricsArray],
+      timeInterval: model.interval ?? 'auto',
     };
     options[layerIdx] = triggerOptions;
   }

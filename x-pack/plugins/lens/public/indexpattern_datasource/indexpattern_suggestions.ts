@@ -176,7 +176,7 @@ function createNewLayerWithMetricAggregationFromVizEditor(
   indexPattern: IndexPattern,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer | undefined {
-  const { timeFieldName, splitMode, splitFilters, metrics } = layer;
+  const { timeFieldName, splitMode, splitFilters, metrics, timeInterval } = layer;
   const dateField = indexPattern.getFieldByName(timeFieldName!);
   const splitField = layer.splitField ? indexPattern.getFieldByName(layer.splitField) : null;
   // generate the layer for split by terms
@@ -200,6 +200,9 @@ function createNewLayerWithMetricAggregationFromVizEditor(
       field: dateField,
       indexPattern,
       visualizationGroups: [],
+      columnParams: {
+        interval: timeInterval,
+      },
     });
   }
 }
