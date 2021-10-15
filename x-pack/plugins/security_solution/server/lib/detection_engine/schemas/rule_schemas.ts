@@ -239,12 +239,6 @@ export const internalRuleCreate = t.type({
 });
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
 
-export const internalRulePreview = t.intersection([
-  internalRuleCreate,
-  t.type({ invocationCount: t.number }),
-]);
-export type InternalRulePreview = t.TypeOf<typeof internalRulePreview>;
-
 export const internalRuleUpdate = t.type({
   name,
   tags,

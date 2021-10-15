@@ -16,7 +16,6 @@ import {
   ThreatMatchCreateSchema,
   ThreatMatchUpdateSchema,
   ThresholdCreateSchema,
-  PreviewRulesSchema,
 } from './rule_schemas';
 
 export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema => ({
@@ -199,16 +198,4 @@ export const getUpdateMachineLearningSchemaMock = (
   type: 'machine_learning',
   anomaly_threshold: 58,
   machine_learning_job_id: 'typical-ml-job-id',
-});
-
-export const getPreviewRulesSchemaMock = (ruleId = 'rule-1'): PreviewRulesSchema => ({
-  description: 'Detecting root and admin users',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  type: 'query',
-  risk_score: 55,
-  language: 'kuery',
-  rule_id: ruleId,
-  invocationCount: 4,
 });

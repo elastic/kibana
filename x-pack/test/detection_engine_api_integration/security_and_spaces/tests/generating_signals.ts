@@ -235,7 +235,7 @@ export default ({ getService }: FtrProviderContext) => {
           parents: [
             {
               rule: signalNoRule.parents[0].rule, // rule id is always changing so skip testing it
-              id: 'ea8a71e2b5f32e65de314241b3031c2c6f1b0bf8d53c28435a5681e8fbe7d81e',
+              id: signalNoRule.parents[0].id, // id is always changing so skip testing it
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -250,7 +250,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             {
               rule: signalNoRule.ancestors[1].rule, // rule id is always changing so skip testing it
-              id: 'ea8a71e2b5f32e65de314241b3031c2c6f1b0bf8d53c28435a5681e8fbe7d81e',
+              id: signalNoRule.ancestors[1].id, //  id is always changing so skip testing it
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -260,7 +260,7 @@ export default ({ getService }: FtrProviderContext) => {
           depth: 2,
           parent: {
             rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
-            id: 'ea8a71e2b5f32e65de314241b3031c2c6f1b0bf8d53c28435a5681e8fbe7d81e',
+            id: signalNoRule.parent?.id, // parent.id is always changing so skip testing it
             type: 'signal',
             index: '.siem-signals-default-000001',
             depth: 1,
@@ -1248,7 +1248,7 @@ export default ({ getService }: FtrProviderContext) => {
           parents: [
             {
               rule: signalNoRule.parents[0].rule, // rule id is always changing so skip testing it
-              id: 'c4db4921f2d9152865fd6518c2a2ef3471738e49f607a21319048c69a303f83f',
+              id: signalNoRule.parents[0].id, //  id is always changing so skip testing it
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -1263,7 +1263,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             {
               rule: signalNoRule.ancestors[1].rule, // rule id is always changing so skip testing it
-              id: 'c4db4921f2d9152865fd6518c2a2ef3471738e49f607a21319048c69a303f83f',
+              id: signalNoRule.ancestors[1].id, //  id is always changing so skip testing it
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -1273,7 +1273,7 @@ export default ({ getService }: FtrProviderContext) => {
           depth: 2,
           parent: {
             rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
-            id: 'c4db4921f2d9152865fd6518c2a2ef3471738e49f607a21319048c69a303f83f',
+            id: signalNoRule.parent?.id, // parent.id is always changing so skip testing it
             type: 'signal',
             index: '.siem-signals-default-000001',
             depth: 1,
@@ -1408,7 +1408,7 @@ export default ({ getService }: FtrProviderContext) => {
           parents: [
             {
               rule: signalNoRule.parents[0].rule, // rule id is always changing so skip testing it
-              id: '0733d5d2eaed77410a65eec95cfb2df099abc97289b78e2b0b406130e2dbdb33',
+              id: signalNoRule.parents[0].id, //  id is always changing so skip testing it
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -1423,7 +1423,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             {
               rule: signalNoRule.ancestors[1].rule, // rule id is always changing so skip testing it
-              id: '0733d5d2eaed77410a65eec95cfb2df099abc97289b78e2b0b406130e2dbdb33',
+              id: signalNoRule.ancestors[1].id, //  id is always changing so skip testing it
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -1433,7 +1433,7 @@ export default ({ getService }: FtrProviderContext) => {
           depth: 2,
           parent: {
             rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
-            id: '0733d5d2eaed77410a65eec95cfb2df099abc97289b78e2b0b406130e2dbdb33',
+            id: signalNoRule.parent?.id, // parent.id is always changing so skip testing it
             type: 'signal',
             index: '.siem-signals-default-000001',
             depth: 1,

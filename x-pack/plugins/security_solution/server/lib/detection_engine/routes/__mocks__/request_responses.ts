@@ -29,10 +29,7 @@ import {
 import { requestMock } from './request';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
-import {
-  getCreateRulesSchemaMock,
-  getPreviewRulesSchemaMock,
-} from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
@@ -266,13 +263,6 @@ export const getCreateRequest = () =>
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
     body: getCreateRulesSchemaMock(),
-  });
-
-export const getPreviewRequest = () =>
-  requestMock.create({
-    method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_preview`,
-    body: getPreviewRulesSchemaMock(),
   });
 
 // TODO: Replace this with the mocks version from the mocks file
