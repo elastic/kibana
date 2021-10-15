@@ -57,30 +57,33 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   },
 
   // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.
-  (settings, fromPath, addDeprecation) => {
+  (settings, _fromPath, addDeprecation, { branch }) => {
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
       addDeprecation({
         configPath: 'xpack.security.authc.providers',
         title: i18n.translate('xpack.security.deprecations.authcProvidersTitle', {
-          defaultMessage:
-            'Defining "xpack.security.authc.providers" as an array of provider types is deprecated',
+          defaultMessage: 'The array format for "xpack.security.authc.providers" is deprecated',
         }),
         message: i18n.translate('xpack.security.deprecations.authcProvidersMessage', {
-          defaultMessage:
-            '"xpack.security.authc.providers" accepts an extended "object" format instead of an array of provider types.',
+          defaultMessage: 'Use the new object format instead of an array of provider types.',
         }),
+        level: 'warning',
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#authentication-security-settings`,
         correctiveActions: {
           manualSteps: [
-            i18n.translate('xpack.security.deprecations.authcProviders.manualStepOneMessage', {
+            i18n.translate('xpack.security.deprecations.authcProviders.manualSteps1', {
               defaultMessage:
-                'Use the extended object format for "xpack.security.authc.providers" in your Kibana configuration.',
+                'Remove the "xpack.security.authc.providers" setting from kibana.yml.',
+            }),
+            i18n.translate('xpack.security.deprecations.authcProviders.manualSteps2', {
+              defaultMessage: 'Add your authentication providers using the new object format.',
             }),
           ],
         },
       });
     }
   },
-  (settings, fromPath, addDeprecation) => {
+  (settings, _fromPath, addDeprecation, { branch }) => {
     const hasProviderType = (providerType: string) => {
       const providers = settings?.xpack?.security?.authc?.providers;
       if (Array.isArray(providers)) {
@@ -93,31 +96,34 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     };
 
     if (hasProviderType('basic') && hasProviderType('token')) {
+      const basicProvider = 'basic';
+      const tokenProvider = 'token';
       addDeprecation({
         configPath: 'xpack.security.authc.providers',
         title: i18n.translate('xpack.security.deprecations.basicAndTokenProvidersTitle', {
           defaultMessage:
-            'Both "basic" and "token" authentication providers are enabled in "xpack.security.authc.providers"',
+            'Using both "{basicProvider}" and "{tokenProvider}" providers in "xpack.security.authc.providers" has no effect',
+          values: { basicProvider, tokenProvider },
         }),
         message: i18n.translate('xpack.security.deprecations.basicAndTokenProvidersMessage', {
           defaultMessage:
-            'Enabling both "basic" and "token" authentication providers in "xpack.security.authc.providers" is deprecated. Login page will only use "token" provider.',
+            'Use only one of these providers. When both providers are set, the login page only uses the "{tokenProvider}" provider.',
+          values: { tokenProvider },
         }),
+        level: 'warning',
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#authentication-security-settings`,
         correctiveActions: {
           manualSteps: [
-            i18n.translate(
-              'xpack.security.deprecations.basicAndTokenProviders.manualStepOneMessage',
-              {
-                defaultMessage:
-                  'Remove either the "basic" or "token" auth provider in "xpack.security.authc.providers" from your Kibana configuration.',
-              }
-            ),
+            i18n.translate('xpack.security.deprecations.basicAndTokenProviders.manualSteps1', {
+              defaultMessage:
+                'Remove "xpack.security.authc.providers.basic.<provider-name>" from kibana.yml.',
+            }),
           ],
         },
       });
     }
   },
-  (settings, fromPath, addDeprecation) => {
+  (settings, _fromPath, addDeprecation, { branch }) => {
     const samlProviders = (settings?.xpack?.security?.authc?.providers?.saml ?? {}) as Record<
       string,
       any
@@ -131,17 +137,18 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
         configPath: `xpack.security.authc.providers.saml.${foundProvider[0]}.maxRedirectURLSize`,
         title: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeTitle', {
           defaultMessage:
-            '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is deprecated',
+            '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" has no effect',
         }),
         message: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeMessage', {
-          defaultMessage:
-            '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is no longer used.',
+          defaultMessage: 'This setting is no longer used.',
         }),
+        level: 'warning',
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#authentication-security-settings`,
         correctiveActions: {
           manualSteps: [
-            i18n.translate('xpack.security.deprecations.maxRedirectURLSize.manualStepOneMessage', {
+            i18n.translate('xpack.security.deprecations.maxRedirectURLSize.manualSteps1', {
               defaultMessage:
-                'Remove "xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" from your Kibana configuration.',
+                'Remove "xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" from kibana.yml.',
             }),
           ],
         },
