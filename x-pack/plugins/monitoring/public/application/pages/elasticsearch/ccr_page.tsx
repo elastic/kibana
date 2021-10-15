@@ -13,17 +13,12 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { Ccr } from '../../../components/elasticsearch/ccr';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { RULE_CCR_READ_EXCEPTIONS } from '../../../../common/constants';
+import { RULE_CCR_READ_EXCEPTIONS, ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
 
 export const ElasticsearchCcrPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -93,6 +88,7 @@ export const ElasticsearchCcrPage: React.FC<ComponentProps> = ({ clusters }) => 
       cluster={cluster}
     >
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
