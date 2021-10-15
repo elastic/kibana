@@ -773,6 +773,7 @@
     "ora": "^4.0.4",
     "parse-link-header": "^1.0.1",
     "pbf": "3.2.1",
+    "pdf-to-img": "^1.1.1",
     "pirates": "^4.0.1",
     "pixelmatch": "^5.1.0",
     "postcss": "^7.0.32",
