@@ -126,8 +126,6 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const { savedObjects } = core;
     const savedObjectsInternalRepository = savedObjects.createInternalRepository();
     this.savedObjectsClient = savedObjectsInternalRepository;
-
-    // Not catching nor awaiting this promise because it should never reject
     this.startFetcher(core, telemetryCollectionManager);
 
     return {
@@ -151,7 +149,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  private async startFetcher(
+  private startFetcher(
     core: CoreStart,
     telemetryCollectionManager: TelemetryCollectionManagerPluginStart
   ) {
