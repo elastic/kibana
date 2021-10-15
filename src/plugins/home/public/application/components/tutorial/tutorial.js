@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { KibanaPageTemplate } from '@kbn/react-page-template';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
@@ -18,7 +19,6 @@ import * as StatusCheckStates from './status_check_states';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../../kibana_services';
-import { KibanaPageTemplate } from '../../../../../kibana_react/public';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
