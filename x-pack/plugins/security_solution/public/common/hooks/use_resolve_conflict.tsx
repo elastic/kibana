@@ -60,7 +60,7 @@ export const useResolveConflict = () => {
       searchQuery.set(CONSTANTS.timeline, newTimelineRison);
 
       const newPath = http.basePath.prepend(
-        `${pathname}${searchQuery.toString()}${window.location.hash}`
+        `${pathname}?${searchQuery.toString()}${window.location.hash}`
       );
 
       return (
