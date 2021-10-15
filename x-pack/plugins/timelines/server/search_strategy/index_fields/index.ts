@@ -13,7 +13,6 @@ import {
   IndexPatternsFetcher,
   ISearchStrategy,
   SearchStrategyDependencies,
-  FieldDescriptor,
 } from '../../../../../../src/plugins/data/server';
 
 // TODO cleanup path
@@ -25,6 +24,7 @@ import {
   DELETED_SECURITY_SOLUTION_DATA_VIEW,
 } from '../../../common';
 import { StartPlugins } from '../../types';
+import { FieldSpec } from '../../../../../../src/plugins/data_views/common';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
@@ -121,8 +121,7 @@ export const requestIndexFieldSearch = async (
     existingIndices = patternList.filter((index, i) => indicesExist[i]);
     if (!request.onlyCheckIfIndicesExist) {
       const dataViewSpec = dataView.toSpec();
-      // type cast because index pattern type is FieldSpec and timeline type is FieldDescriptor, same diff
-      const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {}) as FieldDescriptor[]];
+      const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {})];
       runtimeMappings = dataViewSpec.runtimeFieldMap ?? {};
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
@@ -185,7 +184,7 @@ export const dedupeIndexName = (indices: string[]) =>
     return acc;
   }, []);
 
-const missingFields: FieldDescriptor[] = [
+const missingFields: FieldSpec[] = [
   {
     name: '_id',
     type: 'string',
@@ -218,7 +217,7 @@ const missingFields: FieldDescriptor[] = [
 export const createFieldItem = (
   beatFields: BeatFields,
   indexesAlias: string[],
-  index: FieldDescriptor,
+  index: FieldSpec,
   indexesAliasIdx: number
 ): IndexField => {
   const alias = indexesAlias[indexesAliasIdx];
@@ -234,6 +233,9 @@ export const createFieldItem = (
   return {
     ...beatIndex,
     ...index,
+    // the format type on FieldSpec is SerializedFieldFormat
+    // and is a string on beatIndex
+    format: index.format?.id ?? beatIndex.format,
     indexes: [alias],
   };
 };
@@ -248,24 +250,24 @@ export const createFieldItem = (
  * This intentionally waits for the next tick on the event loop to process as the large 4.7 megs
  * has already consumed a lot of the event loop processing up to this function and we want to give
  * I/O opportunity to occur by scheduling this on the next loop.
- * @param responsesIndexFields The response index fields to loop over
+ * @param responsesFieldSpec The response index fields to loop over
  * @param indexesAlias The index aliases such as filebeat-*
  */
 export const formatFirstFields = async (
   beatFields: BeatFields,
-  responsesIndexFields: FieldDescriptor[][],
+  responsesFieldSpec: FieldSpec[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(
-        responsesIndexFields.reduce(
-          (accumulator: IndexField[], indexFields: FieldDescriptor[], indexesAliasIdx: number) => {
+        responsesFieldSpec.reduce(
+          (accumulator: IndexField[], fieldSpec: FieldSpec[], indexesAliasIdx: number) => {
             missingFields.forEach((index) => {
               const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               accumulator.push(item);
             });
-            indexFields.forEach((index) => {
+            fieldSpec.forEach((index) => {
               const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               accumulator.push(item);
             });
@@ -322,15 +324,15 @@ export const formatSecondFields = async (fields: IndexField[]): Promise<IndexFie
  * NOTE: This will have array sizes up to 4.7 megs in size at a time when being called.
  * This function should be as optimized as possible and should avoid any and all creation
  * of new arrays, iterating over the arrays or performing any n^2 operations.
- * @param responsesIndexFields  The response index fields to format
+ * @param responsesFieldSpec  The response index fields to format
  * @param indexesAlias The index alias
  */
 export const formatIndexFields = async (
   beatFields: BeatFields,
-  responsesIndexFields: FieldDescriptor[][],
+  responsesFieldSpec: FieldSpec[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
-  const fields = await formatFirstFields(beatFields, responsesIndexFields, indexesAlias);
+  const fields = await formatFirstFields(beatFields, responsesFieldSpec, indexesAlias);
   const secondFields = await formatSecondFields(fields);
   return secondFields;
 };

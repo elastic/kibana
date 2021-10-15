@@ -25,28 +25,21 @@ export interface FieldInfo {
   type?: string;
 }
 
-export interface IndexField {
+// without omitting:
+// TS2430: Interface 'IndexField' incorrectly extends interface 'FieldSpec'.
+// Types of property 'format' are incompatible.
+// Type 'string | null | undefined' is not assignable to type 'SerializedFieldFormat<FieldFormatParams> | undefined'.
+// Type 'null' is not assignable to type 'SerializedFieldFormat<FieldFormatParams> | undefined'.
+export interface IndexField extends Omit<FieldSpec, 'format'> {
   /** Where the field belong */
   category: string;
   /** Example of field's value */
   example?: Maybe<string | number>;
   /** whether the field's belong to an alias index */
   indexes: Array<Maybe<string>>;
-  /** The name of the field */
-  name: string;
-  /** The type of the field's values as recognized by Kibana */
-  type: string;
-  /** Whether the field's values can be efficiently searched for */
-  searchable: boolean;
-  /** Whether the field's values can be aggregated */
-  aggregatable: boolean;
   /** Description of the field */
   description?: Maybe<string>;
   format?: Maybe<string>;
-  /** the elastic type as mapped in the index */
-  esTypes?: string[];
-  subType?: IFieldSubType;
-  readFromDocValues: boolean;
 }
 
 export type BeatFields = Record<string, FieldInfo>;

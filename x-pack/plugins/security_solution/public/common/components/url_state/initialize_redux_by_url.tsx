@@ -28,7 +28,7 @@ import {
   queryTimelineById,
   dispatchUpdateTimeline,
 } from '../../../timelines/components/open_timeline/helpers';
-import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
+import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
 import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 
@@ -56,7 +56,7 @@ export const useSetInitialStateFromUrl = () => {
           updateTimerange(newUrlStateString, dispatch);
         }
         if (urlKey === CONSTANTS.sourcerer) {
-          const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
+          const sourcererState = decodeRisonUrlState<SourcererUrlState>(newUrlStateString);
           if (sourcererState != null) {
             const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
               (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))

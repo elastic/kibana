@@ -20,6 +20,9 @@ export interface SecuritySolutionUiConfigType {
   enableExperimental: string[];
 }
 
+/**
+ * DataViewBase with beats enhanced index fields used in timelines
+ */
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: FieldSpec[];
 }

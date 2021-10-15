@@ -6,7 +6,6 @@
  */
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
-import { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import {
   BrowserFields,
   DocValueFields,
@@ -14,55 +13,102 @@ import {
   EMPTY_DOCVALUE_FIELD,
   EMPTY_INDEX_FIELDS,
 } from '../../../../../timelines/common';
-
-export type ErrorModel = Error[];
-
+import { SecuritySolutionDataViewBase } from '../../types';
+/** Uniquely identifies a Sourcerer Scope */
 export enum SourcererScopeName {
   default = 'default',
   detections = 'detections',
   timeline = 'timeline',
 }
 
+/**
+ * Data related to each sourcerer scope
+ */
 export interface SourcererScope {
+  /** Uniquely identifies a Sourcerer Scope */
   id: SourcererScopeName;
+  /** is an update being made to the sourcerer data view */
   loading: boolean;
+  /** selected data view id */
   selectedDataViewId: string;
+  /** selected patterns within the data view */
   selectedPatterns: string[];
-}
-
-export interface SourcererScopeInit extends Partial<SourcererScope> {
-  id: SourcererScopeName;
 }
 
 export type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
 
+/**
+ * DataView from Kibana + timelines/index_fields enhanced field data
+ */
 export interface SourcererDataView {
-  /**
-   * title of Kibana Index Pattern
-   * title also serves as "all pattern list", including inactive
-   */
+  /** we need this for @timestamp data */
   browserFields: BrowserFields;
+  /** we need this for @timestamp data */
   docValueFields: DocValueFields[];
   /** Uniquely identifies a Kibana Data View */
   id: string;
-  indexFields: FieldSpec[];
+  /** comes from dataView.fields.toSpec() */
+  indexFields: SecuritySolutionDataViewBase['fields'];
   /** set when data view fields are fetched */
   loading: boolean;
   /**  list of active patterns that return data  */
   patternList: string[];
-  /**  list of all patterns as comma separated string  */
+  /**
+   * title of Kibana Data View
+   * title also serves as "all pattern list", including inactive
+   * comma separated string
+   */
   title: string;
-  // Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
+  /**
+   * Needed to pass to search strategy
+   * Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
+   */
   runtimeMappings: MappingRuntimeFields;
 }
 
-// ManageSourcerer
+/**
+ * Combined data from SourcererDataView and SourcererScope to create
+ * selected data view state
+ */
+export interface SelectedDataView {
+  browserFields: SourcererDataView['browserFields'];
+  dataViewId: SourcererDataView['id'];
+  docValueFields: SourcererDataView['docValueFields'];
+  /**
+   * DataViewBase with enhanced index fields used in timelines
+   */
+  indexPattern: SecuritySolutionDataViewBase;
+  /** do the selected indices exist  */
+  indicesExist: boolean;
+  /** is an update being made to the data view */
+  loading: boolean;
+  /** all active & inactive patterns from SourcererDataView['title']  */
+  patternList: string[];
+  runtimeMappings: SourcererDataView['runtimeMappings'];
+  /** all selected patterns from SourcererScope['selectedPatterns']  */
+  selectedPatterns: string[];
+}
+
+/**
+ * sourcerer model for redux
+ */
 export interface SourcererModel {
+  /** default security-solution data view */
   defaultDataView: SourcererDataView;
+  /** all Kibana data views, including security-solution */
   kibanaDataViews: SourcererDataView[];
+  /** security solution signals index name */
   signalIndexName: string | null;
+  /** sourcerer scope data by id */
   sourcererScopes: SourcererScopeById;
 }
+
+export type SourcererUrlState = Partial<{
+  [id in SourcererScopeName]: {
+    id: string;
+    selectedPatterns: string[];
+  };
+}>;
 
 export const initSourcererScope: Omit<SourcererScope, 'id'> = {
   loading: false,
@@ -99,11 +145,3 @@ export const initialSourcererState: SourcererModel = {
     },
   },
 };
-
-export type FSourcererScopePatterns = {
-  [id in SourcererScopeName]: {
-    id: string;
-    selectedPatterns: string[];
-  };
-};
-export type SourcererScopePatterns = Partial<FSourcererScopePatterns>;

@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import { SourcererDataView, SourcererScopeName } from '../../store/sourcerer/model';
+import { SelectedDataView, SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ALERTS_PATH, RULES_PATH, UEBA_PATH } from '../../../../common/constants';
@@ -20,7 +20,6 @@ import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
-import { SecuritySolutionDataViewBase } from '../../types';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -231,18 +230,6 @@ export const useInitSourcerer = (
   ]);
 };
 export const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
-
-export interface SelectedDataView {
-  browserFields: SourcererDataView['browserFields'];
-  dataViewId: SourcererDataView['id'];
-  docValueFields: SourcererDataView['docValueFields'];
-  indexPattern: SecuritySolutionDataViewBase;
-  indicesExist: boolean;
-  loading: boolean;
-  patternList: string[];
-  runtimeMappings: SourcererDataView['runtimeMappings'];
-  selectedPatterns: string[];
-}
 
 export const useSourcererDataView = (
   scopeId: SourcererScopeName = SourcererScopeName.default

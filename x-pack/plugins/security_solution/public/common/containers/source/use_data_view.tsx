@@ -27,7 +27,7 @@ import {
 import * as i18n from './translations';
 import { getBrowserFields, getDocValueFields } from './';
 
-export const getIndexFields = memoizeOne(
+const getEsFields = memoizeOne(
   (fields: IndexField[]): FieldSpec[] =>
     fields && fields.length > 0
       ? fields.map((field) =>
@@ -77,7 +77,7 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
                     browserFields: getBrowserFields(patternString, response.indexFields),
                     docValueFields: getDocValueFields(patternString, response.indexFields),
                     id: selectedDataViewId,
-                    indexFields: getIndexFields(response.indexFields),
+                    indexFields: getEsFields(response.indexFields),
                     runtimeMappings: response.runtimeMappings,
                   })
                 );

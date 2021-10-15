@@ -13,7 +13,7 @@ import { RouteSpyState } from '../../utils/route/types';
 import { SecurityNav } from '../navigation/types';
 
 import { CONSTANTS, UrlStateType } from './constants';
-import { SourcererScopePatterns } from '../../store/sourcerer/model';
+import { SourcererUrlState } from '../../store/sourcerer/model';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
   CONSTANTS.appQuery,
@@ -42,7 +42,7 @@ export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
-  [CONSTANTS.sourcerer]: SourcererScopePatterns;
+  [CONSTANTS.sourcerer]: SourcererUrlState;
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: TimelineUrl;
 }

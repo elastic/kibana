@@ -14,6 +14,7 @@ import { Storage } from '../../../../../../../../../src/plugins/kibana_utils/pub
 import { urlFromQueryParams } from '../url_from_query_params';
 import { useEndpointSelector } from '../hooks';
 import * as selectors from '../../store/selectors';
+import { clone } from '../../models/index_pattern';
 
 const AdminQueryBar = styled.div`
   .globalQueryBar {
@@ -26,6 +27,10 @@ export const AdminSearchBar = memo(() => {
   const { admin_query: _, ...queryParams } = useEndpointSelector(selectors.uiQueryParams);
   const searchBarIndexPatterns = useEndpointSelector(selectors.patterns);
   const searchBarQuery = useEndpointSelector(selectors.searchBarQuery);
+  const clonedIndexPatterns = useMemo(
+    () => searchBarIndexPatterns.map((pattern) => clone(pattern)),
+    [searchBarIndexPatterns]
+  );
 
   const onQuerySubmit = useCallback(
     (params: { query?: Query }) => {
@@ -52,7 +57,7 @@ export const AdminSearchBar = memo(() => {
           <SearchBar
             dataTestSubj="adminSearchBar"
             query={searchBarQuery}
-            indexPatterns={searchBarIndexPatterns}
+            indexPatterns={clonedIndexPatterns}
             timeHistory={timeHistory}
             onQuerySubmit={onQuerySubmit}
             isLoading={false}
