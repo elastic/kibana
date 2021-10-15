@@ -101,11 +101,10 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                 {isLegacyConnector(connector) && (
                   <EuiFlexItem grow={false}>
                     <StyledEuiIconTip
-                      aria-label={i18n.DEPRECATED_TOOLTIP_TITLE}
+                      aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
                       size={ICON_SIZE}
                       type="alert"
                       color="warning"
-                      title={i18n.DEPRECATED_TOOLTIP_TITLE}
                       content={i18n.DEPRECATED_TOOLTIP_CONTENT}
                     />
                   </EuiFlexItem>
