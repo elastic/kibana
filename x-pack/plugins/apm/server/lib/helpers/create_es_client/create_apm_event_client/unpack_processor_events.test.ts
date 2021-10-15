@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 import { APMEventESSearchRequest } from '.';
 import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
 import { unpackProcessorEvents } from './unpack_processor_events';
@@ -19,12 +18,12 @@ describe('unpackProcessorEvents', () => {
     } as APMEventESSearchRequest;
 
     const indices = {
-      'apm_oss.transactionIndices': 'my-apm-*-transaction-*',
-      'apm_oss.metricsIndices': 'my-apm-*-metric-*',
-      'apm_oss.errorIndices': 'my-apm-*-error-*',
-      'apm_oss.spanIndices': 'my-apm-*-span-*',
-      'apm_oss.onboardingIndices': 'my-apm-*-onboarding-',
-      'apm_oss.sourcemapIndices': 'my-apm-*-sourcemap-*',
+      transaction: 'my-apm-*-transaction-*',
+      metric: 'my-apm-*-metric-*',
+      error: 'my-apm-*-error-*',
+      span: 'my-apm-*-span-*',
+      onboarding: 'my-apm-*-onboarding-*',
+      sourcemap: 'my-apm-*-sourcemap-*',
     } as ApmIndicesConfig;
 
     res = unpackProcessorEvents(request, indices);

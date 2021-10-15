@@ -6,13 +6,22 @@ const path = require('path');
 const STORYBOOKS = [
   'apm',
   'canvas',
-  'ci_composite',
-  'url_template_editor',
   'codeeditor',
+  'ci_composite',
+  'custom_integrations',
+  'url_template_editor',
   'dashboard',
   'dashboard_enhanced',
   'data_enhanced',
   'embeddable',
+  'expression_error',
+  'expression_image',
+  'expression_metric',
+  'expression_repeat_image',
+  'expression_reveal_image',
+  'expression_shape',
+  'expression_tagcloud',
+  'fleet',
   'infra',
   'security_solution',
   'ui_actions_enhanced',
@@ -90,6 +99,12 @@ const upload = () => {
       gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${process.env.BUILDKITE_COMMIT}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);
+
+    if (process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false') {
+      exec(
+        `buildkite-agent meta-data set pr_comment:storybooks:head '* [Storybooks Preview](${STORYBOOK_BASE_URL})'`
+      );
+    }
   } finally {
     process.chdir(originalDirectory);
   }

@@ -27,12 +27,21 @@ interface AxisConfig {
   hide?: boolean;
 }
 
-export type YAxisMode = 'auto' | 'left' | 'right';
+export type YAxisMode = 'auto' | 'left' | 'right' | 'bottom';
+export type LineStyle = 'solid' | 'dashed' | 'dotted';
+export type FillStyle = 'none' | 'above' | 'below';
+export type IconPosition = 'auto' | 'left' | 'right' | 'above' | 'below';
 
 export interface YConfig {
   forAccessor: string;
   axisMode?: YAxisMode;
   color?: string;
+  icon?: string;
+  lineWidth?: number;
+  lineStyle?: LineStyle;
+  fill?: FillStyle;
+  iconPosition?: IconPosition;
+  textVisibility?: boolean;
 }
 
 export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
@@ -160,6 +169,33 @@ export const yAxisConfig: ExpressionFunctionDefinition<
     color: {
       types: ['string'],
       help: 'The color of the series',
+    },
+    lineStyle: {
+      types: ['string'],
+      options: ['solid', 'dotted', 'dashed'],
+      help: 'The style of the threshold line',
+    },
+    lineWidth: {
+      types: ['number'],
+      help: 'The width of the threshold line',
+    },
+    icon: {
+      types: ['string'],
+      help: 'An optional icon used for threshold lines',
+    },
+    iconPosition: {
+      types: ['string'],
+      options: ['auto', 'above', 'below', 'left', 'right'],
+      help: 'The placement of the icon for the threshold line',
+    },
+    textVisibility: {
+      types: ['boolean'],
+      help: 'Visibility of the label on the threshold line',
+    },
+    fill: {
+      types: ['string'],
+      options: ['none', 'above', 'below'],
+      help: '',
     },
   },
   fn: function fn(input: unknown, args: YConfig) {

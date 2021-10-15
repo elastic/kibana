@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_r
 import { StartServices } from '../../../types';
 import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { securityMock } from '../../../../../security/public/mocks';
+import { spacesPluginMock } from '../../../../../spaces/public/mocks';
 import { triggersActionsUiMock } from '../../../../../triggers_actions_ui/public/mocks';
 
 export const createStartServicesMock = (): StartServices =>
@@ -25,6 +26,7 @@ export const createStartServicesMock = (): StartServices =>
     },
     security: securityMock.createStart(),
     triggersActionsUi: triggersActionsUiMock.createStart(),
+    spaces: spacesPluginMock.createStartContract(),
   } as unknown as StartServices);
 
 export const createWithKibanaMock = () => {

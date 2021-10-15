@@ -24,6 +24,7 @@ import { LensAttributeService } from '../lens_attribute_service';
 import { DOC_TYPE } from '../../common/constants';
 import { ErrorMessage } from '../editor_frame_service/types';
 import { extract, inject } from '../../common/embeddable_factory';
+import type { SpacesPluginStart } from '../../../spaces/public';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
@@ -38,6 +39,7 @@ export interface LensEmbeddableStartServices {
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  spaces?: SpacesPluginStart;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -90,6 +92,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       capabilities,
       usageCollection,
       inspector,
+      spaces,
     } = await this.getStartServices();
 
     const { Embeddable } = await import('../async_services');
@@ -110,6 +113,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
           canSaveVisualizations: Boolean(capabilities.visualize.save),
         },
         usageCollection,
+        spaces,
       },
       input,
       parent

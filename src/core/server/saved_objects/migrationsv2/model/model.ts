@@ -265,7 +265,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // control state progression and simplify the implementation.
         return { ...stateP, controlState: 'LEGACY_DELETE' };
       } else if (isLeftTypeof(left, 'wait_for_task_completion_timeout')) {
-        // After waiting for the specificed timeout, the task has not yet
+        // After waiting for the specified timeout, the task has not yet
         // completed. Retry this step to see if the task has completed after an
         // exponential delay. We will basically keep polling forever until the
         // Elasticeasrch task succeeds or fails.
@@ -446,7 +446,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (res.right.outdatedDocuments.length > 0) {
         return {
           ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX',
+          controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM',
           outdatedDocuments: res.right.outdatedDocuments,
           lastHitSortValue: res.right.lastHitSortValue,
           progress,
@@ -489,11 +489,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX') {
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_TRANSFORM') {
     // We follow a similar control flow as for
     // outdated document search -> outdated document transform -> transform documents bulk index
     // collecting issues along the way rather than failing
-    // REINDEX_SOURCE_TO_TEMP_INDEX handles the document transforms
+    // REINDEX_SOURCE_TO_TEMP_TRANSFORM handles the document transforms
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
     // Increment the processed documents, no matter what the results are.
@@ -854,7 +854,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // If there are none versionIndexReadyActions another instance
         // already completed this migration and we only transformed outdated
-        // documents and updated the mappings for incase a new plugin was
+        // documents and updated the mappings for in case a new plugin was
         // enabled.
         return {
           ...stateP,

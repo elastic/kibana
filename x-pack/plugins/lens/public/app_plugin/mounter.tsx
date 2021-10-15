@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback } from 'react';
-import { DeepPartial } from '@reduxjs/toolkit';
+import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
@@ -41,6 +41,7 @@ import {
   LensState,
 } from '../state_management';
 import { getPreloadedState } from '../state_management/lens_slice';
+import { getLensInspectorService } from '../lens_inspector_service';
 
 export async function getLensServices(
   coreStart: CoreStart,
@@ -65,7 +66,7 @@ export async function getLensServices(
   return {
     data,
     storage,
-    inspector,
+    inspector: getLensInspectorService(inspector),
     navigation,
     fieldFormats,
     stateTransfer,
@@ -192,7 +193,7 @@ export async function mountApp(
   const emptyState = getPreloadedState(storeDeps) as LensAppState;
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
     lens: emptyState,
-  } as DeepPartial<LensState>);
+  } as PreloadedState<LensState>);
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
@@ -278,6 +279,7 @@ export async function mountApp(
   return () => {
     data.search.session.clear();
     unmountComponentAtNode(params.element);
+    lensServices.inspector.close();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
   };

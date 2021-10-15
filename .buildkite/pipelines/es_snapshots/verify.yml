@@ -19,7 +19,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      queue: c2-8
+      queue: c2-16
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
@@ -64,7 +64,7 @@ steps:
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
     agents:
-      queue: jest
+      queue: n2-4
     timeout_in_minutes: 120
     key: jest-integration
     retry:
@@ -87,14 +87,6 @@ steps:
       - oss-cigroup
       - jest-integration
       - api-integration
-
-  - wait: ~
-    continue_on_failure: true
-
-  - plugins:
-      - junit-annotate#v1.9.0:
-          artifacts: target/junit/**/*.xml
-          job-uuid-file-pattern: '-bk__(.*).xml'
 
   - wait: ~
     continue_on_failure: true

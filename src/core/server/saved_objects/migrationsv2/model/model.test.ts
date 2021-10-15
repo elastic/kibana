@@ -20,7 +20,7 @@ import type {
   ReindexSourceToTempOpenPit,
   ReindexSourceToTempRead,
   ReindexSourceToTempClosePit,
-  ReindexSourceToTempIndex,
+  ReindexSourceToTempTransform,
   RefreshTarget,
   UpdateTargetMappingsState,
   UpdateTargetMappingsWaitForTaskState,
@@ -565,7 +565,7 @@ describe('migrations v2 model', () => {
       });
       // The createIndex action called by LEGACY_CREATE_REINDEX_TARGET never
       // returns a left, it will always succeed or timeout. Since timeout
-      // failures are always retried we don't explicity test this logic
+      // failures are always retried we don't explicitly test this logic
     });
 
     describe('LEGACY_REINDEX', () => {
@@ -962,7 +962,7 @@ describe('migrations v2 model', () => {
         progress: createInitialProgress(),
       };
 
-      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_INDEX if the index has outdated documents to reindex', () => {
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM if the index has outdated documents to reindex', () => {
         const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
         const lastHitSortValue = [123456];
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
@@ -970,8 +970,8 @@ describe('migrations v2 model', () => {
           lastHitSortValue,
           totalHits: 1,
         });
-        const newState = model(state, res) as ReindexSourceToTempIndex;
-        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_INDEX');
+        const newState = model(state, res) as ReindexSourceToTempTransform;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
         expect(newState.outdatedDocuments).toBe(outdatedDocuments);
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
@@ -1032,16 +1032,16 @@ describe('migrations v2 model', () => {
 
       it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> SET_TEMP_WRITE_BLOCK if action succeeded', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
-        const newState = model(state, res) as ReindexSourceToTempIndex;
+        const newState = model(state, res) as ReindexSourceToTempTransform;
         expect(newState.controlState).toBe('SET_TEMP_WRITE_BLOCK');
         expect(newState.sourceIndex).toEqual(state.sourceIndex);
       });
     });
 
-    describe('REINDEX_SOURCE_TO_TEMP_INDEX', () => {
-      const state: ReindexSourceToTempIndex = {
+    describe('REINDEX_SOURCE_TO_TEMP_TRANSFORM', () => {
+      const state: ReindexSourceToTempTransform = {
         ...baseState,
-        controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX',
+        controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM',
         outdatedDocuments: [],
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -1059,8 +1059,8 @@ describe('migrations v2 model', () => {
         },
       ] as SavedObjectsRawDoc[];
 
-      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK if action succeeded', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right({
+      it('REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK if action succeeded', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_TRANSFORM'> = Either.right({
           processedDocs,
         });
         const newState = model(state, res) as ReindexSourceToTempIndexBulk;
@@ -1071,7 +1071,7 @@ describe('migrations v2 model', () => {
       });
 
       it('increments the progress.processed counter', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right({
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_TRANSFORM'> = Either.right({
           processedDocs,
         });
 
@@ -1089,8 +1089,8 @@ describe('migrations v2 model', () => {
         expect(newState.progress.processed).toBe(2);
       });
 
-      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded but we have carried through previous failures', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right({
+      it('REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded but we have carried through previous failures', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_TRANSFORM'> = Either.right({
           processedDocs,
         });
         const testState = {
@@ -1098,15 +1098,15 @@ describe('migrations v2 model', () => {
           corruptDocumentIds: ['a:b'],
           transformErrors: [],
         };
-        const newState = model(testState, res) as ReindexSourceToTempIndex;
+        const newState = model(testState, res) as ReindexSourceToTempTransform;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.corruptDocumentIds.length).toEqual(1);
         expect(newState.transformErrors.length).toEqual(0);
         expect(newState.progress.processed).toBe(0);
       });
 
-      it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ when response is left documents_transform_failed', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.left({
+      it('REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_READ when response is left documents_transform_failed', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_TRANSFORM'> = Either.left({
           type: 'documents_transform_failed',
           corruptDocumentIds: ['a:b'],
           transformErrors: [],

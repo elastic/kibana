@@ -8,7 +8,7 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
 
-export function registerMapsUsageCollector(usageCollection: UsageCollectionSetup): void {
+export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetup): void {
   if (!usageCollection) {
     return;
   }

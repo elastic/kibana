@@ -50,7 +50,7 @@ export async function createAnomalyDetectionJobs(
       `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
     );
 
-    const indexPatternName = indices['apm_oss.transactionIndices'];
+    const indexPatternName = indices.metric;
     const responses = await Promise.all(
       uniqueMlJobEnvs.map((environment) =>
         createAnomalyDetectionJob({ ml, environment, indexPatternName })

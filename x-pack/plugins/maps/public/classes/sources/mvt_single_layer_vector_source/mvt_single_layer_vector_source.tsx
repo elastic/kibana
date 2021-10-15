@@ -243,6 +243,14 @@ export class MVTSingleLayerVectorSource
   async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
     return {};
   }
+
+  showJoinEditor(): boolean {
+    return false;
+  }
+
+  getJoinsDisabledReason(): string | null {
+    return null;
+  }
 }
 
 registerSource({

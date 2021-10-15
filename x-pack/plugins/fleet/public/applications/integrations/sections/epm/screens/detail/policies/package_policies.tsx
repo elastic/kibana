@@ -13,19 +13,16 @@ import type {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import {
-  EuiButtonIcon,
   EuiBasicTable,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   EuiText,
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
-import styled from 'styled-components';
 
 import { InstallStatus } from '../../../../../types';
 import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
@@ -41,10 +38,10 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
   AgentEnrollmentFlyout,
   AgentPolicySummaryLine,
-  LinkedAgentCount,
   PackagePolicyActionsMenu,
 } from '../../../../../components';
 
+import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
 
@@ -57,10 +54,6 @@ interface InMemoryPackagePolicyAndAgentPolicy {
   packagePolicy: InMemoryPackagePolicy;
   agentPolicy: GetAgentPoliciesResponseItem;
 }
-
-const AddAgentButton = styled(EuiButtonIcon)`
-  margin-left: ${(props) => props.theme.eui.euiSizeS};
-`;
 
 const IntegrationDetailsLink = memo<{
   packagePolicy: InMemoryPackagePolicyAndAgentPolicy['packagePolicy'];
@@ -86,6 +79,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const agentPolicyIdFromParams = useMemo(
     () => queryParams.get('addAgentToPolicyId'),
+    [queryParams]
+  );
+  const showAddAgentHelpForPolicyId = useMemo(
+    () => queryParams.get('showAddAgentHelpForPolicyId'),
     [queryParams]
   );
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string | null>(
@@ -224,7 +221,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         }),
         render(_version, { agentPolicy, packagePolicy }) {
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s" className="eui-textNoWrap">
                   <FormattedMessage
@@ -267,51 +264,6 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
       {
-        field: '',
-        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentCount', {
-          defaultMessage: 'Agents',
-        }),
-        truncateText: true,
-        align: 'left',
-        width: '8ch',
-        render({ packagePolicy, agentPolicy }: InMemoryPackagePolicyAndAgentPolicy) {
-          const count = agentPolicy?.agents ?? 0;
-
-          return (
-            <>
-              <LinkedAgentCount
-                count={count}
-                agentPolicyId={packagePolicy.policy_id}
-                className="eui-textTruncate"
-                data-test-subj="rowAgentCount"
-              />
-              {count === 0 && (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.fleet.epm.packageDetails.integrationList.addAgent',
-                    {
-                      defaultMessage: 'Add Agent',
-                    }
-                  )}
-                >
-                  <AddAgentButton
-                    iconType="plusInCircle"
-                    onClick={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
-                    data-test-subj="addAgentButton"
-                    aria-label={i18n.translate(
-                      'xpack.fleet.epm.packageDetails.integrationList.addAgent',
-                      {
-                        defaultMessage: 'Add Agent',
-                      }
-                    )}
-                  />
-                </EuiToolTip>
-              )}
-            </>
-          );
-        },
-      },
-      {
         field: 'packagePolicy.updated_by',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.updatedBy', {
           defaultMessage: 'Last Updated By',
@@ -332,6 +284,22 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             <span className="eui-textTruncate" title={updatedAt}>
               <FormattedRelative value={updatedAt} />
             </span>
+          );
+        },
+      },
+      {
+        field: '',
+        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentCount', {
+          defaultMessage: 'Agents',
+        }),
+        render({ agentPolicy }: InMemoryPackagePolicyAndAgentPolicy) {
+          return (
+            <PackagePolicyAgentsCell
+              agentPolicyId={agentPolicy.id}
+              agentCount={agentPolicy.agents}
+              onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
+              hasHelpPopover={showAddAgentHelpForPolicyId === agentPolicy.id}
+            />
           );
         },
       },
@@ -358,7 +326,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
     ],
-    [getHref, viewDataStep]
+    [getHref, showAddAgentHelpForPolicyId, viewDataStep]
   );
 
   const noItemsMessage = useMemo(() => {

@@ -20,8 +20,8 @@ import { getSeriesData } from './vis_data/get_series_data';
 import { getTableData } from './vis_data/get_table_data';
 import { getEsQueryConfig } from './vis_data/helpers/get_es_query_uisettings';
 import { getCachedIndexPatternFetcher } from './search_strategies/lib/cached_index_pattern_fetcher';
-import { MAX_BUCKETS_SETTING } from '../../common/constants';
 import { getIntervalAndTimefield } from './vis_data/get_interval_and_timefield';
+import { UI_SETTINGS } from '../../common/constants';
 
 export async function getVisData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -57,7 +57,7 @@ export async function getVisData(
           index = await cachedIndexPatternFetcher(index.indexPatternString, true);
         }
 
-        const maxBuckets = await uiSettings.get<number>(MAX_BUCKETS_SETTING);
+        const maxBuckets = await uiSettings.get<number>(UI_SETTINGS.MAX_BUCKETS_SETTING);
         const { min, max } = request.body.timerange;
 
         return getIntervalAndTimefield(

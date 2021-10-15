@@ -33,7 +33,7 @@ import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { LAYER_TYPE } from '../../../common/constants';
 import { getData, getCore } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
-import { IVectorLayer } from '../../classes/layers/vector_layer';
+import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
 import { ImmutableSourceProperty, OnSourceChangeArgs } from '../../classes/sources/source';
 import { IField } from '../../classes/fields/field';
 
@@ -111,11 +111,12 @@ export class EditLayerPanel extends Component<Props, State> {
   };
 
   async _loadLeftJoinFields() {
-    if (
-      !this.props.selectedLayer ||
-      !this.props.selectedLayer.showJoinEditor() ||
-      (this.props.selectedLayer as IVectorLayer).getLeftJoinFields === undefined
-    ) {
+    if (!this.props.selectedLayer || !isVectorLayer(this.props.selectedLayer)) {
+      return;
+    }
+
+    const vectorLayer = this.props.selectedLayer as IVectorLayer;
+    if (!vectorLayer.showJoinEditor() || vectorLayer.getLeftJoinFields === undefined) {
       return;
     }
 
@@ -182,7 +183,11 @@ export class EditLayerPanel extends Component<Props, State> {
   }
 
   _renderJoinSection() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.showJoinEditor()) {
+    if (!this.props.selectedLayer || !isVectorLayer(this.props.selectedLayer)) {
+      return;
+    }
+    const vectorLayer = this.props.selectedLayer as IVectorLayer;
+    if (!vectorLayer.showJoinEditor()) {
       return null;
     }
 
@@ -190,7 +195,7 @@ export class EditLayerPanel extends Component<Props, State> {
       <Fragment>
         <EuiPanel>
           <JoinEditor
-            layer={this.props.selectedLayer}
+            layer={vectorLayer}
             leftJoinFields={this.state.leftJoinFields}
             layerDisplayName={this.state.displayName}
           />

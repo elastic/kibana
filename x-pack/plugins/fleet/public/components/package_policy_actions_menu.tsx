@@ -69,7 +69,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           >
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
-              defaultMessage="Add Agent"
+              defaultMessage="Add agent"
             />
           </EuiContextMenuItem>,
         ]
@@ -77,8 +77,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     <EuiContextMenuItem
       disabled={!hasWriteCapabilities}
       icon="pencil"
-      href={getHref('edit_integration', {
-        policyId: agentPolicy.id,
+      href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
       })}
       key="packagePolicyEdit"

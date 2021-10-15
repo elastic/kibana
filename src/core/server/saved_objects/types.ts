@@ -214,7 +214,7 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  *
  * From the perspective of application code and APIs the SavedObjectsClient is
  * a black box that persists objects. One of the internal details that users have
- * no control over is that we use an elasticsearch index for persistance and that
+ * no control over is that we use an elasticsearch index for persistence and that
  * index might be missing.
  *
  * At the time of writing we are in the process of transitioning away from the
@@ -356,6 +356,10 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
    * Is the type importable or exportable. Defaults to `false`.
    */
   importableAndExportable?: boolean;
+  /**
+   * When specified, will be used instead of the type's name in SO management section's labels.
+   */
+  displayName?: string;
   /**
    * When set to false, the type will not be listed or searchable in the SO management section.
    * Main usage of setting this property to false for a type is when objects from the type should

@@ -607,17 +607,25 @@
               "UrlGeneratorsSetup",
               "; url: ",
               "UrlService",
-              "; navigate(options: ",
+              "<unknown>; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
               {
                 "pluginId": "share",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.RedirectOptions",
-                "text": "RedirectOptions"
+                "section": "def-common.AnonymousAccessServiceContract",
+                "text": "AnonymousAccessServiceContract"
               },
-              "<",
-              "SerializableRecord",
-              ">): void; }"
+              ") => void; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
@@ -712,16 +720,16 @@
               "UrlGeneratorsStart",
               "; url: ",
               "UrlService",
-              "; navigate(options: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.RedirectOptions",
-                "text": "RedirectOptions"
-              },
+              "<unknown>; navigate(options: ",
+              "RedirectOptions",
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">): void; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",

@@ -57,17 +57,6 @@ const clientSearchMock = (
       aggregations = { transaction_duration_percentiles: { values: {} } };
     }
 
-    // fetchTransactionDurationHistogramInterval
-    if (
-      aggs.transaction_duration_min !== undefined &&
-      aggs.transaction_duration_max !== undefined
-    ) {
-      aggregations = {
-        transaction_duration_min: { value: 0 },
-        transaction_duration_max: { value: 1234 },
-      };
-    }
-
     // fetchTransactionDurationCorrelation
     if (aggs.logspace_ranges !== undefined) {
       aggregations = { logspace_ranges: { buckets: [] } };
@@ -101,10 +90,7 @@ const clientSearchMock = (
 };
 
 const getApmIndicesMock = async () =>
-  ({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    'apm_oss.transactionIndices': 'apm-*',
-  } as ApmIndicesConfig);
+  ({ transaction: 'apm-*' } as ApmIndicesConfig);
 
 describe('APM Correlations search strategy', () => {
   describe('strategy interface', () => {

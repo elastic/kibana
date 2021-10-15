@@ -159,6 +159,7 @@ export const basicCompositeResponse = (from: number) => ({
           aggregatedIntervals: {
             buckets: bucketsA(from),
           },
+          doc_count: 1,
         },
         {
           key: {
@@ -167,6 +168,7 @@ export const basicCompositeResponse = (from: number) => ({
           aggregatedIntervals: {
             buckets: bucketsB(from),
           },
+          doc_count: 1,
         },
       ],
     },
@@ -190,6 +192,7 @@ export const alternateCompositeResponse = (from: number) => ({
           aggregatedIntervals: {
             buckets: bucketsB(from),
           },
+          doc_count: 1,
         },
         {
           key: {
@@ -198,13 +201,23 @@ export const alternateCompositeResponse = (from: number) => ({
           aggregatedIntervals: {
             buckets: bucketsA(from),
           },
+          doc_count: 1,
+        },
+        {
+          key: {
+            groupBy0: 'c',
+          },
+          aggregatedIntervals: {
+            buckets: bucketsC(from),
+          },
+          doc_count: 1,
         },
       ],
     },
   },
   hits: {
     total: {
-      value: 2,
+      value: 3,
     },
   },
 });

@@ -77,6 +77,8 @@ export async function registerMetricThresholdAlertType(
           ),
           sourceId: schema.string(),
           alertOnNoData: schema.maybe(schema.boolean()),
+          alertOnGroupDisappear: schema.maybe(schema.boolean()),
+          shouldDropPartialBuckets: schema.maybe(schema.boolean()),
         },
         { unknowns: 'allow' }
       ),

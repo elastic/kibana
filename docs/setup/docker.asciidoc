@@ -125,7 +125,7 @@ Some example translations are shown here:
 **Environment Variable**:: **Kibana Setting**
 `SERVER_NAME`:: `server.name`
 `SERVER_BASEPATH`:: `server.basePath`
-`MONITORING_ENABLED`:: `monitoring.enabled`
+`ELASTICSEARCH_HOSTS`:: `elasticsearch.hosts`
 
 In general, any setting listed in <<settings>> can be configured with this technique.
 

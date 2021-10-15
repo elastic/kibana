@@ -166,7 +166,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         ...selection,
         visualizationState: selection.getVisualizationState(),
       },
-      'SWITCH_VISUALIZATION'
+      true
     );
 
     if (
@@ -515,11 +515,14 @@ function getTopSuggestion(
     props.visualizationMap[visualization.activeId].getMainPalette
       ? props.visualizationMap[visualization.activeId].getMainPalette!(visualization.state)
       : undefined;
+
   const unfilteredSuggestions = getSuggestions({
     datasourceMap: props.datasourceMap,
     datasourceStates,
     visualizationMap: { [visualizationId]: newVisualization },
-    activeVisualizationId: visualization.activeId,
+    activeVisualization: visualization.activeId
+      ? props.visualizationMap[visualization.activeId]
+      : undefined,
     visualizationState: visualization.state,
     subVisualizationId,
     activeData: props.framePublicAPI.activeData,

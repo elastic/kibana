@@ -34,6 +34,7 @@ import {
 const mapStateToProps = (state, ownProps) => {
   const indexStatusByName = {};
   const { indexNames } = ownProps;
+  const allIndices = state.indices.byId;
 
   indexNames.forEach((indexName) => {
     indexStatusByName[indexName] = getIndexStatusByIndexName(state, indexName);
@@ -42,8 +43,8 @@ const mapStateToProps = (state, ownProps) => {
   return {
     indexStatusByName,
     indices: getIndicesByName(state, indexNames),
-    isSystemIndexByName: getIsSystemIndexByName(indexNames),
-    hasSystemIndex: hasSystemIndex(indexNames),
+    isSystemIndexByName: getIsSystemIndexByName(indexNames, allIndices),
+    hasSystemIndex: hasSystemIndex(indexNames, allIndices),
   };
 };
 

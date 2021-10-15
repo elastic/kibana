@@ -256,6 +256,7 @@ export function TransactionDistributionChart({
           />
           {data.map((d, i) => (
             <AreaSeries
+              key={d.id}
               id={d.id}
               xScaleType={ScaleType.Log}
               yScaleType={ScaleType.Log}

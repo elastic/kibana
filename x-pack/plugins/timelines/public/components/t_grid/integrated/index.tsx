@@ -237,7 +237,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       endDate: end,
       entityType,
       fields,
-      filterQuery: combinedQueries!.filterQuery,
+      filterQuery: combinedQueries?.filterQuery,
       id,
       indexNames,
       limit: itemsPerPage,
@@ -347,30 +347,31 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     >
                       <ScrollableFlexItem grow={1}>
                         <StatefulBody
-                          hasAlertsCrud={hasAlertsCrud}
                           activePage={pageInfo.activePage}
                           browserFields={browserFields}
                           bulkActions={bulkActions}
-                          filterQuery={filterQuery}
                           data={nonDeletedEvents}
                           defaultCellActions={defaultCellActions}
+                          filterQuery={filterQuery}
+                          filters={filters}
+                          filterStatus={filterStatus}
+                          hasAlertsCrud={hasAlertsCrud}
                           id={id}
+                          indexNames={indexNames}
                           isEventViewer={true}
                           itemsPerPageOptions={itemsPerPageOptions}
+                          leadingControlColumns={leadingControlColumns}
                           loadPage={loadPage}
                           onRuleChange={onRuleChange}
                           pageSize={itemsPerPage}
+                          refetch={refetch}
                           renderCellValue={renderCellValue}
                           rowRenderers={rowRenderers}
-                          tabType={TimelineTabs.query}
                           tableView={tableView}
+                          tabType={TimelineTabs.query}
                           totalItems={totalCountMinusDeleted}
-                          unit={unit}
-                          filterStatus={filterStatus}
-                          leadingControlColumns={leadingControlColumns}
                           trailingControlColumns={trailingControlColumns}
-                          refetch={refetch}
-                          indexNames={indexNames}
+                          unit={unit}
                         />
                       </ScrollableFlexItem>
                     </FullWidthFlexGroup>

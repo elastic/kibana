@@ -22,7 +22,8 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
     preserveDrawingBuffer: true,
   },
   schema: configSchema,
-  deprecations: () => [
+  deprecations: ({ deprecate }) => [
+    deprecate('enabled', '8.0.0'),
     (
       completeConfig: Record<string, any>,
       rootPath: string,
@@ -32,6 +33,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
         return completeConfig;
       }
       addDeprecation({
+        configPath: 'map.proxyElasticMapsServiceInMaps',
         documentationUrl:
           'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html#elastic-maps-server',
         message: i18n.translate('xpack.maps.deprecation.proxyEMS.message', {

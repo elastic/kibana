@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { configDeprecationsMock } from '../../../../core/server/mocks';
 import { deprecateEndpointConfigs } from './deprecations';
 import type { TelemetryConfigType } from './config';
 import { TELEMETRY_ENDPOINT } from '../../common/constants';
+
 describe('deprecateEndpointConfigs', () => {
   const fromPath = 'telemetry';
   const mockAddDeprecation = jest.fn();
+  const deprecationContext = configDeprecationsMock.createContext();
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -28,7 +32,12 @@ describe('deprecateEndpointConfigs', () => {
 
   it('returns void if telemetry.* config is not set', () => {
     const rawConfig = createMockRawConfig();
-    const result = deprecateEndpointConfigs(rawConfig, fromPath, mockAddDeprecation);
+    const result = deprecateEndpointConfigs(
+      rawConfig,
+      fromPath,
+      mockAddDeprecation,
+      deprecationContext
+    );
     expect(result).toBe(undefined);
   });
 
@@ -36,7 +45,12 @@ describe('deprecateEndpointConfigs', () => {
     const rawConfig = createMockRawConfig({
       url: TELEMETRY_ENDPOINT.MAIN_CHANNEL.STAGING,
     });
-    const result = deprecateEndpointConfigs(rawConfig, fromPath, mockAddDeprecation);
+    const result = deprecateEndpointConfigs(
+      rawConfig,
+      fromPath,
+      mockAddDeprecation,
+      deprecationContext
+    );
     expect(result).toMatchInlineSnapshot(`
       Object {
         "set": Array [
@@ -58,7 +72,12 @@ describe('deprecateEndpointConfigs', () => {
     const rawConfig = createMockRawConfig({
       url: 'random-endpoint',
     });
-    const result = deprecateEndpointConfigs(rawConfig, fromPath, mockAddDeprecation);
+    const result = deprecateEndpointConfigs(
+      rawConfig,
+      fromPath,
+      mockAddDeprecation,
+      deprecationContext
+    );
     expect(result).toMatchInlineSnapshot(`
       Object {
         "set": Array [
@@ -80,7 +99,12 @@ describe('deprecateEndpointConfigs', () => {
     const rawConfig = createMockRawConfig({
       optInStatusUrl: TELEMETRY_ENDPOINT.MAIN_CHANNEL.STAGING,
     });
-    const result = deprecateEndpointConfigs(rawConfig, fromPath, mockAddDeprecation);
+    const result = deprecateEndpointConfigs(
+      rawConfig,
+      fromPath,
+      mockAddDeprecation,
+      deprecationContext
+    );
     expect(result).toMatchInlineSnapshot(`
       Object {
         "set": Array [
@@ -102,7 +126,12 @@ describe('deprecateEndpointConfigs', () => {
     const rawConfig = createMockRawConfig({
       optInStatusUrl: 'random-endpoint',
     });
-    const result = deprecateEndpointConfigs(rawConfig, fromPath, mockAddDeprecation);
+    const result = deprecateEndpointConfigs(
+      rawConfig,
+      fromPath,
+      mockAddDeprecation,
+      deprecationContext
+    );
     expect(result).toMatchInlineSnapshot(`
       Object {
         "set": Array [
@@ -124,11 +153,12 @@ describe('deprecateEndpointConfigs', () => {
     const rawConfig = createMockRawConfig({
       url: TELEMETRY_ENDPOINT.MAIN_CHANNEL.PROD,
     });
-    deprecateEndpointConfigs(rawConfig, fromPath, mockAddDeprecation);
+    deprecateEndpointConfigs(rawConfig, fromPath, mockAddDeprecation, deprecationContext);
     expect(mockAddDeprecation).toBeCalledTimes(1);
     expect(mockAddDeprecation.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "configPath": "telemetry.url",
           "correctiveActions": Object {
             "manualSteps": Array [
               "Remove \\"telemetry.url\\" from the Kibana configuration.",
@@ -136,6 +166,7 @@ describe('deprecateEndpointConfigs', () => {
             ],
           },
           "message": "\\"telemetry.url\\" has been deprecated. Set \\"telemetry.sendUsageTo: staging\\" to the Kibana configurations to send usage to the staging endpoint.",
+          "title": "Setting \\"telemetry.url\\" is deprecated",
         },
       ]
     `);
@@ -145,11 +176,12 @@ describe('deprecateEndpointConfigs', () => {
     const rawConfig = createMockRawConfig({
       optInStatusUrl: 'random-endpoint',
     });
-    deprecateEndpointConfigs(rawConfig, fromPath, mockAddDeprecation);
+    deprecateEndpointConfigs(rawConfig, fromPath, mockAddDeprecation, deprecationContext);
     expect(mockAddDeprecation).toBeCalledTimes(1);
     expect(mockAddDeprecation.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "configPath": "telemetry.optInStatusUrl",
           "correctiveActions": Object {
             "manualSteps": Array [
               "Remove \\"telemetry.optInStatusUrl\\" from the Kibana configuration.",
@@ -157,6 +189,7 @@ describe('deprecateEndpointConfigs', () => {
             ],
           },
           "message": "\\"telemetry.optInStatusUrl\\" has been deprecated. Set \\"telemetry.sendUsageTo: staging\\" to the Kibana configurations to send usage to the staging endpoint.",
+          "title": "Setting \\"telemetry.optInStatusUrl\\" is deprecated",
         },
       ]
     `);

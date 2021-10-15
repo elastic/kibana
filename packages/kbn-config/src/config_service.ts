@@ -19,12 +19,13 @@ import { RawConfigurationProvider } from './raw/raw_config_service';
 import {
   applyDeprecations,
   ConfigDeprecationWithContext,
+  ConfigDeprecationContext,
   ConfigDeprecationProvider,
   configDeprecationFactory,
   DeprecatedConfigDetails,
   ChangedDeprecatedPaths,
 } from './deprecation';
-import { LegacyObjectToConfigAdapter } from './legacy';
+import { ObjectToConfigAdapter } from './object_to_config_adapter';
 
 /** @internal */
 export type IConfigService = PublicMethodsOf<ConfigService>;
@@ -71,7 +72,7 @@ export class ConfigService {
       map(([rawConfig, deprecations]) => {
         const migrated = applyDeprecations(rawConfig, deprecations);
         this.deprecatedConfigPaths.next(migrated.changedPaths);
-        return new LegacyObjectToConfigAdapter(migrated.config);
+        return new ObjectToConfigAdapter(migrated.config);
       }),
       tap((config) => {
         this.lastConfig = config;
@@ -103,6 +104,7 @@ export class ConfigService {
       ...provider(configDeprecationFactory).map((deprecation) => ({
         deprecation,
         path: flatPath,
+        context: createDeprecationContext(this.env),
       })),
     ]);
   }
@@ -177,6 +179,24 @@ export class ConfigService {
     // if plugin hasn't got a config schema, we try to read "enabled" directly
     const isEnabled = validatedConfig?.enabled ?? config.get(enabledPath);
 
+    // if we implicitly added an `enabled` config to a plugin without a schema,
+    // we log a deprecation warning, as this will not be supported in 8.0
+    if (validatedConfig?.enabled === undefined && isEnabled !== undefined) {
+      const deprecationPath = pathToString(enabledPath);
+      const deprecatedConfigDetails: DeprecatedConfigDetails = {
+        configPath: deprecationPath,
+        title: `Setting "${deprecationPath}" is deprecated`,
+        message: `Configuring "${deprecationPath}" is deprecated and will be removed in 8.0.0.`,
+        correctiveActions: {
+          manualSteps: [
+            `Remove "${deprecationPath}" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.`,
+          ],
+        },
+      };
+      this.deprecationLog.warn(deprecatedConfigDetails.message);
+      this.markDeprecatedConfigAsHandled(namespace, deprecatedConfigDetails);
+    }
+
     // not declared. consider that plugin is enabled by default
     if (isEnabled === undefined) {
       return true;
@@ -220,9 +240,7 @@ export class ConfigService {
       if (!context.silent) {
         deprecationMessages.push(context.message);
       }
-      const handledDeprecatedConfig = this.handledDeprecatedConfigs.get(domainId) || [];
-      handledDeprecatedConfig.push(context);
-      this.handledDeprecatedConfigs.set(domainId, handledDeprecatedConfig);
+      this.markDeprecatedConfigAsHandled(domainId, context);
     };
 
     applyDeprecations(rawConfig, deprecations, createAddDeprecation);
@@ -260,6 +278,12 @@ export class ConfigService {
     this.log.debug(`Marking config path as handled: ${path}`);
     this.handledPaths.add(path);
   }
+
+  private markDeprecatedConfigAsHandled(domainId: string, config: DeprecatedConfigDetails) {
+    const handledDeprecatedConfig = this.handledDeprecatedConfigs.get(domainId) || [];
+    handledDeprecatedConfig.push(config);
+    this.handledDeprecatedConfigs.set(domainId, handledDeprecatedConfig);
+  }
 }
 
 const createPluginEnabledPath = (configPath: string | string[]) => {
@@ -277,3 +301,10 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
   handledPaths.some((handledPath) => hasConfigPathIntersection(path, handledPath));
+
+const createDeprecationContext = (env: Env): ConfigDeprecationContext => {
+  return {
+    branch: env.packageInfo.branch,
+    version: env.packageInfo.version,
+  };
+};

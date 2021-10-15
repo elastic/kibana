@@ -21,6 +21,7 @@ import { readTestReport } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
 import { getReportMessageIter } from './report_metadata';
 import { reportFailuresToEs } from './report_failures_to_es';
+import { reportFailuresToFile } from './report_failures_to_file';
 
 const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
 
@@ -36,30 +37,31 @@ export function runFailedTestsReporterCli() {
         );
       }
 
+      let branch: string = '';
       if (updateGithub) {
-        let branch: string | undefined = '';
         let isPr = false;
 
         if (process.env.BUILDKITE === 'true') {
-          branch = process.env.BUILDKITE_BRANCH;
+          branch = process.env.BUILDKITE_BRANCH || '';
           isPr = process.env.BUILDKITE_PULL_REQUEST === 'true';
+          updateGithub = process.env.REPORT_FAILED_TESTS_TO_GITHUB === 'true';
         } else {
           // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
           const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
-          branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH;
+          branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH || '';
           isPr = !!process.env.ghprbPullId;
+
+          const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
+          if (!isMasterOrVersion || isPr) {
+            log.info('Failure issues only created on master/version branch jobs');
+            updateGithub = false;
+          }
         }
 
         if (!branch) {
           throw createFailError(
             'Unable to determine originating branch from job name or other environment variables'
           );
-        }
-
-        const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
-        if (!isMasterOrVersion || isPr) {
-          log.info('Failure issues only created on master/version branch jobs');
-          updateGithub = false;
         }
       }
 
@@ -135,8 +137,15 @@ export function runFailedTestsReporterCli() {
           }
 
           if (existingIssue) {
-            const newFailureCount = await updateFailureIssue(buildUrl, existingIssue, githubApi);
+            const newFailureCount = await updateFailureIssue(
+              buildUrl,
+              existingIssue,
+              githubApi,
+              branch
+            );
             const url = existingIssue.html_url;
+            failure.githubIssue = url;
+            failure.failureCount = updateGithub ? newFailureCount : newFailureCount - 1;
             pushMessage(`Test has failed ${newFailureCount - 1} times on tracked branches: ${url}`);
             if (updateGithub) {
               pushMessage(`Updated existing issue: ${url} (fail count: ${newFailureCount})`);
@@ -144,12 +153,14 @@ export function runFailedTestsReporterCli() {
             continue;
           }
 
-          const newIssue = await createFailureIssue(buildUrl, failure, githubApi);
+          const newIssue = await createFailureIssue(buildUrl, failure, githubApi, branch);
           pushMessage('Test has not failed recently on tracked branches');
           if (updateGithub) {
             pushMessage(`Created new issue: ${newIssue.html_url}`);
+            failure.githubIssue = newIssue.html_url;
           }
           newlyCreatedIssues.push({ failure, newIssue });
+          failure.failureCount = updateGithub ? 1 : 0;
         }
 
         // mutates report to include messages and writes updated report to disk
@@ -160,6 +171,8 @@ export function runFailedTestsReporterCli() {
           reportPath,
           dryRun: !flags['report-update'],
         });
+
+        reportFailuresToFile(log, failures);
       }
     },
     {

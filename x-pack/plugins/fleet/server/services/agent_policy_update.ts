@@ -43,11 +43,11 @@ export async function agentPolicyUpdateEventHandler(
       name: 'Default',
       agentPolicyId,
     });
-    await agentPolicyService.createFleetPolicyChangeAction(internalSoClient, agentPolicyId);
+    await agentPolicyService.createFleetServerPolicy(internalSoClient, agentPolicyId);
   }
 
   if (action === 'updated') {
-    await agentPolicyService.createFleetPolicyChangeAction(internalSoClient, agentPolicyId);
+    await agentPolicyService.createFleetServerPolicy(internalSoClient, agentPolicyId);
   }
 
   if (action === 'deleted') {

@@ -20,7 +20,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
 import { createStubIndexPattern } from '../../../../plugins/data/common/stubs';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
-import { IndexPattern } from '../../../data/common';
+import { DataView } from '../../../data/common';
 import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
 
 describe('Saved Object', () => {
@@ -725,7 +725,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: true,
-          indexPattern: { id: indexPatternId } as IndexPattern,
+          indexPattern: { id: indexPatternId } as DataView,
         };
 
         stubESResponse(
@@ -752,7 +752,7 @@ describe('Saved Object', () => {
         return savedObject.init!().then(() => {
           expect(afterESRespCallback).toHaveBeenCalled();
           const index = savedObject.searchSource!.getField('index');
-          expect(index instanceof IndexPattern).toBe(true);
+          expect(index instanceof DataView).toBe(true);
           expect(index!.id).toEqual(indexPatternId);
         });
       });
@@ -765,7 +765,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: false,
-          indexPattern: { id: indexPatternId } as IndexPattern,
+          indexPattern: { id: indexPatternId } as DataView,
         };
 
         stubESResponse(getMockedDocResponse(indexPatternId));

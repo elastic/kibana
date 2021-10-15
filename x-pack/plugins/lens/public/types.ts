@@ -234,7 +234,11 @@ export interface Datasource<T = unknown, P = unknown> {
 
   toExpression: (state: T, layerId: string) => ExpressionAstExpression | string | null;
 
-  getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForField: (
+    state: T,
+    field: unknown,
+    filterFn: (layerId: string) => boolean
+  ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
     state: T,
     indexPatternId: string,
@@ -242,6 +246,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (
     state: T,
+    filterFn?: (layerId: string) => boolean,
     activeData?: Record<string, Datatable>
   ) => Array<DatasourceSuggestion<T>>;
 
@@ -326,6 +331,8 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  invalid?: boolean;
+  invalidMessage?: string;
 };
 
 // The only way a visualization has to restrict the query building
@@ -335,6 +342,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
     newState: Parameters<StateSetter<T>>[0],
     publishToVisualization?: {
       isDimensionComplete?: boolean;
+      forceRender?: boolean;
     }
   ) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
@@ -343,6 +351,8 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   toggleFullscreen: () => void;
   isFullscreen: boolean;
   layerType: LayerType | undefined;
+  supportStaticValue: boolean;
+  supportFieldFormat?: boolean;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -434,7 +444,7 @@ export interface VisualizationToolbarProps<T = unknown> {
 export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
   groupId: string;
   accessor: string;
-  setState: (newState: T) => void;
+  setState(newState: T | ((currState: T) => T)): void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
@@ -466,13 +476,18 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // this dimension group in the hierarchy. If not specified, the position of the dimension in the array is used. specified nesting
   // orders are always higher in the hierarchy than non-specified ones.
   nestingOrder?: number;
+  // some type of layers can produce groups even if invalid. Keep this information to visually show the user that.
+  invalid?: boolean;
+  invalidMessage?: string;
+  // need a special flag to know when to pass the previous column on duplicating
+  requiresPreviousColumnOnDuplicate?: boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
-  frame: Pick<FramePublicAPI, 'datasourceLayers'>;
+  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
 }
 
 /**
@@ -655,6 +670,7 @@ export interface Visualization<T = unknown> {
   getConfiguration: (props: VisualizationConfigProps<T>) => {
     groups: VisualizationDimensionGroupConfig[];
     supportStaticValue?: boolean;
+    supportFieldFormat?: boolean;
   };
 
   /**
@@ -818,5 +834,5 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 export interface SharingSavedObjectProps {
   outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
   aliasTargetId?: string;
-  errorJSON?: string;
+  sourceId?: string;
 }
