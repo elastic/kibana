@@ -31,6 +31,12 @@ export const optionsListReducers = {
     if (!state.selectedOptions) state.selectedOptions = [];
     state.selectedOptions?.push(action.payload);
   },
+  replaceSelection: (
+    state: WritableDraft<OptionsListEmbeddableInput>,
+    action: PayloadAction<string>
+  ) => {
+    state.selectedOptions = [action.payload];
+  },
   clearSelections: (state: WritableDraft<OptionsListEmbeddableInput>) => {
     state.selectedOptions = [];
   },

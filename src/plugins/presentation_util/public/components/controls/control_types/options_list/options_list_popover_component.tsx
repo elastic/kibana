@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiFilterSelectItem,
   EuiLoadingChart,
@@ -42,15 +42,22 @@ export const OptionsListPopover = ({
   const {
     useEmbeddableSelector,
     useEmbeddableDispatch,
-    actions: { selectOption, deselectOption, clearSelections },
+    actions: { selectOption, deselectOption, clearSelections, replaceSelection },
   } = useReduxEmbeddableContext<OptionsListEmbeddableInput, typeof optionsListReducers>();
 
   const dispatch = useEmbeddableDispatch();
-  const { selectedOptions } = useEmbeddableSelector((state) => state);
+  const { selectedOptions, singleSelect } = useEmbeddableSelector((state) => state);
 
   // track selectedOptions in a set for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
   const [showOnlySelected, setShowOnlySelected] = useState(false);
+
+  // remove all other selections if this control is single select
+  useEffect(() => {
+    if (singleSelect && selectedOptions && selectedOptions?.length > 1) {
+      dispatch(replaceSelection(selectedOptions[0]));
+    }
+  }, [selectedOptions, singleSelect, dispatch, replaceSelection]);
 
   return (
     <>
@@ -110,6 +117,10 @@ export const OptionsListPopover = ({
                 checked={selectedOptionsSet?.has(availableOption) ? 'on' : undefined}
                 key={index}
                 onClick={() => {
+                  if (singleSelect) {
+                    dispatch(replaceSelection(availableOption));
+                    return;
+                  }
                   if (selectedOptionsSet.has(availableOption)) {
                     dispatch(deselectOption(availableOption));
                     return;

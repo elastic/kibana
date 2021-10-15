@@ -28,6 +28,10 @@ export const OptionsListStrings = {
       i18n.translate('presentationUtil.inputControls.optionsList.editor.fieldTitle', {
         defaultMessage: 'Field',
       }),
+    getAllowMultiselectTitle: () =>
+      i18n.translate('presentationUtil.inputControls.optionsList.editor.allowMultiselectTitle', {
+        defaultMessage: 'Allow multiselect',
+      }),
   },
   popover: {
     getLoadingMessage: () =>

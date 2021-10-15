@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow, EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
+import { EuiFormRow, EuiSuperSelect, EuiSuperSelectOption, EuiSwitch } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { IFieldType, IIndexPattern } from '../../../../../../data/public';
@@ -26,6 +26,8 @@ interface OptionsListEditorProps extends ControlEditorProps {
 }
 
 interface OptionsListEditorState {
+  singleSelect?: boolean;
+
   indexPatternSelectOptions: Array<EuiSuperSelectOption<string>>;
   availableIndexPatterns?: { [key: string]: IIndexPattern };
   indexPattern?: IIndexPattern;
@@ -45,18 +47,25 @@ export const OptionsListEditor = ({
   const [state, setState] = useState<OptionsListEditorState>({
     indexPattern: initialInput?.indexPattern,
     field: initialInput?.field,
+    singleSelect: initialInput?.singleSelect,
     indexPatternSelectOptions: [],
     fieldSelectOptions: [],
   });
 
   const applySelection = ({
     field,
+    singleSelect,
     indexPattern,
   }: {
     field?: IFieldType;
+    singleSelect?: boolean;
     indexPattern?: IIndexPattern;
   }) => {
-    const newState = { ...(field ? { field } : {}), ...(indexPattern ? { indexPattern } : {}) };
+    const newState = {
+      ...(field ? { field } : {}),
+      ...(indexPattern ? { indexPattern } : {}),
+      ...(singleSelect !== undefined ? { singleSelect } : {}),
+    };
     /**
      * apply state and run onChange concurrently. State is copied here rather than by subscribing to embeddable
      * input so that the same editor component can cover the 'create' use case.
@@ -132,6 +141,13 @@ export const OptionsListEditor = ({
           options={state.fieldSelectOptions}
           onChange={(fieldName) => applySelection({ field: state.availableFields?.[fieldName] })}
           valueOfSelected={state.field?.name}
+        />
+      </EuiFormRow>
+      <EuiFormRow>
+        <EuiSwitch
+          label={OptionsListStrings.editor.getAllowMultiselectTitle()}
+          checked={!state.singleSelect}
+          onChange={(e) => applySelection({ singleSelect: !e.target.checked })}
         />
       </EuiFormRow>
     </>
