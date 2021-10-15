@@ -6,19 +6,14 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ClassNames } from '@emotion/react';
-import { EuiButtonIcon, EuiColorStops, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ExpressionAstExpression } from 'src/plugins/expressions';
 import { ColorStop } from '@elastic/eui/src/components/color_picker/color_stops';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
+import { PalettePicker } from '../../../public/components/palette_picker';
 
 const { StopsPalette: strings } = ArgumentStrings;
-
-const confirmContainerStyle = {
-  alignItems: 'center',
-  justifyContent: 'center',
-};
 
 interface StopPaletteArgInputProps {
   onValueChange: (value: ExpressionAstExpression) => void;
@@ -84,39 +79,10 @@ const StopsPaletteArgInput: React.FC<StopPaletteArgInputProps> = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="s" direction="row">
+    <EuiFlexGroup gutterSize="s" direction="column">
       <EuiFlexItem>
-        <EuiColorStops
-          label="Single start"
-          onChange={(e: ColorStop[] | undefined, isInvalid?: boolean | undefined) => {
-            if (isInvalid) {
-              return;
-            }
-
-            setColorStops(e ?? []);
-            onChange(e ?? []);
-          }}
-          colorStops={colorStops}
-          stopType="fixed"
-        />
+        <PalettePicker id={argId} additionalPalettes={[]} clearable={false} />
       </EuiFlexItem>
-      {confirm && (
-        <ClassNames>
-          {({ css, cx }) => (
-            <EuiFlexItem
-              grow={false}
-              className={cx('confirmButtonContainer', css(confirmContainerStyle))}
-            >
-              <EuiButtonIcon
-                iconType="checkInCircleFilled"
-                size="s"
-                aria-label="Apply changes"
-                onClick={() => onValueChange(value)}
-              />
-            </EuiFlexItem>
-          )}
-        </ClassNames>
-      )}
     </EuiFlexGroup>
   );
 };

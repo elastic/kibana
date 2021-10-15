@@ -11,7 +11,7 @@ import { isEqual } from 'lodash';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { palettes, ColorPalette } from '../../../common/lib/palettes';
+import { palettes as defaultPalettes, ColorPalette } from '../../../common/lib/palettes';
 
 const strings = {
   getEmptyPaletteLabel: () =>
@@ -27,8 +27,9 @@ const strings = {
 interface RequiredProps {
   id?: string;
   onChange?: (palette: ColorPalette) => void;
-  palette: ColorPalette;
+  palette?: ColorPalette;
   clearable?: false;
+  additionalPalettes?: ColorPalette[];
 }
 
 interface ClearableProps {
@@ -36,6 +37,7 @@ interface ClearableProps {
   onChange?: (palette: ColorPalette | null) => void;
   palette: ColorPalette | null;
   clearable: true;
+  additionalPalettes?: ColorPalette[];
 }
 
 type Props = RequiredProps | ClearableProps;
@@ -50,6 +52,8 @@ const findPalette = (colorPalette: ColorPalette | null, colorPalettes: ColorPale
 };
 
 export const PalettePicker: FC<Props> = (props) => {
+  const { additionalPalettes = [] } = props;
+  const palettes = [...defaultPalettes, ...additionalPalettes];
   const colorPalettes: EuiColorPalettePickerPaletteProps[] = palettes.map((item) => ({
     value: item.id,
     title: item.label,
