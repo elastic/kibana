@@ -100,8 +100,8 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
         setShowUpdateConnector(false);
 
         toasts.addSuccess({
-          title: i18n.MIGRATION_SUCCESS_TOAST_TITLE(action.name),
-          text: i18n.MIGRATION_SUCCESS_TOAST_TEXT,
+          title: i18n.UPDATE_SUCCESS_TOAST_TITLE(action.name),
+          text: i18n.UPDATE_SUCCESS_TOAST_TEXT,
         });
       } catch (err) {
         /**

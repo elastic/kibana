@@ -357,8 +357,8 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        text: 'Connector has been successfully migrated.',
-        title: 'Migrated connector SN',
+        text: 'Connector has been successfully updated.',
+        title: 'SN connector updated',
       });
 
       // The flyout is closed

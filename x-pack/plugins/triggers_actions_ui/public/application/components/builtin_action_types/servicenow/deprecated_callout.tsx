@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiSpacer, EuiCallOut, EuiButtonEmpty } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -31,22 +31,28 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
         )}
       >
         <FormattedMessage
-          defaultMessage="{migrate} or create a new one."
+          defaultMessage="{update} {create} "
           id="xpack.triggersActionsUI.components.builtinActionTypes.servicenow.appInstallationInfo"
           values={{
-            migrate: (
-              <EuiButtonEmpty
-                onClick={onMigrate}
-                flush="left"
-                data-test-subj="update-connector-btn"
-              >
+            update: (
+              <EuiLink onClick={onMigrate} data-test-subj="update-connector-btn">
                 {i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutMigrate',
                   {
                     defaultMessage: 'Update this connector',
                   }
                 )}
-              </EuiButtonEmpty>
+              </EuiLink>
+            ),
+            create: (
+              <span>
+                {i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutMigrate',
+                  {
+                    defaultMessage: 'or create a new one.',
+                  }
+                )}
+              </span>
             ),
           }}
         />

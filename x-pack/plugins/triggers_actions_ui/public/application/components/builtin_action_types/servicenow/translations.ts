@@ -197,21 +197,21 @@ export const INSTALLATION_CALLOUT_TITLE = i18n.translate(
   }
 );
 
-export const MIGRATION_SUCCESS_TOAST_TITLE = (connectorName: string) =>
+export const UPDATE_SUCCESS_TOAST_TITLE = (connectorName: string) =>
   i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.migrationSuccessToastTitle',
+    'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateSuccessToastTitle',
     {
-      defaultMessage: 'Migrated connector {connectorName}',
+      defaultMessage: '{connectorName} connector updated',
       values: {
         connectorName,
       },
     }
   );
 
-export const MIGRATION_SUCCESS_TOAST_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutText',
+export const UPDATE_SUCCESS_TOAST_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateCalloutText',
   {
-    defaultMessage: 'Connector has been successfully migrated.',
+    defaultMessage: 'Connector has been successfully updated.',
   }
 );
 
