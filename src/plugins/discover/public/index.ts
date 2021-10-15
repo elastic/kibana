@@ -16,9 +16,6 @@ export {
   getSavedSearchUrlConflictMessage,
   throwErrorOnSavedSearchUrlConflict,
   SavedSearch,
-  LegacySavedSearch,
-  SavedSearchLoader,
-  __LEGACY,
 } from './saved_searches';
 
 export { DiscoverSetup, DiscoverStart } from './plugin';

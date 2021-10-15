@@ -24,12 +24,15 @@ export interface SavedSearchAttributes {
   };
 }
 
+/** @internal **/
+export type SortOrder = [string, string];
+
 /** @public **/
 export interface SavedSearch {
   searchSource: ISearchSource;
   id?: string;
   title?: string;
-  sort?: Array<[string, string]>;
+  sort?: SortOrder[];
   columns?: string[];
   description?: string;
   grid?: {

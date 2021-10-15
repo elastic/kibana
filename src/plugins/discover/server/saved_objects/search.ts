@@ -12,7 +12,8 @@ import { searchMigrations } from './search_migrations';
 export const searchSavedObjectType: SavedObjectsType = {
   name: 'search',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'discoverApp',
     defaultSearchField: 'title',

@@ -16,7 +16,6 @@
 import type { SavedObjectsStart, SavedObject } from '../../../../plugins/saved_objects/public';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
-import { __LEGACY } from '../../../discover/public';
 import { extractReferences, injectReferences } from '../utils/saved_visualization_references';
 import type { SavedObjectsClientContract } from '../../../../core/public';
 import type { IndexPatternsContract } from '../../../../plugins/data/public';
@@ -30,8 +29,6 @@ export interface SavedVisServices {
 
 /** @deprecated **/
 export function createSavedVisClass(services: SavedVisServices) {
-  const savedSearch = __LEGACY.createSavedSearchesLoader(services);
-
   class SavedVis extends services.savedObjects.SavedObjectClass {
     public static type: string = 'visualization';
     public static mapping: Record<string, string> = {
@@ -71,9 +68,6 @@ export function createSavedVisClass(services: SavedVisServices) {
           savedVis.visState = await updateOldState(savedVis.visState);
           if (savedVis.searchSourceFields?.index) {
             await services.indexPatterns.get(savedVis.searchSourceFields.index as any);
-          }
-          if (savedVis.savedSearchId) {
-            await savedSearch.get(savedVis.savedSearchId);
           }
           return savedVis as any as SavedObject;
         },
