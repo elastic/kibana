@@ -21,8 +21,8 @@ export interface SecuritySolutionUiConfigType {
 }
 
 /**
- * DataViewBase with beats enhanced index fields used in timelines
+ * DataViewBase with enhanced index fields used in timelines
  */
-export interface SecuritySolutionDataViewBase extends DataViewBase {
+export type SecuritySolutionDataViewBase extends DataViewBase {
   fields: FieldSpec[];
 }
