@@ -6,15 +6,15 @@ This document describes routing in the APM plugin.
 
 ### Server-side
 
-Route definitions for APM's server-side API are in the [server/routes directory](../server/routes). Routes are created with [the `createRoute` function](../server/routes/create_route.ts). Routes are added to the API in [the `createApmApi` function](../server/routes/create_apm_api.ts), which is initialized in the plugin `start` lifecycle method.
+Route definitions for APM's server-side API are in the [server/routes directory](../server/routes). Routes are created with [the `createApmServerRoute` function](../server/routes/create_apm_server_route.ts). Routes are added to the API in [the `registerRoutes` function](../server/routes/register_routes.ts), which is initialized in the plugin `setup` lifecycle method.
 
-The path and query string parameters are defined in the calls to `createRoute` with io-ts types, so that each route has its parameters type checked.
+The path and query string parameters are defined in the calls to `createApmServerRoute` with io-ts types, so that each route has its parameters type checked.
 
 ### Client-side
 
 The client-side routing uses `@kbn/typed-react-router-config`, which is a wrapper around [React Router](https://reactrouter.com/) and [React Router Config](https://www.npmjs.com/package/react-router-config). Its goal is to provide a layer of high-fidelity types that allows us to parse and format URLs for routes while making sure the needed parameters are provided and/or available (typed and validated at runtime). The `history` object used by React Router is injected by the Kibana Platform.
 
-Routes (and their parameters) are defined in [public/components/routing/apm_config.tsx](../public/components/routing/apm_config.tsx).
+Routes (and their parameters) are defined in [public/components/routing/apm_route_config.tsx](../public/components/routing/apm_route_config.tsx).
 
 #### Parameter handling
 
