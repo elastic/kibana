@@ -11,7 +11,6 @@ import { Readable } from 'stream';
 import {
   SavedObject,
   SavedObjectAttributes,
-  SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from 'kibana/server';

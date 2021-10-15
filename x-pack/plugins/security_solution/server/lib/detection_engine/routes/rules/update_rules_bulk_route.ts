@@ -75,6 +75,7 @@ export const updateRulesBulkRoute = (
               spaceId: context.securitySolution.getSpaceId(),
               rulesClient,
               ruleStatusClient,
+              savedObjectsClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
               ruleUpdate: payloadRule,
               isRuleRegistryEnabled,
@@ -95,13 +96,6 @@ export const updateRulesBulkRoute = (
               const thing2 = await savedObjectsClient.find({
                 type: legacyRuleActionsSavedObjectType,
               });
-
-              console.error(
-                'DID WE FIND THE SIEM NOTIFICATION FOR THIS ALERT?',
-                JSON.stringify(siemNotification, null, 2)
-              );
-
-              console.error('RULE SIDE CAR', JSON.stringify(thing2, null, 2));
 
               if (rule?.actions != null) {
                 rule.actions = siemNotification.data[0].actions;

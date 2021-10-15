@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import {
   getUpdateMachineLearningSchemaMock,
   getUpdateRulesSchemaMock,
@@ -16,6 +17,7 @@ export const getUpdateRulesOptionsMock = (isRuleRegistryEnabled: boolean) => ({
   spaceId: 'default',
   rulesClient: rulesClientMock.create(),
   ruleStatusClient: ruleExecutionLogClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
   defaultOutputIndex: '.siem-signals-default',
   ruleUpdate: getUpdateRulesSchemaMock(),
   isRuleRegistryEnabled,
@@ -25,6 +27,7 @@ export const getUpdateMlRulesOptionsMock = (isRuleRegistryEnabled: boolean) => (
   spaceId: 'default',
   rulesClient: rulesClientMock.create(),
   ruleStatusClient: ruleExecutionLogClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
   defaultOutputIndex: '.siem-signals-default',
   ruleUpdate: getUpdateMachineLearningSchemaMock(),
   isRuleRegistryEnabled,

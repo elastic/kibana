@@ -58,21 +58,21 @@ export const updateRules = async ({
       },
     });
 
-    await rulesClient.delete({ id: siemNotification.data[0].id });
+    const legacyRuleActionsSO = await savedObjectsClient.find({
+      type: legacyRuleActionsSavedObjectType,
+    });
 
-    const thing2 = await savedObjectsClient.find({ type: legacyRuleActionsSavedObjectType });
-
-    console.error(
-      'DID WE FIND THE SIEM NOTIFICATION FOR THIS ALERT?',
-      JSON.stringify(siemNotification, null, 2)
-    );
-
-    console.error('RULE SIDE CAR', JSON.stringify(thing2, null, 2));
-
-    if (existingRule?.actions != null) {
+    if (siemNotification != null && siemNotification.data.length > 0) {
       existingRule.actions = siemNotification.data[0].actions;
       existingRule.throttle = siemNotification.data[0].schedule.interval;
       existingRule.notifyWhen = transformToNotifyWhen(siemNotification.data[0].throttle);
+      await rulesClient.delete({ id: siemNotification.data[0].id });
+      if (legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0) {
+        await savedObjectsClient.delete(
+          legacyRuleActionsSavedObjectType,
+          legacyRuleActionsSO.saved_objects[0].id
+        );
+      }
       migratedRule = true;
     }
   }

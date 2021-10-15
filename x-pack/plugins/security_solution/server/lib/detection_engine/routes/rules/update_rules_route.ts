@@ -19,8 +19,6 @@ import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRules } from '../../rules/update_rules';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-// eslint-disable-next-line no-restricted-imports
-import { legacyRuleActionsSavedObjectType } from '../../rule_actions/legacy_saved_object_mappings';
 
 export const updateRulesRoute = (
   router: SecuritySolutionPluginRouter,

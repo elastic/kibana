@@ -222,16 +222,7 @@ export type QueryFilter = t.TypeOf<typeof queryFilter>;
 export const queryFilterOrUndefined = t.union([queryFilter, t.undefined]);
 export type QueryFilterOrUndefined = t.TypeOf<typeof queryFilterOrUndefined>;
 
-// export const references = t.array(t.string);
-export const references = t.array(
-  t.exact(
-    t.type({
-      name: t.string,
-      type: t.string,
-      id: t.string,
-    })
-  )
-);
+export const references = t.array(t.string);
 export type References = t.TypeOf<typeof references>;
 
 export const referencesOrUndefined = t.union([references, t.undefined]);
