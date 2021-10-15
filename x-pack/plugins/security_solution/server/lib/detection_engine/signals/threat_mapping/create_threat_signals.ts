@@ -6,13 +6,12 @@
  */
 
 import chunk from 'lodash/fp/chunk';
-import moment from 'moment';
 import { getThreatList, getThreatListCount } from './get_threat_list';
 
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
-import { combineConcurrentResults } from './utils';
+import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
@@ -47,14 +46,9 @@ export const createThreatSignals = async ({
   const params = ruleSO.attributes.params;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
   const perPage = concurrentSearches * itemsPerSearch;
-  const interval = ruleSO.attributes.schedule.interval;
-  const executionEnd = moment().add(interval);
-  const verifyExecutionCanProceed = () => {
-    if (moment().isAfter(executionEnd)) {
-      const message = `Rule execution has exceeded its allotted interval (${interval}) and has been cancelled.`;
-      throw new Error(message);
-    }
-  };
+  const verifyExecutionCanProceed = buildExecutionIntervalValidator(
+    ruleSO.attributes.schedule.interval
+  );
 
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
