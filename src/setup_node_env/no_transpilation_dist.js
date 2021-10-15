@@ -6,5 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { createSavedSearchesLoader } from './saved_searches';
-export { LegacySavedSearch, SavedSearchLoader } from './types';
+// The following require statements MUST be executed before any others - BEGIN
+require('./exit_on_warning');
+require('./harden');
+// The following require statements MUST be executed before any others - END
+
+require('symbol-observable');
+require('source-map-support/register');
+require('./node_version_validator');
