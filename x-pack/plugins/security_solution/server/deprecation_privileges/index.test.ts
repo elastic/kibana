@@ -474,7 +474,7 @@ describe('deprecations', () => {
             "deprecationType": "feature",
             "level": "warning",
             "message": "The Security feature will be split into the Security and Cases features in 8.0. The \\"first_role\\" role grants access to the Security feature only. Update the role to also grant access to the Cases feature.",
-            "title": "The Security feature is changing, and the \"first_role\" role requires an update",
+            "title": "The Security feature is changing, and the \\"first_role\\" role requires an update",
           },
         ]
       `);
@@ -609,7 +609,7 @@ describe('deprecations', () => {
             "deprecationType": "feature",
             "level": "warning",
             "message": "The Security feature will be split into the Security and Cases features in 8.0. The \\"second_role\\" role grants access to the Security feature only. Update the role to also grant access to the Cases feature.",
-            "title": "The Security feature is changing, and the \"second_role\" role requires an update",
+            "title": "The Security feature is changing, and the \\"second_role\\" role requires an update",
           },
         ]
       `);
