@@ -60,7 +60,9 @@ describe('UpdateConnector renders', () => {
 
   it('should disable inputs on loading', () => {
     const wrapper = mountUpdateConnector({ isLoading: true });
-    expect(wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').first().prop('disabled'));
+    expect(
+      wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').first().prop('disabled')
+    ).toBeTruthy();
     expect(
       wrapper
         .find('[data-test-subj="connector-servicenow-username-form-input"]')
@@ -78,7 +80,9 @@ describe('UpdateConnector renders', () => {
   it('should set inputs as read-only', () => {
     const wrapper = mountUpdateConnector({ readOnly: true });
 
-    expect(wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').first().prop('readOnly'));
+    expect(
+      wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').first().prop('readOnly')
+    ).toBeTruthy();
     expect(
       wrapper
         .find('[data-test-subj="connector-servicenow-username-form-input"]')
