@@ -19,8 +19,6 @@ import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { updateRules } from '../../rules/update_rules';
-// eslint-disable-next-line no-restricted-imports
-import { legacyRuleActionsSavedObjectType } from '../../rule_actions/legacy_saved_object_mappings';
 
 export const updateRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
