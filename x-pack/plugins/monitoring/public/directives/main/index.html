@@ -1,4 +1,4 @@
-<div class="app-container">
+<div class="app-container" data-test-subj="monitoringAppContainer">
   <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive">
     <div class="euiFlexItem euiFlexItem--flexGrowZero">
       <div class="euiFlexGroup euiFlexGroup--gutterNone euiFlexGroup--justifyContentSpaceEvenly euiFlexGroup--responsive euiFlexGroup--directionColumn">
@@ -103,7 +103,7 @@
       </a>
       <a
         ng-if="monitoringMain.instance && (monitoringMain.name === 'nodes' || monitoringMain.name === 'indices')"
-        data-test-subj="esNodeDetailAdvancedLink"
+        data-test-subj="esItemDetailAdvancedLink"
         kbn-href="#/elasticsearch/{{ monitoringMain.name }}/{{ monitoringMain.resolver }}/advanced"
         class="euiTab"
         ng-class="{'euiTab-isSelected': monitoringMain.page === 'advanced'}"
@@ -299,7 +299,7 @@
     </div>
 
     <div ng-if="monitoringMain.inOverview" class="euiTabs" role="navigation">
-      <a class="euiTab" data-test-subj="clusterName">{{ pageData.cluster_name }}</a>
+      <a class="euiTab" data-test-subj="overviewTabsclusterName">{{ pageData.cluster_name }}</a>
     </div>
 
     <div ng-if="monitoringMain.inAlerts" class="euiTabs" role="navigation">
