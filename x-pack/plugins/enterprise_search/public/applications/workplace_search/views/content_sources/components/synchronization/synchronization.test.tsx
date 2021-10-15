@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiLink, EuiCallOut, EuiSwitch } from '@elastic/eui';
+import { EuiCallOut, EuiSwitch } from '@elastic/eui';
 
 import { Synchronization } from './synchronization';
 
@@ -28,7 +28,6 @@ describe('Synchronization', () => {
   it('renders when config enabled', () => {
     const wrapper = shallow(<Synchronization />);
 
-    expect(wrapper.find(EuiLink)).toHaveLength(1);
     expect(wrapper.find(EuiSwitch)).toHaveLength(1);
   });
 
