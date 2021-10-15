@@ -12,8 +12,8 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsBulkGetObject,
-  SavedObjectsBulkResponse,
   SavedObjectsBaseOptions,
+  SavedObjectsBulkResolveResponse,
 } from 'src/core/server';
 import { signalsMigrationType } from './saved_objects';
 import { SignalsMigrationSOAttributes } from './saved_objects_schema';
@@ -22,7 +22,7 @@ export interface SignalsMigrationSOClient {
   bulkGet: (
     objects: Array<Omit<SavedObjectsBulkGetObject, 'type'>>,
     options?: SavedObjectsBaseOptions
-  ) => Promise<SavedObjectsBulkResponse<SignalsMigrationSOAttributes>>;
+  ) => Promise<SavedObjectsBulkResolveResponse<SignalsMigrationSOAttributes>>;
   find: (
     options?: Omit<SavedObjectsFindOptions, 'type'>
   ) => Promise<SavedObjectsFindResponse<SignalsMigrationSOAttributes>>;
@@ -40,7 +40,7 @@ export const signalsMigrationSOClient = (
   savedObjectsClient: SavedObjectsClientContract
 ): SignalsMigrationSOClient => ({
   bulkGet: (objects, options) =>
-    savedObjectsClient.bulkGet(
+    savedObjectsClient.bulkResolve(
       objects.map((o) => ({ ...o, type: signalsMigrationType })),
       options
     ),

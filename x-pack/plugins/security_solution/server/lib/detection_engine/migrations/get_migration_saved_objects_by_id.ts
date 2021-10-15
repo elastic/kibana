@@ -40,7 +40,8 @@ export const getMigrationSavedObjectsById = async ({
 }): Promise<SignalsMigrationSO[]> => {
   const client = signalsMigrationSOClient(soClient);
   const objects = ids.map((id) => ({ id }));
-  const { saved_objects: migrations } = await client.bulkGet(objects);
+  const bulkResponse = await client.bulkGet(objects);
+  const migrations = bulkResponse.resolved_objects.map((object) => object.saved_object);
   const error = migrations.find((migration) => migration.error)?.error;
 
   if (error) {
