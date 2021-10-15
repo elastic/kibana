@@ -33,7 +33,7 @@ import {
 } from '../../../../../common/routing';
 import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
 import { useAppUrl, useToasts } from '../../../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
@@ -119,7 +119,7 @@ export const PolicyTrustedAppsList = memo(() => {
               const policyDetailsPath = getPolicyDetailPath(trustedAppAssignedPolicyId);
 
               const thisPolicyMenuProps: ContextMenuItemNavByRouterProps = {
-                navigateAppId: APP_ID,
+                navigateAppId: APP_UI_ID,
                 navigateOptions: {
                   path: policyDetailsPath,
                 },
@@ -141,8 +141,8 @@ export const PolicyTrustedAppsList = memo(() => {
               'xpack.securitySolution.endpoint.policy.trustedApps.list.viewAction',
               { defaultMessage: 'View full details' }
             ),
-            href: getAppUrl({ appId: APP_ID, path: viewUrlPath }),
-            navigateAppId: APP_ID,
+            href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
+            navigateAppId: APP_UI_ID,
             navigateOptions: { path: viewUrlPath },
             'data-test-subj': getTestId('viewFullDetailsAction'),
           },

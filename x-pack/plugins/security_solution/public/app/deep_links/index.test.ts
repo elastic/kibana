@@ -8,7 +8,7 @@ import { getDeepLinks, PREMIUM_DEEP_LINK_IDS } from '.';
 import { AppDeepLink, Capabilities } from '../../../../../../src/core/public';
 import { SecurityPageName } from '../types';
 import { mockGlobalState } from '../../common/mock';
-import { CASES_FEATURE_ID } from '../../../common/constants';
+import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../../common/constants';
 
 const findDeepLink = (id: string, deepLinks: AppDeepLink[]): AppDeepLink | null =>
   deepLinks.reduce((deepLinkFound: AppDeepLink | null, deepLink) => {
@@ -60,8 +60,8 @@ describe('deepLinks', () => {
     const basicLicense = 'basic';
     const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+      [SERVER_APP_ID]: { show: true },
     } as unknown as Capabilities);
-
     expect(findDeepLink(SecurityPageName.case, basicLinks)).toBeTruthy();
   });
 
@@ -69,6 +69,7 @@ describe('deepLinks', () => {
     const basicLicense = 'basic';
     const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+      [SERVER_APP_ID]: { show: true },
     } as unknown as Capabilities);
     expect(findDeepLink(SecurityPageName.case, basicLinks)?.deepLinks?.length === 0).toBeTruthy();
   });
@@ -77,6 +78,7 @@ describe('deepLinks', () => {
     const basicLicense = 'basic';
     const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+      [SERVER_APP_ID]: { show: true },
     } as unknown as Capabilities);
 
     expect(
@@ -88,6 +90,7 @@ describe('deepLinks', () => {
     const basicLicense = 'basic';
     const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+      [SERVER_APP_ID]: { show: true },
     } as unknown as Capabilities);
 
     expect(findDeepLink(SecurityPageName.case, basicLinks)).toBeFalsy();

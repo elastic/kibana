@@ -43,6 +43,7 @@ import {
   DEFAULT_INDEX_KEY,
   APP_ICON_SOLUTION,
   DETECTION_ENGINE_INDEX_URL,
+  SERVER_APP_ID,
 } from '../common/constants';
 
 import { getDeepLinks } from './app/deep_links';
@@ -365,9 +366,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         //   }
         // );
         // signal = { name: indexName[0] };
-        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-          method: 'GET',
-        });
+        if (coreStart.application.capabilities[SERVER_APP_ID].read === true) {
+          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+            method: 'GET',
+          });
+        }
       } catch {
         signal = { name: null };
       }
@@ -391,10 +394,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...subPlugins.hosts.storageTimelines!.timelineById,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.network.storageTimelines!.timelineById,
-            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-              ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                subPlugins.ueba.storageTimelines!.timelineById
-              : {}),
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            ...subPlugins.ueba.storageTimelines!.timelineById,
           },
         },
       };
@@ -425,9 +426,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         {
           ...subPlugins.hosts.store.reducer,
           ...subPlugins.network.store.reducer,
-          ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-            ? subPlugins.ueba.store.reducer
-            : {}),
+          ...subPlugins.ueba.store.reducer,
           timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
           ...tGridReducer,

@@ -175,7 +175,7 @@ export const getSubPluginRoutesByCapabilities = (
       ...acc,
       ...value.routes.map((route: RouteProps) => ({
         path: route.path,
-        component: <NoPrivilegesPage subPluginKey={key} />,
+        component: () => <NoPrivilegesPage subPluginKey={key} />,
       })),
     ];
   }, []);

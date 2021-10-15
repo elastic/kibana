@@ -20,7 +20,7 @@ import {
   isLoadedResourceState,
 } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 
 describe('when rendering the PolicyTrustedAppsList', () => {
   // The index (zero based) of the card created by the generator that is policy specific
@@ -175,7 +175,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     });
 
     expect(appTestContext.coreStart.application.navigateToApp).toHaveBeenCalledWith(
-      APP_ID,
+      APP_UI_ID,
       expect.objectContaining({
         path: '/administration/trusted_apps?show=edit&id=89f72d8a-05b5-4350-8cad-0dc3661d6e67',
       })

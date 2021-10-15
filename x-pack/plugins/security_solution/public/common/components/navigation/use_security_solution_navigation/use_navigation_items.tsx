@@ -11,7 +11,8 @@ import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_na
 import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
-import { useGetUserCasesPermissions, useKibana } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana/kibana_react';
+import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import { NavTab } from '../types';
 

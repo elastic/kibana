@@ -16,7 +16,7 @@ import { Create } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { Case } from '../../../../../cases/public/containers/types';
 import { basicCase } from '../../../../../cases/public/containers/mock';
-import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
+import { APP_ID, APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 
 jest.mock('../use_insert_timeline');
@@ -50,7 +50,7 @@ describe('Create case', () => {
     );
 
     expect(mockCreateCase).toHaveBeenCalled();
-    expect(mockCreateCase.mock.calls[0][0].owner).toEqual([APP_UI_ID]);
+    expect(mockCreateCase.mock.calls[0][0].owner).toEqual([APP_ID]);
   });
 
   it('should redirect to all cases on cancel click', async () => {
