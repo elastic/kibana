@@ -15,6 +15,7 @@ import {
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
 import { SearchExceptions, SearchExceptionsProps } from '.';
+import { getEndpointPrivilegesInitialStateMock } from '../../../common/components/user_privileges/endpoint/mocks';
 jest.mock('../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 let onSearchMock: jest.Mock;
@@ -29,13 +30,11 @@ describe('Search exceptions', () => {
 
   const loadedUserEndpointPrivilegesState = (
     endpointOverrides: Partial<EndpointPrivileges> = {}
-  ): EndpointPrivileges => ({
-    loading: false,
-    canAccessFleet: true,
-    canAccessEndpointManagement: true,
-    isPlatinumPlus: false,
-    ...endpointOverrides,
-  });
+  ): EndpointPrivileges =>
+    getEndpointPrivilegesInitialStateMock({
+      isPlatinumPlus: false,
+      ...endpointOverrides,
+    });
 
   beforeEach(() => {
     onSearchMock = jest.fn();
