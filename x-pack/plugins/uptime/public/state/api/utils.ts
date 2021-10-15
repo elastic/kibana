@@ -78,7 +78,7 @@ class ApiService {
       asResponse,
     });
 
-    this.addInspectorRequest({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
+    this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
 
     if (decodeType) {
       const decoded = decodeType.decode(response);
