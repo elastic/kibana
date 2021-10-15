@@ -25,9 +25,6 @@ const i18nTexts = {
   identifyStepTitle: i18n.translate('xpack.upgradeAssistant.overview.identifyStepTitle', {
     defaultMessage: 'Identify deprecated API use and update your applications',
   }),
-  toggleTitle: i18n.translate('xpack.upgradeAssistant.overview.toggleTitle', {
-    defaultMessage: 'Log Elasticsearch deprecation issues',
-  }),
   analyzeTitle: i18n.translate('xpack.upgradeAssistant.overview.analyzeTitle', {
     defaultMessage: 'Analyze deprecation logs',
   }),
@@ -140,21 +137,15 @@ const FixLogsStep: FunctionComponent<Props> = ({
 
   return (
     <>
-      <EuiText>
-        <h4>{i18nTexts.toggleTitle}</h4>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiPanel>
-        <DeprecationLoggingToggle
-          isDeprecationLogIndexingEnabled={isDeprecationLogIndexingEnabled}
-          isLoading={isLoading}
-          isUpdating={isUpdating}
-          fetchError={fetchError}
-          updateError={updateError}
-          resendRequest={resendRequest}
-          toggleLogging={toggleLogging}
-        />
-      </EuiPanel>
+      <DeprecationLoggingToggle
+        isDeprecationLogIndexingEnabled={isDeprecationLogIndexingEnabled}
+        isLoading={isLoading}
+        isUpdating={isUpdating}
+        fetchError={fetchError}
+        updateError={updateError}
+        resendRequest={resendRequest}
+        toggleLogging={toggleLogging}
+      />
 
       {onlyDeprecationLogWritingEnabled && (
         <>
