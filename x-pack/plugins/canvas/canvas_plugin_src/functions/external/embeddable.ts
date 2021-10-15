@@ -12,6 +12,7 @@ import { getFunctionHelp } from '../../../i18n';
 import { SavedObjectReference } from '../../../../../../src/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { decode, encode } from '../../../common/lib/embeddable_dataurl';
+import { InitializeArguments } from '.';
 
 interface Arguments {
   config: string;
@@ -31,77 +32,112 @@ const baseEmbeddableInput = {
 
 type Return = EmbeddableExpression<EmbeddableInput>;
 
-export function embeddable(): ExpressionFunctionDefinition<
+type EmbeddableFunction = ExpressionFunctionDefinition<
   'embeddable',
   ExpressionValueFilter | null,
   Arguments,
   Return
-> {
-  const { help, args: argHelp } = getFunctionHelp().embeddable;
+>;
 
-  return {
-    name: 'embeddable',
-    help,
-    args: {
-      config: {
-        aliases: ['_'],
-        types: ['string'],
-        required: true,
-        help: argHelp.config,
-      },
-      type: {
-        types: ['string'],
-        required: true,
-        help: argHelp.type,
-      },
-    },
-    context: {
-      types: ['filter'],
-    },
-    type: EmbeddableExpressionType,
-    fn: (input, args) => {
-      const filters = input ? input.and : [];
+export function embeddableFunctionFactory({
+  embeddablePersistableStateService,
+}: InitializeArguments): () => EmbeddableFunction {
+  return function embeddable(): EmbeddableFunction {
+    const { help, args: argHelp } = getFunctionHelp().embeddable;
 
-      const embeddableInput = decode(args.config) as EmbeddableInput;
-
-      return {
-        type: EmbeddableExpressionType,
-        input: {
-          ...baseEmbeddableInput,
-          ...embeddableInput,
-          filters: getQueryFilters(filters),
+    return {
+      name: 'embeddable',
+      help,
+      args: {
+        config: {
+          aliases: ['_'],
+          types: ['string'],
+          required: true,
+          help: argHelp.config,
         },
-        generatedAt: Date.now(),
-        embeddableType: args.type,
-      };
-    },
-
-    extract(state) {
-      const input = decode(state.config[0] as string);
-      const refName = 'embeddable.id';
-
-      const references: SavedObjectReference[] = [
-        {
-          name: refName,
-          type: state.type[0] as string,
-          id: input.savedObjectId as string,
+        type: {
+          types: ['string'],
+          required: true,
+          help: argHelp.type,
         },
-      ];
+      },
+      context: {
+        types: ['filter'],
+      },
+      type: EmbeddableExpressionType,
+      fn: (input, args) => {
+        const filters = input ? input.and : [];
 
-      return {
-        state,
-        references,
-      };
-    },
+        const embeddableInput = decode(args.config) as EmbeddableInput;
 
-    inject(state, references) {
-      const reference = references.find((ref) => ref.name === 'embeddable.id');
-      if (reference) {
+        return {
+          type: EmbeddableExpressionType,
+          input: {
+            ...baseEmbeddableInput,
+            ...embeddableInput,
+            filters: getQueryFilters(filters),
+          },
+          generatedAt: Date.now(),
+          embeddableType: args.type,
+        };
+      },
+
+      extract(state) {
         const input = decode(state.config[0] as string);
-        input.savedObjectId = reference.id;
-        state.config[0] = encode(input);
-      }
-      return state;
-    },
+
+        // extracts references for by-reference embeddables
+        if (input.savedObjectId) {
+          const refName = 'embeddable.savedObjectId';
+
+          const references: SavedObjectReference[] = [
+            {
+              name: refName,
+              type: state.type[0] as string,
+              id: input.savedObjectId as string,
+            },
+          ];
+
+          return {
+            state,
+            references,
+          };
+        }
+
+        // extracts references for by-value embeddables
+        const { state: extractedState, references: extractedReferences } =
+          embeddablePersistableStateService.extract({
+            ...input,
+            type: state.type[0],
+          });
+
+        const { type, ...extractedInput } = extractedState;
+
+        return {
+          state: { ...state, config: [encode(extractedInput)], type: [type] },
+          references: extractedReferences,
+        };
+      },
+
+      inject(state, references) {
+        const input = decode(state.config[0] as string);
+        const savedObjectReference = references.find((ref) => ref.name === 'embeddable.id');
+
+        // injects saved object id for by-references embeddable
+        if (savedObjectReference) {
+          input.savedObjectId = savedObjectReference.id;
+          state.config[0] = encode(input);
+          state.type[0] = savedObjectReference.type;
+        } else {
+          // injects references for by-value embeddables
+          const { type, ...injectedInput } = embeddablePersistableStateService.inject(
+            input,
+            references
+          );
+          state.config[0] = encode(injectedInput);
+          state.type[0] = type;
+        }
+        return state;
+      },
+    };
   };
 }
