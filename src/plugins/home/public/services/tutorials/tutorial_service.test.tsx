@@ -27,22 +27,6 @@ describe('TutorialService', () => {
       }).toThrow();
     });
 
-    test('allows multiple register directory notice calls', () => {
-      const setup = new TutorialService().setup();
-      expect(() => {
-        setup.registerDirectoryNotice('abc', () => <div />);
-        setup.registerDirectoryNotice('def', () => <span />);
-      }).not.toThrow();
-    });
-
-    test('throws when same directory notice is registered twice', () => {
-      const setup = new TutorialService().setup();
-      expect(() => {
-        setup.registerDirectoryNotice('abc', () => <div />);
-        setup.registerDirectoryNotice('abc', () => <span />);
-      }).toThrow();
-    });
-
     test('allows multiple register directory header link calls', () => {
       const setup = new TutorialService().setup();
       expect(() => {
