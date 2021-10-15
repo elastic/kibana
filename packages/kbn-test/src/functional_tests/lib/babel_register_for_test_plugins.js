@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+const Fs = require('fs');
 const Path = require('path');
 
 const { REPO_ROOT } = require('@kbn/dev-utils');
@@ -22,7 +23,7 @@ require('@babel/register')({
     // TODO: should should probably remove this link back to the source
     Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
     Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
-  ],
+  ].map((path) => Fs.realpathSync(path)),
   babelrc: false,
   presets: [require.resolve('@kbn/babel-preset/node_preset')],
   extensions: ['.js', '.ts', '.tsx'],
