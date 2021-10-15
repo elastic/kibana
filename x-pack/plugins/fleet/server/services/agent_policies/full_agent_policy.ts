@@ -31,11 +31,10 @@ import { getMonitoringPermissions } from './monitoring_permissions';
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone: boolean; kubernetes: boolean }
+  options?: { standalone: boolean }
 ): Promise<FullAgentPolicy | null> {
   let agentPolicy;
   const standalone = options?.standalone;
-  const kubernetes = options?.kubernetes;
 
   try {
     agentPolicy = await agentPolicyService.get(soClient, id);
@@ -70,13 +69,6 @@ export async function getFullAgentPolicy(
   const monitoringOutput = outputs.find((output) => output.id === monitoringOutputId);
   if (!monitoringOutput) {
     throw new Error(`Monitoring output not found ${monitoringOutputId}`);
-  }
-  if (kubernetes) {
-    outputs.forEach((output) => {
-      if (output.hosts !== undefined) {
-        output.hosts[0] = '{ES_HOST}';
-      }
-    });
   }
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,

@@ -261,7 +261,7 @@ export const getFullAgentPolicy: RequestHandler<
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
         soClient,
         request.params.agentPolicyId,
-        { standalone: request.query.standalone === true, kubernetes: false }
+        { standalone: request.query.standalone === true }
       );
       if (fullAgentPolicy) {
         const body: GetFullAgentPolicyResponse = {
@@ -321,7 +321,6 @@ export const downloadFullAgentPolicy: RequestHandler<
     try {
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
         standalone: request.query.standalone === true,
-        kubernetes: false,
       });
       if (fullAgentPolicy) {
         const body = fullAgentPolicyToYaml(fullAgentPolicy, safeDump);

@@ -42,8 +42,6 @@ spec:
               value: "elastic"
             - name: ES_PASSWORD
               value: "changeme"
-            - name: ES_HOST
-              value: ""
             - name: NODE_NAME
               valueFrom:
                 fieldRef:

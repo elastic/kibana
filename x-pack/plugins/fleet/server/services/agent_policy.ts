@@ -729,10 +729,7 @@ class AgentPolicyService {
     id: string,
     options?: { standalone: boolean }
   ): Promise<string | null> {
-    const fullAgentPolicy = await getFullAgentPolicy(soClient, id, {
-      standalone: true,
-      kubernetes: true,
-    });
+    const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
     if (fullAgentPolicy) {
       const fullAgentConfigMap: FullAgentConfigMap = {
         apiVersion: 'v1',
@@ -748,7 +745,6 @@ class AgentPolicyService {
       };
 
       const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
-      // const updateMapHosts = configMapYaml.replace('http://localhost:9200', '{ES_HOST}');
       const updateManifestVersion = elasticAgentManifest.replace(
         'VERSION',
         appContextService.getKibanaVersion()
@@ -762,7 +758,7 @@ class AgentPolicyService {
   public async getFullAgentPolicy(
     soClient: SavedObjectsClientContract,
     id: string,
-    options?: { standalone: boolean; kubernetes: boolean }
+    options?: { standalone: boolean }
   ): Promise<FullAgentPolicy | null> {
     return getFullAgentPolicy(soClient, id, options);
   }

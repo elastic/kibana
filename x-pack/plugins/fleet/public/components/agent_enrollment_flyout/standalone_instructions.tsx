@@ -136,11 +136,10 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
     isK8s === 'IS_KUBERNETES' ? (
       <FormattedMessage
         id="xpack.fleet.agentEnrollment.stepConfigureAgentDescriptionk8s"
-        defaultMessage="Copy or download the Kubernetes manifest inside the Kubernetes cluster. Modify {ESUsernameVariable}, {ESPasswordVariable} and {ESHostVariable} in the Daemonset environment variables and apply the manifest."
+        defaultMessage="Copy or download the Kubernetes manifest inside the Kubernetes cluster. Modify {ESUsernameVariable} and {ESPasswordVariable} in the Daemonset environment variables and apply the manifest."
         values={{
           ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
           ESPasswordVariable: <EuiCode>ES_PASSWORD</EuiCode>,
-          ESHostVariable: <EuiCode>ES_HOST</EuiCode>,
         }}
       />
     ) : (
