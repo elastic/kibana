@@ -18,7 +18,7 @@
       "event": {
         "category": "threat",
         "created": "2021-01-26T11:09:05.529Z",
-        "dataset": "threatintel.abuseurl",
+        "dataset": "ti_abusech.malware",
         "ingested": "2021-01-26T11:09:06.595350Z",
         "kind": "enrichment",
         "module": "threatintel",
@@ -87,7 +87,7 @@
       "event": {
         "category": "threat",
         "created": "2021-01-26T11:09:05.529Z",
-        "dataset": "threatintel.abuseurl",
+        "dataset": "ti_abusech.malware",
         "ingested": "2021-01-26T11:09:06.616763Z",
         "kind": "enrichment",
         "module": "threatintel",
@@ -156,7 +156,7 @@
       "event": {
         "category": "threat",
         "created": "2021-01-26T11:09:05.529Z",
-        "dataset": "threatintel.abuseurl",
+        "dataset": "ti_abusech.malware",
         "ingested": "2021-01-26T11:09:06.616763Z",
         "kind": "enrichment",
         "module": "threatintel",
@@ -226,7 +226,7 @@
       "event": {
         "category": "threat",
         "created": "2021-01-26T11:09:05.529Z",
-        "dataset": "threatintel.abuseurl",
+        "dataset": "ti_abusech.malware",
         "ingested": "2021-01-26T11:09:06.616763Z",
         "kind": "enrichment",
         "module": "threatintel",
