@@ -13,7 +13,24 @@ exports[`ElasticAgentCard props button 1`] = `
   href="/app/integrations/browse"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
-  title="Add Elastic Agent"
+  title=""
+/>
+`;
+
+exports[`ElasticAgentCard props category 1`] = `
+<EuiCard
+  description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+  footer={
+    <EuiButton
+      fill={true}
+    >
+      Add Elastic Agent
+    </EuiButton>
+  }
+  href="/app/integrations/browse/custom"
+  image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+  paddingSize="l"
+  title=""
 />
 `;
 
@@ -30,7 +47,7 @@ exports[`ElasticAgentCard props href 1`] = `
   href="#"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
-  title="Add Elastic Agent"
+  title=""
 />
 `;
 
@@ -48,7 +65,7 @@ exports[`ElasticAgentCard props recommended 1`] = `
   href="/app/integrations/browse"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
-  title="Add Elastic Agent"
+  title=""
 />
 `;
 
@@ -65,6 +82,6 @@ exports[`ElasticAgentCard renders 1`] = `
   href="/app/integrations/browse"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
-  title="Add Elastic Agent"
+  title=""
 />
 `;
