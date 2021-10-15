@@ -11,11 +11,11 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../../common
 import {
   EndpointPrivileges,
   useEndpointPrivileges,
-} from '../../../common/components/user_privileges/use_endpoint_privileges';
+} from '../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
 import { SearchExceptions, SearchExceptionsProps } from '.';
-jest.mock('../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 let onSearchMock: jest.Mock;
 const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
