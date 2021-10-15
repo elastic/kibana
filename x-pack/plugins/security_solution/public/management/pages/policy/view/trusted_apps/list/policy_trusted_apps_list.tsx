@@ -106,7 +106,7 @@ export const PolicyTrustedAppsList = memo(() => {
 
     for (const trustedApp of trustedAppItems) {
       const isGlobal = trustedApp.effectScope.type === 'global';
-      const viewUrlPath = getTrustedAppsListPath({ id: trustedApp.id, show: 'edit' });
+      const viewUrlPath = getTrustedAppsListPath({ filter: trustedApp.id });
       const assignedPoliciesMenuItems: ArtifactEntryCollapsibleCardProps['policies'] =
         trustedApp.effectScope.type === 'global'
           ? undefined
