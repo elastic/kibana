@@ -30,53 +30,55 @@ import { TooltipWrapper, useDebouncedValue } from '../../shared_components';
 const icons = [
   {
     value: 'none',
-    label: i18n.translate('xpack.lens.xyChart.thresholds.noIconLabel', { defaultMessage: 'None' }),
+    label: i18n.translate('xpack.lens.xyChart.referenceLine.noIconLabel', {
+      defaultMessage: 'None',
+    }),
   },
   {
     value: 'asterisk',
-    label: i18n.translate('xpack.lens.xyChart.thresholds.asteriskIconLabel', {
+    label: i18n.translate('xpack.lens.xyChart.referenceLine.asteriskIconLabel', {
       defaultMessage: 'Asterisk',
     }),
   },
   {
     value: 'bell',
-    label: i18n.translate('xpack.lens.xyChart.thresholds.bellIconLabel', {
+    label: i18n.translate('xpack.lens.xyChart.referenceLine.bellIconLabel', {
       defaultMessage: 'Bell',
     }),
   },
   {
     value: 'bolt',
-    label: i18n.translate('xpack.lens.xyChart.thresholds.boltIconLabel', {
+    label: i18n.translate('xpack.lens.xyChart.referenceLine.boltIconLabel', {
       defaultMessage: 'Bolt',
     }),
   },
   {
     value: 'bug',
-    label: i18n.translate('xpack.lens.xyChart.thresholds.bugIconLabel', {
+    label: i18n.translate('xpack.lens.xyChart.referenceLine.bugIconLabel', {
       defaultMessage: 'Bug',
     }),
   },
   {
     value: 'editorComment',
-    label: i18n.translate('xpack.lens.xyChart.thresholds.commentIconLabel', {
+    label: i18n.translate('xpack.lens.xyChart.referenceLine.commentIconLabel', {
       defaultMessage: 'Comment',
     }),
   },
   {
     value: 'alert',
-    label: i18n.translate('xpack.lens.xyChart.thresholds.alertIconLabel', {
+    label: i18n.translate('xpack.lens.xyChart.referenceLine.alertIconLabel', {
       defaultMessage: 'Alert',
     }),
   },
   {
     value: 'flag',
-    label: i18n.translate('xpack.lens.xyChart.thresholds.flagIconLabel', {
+    label: i18n.translate('xpack.lens.xyChart.referenceLine.flagIconLabel', {
       defaultMessage: 'Flag',
     }),
   },
   {
     value: 'tag',
-    label: i18n.translate('xpack.lens.xyChart.thresholds.tagIconLabel', {
+    label: i18n.translate('xpack.lens.xyChart.referenceLine.tagIconLabel', {
       defaultMessage: 'Tag',
     }),
   },
@@ -116,20 +118,57 @@ const IconSelect = ({
   );
 };
 
-function getIconPositionOptions({
-  isHorizontal,
-  axisMode,
-}: {
+interface LabelConfigurationOptions {
   isHorizontal: boolean;
   axisMode: YConfig['axisMode'];
-}) {
+}
+
+function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOptions) {
+  const aboveLabel = i18n.translate('xpack.lens.xyChart.referenceLineFill.above', {
+    defaultMessage: 'Above',
+  });
+  const belowLabel = i18n.translate('xpack.lens.xyChart.referenceLineFill.below', {
+    defaultMessage: 'Below',
+  });
+  const beforeLabel = i18n.translate('xpack.lens.xyChart.referenceLineFill.before', {
+    defaultMessage: 'Before',
+  });
+  const afterLabel = i18n.translate('xpack.lens.xyChart.referenceLineFill.after', {
+    defaultMessage: 'After',
+  });
+
+  const aboveOptionLabel = axisMode !== 'bottom' && !isHorizontal ? aboveLabel : afterLabel;
+  const belowOptionLabel = axisMode !== 'bottom' && !isHorizontal ? belowLabel : beforeLabel;
+
+  return [
+    {
+      id: `${idPrefix}none`,
+      label: i18n.translate('xpack.lens.xyChart.referenceLineFill.none', {
+        defaultMessage: 'None',
+      }),
+      'data-test-subj': 'lnsXY_referenceLine_fill_none',
+    },
+    {
+      id: `${idPrefix}above`,
+      label: aboveOptionLabel,
+      'data-test-subj': 'lnsXY_referenceLine_fill_above',
+    },
+    {
+      id: `${idPrefix}below`,
+      label: belowOptionLabel,
+      'data-test-subj': 'lnsXY_referenceLine_fill_below',
+    },
+  ];
+}
+
+function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOptions) {
   const options = [
     {
       id: `${idPrefix}auto`,
-      label: i18n.translate('xpack.lens.xyChart.thresholdMarker.auto', {
+      label: i18n.translate('xpack.lens.xyChart.referenceLineMarker.auto', {
         defaultMessage: 'Auto',
       }),
-      'data-test-subj': 'lnsXY_markerPosition_auto',
+      'data-test-subj': 'lnsXY_referenceLine_markerPosition_auto',
     },
   ];
   const topLabel = i18n.translate('xpack.lens.xyChart.markerPosition.above', {
@@ -149,12 +188,12 @@ function getIconPositionOptions({
       {
         id: `${idPrefix}above`,
         label: isHorizontal ? rightLabel : topLabel,
-        'data-test-subj': 'lnsXY_markerPosition_above',
+        'data-test-subj': 'lnsXY_referenceLine_markerPosition_above',
       },
       {
         id: `${idPrefix}below`,
         label: isHorizontal ? leftLabel : bottomLabel,
-        'data-test-subj': 'lnsXY_markerPosition_below',
+        'data-test-subj': 'lnsXY_referenceLine_markerPosition_below',
       },
     ];
     if (isHorizontal) {
@@ -168,12 +207,12 @@ function getIconPositionOptions({
     {
       id: `${idPrefix}left`,
       label: isHorizontal ? bottomLabel : leftLabel,
-      'data-test-subj': 'lnsXY_markerPosition_left',
+      'data-test-subj': 'lnsXY_referenceLine_markerPosition_left',
     },
     {
       id: `${idPrefix}right`,
       label: isHorizontal ? topLabel : rightLabel,
-      'data-test-subj': 'lnsXY_markerPosition_right',
+      'data-test-subj': 'lnsXY_referenceLine_markerPosition_right',
     },
   ];
   if (isHorizontal) {
@@ -188,7 +227,7 @@ export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'none';
 }
 
-export const ThresholdPanel = (
+export const ReferenceLinePanel = (
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
@@ -232,18 +271,18 @@ export const ThresholdPanel = (
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.lens.thresholdMarker.textVisibility', {
+        label={i18n.translate('xpack.lens.referenceLineMarker.textVisibility', {
           defaultMessage: 'Show display name',
         })}
         display="columnCompressedSwitch"
       >
         <EuiSwitch
           compressed
-          label={i18n.translate('xpack.lens.thresholdMarker.textVisibility', {
+          label={i18n.translate('xpack.lens.referenceLineMarker.textVisibility', {
             defaultMessage: 'Show display name',
           })}
           showLabel={false}
-          data-test-subj="lns-thresholdMaker-text-visibility"
+          data-test-subj="lns-referenceLineMaker-text-visibility"
           checked={Boolean(currentYConfig?.textVisibility)}
           onChange={() => {
             setYConfig({ forAccessor: accessor, textVisibility: !currentYConfig?.textVisibility });
@@ -253,7 +292,7 @@ export const ThresholdPanel = (
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.thresholdMarker.icon', {
+        label={i18n.translate('xpack.lens.xyChart.referenceLineMarker.icon', {
           defaultMessage: 'Icon',
         })}
       >
@@ -268,15 +307,18 @@ export const ThresholdPanel = (
         display="columnCompressed"
         fullWidth
         isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
-        label={i18n.translate('xpack.lens.xyChart.thresholdMarker.position', {
+        label={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
           defaultMessage: 'Decoration position',
         })}
       >
         <TooltipWrapper
-          tooltipContent={i18n.translate('xpack.lens.thresholdMarker.positionRequirementTooltip', {
-            defaultMessage:
-              'You must select an icon or show the display name in order to alter its position',
-          })}
+          tooltipContent={i18n.translate(
+            'xpack.lens.referenceLineMarker.positionRequirementTooltip',
+            {
+              defaultMessage:
+                'You must select an icon or show the display name in order to alter its position',
+            }
+          )}
           condition={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
           position="top"
           delay="regular"
@@ -284,10 +326,10 @@ export const ThresholdPanel = (
         >
           <EuiButtonGroup
             isFullWidth
-            legend={i18n.translate('xpack.lens.xyChart.thresholdMarker.position', {
+            legend={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
               defaultMessage: 'Decoration position',
             })}
-            data-test-subj="lnsXY_markerPosition_threshold"
+            data-test-subj="lnsXY_markerPosition_referenceLine"
             name="markerPosition"
             isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
             buttonSize="compressed"
@@ -306,20 +348,20 @@ export const ThresholdPanel = (
       <ColorPicker
         {...props}
         disableHelpTooltip
-        label={i18n.translate('xpack.lens.xyChart.thresholdColor.label', {
+        label={i18n.translate('xpack.lens.xyChart.referenceLineColor.label', {
           defaultMessage: 'Color',
         })}
       />
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
+        label={i18n.translate('xpack.lens.xyChart.referenceLineStyle.label', {
           defaultMessage: 'Line style',
         })}
       >
         <EuiButtonGroup
           isFullWidth
-          legend={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
+          legend={i18n.translate('xpack.lens.xyChart.referenceLineStyle.label', {
             defaultMessage: 'Line style',
           })}
           data-test-subj="lnsXY_line_style"
@@ -328,21 +370,21 @@ export const ThresholdPanel = (
           options={[
             {
               id: `${idPrefix}solid`,
-              label: i18n.translate('xpack.lens.xyChart.lineStyle.solid', {
+              label: i18n.translate('xpack.lens.xyChart.referenceLineStyle.solid', {
                 defaultMessage: 'Solid',
               }),
               'data-test-subj': 'lnsXY_line_style_solid',
             },
             {
               id: `${idPrefix}dashed`,
-              label: i18n.translate('xpack.lens.xyChart.lineStyle.dashed', {
+              label: i18n.translate('xpack.lens.xyChart.referenceLineStyle.dashed', {
                 defaultMessage: 'Dashed',
               }),
               'data-test-subj': 'lnsXY_line_style_dashed',
             },
             {
               id: `${idPrefix}dotted`,
-              label: i18n.translate('xpack.lens.xyChart.lineStyle.dotted', {
+              label: i18n.translate('xpack.lens.xyChart.referenceLineStyle.dotted', {
                 defaultMessage: 'Dotted',
               }),
               'data-test-subj': 'lnsXY_line_style_dotted',
@@ -358,7 +400,7 @@ export const ThresholdPanel = (
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.lineThickness.label', {
+        label={i18n.translate('xpack.lens.xyChart.referenceLineThickness.label', {
           defaultMessage: 'Line thickness',
         })}
       >
@@ -372,41 +414,19 @@ export const ThresholdPanel = (
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.fillThreshold.label', {
+        label={i18n.translate('xpack.lens.xyChart.referenceLineFill.label', {
           defaultMessage: 'Fill',
         })}
       >
         <EuiButtonGroup
           isFullWidth
-          legend={i18n.translate('xpack.lens.xyChart.fillThreshold.label', {
+          legend={i18n.translate('xpack.lens.xyChart.referenceLineFill.label', {
             defaultMessage: 'Fill',
           })}
-          data-test-subj="lnsXY_fill_threshold"
+          data-test-subj="lnsXY_referenceLine_fill"
           name="fill"
           buttonSize="compressed"
-          options={[
-            {
-              id: `${idPrefix}none`,
-              label: i18n.translate('xpack.lens.xyChart.fillThreshold.none', {
-                defaultMessage: 'None',
-              }),
-              'data-test-subj': 'lnsXY_fill_none',
-            },
-            {
-              id: `${idPrefix}above`,
-              label: i18n.translate('xpack.lens.xyChart.fillThreshold.above', {
-                defaultMessage: 'Above',
-              }),
-              'data-test-subj': 'lnsXY_fill_above',
-            },
-            {
-              id: `${idPrefix}below`,
-              label: i18n.translate('xpack.lens.xyChart.fillThreshold.below', {
-                defaultMessage: 'Below',
-              }),
-              'data-test-subj': 'lnsXY_fill_below',
-            },
-          ]}
+          options={getFillPositionOptions({ isHorizontal, axisMode: currentYConfig?.axisMode })}
           idSelected={`${idPrefix}${currentYConfig?.fill || 'none'}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as FillStyle;
@@ -440,7 +460,7 @@ const LineThicknessSlider = ({
   return (
     <EuiRange
       fullWidth
-      data-test-subj="lnsXY_lineThickness"
+      data-test-subj="lnsXY_referenceLineThickness"
       value={unsafeValue}
       showInput
       min={minRange}

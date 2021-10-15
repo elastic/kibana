@@ -24,7 +24,7 @@ interface LayerColorConfig {
   layerType: LayerType;
 }
 
-export const defaultThresholdColor = euiLightVars.euiColorDarkShade;
+export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 
 export type ColorAssignments = Record<
   string,
@@ -117,11 +117,11 @@ export function getAccessorColorConfig(
         triggerIcon: 'disabled',
       };
     }
-    if (layer.layerType === layerTypes.THRESHOLD) {
+    if (layer.layerType === layerTypes.REFERENCELINE) {
       return {
         columnId: accessor as string,
         triggerIcon: 'color',
-        color: currentYConfig?.color || defaultThresholdColor,
+        color: currentYConfig?.color || defaultReferenceLineColor,
       };
     }
     const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);

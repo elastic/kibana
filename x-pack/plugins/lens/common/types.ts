@@ -61,4 +61,4 @@ export interface CustomPaletteParams {
 
 export type RequiredPaletteParamTypes = Required<CustomPaletteParams>;
 
-export type LayerType = 'data' | 'threshold';
+export type LayerType = 'data' | 'referenceLine';
