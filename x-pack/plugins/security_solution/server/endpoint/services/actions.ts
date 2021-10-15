@@ -130,7 +130,6 @@ const getActivityLog = async ({
       body: {
         query: {
           bool: {
-            // @ts-ignore
             filter: actionsFilters,
           },
         },
@@ -164,20 +163,6 @@ const getActivityLog = async ({
         query: {
           bool: {
             filter: responsesFilters,
-            must_not: [
-              {
-                term: {
-                  'error.code': {
-                    value: '424',
-                  },
-                },
-              },
-              {
-                match: {
-                  'error.message': 'Failed to deliver action request to fleet',
-                },
-              },
-            ],
           },
         },
       },
