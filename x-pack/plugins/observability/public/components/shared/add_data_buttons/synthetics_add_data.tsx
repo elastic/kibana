@@ -18,7 +18,7 @@ export function SyntheticsAddData() {
       aria-label={i18n.translate('xpack.observability.page_header.addUptimeDataLink.label', {
         defaultMessage: 'Navigate to a tutorial about adding Uptime data',
       })}
-      href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
+      href={kibana.services?.application?.getUrlForApp('/integrations/detail/synthetics/overview')}
       color="primary"
       iconType="indexOpen"
     >
