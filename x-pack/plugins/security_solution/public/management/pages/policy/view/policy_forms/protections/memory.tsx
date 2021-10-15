@@ -23,7 +23,7 @@ import { ProtectionSwitch } from '../components/protection_switch';
  *  which will configure for all relevant OSes.
  */
 export const MemoryProtection = React.memo(() => {
-  const OSes: Immutable<MemoryProtectionOSes[]> = [OS.windows];
+  const OSes: Immutable<MemoryProtectionOSes[]> = [OS.windows, OS.mac, OS.linux];
   const protection = 'memory_protection';
   const protectionLabel = i18n.translate(
     'xpack.securitySolution.endpoint.policy.protections.memory',
@@ -36,7 +36,7 @@ export const MemoryProtection = React.memo(() => {
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory_protection', {
         defaultMessage: 'Memory threat',
       })}
-      supportedOss={[OperatingSystem.WINDOWS]}
+      supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
       dataTestSubj="memoryProtectionsForm"
       rightCorner={
         <ProtectionSwitch protection={protection} protectionLabel={protectionLabel} osList={OSes} />
