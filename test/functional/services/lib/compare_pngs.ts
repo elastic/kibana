@@ -11,8 +11,12 @@ import Jimp from 'jimp';
 import { ToolingLog } from '@kbn/dev-utils';
 
 interface PngDescriptor {
-  buffer?: Buffer;
   path: string;
+
+  /**
+   * If a buffer is provided this will avoid the extra step of reading from disk
+   */
+  buffer?: Buffer;
 }
 
 const toDescriptor = (imageInfo: string | PngDescriptor): PngDescriptor => {
