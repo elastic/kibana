@@ -261,7 +261,8 @@ describe('signal_rule_alert_type', () => {
         2,
         expect.objectContaining({
           newStatus: RuleExecutionStatus['partial failure'],
-          message: 'Missing required read privileges on the following indices: ["some*"]',
+          message:
+            'This rule may not have the required read privileges to the following indices/index patterns: ["some*"]',
         })
       );
     });
@@ -291,7 +292,7 @@ describe('signal_rule_alert_type', () => {
         expect.objectContaining({
           newStatus: RuleExecutionStatus['partial failure'],
           message:
-            'This rule may not have the required read privileges to the following indices: ["myfa*","some*"]',
+            'This rule may not have the required read privileges to the following indices/index patterns: ["myfa*","some*"]',
         })
       );
     });
