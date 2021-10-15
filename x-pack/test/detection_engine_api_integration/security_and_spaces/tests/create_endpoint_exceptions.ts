@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import objectHash from 'object-hash';
 
 import {
   createListsIndex,
@@ -24,6 +25,22 @@ import {
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../utils';
+
+const sortEntries = (hits: unknown[]) => {
+  const entryMap = hits.reduce<Record<string, unknown[]>>((acc, hit) => {
+    const hash = objectHash(hit);
+    if (acc[hash] == null) {
+      acc[hash] = [];
+    }
+    return {
+      ...acc,
+      [hash]: [...acc[hash], hit],
+    };
+  }, {});
+  return Object.keys(entryMap)
+    .sort()
+    .flatMap((hash) => entryMap[hash]);
+};
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -66,7 +83,10 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host).sort();
-        expect(hits).to.eql([
+        expect(sortEntries(hits)).to.eql([
+          {
+            os: { type: 'linux' },
+          },
           {
             os: { type: 'linux' },
           },
@@ -75,9 +95,6 @@ export default ({ getService }: FtrProviderContext) => {
           },
           {
             os: { type: 'macos' },
-          },
-          {
-            os: { type: 'linux' },
           },
         ]);
       });
@@ -89,7 +106,10 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host).sort();
-        expect(hits).to.eql([
+        expect(sortEntries(hits)).to.eql([
+          {
+            os: { name: 'Linux' },
+          },
           {
             os: { name: 'Linux' },
           },
@@ -98,9 +118,6 @@ export default ({ getService }: FtrProviderContext) => {
           },
           {
             os: { name: 'Macos' },
-          },
-          {
-            os: { name: 'Linux' },
           },
         ]);
       });
@@ -132,15 +149,15 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-          expect(hits).to.eql([
+          expect(sortEntries(hits)).to.eql([
+            {
+              os: { name: 'Linux' },
+            },
             {
               os: { name: 'Windows' },
             },
             {
               os: { name: 'Macos' },
-            },
-            {
-              os: { name: 'Linux' },
             },
           ]);
         });
@@ -169,15 +186,15 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host).sort();
-          expect(hits).to.eql([
+          expect(sortEntries(hits)).to.eql([
+            {
+              os: { name: 'Linux' },
+            },
             {
               os: { name: 'Windows' },
             },
             {
               os: { name: 'Macos' },
-            },
-            {
-              os: { name: 'Linux' },
             },
           ]);
         });
@@ -217,12 +234,12 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-          expect(hits).to.eql([
-            {
-              os: { name: 'Macos' },
-            },
+          expect(sortEntries(hits)).to.eql([
             {
               os: { name: 'Linux' },
+            },
+            {
+              os: { name: 'Macos' },
             },
           ]);
         });
@@ -262,12 +279,12 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-          expect(hits).to.eql([
-            {
-              os: { name: 'Macos' },
-            },
+          expect(sortEntries(hits)).to.eql([
             {
               os: { name: 'Linux' },
+            },
+            {
+              os: { name: 'Macos' },
             },
           ]);
         });
@@ -298,15 +315,15 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-          expect(hits).to.eql([
+          expect(sortEntries(hits)).to.eql([
+            {
+              os: { type: 'linux' },
+            },
             {
               os: { type: 'windows' },
             },
             {
               os: { type: 'macos' },
-            },
-            {
-              os: { type: 'linux' },
             },
           ]);
         });
@@ -335,15 +352,15 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-          expect(hits).to.eql([
+          expect(sortEntries(hits)).to.eql([
+            {
+              os: { type: 'linux' },
+            },
             {
               os: { type: 'windows' },
             },
             {
               os: { type: 'macos' },
-            },
-            {
-              os: { type: 'linux' },
             },
           ]);
         });
@@ -383,12 +400,12 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-          expect(hits).to.eql([
-            {
-              os: { type: 'macos' },
-            },
+          expect(sortEntries(hits)).to.eql([
             {
               os: { type: 'linux' },
+            },
+            {
+              os: { type: 'macos' },
             },
           ]);
         });
@@ -428,12 +445,12 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-          expect(hits).to.eql([
-            {
-              os: { type: 'macos' },
-            },
+          expect(sortEntries(hits)).to.eql([
             {
               os: { type: 'linux' },
+            },
+            {
+              os: { type: 'macos' },
             },
           ]);
         });
@@ -464,24 +481,24 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 6, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-          expect(hits).to.eql([
+          expect(sortEntries(hits)).to.eql([
             {
-              os: { type: 'windows' },
+              os: { type: 'linux' },
+            },
+            {
+              os: { name: 'Linux' },
             },
             {
               os: { name: 'Windows' },
+            },
+            {
+              os: { type: 'windows' },
             },
             {
               os: { type: 'macos' },
             },
             {
               os: { name: 'Macos' },
-            },
-            {
-              os: { type: 'linux' },
-            },
-            {
-              os: { name: 'Linux' },
             },
           ]);
         });
@@ -510,24 +527,24 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 6, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-          expect(hits).to.eql([
+          expect(sortEntries(hits)).to.eql([
             {
-              os: { type: 'windows' },
+              os: { type: 'linux' },
+            },
+            {
+              os: { name: 'Linux' },
             },
             {
               os: { name: 'Windows' },
+            },
+            {
+              os: { type: 'windows' },
             },
             {
               os: { type: 'macos' },
             },
             {
               os: { name: 'Macos' },
-            },
-            {
-              os: { type: 'linux' },
-            },
-            {
-              os: { name: 'Linux' },
             },
           ]);
         });
@@ -567,18 +584,18 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 4, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-          expect(hits).to.eql([
-            {
-              os: { type: 'macos' },
-            },
-            {
-              os: { name: 'Macos' },
-            },
+          expect(sortEntries(hits)).to.eql([
             {
               os: { type: 'linux' },
             },
             {
               os: { name: 'Linux' },
+            },
+            {
+              os: { type: 'macos' },
+            },
+            {
+              os: { name: 'Macos' },
             },
           ]);
         });
@@ -618,18 +635,18 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 4, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-          expect(hits).to.eql([
-            {
-              os: { type: 'macos' },
-            },
-            {
-              os: { name: 'Macos' },
-            },
+          expect(sortEntries(hits)).to.eql([
             {
               os: { type: 'linux' },
             },
             {
               os: { name: 'Linux' },
+            },
+            {
+              os: { type: 'macos' },
+            },
+            {
+              os: { name: 'Macos' },
             },
           ]);
         });
@@ -670,7 +687,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-        expect(hits).to.eql([
+        expect(sortEntries(hits)).to.eql([
           {
             os: { type: 'macos' },
           },
@@ -710,7 +727,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-        expect(hits).to.eql([
+        expect(sortEntries(hits)).to.eql([
           {
             os: { type: 'macos' },
           },
@@ -743,15 +760,15 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-        expect(hits).to.eql([
+        expect(sortEntries(hits)).to.eql([
+          {
+            os: { type: 'linux' },
+          },
           {
             os: { type: 'linux' },
           },
           {
             os: { type: 'macos' },
-          },
-          {
-            os: { type: 'linux' },
           },
         ]);
       });
@@ -780,12 +797,12 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-        expect(hits).to.eql([
-          {
-            os: { type: 'macos' },
-          },
+        expect(sortEntries(hits)).to.eql([
           {
             os: { type: 'linux' },
+          },
+          {
+            os: { type: 'macos' },
           },
         ]);
       });
@@ -814,12 +831,12 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-        expect(hits).to.eql([
-          {
-            os: { type: 'macos' },
-          },
+        expect(sortEntries(hits)).to.eql([
           {
             os: { type: 'linux' },
+          },
+          {
+            os: { type: 'macos' },
           },
         ]);
       });
@@ -848,7 +865,10 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.host);
-        expect(hits).to.eql([
+        expect(sortEntries(hits)).to.eql([
+          {
+            os: { type: 'linux' },
+          },
           {
             os: { type: 'linux' },
           },
@@ -857,9 +877,6 @@ export default ({ getService }: FtrProviderContext) => {
           },
           {
             os: { type: 'macos' },
-          },
-          {
-            os: { type: 'linux' },
           },
         ]);
       });
