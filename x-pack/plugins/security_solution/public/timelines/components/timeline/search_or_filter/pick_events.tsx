@@ -172,6 +172,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       patternList.map((indexName) => ({
         label: indexName,
         value: indexName,
+        'data-test-subj': 'sourcerer-option',
         disabled: !selectablePatterns.includes(indexName),
       })),
     [selectablePatterns, patternList]
@@ -392,7 +393,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
               <>
                 <EuiSpacer size="s" />
                 <EuiSuperSelect
-                  data-test-subj="sourcerer-combo-box"
+                  data-test-subj="sourcerer-select"
                   placeholder={i18n.PICK_INDEX_PATTERNS}
                   fullWidth
                   options={dataViewSelectOptions}

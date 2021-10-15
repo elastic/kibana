@@ -135,27 +135,6 @@ export const Component = () => {
 
 Full details are {kib-repo}tree/master/packages/kbn-i18n#react[here].
 
-
-
-[discrete]
-==== i18n for Angular
-
-You are encouraged to use `i18n.translate()` by statically importing `i18n` from `@kbn/i18n` wherever possible in your Angular code. Angular wrappers use the translation `service` with the i18n engine under the hood.
-
-The translation directive has the following syntax:
-["source","js"]
------------
-<ANY
-  i18n-id="{string}"
-  i18n-default-message="{string}"
-  [i18n-values="{object}"]
-  [i18n-description="{string}"]
-></ANY>
------------
-
-Full details are {kib-repo}tree/master/packages/kbn-i18n#angularjs[here].
-
-
 [discrete]
 === Resources
 

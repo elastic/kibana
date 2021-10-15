@@ -235,7 +235,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       endDate: end,
       entityType,
       fields,
-      filterQuery: combinedQueries!.filterQuery,
+      filterQuery: combinedQueries?.filterQuery,
       id,
       indexNames,
       limit: itemsPerPage,

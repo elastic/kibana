@@ -191,6 +191,7 @@ export const buildCombinedQuery = (combineQueriesParams: CombineQueries) => {
   const combinedQuery = combineQueries(combineQueriesParams);
   return combinedQuery
     ? {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         filterQuery: replaceStatusField(combinedQuery!.filterQuery),
       }
     : null;

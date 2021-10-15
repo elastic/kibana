@@ -25,6 +25,12 @@ describe('Pick Events/Timeline Sourcerer', () => {
     eventType: 'all' as TimelineEventsType,
     onChangeEventTypeAndIndexesName: jest.fn(),
   };
+  const initialPatterns = [
+    ...mockSourcererState.defaultDataView.patternList.filter(
+      (p) => !isSignalIndex(p, mockSourcererState.signalIndexName)
+    ),
+    mockSourcererState.signalIndexName,
+  ];
   const { storage } = createSecuritySolutionStorageMock();
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,15 +44,12 @@ describe('Pick Events/Timeline Sourcerer', () => {
     );
     fireEvent.click(wrapper.getByTestId('sourcerer-timeline-trigger'));
     expect(wrapper.getByTestId('timeline-sourcerer').textContent).toEqual(
-      [
-        ...mockSourcererState.defaultDataView.patternList.filter(
-          (p) => !isSignalIndex(p, mockSourcererState.signalIndexName)
-        ),
-        mockSourcererState.signalIndexName,
-      ]
-        .sort()
-        .join('')
+      initialPatterns.sort().join('')
     );
+    fireEvent.click(wrapper.getByTestId(`sourcerer-accordion`));
+    fireEvent.click(wrapper.getByTestId('comboBoxToggleListButton'));
+    const optionNodes = wrapper.getAllByTestId('sourcerer-option');
+    expect(optionNodes.length).toBe(1);
   });
   it('Removes duplicate options from options list', () => {
     const store = createStore(
@@ -94,5 +97,47 @@ describe('Pick Events/Timeline Sourcerer', () => {
     expect(
       wrapper.getByTestId('comboBoxOptionsList timeline-sourcerer-optionsList').textContent
     ).toEqual('auditbeat-*');
+  });
+  const state = {
+    ...mockGlobalState,
+    sourcerer: {
+      ...mockGlobalState.sourcerer,
+      sourcererScopes: {
+        ...mockGlobalState.sourcerer.sourcererScopes,
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          loading: false,
+          selectedDataViewId: mockGlobalState.sourcerer.defaultDataView.id,
+          selectedPatterns: ['filebeat-*'],
+        },
+      },
+    },
+  };
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  it('correctly filters options', () => {
+    const wrapper = render(
+      <TestProviders store={store}>
+        <PickEventType {...defaultProps} />
+      </TestProviders>
+    );
+    fireEvent.click(wrapper.getByTestId('sourcerer-timeline-trigger'));
+    fireEvent.click(wrapper.getByTestId('comboBoxToggleListButton'));
+    fireEvent.click(wrapper.getByTestId('sourcerer-accordion'));
+    const optionNodes = wrapper.getAllByTestId('sourcerer-option');
+    expect(optionNodes.length).toBe(9);
+  });
+  it('reset button works', () => {
+    const wrapper = render(
+      <TestProviders store={store}>
+        <PickEventType {...defaultProps} />
+      </TestProviders>
+    );
+    fireEvent.click(wrapper.getByTestId('sourcerer-timeline-trigger'));
+    expect(wrapper.getByTestId('timeline-sourcerer').textContent).toEqual('filebeat-*');
+
+    fireEvent.click(wrapper.getByTestId('sourcerer-reset'));
+    expect(wrapper.getByTestId('timeline-sourcerer').textContent).toEqual(
+      initialPatterns.sort().join('')
+    );
   });
 });
