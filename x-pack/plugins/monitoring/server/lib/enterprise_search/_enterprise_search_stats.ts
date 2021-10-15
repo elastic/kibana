@@ -147,7 +147,7 @@ export const entSearchAggResponseHandler = (response: ElasticsearchResponse) => 
   const workplaceSearchPrivateSources = aggs?.workplace_search_private_sources.value ?? 0;
 
   const totalInstances = aggs?.total.value ?? 0;
-  const uptime = aggs?.uptime.value;
+  const uptime = aggs?.uptime.value ?? 0;
 
   const memUsed = aggs?.cluster_heap_used.value ?? 0;
   const memCommitted = aggs?.cluster_heap_committed.value ?? 0;
