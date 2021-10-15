@@ -356,6 +356,7 @@ export class DocLinksService {
           clusterPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-cluster`,
           elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
           elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}configuring-stack-security.html`,
+          elasticsearchEnableApiKeys: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
           indicesPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-indices`,
           kibanaTLS: `${ELASTICSEARCH_DOCS}security-basic-setup.html#encrypt-internode-communication`,
           kibanaPrivileges: `${KIBANA_DOCS}kibana-privileges.html`,
@@ -713,6 +714,7 @@ export interface DocLinksStart {
       clusterPrivileges: string;
       elasticsearchSettings: string;
       elasticsearchEnableSecurity: string;
+      elasticsearchEnableApiKeys: string;
       indicesPrivileges: string;
       kibanaTLS: string;
       kibanaPrivileges: string;

@@ -82,11 +82,11 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
         ) : !healthCheck.isAlertsAvailable ? (
           <AlertsError docLinks={docLinks} className={className} />
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (
-          <TlsAndEncryptionError docLinks={docLinks} className={className} />
+          <ApiKeysAndEncryptionError docLinks={docLinks} className={className} />
         ) : !healthCheck.hasPermanentEncryptionKey ? (
           <EncryptionError docLinks={docLinks} className={className} />
         ) : (
-          <TlsError docLinks={docLinks} className={className} />
+          <ApiKeysDisabledError docLinks={docLinks} className={className} />
         );
       }
     )
@@ -143,7 +143,7 @@ const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
   />
 );
 
-const TlsError = ({ docLinks, className }: PromptErrorProps) => (
+const ApiKeysDisabledError = ({ docLinks, className }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
@@ -152,22 +152,28 @@ const TlsError = ({ docLinks, className }: PromptErrorProps) => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.healthCheck.tlsErrorTitle"
-          defaultMessage="You must enable Transport Layer Security and API keys"
+          id="xpack.triggersActionsUI.components.healthCheck.apiKeysDisabledErrorTitle"
+          defaultMessage="You must enable API keys"
         />
       </h2>
     }
     body={
       <div className={`${className}__body`}>
         <p role="banner">
-          {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsError', {
-            defaultMessage:
-              'Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. ',
+          {i18n.translate('xpack.triggersActionsUI.components.healthCheck.apiKeysDisabledError', {
+            defaultMessage: 'Alerting relies on API keys. ',
           })}
-          <EuiLink href={docLinks.links.security.kibanaTLS} external target="_blank">
-            {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsErrorAction', {
-              defaultMessage: 'Learn how to enable TLS.',
-            })}
+          <EuiLink
+            href={docLinks.links.security.elasticsearchEnableApiKeys}
+            external
+            target="_blank"
+          >
+            {i18n.translate(
+              'xpack.triggersActionsUI.components.healthCheck.apiKeysDisabledErrorAction',
+              {
+                defaultMessage: 'Learn how to enable API keys.',
+              }
+            )}
           </EuiLink>
         </p>
       </div>
@@ -206,7 +212,7 @@ const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
   />
 );
 
-const TlsAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
+const ApiKeysAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
@@ -215,7 +221,7 @@ const TlsAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorTitle"
+          id="xpack.triggersActionsUI.components.healthCheck.apiKeysAndEncryptionErrorTitle"
           defaultMessage="Additional setup required"
         />
       </h2>
@@ -223,13 +229,15 @@ const TlsAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
     body={
       <div className={`${className}__body`}>
         <p role="banner">
-          {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionError', {
-            defaultMessage:
-              'You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. ',
-          })}
+          {i18n.translate(
+            'xpack.triggersActionsUI.components.healthCheck.apiKeysAndEncryptionError',
+            {
+              defaultMessage: 'You must enable API keys and configure an encryption key. ',
+            }
+          )}
           <EuiLink href={docLinks.links.alerting.setupPrerequisites} external target="_blank">
             {i18n.translate(
-              'xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorAction',
+              'xpack.triggersActionsUI.components.healthCheck.apiKeysAndEncryptionErrorAction',
               {
                 defaultMessage: 'Learn how.',
               }
