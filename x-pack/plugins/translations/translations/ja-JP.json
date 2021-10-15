@@ -4175,8 +4175,6 @@
     "inspector.requests.statisticsTabLabel": "統計",
     "inspector.title": "インスペクター",
     "inspector.view": "{viewName} を表示",
-    "kibana_legacy.notify.fatalError.errorStatusMessage": "エラー {errStatus} {errStatusText}: {errMessage}",
-    "kibana_legacy.notify.fatalError.unavailableServerErrorMessage": "HTTP リクエストで接続に失敗しました。Kibana サーバーが実行されていて、ご使用のブラウザの接続が正常に動作していることを確認するか、システム管理者にお問い合わせください。",
     "kibana_legacy.notify.toaster.errorStatusMessage": "エラー {errStatus} {errStatusText}: {errMessage}",
     "kibana_legacy.notify.toaster.unavailableServerErrorMessage": "HTTP リクエストで接続に失敗しました。Kibana サーバーが実行されていて、ご使用のブラウザの接続が正常に動作していることを確認するか、システム管理者にお問い合わせください。",
     "kibana_utils.history.savedObjectIsMissingNotificationMessage": "保存されたオブジェクトがありません",
