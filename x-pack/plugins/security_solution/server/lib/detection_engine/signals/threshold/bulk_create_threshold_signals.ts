@@ -119,6 +119,7 @@ const getTransformedHits = (
             ? [
                 {
                   field: threshold.cardinality[0].field,
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   value: bucket.cardinality_count!.value,
                 },
               ]
