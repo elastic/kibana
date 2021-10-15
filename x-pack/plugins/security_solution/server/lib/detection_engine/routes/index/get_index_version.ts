@@ -14,7 +14,8 @@ export const getIndexVersion = async (
   index: string
 ): Promise<number> => {
   const { body: indexAlias } = await esClient.indices.getAlias({
-    index,
+    index: `${index}-*`,
+    name: index,
   });
   const writeIndex = Object.keys(indexAlias).find(
     (key) => indexAlias[key].aliases[index]?.is_write_index

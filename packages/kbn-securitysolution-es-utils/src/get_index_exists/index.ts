@@ -13,15 +13,11 @@ export const getIndexExists = async (
   index: string
 ): Promise<boolean> => {
   try {
-    const { body: response } = await esClient.search({
-      index,
-      size: 0,
-      allow_no_indices: true,
-      body: {
-        terminate_after: 1,
-      },
+    const { body } = await esClient.indices.getAlias({
+      index: `${index}-*`,
+      name: index,
     });
-    return response._shards.total > 0;
+    return Object.keys(body).length > 0;
   } catch (err) {
     if (err.body != null && err.body.status === 404) {
       return false;
