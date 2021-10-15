@@ -25,7 +25,7 @@ interface Arguments {
   title: string | null;
 }
 
-type Output = EmbeddableExpression<VisualizeInput>;
+type Output = EmbeddableExpression<VisualizeInput & { savedObjectId: string }>;
 
 const defaultTimeRange = {
   from: 'now-15m',
@@ -94,6 +94,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         type: EmbeddableExpressionType,
         input: {
           id,
+          savedObjectId: id,
           disableTriggers: true,
           timeRange: timerange || defaultTimeRange,
           filters: getQueryFilters(filters),

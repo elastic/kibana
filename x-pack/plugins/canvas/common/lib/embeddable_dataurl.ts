@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EmbeddableInput } from '../../canvas_plugin_src/expression_types';
+import { EmbeddableInput } from '../../types';
 
 export const encode = (input: Partial<EmbeddableInput>) =>
   Buffer.from(JSON.stringify(input)).toString('base64');

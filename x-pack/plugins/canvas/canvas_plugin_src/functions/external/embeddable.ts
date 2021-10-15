@@ -6,14 +6,8 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { TimeRange } from 'src/plugins/data/public';
-import { Filter } from '@kbn/es-query';
-import { ExpressionValueFilter } from '../../../types';
-import {
-  EmbeddableExpressionType,
-  EmbeddableExpression,
-  EmbeddableInput as Input,
-} from '../../expression_types';
+import { ExpressionValueFilter, EmbeddableInput } from '../../../types';
+import { EmbeddableExpressionType, EmbeddableExpression } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 import { SavedObjectReference } from '../../../../../../src/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
@@ -27,12 +21,6 @@ interface Arguments {
 const defaultTimeRange = {
   from: 'now-15m',
   to: 'now',
-};
-
-export type EmbeddableInput = Input & {
-  timeRange?: TimeRange;
-  filters?: Filter[];
-  savedObjectId: string;
 };
 
 const baseEmbeddableInput = {

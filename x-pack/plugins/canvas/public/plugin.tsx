@@ -122,7 +122,12 @@ export class CanvasPlugin
 
         const { pluginServices } = await import('./services');
         pluginServices.setRegistry(
-          pluginServiceRegistry.start({ coreStart, startPlugins, initContext: this.initContext })
+          pluginServiceRegistry.start({
+            coreStart,
+            startPlugins,
+            appUpdater: this.appUpdater,
+            initContext: this.initContext,
+          })
         );
 
         // Load application bundle
