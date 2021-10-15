@@ -22,10 +22,7 @@ import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
 import { History } from 'history';
 
 import { CoreStart } from 'kibana/public';
-import {
-  formatAngularHttpError,
-  isAngularHttpError,
-} from '../../../../../../src/plugins/kibana_legacy/public';
+import { formatAngularHttpError, isAngularHttpError } from '../helpers/format_angular_http_error';
 
 export interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);
