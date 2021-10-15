@@ -186,15 +186,10 @@ describe('<IndexManagementHome />', () => {
     });
 
     test('should be able to flush index', async () => {
-      const { find, actions } = testBed;
-      actions.clickManageContextMenuButton();
+      const { actions } = testBed;
+      await actions.clickManageContextMenuButton();
+      await actions.clickContextMenuOption('flushIndexMenuButton');
 
-      const contextMenu = find('indexContextMenu');
-      const flushIndexButton = contextMenu
-        .find('button[data-test-subj="indexTableContextMenuButton"]')
-        .at(4);
-
-      await flushIndexButton.simulate('click');
       const latestRequest = server.requests[server.requests.length - 1];
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/flush`);
     });

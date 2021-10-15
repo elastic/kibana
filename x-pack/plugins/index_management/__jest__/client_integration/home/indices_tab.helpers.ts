@@ -29,6 +29,7 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;
     clickManageContextMenuButton: () => void;
+    clickContextMenuOption: (optionDataTestSubject: string) => void;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
@@ -44,6 +45,12 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
   /**
    * User Actions
    */
+
+  const clickContextMenuOption = async (optionDataTestSubject: string) => {
+    const { find } = testBed;
+    const contextMenu = find('indexContextMenu');
+    contextMenu.find(`button[data-test-subj="${optionDataTestSubject}"]`).simulate('click');
+  };
 
   const clickIncludeHiddenIndicesToggle = () => {
     const { find } = testBed;
@@ -102,6 +109,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
       clickIncludeHiddenIndicesToggle,
       clickDataStreamAt,
       clickManageContextMenuButton,
+      clickContextMenuOption,
     },
     findDataStreamDetailPanel,
     findDataStreamDetailPanelTitle,
