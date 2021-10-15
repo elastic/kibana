@@ -42,13 +42,6 @@ export const OptionsListStrings = {
       i18n.translate('presentationUtil.inputControls.optionsList.popover.selectionsEmpty', {
         defaultMessage: 'You have no selections',
       }),
-    getSelectionButtonGroupLegend: () =>
-      i18n.translate(
-        'presentationUtil.inputControls.optionsList.popover.selectionButtonGroupLegend',
-        {
-          defaultMessage: 'Switch between showing selected options, and all available options',
-        }
-      ),
     getAllOptionsButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.optionsList.popover.allOptionsTitle', {
         defaultMessage: 'Show all options',
