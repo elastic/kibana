@@ -374,8 +374,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     ]
   );
 
-  // useEffect(dataVisualizerRefresh$
-
   useEffect(() => {
     loadOverallStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -859,7 +857,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   }, [currentIndexPattern, services, searchQueryLanguage, searchString]);
 
   const helpLink = docLinks.links.ml.guide;
-  console.log('documentCountStats', documentCountStats);
 
   return (
     <Fragment>

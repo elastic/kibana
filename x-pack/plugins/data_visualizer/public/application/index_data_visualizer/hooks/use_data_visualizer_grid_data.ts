@@ -254,6 +254,7 @@ export const useDataVisualizerGridData = (
   useEffect(() => {
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
+      timefilter.getAutoRefreshFetch$(),
       dataVisualizerRefresh$
     ).subscribe(() => {
       if (onUpdate) {
