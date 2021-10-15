@@ -43,6 +43,10 @@ describe('getAlertInstanceSummaryRoute', () => {
     status: 'OK',
     errorMessages: [],
     instances: {},
+    executionDuration: {
+      average: 0,
+      values: [],
+    },
   };
 
   it('gets alert instance summary', async () => {

@@ -14,7 +14,7 @@ describe('filter manager utilities', () => {
     test('should return the key and value for matching filters with gt/lt', async () => {
       const filter = {
         meta: { index: 'logstash-*' } as FilterMeta,
-        range: { bytes: { lt: 2048, gt: 1024 } },
+        query: { range: { bytes: { lt: 2048, gt: 1024 } } },
       } as RangeFilter;
       const result = mapRange(filter);
 
