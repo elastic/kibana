@@ -114,11 +114,20 @@ export const TableFieldValue = ({
 
   return (
     <Fragment>
-      {/* TODO: collapse those two into one line if both are showing */}
-      {isCollapsible && (
-        <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
+      {(isCollapsible || ignoreReason) && (
+        <EuiFlexGroup gutterSize="s">
+          {isCollapsible && (
+            <EuiFlexItem grow={false}>
+              <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
+            </EuiFlexItem>
+          )}
+          {ignoreReason && (
+            <EuiFlexItem grow={false}>
+              <IgnoreWarning reason={ignoreReason} rawValue={rawValue} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       )}
-      {ignoreReason && <IgnoreWarning reason={ignoreReason} rawValue={rawValue} />}
       <div
         className={valueClassName}
         data-test-subj={`tableDocViewRow-${field}-value`}
