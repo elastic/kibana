@@ -112,7 +112,7 @@ export function CompareImagesProvider({ getService }: FtrProviderContext) {
       await fs.writeFile(actualCopyPath, await fs.readFile(actualPdfPath));
 
       const actualPdf = await pdf(actualCopyPath);
-      const baselinePdf = await pdf(actualCopyPath);
+      const baselinePdf = await pdf(baselineCopyPath);
 
       log.debug(`Checking number of pages`);
 
@@ -132,8 +132,8 @@ export function CompareImagesProvider({ getService }: FtrProviderContext) {
             `${baselinePdfFileName}-${pageNum}.png`
           );
           diffTotal += await comparePngs(
-            { path: screenshotsDirectory, buffer: actualPage },
-            { path: screenshotsDirectory, buffer: baselinePage },
+            { path: path.resolve(screenshotsDirectory, '_actual.png'), buffer: actualPage },
+            { path: path.resolve(screenshotsDirectory, '_baseline.png'), buffer: baselinePage },
             diffPngPath,
             sessionDirectoryPath,
             log

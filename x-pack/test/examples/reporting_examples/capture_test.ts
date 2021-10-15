@@ -18,12 +18,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const appId = 'reportingExample';
 
   const fixtures = {
-    baselineCaptureAPng: path.resolve(__dirname, 'fixtures/baseline/capture_a.png'),
-    baselineCaptureAPdf: path.resolve(__dirname, 'fixtures/baseline/capture_a.pdf'),
+    baselineAPng: path.resolve(__dirname, 'fixtures/baseline/capture_a.png'),
+    baselineAPdf: path.resolve(__dirname, 'fixtures/baseline/capture_a.pdf'),
+    baselineAPdfPrint: path.resolve(__dirname, 'fixtures/baseline/capture_a_print.pdf'),
   };
 
-  describe('Capture', () => {
-    it('a PNG that matches the baseline', async () => {
+  describe('Captures', () => {
+    it('PNG that matches the baseline', async () => {
       await PageObjects.common.navigateToApp(appId);
 
       await (await testSubjects.find('shareButton')).click();
@@ -40,11 +41,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       expect(
-        await compareImages.checkIfPngsMatch(pngSessionFilePath, fixtures.baselineCaptureAPng)
+        await compareImages.checkIfPngsMatch(pngSessionFilePath, fixtures.baselineAPng)
       ).to.be.lessThan(0.09);
     });
 
-    it('a PDF that matches the baseline', async () => {
+    it('PDF that matches the baseline', async () => {
       await PageObjects.common.navigateToApp(appId);
 
       await (await testSubjects.find('shareButton')).click();
@@ -61,7 +62,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       expect(
-        await compareImages.checkIfPdfsMatch(pdfSessionFilePath, fixtures.baselineCaptureAPdf)
+        await compareImages.checkIfPdfsMatch(pdfSessionFilePath, fixtures.baselineAPdf)
+      ).to.be.lessThan(0.09);
+    });
+
+    it('print-optimized PDF that matches the baseline', async () => {
+      await PageObjects.common.navigateToApp(appId);
+
+      await (await testSubjects.find('shareButton')).click();
+      await (await testSubjects.find('captureTestPanel')).click();
+      await (await testSubjects.find('captureTestPDFPrint')).click();
+
+      await PageObjects.reporting.checkUsePrintLayout();
+      await PageObjects.reporting.clickGenerateReportButton();
+      const url = await PageObjects.reporting.getReportURL(60000);
+      const captureData = await PageObjects.reporting.getRawPdfReportData(url);
+
+      const pdfSessionFilePath = await compareImages.writeToSessionFile(
+        'capture_test_baseline_a',
+        captureData
+      );
+
+      expect(
+        await compareImages.checkIfPdfsMatch(pdfSessionFilePath, fixtures.baselineAPdfPrint)
       ).to.be.lessThan(0.09);
     });
   });
