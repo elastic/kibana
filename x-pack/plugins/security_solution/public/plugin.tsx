@@ -377,15 +377,24 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       const timelineInitialState = {
         timeline: {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           ...subPlugins.timelines.store.initialState.timeline!,
           timelineById: {
             ...subPlugins.timelines.store.initialState.timeline.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.alerts.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.rules.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.exceptions.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.hosts.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.network.storageTimelines!.timelineById,
-            ...subPlugins.ueba.storageTimelines!.timelineById,
+            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+              ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                subPlugins.ueba.storageTimelines!.timelineById
+              : {}),
           },
         },
       };
@@ -416,7 +425,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         {
           ...subPlugins.hosts.store.reducer,
           ...subPlugins.network.store.reducer,
-          ...subPlugins.ueba.store.reducer,
+          ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+            ? subPlugins.ueba.store.reducer
+            : {}),
           timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
           ...tGridReducer,

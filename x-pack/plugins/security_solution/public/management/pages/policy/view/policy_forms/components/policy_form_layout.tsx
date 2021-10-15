@@ -101,6 +101,7 @@ export const PolicyFormLayout = React.memo(() => {
           title: i18n.translate('xpack.securitySolution.endpoint.policy.details.updateErrorTitle', {
             defaultMessage: 'Failed!',
           }),
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           text: policyUpdateStatus.error!.message,
         });
       }
