@@ -78,7 +78,7 @@ export const exportRulesRoute = (
                 request.body.objects,
                 isRuleRegistryEnabled
               )
-            : await getExportAll(rulesClient, isRuleRegistryEnabled);
+            : await getExportAll(rulesClient, exceptionsClient, isRuleRegistryEnabled);
 
         const responseBody = request.query.exclude_export_details
           ? exportedRules.rulesNdjson

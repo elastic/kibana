@@ -15,6 +15,9 @@ import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
+
+const exceptionsClient = getExceptionListClientMock();
 
 describe.each([
   ['Legacy', false],
@@ -35,7 +38,7 @@ describe.each([
     result.data = [alert];
     rulesClient.find.mockResolvedValue(result);
 
-    const exports = await getExportAll(rulesClient, isRuleRegistryEnabled);
+    const exports = await getExportAll(rulesClient, exceptionsClient, isRuleRegistryEnabled);
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
     expect(rulesJson).toEqual({
@@ -97,10 +100,11 @@ describe.each([
 
     rulesClient.find.mockResolvedValue(findResult);
 
-    const exports = await getExportAll(rulesClient, isRuleRegistryEnabled);
+    const exports = await getExportAll(rulesClient, exceptionsClient, isRuleRegistryEnabled);
     expect(exports).toEqual({
       rulesNdjson: '',
       exportDetails: '{"exported_count":0,"missing_rules":[],"missing_rules_count":0}\n',
+      exceptionLists: '',
     });
   });
 });
