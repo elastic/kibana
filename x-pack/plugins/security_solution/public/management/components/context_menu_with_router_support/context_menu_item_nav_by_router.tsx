@@ -90,7 +90,7 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
               <EuiFlexItem className="link-button" grow={false}>
                 <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="popout">
                   <FormattedMessage
-                    id="pack.securitySolution.contextMenuItemByRouter.viewDetails"
+                    id="xpack.securitySolution.contextMenuItemByRouter.viewDetails"
                     defaultMessage="View details"
                   />
                 </StyledEuiButtonEmpty>
