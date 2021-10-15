@@ -20,11 +20,6 @@ const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const COPY_TO_CLIPBOARD_BUTTON_SELECTOR = 'copy-to-clipboard';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const ACTION_COLUMN_INDEX = 1;
-// CASES
-const ADD_TO_EXISTING_CASE_SELECTOR = 'add-existing-case-menu-item';
-const ADD_TO_NEW_CASE_SELECTOR = 'add-new-case-item';
-const CREATE_CASE_FLYOUT = 'create-case-flyout';
-const SELECT_CASE_MODAL = 'all-cases-modal';
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -185,51 +180,6 @@ export function ObservabilityAlertsCommonProvider({
     await buttonGroupButton.click();
   };
 
-  // Add to case actions
-  const getAddToExistingCaseSelector = async () => {
-    return await testSubjects.find(ADD_TO_EXISTING_CASE_SELECTOR);
-  };
-
-  const getAddToExistingCaseSelectorOrFail = async () => {
-    return await testSubjects.existOrFail(ADD_TO_EXISTING_CASE_SELECTOR);
-  };
-
-  const missingAddToExistingCaseSelectorOrFail = async () => {
-    return await testSubjects.missingOrFail(ADD_TO_EXISTING_CASE_SELECTOR);
-  };
-
-  const getAddToNewCaseSelector = async () => {
-    return await testSubjects.find(ADD_TO_NEW_CASE_SELECTOR);
-  };
-
-  const getAddToNewCaseSelectorOrFail = async () => {
-    return await testSubjects.existOrFail(ADD_TO_NEW_CASE_SELECTOR);
-  };
-
-  const missingAddToNewCaseSelectorOrFail = async () => {
-    return await testSubjects.missingOrFail(ADD_TO_NEW_CASE_SELECTOR);
-  };
-
-  const addToNewCaseButtonClick = async () => {
-    return await (await getAddToNewCaseSelector()).click();
-  };
-
-  const addToExistingCaseButtonClick = async () => {
-    return await (await getAddToExistingCaseSelector()).click();
-  };
-
-  const getCreateCaseFlyoutOrFail = async () => {
-    return await testSubjects.existOrFail(CREATE_CASE_FLYOUT);
-  };
-
-  const closeFlyout = async () => {
-    return await (await testSubjects.find('euiFlyoutCloseButton')).click();
-  };
-
-  const getAddtoExistingCaseModalOrFail = async () => {
-    return await testSubjects.existOrFail(SELECT_CASE_MODAL);
-  };
-
   return {
     getQueryBar,
     clearQueryBar,
@@ -255,16 +205,5 @@ export function ObservabilityAlertsCommonProvider({
     submitQuery,
     typeInQueryBar,
     openActionsMenuForRow,
-    getAddToExistingCaseSelector,
-    getAddToExistingCaseSelectorOrFail,
-    missingAddToExistingCaseSelectorOrFail,
-    getAddToNewCaseSelector,
-    getAddToNewCaseSelectorOrFail,
-    missingAddToNewCaseSelectorOrFail,
-    getCreateCaseFlyoutOrFail,
-    closeFlyout,
-    addToNewCaseButtonClick,
-    addToExistingCaseButtonClick,
-    getAddtoExistingCaseModalOrFail,
   };
 }

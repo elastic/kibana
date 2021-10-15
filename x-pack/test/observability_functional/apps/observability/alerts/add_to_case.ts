@@ -47,17 +47,18 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('opens a flyout when Add to new case is clicked', async () => {
+        await observability.alerts.addToCase.addToNewCaseButtonClick();
+
         await retry.try(async () => {
-          await observability.alerts.common.openActionsMenuForRow(0);
-          await observability.alerts.addToCase.addToNewCaseButtonClick();
           await observability.alerts.addToCase.getCreateCaseFlyoutOrFail();
           await observability.alerts.addToCase.closeFlyout();
         });
       });
 
       it('opens a modal when Add to existing case is clicked', async () => {
+        await observability.alerts.common.openActionsMenuForRow(0);
+
         await retry.try(async () => {
-          await observability.alerts.common.openActionsMenuForRow(0);
           await observability.alerts.addToCase.addToExistingCaseButtonClick();
           await observability.alerts.addToCase.getAddtoExistingCaseModalOrFail();
         });
