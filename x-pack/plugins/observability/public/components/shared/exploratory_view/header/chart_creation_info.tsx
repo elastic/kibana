@@ -9,45 +9,53 @@ import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiSpacer } from '@elastic/eui';
-import { UI_SETTINGS, useKibanaUISettings } from '../../../hooks/use_kibana_ui_settings';
-import { ChartTimeRangeContext } from './exploratory_view';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import { UI_SETTINGS, useKibanaUISettings } from '../../../../hooks/use_kibana_ui_settings';
+import type { ChartTimeRange } from './last_updated';
 
-export function ChartCreationInfo(props: Partial<ChartTimeRangeContext>) {
+export function ChartCreationInfo(props: Partial<ChartTimeRange>) {
   const dateFormat = useKibanaUISettings(UI_SETTINGS.DATE_FORMAT) as string;
   const from = moment(props.from).format(dateFormat);
   const to = moment(props.to).format(dateFormat);
-  const current = moment(props.lastUpdated).format(dateFormat);
+  const created = moment(props.lastUpdated).format(dateFormat);
 
   return (
     <>
       {props.lastUpdated && (
         <>
-          <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.observability.expView.seriesBuilder.creationTime"
-              defaultMessage="Chart created on {current}"
-              values={{
-                current,
-              }}
-            />
-          </EuiText>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="xpack.observability.expView.seriesBuilder.creationTime"
+                  defaultMessage="Chart created"
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={2}>
+              <EuiText size="xs">{created}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="xs" />
         </>
       )}
       {props.to && props.from && (
         <>
-          <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.observability.expView.seriesBuilder.creationContext"
-              defaultMessage="Displaying data from {from} to {to}"
-              values={{
-                from,
-                to,
-              }}
-            />
-          </EuiText>
-          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="xpack.observability.expView.seriesBuilder.creationContext"
+                  defaultMessage="Displaying from"
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={2}>
+              <EuiText size="xs">
+                {from} &#8594; {to}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       )}
     </>

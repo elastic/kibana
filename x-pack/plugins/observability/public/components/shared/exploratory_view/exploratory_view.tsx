@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
-import { EuiButtonEmpty, EuiPanel, EuiResizableContainer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
+import { EuiButtonEmpty, EuiResizableContainer, EuiTitle } from '@elastic/eui';
 import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
@@ -20,15 +20,9 @@ import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
 import { SeriesViews } from './views/series_views';
 import { LensEmbeddable } from './lens_embeddable';
 import { EmptyView } from './components/empty_view';
-import { ChartCreationInfo } from './chart_creation_info';
+import type { ChartTimeRange } from './header/last_updated';
 
 export type PanelId = 'seriesPanel' | 'chartPanel';
-
-export interface ChartTimeRangeContext {
-  lastUpdated: number;
-  to: number;
-  from: number;
-}
 
 export function ExploratoryView({
   saveAttributes,
@@ -44,9 +38,7 @@ export function ExploratoryView({
 
   const [height, setHeight] = useState<string>('100vh');
 
-  const [chartTimeRangeContext, setChartTimeRangeContext] = useState<
-    ChartTimeRangeContext | undefined
-  >();
+  const [chartTimeRangeContext, setChartTimeRangeContext] = useState<ChartTimeRange | undefined>();
 
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
@@ -107,7 +99,7 @@ export function ExploratoryView({
         <>
           <ExploratoryViewHeader
             lensAttributes={lensAttributes}
-            lastUpdated={chartTimeRangeContext?.lastUpdated}
+            chartTimeRange={chartTimeRangeContext}
           />
           <LensWrapper ref={wrapperRef} height={height}>
             <EuiResizableContainer
@@ -156,11 +148,6 @@ export function ExploratoryView({
                           {HIDE_CHART_LABEL}
                         </HideChart>
                       )}
-                      <ChartCreationInfo
-                        lastUpdated={chartTimeRangeContext?.lastUpdated}
-                        to={chartTimeRangeContext?.to}
-                        from={chartTimeRangeContext?.from}
-                      />
                       <SeriesViews
                         seriesBuilderRef={seriesBuilderRef}
                         onSeriesPanelCollapse={onChange}
@@ -193,7 +180,7 @@ const LensWrapper = styled.div<{ height: string }>`
     height: 100%;
   }
 `;
-const Wrapper = styled(EuiPanel)`
+const Wrapper = styled.div`
   max-width: 1800px;
   min-width: 800px;
   margin: 0 auto;

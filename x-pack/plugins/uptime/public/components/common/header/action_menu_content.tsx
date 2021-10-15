@@ -50,7 +50,7 @@ export function ActionMenuContent(): React.ReactElement {
       allSeries: [
         {
           dataType: 'synthetics',
-          seriesType: 'area_stacked',
+          seriesType: 'area',
           selectedMetricField: 'monitor.duration.us',
           time: { from: dateRangeStart, to: dateRangeEnd },
           breakdown: monitorId ? 'observer.geo.name' : 'monitor.type',
