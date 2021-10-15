@@ -8,7 +8,7 @@
 import { ExpressionTypeDefinition } from '../../../../../../src/plugins/expressions/common';
 import { LensMultiTable } from '../../types';
 
-const name = 'first_datatable';
+const name = 'lens_multitable';
 
 type Input = LensMultiTable;
 
