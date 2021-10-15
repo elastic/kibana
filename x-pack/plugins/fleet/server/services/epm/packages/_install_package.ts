@@ -17,12 +17,17 @@ import type { InstallablePackage, InstallSource, PackageAssetReference } from '.
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { AssetReference, Installation, InstallType } from '../../../types';
 import { installTemplates } from '../elasticsearch/template/install';
-import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
+import {
+  installPipelines,
+  isTopLevelPipeline,
+  deletePreviousPipelines,
+} from '../elasticsearch/ingest_pipeline/';
 import { getAllTemplateRefs } from '../elasticsearch/template/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installTransform } from '../elasticsearch/transform/install';
+import { installMlModel } from '../elasticsearch/ml_model/';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
@@ -54,6 +59,7 @@ export async function _installPackage({
   installSource: InstallSource;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion } = packageInfo;
+
   try {
     // if some installation already exists
     if (installedPkg) {
@@ -134,6 +140,9 @@ export async function _installPackage({
       savedObjectsClient
     );
 
+    // installs ml models
+    const installedMlModel = await installMlModel(packageInfo, paths, esClient, savedObjectsClient);
+
     // installs versionized pipelines without removing currently installed ones
     const installedPipelines = await installPipelines(
       packageInfo,
@@ -159,8 +168,14 @@ export async function _installPackage({
       savedObjectsClient
     );
 
-    // if this is an update or retrying an update, delete the previous version's pipelines
-    if ((installType === 'update' || installType === 'reupdate') && installedPkg) {
+    // If this is an update or retrying an update, delete the previous version's pipelines
+    // Top-level pipeline assets will not be removed on upgrade as of ml model package addition which requires previous
+    // assets to remain installed. This is a temporary solution - more robust solution tracked here https://github.com/elastic/kibana/issues/115035
+    if (
+      paths.filter((path) => isTopLevelPipeline(path)).length === 0 &&
+      (installType === 'update' || installType === 'reupdate') &&
+      installedPkg
+    ) {
       await deletePreviousPipelines(
         esClient,
         savedObjectsClient,
@@ -227,6 +242,7 @@ export async function _installPackage({
       ...installedDataStreamIlm,
       ...installedTemplateRefs,
       ...installedTransforms,
+      ...installedMlModel,
     ];
   } catch (err) {
     if (savedObjectsClient.errors.isConflictError(err)) {
