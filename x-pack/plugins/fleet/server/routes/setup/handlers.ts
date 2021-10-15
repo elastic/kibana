@@ -50,13 +50,21 @@ export const fleetSetupHandler: FleetRequestHandler = async (context, request, r
     const setupStatus = await setupFleet(soClient, esClient);
     const body: PostFleetSetupResponse = {
       ...setupStatus,
-      nonFatalErrors: setupStatus.nonFatalErrors.map((e) => {
+      nonFatalErrors: setupStatus.nonFatalErrors.flatMap((e) => {
         // JSONify the error object so it can be displayed properly in the UI
-        const error = e.error ?? e;
-        return {
-          name: error.name,
-          message: error.message,
-        };
+        if ('error' in e) {
+          return {
+            name: e.error.name,
+            message: e.error.message,
+          };
+        } else {
+          return e.errors.map((upgradePackagePolicyError: any) => {
+            return {
+              name: upgradePackagePolicyError.key,
+              message: upgradePackagePolicyError.message,
+            };
+          });
+        }
       }),
     };
 
