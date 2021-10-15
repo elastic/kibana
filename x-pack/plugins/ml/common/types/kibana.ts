@@ -8,7 +8,6 @@
 // custom edits or fixes for default kibana types which are incomplete
 
 import type { SimpleSavedObject } from 'kibana/public';
-import type { IndexPatternAttributes } from 'src/plugins/data/common';
 import type { FieldFormatsRegistry } from '../../../../../src/plugins/field_formats/common';
 
 export type IndexPatternTitle = string;
@@ -18,7 +17,6 @@ export interface Route {
   k7Breadcrumbs: () => any;
 }
 
-export type IndexPatternSavedObject = SimpleSavedObject<IndexPatternAttributes>;
 // TODO define saved object type
 export type SavedSearchSavedObject = SimpleSavedObject<any>;
 
