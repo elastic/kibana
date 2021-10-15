@@ -61,6 +61,7 @@ import {
 } from './dashboard';
 import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
+import { PngProvider } from './png';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -112,4 +113,5 @@ export const services = {
   reporting: ReportingFunctionalProvider,
   searchSessions: SearchSessionsService,
   observability: ObservabilityProvider,
+  png: PngProvider,
 };

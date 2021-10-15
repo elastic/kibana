@@ -171,7 +171,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       items: [
         { name: 'PDF Reports', icon: 'document', panel: 1 },
         { name: 'PNG Reports', icon: 'document', panel: 7 },
-        { name: 'Capture test', icon: 'document', panel: 8, 'data-test-subj': 'captureTest' },
+        { name: 'Capture test', icon: 'document', panel: 8, 'data-test-subj': 'captureTestPanel' },
       ],
     },
     {
@@ -310,7 +310,11 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
                     <EuiFlexItem grow={false}>
                       <EuiPopover
                         id="contextMenuExample"
-                        button={<EuiButton onClick={onButtonClick}>Share</EuiButton>}
+                        button={
+                          <EuiButton data-test-subj="shareButton" onClick={onButtonClick}>
+                            Share
+                          </EuiButton>
+                        }
                         isOpen={isPopoverOpen}
                         closePopover={closePopover}
                         panelPaddingSize="none"

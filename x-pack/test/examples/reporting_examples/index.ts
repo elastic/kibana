@@ -8,13 +8,10 @@
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService, loadTestFile }: PluginFunctionalProviderContext) {
-  describe('search examples', function () {
+export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
+  describe('reporting examples', function () {
     this.tags('ciGroup13');
 
-    loadTestFile(require.resolve('./search_session_example'));
-    loadTestFile(require.resolve('./search_example'));
-    loadTestFile(require.resolve('./search_sessions_cache'));
-    loadTestFile(require.resolve('./partial_results_example'));
+    loadTestFile(require.resolve('./capture_test'));
   });
 }
