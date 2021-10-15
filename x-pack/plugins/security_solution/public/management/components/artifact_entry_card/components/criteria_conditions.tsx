@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { CommonProps, EuiExpression } from '@elastic/eui';
+import React, { memo, useCallback } from 'react';
+import { CommonProps, EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   CONDITION_OS,
@@ -21,7 +22,7 @@ import {
   CONDITION_OPERATOR_TYPE_EXISTS,
   CONDITION_OPERATOR_TYPE_LIST,
 } from './translations';
-import { ArtifactInfo } from '../types';
+import { ArtifactInfo, ArtifactInfoEntry } from '../types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const OS_LABELS = Object.freeze({
@@ -39,12 +40,59 @@ const OPERATOR_TYPE_LABELS = Object.freeze({
   [ListOperatorTypeEnum.LIST]: CONDITION_OPERATOR_TYPE_LIST,
 });
 
+const EuiFlexGroupNested = styled(EuiFlexGroup)`
+  margin-left: ${({ theme }) => theme.eui.spacerSizes.l};
+`;
+
+const EuiFlexItemNested = styled(EuiFlexItem)`
+  margin-bottom: 6px !important;
+  margin-top: 6px !important;
+`;
+
 export type CriteriaConditionsProps = Pick<ArtifactInfo, 'os' | 'entries'> &
   Pick<CommonProps, 'data-test-subj'>;
 
 export const CriteriaConditions = memo<CriteriaConditionsProps>(
   ({ os, entries, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const getNestedEntriesContent = useCallback(
+      (type: string, nestedEntries: ArtifactInfoEntry[]) => {
+        if (type === 'nested' && nestedEntries.length) {
+          return nestedEntries.map(
+            ({ field: nestedField, type: nestedType, value: nestedValue }) => {
+              return (
+                <EuiFlexGroupNested
+                  data-test-subj={getTestId('nestedCondition')}
+                  key={nestedField + nestedType + nestedValue}
+                  direction="row"
+                  alignItems="center"
+                  gutterSize="m"
+                  responsive={false}
+                >
+                  <EuiFlexItemNested grow={false}>
+                    <EuiToken iconType="tokenNested" size="s" />
+                  </EuiFlexItemNested>
+                  <EuiFlexItemNested grow={false}>
+                    <EuiExpression description={''} value={nestedField} color="subdued" />
+                  </EuiFlexItemNested>
+                  <EuiFlexItemNested grow={false}>
+                    <EuiExpression
+                      description={
+                        OPERATOR_TYPE_LABELS[nestedType as keyof typeof OPERATOR_TYPE_LABELS] ??
+                        nestedType
+                      }
+                      value={nestedValue}
+                    />
+                  </EuiFlexItemNested>
+                </EuiFlexGroupNested>
+              );
+            }
+          );
+        }
+      },
+      [getTestId]
+    );
 
     return (
       <div data-test-subj={dataTestSubj}>
@@ -57,7 +105,7 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
             />
           </strong>
         </div>
-        {entries.map(({ field, type, value }) => {
+        {entries.map(({ field, type, value, entries: nestedEntries = [] }) => {
           return (
             <div data-test-subj={getTestId('condition')} key={field + type + value}>
               <EuiExpression description={CONDITION_AND} value={field} color="subdued" />
@@ -67,6 +115,7 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
                 }
                 value={value}
               />
+              {getNestedEntriesContent(type, nestedEntries)}
             </div>
           );
         })}
