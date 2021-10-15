@@ -42,7 +42,6 @@ export const AutomatedCuration: React.FC = () => {
   const { engineName } = useValues(EngineLogic);
   const [selectedPageTab, setSelectedPageTab] = useState(PROMOTED);
 
-  // This tab group is meant to visually mirror the dynamic group of tags in the ManualCuration component
   const pageTabs = [
     {
       label: PROMOTED_DOCUMENTS_TITLE,
