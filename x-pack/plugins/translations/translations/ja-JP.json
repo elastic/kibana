@@ -2424,7 +2424,6 @@
     "discover.docViews.table.toggleFieldDetails": "フィールド詳細を切り替える",
     "discover.docViews.table.unableToFilterForPresenceOfMetaFieldsTooltip": "メタフィールドの有無でフィルタリングできません",
     "discover.docViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip": "スクリプトフィールドの有無でフィルタリングできません",
-    "discover.docViews.table.unindexedFieldsCanNotBeSearchedTooltip": "インデックスされていないフィールドは検索できません",
     "discover.embeddable.inspectorRequestDataTitle": "データ",
     "discover.embeddable.inspectorRequestDescription": "このリクエストはElasticsearchにクエリをかけ、検索データを取得します。",
     "discover.embeddable.search.displayName": "検索",
