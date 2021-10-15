@@ -27,11 +27,12 @@ export const DocumentViewModeToggle = ({
         label: i18n.translate('discover.viewModes.document.label', {
           defaultMessage: 'Documents',
         }),
+        'data-test-subj': 'dscViewModeDocumentButton',
       },
       {
         id: VIEW_MODE.AGGREGATED_LEVEL,
         label: (
-          <div className="fieldStatsButton">
+          <div className="fieldStatsButton" data-test-subj="dscViewModeFieldStatsButton">
             <FormattedMessage
               id="discover.viewModes.fieldStatistics.label"
               defaultMessage="Field statistics"
@@ -59,6 +60,7 @@ export const DocumentViewModeToggle = ({
       options={toggleButtons}
       idSelected={viewMode}
       onChange={(id: string) => setDiscoverViewMode(id as VIEW_MODE)}
+      data-test-subj={'dscViewModeToggle'}
     />
   );
 };

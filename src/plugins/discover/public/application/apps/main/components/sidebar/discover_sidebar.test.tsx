@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { each, cloneDeep } from 'lodash';
+import { cloneDeep, each } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
@@ -14,7 +14,7 @@ import realHits from '../../../../../__fixtures__/real_hits.js';
 
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
+import { DiscoverSidebarProps } from './discover_sidebar';
 import { flattenHit, IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';

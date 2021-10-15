@@ -26,6 +26,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
+  SHOW_FIELD_STATISTICS,
 } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
@@ -201,6 +202,24 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
+  },
+  [SHOW_FIELD_STATISTICS]: {
+    name: i18n.translate('discover.advancedSettings.discover.showFieldStatistics', {
+      defaultMessage: 'Show field statistics',
+    }),
+    description: i18n.translate(
+      'discover.advancedSettings.discover.showFieldStatisticsDescription',
+      {
+        defaultMessage: `Enable Field statistics table in Discover.`,
+      }
+    ),
+    value: false,
+    category: ['discover'],
+    schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:showFieldStatistics',
+    },
   },
   [SHOW_MULTIFIELDS]: {
     name: i18n.translate('discover.advancedSettings.discover.showMultifields', {

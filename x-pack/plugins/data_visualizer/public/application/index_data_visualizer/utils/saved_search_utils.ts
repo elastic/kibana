@@ -69,9 +69,9 @@ export function createMergedEsQuery(
     if (query.query !== '') {
       combinedQuery = toElasticsearchQuery(ast, indexPattern);
     }
-    const filterQuery = buildQueryFromFilters(filters, indexPattern);
+    if (combinedQuery.bool !== undefined) {
+      const filterQuery = buildQueryFromFilters(filters, indexPattern);
 
-    if (combinedQuery.bool) {
       if (Array.isArray(combinedQuery.bool.filter) === false) {
         combinedQuery.bool.filter =
           combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];

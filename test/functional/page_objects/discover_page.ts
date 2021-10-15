@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 export class DiscoverPageObject extends FtrService {
@@ -307,6 +308,13 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.click('collapseSideBarButton');
   }
 
+  public async closeSidebar() {
+    await this.retry.tryForTime(2 * 1000, async () => {
+      await this.toggleSidebarCollapse();
+      await this.testSubjects.missingOrFail('discover-sidebar');
+    });
+  }
+
   public async getAllFieldNames() {
     const sidebar = await this.testSubjects.find('discover-sidebar');
     const $ = await sidebar.parseDomContent();
@@ -544,5 +552,38 @@ export class DiscoverPageObject extends FtrService {
 
   public async clearSavedQuery() {
     await this.testSubjects.click('saved-query-management-clear-button');
+  }
+
+  public async assertHitCount(expectedHitCount: string) {
+    await this.retry.tryForTime(2 * 1000, async () => {
+      // Close side bar to ensure Discover hit count shows
+      // edge case for when browser width is small
+      await this.closeSidebar();
+      const hitCount = await this.getHitCount();
+      expect(hitCount).to.eql(
+        expectedHitCount,
+        `Expected Discover hit count to be ${expectedHitCount} but got ${hitCount}.`
+      );
+    });
+  }
+
+  public async assertViewModeToggleNotExists() {
+    await this.testSubjects.missingOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+  }
+
+  public async assertViewModeToggleExists() {
+    await this.testSubjects.existOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+  }
+
+  public async assertFieldStatsTableNotExists() {
+    await this.testSubjects.missingOrFail('dscFieldStatsEmbeddedContent', { timeout: 2 * 1000 });
+  }
+
+  public async clickViewModeFieldStatsButton() {
+    await this.retry.tryForTime(2 * 1000, async () => {
+      await this.testSubjects.existOrFail('dscViewModeFieldStatsButton');
+      await this.testSubjects.clickWhenNotDisabled('dscViewModeFieldStatsButton');
+      await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
+    });
   }
 }

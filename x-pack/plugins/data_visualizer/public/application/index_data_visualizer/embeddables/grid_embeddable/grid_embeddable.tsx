@@ -10,7 +10,7 @@ import { CoreStart } from 'kibana/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiProgress, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -102,6 +102,28 @@ export const EmbeddableWrapper = ({
     [input, searchQueryLanguage, searchString]
   );
 
+  if (progress === 100 && configs.length === 0) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          flex: '1 0 100%',
+          textAlign: 'center',
+        }}
+      >
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="visualizeApp" size="m" color="subdued" />
+          <EuiSpacer size="m" />
+          <FormattedMessage
+            id="xpack.dataVisualizer.index.embeddableNoResultsMessage"
+            defaultMessage="No results found"
+          />
+        </EuiText>
+      </div>
+    );
+  }
   return (
     <div>
       <EuiProgress value={progress} max={100} size={'xs'} />
