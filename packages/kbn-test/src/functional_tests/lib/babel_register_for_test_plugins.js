@@ -11,13 +11,6 @@ const Path = require('path');
 
 const { REPO_ROOT } = require('@kbn/dev-utils');
 
-// const KIBANA_ROOT = Path.resolve(__dirname, '../../../../../');
-
-// console.log(Path.resolve(REPO_ROOT, 'test'));
-// console.log(require('fs').realpathSync(Path.resolve(REPO_ROOT, 'test')));
-// console.log(Path.resolve(KIBANA_ROOT, 'test'));
-// throw new Error('FAIL CI');
-
 // modifies all future calls to require() to automatically
 // compile the required source with babel
 require('@babel/register')({
