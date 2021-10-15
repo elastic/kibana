@@ -108,7 +108,7 @@ export const getIndexPatterns = (): string[] => [
   'winlogbeat-*',
 ];
 
-export const getThreatIndexPatterns = (): string[] => ['filebeat-*'];
+export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
 
 const getMitre1 = (): Mitre => ({
   tactic: `${getMockThreatData().tactic.name} (${getMockThreatData().tactic.id})`,
@@ -380,7 +380,7 @@ export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   lookBack: getLookBack(),
   indicatorIndexPattern: ['filebeat-*'],
   indicatorMappingField: 'myhash.mysha256',
-  indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
+  indicatorIndexField: 'threat.indicator.file.hash.sha256',
   type: 'file',
   atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
   timeline: getIndicatorMatchTimelineTemplate(),

@@ -13,6 +13,7 @@ import { keys, each, cloneDeep, clone, uniq, filter, map } from 'lodash';
 import realHits from '../../../../../../__fixtures__/real_hits.js';
 
 import { IndexPattern } from '../../../../../../../../data/public';
+import { flattenHit } from '../../../../../../../../data/common';
 
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
@@ -120,7 +121,7 @@ describe('fieldCalculator', function () {
     let hits: any;
 
     beforeEach(function () {
-      hits = each(cloneDeep(realHits), (hit) => indexPattern.flattenHit(hit));
+      hits = each(cloneDeep(realHits), (hit) => flattenHit(hit, indexPattern));
     });
 
     it('Should return an array of values for _source fields', function () {
