@@ -313,10 +313,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         componentTemplates: [
           {
             name: 'mappings',
-            mappings: mappingFromFieldMap(
-              { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
-              false
-            ),
+            mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
           },
         ],
       }),
