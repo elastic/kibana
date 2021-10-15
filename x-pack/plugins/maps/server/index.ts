@@ -59,6 +59,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
         return completeConfig;
       }
       addDeprecation({
+        configPath: 'map.proxyElasticMapsServiceInMaps',
         documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/maps-connect-to-ems.html#elastic-maps-server`,
         message: i18n.translate('xpack.maps.deprecation.proxyEMS.message', {
           defaultMessage: 'map.proxyElasticMapsServiceInMaps is deprecated and is no longer used',
