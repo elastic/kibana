@@ -316,7 +316,7 @@ describe('<CustomFields />', () => {
       expect(getByText('HTTP')).toBeInTheDocument();
       expect(getByText('TCP')).toBeInTheDocument();
       expect(getByText('ICMP')).toBeInTheDocument();
-      expect(queryByText('BROWSER')).not.toBeInTheDocument();
+      expect(queryByText('Browser')).not.toBeInTheDocument();
     });
   });
 });
