@@ -96,6 +96,19 @@ describe('TimeComparison', () => {
         TimeRangeComparisonType.WeekBefore.valueOf(),
       ]);
     });
+
+    it('shows week and day before when 24 hours is selected but milliseconds are different', () => {
+      expect(
+        getComparisonTypes({
+          start: '2021-10-15T00:52:59.554Z',
+          end: '2021-10-14T00:52:59.553Z',
+        })
+      ).toEqual([
+        TimeRangeComparisonType.DayBefore.valueOf(),
+        TimeRangeComparisonType.WeekBefore.valueOf(),
+      ]);
+    });
+
     it('shows week before when 25 hours is selected', () => {
       expect(
         getComparisonTypes({
