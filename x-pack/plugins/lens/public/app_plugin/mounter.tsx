@@ -44,6 +44,7 @@ import {
   LensState,
 } from '../state_management';
 import { getPreloadedState } from '../state_management/lens_slice';
+import { getLensInspectorService } from '../lens_inspector_service';
 
 export async function getLensServices(
   coreStart: CoreStart,
@@ -68,7 +69,7 @@ export async function getLensServices(
   return {
     data,
     storage,
-    inspector,
+    inspector: getLensInspectorService(inspector),
     navigation,
     fieldFormats,
     stateTransfer,
@@ -284,6 +285,7 @@ export async function mountApp(
   return () => {
     data.search.session.clear();
     unmountComponentAtNode(params.element);
+    lensServices.inspector.close();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
   };

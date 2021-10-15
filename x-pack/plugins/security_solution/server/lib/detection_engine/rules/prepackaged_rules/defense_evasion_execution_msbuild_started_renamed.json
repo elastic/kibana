@@ -38,12 +38,19 @@
         {
           "id": "T1036",
           "name": "Masquerading",
-          "reference": "https://attack.mitre.org/techniques/T1036/"
+          "reference": "https://attack.mitre.org/techniques/T1036/",
+          "subtechnique": [
+            {
+              "id": "T1036.003",
+              "name": "Rename System Utilities",
+              "reference": "https://attack.mitre.org/techniques/T1036/003/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 8
+  "version": 9
 }
