@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { DeprecationSource } from '../../../../../../common/types';
 import { getDeprecationsUpperLimit } from '../../../../lib/utils';
+import { LevelInfoTip } from '../../../shared';
 import { LoadingIssuesError } from './loading_issues_error';
 import { NoDeprecationIssues } from './no_deprecation_issues';
 
@@ -100,7 +101,15 @@ export const DeprecationIssuesPanel = (props: Props) => {
                 )
               }
               titleElement="span"
-              description={i18nTexts.criticalDeprecationsTitle}
+              description={
+                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                  <EuiFlexItem grow={false}>{i18nTexts.criticalDeprecationsTitle}</EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <LevelInfoTip level="critical" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
               titleColor="danger"
               isLoading={isLoading}
             />
@@ -123,7 +132,15 @@ export const DeprecationIssuesPanel = (props: Props) => {
                 )
               }
               titleElement="span"
-              description={i18nTexts.warningDeprecationsTitle}
+              description={
+                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                  <EuiFlexItem grow={false}>{i18nTexts.warningDeprecationsTitle}</EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <LevelInfoTip level="warning" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
               isLoading={isLoading}
             />
           </EuiFlexItem>
