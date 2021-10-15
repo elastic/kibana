@@ -15,8 +15,8 @@ import { licenseService } from '../../../hooks/use_license';
 import { fleetGetCheckPermissionsHttpMock } from '../../../../management/pages/mocks';
 import { getEndpointPrivilegesInitialStateMock } from './mocks';
 
-jest.mock('../../lib/kibana');
-jest.mock('../../hooks/use_license', () => {
+jest.mock('../../../lib/kibana');
+jest.mock('../../../hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
   };
