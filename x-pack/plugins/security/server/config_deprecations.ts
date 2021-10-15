@@ -122,9 +122,13 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       string,
       any
     >;
-    if (Object.values(samlProviders).find((provider) => !!provider.maxRedirectURLSize)) {
+
+    const foundProvider = Object.entries(samlProviders).find(
+      ([_, provider]) => !!provider.maxRedirectURLSize
+    );
+    if (foundProvider) {
       addDeprecation({
-        configPath: 'xpack.security.authc.providers.saml.provider.maxRedirectURLSize',
+        configPath: `xpack.security.authc.providers.saml.${foundProvider[0]}.maxRedirectURLSize`,
         title: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeTitle', {
           defaultMessage:
             '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is deprecated',

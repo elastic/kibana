@@ -266,6 +266,44 @@ describe('DeprecationsFactory', () => {
         }),
       ]);
     });
+
+    it('does not throw when configured with paths not matching any deprecation', async () => {
+      const deprecationsFactory = new DeprecationsFactory({
+        logger,
+        config: {
+          ignoredConfigDeprecations: ['unknown.bar'],
+        },
+      });
+      const mockPluginDeprecationsInfo: DeprecationsDetails[] = [
+        {
+          configPath: 'mockPlugin.foo',
+          title: 'mockPlugin.foo is deprecated',
+          message: 'mockPlugin.foo is deprecated and will be removed in a future Kibana version',
+          level: 'critical',
+          deprecationType: 'config',
+          correctiveActions: {
+            manualSteps: ['come on', 'do something'],
+          },
+        },
+        {
+          configPath: 'mockPlugin.bar',
+          title: 'mockPlugin.bar is deprecated',
+          message: 'mockPlugin.bar is deprecated and will be removed in a future Kibana version',
+          level: 'critical',
+          deprecationType: 'config',
+          correctiveActions: {
+            manualSteps: ['come on', 'do something'],
+          },
+        },
+      ];
+
+      const mockPluginRegistry = deprecationsFactory.getRegistry('mockPlugin');
+      mockPluginRegistry.registerDeprecations({
+        getDeprecations: jest.fn().mockResolvedValue(mockPluginDeprecationsInfo),
+      });
+
+      await expect(deprecationsFactory.getAllDeprecations(mockDependencies)).resolves.toBeDefined();
+    });
   });
 
   describe('getDeprecations', () => {

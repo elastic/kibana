@@ -10,6 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { ServiceConfigDescriptor } from '../internal_types';
 
 const configSchema = schema.object({
+  // `deprecation.skip_deprecated_settings` is consistent with the equivalent ES feature and config property
   skip_deprecated_settings: schema.arrayOf(schema.string(), { defaultValue: [] }),
 });
 
