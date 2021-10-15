@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
@@ -86,23 +86,26 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       );
   }
 
-  const cancelLink = (
-    <>
-      {' '}
-      <EuiLink data-test-subj="cancelReindexingDocumentsButton" onClick={cancelReindex}>
-        {cancelText}
-      </EuiLink>
-    </>
-  );
-
   return (
-    <>
-      <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
-        defaultMessage="Reindexing documents"
-      />
-      {showCancelLink && cancelLink}
-    </>
+    <EuiFlexGroup component="span">
+      <EuiFlexItem grow={false}>
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
+          defaultMessage="Reindexing documents"
+        />
+      </EuiFlexItem>
+      {showCancelLink && (
+        <EuiFlexItem>
+          <EuiLink
+            data-test-subj="cancelReindexingDocumentsButton"
+            onClick={cancelReindex}
+            disabled={cancelLoadingState !== undefined}
+          >
+            {cancelText}
+          </EuiLink>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
 
