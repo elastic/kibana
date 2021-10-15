@@ -14,6 +14,7 @@ import {
 } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
+  ActivityLogItemTypes,
   ActivityLog,
   EndpointAction,
   EndpointActionResponse,
@@ -181,7 +182,9 @@ const getActivityLog = async ({
   const responses = responsesResult?.body?.hits?.hits?.length
     ? responsesResult?.body?.hits?.hits?.map((e) => {
         return {
-          type: logsEndpointResponsesRegex.test(e._index) ? 'response' : 'fleetResponse',
+          type: logsEndpointResponsesRegex.test(e._index)
+            ? ActivityLogItemTypes.RESPONSE
+            : ActivityLogItemTypes.FLEET_RESPONSE,
           item: { id: e._id, data: e._source },
         };
       })
@@ -190,7 +193,7 @@ const getActivityLog = async ({
     ? actionsResult?.body?.hits?.hits
         ?.filter((e) => !logsEndpointActionsRegex.test(e._index))
         .map((e) => ({
-          type: 'fleetAction',
+          type: ActivityLogItemTypes.FLEET_ACTION,
           item: { id: e._id, data: e._source },
         }))
     : [];

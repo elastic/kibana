@@ -9,7 +9,11 @@ import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { EuiComment, EuiText, EuiAvatarProps, EuiCommentProps, IconType } from '@elastic/eui';
-import { Immutable, ActivityLogEntry } from '../../../../../../../common/endpoint/types';
+import {
+  Immutable,
+  ActivityLogEntry,
+  ActivityLogItemTypes,
+} from '../../../../../../../common/endpoint/types';
 import { FormattedRelativePreferenceDate } from '../../../../../../common/components/formatted_date';
 import { LogEntryTimelineIcon } from './log_entry_timeline_icon';
 import { useEuiTheme } from '../../../../../../common/lib/theme/use_eui_theme';
@@ -48,7 +52,7 @@ const useLogEntryUIProps = (
     let displayResponseEvent: boolean = true;
     let username: EuiCommentProps['username'] = '';
 
-    if (logEntry.type === 'fleetAction') {
+    if (logEntry.type === ActivityLogItemTypes.FLEET_ACTION) {
       avatarSize = 'm';
       commentType = 'regular';
       commentText = logEntry.item.data.data.comment?.trim() ?? '';
@@ -65,7 +69,7 @@ const useLogEntryUIProps = (
           displayComment = true;
         }
       }
-    } else if (logEntry.type === 'fleetResponse') {
+    } else if (logEntry.type === ActivityLogItemTypes.FLEET_RESPONSE) {
       isResponseEvent = true;
       if (logEntry.item.data.action_data.command === 'isolate') {
         isIsolateAction = true;
@@ -75,7 +79,7 @@ const useLogEntryUIProps = (
       } else {
         avatarColor = theme.euiColorVis9_behindText;
       }
-    } else if (logEntry.type === 'response') {
+    } else if (logEntry.type === ActivityLogItemTypes.RESPONSE) {
       iconType = 'check';
       isResponseEvent = true;
       if (logEntry.item.data.EndpointActions.data.command === 'isolate') {

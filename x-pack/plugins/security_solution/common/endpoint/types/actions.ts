@@ -10,6 +10,13 @@ import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
+export const ActivityLogItemTypes = {
+  ACTION: 'action' as const,
+  RESPONSE: 'response' as const,
+  FLEET_ACTION: 'fleetAction' as const,
+  FLEET_RESPONSE: 'fleetResponse' as const,
+};
+
 interface EcsError {
   code?: string;
   id?: string;
@@ -88,7 +95,7 @@ export interface EndpointActionResponse {
 }
 
 export interface EndpointActivityLogAction {
-  type: 'action';
+  type: typeof ActivityLogItemTypes.ACTION;
   item: {
     id: string;
     data: LogsEndpointAction;
@@ -96,7 +103,7 @@ export interface EndpointActivityLogAction {
 }
 
 export interface EndpointActivityLogActionResponse {
-  type: 'response';
+  type: typeof ActivityLogItemTypes.RESPONSE;
   item: {
     id: string;
     data: LogsEndpointActionResponse;
@@ -104,7 +111,7 @@ export interface EndpointActivityLogActionResponse {
 }
 
 export interface ActivityLogAction {
-  type: 'fleetAction';
+  type: typeof ActivityLogItemTypes.FLEET_ACTION;
   item: {
     // document _id
     id: string;
@@ -113,7 +120,7 @@ export interface ActivityLogAction {
   };
 }
 export interface ActivityLogActionResponse {
-  type: 'fleetResponse';
+  type: typeof ActivityLogItemTypes.FLEET_RESPONSE;
   item: {
     // document id
     id: string;

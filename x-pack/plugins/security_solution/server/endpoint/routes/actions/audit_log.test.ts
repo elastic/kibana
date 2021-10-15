@@ -32,7 +32,7 @@ import { registerActionAuditLogRoutes } from './audit_log';
 import uuid from 'uuid';
 import { aMockAction, aMockResponse, MockAction, mockSearchResult, MockResponse } from './mocks';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
-import { ActivityLog } from '../../../../common/endpoint/types';
+import { ActivityLog, ActivityLogItemTypes } from '../../../../common/endpoint/types';
 
 describe('Action Log API', () => {
   describe('schema', () => {
@@ -191,8 +191,12 @@ describe('Action Log API', () => {
 
       expect(response.ok).toBeCalled();
       expect(responseBody.data).toHaveLength(3);
-      expect(responseBody.data.filter((e) => e.type === 'fleetResponse')).toHaveLength(1);
-      expect(responseBody.data.filter((e) => e.type === 'fleetAction')).toHaveLength(2);
+      expect(
+        responseBody.data.filter((e) => e.type === ActivityLogItemTypes.FLEET_RESPONSE)
+      ).toHaveLength(1);
+      expect(
+        responseBody.data.filter((e) => e.type === ActivityLogItemTypes.FLEET_ACTION)
+      ).toHaveLength(2);
     });
 
     it('should throw errors when no results for some agentID', async () => {
