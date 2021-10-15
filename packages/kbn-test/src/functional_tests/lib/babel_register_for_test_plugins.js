@@ -31,6 +31,8 @@ const testMap = [
   Path.resolve(KIBANA_ROOT2, 'src/core/utils/default_app_categories.ts'),
 ];
 
+const testMap2 = testMap.map((path) => Fs.realpathSync(path));
+
 console.log('SIMPLE REPO ROOT: ');
 console.log(Path.resolve(REPO_ROOT, 'test'));
 console.log('REAL PATH REPO ROOT: ');
@@ -39,6 +41,8 @@ console.log('KBN ROOT: ');
 console.log(Path.resolve(KIBANA_ROOT, 'test'));
 console.log('TEST PATHS: ');
 console.log(testMap);
+console.log('TEST PATHS 2: ');
+console.log(testMap2);
 // throw new Error('FAIL CI');
 
 // modifies all future calls to require() to automatically
