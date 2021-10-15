@@ -144,7 +144,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         ...kibanaIndexPatterns.map((kip) => kip.title),
         signalIndexName,
       ].reduce<Array<EuiComboBoxOptionOption<string>>>((acc, index) => {
-        if (index != null && !acc.some((o) => o.label.includes(index))) {
+        if (index != null && !acc.some((o) => o.label === index)) {
           return [...acc, { label: index, value: index }];
         }
         return acc;
@@ -153,16 +153,15 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   );
 
   const renderOption = useCallback(
-    (option) => {
-      const { value } = option;
+    ({ value }) => {
       if (kibanaIndexPatterns.some((kip) => kip.title === value)) {
         return (
-          <>
+          <span data-test-subj="sourcerer-option">
             <EuiIcon type="logoKibana" size="s" /> {value}
-          </>
+          </span>
         );
       }
-      return <>{value}</>;
+      return <span data-test-subj="sourcerer-option">{value}</span>;
     },
     [kibanaIndexPatterns]
   );
@@ -193,14 +192,14 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       setFilterEventType(filter);
       if (filter === 'all') {
         setSelectedOptions(
-          [...configIndexPatterns, signalIndexName ?? ''].map((indexSelected) => ({
+          [...configIndexPatterns.sort(), signalIndexName ?? ''].map((indexSelected) => ({
             label: indexSelected,
             value: indexSelected,
           }))
         );
       } else if (filter === 'raw') {
         setSelectedOptions(
-          configIndexPatterns.map((indexSelected) => ({
+          configIndexPatterns.sort().map((indexSelected) => ({
             label: indexSelected,
             value: indexSelected,
           }))
@@ -240,14 +239,8 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   }, [filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
 
   const resetDataSources = useCallback(() => {
-    setSelectedOptions(
-      sourcererScope.selectedPatterns.map((indexSelected) => ({
-        label: indexSelected,
-        value: indexSelected,
-      }))
-    );
-    setFilterEventType(eventType);
-  }, [eventType, sourcererScope.selectedPatterns]);
+    onChangeFilter('all');
+  }, [onChangeFilter]);
 
   const comboBox = useMemo(
     () => (
