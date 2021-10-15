@@ -52,7 +52,8 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
       correctiveActions: {
         manualSteps: [
           i18n.translate('xpack.infra.deprecations.timestampAdjustIndexing', {
-            defaultMessage: 'Adjust your indexing to use "@timestamp" as a timestamp.',
+            defaultMessage: 'Adjust your indexing to use "{field}" as a timestamp.',
+            values: { field: '@timestamp' },
           }),
         ],
       },
@@ -72,7 +73,8 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
       correctiveActions: {
         manualSteps: [
           i18n.translate('xpack.infra.deprecations.tiebreakerAdjustIndexing', {
-            defaultMessage: 'Adjust your indexing to use "_doc" as a tiebreaker.',
+            defaultMessage: 'Adjust your indexing to use "{field}" as a tiebreaker.',
+            values: { field: '_doc' },
           }),
         ],
       },
@@ -92,7 +94,8 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
       correctiveActions: {
         manualSteps: [
           i18n.translate('xpack.infra.deprecations.hostAdjustIndexing', {
-            defaultMessage: 'Adjust your indexing to identify hosts using "host.name"',
+            defaultMessage: 'Adjust your indexing to identify hosts using "{field}"',
+            values: { field: 'host.name' },
           }),
         ],
       },
@@ -111,7 +114,8 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
         manualSteps: [
           i18n.translate('xpack.infra.deprecations.podAdjustIndexing', {
             defaultMessage:
-              'Adjust your indexing to identify Kubernetes pods using "kubernetes.pod.uid"',
+              'Adjust your indexing to identify Kubernetes pods using "{field}"',
+             values: { field: 'kubernetes.pod.uid' },
           }),
         ],
       },
@@ -132,7 +136,8 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
         manualSteps: [
           i18n.translate('xpack.infra.deprecations.containerAdjustIndexing', {
             defaultMessage:
-              'Adjust your indexing to identify Docker containers using "container.id"',
+              'Adjust your indexing to identify Docker containers using "{field}"',
+            values: { field: 'container.id' },
           }),
         ],
       },
