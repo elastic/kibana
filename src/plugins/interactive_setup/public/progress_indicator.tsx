@@ -28,13 +28,17 @@ export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ o
     let isAvailable: boolean | undefined = false;
     let isPastPreboot: boolean | undefined = false;
     try {
-      const { response } = await http.get('/api/status', { asResponse: true });
+      const { response, body = {} } = await http.get('/api/status', { asResponse: true });
       isAvailable = response ? response.status < 500 : undefined;
-      isPastPreboot = response?.headers.get('content-type')?.includes('application/json');
+      isPastPreboot =
+        response?.headers.get('content-type')?.includes('application/json') &&
+        body?.status?.overall?.level === 'available';
     } catch (error) {
-      const { response } = error as IHttpFetchError;
+      const { response, body = {} } = error as IHttpFetchError;
       isAvailable = response ? response.status < 500 : undefined;
-      isPastPreboot = response?.headers.get('content-type')?.includes('application/json');
+      isPastPreboot =
+        response?.headers.get('content-type')?.includes('application/json') &&
+        body?.status?.overall?.level === 'available';
     }
     return isAvailable === true && isPastPreboot === true
       ? 'complete'
