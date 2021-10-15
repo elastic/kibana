@@ -284,24 +284,26 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
   const onSaveNavigate = useCallback(
     (policy?: PackagePolicy, paramsToApply: OnSaveQueryParamKeys[] = []) => {
-      if (doOnSaveNavigation.current) {
-        if (routeState && routeState.onSaveNavigateTo && policy) {
-          const [appId, options] = routeState.onSaveNavigateTo;
+      if (!doOnSaveNavigation.current) {
+        return;
+      }
 
-          if (options?.path) {
-            const pathWithQueryString = appendOnSaveQueryParamsToPath({
-              path: options.path,
-              policy,
-              mappingOptions: routeState.onSaveQueryParams,
-              paramsToApply,
-            });
-            handleNavigateTo([appId, { ...options, path: pathWithQueryString }]);
-          } else {
-            handleNavigateTo(routeState.onSaveNavigateTo);
-          }
+      if (routeState?.onSaveNavigateTo && policy) {
+        const [appId, options] = routeState.onSaveNavigateTo;
+
+        if (options?.path) {
+          const pathWithQueryString = appendOnSaveQueryParamsToPath({
+            path: options.path,
+            policy,
+            mappingOptions: routeState.onSaveQueryParams,
+            paramsToApply,
+          });
+          handleNavigateTo([appId, { ...options, path: pathWithQueryString }]);
         } else {
-          history.push(getPath('policy_details', { policyId: agentPolicy!.id }));
+          handleNavigateTo(routeState.onSaveNavigateTo);
         }
+      } else {
+        history.push(getPath('policy_details', { policyId: agentPolicy!.id }));
       }
     },
     [agentPolicy, getPath, handleNavigateTo, history, routeState]
