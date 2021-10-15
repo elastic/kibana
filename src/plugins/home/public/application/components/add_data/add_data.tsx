@@ -22,8 +22,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ApplicationStart } from 'kibana/public';
 import { createAppNavigationHandler } from '../app_navigation_handler';
-// @ts-expect-error untyped component
-import { Synopsis } from '../synopsis';
 import { getServices } from '../../kibana_services';
 import { RedirectAppLinks } from '../../../../../kibana_react/public';
 
