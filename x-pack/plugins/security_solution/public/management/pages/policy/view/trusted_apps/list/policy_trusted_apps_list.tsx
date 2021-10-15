@@ -38,6 +38,7 @@ import { ContextMenuItemNavByRouterProps } from '../../../../../components/conte
 import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 import { RemoveTrustedAppFromPolicyModal } from './remove_trusted_app_from_policy_modal';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
 
 const DATA_TEST_SUBJ = 'policyTrustedAppsGrid';
 
@@ -46,6 +47,7 @@ export const PolicyTrustedAppsList = memo(() => {
   const toasts = useToasts();
   const history = useHistory();
   const { getAppUrl } = useAppUrl();
+  const { isPlatinumPlus } = useEndpointPrivileges();
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
   const hasTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
   const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
@@ -132,44 +134,50 @@ export const PolicyTrustedAppsList = memo(() => {
               return byIdPolicies;
             }, {});
 
+      const fullDetailsAction: ArtifactCardGridCardComponentProps['actions'] = [
+        {
+          icon: 'controlsHorizontal',
+          children: i18n.translate(
+            'xpack.securitySolution.endpoint.policy.trustedApps.list.viewAction',
+            { defaultMessage: 'View full details' }
+          ),
+          href: getAppUrl({ appId: APP_ID, path: viewUrlPath }),
+          navigateAppId: APP_ID,
+          navigateOptions: { path: viewUrlPath },
+          'data-test-subj': getTestId('viewFullDetailsAction'),
+        },
+      ];
       const thisTrustedAppCardProps: ArtifactCardGridCardComponentProps = {
         expanded: Boolean(isCardExpanded[trustedApp.id]),
-        actions: [
-          {
-            icon: 'controlsHorizontal',
-            children: i18n.translate(
-              'xpack.securitySolution.endpoint.policy.trustedApps.list.viewAction',
-              { defaultMessage: 'View full details' }
-            ),
-            href: getAppUrl({ appId: APP_ID, path: viewUrlPath }),
-            navigateAppId: APP_ID,
-            navigateOptions: { path: viewUrlPath },
-            'data-test-subj': getTestId('viewFullDetailsAction'),
-          },
-          {
-            icon: 'trash',
-            children: i18n.translate(
-              'xpack.securitySolution.endpoint.policy.trustedApps.list.removeAction',
-              { defaultMessage: 'Remove from policy' }
-            ),
-            onClick: () => {
-              setTrustedAppsForRemoval([trustedApp]);
-              setShowRemovalModal(true);
-            },
-            disabled: isGlobal,
-            toolTipContent: isGlobal
-              ? i18n.translate(
-                  'xpack.securitySolution.endpoint.policy.trustedApps.list.removeActionNotAllowed',
-                  {
-                    defaultMessage:
-                      'Globally applied trusted applications cannot be removed from policy.',
-                  }
-                )
-              : undefined,
-            toolTipPosition: 'top',
-            'data-test-subj': getTestId('removeAction'),
-          },
-        ],
+        actions: isPlatinumPlus
+          ? [
+              ...fullDetailsAction,
+              {
+                icon: 'trash',
+                children: i18n.translate(
+                  'xpack.securitySolution.endpoint.policy.trustedApps.list.removeAction',
+                  { defaultMessage: 'Remove from policy' }
+                ),
+                onClick: () => {
+                  setTrustedAppsForRemoval([trustedApp]);
+                  setShowRemovalModal(true);
+                },
+                disabled: isGlobal,
+                toolTipContent: isGlobal
+                  ? i18n.translate(
+                      'xpack.securitySolution.endpoint.policy.trustedApps.list.removeActionNotAllowed',
+                      {
+                        defaultMessage:
+                          'Globally applied trusted applications cannot be removed from policy.',
+                      }
+                    )
+                  : undefined,
+                toolTipPosition: 'top',
+                'data-test-subj': getTestId('removeAction'),
+              },
+            ]
+          : fullDetailsAction,
+
         policies: assignedPoliciesMenuItems,
       };
 
@@ -177,7 +185,7 @@ export const PolicyTrustedAppsList = memo(() => {
     }
 
     return newCardProps;
-  }, [allPoliciesById, getAppUrl, getTestId, isCardExpanded, trustedAppItems]);
+  }, [allPoliciesById, getAppUrl, getTestId, isCardExpanded, trustedAppItems, isPlatinumPlus]);
 
   const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
     (item) => {
