@@ -47,7 +47,7 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
             create: (
               <span>
                 {i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutMigrate',
+                  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutCreate',
                   {
                     defaultMessage: 'or create a new one.',
                   }
