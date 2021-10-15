@@ -56,7 +56,7 @@ export interface SeriesConfig {
   filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
   baseFilters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
-  definitionFields: string[];
+  definitionFields: Array<string | { field: string; nested: string }>;
   metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;

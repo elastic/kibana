@@ -19,13 +19,15 @@ import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_valu
 interface Props {
   seriesId: number;
   series: SeriesUrl;
-  field: string;
+  field: string | { field: string; nested: string };
   seriesConfig: SeriesConfig;
   onChange: (field: string, value?: string[]) => void;
 }
 
-export function ReportDefinitionField({ series, field, seriesConfig, onChange }: Props) {
+export function ReportDefinitionField({ series, field: fieldProp, seriesConfig, onChange }: Props) {
   const { indexPattern } = useAppIndexPatternContext(series.dataType);
+
+  const field = typeof fieldProp === 'string' ? fieldProp : fieldProp.field;
 
   const { reportDefinitions: selectedReportDefinitions = {} } = series;
 
@@ -44,7 +46,9 @@ export function ReportDefinitionField({ series, field, seriesConfig, onChange }:
     });
 
     if (!isEmpty(selectedReportDefinitions)) {
-      definitionFields.forEach((fieldT) => {
+      definitionFields.forEach((fieldObj) => {
+        const fieldT = typeof fieldObj === 'string' ? fieldObj : fieldObj.field;
+
         if (indexPattern && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
           const values = selectedReportDefinitions?.[fieldT];
           if (!values.includes(ALL_VALUES_SELECTED)) {
@@ -65,7 +69,7 @@ export function ReportDefinitionField({ series, field, seriesConfig, onChange }:
 
   return (
     <FieldValueSuggestions
-      label={labels[field]}
+      label={labels[field] ?? field}
       sourceField={field}
       indexPatternTitle={indexPattern.title}
       selectedValue={selectedReportDefinitions?.[field]}

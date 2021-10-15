@@ -194,10 +194,12 @@ export class LensAttributes {
     label,
     sourceField,
     columnType,
+    columnFilter,
     operationType,
   }: {
     sourceField: string;
     columnType?: string;
+    columnFilter?: ColumnFilter;
     operationType?: string;
     label?: string;
     seriesConfig: SeriesConfig;
@@ -214,6 +216,7 @@ export class LensAttributes {
           operationType,
           label,
           seriesConfig,
+          columnFilter,
         });
       }
       if (operationType?.includes('th')) {
@@ -228,11 +231,13 @@ export class LensAttributes {
     label,
     seriesConfig,
     operationType,
+    columnFilter,
   }: {
     sourceField: string;
     operationType: 'average' | 'median' | 'sum' | 'unique_count';
     label?: string;
     seriesConfig: SeriesConfig;
+    columnFilter?: ColumnFilter;
   }):
     | AvgIndexPatternColumn
     | MedianIndexPatternColumn
@@ -247,6 +252,7 @@ export class LensAttributes {
           operationType: capitalize(operationType),
         },
       }),
+      filter: columnFilter,
       operationType,
     };
   }
@@ -391,6 +397,7 @@ export class LensAttributes {
       return this.getNumberColumn({
         sourceField: fieldName,
         columnType,
+        columnFilter: columnFilters?.[0],
         operationType,
         label: columnLabel || label,
         seriesConfig: layerConfig.seriesConfig,
@@ -447,10 +454,10 @@ export class LensAttributes {
 
     return this.getColumnBasedOnType({
       sourceField,
-      operationType: breakdown === PERCENTILE ? PERCENTILE_RANKS[0] : operationType,
       label,
       layerConfig,
       colIndex: 0,
+      operationType: breakdown === PERCENTILE ? PERCENTILE_RANKS[0] : operationType,
     });
   }
 
@@ -629,7 +636,12 @@ export class LensAttributes {
           [`y-axis-column-${layerId}`]: {
             ...mainYAxis,
             label,
-            filter: { query: columnFilter, language: 'kuery' },
+            filter: {
+              query: mainYAxis.filter
+                ? `${columnFilter} and ${mainYAxis.filter.query}`
+                : columnFilter,
+              language: 'kuery',
+            },
             ...(timeShift ? { timeShift } : {}),
           },
           ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN && breakdown !== PERCENTILE

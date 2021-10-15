@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../../types';
@@ -41,19 +42,46 @@ export function ReportDefinitionCol({
     }
   };
 
+  const hasFieldDataSelected = (field: string) => {
+    return !isEmpty(series.reportDefinitions?.[field]);
+  };
+
   return (
     <EuiFlexGroup gutterSize="s">
-      {definitionFields.map((field) => (
-        <EuiFlexItem key={field} grow={1}>
-          <ReportDefinitionField
-            seriesId={seriesId}
-            series={series}
-            seriesConfig={seriesConfig}
-            field={field}
-            onChange={onChange}
-          />
-        </EuiFlexItem>
-      ))}
+      {definitionFields.map((field) => {
+        const fieldStr = typeof field === 'string' ? field : field.field;
+
+        let nestedFieldElement;
+
+        if (typeof field !== 'string' && hasFieldDataSelected(field.field)) {
+          nestedFieldElement = (
+            <EuiFlexItem key={field.nested} grow={1}>
+              <ReportDefinitionField
+                seriesId={seriesId}
+                series={series}
+                seriesConfig={seriesConfig}
+                field={field.nested}
+                onChange={onChange}
+              />
+            </EuiFlexItem>
+          );
+        }
+
+        return (
+          <>
+            <EuiFlexItem key={fieldStr} grow={1}>
+              <ReportDefinitionField
+                seriesId={seriesId}
+                series={series}
+                seriesConfig={seriesConfig}
+                field={field}
+                onChange={onChange}
+              />
+            </EuiFlexItem>
+            {nestedFieldElement}
+          </>
+        );
+      })}
     </EuiFlexGroup>
   );
 }

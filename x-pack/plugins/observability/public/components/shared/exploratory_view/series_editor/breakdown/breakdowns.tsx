@@ -17,6 +17,10 @@ import {
   PERCENTILE,
 } from '../../configurations/constants';
 import { SeriesConfig, SeriesUrl } from '../../types';
+import {
+  MONITOR_DURATION_US,
+  SYNTHETICS_STEP_NAME,
+} from '../../configurations/constants/field_names/synthetics';
 
 interface Props {
   seriesId: number;
@@ -71,11 +75,22 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
   }
 
   const options = items
-    .map(({ id, label }) => ({
-      inputDisplay: label,
-      value: id,
-      dropdownDisplay: label,
-    }))
+    .map(({ id, label }) => {
+      if (id === SYNTHETICS_STEP_NAME && series.selectedMetricField === MONITOR_DURATION_US) {
+        return {
+          inputDisplay: label,
+          value: id,
+          dropdownDisplay: label,
+          disabled: true,
+        };
+      } else {
+        return {
+          inputDisplay: label,
+          value: id,
+          dropdownDisplay: label,
+        };
+      }
+    })
     .filter(({ value }) => !(value === PERCENTILE && isRecordsMetric));
 
   let valueOfSelected =
