@@ -142,14 +142,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const setEventsLoadingCallback = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      setEventsLoading!({ id: timelineId, eventIds, isLoading });
+      setEventsLoading({ id: timelineId, eventIds, isLoading });
     },
     [setEventsLoading, timelineId]
   );
 
   const setEventsDeletedCallback = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      setEventsDeleted!({ id: timelineId, eventIds, isDeleted });
+      setEventsDeleted({ id: timelineId, eventIds, isDeleted });
     },
     [setEventsDeleted, timelineId]
   );
@@ -216,7 +216,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
-    clearSelected!({ id: timelineId });
+    clearSelected({ id: timelineId });
     dispatch(
       timelineActions.setTGridSelectAll({
         id: timelineId,
@@ -375,21 +375,21 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   return (
     <StatefulEventsViewer
-      pageFilters={defaultFiltersMemo}
+      additionalFilters={additionalFiltersComponent}
+      currentFilter={filterGroup}
       defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
-      entityType="events"
       end={to}
-      currentFilter={filterGroup}
+      entityType="events"
+      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
       id={timelineId}
       onRuleChange={onRuleChange}
+      pageFilters={defaultFiltersMemo}
       renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}
-      additionalFilters={additionalFiltersComponent}
-      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
     />
   );
 };

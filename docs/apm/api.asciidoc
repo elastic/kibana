@@ -484,8 +484,7 @@ An example is below.
 [[api-create-apm-index-pattern]]
 ==== Customize the APM index pattern
 
-As an alternative to updating <<apm-settings-in-kibana,`apm_oss.indexPattern`>> in your `kibana.yml` configuration file,
-you can use Kibana's <<saved-objects-api-update,update object API>> to update the default APM index pattern on the fly.
+Use Kibana's <<saved-objects-api-update,update object API>> to update the default APM index pattern on the fly.
 
 The following example sets the default APM app index pattern to `some-other-pattern-*`:
 
