@@ -181,6 +181,7 @@ export const PolicyTrustedAppsList = memo(() => {
 
   const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
     (item) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return cardProps.get(item as Immutable<TrustedApp>)!;
     },
     [cardProps]
