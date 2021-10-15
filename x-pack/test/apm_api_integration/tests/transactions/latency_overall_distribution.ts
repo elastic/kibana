@@ -46,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'latency overall distribution with data and default args',
-    // This uses the same archvie used for the other tab's search strategy approach in `../correlations/*`.
+    // This uses the same archive used for the other tab's search strategy approach in `../correlations/*`.
     { config: 'trial', archives: ['8.0.0'] },
     () => {
       it('returns percentileThresholdValue and overall histogram', async () => {
