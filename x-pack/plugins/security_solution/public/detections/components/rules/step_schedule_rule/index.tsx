@@ -29,7 +29,7 @@ interface StepScheduleRuleProps extends RuleStepProps {
 const DEFAULT_INTERVAL = '5m';
 const DEFAULT_FROM = '1m';
 const THREAT_MATCH_INTERVAL = '1h';
-const THREAT_MATCH_FROM = '1h';
+const THREAT_MATCH_FROM = '6m';
 
 const getStepScheduleDefaultValue = (ruleType: Type | undefined): ScheduleStepRule => {
   return {
