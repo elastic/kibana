@@ -15,14 +15,12 @@ import {
   RuleParams,
   TypeSpecificRuleParams,
   BaseRuleParams,
-  InternalRulePreview,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
   CreateRulesSchema,
   CreateTypeSpecific,
   FullResponseSchema,
-  PreviewRulesSchema,
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
 import { AppClient } from '../../../types';
