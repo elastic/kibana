@@ -144,6 +144,12 @@
         "count_disabled_total": {
           "type": "long"
         },
+        "count_rules_namespaces": {
+          "type": "long",
+          "_meta": {
+            "description": "The total number of namespaces where rules are in use."
+          }
+        },
         "throttle_time": {
           "properties": {
             "min": {
