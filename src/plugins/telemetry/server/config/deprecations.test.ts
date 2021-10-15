@@ -158,6 +158,7 @@ describe('deprecateEndpointConfigs', () => {
     expect(mockAddDeprecation.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "configPath": "telemetry.url",
           "correctiveActions": Object {
             "manualSteps": Array [
               "Remove \\"telemetry.url\\" from the Kibana configuration.",
@@ -180,6 +181,7 @@ describe('deprecateEndpointConfigs', () => {
     expect(mockAddDeprecation.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "configPath": "telemetry.optInStatusUrl",
           "correctiveActions": Object {
             "manualSteps": Array [
               "Remove \\"telemetry.optInStatusUrl\\" from the Kibana configuration.",
