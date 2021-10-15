@@ -30,5 +30,13 @@ export function MonitoringNoDataProvider({ getService }) {
       const pageId = await retry.try(() => testSubjects.find('noDataContainer'));
       return pageId !== null;
     }
+
+    async isOnNoDataPageMonitoringEnablementDenied() {
+      return testSubjects.exists('weTriedContainer');
+    }
+
+    async clickSetupWithSelfMonitoring() {
+      await testSubjects.click('useInternalCollection');
+    }
   })();
 }
