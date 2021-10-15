@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -21,14 +21,14 @@ import {
   EuiText,
   EuiFormRow,
   EuiButtonEmpty,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiIconTip,
 } from '@elastic/eui';
 import { AlertAction, ActionTypeIndex, ActionConnector } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
+import { getEnabledAndConfiguredConnectors } from '../common/connectors';
+import { ConnectorsDropdown } from './connector_dropdown';
 
 type AddConnectorInFormProps = {
   actionTypesIndex: ActionTypeIndex;
@@ -56,15 +56,17 @@ export const AddConnectorInline = ({
     application: { capabilities },
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
-  const [connectorOptionsList, setConnectorOptionsList] = useState<EuiComboBoxOptionOption[]>([]);
+  const [hasConnectors, setHasConnectors] = useState<boolean>(false);
   const [isEmptyActionId, setIsEmptyActionId] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
   const actionTypeName = actionTypesIndex
     ? actionTypesIndex[actionItem.actionTypeId].name
     : actionItem.actionTypeId;
-  const actionType = actionTypesIndex[actionItem.actionTypeId];
   const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
+  const connectorDropdownErrors = useMemo(
+    () => [`Unable to load ${actionTypeRegistered.actionTypeTitle} connector`],
+    [actionTypeRegistered.actionTypeTitle]
+  );
 
   const noConnectorsLabel = (
     <FormattedMessage
@@ -86,24 +88,14 @@ export const AddConnectorInline = ({
   );
 
   useEffect(() => {
-    if (connectors) {
-      const altConnectorOptions = connectors
-        .filter(
-          (connector) =>
-            connector.actionTypeId === actionItem.actionTypeId &&
-            // include only enabled by config connectors or preconfigured
-            (actionType?.enabledInConfig || connector.isPreconfigured)
-        )
-        .map(({ name, id, isPreconfigured }) => ({
-          label: `${name} ${isPreconfigured ? '(preconfigured)' : ''}`,
-          key: id,
-          id,
-        }));
-      setConnectorOptionsList(altConnectorOptions);
+    const filteredConnectors = getEnabledAndConfiguredConnectors(
+      connectors,
+      actionItem,
+      actionTypesIndex
+    );
 
-      if (altConnectorOptions.length > 0) {
-        setErrors([`Unable to load ${actionTypeRegistered.actionTypeTitle} connector`]);
-      }
+    if (filteredConnectors.length > 0) {
+      setHasConnectors(true);
     }
 
     setIsEmptyActionId(!!emptyActionsIds.find((emptyId: string) => actionItem.id === emptyId));
@@ -136,25 +128,15 @@ export const AddConnectorInline = ({
               />
             </EuiButtonEmpty>
           }
-          error={errors}
-          isInvalid={errors.length > 0}
+          error={connectorDropdownErrors}
+          isInvalid
         >
-          <EuiComboBox
-            fullWidth
-            singleSelection={{ asPlainText: true }}
-            options={connectorOptionsList}
-            id={`selectActionConnector-${actionItem.id}-${index}`}
-            data-test-subj={`selectActionConnector-${actionItem.actionTypeId}-${index}`}
-            onChange={(selectedOptions) => {
-              // On selecting a option from this combo box, this component will
-              // be removed but the EuiComboBox performs some additional updates on
-              // closing the dropdown. Wrapping in a `setTimeout` to avoid `React state
-              // update on an unmounted component` warnings.
-              setTimeout(() => {
-                onSelectConnector(selectedOptions[0].id ?? '');
-              });
-            }}
-            isClearable={false}
+          <ConnectorsDropdown
+            actionItem={actionItem}
+            accordionIndex={index}
+            actionTypesIndex={actionTypesIndex}
+            connectors={connectors}
+            onConnectorSelected={onSelectConnector}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -223,7 +205,7 @@ export const AddConnectorInline = ({
         paddingSize="l"
       >
         {canSave ? (
-          connectorOptionsList.length > 0 ? (
+          hasConnectors ? (
             connectorsDropdown
           ) : (
             <EuiEmptyPrompt

@@ -14,7 +14,6 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiFormRow,
-  EuiComboBox,
   EuiAccordion,
   EuiButtonIcon,
   EuiButtonEmpty,
@@ -36,13 +35,20 @@ import {
   ActionVariables,
   ActionTypeRegistryContract,
   REQUIRED_ACTION_VARIABLES,
+  ActionTypeModel,
 } from '../../../types';
-import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import {
+  checkActionFormActionTypeEnabled,
+  IsDisabledResult,
+  IsEnabledResult,
+} from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
+import { ConnectorsDropdown } from './connector_dropdown';
+import { DeprecatedConnectorIcon } from './deprecated_connector';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -140,32 +146,6 @@ export const ActionTypeForm = ({
   }, [actionItem]);
 
   const canSave = hasSaveActionsCapability(capabilities);
-  const getSelectedOptions = (actionItemId: string) => {
-    const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
-    if (
-      !selectedConnector ||
-      // if selected connector is not preconfigured and action type is for preconfiguration only,
-      // do not show regular connectors of this type
-      (actionTypesIndex &&
-        !actionTypesIndex[selectedConnector.actionTypeId].enabledInConfig &&
-        !selectedConnector.isPreconfigured)
-    ) {
-      return [];
-    }
-    const optionTitle = `${selectedConnector.name} ${
-      selectedConnector.isPreconfigured ? preconfiguredMessage : ''
-    }`;
-    return [
-      {
-        label: optionTitle,
-        value: optionTitle,
-        id: actionItemId,
-        'data-test-subj': 'itemActionConnector',
-      },
-    ];
-  };
-
-  const actionType = actionTypesIndex[actionItem.actionTypeId];
 
   const actionGroupDisplay = (
     actionGroupId: string,
@@ -189,18 +169,6 @@ export const ActionTypeForm = ({
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
       : false;
 
-  const optionsList = connectors
-    .filter(
-      (connectorItem) =>
-        connectorItem.actionTypeId === actionItem.actionTypeId &&
-        // include only enabled by config connectors or preconfigured
-        (actionType.enabledInConfig || connectorItem.isPreconfigured)
-    )
-    .map(({ name, id, isPreconfigured }) => ({
-      label: `${name} ${isPreconfigured ? preconfiguredMessage : ''}`,
-      key: id,
-      id,
-    }));
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
 
@@ -283,17 +251,12 @@ export const ActionTypeForm = ({
               ) : null
             }
           >
-            <EuiComboBox
-              fullWidth
-              singleSelection={{ asPlainText: true }}
-              options={optionsList}
-              id={`selectActionConnector-${actionItem.id}`}
-              data-test-subj={`selectActionConnector-${actionItem.actionTypeId}`}
-              selectedOptions={getSelectedOptions(actionItem.id)}
-              onChange={(selectedOptions) => {
-                onConnectorSelected(selectedOptions[0].id ?? '');
-              }}
-              isClearable={false}
+            <ConnectorsDropdown
+              actionItem={actionItem}
+              accordionIndex={index}
+              actionTypesIndex={actionTypesIndex}
+              connectors={connectors}
+              onConnectorSelected={onConnectorSelected}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -330,52 +293,12 @@ export const ActionTypeForm = ({
       buttonContentClassName="actAccordionActionForm__button"
       data-test-subj={`alertActionAccordion-${index}`}
       buttonContent={
-        <EuiFlexGroup gutterSize="l" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <div>
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      defaultMessage="{actionConnectorName}"
-                      id="xpack.triggersActionsUI.sections.actionTypeForm.existingAlertActionTypeEditTitle"
-                      values={{
-                        actionConnectorName: `${actionConnector.name} ${
-                          actionConnector.isPreconfigured ? preconfiguredMessage : ''
-                        }`,
-                      }}
-                    />
-                  </EuiFlexItem>
-                  {selectedActionGroup && !isOpen && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge>{selectedActionGroup.name}</EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    {checkEnabledResult.isEnabled === false && (
-                      <>
-                        <EuiIconTip
-                          type="alert"
-                          color="danger"
-                          content={i18n.translate(
-                            'xpack.triggersActionsUI.sections.actionTypeForm.actionDisabledTitle',
-                            {
-                              defaultMessage: 'This action is disabled',
-                            }
-                          )}
-                          position="right"
-                        />
-                      </>
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <AccordionButtonContent
+          actionConnector={actionConnector}
+          actionTypeRegistered={actionTypeRegistered}
+          checkEnabledResult={checkEnabledResult}
+          isOpen={isOpen}
+        />
       }
       extraAction={
         <EuiButtonIcon
@@ -394,6 +317,70 @@ export const ActionTypeForm = ({
     >
       {accordionContent}
     </EuiAccordion>
+  );
+};
+
+const AccordionButtonContent = ({
+  actionConnector,
+  actionTypeRegistered,
+  checkEnabledResult,
+  isOpen,
+  selectedActionGroup,
+}: {
+  actionTypeRegistered: ActionTypeModel;
+  actionConnector: ActionConnector;
+  checkEnabledResult: IsEnabledResult | IsDisabledResult;
+  isOpen: boolean;
+  selectedActionGroup?: ActionGroupWithMessageVariables;
+}) => {
+  return (
+    <EuiFlexGroup gutterSize="l" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText>
+          <div>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  defaultMessage="{actionConnectorName}"
+                  id="xpack.triggersActionsUI.sections.actionTypeForm.existingAlertActionTypeEditTitle"
+                  values={{
+                    actionConnectorName: `${actionConnector.name} ${
+                      actionConnector.isPreconfigured ? preconfiguredMessage : ''
+                    }`,
+                  }}
+                />
+              </EuiFlexItem>
+              {selectedActionGroup && !isOpen && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>{selectedActionGroup.name}</EuiBadge>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                {checkEnabledResult.isEnabled === false && (
+                  <>
+                    <EuiIconTip
+                      type="alert"
+                      color="danger"
+                      content={i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionTypeForm.actionDisabledTitle',
+                        {
+                          defaultMessage: 'This action is disabled',
+                        }
+                      )}
+                      position="right"
+                    />
+                  </>
+                )}
+              </EuiFlexItem>
+              <DeprecatedConnectorIcon connector={actionConnector} />
+            </EuiFlexGroup>
+          </div>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
