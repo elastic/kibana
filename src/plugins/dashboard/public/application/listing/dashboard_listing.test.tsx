@@ -17,6 +17,14 @@ import { createKbnUrlStateStorage } from '../../services/kibana_utils';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { makeDefaultServices } from '../test_helpers';
 
+jest.mock('../../services/kibana_react', () => ({
+  ...jest.requireActual('../../services/kibana_react'),
+  // force eager version of `TableListView` instead of a lazy wrapper for testing purposes
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  TableListView: require('../../../../kibana_react/public/table_list_view/table_list_view')
+    .TableListView,
+}));
+
 function makeDefaultProps(): DashboardListingProps {
   return {
     redirectTo: jest.fn(),

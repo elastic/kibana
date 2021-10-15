@@ -52,6 +52,8 @@ describe('OverviewEmpty', () => {
         },
         docsLink: 'https://www.elastic.co/guide/en/security/mocked-test-branch/index.html',
         solution: 'Security',
+        isDarkMode: false,
+        addBasePath: expect.any(Function),
       });
     });
   });
@@ -74,6 +76,8 @@ describe('OverviewEmpty', () => {
         },
         docsLink: 'https://www.elastic.co/guide/en/security/mocked-test-branch/index.html',
         solution: 'Security',
+        isDarkMode: false,
+        addBasePath: expect.any(Function),
       });
     });
   });
