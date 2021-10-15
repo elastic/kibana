@@ -33,6 +33,18 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
 
   const [showWarningsStep, setShowWarningsStep] = useState(false);
 
+  const startReindexWithWarnings = () => {
+    if (
+      reindexWarnings &&
+      reindexWarnings.length > 0 &&
+      status !== ReindexStatus.inProgress &&
+      status !== ReindexStatus.completed
+    ) {
+      setShowWarningsStep(true);
+    } else {
+      startReindex();
+    }
+  };
   const flyoutContents = showWarningsStep ? (
     <WarningsFlyoutStep
       warnings={reindexState.reindexWarnings ?? []}
@@ -45,18 +57,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
   ) : (
     <ChecklistFlyoutStep
       closeFlyout={closeFlyout}
-      startReindex={() => {
-        if (
-          reindexWarnings &&
-          reindexWarnings.length > 0 &&
-          status !== ReindexStatus.inProgress &&
-          status !== ReindexStatus.completed
-        ) {
-          setShowWarningsStep(true);
-        } else {
-          startReindex();
-        }
-      }}
+      startReindex={startReindexWithWarnings}
       reindexState={reindexState}
       cancelReindex={cancelReindex}
     />
@@ -80,6 +81,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
+
       {flyoutContents}
     </>
   );
