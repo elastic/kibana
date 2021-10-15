@@ -169,8 +169,8 @@ describe('UpdateConnector renders', () => {
       applicationInfoErrorMsg,
     });
 
-    expect(wrapper.find('[data-test-subj="snDeprecatedCallout"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="snDeprecatedCallout"]').first().text()).toContain(
+    expect(wrapper.find('[data-test-subj="snApplicationCallout"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="snApplicationCallout"]').first().text()).toContain(
       applicationInfoErrorMsg
     );
   });

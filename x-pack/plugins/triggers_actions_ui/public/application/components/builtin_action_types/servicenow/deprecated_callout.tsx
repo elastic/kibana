@@ -35,7 +35,11 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
           id="xpack.triggersActionsUI.components.builtinActionTypes.servicenow.appInstallationInfo"
           values={{
             migrate: (
-              <EuiButtonEmpty onClick={onMigrate} flush="left">
+              <EuiButtonEmpty
+                onClick={onMigrate}
+                flush="left"
+                data-test-subj="update-connector-btn"
+              >
                 {i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutMigrate',
                   {
