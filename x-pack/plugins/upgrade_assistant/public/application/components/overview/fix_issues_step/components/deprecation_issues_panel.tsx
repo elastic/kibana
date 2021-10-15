@@ -76,7 +76,7 @@ export const DeprecationIssuesPanel = (props: Props) => {
       titleSize="xs"
       {...(!hasNoIssues && reactRouterNavigate(history, linkUrl))}
     >
-      <EuiSpacer size="s"/>
+      <EuiSpacer size="s" />
 
       {hasError ? (
         <LoadingIssuesError>{errorMessage}</LoadingIssuesError>
