@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render, prettyDOM } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { PickEventType } from './pick_events';
 import {
