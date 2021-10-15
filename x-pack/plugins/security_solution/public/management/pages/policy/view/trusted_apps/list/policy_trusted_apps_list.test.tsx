@@ -21,6 +21,13 @@ import {
 } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_ID } from '../../../../../../../common/constants';
+import {
+  EndpointPrivileges,
+  useEndpointPrivileges,
+} from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
+
+jest.mock('../../../../../../common/components/user_privileges/use_endpoint_privileges');
+const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
 
 describe('when rendering the PolicyTrustedAppsList', () => {
   // The index (zero based) of the card created by the generator that is policy specific
@@ -32,6 +39,16 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   let mockedApis: ReturnType<typeof policyDetailsPageAllApiHttpMocks>;
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
   let componentRenderProps: PolicyTrustedAppsListProps;
+
+  const loadedUserEndpointPrivilegesState = (
+    endpointOverrides: Partial<EndpointPrivileges> = {}
+  ): EndpointPrivileges => ({
+    loading: false,
+    canAccessFleet: true,
+    canAccessEndpointManagement: true,
+    isPlatinumPlus: true,
+    ...endpointOverrides,
+  });
 
   const getCardByIndexPosition = (cardIndex: number = 0) => {
     const card = renderResult.getAllByTestId('policyTrustedAppsGrid-card')[cardIndex];
@@ -67,8 +84,12 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     );
   };
 
+  afterAll(() => {
+    mockUseEndpointPrivileges.mockReset();
+  });
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
+    mockUseEndpointPrivileges.mockReturnValue(loadedUserEndpointPrivilegesState());
 
     mockedApis = policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
     appTestContext.setExperimentalFlag({ trustedAppsByPolicyEnabled: true });
@@ -305,5 +326,17 @@ describe('when rendering the PolicyTrustedAppsList', () => {
         title: expect.any(String),
       })
     );
+  });
+
+  it('does not show remove option in actions menu if license is downgraded to gold or below', async () => {
+    await render();
+    mockUseEndpointPrivileges.mockReturnValue(
+      loadedUserEndpointPrivilegesState({
+        isPlatinumPlus: false,
+      })
+    );
+    await toggleCardActionMenu(POLICY_SPECIFIC_CARD_INDEX);
+
+    expect(renderResult.queryByTestId('policyTrustedAppsGrid-removeAction')).toBeNull();
   });
 });

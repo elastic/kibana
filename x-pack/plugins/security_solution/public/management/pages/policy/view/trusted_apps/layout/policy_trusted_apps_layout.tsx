@@ -30,6 +30,7 @@ import {
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
 import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../../../common/constants';
 import { getTrustedAppsListPath } from '../../../../../common/routing';
@@ -42,6 +43,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const navigateCallback = usePolicyDetailsNavigateCallback();
   const hasAssignedTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
+  const { isPlatinumPlus } = useEndpointPrivileges();
   const totalAssignedCount = usePolicyDetailsSelector(
     getPolicyTrustedAppsListPagination
   ).totalItemCount;
@@ -53,6 +55,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
       <EuiButton
         fill
         iconType="plusInCircle"
+        data-test-subj="assignTrustedAppButton"
         onClick={() =>
           navigateCallback({
             show: 'list',
@@ -133,7 +136,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
               </EuiText>
             </EuiPageHeaderSection>
 
-            <EuiPageHeaderSection>{assignTrustedAppButton}</EuiPageHeaderSection>
+            <EuiPageHeaderSection>{isPlatinumPlus && assignTrustedAppButton}</EuiPageHeaderSection>
           </EuiPageHeader>
 
           <EuiSpacer size="m" />
@@ -162,7 +165,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
           <PolicyTrustedAppsList hideTotalShowingLabel={true} />
         )}
       </EuiPageContent>
-      {showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
+      {isPlatinumPlus && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
     </div>
   ) : null;
 });
