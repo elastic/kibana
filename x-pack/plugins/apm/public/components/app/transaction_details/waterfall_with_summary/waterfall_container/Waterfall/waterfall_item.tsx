@@ -68,6 +68,7 @@ const ItemText = euiStyled.span`
   display: flex;
   align-items: center;
   height: ${({ theme }) => theme.eui.euiSizeL};
+  max-width: 100%;
 
   /* add margin to all direct descendants */
   & > * {
@@ -210,10 +211,7 @@ export function WaterfallItem({
         type={item.docType}
       />
       <ItemText // using inline styles instead of props to avoid generating a css class for each item
-        style={{
-          maxWidth: `${Math.max(100 - left, 0)}%`,
-          minWidth: `${Math.max(100 - left, 0)}%`,
-        }}
+        style={{ minWidth: `${Math.max(100 - left, 0)}%` }}
       >
         <SpanActionToolTip item={item}>
           <PrefixIcon item={item} />

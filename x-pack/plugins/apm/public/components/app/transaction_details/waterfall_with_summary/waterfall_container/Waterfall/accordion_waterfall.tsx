@@ -23,7 +23,6 @@ interface AccordionWaterfallProps {
   duration: IWaterfall['duration'];
   waterfallItemId?: string;
   waterfall: IWaterfall;
-  onToggleEntryTransaction?: () => void;
   timelineMargins: Margins;
   onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
 }
@@ -99,10 +98,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     waterfallItemId,
     timelineMargins,
     onClickWaterfallItem,
-    onToggleEntryTransaction,
   } = props;
-
-  console.log({ item, isOpen, level });
 
   const nextLevel = level + 1;
 
@@ -141,9 +137,6 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={() => {
         setIsOpen((isCurrentOpen) => !isCurrentOpen);
-        // if (onToggleEntryTransaction) {
-        //   onToggleEntryTransaction();
-        // }
       }}
     >
       {children.map((child) => (

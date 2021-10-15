@@ -13,6 +13,7 @@ import { WaterfallContainer } from './index';
 import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import {
   inferredSpans,
+  manyChildrenWithSameLength,
   simpleTrace,
   traceChildStartBeforeParent,
   traceWithErrors,
@@ -73,4 +74,15 @@ export const InferredSpans: Story<Args> = ({ urlParams, waterfall }) => {
 InferredSpans.args = {
   urlParams: testUrlParams,
   waterfall: getWaterfall(inferredSpans, 'f2387d37260d00bd'),
+};
+
+export const ManyChildrenWithSameLength: Story<Args> = ({
+  urlParams,
+  waterfall,
+}) => {
+  return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
+};
+ManyChildrenWithSameLength.args = {
+  urlParams: testUrlParams,
+  waterfall: getWaterfall(manyChildrenWithSameLength, '975c8d5bfd1dd20b'),
 };

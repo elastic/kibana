@@ -117,9 +117,6 @@ export function Waterfall({ waterfall, waterfallItemId }: Props) {
                 onClickWaterfallItem={(item: IWaterfallItem) =>
                   toggleFlyout({ history, item })
                 }
-                onToggleEntryTransaction={() =>
-                  setIsAccordionOpen((isOpen) => !isOpen)
-                }
               />
             )}
           </WaterfallItemsContainer>
