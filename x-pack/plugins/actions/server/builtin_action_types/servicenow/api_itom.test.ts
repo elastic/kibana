@@ -35,8 +35,7 @@ describe('api_itom', () => {
 
     test('it set the time to null if it is not a proper date', async () => {
       const { time_of_event: timeOfEvent, ...rest } = itomEventParams;
-      prepareParams({ ...rest, time_of_event: 'not a proper date' });
-      // expect(prepareParams({ ...rest, time_of_event: 'not a proper date' })).toEqual(rest);
+      expect(prepareParams({ ...rest, time_of_event: 'not a proper date' })).toEqual(rest);
     });
   });
 
