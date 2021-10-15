@@ -32,7 +32,7 @@ export function CompareImagesProvider({ getService }: FtrProviderContext) {
       baselinePngPath: string,
       screenshotsDirectory: string = screenshotsDir
     ) {
-      log.debug(`png.checkIfPngsMatch: ${baselinePngPath}`);
+      log.debug(`checkIfPngsMatch: ${baselinePngPath}`);
       // Copy the pngs into the screenshot session directory, as that's where the generated pngs will automatically be
       // stored.
       const sessionDirectoryPath = path.resolve(screenshotsDirectory, 'session');
