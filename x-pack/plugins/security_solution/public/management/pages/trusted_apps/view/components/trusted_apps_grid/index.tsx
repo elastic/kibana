@@ -131,14 +131,13 @@ export const TrustedAppsGrid = memo(() => {
           };
 
           policyToNavOptionsMap[policyId] = {
-            navigateAppId: APP_ID,
             navigateOptions: {
               path: policyDetailsPath,
               state: routeState,
-              openInNewTab: true,
             },
             href: getAppUrl({ path: policyDetailsPath }),
             children: policyListById[policyId]?.name ?? policyId,
+            target: '_blank',
           };
           return policyToNavOptionsMap;
         }, {});

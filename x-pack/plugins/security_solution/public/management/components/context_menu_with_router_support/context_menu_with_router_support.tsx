@@ -33,12 +33,15 @@ export interface ContextMenuWithRouterSupportProps
    */
   maxWidth?: CSSProperties['maxWidth'];
   /**
+   * The max height for the popup menu. Default is `255px`.
+   */
+  maxHeight?: CSSProperties['maxHeight'];
+  /**
    * It makes the panel scrollable
    */
-  scroll?: boolean;
   title?: string;
   loading?: boolean;
-  displayLinkButtonOnHover?: boolean;
+  additionalInfoOnHover?: React.ReactNode;
 }
 
 /**
@@ -53,10 +56,10 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
     panelPaddingSize,
     anchorPosition,
     maxWidth = '32ch',
+    maxHeight = '255px',
     title,
-    scroll = false,
     loading = false,
-    displayLinkButtonOnHover = false,
+    additionalInfoOnHover,
     ...commonProps
   }) => {
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
@@ -86,7 +89,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
             key={uuid.v4()}
             data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-${index}`)}
             textTruncate={Boolean(maxWidth) || itemProps.textTruncate}
-            displayLinkButtonOnHover={displayLinkButtonOnHover}
+            additionalInfoOnHover={additionalInfoOnHover}
             onClick={(ev) => {
               handleCloseMenu();
               if (itemProps.onClick) {
@@ -96,7 +99,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           />
         );
       });
-    }, [getTestId, handleCloseMenu, items, maxWidth, loading, displayLinkButtonOnHover]);
+    }, [getTestId, handleCloseMenu, items, maxWidth, loading, additionalInfoOnHover]);
 
     type AdditionalPanelProps = Partial<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>>;
     const additionalContextMenuPanelProps = useMemo<AdditionalPanelProps>(() => {
@@ -109,15 +112,15 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         newAdditionalProps.style!.maxWidth = maxWidth;
       }
 
-      if (scroll) {
+      if (maxHeight) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         newAdditionalProps.style!.overflowY = 'scroll';
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        newAdditionalProps.style!.maxHeight = '235px';
+        newAdditionalProps.style!.maxHeight = maxHeight;
       }
 
       return newAdditionalProps;
-    }, [maxWidth, scroll]);
+    }, [maxWidth, maxHeight]);
 
     return (
       <EuiPopover

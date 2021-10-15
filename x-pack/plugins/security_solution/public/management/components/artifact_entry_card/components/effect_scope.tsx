@@ -8,6 +8,7 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { CommonProps, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   GLOBAL_EFFECT_SCOPE,
   POLICY_EFFECT_SCOPE,
@@ -26,6 +27,10 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const StyledWithContextMenuShiftedWrapper = styled('div')`
   margin-left: -10px;
+`;
+
+const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
+  height: 10px !important;
 `;
 export interface EffectScopeProps extends Pick<CommonProps, 'data-test-subj'> {
   /** If set (even if empty), then effect scope will be policy specific. Else, it shows as global */
@@ -88,15 +93,26 @@ export const WithContextMenu = memo<WithContextMenuProps>(
   ({ policies, loadingPoliciesList = false, children, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
+    const additionalInfoOnHover = useMemo(
+      () => (
+        <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="popout">
+          <FormattedMessage
+            id="xpack.securitySolution.contextMenuItemByRouter.viewDetails"
+            defaultMessage="View details"
+          />
+        </StyledEuiButtonEmpty>
+      ),
+      []
+    );
     return (
       <ContextMenuWithRouterSupport
-        scroll
+        maxHeight="235px"
         panelPaddingSize="none"
         items={policies}
         anchorPosition={policies.length > 1 ? 'rightCenter' : 'rightUp'}
         data-test-subj={dataTestSubj}
         loading={loadingPoliciesList}
-        displayLinkButtonOnHover
+        additionalInfoOnHover={additionalInfoOnHover}
         button={
           <EuiButtonEmpty size="xs" data-test-subj={getTestId('button')}>
             {children}

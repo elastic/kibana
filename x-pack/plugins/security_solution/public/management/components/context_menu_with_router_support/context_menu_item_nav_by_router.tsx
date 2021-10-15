@@ -7,14 +7,12 @@
 
 import React, { memo } from 'react';
 import {
-  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuItemProps,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { NavigateToAppOptions } from 'kibana/public';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
@@ -30,36 +28,34 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
    * is set on the menu component, this prop will be overridden
    */
   textTruncate?: boolean;
-  /** Displays a link button when hover an item, false by default */
-  displayLinkButtonOnHover?: boolean;
+  /** Displays an additional info when hover an item */
+  additionalInfoOnHover?: React.ReactNode;
   children: React.ReactNode;
 }
 
 const StyledEuiContextMenuItem = styled(EuiContextMenuItem)`
-  .link-button {
+  .additional-info {
     display: none;
   }
   &:hover {
-    .link-button {
+    .additional-info {
       display: block !important;
     }
   }
-`;
-const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
-  height: 10px !important;
 `;
 
 /**
  * Just like `EuiContextMenuItem`, but allows for additional props to be defined which will
  * allow navigation to a URL path via React Router
  */
+
 export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
   ({
     navigateAppId,
     navigateOptions,
     onClick,
     textTruncate,
-    displayLinkButtonOnHover = false,
+    additionalInfoOnHover,
     children,
     ...otherMenuItemProps
   }) => {
@@ -74,32 +70,34 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
         {...otherMenuItemProps}
         onClick={navigateAppId ? handleOnClickViaNavigateToApp : onClick}
       >
-        {textTruncate ? (
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <div
-              className="eui-textTruncate"
-              data-test-subj={getTestId('truncateWrapper')}
-              {
-                /* Add the html `title` prop if children is a string */
-                ...('string' === typeof children ? { title: children } : {})
-              }
-            >
-              {children}
-            </div>
-            {displayLinkButtonOnHover && (
-              <EuiFlexItem className="link-button" grow={false}>
-                <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="popout">
-                  <FormattedMessage
-                    id="xpack.securitySolution.contextMenuItemByRouter.viewDetails"
-                    defaultMessage="View details"
-                  />
-                </StyledEuiButtonEmpty>
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          {textTruncate ? (
+            <>
+              <div
+                className="eui-textTruncate"
+                data-test-subj={getTestId('truncateWrapper')}
+                {
+                  /* Add the html `title` prop if children is a string */
+                  ...('string' === typeof children ? { title: children } : {})
+                }
+              >
+                {children}
+              </div>
+              <EuiFlexItem className="additional-info" grow={false}>
+                {additionalInfoOnHover}
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        ) : (
-          children
-        )}
+            </>
+          ) : (
+            <>
+              <EuiFlexGroup alignItems="center" gutterSize="none">
+                {children}
+              </EuiFlexGroup>
+              <EuiFlexItem className="additional-info" grow={false}>
+                {additionalInfoOnHover}
+              </EuiFlexItem>
+            </>
+          )}
+        </EuiFlexGroup>
       </StyledEuiContextMenuItem>
     );
   }
