@@ -178,6 +178,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation, { branch }) => {
     if (settings?.xpack?.security?.session?.idleTimeout === undefined) {
       addDeprecation({
+        configPath: 'xpack.security.session.idleTimeout',
         level: 'warning',
         title: i18n.translate('xpack.security.deprecations.idleTimeoutTitle', {
           defaultMessage: 'The "xpack.security.session.idleTimeout" default is changing',
@@ -201,6 +202,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     if (settings?.xpack?.security?.session?.lifespan === undefined) {
       addDeprecation({
+        configPath: 'xpack.security.session.lifespan',
         level: 'warning',
         title: i18n.translate('xpack.security.deprecations.lifespanTitle', {
           defaultMessage: 'The "xpack.security.session.lifespan" default is changing',

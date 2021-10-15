@@ -151,6 +151,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       const actions = get(settings, fromPath);
       if (actions?.enabled === false || actions?.enabled === true) {
         addDeprecation({
+          configPath: 'xpack.actions.enabled',
           message: `"xpack.actions.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
             manualSteps: [`Remove "xpack.actions.enabled" from your kibana configs.`],

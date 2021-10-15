@@ -62,6 +62,7 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
       const alerting = get(settings, fromPath);
       if (alerting?.enabled === false || alerting?.enabled === true) {
         addDeprecation({
+          configPath: 'xpack.alerting.enabled',
           message: `"xpack.alerting.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
             manualSteps: [`Remove "xpack.alerting.enabled" from your kibana configs.`],

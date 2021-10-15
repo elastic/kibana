@@ -34,6 +34,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
         return completeConfig;
       }
       addDeprecation({
+        configPath: 'xpack.maps.showMapVisualizationTypes',
         message: i18n.translate('xpack.maps.deprecation.showMapVisualizationTypes.message', {
           defaultMessage:
             'xpack.maps.showMapVisualizationTypes is deprecated and is no longer used',
@@ -87,6 +88,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
         return completeConfig;
       }
       addDeprecation({
+        configPath: 'map.regionmap',
         message: i18n.translate('xpack.maps.deprecation.regionmap.message', {
           defaultMessage: 'map.regionmap is deprecated and is no longer used',
         }),
