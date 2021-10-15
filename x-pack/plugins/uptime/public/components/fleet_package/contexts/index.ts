@@ -5,11 +5,11 @@
  * 2.0.
  */
 export {
-  MonitorTypeContext,
-  MonitorTypeContextProvider,
+  PolicyConfigContext,
+  PolicyConfigContextProvider,
   initialValue as defaultMonitorType,
-  useMonitorTypeContext,
-} from './monitor_type_context';
+  usePolicyConfigContext,
+} from './policy_config_context';
 export {
   HTTPSimpleFieldsContext,
   HTTPSimpleFieldsContextProvider,
