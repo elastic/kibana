@@ -229,6 +229,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./historical_data/has_data'));
     });
 
+    describe('error_rate/service_apis', function () {
+      loadTestFile(require.resolve('./error_rate/service_apis'));
+    });
+
     registry.run(providerContext);
   });
 }
