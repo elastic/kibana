@@ -20,7 +20,7 @@ const testMap = [
   // TODO: should should probably remove this link back to the source
   Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
   Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
-].map((path) => Fs.realpathSync(path));
+].map((path) => Fs.realpathSync(Fs.realpathSync(path)));
 
 console.log('SIMPLE REPO ROOT: ');
 console.log(Path.resolve(REPO_ROOT, 'test'));
