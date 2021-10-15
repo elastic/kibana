@@ -622,6 +622,12 @@ export class LensAttributes {
 
       const label = timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label;
 
+      let filterQuery = columnFilter || mainYAxis.filter?.query;
+
+      if (columnFilter && mainYAxis.filter?.query) {
+        filterQuery = `${columnFilter} and ${mainYAxis.filter.query}`;
+      }
+
       layers[layerId] = {
         columnOrder: [
           `x-axis-column-${layerId}`,
@@ -637,9 +643,7 @@ export class LensAttributes {
             ...mainYAxis,
             label,
             filter: {
-              query: mainYAxis.filter
-                ? `${columnFilter} and ${mainYAxis.filter.query}`
-                : columnFilter,
+              query: filterQuery ?? '',
               language: 'kuery',
             },
             ...(timeShift ? { timeShift } : {}),

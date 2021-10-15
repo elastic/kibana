@@ -23,6 +23,7 @@ export interface ExploratoryEmbeddableProps {
   title: string | JSX.Element;
   showCalculationMethod?: boolean;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
+  legendIsVisible?: boolean;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -39,6 +40,7 @@ export default function Embeddable({
   indexPatterns,
   lens,
   axisTitlesVisibility,
+  legendIsVisible,
   showCalculationMethod = false,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
@@ -63,6 +65,10 @@ export default function Embeddable({
 
   (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
     axisTitlesVisibility;
+
+  if (typeof legendIsVisible !== 'undefined') {
+    (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
+  }
 
   return (
     <Wrapper>

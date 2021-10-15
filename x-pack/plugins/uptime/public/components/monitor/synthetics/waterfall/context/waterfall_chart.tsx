@@ -38,6 +38,7 @@ export interface IWaterfallContext {
     index?: number
   ) => JSX.Element;
   markerItems?: MarkerItems;
+  stepName: string;
 }
 
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
@@ -56,6 +57,7 @@ interface ProviderProps {
   metadata: IWaterfallContext['metadata'];
   renderTooltipItem: IWaterfallContext['renderTooltipItem'];
   markerItems?: MarkerItems;
+  stepName: string;
 }
 
 export const WaterfallProvider: React.FC<ProviderProps> = ({
@@ -73,11 +75,13 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
   totalNetworkRequests,
   highlightedNetworkRequests,
   fetchedNetworkRequests,
+  stepName,
 }) => {
   return (
     <WaterfallContext.Provider
       value={{
         data,
+        stepName,
         markerItems,
         showOnlyHighlightedNetworkRequests,
         sidebarItems,

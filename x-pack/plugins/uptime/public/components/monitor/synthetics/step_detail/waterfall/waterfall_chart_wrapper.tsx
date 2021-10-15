@@ -26,11 +26,12 @@ export const renderLegendItem: RenderItem<LegendItem> = (item) => {
 
 interface Props {
   total: number;
+  stepName: string;
   data: NetworkItems;
   markerItems?: MarkerItems;
 }
 
-export const WaterfallChartWrapper: React.FC<Props> = ({ data, total, markerItems }) => {
+export const WaterfallChartWrapper: React.FC<Props> = ({ data, total, markerItems, stepName }) => {
   const [query, setQuery] = useState<string>('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [onlyHighlighted, setOnlyHighlighted] = useState(false);
@@ -109,6 +110,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total, markerItem
 
   return (
     <WaterfallProvider
+      stepName={stepName}
       markerItems={markerItems}
       totalNetworkRequests={total}
       fetchedNetworkRequests={networkData.length}

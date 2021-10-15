@@ -12,6 +12,7 @@ import { useUptimeStartPlugins } from '../../../../../contexts/uptime_startup_pl
 import { useUptimeSettingsContext } from '../../../../../contexts/uptime_settings_context';
 import { AllSeries, createExploratoryViewUrl } from '../../../../../../../observability/public';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { useWaterfallContext } from '../context/waterfall_chart';
 
 export function WaterfallMarkerTrend({ title, field }: { title: string; field: string }) {
   const { observability } = useUptimeStartPlugins();
@@ -20,14 +21,19 @@ export function WaterfallMarkerTrend({ title, field }: { title: string; field: s
 
   const { basePath } = useUptimeSettingsContext();
 
+  const { stepName } = useWaterfallContext();
+
   const allSeries: AllSeries = [
     {
-      name: title,
+      name: `${title}(${stepName})`,
       selectedMetricField: field,
       time: { from: 'now-1d', to: 'now' },
       seriesType: 'area',
       dataType: 'synthetics',
-      reportDefinitions: { 'monitor.name': ['ALL_VALUES'] },
+      reportDefinitions: {
+        'monitor.name': ['ALL_VALUES'],
+        'synthetics.step.name.keyword': [stepName],
+      },
     },
   ];
 
@@ -45,19 +51,20 @@ export function WaterfallMarkerTrend({ title, field }: { title: string; field: s
         title={title}
         appendTitle={
           <EuiButton iconType={'visArea'} href={href} target="_blank" size="s">
-            {ANALYZE_LABEL}
+            {EXPLORE_LABEL}
           </EuiButton>
         }
         reportType={'kpi-over-time'}
         attributes={allSeries}
         axisTitlesVisibility={{ x: false, yLeft: false, yRight: false }}
+        legendIsVisible={false}
       />
     </Wrapper>
   );
 }
 
-export const ANALYZE_LABEL = i18n.translate('xpack.uptime.synthetics.markers.analyze', {
-  defaultMessage: 'Analyze',
+export const EXPLORE_LABEL = i18n.translate('xpack.uptime.synthetics.markers.explore', {
+  defaultMessage: 'Explore',
 });
 
 const Wrapper = euiStyled.div`
