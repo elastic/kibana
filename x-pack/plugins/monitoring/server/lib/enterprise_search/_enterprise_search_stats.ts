@@ -142,9 +142,9 @@ export const entSearchAggResponseHandler = (response: ElasticsearchResponse) => 
 
   // console.log('Aggs: ', aggs);
 
-  const appSearchEngines = aggs.app_search_engines.value ?? 0;
-  const workplaceSearchOrgSources = aggs.workplace_search_org_sources.value ?? 0;
-  const workplaceSearchPrivateSources = aggs.workplace_search_private_sources.value ?? 0;
+  const appSearchEngines = aggs?.app_search_engines.value ?? 0;
+  const workplaceSearchOrgSources = aggs?.workplace_search_org_sources.value ?? 0;
+  const workplaceSearchPrivateSources = aggs?.workplace_search_private_sources.value ?? 0;
 
   const totalInstances = aggs?.total.value ?? 0;
   const uptime = aggs?.uptime.value;
