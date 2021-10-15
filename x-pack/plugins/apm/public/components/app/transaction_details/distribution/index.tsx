@@ -123,7 +123,7 @@ export function TransactionDistribution({
               environment,
               start,
               end,
-              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD + '',
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
             },
           },
         });
