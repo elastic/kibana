@@ -24,7 +24,7 @@ export function formatAngularHttpError(error: AngularHttpError) {
   // is an Angular $http "error object"
   if (error.status === -1) {
     // status = -1 indicates that the request was failed to reach the server
-    return i18n.translate('kibana_legacy.notify.fatalError.unavailableServerErrorMessage', {
+    return i18n.translate('xpack.monitoring.notify.fatalError.unavailableServerErrorMessage', {
       defaultMessage:
         'An HTTP request has failed to connect. ' +
         'Please check if the Kibana server is running and that your browser has a working connection, ' +
@@ -32,7 +32,7 @@ export function formatAngularHttpError(error: AngularHttpError) {
     });
   }
 
-  return i18n.translate('kibana_legacy.notify.fatalError.errorStatusMessage', {
+  return i18n.translate('xpack.monitoring.notify.fatalError.errorStatusMessage', {
     defaultMessage: 'Error {errStatus} {errStatusText}: {errMessage}',
     values: {
       errStatus: error.status,
