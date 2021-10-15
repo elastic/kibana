@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DocumentCountStats } from '../../../../common/types/field_stats';
+
 export interface AggregatableField {
   fieldName: string;
   stats: {
@@ -19,6 +21,7 @@ export type NonAggregatableField = Omit<AggregatableField, 'stats'>;
 
 export interface OverallStats {
   totalCount: number;
+  documentCountStats?: DocumentCountStats['documentCounts'];
   aggregatableExistsFields: AggregatableField[];
   aggregatableNotExistsFields: AggregatableField[];
   nonAggregatableExistsFields: NonAggregatableField[];

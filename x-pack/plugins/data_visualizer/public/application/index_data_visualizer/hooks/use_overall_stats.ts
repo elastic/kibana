@@ -25,6 +25,10 @@ import { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { extractErrorProperties } from '../utils/error_utils';
 import { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
+import {
+  getDocumentCountStatsRequest,
+  processDocumentCountStats,
+} from '../search_strategy/requests/get_document_stats';
 
 function displayError(toastNotifications: ToastsStart, indexPattern: string, err: any) {
   if (err.statusCode === 500) {
@@ -81,6 +85,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       timeFieldName,
       earliest,
       latest,
+      intervalMs,
       runtimeFieldMap,
       samplerShardSize,
     } = searchStrategyParams;
@@ -142,25 +147,48 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           )
         : of(undefined);
 
+    const documentCountStats$ =
+      intervalMs !== undefined && intervalMs > 0
+        ? data.search.search(
+            {
+              params: getDocumentCountStatsRequest(searchStrategyParams),
+            },
+            {
+              abortSignal: abortCtrl.current.signal,
+              sessionId: searchStrategyParams?.sessionId,
+            }
+          )
+        : of(undefined);
     const sub = forkJoin({
+      documentCountStatsResp: documentCountStats$,
       nonAggregatableOverallStatsResp: nonAggregatableOverallStats$,
       aggregatableOverallStatsResp: aggregatableOverallStats$,
     }).pipe(
-      mergeMap(({ nonAggregatableOverallStatsResp, aggregatableOverallStatsResp }) => {
-        const aggregatableOverallStats = processAggregatableFieldsExistResponse(
-          aggregatableOverallStatsResp?.rawResponse,
-          aggregatableFields,
-          samplerShardSize
-        );
-        const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
+      mergeMap(
+        ({
+          documentCountStatsResp,
           nonAggregatableOverallStatsResp,
-          nonAggregatableFields
-        );
-        return of({
-          ...nonAggregatableOverallStats,
-          ...aggregatableOverallStats,
-        });
-      })
+          aggregatableOverallStatsResp,
+        }) => {
+          const aggregatableOverallStats = processAggregatableFieldsExistResponse(
+            aggregatableOverallStatsResp?.rawResponse,
+            aggregatableFields,
+            samplerShardSize
+          );
+          const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
+            nonAggregatableOverallStatsResp,
+            nonAggregatableFields
+          );
+          return of({
+            documentCountStats: processDocumentCountStats(
+              documentCountStatsResp?.rawResponse,
+              intervalMs
+            ).documentCounts,
+            ...nonAggregatableOverallStats,
+            ...aggregatableOverallStats,
+          });
+        }
+      )
     );
 
     searchSubscription$.current = sub.subscribe({

@@ -496,6 +496,7 @@ export const useDataVisualizerGridData = (
     return [actionColumn];
   }, [input.indexPattern, services, searchQueryLanguage, searchString]);
 
+  console.log('overallStats.documentCountStats', overallStats.documentCountStats);
   return {
     progress: strategyResponse.progress,
     configs,
@@ -503,7 +504,7 @@ export const useDataVisualizerGridData = (
     searchString,
     searchQuery,
     extendedColumns,
-    documentCountStats,
+    documentCountStats: overallStats.documentCountStats,
     metricsStats,
   };
 };

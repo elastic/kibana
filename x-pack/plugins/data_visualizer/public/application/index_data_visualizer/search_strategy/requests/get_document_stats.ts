@@ -5,21 +5,28 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { each, get } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type {
   DocumentCountStats,
-  FieldStatsCommonRequestParams,
+  OverallStatsSearchStrategyParams,
 } from '../../../../../common/types/field_stats';
 
-export const getDocumentCountStatsRequest = (params: FieldStatsCommonRequestParams) => {
-  const { index, timeFieldName, earliestMs, latestMs, query, runtimeFieldMap, intervalMs } = params;
+export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyParams) => {
+  const {
+    index,
+    timeFieldName,
+    earliest: earliestMs,
+    latest: latestMs,
+    runtimeFieldMap,
+    searchQuery,
+    intervalMs,
+  } = params;
 
   const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
+  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
   // Don't use the sampler aggregation as this can lead to some potentially
   // confusing date histogram results depending on the date range of data amongst shards.
@@ -50,15 +57,18 @@ export const getDocumentCountStatsRequest = (params: FieldStatsCommonRequestPara
   };
 };
 
-export const fetchDocumentCountStats = async (
-  esClient: ElasticsearchClient,
-  params: FieldStatsCommonRequestParams
-): Promise<DocumentCountStats> => {
-  const { intervalMs } = params;
-  const request: SearchRequest = getDocumentCountStatsRequest(params);
-
-  const { body } = await esClient.search(request);
-
+export const processDocumentCountStats = (
+  body: estypes.SearchResponse | undefined,
+  intervalMs: number | undefined
+): DocumentCountStats => {
+  if (!body || intervalMs === undefined) {
+    return {
+      documentCounts: {
+        interval: 0,
+        buckets: {},
+      },
+    };
+  }
   const buckets: { [key: string]: number } = {};
   const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
     body,
@@ -72,8 +82,7 @@ export const fetchDocumentCountStats = async (
 
   return {
     documentCounts: {
-      // @todo: confirm
-      interval: intervalMs ?? 0,
+      interval: intervalMs,
       buckets,
     },
   };

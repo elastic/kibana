@@ -321,6 +321,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
 
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
+
+  console.log('documentCountStats', documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded, setMetricsLoaded] = useState(defaults.metricsLoaded);
   const [metricsStats, setMetricsStats] = useState<undefined | MetricFieldsStats>();
@@ -623,7 +625,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
 
     // @todo: REMOVE
-    // // Add a config for 'document count', identified by no field name if indexpattern is time based.
+    // Add a config for 'document count', identified by no field name if indexpattern is time based.
     // if (currentIndexPattern.timeFieldName !== undefined) {
     //   configs.push({
     //     type: JOB_FIELD_TYPES.NUMBER,
