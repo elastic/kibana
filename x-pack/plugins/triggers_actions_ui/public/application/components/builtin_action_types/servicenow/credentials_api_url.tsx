@@ -46,7 +46,7 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
-            defaultMessage="Please provide the full URL to the desired ServiceNow instance. If you do not have one, you can {instance}"
+            defaultMessage="Provide the full URL to the desired ServiceNow instance. If you don't have one, set up a developer instance."
             values={{
               instance: (
                 <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">

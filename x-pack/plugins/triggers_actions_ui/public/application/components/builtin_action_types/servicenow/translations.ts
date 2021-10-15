@@ -17,7 +17,7 @@ export const API_URL_LABEL = i18n.translate(
 export const API_URL_HELPTEXT = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlHelpText',
   {
-    defaultMessage: 'Include the full URL',
+    defaultMessage: 'Include the full URL.',
   }
 );
 
@@ -60,7 +60,7 @@ export const REMEMBER_VALUES_LABEL = i18n.translate(
 export const REENTER_VALUES_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterValuesLabel',
   {
-    defaultMessage: 'You will need to re-authenticate each time you edit the connector',
+    defaultMessage: 'You must authenticate each time you edit the connector.',
   }
 );
 
@@ -253,6 +253,6 @@ export const CORRELATION_ID = i18n.translate(
 export const CORRELATION_DISPLAY = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.correlationDisplay',
   {
-    defaultMessage: 'Correlation Display (optional)',
+    defaultMessage: 'Correlation display (optional)',
   }
 );

@@ -26,12 +26,12 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
         title={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutTitle',
           {
-            defaultMessage: 'Deprecated connector type',
+            defaultMessage: 'This connector type is deprecated',
           }
         )}
       >
         <FormattedMessage
-          defaultMessage="This connector type is deprecated. Create a new connector or {migrate}"
+          defaultMessage="{migrate} or create a new one."
           id="xpack.triggersActionsUI.components.builtinActionTypes.servicenow.appInstallationInfo"
           values={{
             migrate: (
@@ -39,7 +39,7 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
                 {i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutMigrate',
                   {
-                    defaultMessage: 'update this connector.',
+                    defaultMessage: 'Update this connector',
                   }
                 )}
               </EuiButtonEmpty>

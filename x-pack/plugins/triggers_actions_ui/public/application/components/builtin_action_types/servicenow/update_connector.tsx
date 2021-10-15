@@ -39,7 +39,7 @@ const title = i18n.translate(
 const step1InstallTitle = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.updateFormInstallTitle',
   {
-    defaultMessage: 'Install the Elastic ServiceNow App',
+    defaultMessage: 'Install the Elastic ServiceNow app',
   }
 );
 
@@ -74,7 +74,7 @@ const confirmButtonText = i18n.translate(
 const warningMessage = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.warningMessage',
   {
-    defaultMessage: 'This will update all instances of this connector.  This can not be reversed.',
+    defaultMessage: 'This updates all instances of this connector and cannot be reversed.',
   }
 );
 
