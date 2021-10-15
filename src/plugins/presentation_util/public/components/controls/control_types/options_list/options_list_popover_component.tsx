@@ -93,6 +93,7 @@ export const OptionsListPopover = ({
                   iconType="list"
                   aria-pressed={showOnlySelected}
                   color={showOnlySelected ? 'primary' : 'subdued'}
+                  display={showOnlySelected ? 'base' : 'empty'}
                   aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
                   onClick={() => setShowOnlySelected(!showOnlySelected)}
                 />
