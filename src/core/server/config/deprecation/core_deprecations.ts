@@ -12,6 +12,7 @@ import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 const kibanaPathConf: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (process.env?.KIBANA_PATH_CONF) {
     addDeprecation({
+      configPath: 'env.KIBANA_PATH_CONF',
       message: `Environment variable "KIBANA_PATH_CONF" is deprecated. It has been replaced with "KBN_PATH_CONF" pointing to a config folder`,
       correctiveActions: {
         manualSteps: [
@@ -25,6 +26,7 @@ const kibanaPathConf: ConfigDeprecation = (settings, fromPath, addDeprecation) =
 const configPathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (process.env?.CONFIG_PATH) {
     addDeprecation({
+      configPath: 'env.CONFIG_PATH',
       message: `Environment variable "CONFIG_PATH" is deprecated. It has been replaced with "KBN_PATH_CONF" pointing to a config folder`,
       correctiveActions: {
         manualSteps: ['Use "KBN_PATH_CONF" instead of "CONFIG_PATH" to point to a config folder.'],
@@ -36,6 +38,7 @@ const configPathDeprecation: ConfigDeprecation = (settings, fromPath, addDepreca
 const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (process.env?.DATA_PATH) {
     addDeprecation({
+      configPath: 'env.DATA_PATH',
       message: `Environment variable "DATA_PATH" will be removed.  It has been replaced with kibana.yml setting "path.data"`,
       correctiveActions: {
         manualSteps: [
@@ -109,6 +112,7 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecati
           value: [...parsed].map(([policy, sourceList]) => {
             if (sourceList.find((source) => source.includes(NONCE_STRING))) {
               addDeprecation({
+                configPath: 'csp.rules',
                 message: `csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in ${policy}`,
                 correctiveActions: {
                   manualSteps: [`Replace {nonce} syntax with 'self' in ${policy}`],
@@ -127,6 +131,7 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecati
               !sourceList.find((source) => source.includes(SELF_STRING))
             ) {
               addDeprecation({
+                configPath: 'csp.rules',
                 message: `csp.rules must contain the 'self' source. Automatically adding to ${policy}.`,
                 correctiveActions: {
                   manualSteps: [`Add 'self' source to ${policy}.`],
@@ -150,6 +155,7 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.map?.manifestServiceUrl) {
     addDeprecation({
+      configPath: 'map.manifestServiceUrl',
       message:
         'You should no longer use the map.manifestServiceUrl setting in kibana.yml to configure the location ' +
         'of the Elastic Maps Service settings. These settings have moved to the "map.emsTileApiUrl" and ' +
@@ -168,6 +174,7 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (
 const serverHostZeroDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (settings.server?.host === '0') {
     addDeprecation({
+      configPath: 'server.host',
       message:
         'Support for setting server.host to "0" in kibana.yml is deprecated and will be removed in Kibana version 8.0.0. ' +
         'Instead use "0.0.0.0" to bind to all interfaces.',
@@ -198,6 +205,7 @@ const opsLoggingEventDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.events?.ops) {
     addDeprecation({
+      configPath: 'logging.events.ops',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
       title: i18n.translate('core.deprecations.loggingEventsOps.deprecationTitle', {
         defaultMessage: `Setting "logging.events.ops" is deprecated`,
@@ -228,6 +236,7 @@ const requestLoggingEventDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.events?.request) {
     addDeprecation({
+      configPath: 'logging.events.request',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
       title: i18n.translate('core.deprecations.loggingEventsRequest.deprecationTitle', {
         defaultMessage: `Setting "logging.events.request" is deprecated`,
@@ -258,6 +267,7 @@ const responseLoggingEventDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.events?.response) {
     addDeprecation({
+      configPath: 'logging.events.response',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
       title: i18n.translate('core.deprecations.loggingEventsResponse.deprecationTitle', {
         defaultMessage: `Setting "logging.events.response" is deprecated`,
@@ -288,6 +298,7 @@ const timezoneLoggingDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.timezone) {
     addDeprecation({
+      configPath: 'logging.timezone',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingtimezone`,
       title: i18n.translate('core.deprecations.loggingTimezone.deprecationTitle', {
         defaultMessage: `Setting "logging.timezone" is deprecated`,
@@ -318,6 +329,7 @@ const destLoggingDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.dest) {
     addDeprecation({
+      configPath: 'logging.dest',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingdest`,
       title: i18n.translate('core.deprecations.loggingDest.deprecationTitle', {
         defaultMessage: `Setting "logging.dest" is deprecated`,
@@ -348,6 +360,7 @@ const quietLoggingDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.quiet) {
     addDeprecation({
+      configPath: 'logging.quiet',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingquiet`,
       title: i18n.translate('core.deprecations.loggingQuiet.deprecationTitle', {
         defaultMessage: `Setting "logging.quiet" is deprecated`,
@@ -377,6 +390,7 @@ const silentLoggingDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.silent) {
     addDeprecation({
+      configPath: 'logging.silent',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingsilent`,
       title: i18n.translate('core.deprecations.loggingSilent.deprecationTitle', {
         defaultMessage: `Setting "logging.silent" is deprecated`,
@@ -406,6 +420,7 @@ const verboseLoggingDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.verbose) {
     addDeprecation({
+      configPath: 'logging.verbose',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingverbose`,
       title: i18n.translate('core.deprecations.loggingVerbose.deprecationTitle', {
         defaultMessage: `Setting "logging.verbose" is deprecated`,
@@ -439,6 +454,7 @@ const jsonLoggingDeprecation: ConfigDeprecation = (
   // ` legacyLoggingConfigSchema` returns `true` for the TTY check on `process.stdout.isTTY`
   if (settings.logging?.json && settings.env !== 'development') {
     addDeprecation({
+      configPath: 'logging.json',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx`,
       title: i18n.translate('core.deprecations.loggingJson.deprecationTitle', {
         defaultMessage: `Setting "logging.json" is deprecated`,
@@ -470,6 +486,7 @@ const logRotateDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.rotate) {
     addDeprecation({
+      configPath: 'logging.rotate',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#rolling-file-appender`,
       title: i18n.translate('core.deprecations.loggingRotate.deprecationTitle', {
         defaultMessage: `Setting "logging.rotate" is deprecated`,
@@ -500,6 +517,7 @@ const logEventsLogDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.events?.log) {
     addDeprecation({
+      configPath: 'logging.events.log',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
       title: i18n.translate('core.deprecations.loggingEventsLog.deprecationTitle', {
         defaultMessage: `Setting "logging.events.log" is deprecated`,
@@ -529,6 +547,7 @@ const logEventsErrorDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.events?.error) {
     addDeprecation({
+      configPath: 'logging.events.error',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
       title: i18n.translate('core.deprecations.loggingEventsError.deprecationTitle', {
         defaultMessage: `Setting "logging.events.error" is deprecated`,
@@ -558,6 +577,7 @@ const logFilterDeprecation: ConfigDeprecation = (
 ) => {
   if (settings.logging?.filter) {
     addDeprecation({
+      configPath: 'logging.filter',
       documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingfilter`,
       title: i18n.translate('core.deprecations.loggingFilter.deprecationTitle', {
         defaultMessage: `Setting "logging.filter" is deprecated`,
