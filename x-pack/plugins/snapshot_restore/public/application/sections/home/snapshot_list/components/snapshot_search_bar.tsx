@@ -18,6 +18,8 @@ import { SnapshotDeleteProvider } from '../../../../components';
 import { SnapshotDetails } from '../../../../../../common/types';
 import { getQueryFromListParams, SnapshotListParams, getListParams } from '../../../../lib';
 
+const SEARCH_DEBOUNCE_VALUE_MS = 200;
+
 const onlyOneClauseMessage = i18n.translate(
   'xpack.snapshotRestore.snapshotList.searchBar.onlyOneClauseMessage',
   {
@@ -62,7 +64,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
     () => {
       setListParams(debouncedValue);
     },
-    500,
+    SEARCH_DEBOUNCE_VALUE_MS,
     [debouncedValue]
   );
 
