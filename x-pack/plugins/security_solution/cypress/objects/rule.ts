@@ -72,10 +72,6 @@ export interface OverrideRule extends CustomRule {
   timestampOverride: string;
 }
 
-export interface EventCorrelationRule extends CustomRule {
-  language: string;
-}
-
 export interface ThreatIndicatorRule extends CustomRule {
   indicatorIndexPattern: string[];
   indicatorMappingField: string;
@@ -112,7 +108,7 @@ export const getIndexPatterns = (): string[] => [
   'winlogbeat-*',
 ];
 
-export const getThreatIndexPatterns = (): string[] => ['filebeat-*'];
+export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
 
 const getMitre1 = (): Mitre => ({
   tactic: `${getMockThreatData().tactic.name} (${getMockThreatData().tactic.id})`,
@@ -330,7 +326,7 @@ export const getEqlRule = (): CustomRule => ({
   maxSignals: 100,
 });
 
-export const getCCSEqlRule = (): EventCorrelationRule => ({
+export const getCCSEqlRule = (): CustomRule => ({
   customQuery: 'any where process.name == "run-parts"',
   name: 'New EQL Rule',
   index: [`${ccsRemoteName}:run-parts`],
@@ -346,7 +342,6 @@ export const getCCSEqlRule = (): EventCorrelationRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
-  language: 'eql',
 });
 
 export const getEqlSequenceRule = (): CustomRule => ({
@@ -385,7 +380,7 @@ export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   lookBack: getLookBack(),
   indicatorIndexPattern: ['filebeat-*'],
   indicatorMappingField: 'myhash.mysha256',
-  indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
+  indicatorIndexField: 'threat.indicator.file.hash.sha256',
   type: 'file',
   atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
   timeline: getIndicatorMatchTimelineTemplate(),

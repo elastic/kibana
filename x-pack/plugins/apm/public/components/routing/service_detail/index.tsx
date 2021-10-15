@@ -83,14 +83,14 @@ export const serviceDetail = {
           comparisonType: t.string,
           latencyAggregationType: t.string,
           transactionType: t.string,
+          refreshPaused: t.union([t.literal('true'), t.literal('false')]),
+          refreshInterval: t.string,
         }),
       ]),
     }),
   ]),
   defaults: {
     query: {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
       kuery: '',
       environment: ENVIRONMENT_ALL.value,
     },

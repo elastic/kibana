@@ -24,6 +24,16 @@ import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enric
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/cti/event_enrichment');
 
+jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
+  return {
+    useRuleWithFallback: jest.fn().mockReturnValue({
+      rule: {
+        note: 'investigation guide',
+      },
+    }),
+  };
+});
+
 jest.mock('../link_to');
 describe('EventDetails', () => {
   const mount = useMountAppended();
@@ -37,6 +47,7 @@ describe('EventDetails', () => {
     timelineTabType: TimelineTabs.query,
     timelineId: 'test',
     eventView: EventsViewType.summaryView,
+    hostRisk: { fields: [], loading: true },
   };
 
   const alertsProps = {
@@ -112,6 +123,12 @@ describe('EventDetails', () => {
       expect(
         alertsWrapper.find('[data-test-subj="enrichment-count-notification"]').hostNodes().text()
       ).toEqual('1');
+    });
+  });
+
+  describe('summary view tab', () => {
+    it('render investigation guide', () => {
+      expect(alertsWrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(true);
     });
   });
 

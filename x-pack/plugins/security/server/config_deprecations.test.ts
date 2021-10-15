@@ -9,22 +9,30 @@ import { cloneDeep } from 'lodash';
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 
+import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 import { securityConfigDeprecationProvider } from './config_deprecations';
+
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
+  const configPaths: string[] = [];
   const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
       deprecation,
       path: 'xpack.security',
+      context: deprecationContext,
     })),
     () =>
-      ({ message }) =>
-        deprecationMessages.push(message)
+      ({ message, configPath }) => {
+        deprecationMessages.push(message);
+        configPaths.push(configPath);
+      }
   );
   return {
+    configPaths,
     messages: deprecationMessages,
     migrated,
   };
@@ -167,6 +175,22 @@ describe('Config Deprecations', () => {
     `);
   });
 
+  it('renames security.showInsecureClusterWarning to xpack.security.showInsecureClusterWarning', () => {
+    const config = {
+      security: {
+        showInsecureClusterWarning: false,
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.security.showInsecureClusterWarning).not.toBeDefined();
+    expect(migrated.xpack.security.showInsecureClusterWarning).toEqual(false);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting \\"security.showInsecureClusterWarning\\" has been replaced by \\"xpack.security.showInsecureClusterWarning\\"",
+      ]
+    `);
+  });
+
   it('warns when using the legacy audit logger', () => {
     const config = {
       xpack: {
@@ -285,12 +309,14 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages } = applyConfigDeprecations(cloneDeep(config));
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "\\"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\\" is no longer used.",
       ]
     `);
+
+    expect(configPaths).toEqual(['xpack.security.authc.providers.saml.saml1.maxRedirectURLSize']);
   });
 
   it(`warns when 'xpack.security.authc.providers' is an array of strings`, () => {

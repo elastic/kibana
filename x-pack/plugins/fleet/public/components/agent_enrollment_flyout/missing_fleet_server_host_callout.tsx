@@ -30,7 +30,7 @@ export const MissingFleetServerHostCallout: React.FunctionComponent = () => {
             <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.missingFleetHostGuideLink"
-                defaultMessage="Fleet User Guide"
+                defaultMessage="Fleet and Elastic Agent Guide"
               />
             </EuiLink>
           ),

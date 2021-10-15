@@ -96,6 +96,14 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./services/throughput'));
     });
 
+    describe('service apis throughput', function () {
+      loadTestFile(require.resolve('./throughput/service_apis'));
+    });
+
+    describe('dependencies throughput', function () {
+      loadTestFile(require.resolve('./throughput/dependencies_apis'));
+    });
+
     describe('services/top_services', function () {
       loadTestFile(require.resolve('./services/top_services'));
     });
@@ -150,7 +158,7 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     describe('traces/top_traces', function () {
       loadTestFile(require.resolve('./traces/top_traces'));
     });
-    describe('/api/apm/traces/{traceId}', function () {
+    describe('/internal/apm/traces/{traceId}', function () {
       loadTestFile(require.resolve('./traces/trace_by_id'));
     });
 
