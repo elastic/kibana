@@ -25,17 +25,17 @@ export const useShowPagesWithEmptyView = () => {
     return pageNamesWithEmptyView.includes(currentName);
   };
 
-  const [showEmptyState, setShowEmptyState] = useState(
-    isPageNameWithEmptyView(pageName) && !indicesExist
-  );
+  const shouldShowEmptyState = isPageNameWithEmptyView(pageName) && !indicesExist;
+
+  const [showEmptyState, setShowEmptyState] = useState(shouldShowEmptyState);
 
   useEffect(() => {
-    if (isPageNameWithEmptyView(pageName) && !indicesExist) {
+    if (shouldShowEmptyState) {
       setShowEmptyState(true);
     } else {
       setShowEmptyState(false);
     }
-  }, [pageName, indicesExist]);
+  }, [shouldShowEmptyState]);
 
   return showEmptyState;
 };
