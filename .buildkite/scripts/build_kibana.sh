@@ -5,7 +5,11 @@ set -euo pipefail
 export KBN_NP_PLUGINS_BUILT=true
 
 echo "--- Build Kibana Distribution"
-node scripts/build --debug
+if [[ "${GITHUB_PR_LABELS:-}" == *"ci:build-all-platforms"* ]]; then
+  node scripts/build --all-platforms --skip-os-packages
+else
+  node scripts/build
+fi
 
 echo "--- Archive Kibana Distribution"
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
