@@ -498,7 +498,6 @@ module.exports = {
         'x-pack/plugins/apm/**/*.js',
         'test/*/config.ts',
         'test/*/config_open.ts',
-        'test/*/*.config.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
@@ -1597,7 +1596,6 @@ module.exports = {
     {
       files: [
         'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
-        'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',

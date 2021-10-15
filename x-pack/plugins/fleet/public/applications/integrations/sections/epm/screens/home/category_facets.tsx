@@ -21,7 +21,7 @@ export interface CategoryFacet {
 export const ALL_CATEGORY = {
   id: '',
   title: i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
-    defaultMessage: 'All categories',
+    defaultMessage: 'All',
   }),
 };
 

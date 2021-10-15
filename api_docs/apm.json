@@ -184,11 +184,11 @@
               "APMPluginStartDependencies",
               ", unknown>, plugins: Pick<",
               "APMPluginSetupDependencies",
-              ", \"data\" | \"cloud\" | \"security\" | \"home\" | \"features\" | \"fleet\" | \"ml\" | \"spaces\" | \"actions\" | \"usageCollection\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"taskManager\" | \"alerting\">) => { config$: ",
+              ", \"data\" | \"cloud\" | \"security\" | \"home\" | \"features\" | \"fleet\" | \"ml\" | \"actions\" | \"usageCollection\" | \"spaces\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"taskManager\" | \"alerting\">) => { config$: ",
               "Observable",
-              "<Readonly<{} & { enabled: boolean; indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; autocreateApmIndexPattern: boolean; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+              "<{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
               "SearchAggregatedTransactionSetting",
-              "; telemetryCollectionEnabled: boolean; metricsInterval: number; profilingEnabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }>>; getApmIndices: () => Promise<",
+              "; 'xpack.apm.metricsInterval': number; 'xpack.apm.agent.migrations.enabled': boolean; }>; getApmIndices: () => Promise<",
               "ApmIndicesConfig",
               ">; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
               {
@@ -248,7 +248,7 @@
                 "signature": [
                   "Pick<",
                   "APMPluginSetupDependencies",
-                  ", \"data\" | \"cloud\" | \"security\" | \"home\" | \"features\" | \"fleet\" | \"ml\" | \"spaces\" | \"actions\" | \"usageCollection\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"taskManager\" | \"alerting\">"
+                  ", \"data\" | \"cloud\" | \"security\" | \"home\" | \"features\" | \"fleet\" | \"ml\" | \"actions\" | \"usageCollection\" | \"spaces\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"taskManager\" | \"alerting\">"
                 ],
                 "path": "x-pack/plugins/apm/server/plugin.ts",
                 "deprecated": false,
@@ -320,7 +320,59 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "apm",
+        "id": "def-server.mergeConfigs",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeConfigs",
+        "description": [],
+        "signature": [
+          "(apmOssConfig: Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>, apmConfig: Readonly<{} & { enabled: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; autocreateApmIndexPattern: boolean; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+          "SearchAggregatedTransactionSetting",
+          "; telemetryCollectionEnabled: boolean; metricsInterval: number; profilingEnabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }>) => { 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
+          "SearchAggregatedTransactionSetting",
+          "; 'xpack.apm.metricsInterval': number; 'xpack.apm.agent.migrations.enabled': boolean; }"
+        ],
+        "path": "x-pack/plugins/apm/server/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "apm",
+            "id": "def-server.mergeConfigs.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "apmOssConfig",
+            "description": [],
+            "signature": [
+              "Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>"
+            ],
+            "path": "x-pack/plugins/apm/server/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apm",
+            "id": "def-server.mergeConfigs.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "apmConfig",
+            "description": [],
+            "signature": [
+              "Readonly<{} & { enabled: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; autocreateApmIndexPattern: boolean; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+              "SearchAggregatedTransactionSetting",
+              "; telemetryCollectionEnabled: boolean; metricsInterval: number; profilingEnabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }>"
+            ],
+            "path": "x-pack/plugins/apm/server/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "apm",
@@ -388,9 +440,9 @@
             "label": "config",
             "description": [],
             "signature": [
-              "{ readonly enabled: boolean; readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly autocreateApmIndexPattern: boolean; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+              "{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
               "SearchAggregatedTransactionSetting",
-              "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly profilingEnabled: boolean; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }"
+              "; 'xpack.apm.metricsInterval': number; 'xpack.apm.agent.migrations.enabled': boolean; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
@@ -483,7 +535,15 @@
                 "section": "def-server.PluginStartContract",
                 "text": "PluginStartContract"
               },
-              ">; }; licensing: { setup: ",
+              ">; }; apmOss: { setup: ",
+              {
+                "pluginId": "apmOss",
+                "scope": "server",
+                "docId": "kibApmOssPluginApi",
+                "section": "def-server.APMOSSPluginSetup",
+                "text": "APMOSSPluginSetup"
+              },
+              "; start: () => Promise<undefined>; }; licensing: { setup: ",
               {
                 "pluginId": "licensing",
                 "scope": "server",
@@ -595,23 +655,7 @@
               },
               ">; } | undefined; ml?: { setup: ",
               "SharedServices",
-              "; start: () => Promise<void>; } | undefined; spaces?: { setup: ",
-              {
-                "pluginId": "spaces",
-                "scope": "server",
-                "docId": "kibSpacesPluginApi",
-                "section": "def-server.SpacesPluginSetup",
-                "text": "SpacesPluginSetup"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "spaces",
-                "scope": "server",
-                "docId": "kibSpacesPluginApi",
-                "section": "def-server.SpacesPluginStart",
-                "text": "SpacesPluginStart"
-              },
-              ">; } | undefined; actions?: { setup: ",
+              "; start: () => Promise<void>; } | undefined; actions?: { setup: ",
               {
                 "pluginId": "actions",
                 "scope": "server",
@@ -635,7 +679,23 @@
                 "section": "def-server.UsageCollectionSetup",
                 "text": "UsageCollectionSetup"
               },
-              "; start: () => Promise<undefined>; } | undefined; taskManager?: { setup: ",
+              "; start: () => Promise<undefined>; } | undefined; spaces?: { setup: ",
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.SpacesPluginSetup",
+                "text": "SpacesPluginSetup"
+              },
+              "; start: () => Promise<",
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.SpacesPluginStart",
+                "text": "SpacesPluginStart"
+              },
+              ">; } | undefined; taskManager?: { setup: ",
               {
                 "pluginId": "taskManager",
                 "scope": "server",
@@ -765,23 +825,9 @@
         "label": "APMConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly autocreateApmIndexPattern: boolean; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+          "{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
           "SearchAggregatedTransactionSetting",
-          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly profilingEnabled: boolean; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }"
-        ],
-        "path": "x-pack/plugins/apm/server/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "apm",
-        "id": "def-server.ApmIndicesConfigName",
-        "type": "Type",
-        "tags": [],
-        "label": "ApmIndicesConfigName",
-        "description": [],
-        "signature": [
-          "\"error\" | \"metric\" | \"span\" | \"transaction\" | \"sourcemap\" | \"onboarding\""
+          "; 'xpack.apm.metricsInterval': number; 'xpack.apm.agent.migrations.enabled': boolean; }"
         ],
         "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
@@ -4000,7 +4046,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { apmIndexSettings: { configurationName: \"error\" | \"metric\" | \"span\" | \"transaction\" | \"sourcemap\" | \"onboarding\"; defaultValue: string; savedValue: string | undefined; }[]; }, ",
+          ", { apmIndexSettings: { configurationName: \"apm_oss.sourcemapIndices\" | \"apm_oss.errorIndices\" | \"apm_oss.onboardingIndices\" | \"apm_oss.spanIndices\" | \"apm_oss.transactionIndices\" | \"apm_oss.metricsIndices\" | \"apmAgentConfigurationIndex\" | \"apmCustomLinkIndex\"; defaultValue: string; savedValue: string | undefined; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /internal/apm/settings/apm-indices\": ",
           {
@@ -4034,7 +4080,19 @@
           "TypeC",
           "<{ body: ",
           "PartialC",
-          "<SaveApmIndicesBodySchema>; }>, ",
+          "<{ 'apm_oss.sourcemapIndices': ",
+          "StringC",
+          "; 'apm_oss.errorIndices': ",
+          "StringC",
+          "; 'apm_oss.onboardingIndices': ",
+          "StringC",
+          "; 'apm_oss.spanIndices': ",
+          "StringC",
+          "; 'apm_oss.transactionIndices': ",
+          "StringC",
+          "; 'apm_oss.metricsIndices': ",
+          "StringC",
+          "; }>; }>, ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -4901,6 +4959,22 @@
         "path": "x-pack/plugins/apm/server/routes/get_global_apm_server_route_repository.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apm",
+        "id": "def-server.APMXPackConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "APMXPackConfig",
+        "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly autocreateApmIndexPattern: boolean; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+          "SearchAggregatedTransactionSetting",
+          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly profilingEnabled: boolean; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }"
+        ],
+        "path": "x-pack/plugins/apm/server/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -4923,9 +4997,9 @@
           "description": [],
           "signature": [
             "Observable",
-            "<Readonly<{} & { enabled: boolean; indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; autocreateApmIndexPattern: boolean; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+            "<{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
             "SearchAggregatedTransactionSetting",
-            "; telemetryCollectionEnabled: boolean; metricsInterval: number; profilingEnabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }>>"
+            "; 'xpack.apm.metricsInterval': number; 'xpack.apm.agent.migrations.enabled': boolean; }>"
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false

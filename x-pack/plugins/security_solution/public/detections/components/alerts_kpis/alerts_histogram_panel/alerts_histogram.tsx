@@ -31,7 +31,6 @@ interface AlertsHistogramProps {
   legendItems: LegendItem[];
   legendPosition?: Position;
   loading: boolean;
-  showLegend?: boolean;
   to: string;
   data: HistogramData[];
   updateDateRange: UpdateDateRange;
@@ -44,7 +43,6 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
     legendItems,
     legendPosition = 'right',
     loading,
-    showLegend,
     to,
     updateDateRange,
   }) => {
@@ -75,9 +73,8 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
               <Settings
                 legendPosition={legendPosition}
                 onBrushEnd={updateDateRange}
-                // showLegend controls the default legend coming from Elastic chart, we show them when our customised legend items doesn't exist (but we still want to show legend).
-                showLegend={showLegend && legendItems.length === 0}
-                showLegendExtra={showLegend}
+                showLegend={legendItems.length === 0}
+                showLegendExtra
                 theme={theme}
               />
 

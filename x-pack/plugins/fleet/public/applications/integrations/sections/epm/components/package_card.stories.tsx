@@ -22,7 +22,7 @@ export default {
 type Args = Omit<PackageCardProps, 'status'> & { width: number };
 
 const args: Args = {
-  width: 280,
+  width: 250,
   title: 'Title',
   description: 'Description',
   name: 'beats',

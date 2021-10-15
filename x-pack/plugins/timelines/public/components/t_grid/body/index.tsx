@@ -145,9 +145,6 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
-const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
-const hasCellActions = (columnId?: string) =>
-  columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
 const transformControlColumns = ({
   actionColumnsWidth,
   columnHeaders,
@@ -639,6 +636,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       setEventsDeleted,
       hasAlertsCrudPermissions,
     ]);
+
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
         columnHeaders.map((header) => {
@@ -646,24 +644,18 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             tGridCellAction({
               browserFields,
               data: data.map((row) => row.data),
-              ecsData: data.map((row) => row.ecs),
-              header: columnHeaders.find((h) => h.id === header.id),
+              globalFilters: filters,
               pageSize,
               timelineId: id,
             });
 
           return {
             ...header,
-            ...(hasCellActions(header.id)
-              ? {
-                  cellActions:
-                    header.tGridCellActions?.map(buildAction) ??
-                    defaultCellActions?.map(buildAction),
-                }
-              : {}),
+            cellActions:
+              header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction),
           };
         }),
-      [columnHeaders, defaultCellActions, browserFields, data, pageSize, id]
+      [browserFields, columnHeaders, data, defaultCellActions, id, pageSize, filters]
     );
 
     const renderTGridCellValue = useMemo(() => {
@@ -671,9 +663,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         columnId,
         rowIndex,
         setCellProps,
-        isDetails,
       }): React.ReactElement | null => {
         const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+
         const rowData = pageRowIndex < data.length ? data[pageRowIndex].data : null;
         const header = columnHeaders.find((h) => h.id === columnId);
         const eventId = pageRowIndex < data.length ? data[pageRowIndex]._id : null;
@@ -695,36 +687,34 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         }
 
         return renderCellValue({
-          browserFields,
           columnId: header.id,
-          data: rowData,
-          ecsData: ecs,
           eventId,
-          globalFilters: filters,
+          data: rowData,
           header,
-          isDetails,
           isDraggable: false,
           isExpandable: true,
           isExpanded: false,
+          isDetails: false,
           linkValues: getOr([], header.linkField ?? '', ecs),
           rowIndex,
-          rowRenderers,
           setCellProps,
-          timelineId: id,
-          truncate: isDetails ? false : true,
+          timelineId: tabType != null ? `${id}-${tabType}` : id,
+          ecsData: ecs,
+          browserFields,
+          rowRenderers,
         }) as React.ReactElement;
       };
       return Cell;
     }, [
-      browserFields,
       columnHeaders,
       data,
-      filters,
       id,
-      pageSize,
       renderCellValue,
-      rowRenderers,
+      tabType,
       theme,
+      browserFields,
+      rowRenderers,
+      pageSize,
     ]);
 
     const onChangeItemsPerPage = useCallback(

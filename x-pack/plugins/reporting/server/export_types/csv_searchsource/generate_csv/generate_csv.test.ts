@@ -75,7 +75,6 @@ const mockSearchSourceGetFieldDefault = jest.fn().mockImplementation((key: strin
           getByName: jest.fn().mockImplementation(() => []),
           getByType: jest.fn().mockImplementation(() => []),
         },
-        metaFields: ['_id', '_index', '_type', '_score'],
         getFormatterForField: jest.fn(),
       };
   }

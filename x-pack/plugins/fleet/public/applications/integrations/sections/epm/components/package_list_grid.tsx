@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ReactNode, FunctionComponent } from 'react';
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { useStartServices } from '../../../../../hooks';
 import { Loading } from '../../../components';
 import { useLocalSearch, searchIdField } from '../../../hooks';
 
@@ -30,7 +31,7 @@ import { PackageCard } from './package_card';
 export interface Props {
   isLoading?: boolean;
   controls?: ReactNode | ReactNode[];
-  title?: string;
+  title: string;
   list: IntegrationCardItem[];
   initialSearch?: string;
   setSelectedCategory: (category: string) => void;
@@ -39,7 +40,7 @@ export interface Props {
   callout?: JSX.Element | null;
 }
 
-export const PackageListGrid: FunctionComponent<Props> = ({
+export function PackageListGrid({
   isLoading,
   controls,
   title,
@@ -49,23 +50,9 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   setSelectedCategory,
   showMissingIntegrationMessage = false,
   callout,
-}) => {
+}: Props) {
   const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [isSticky, setIsSticky] = useState(false);
-  const [windowScrollY] = useState(window.scrollY);
-
-  useEffect(() => {
-    const menuRefCurrent = menuRef.current;
-    const onScroll = () => {
-      if (menuRefCurrent) {
-        setIsSticky(menuRefCurrent?.getBoundingClientRect().top < 110);
-      }
-    };
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [windowScrollY, isSticky]);
 
   const onQueryChange = ({
     queryText: userInput,
@@ -84,7 +71,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     setSearchTerm('');
   };
 
-  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
+  const controlsContent = <ControlsColumn title={title} controls={controls} />;
   let gridContent: JSX.Element;
 
   if (isLoading || !localSearchRef.current) {
@@ -106,68 +93,58 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   }
 
   return (
-    <div ref={menuRef}>
-      <EuiFlexGroup alignItems="flexStart" gutterSize="xl">
-        <EuiFlexItem grow={1} className={isSticky ? 'kbnStickyMenu' : ''}>
-          {controlsContent}
-        </EuiFlexItem>
-        <EuiFlexItem grow={5}>
-          <EuiSearchBar
-            query={searchTerm || undefined}
-            box={{
-              placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
-                defaultMessage: 'Search for integrations',
-              }),
-              incremental: true,
-            }}
-            onChange={onQueryChange}
-          />
-          {callout ? (
-            <>
-              <EuiSpacer />
-              {callout}
-            </>
-          ) : null}
-          <EuiSpacer />
-          {gridContent}
-          {showMissingIntegrationMessage && (
-            <>
-              <EuiSpacer />
-              <MissingIntegrationContent
-                resetQuery={resetQuery}
-                setSelectedCategory={setSelectedCategory}
-              />
-            </>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    <EuiFlexGroup alignItems="flexStart">
+      <EuiFlexItem grow={1}>{controlsContent}</EuiFlexItem>
+      <EuiFlexItem grow={3}>
+        <EuiSearchBar
+          query={searchTerm || undefined}
+          box={{
+            placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
+              defaultMessage: 'Search for integrations',
+            }),
+            incremental: true,
+          }}
+          onChange={onQueryChange}
+        />
+        {callout ? (
+          <>
+            <EuiSpacer />
+            {callout}
+          </>
+        ) : null}
+        <EuiSpacer />
+        {gridContent}
+        {showMissingIntegrationMessage && (
+          <>
+            <EuiSpacer size="xxl" />
+            <MissingIntegrationContent
+              resetQuery={resetQuery}
+              setSelectedCategory={setSelectedCategory}
+            />
+          </>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
-};
+}
 
 interface ControlsColumnProps {
   controls: ReactNode;
-  title: string | undefined;
-  sticky: boolean;
+  title: string;
 }
 
-function ControlsColumn({ controls, title, sticky }: ControlsColumnProps) {
-  let titleContent;
-  if (title) {
-    titleContent = (
-      <>
-        <EuiTitle size="s">
-          <h2>{title}</h2>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-      </>
-    );
-  }
+function ControlsColumn({ controls, title }: ControlsColumnProps) {
   return (
-    <EuiFlexGroup direction="column" className={sticky ? 'kbnStickyMenu' : ''} gutterSize="none">
-      {titleContent}
-      {controls}
-    </EuiFlexGroup>
+    <Fragment>
+      <EuiTitle size="s">
+        <h2>{title}</h2>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={4}>{controls}</EuiFlexItem>
+        <EuiFlexItem grow={1} />
+      </EuiFlexGroup>
+    </Fragment>
   );
 }
 
@@ -219,17 +196,20 @@ function MissingIntegrationContent({
   resetQuery,
   setSelectedCategory,
 }: MissingIntegrationContentProps) {
+  const {
+    application: { getUrlForApp },
+  } = useStartServices();
   const handleCustomInputsLinkClick = useCallback(() => {
     resetQuery();
     setSelectedCategory('custom');
   }, [resetQuery, setSelectedCategory]);
 
   return (
-    <EuiText size="s" color="subdued">
+    <EuiText>
       <p>
         <FormattedMessage
           id="xpack.fleet.integrations.missing"
-          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations using our {discussForumLink}."
+          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}, or add data using {beatsTutorialLink}. Request new integrations using our {discussForumLink}."
           values={{
             customInputsLink: (
               <EuiLink onClick={handleCustomInputsLinkClick}>
@@ -244,6 +224,14 @@ function MissingIntegrationContent({
                 <FormattedMessage
                   id="xpack.fleet.integrations.discussForumLink"
                   defaultMessage="discuss forum"
+                />
+              </EuiLink>
+            ),
+            beatsTutorialLink: (
+              <EuiLink href={getUrlForApp('home', { path: '#/tutorial_directory' })}>
+                <FormattedMessage
+                  id="xpack.fleet.integrations.beatsModulesLink"
+                  defaultMessage="Beats modules"
                 />
               </EuiLink>
             ),

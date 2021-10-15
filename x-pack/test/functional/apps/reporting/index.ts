@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './rule_execution_log_client';
-export * from './types';
-export * from './utils/normalization';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Reporting', function () {
+    loadTestFile(require.resolve('./reporting'));
+  });
+}

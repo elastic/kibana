@@ -12,70 +12,36 @@ import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 
 import { CellValueElementProps } from '.';
-import { getLink } from '../../../../common/lib/cell_actions/helpers';
-import {
-  ExpandedCellValueActions,
-  StyledContent,
-} from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
-
-const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
-const hasCellActions = (columnId?: string) => {
-  return columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
-};
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
-  browserFields,
+  columnId,
   data,
-  ecsData,
   eventId,
-  globalFilters,
   header,
-  isDetails,
   isDraggable,
   linkValues,
-  rowRenderers,
   setCellProps,
   timelineId,
-  truncate,
-}) => {
-  const values = getMappedNonEcsValue({
-    data,
-    fieldName: header.id,
-  });
-  const styledContentClassName = isDetails
-    ? 'eui-textBreakWord'
-    : 'eui-displayInlineBlock eui-textTruncate';
-  return (
-    <>
-      <StyledContent className={styledContentClassName} $isDetails={isDetails}>
-        {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-          asPlainText: !!getLink(header.id, header.type), // we want to render value with links as plain text but keep other formatters like badge.
-          browserFields,
-          columnName: header.id,
-          ecsData,
-          eventId,
-          field: header,
-          isDetails,
-          isDraggable,
-          linkValues,
-          rowRenderers,
-          timelineId,
-          truncate,
-          values: getMappedNonEcsValue({
-            data,
-            fieldName: header.id,
-          }),
-        })}
-      </StyledContent>
-      {isDetails && browserFields && hasCellActions(header.id) && (
-        <ExpandedCellValueActions
-          browserFields={browserFields}
-          field={header.id}
-          globalFilters={globalFilters}
-          timelineId={timelineId}
-          value={values}
-        />
-      )}
-    </>
-  );
-};
+  rowRenderers,
+  browserFields,
+  ecsData,
+}) => (
+  <>
+    {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
+      columnName: header.id,
+      eventId,
+      field: header,
+      isDraggable,
+      linkValues,
+      timelineId,
+      truncate: true,
+      values: getMappedNonEcsValue({
+        data,
+        fieldName: header.id,
+      }),
+      rowRenderers,
+      browserFields,
+      ecsData,
+    })}
+  </>
+);

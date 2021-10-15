@@ -114,11 +114,11 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "discover",
+                "pluginId": "savedObjects",
                 "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.SavedSearch",
-                "text": "SavedSearch"
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.SavedObject",
+                "text": "SavedObject"
               },
               " | undefined"
             ],

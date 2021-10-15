@@ -6,4 +6,3 @@
  */
 
 export * from './fleet_mocks';
-export * from './trusted_apps_http_mocks';

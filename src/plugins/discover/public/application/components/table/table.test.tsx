@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerTable, DocViewerTableProps } from './table';
-import { IndexPattern } from '../../../../../data/public';
+import { indexPatterns, IndexPattern } from '../../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 jest.mock('../../../kibana_services', () => ({
@@ -65,13 +65,15 @@ const indexPattern = {
     ],
   },
   metaFields: ['_index', '_score'],
-  flattenHit: jest.fn(),
+  flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
 } as unknown as IndexPattern;
 
 indexPattern.fields.getByName = (name: string) => {
   return indexPattern.fields.getAll().find((field) => field.name === name);
 };
+
+indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 
 const mountComponent = (props: DocViewerTableProps) => {
   return mountWithIntl(<DocViewerTable {...props} />);

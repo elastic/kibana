@@ -54,7 +54,7 @@ const RootWrapper = styled.div`
 
 const BACK_TO_TRUSTED_APPS_LABEL = i18n.translate(
   'xpack.securitySolution.trustedapps.grid.policyDetailsLinkBackLabel',
-  { defaultMessage: 'Back to trusted applications' }
+  { defaultMessage: 'Back to trusted Applications' }
 );
 
 const EDIT_TRUSTED_APP_ACTION_LABEL = i18n.translate(
@@ -120,12 +120,6 @@ export const TrustedAppsGrid = memo(() => {
               ],
               href: getAppUrl({ path: currentPagePath }),
             },
-            onCancelNavigateTo: [
-              APP_ID,
-              {
-                path: currentPagePath,
-              },
-            ],
           };
 
           policyToNavOptionsMap[policyId] = {

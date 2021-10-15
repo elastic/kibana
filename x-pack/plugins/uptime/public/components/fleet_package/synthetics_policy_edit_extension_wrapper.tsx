@@ -27,14 +27,12 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
   ({ policy: currentPolicy, newPolicy, onChange }) => {
     const {
       enableTLS: isTLSEnabled,
-      enableZipUrlTLS: isZipUrlTLSEnabled,
       fullConfig: fullDefaultConfig,
       monitorTypeConfig: defaultConfig,
       monitorType,
       tlsConfig: defaultTLSConfig,
     } = useMemo(() => {
       let enableTLS = false;
-      let enableZipUrlTLS = false;
       const getDefaultConfig = () => {
         // find the enabled input to identify the current monitor type
         const currentInput = currentPolicy.inputs.find((input) => input.enabled === true);
@@ -70,10 +68,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
           [ConfigKeys.TLS_VERSION]: formattedDefaultConfigForMonitorType[ConfigKeys.TLS_VERSION],
         };
 
-        enableTLS =
-          formattedDefaultConfigForMonitorType[ConfigKeys.METADATA].is_tls_enabled || false;
-        enableZipUrlTLS =
-          formattedDefaultConfigForMonitorType[ConfigKeys.METADATA].is_zip_url_tls_enabled || false;
+        enableTLS = Object.values(tlsConfig).some((value) => value?.isEnabled);
 
         const formattedDefaultConfig: Partial<PolicyConfig> = {
           [type]: formattedDefaultConfigForMonitorType,
@@ -83,9 +78,8 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
           fullConfig: formattedDefaultConfig,
           monitorTypeConfig: formattedDefaultConfigForMonitorType,
           tlsConfig,
-          monitorType: type,
           enableTLS,
-          enableZipUrlTLS,
+          monitorType: type,
         };
       };
 
@@ -93,12 +87,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
     }, [currentPolicy]);
 
     return (
-      <PolicyConfigContextProvider
-        defaultMonitorType={monitorType}
-        defaultIsTLSEnabled={isTLSEnabled}
-        defaultIsZipUrlTLSEnabled={isZipUrlTLSEnabled}
-        isEditable={true}
-      >
+      <PolicyConfigContextProvider defaultMonitorType={monitorType} isEditable={true}>
         <TLSFieldsContextProvider defaultValues={isTLSEnabled ? defaultTLSConfig : undefined}>
           <HTTPContextProvider defaultValues={fullDefaultConfig?.[DataStream.HTTP]}>
             <TCPContextProvider defaultValues={fullDefaultConfig?.[DataStream.TCP]}>
@@ -108,6 +97,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
                     newPolicy={newPolicy}
                     onChange={onChange}
                     defaultConfig={defaultConfig}
+                    isTLSEnabled={isTLSEnabled}
                   />
                 </BrowserContextProvider>
               </ICMPSimpleFieldsContextProvider>

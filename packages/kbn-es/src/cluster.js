@@ -257,13 +257,9 @@ exports.Cluster = class Cluster {
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
-
-      // Include default keystore settings only if keystore isn't configured.
-      if (!esArgs.some((arg) => arg.startsWith('xpack.security.http.ssl.keystore'))) {
-        esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
-        esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
-        esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
-      }
+      esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+      esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
+      esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
     }
 
     const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {

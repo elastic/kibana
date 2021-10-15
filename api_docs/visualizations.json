@@ -1012,7 +1012,7 @@
                 "section": "def-public.SerializedVisData",
                 "text": "SerializedVisData"
               },
-              ">; }, never>, \"data\" | \"type\" | \"id\" | \"title\" | \"description\" | \"params\" | \"uiState\">) => Promise<void>"
+              ">; }, never>, \"type\" | \"data\" | \"id\" | \"title\" | \"description\" | \"params\" | \"uiState\">) => Promise<void>"
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
@@ -1057,7 +1057,7 @@
                     "section": "def-public.SerializedVisData",
                     "text": "SerializedVisData"
                   },
-                  ">; }, never>, \"data\" | \"type\" | \"id\" | \"title\" | \"description\" | \"params\" | \"uiState\">"
+                  ">; }, never>, \"type\" | \"data\" | \"id\" | \"title\" | \"description\" | \"params\" | \"uiState\">"
                 ],
                 "path": "src/plugins/visualizations/public/vis.ts",
                 "deprecated": false,
@@ -1280,21 +1280,13 @@
           },
           "; field?: string | undefined; index?: string | undefined; params?: ",
           {
-            "pluginId": "fieldFormats",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
+            "docId": "kibExpressionsPluginApi",
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
-          "> | undefined; source?: string | undefined; sourceParams?: ",
+          "<Record<string, any>> | undefined; source?: string | undefined; sourceParams?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "server",
@@ -2108,21 +2100,13 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "fieldFormats",
+                "pluginId": "expressions",
                 "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
+                "docId": "kibExpressionsPluginApi",
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
-              ">"
+              "<Record<string, any>>"
             ],
             "path": "src/plugins/visualizations/public/vis_schemas.ts",
             "deprecated": false
@@ -4196,21 +4180,13 @@
           },
           "; format: ",
           {
-            "pluginId": "fieldFormats",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
+            "docId": "kibExpressionsPluginApi",
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
-          ">; }>)[] | undefined, string]"
+          "<Record<string, any>>; }>)[] | undefined, string]"
         ],
         "path": "src/plugins/visualizations/common/prepare_log_table.ts",
         "deprecated": false,
@@ -4262,21 +4238,13 @@
           },
           "; format: ",
           {
-            "pluginId": "fieldFormats",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
+            "docId": "kibExpressionsPluginApi",
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
-          ">; }"
+          "<Record<string, any>>; }"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
         "deprecated": false,
@@ -4634,7 +4602,7 @@
         "label": "VisualizeEmbeddableFactoryContract",
         "description": [],
         "signature": [
-          "{ inject: (_state: ",
+          "{ readonly type: \"visualization\"; inject: (_state: ",
           {
             "pluginId": "embeddable",
             "scope": "common",
@@ -4670,7 +4638,7 @@
           },
           "; references: ",
           "SavedObjectReference",
-          "[]; }; readonly type: \"visualization\"; create: (input: ",
+          "[]; }; create: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5600,21 +5568,13 @@
           },
           "; field?: string | undefined; index?: string | undefined; params?: ",
           {
-            "pluginId": "fieldFormats",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
+            "docId": "kibExpressionsPluginApi",
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
-          "> | undefined; source?: string | undefined; sourceParams?: ",
+          "<Record<string, any>> | undefined; source?: string | undefined; sourceParams?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "server",
@@ -6034,21 +5994,13 @@
           },
           "; format: ",
           {
-            "pluginId": "fieldFormats",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
+            "docId": "kibExpressionsPluginApi",
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
-          ">; }>)[] | undefined, string]"
+          "<Record<string, any>>; }>)[] | undefined, string]"
         ],
         "path": "src/plugins/visualizations/common/prepare_log_table.ts",
         "deprecated": false,

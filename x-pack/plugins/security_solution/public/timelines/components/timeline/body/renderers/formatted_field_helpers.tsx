@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { isString, isEmpty } from 'lodash/fp';
-import React, { SyntheticEvent, useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -38,26 +30,22 @@ const EventModuleFlexItem = styled(EuiFlexItem)`
 `;
 
 interface RenderRuleNameProps {
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
   fieldName: string;
   isDraggable: boolean;
   linkValue: string | null | undefined;
   truncate?: boolean;
-  title?: string;
   value: string | number | null | undefined;
 }
 
 export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
-  Component,
   contextId,
   eventId,
   fieldName,
   isDraggable,
   linkValue,
   truncate,
-  title,
   value,
 }) => {
   const ruleName = `${value}`;
@@ -81,29 +69,15 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     [navigateToApp, ruleId, search]
   );
 
-  const href = useMemo(
-    () =>
-      getUrlForApp(APP_ID, {
-        deepLinkId: SecurityPageName.rules,
-        path: getRuleDetailsUrl(ruleId ?? '', search),
-      }),
-    [getUrlForApp, ruleId, search]
-  );
-  const id = `event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`;
-
   if (isString(value) && ruleName.length > 0 && ruleId != null) {
-    const link = Component ? (
-      <Component
-        aria-label={title}
-        data-test-subj={`view-${fieldName}`}
-        iconType="link"
+    const link = (
+      <LinkAnchor
         onClick={goToRuleDetails}
-        title={title}
+        href={getUrlForApp(APP_ID, {
+          deepLinkId: SecurityPageName.rules,
+          path: getRuleDetailsUrl(ruleId, search),
+        })}
       >
-        {title ?? value}
-      </Component>
-    ) : (
-      <LinkAnchor onClick={goToRuleDetails} href={href}>
         {content}
       </LinkAnchor>
     );
@@ -111,7 +85,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
-        id={id}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
         isDraggable={isDraggable}
         tooltipContent={value}
         value={value}
@@ -125,7 +99,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
-        id={id}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
         isDraggable={isDraggable}
         tooltipContent={value}
         value={`${value}`}
@@ -215,71 +189,35 @@ export const renderEventModule = ({
   );
 };
 
-const GenericLinkComponent: React.FC<{
-  children?: React.ReactNode;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  dataTestSubj?: string;
-  href: string;
-  onClick?: (e: SyntheticEvent) => void;
-  title?: string;
-  iconType?: string;
-}> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'link' }) => {
-  return Component ? (
-    <Component
-      data-test-subj={dataTestSubj}
-      href={href}
-      iconType={iconType}
-      onClick={onClick}
-      title={title}
-    >
-      {title ?? children}
-    </Component>
-  ) : (
-    <EuiLink data-test-subj={dataTestSubj} target="_blank" href={href}>
-      {title ?? children}
-    </EuiLink>
-  );
-};
-
-const GenericLink = React.memo(GenericLinkComponent);
-
 export const renderUrl = ({
   contextId,
-  Component,
   eventId,
   fieldName,
   isDraggable,
   linkValue,
   truncate,
-  title,
   value,
 }: {
   contextId: string;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
   isDraggable: boolean;
   linkValue: string | null | undefined;
   truncate?: boolean;
-  title?: string;
   value: string | number | null | undefined;
 }) => {
   const urlName = `${value}`;
-  const isUrlValid = !isUrlInvalid(urlName);
 
   const formattedValue = truncate ? <TruncatableText>{value}</TruncatableText> : value;
-  const content = isUrlValid ? (
-    <GenericLink
-      Component={Component}
-      href={urlName}
-      dataTestSubj="ata-grid-url"
-      title={title}
-      iconType="link"
-    />
-  ) : (
-    <>{formattedValue}</>
+  const content = (
+    <>
+      {!isUrlInvalid(urlName) && (
+        <EuiLink target="_blank" href={urlName}>
+          {formattedValue}
+        </EuiLink>
+      )}
+      {isUrlInvalid(urlName) && <>{formattedValue}</>}
+    </>
   );
 
   return isString(value) && urlName.length > 0 ? (

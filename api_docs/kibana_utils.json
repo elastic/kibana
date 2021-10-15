@@ -6895,7 +6895,7 @@
           "signature": [
             "(history: Pick<",
             "History",
-            "<any>, \"replace\" | \"location\">) => void"
+            "<any>, \"location\" | \"replace\">) => void"
           ],
           "path": "src/plugins/kibana_utils/public/plugin.ts",
           "deprecated": false,
@@ -6910,7 +6910,7 @@
               "signature": [
                 "Pick<",
                 "History",
-                "<any>, \"replace\" | \"location\">"
+                "<any>, \"location\" | \"replace\">"
               ],
               "path": "src/plugins/kibana_utils/public/plugin.ts",
               "deprecated": false,

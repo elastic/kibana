@@ -16,8 +16,6 @@ import { DroppableWrapper } from '../../../../common/components/drag_and_drop/dr
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from './default_cell_renderer';
-import { BrowserFields } from '../../../../../../timelines/common/search_strategy';
-import { Ecs } from '../../../../../common/ecs';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -28,16 +26,15 @@ const mockImplementation = {
 };
 
 describe('DefaultCellRenderer', () => {
-  const columnId = '@timestamp';
+  const columnId = 'signal.rule.risk_score';
   const eventId = '_id-123';
+  const isDetails = true;
   const isExpandable = true;
   const isExpanded = true;
   const linkValues = ['foo', 'bar', '@baz'];
   const rowIndex = 3;
   const setCellProps = jest.fn();
   const timelineId = 'test';
-  const ecsData = {} as Ecs;
-  const browserFields = {} as BrowserFields;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -47,17 +44,14 @@ describe('DefaultCellRenderer', () => {
   test('it invokes `getColumnRenderer` with the expected arguments', () => {
     const data = cloneDeep(mockTimelineData[0].data);
     const header = cloneDeep(defaultHeaders[0]);
-    const isDetails = true;
 
     mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <DroppableWrapper droppableId="testing">
             <DefaultCellRenderer
-              browserFields={browserFields}
               columnId={columnId}
               data={data}
-              ecsData={ecsData}
               eventId={eventId}
               header={header}
               isDetails={isDetails}
@@ -77,21 +71,17 @@ describe('DefaultCellRenderer', () => {
     expect(getColumnRenderer).toBeCalledWith(header.id, columnRenderers, data);
   });
 
-  test('if in tgrid expanded value, it invokes `renderColumn` with the expected arguments', () => {
+  test('it invokes `renderColumn` with the expected arguments', () => {
     const data = cloneDeep(mockTimelineData[0].data);
     const header = cloneDeep(defaultHeaders[0]);
-    const isDetails = true;
-    const truncate = isDetails ? false : true;
 
     mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <DroppableWrapper droppableId="testing">
             <DefaultCellRenderer
-              browserFields={browserFields}
               columnId={columnId}
               data={data}
-              ecsData={ecsData}
               eventId={eventId}
               header={header}
               isDetails={isDetails}
@@ -102,7 +92,6 @@ describe('DefaultCellRenderer', () => {
               rowIndex={rowIndex}
               setCellProps={setCellProps}
               timelineId={timelineId}
-              truncate={truncate}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>
@@ -110,54 +99,14 @@ describe('DefaultCellRenderer', () => {
     );
 
     expect(mockImplementation.renderColumn).toBeCalledWith({
-      asPlainText: false,
-      browserFields,
       columnName: header.id,
-      ecsData,
       eventId,
       field: header,
-      isDetails,
       isDraggable: true,
       linkValues,
-      rowRenderers: undefined,
       timelineId,
-      truncate,
+      truncate: true,
       values: ['2018-11-05T19:03:25.937Z'],
     });
-  });
-
-  test('if in tgrid expanded value, it renders ExpandedCellValueActions', () => {
-    const data = cloneDeep(mockTimelineData[0].data);
-    const header = cloneDeep(defaultHeaders[1]);
-    const isDetails = true;
-    const id = 'event.severity';
-    const wrapper = mount(
-      <TestProviders>
-        <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <DroppableWrapper droppableId="testing">
-            <DefaultCellRenderer
-              browserFields={browserFields}
-              columnId={id}
-              ecsData={ecsData}
-              data={data}
-              eventId={eventId}
-              header={header}
-              isDetails={isDetails}
-              isDraggable={true}
-              isExpandable={isExpandable}
-              isExpanded={isExpanded}
-              linkValues={linkValues}
-              rowIndex={rowIndex}
-              setCellProps={setCellProps}
-              timelineId={timelineId}
-            />
-          </DroppableWrapper>
-        </DragDropContextWrapper>
-      </TestProviders>
-    );
-
-    expect(
-      wrapper.find('[data-test-subj="data-grid-expanded-cell-value-actions"]').exists()
-    ).toBeTruthy();
   });
 });

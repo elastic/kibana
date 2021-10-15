@@ -14,21 +14,17 @@ import { DiscoverGridContext } from './discover_grid_context';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { esHits } from '../../../__mocks__/es_hits';
 
-const baseContextMock = {
-  expanded: undefined,
-  setExpanded: jest.fn(),
-  rows: esHits,
-  onFilter: jest.fn(),
-  indexPattern: indexPatternMock,
-  isDarkMode: false,
-  selectedDocs: [],
-  setSelectedDocs: jest.fn(),
-};
-
 describe('Discover grid view button ', function () {
   it('when no document is expanded, setExpanded is called with current document', async () => {
     const contextMock = {
-      ...baseContextMock,
+      expanded: undefined,
+      setExpanded: jest.fn(),
+      rows: esHits,
+      onFilter: jest.fn(),
+      indexPattern: indexPatternMock,
+      isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
@@ -49,8 +45,14 @@ describe('Discover grid view button ', function () {
   });
   it('when the current document is expanded, setExpanded is called with undefined', async () => {
     const contextMock = {
-      ...baseContextMock,
       expanded: esHits[0],
+      setExpanded: jest.fn(),
+      rows: esHits,
+      onFilter: jest.fn(),
+      indexPattern: indexPatternMock,
+      isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
@@ -71,8 +73,14 @@ describe('Discover grid view button ', function () {
   });
   it('when another document is expanded, setExpanded is called with the current document', async () => {
     const contextMock = {
-      ...baseContextMock,
       expanded: esHits[0],
+      setExpanded: jest.fn(),
+      rows: esHits,
+      onFilter: jest.fn(),
+      indexPattern: indexPatternMock,
+      isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(

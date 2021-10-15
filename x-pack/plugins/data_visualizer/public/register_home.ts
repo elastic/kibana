@@ -9,13 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { FileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
-import {
-  featureDescription,
-  featureTitle,
-  FILE_DATA_VIS_TAB_ID,
-  applicationPath,
-  featureId,
-} from '../common';
+
+const FILE_DATA_VIS_TAB_ID = 'fileDataViz';
 
 export function registerHomeAddData(home: HomePublicPluginSetup) {
   home.addData.registerAddDataTab({
@@ -29,11 +24,15 @@ export function registerHomeAddData(home: HomePublicPluginSetup) {
 
 export function registerHomeFeatureCatalogue(home: HomePublicPluginSetup) {
   home.featureCatalogue.register({
-    id: featureId,
-    title: featureTitle,
-    description: featureDescription,
+    id: `file_data_visualizer`,
+    title: i18n.translate('xpack.dataVisualizer.title', {
+      defaultMessage: 'Upload a file',
+    }),
+    description: i18n.translate('xpack.dataVisualizer.description', {
+      defaultMessage: 'Import your own CSV, NDJSON, or log file.',
+    }),
     icon: 'document',
-    path: applicationPath,
+    path: `/app/home#/tutorial_directory/${FILE_DATA_VIS_TAB_ID}`,
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA,
     order: 520,

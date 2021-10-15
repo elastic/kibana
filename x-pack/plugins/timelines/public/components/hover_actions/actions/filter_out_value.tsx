@@ -14,8 +14,8 @@ import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcu
 import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
 import { HoverActionComponentProps, FilterValueFnArgs } from './types';
 
-export const FILTER_OUT_VALUE = i18n.translate('xpack.timelines.hoverActions.filterOut', {
-  defaultMessage: 'Filter Out',
+export const FILTER_OUT_VALUE = i18n.translate('xpack.timelines.hoverActions.filterOutValue', {
+  defaultMessage: 'Filter out value',
 });
 
 export const FILTER_OUT_VALUE_KEYBOARD_SHORTCUT = 'o';
@@ -30,7 +30,6 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
     onFilterAdded,
     ownFocus,
     onClick,
-    size,
     showTooltip = false,
     value,
   }) => {
@@ -75,7 +74,6 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
             data-test-subj="filter-out-value"
             iconType="minusInCircle"
             onClick={filterOutValueFn}
-            size={size}
             title={FILTER_OUT_VALUE}
           >
             {FILTER_OUT_VALUE}
@@ -89,10 +87,9 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
             iconSize="s"
             iconType="minusInCircle"
             onClick={filterOutValueFn}
-            size={size}
           />
         ),
-      [Component, defaultFocusedButtonRef, filterOutValueFn, size]
+      [Component, defaultFocusedButtonRef, filterOutValueFn]
     );
 
     return showTooltip ? (

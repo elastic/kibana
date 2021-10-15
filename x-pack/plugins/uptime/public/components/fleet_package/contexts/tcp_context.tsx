@@ -22,9 +22,6 @@ interface ITCPSimpleFieldsContextProvider {
 
 export const initialValues: ITCPSimpleFields = {
   ...commonDefaultValues,
-  [ConfigKeys.METADATA]: {
-    is_tls_enabled: false,
-  },
   [ConfigKeys.HOSTS]: '',
   [ConfigKeys.MONITOR_TYPE]: DataStream.TCP,
 };

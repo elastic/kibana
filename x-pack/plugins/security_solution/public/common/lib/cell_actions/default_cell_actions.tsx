@@ -5,28 +5,21 @@
  * 2.0.
  */
 
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import { head, getOr, get, isEmpty } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import type {
   BrowserFields,
   TimelineNonEcsData,
 } from '../../../../../timelines/common/search_strategy';
-import {
-  ColumnHeaderOptions,
-  DataProvider,
-  TGridCellAction,
-} from '../../../../../timelines/common/types';
+import { DataProvider, TGridCellAction } from '../../../../../timelines/common/types';
 import { getPageRowIndex } from '../../../../../timelines/public';
-import { Ecs } from '../../../../common/ecs';
 import { getMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
-import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
-import { parseValue } from '../../../timelines/components/timeline/body/renderers/parse_value';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
+import { allowTopN, escapeDataProviderId } from '../../components/drag_and_drop/helpers';
+import { ShowTopNButton } from '../../components/hover_actions/actions/show_top_n';
+import { getAllFieldsByName } from '../../containers/source';
 import { useKibana } from '../kibana';
-import { getLink } from './helpers';
 
 /** a noop required by the filter in / out buttons */
 const onFilterAdded = () => {};
@@ -43,77 +36,15 @@ const useKibanaServices = () => {
   return { timelines, filterManager };
 };
 
-export const EmptyComponent = () => <></>;
-
-const cellActionLink = [
-  ({
-    browserFields,
-    data,
-    ecsData,
-    header,
-    timelineId,
-    pageSize,
-  }: {
-    browserFields: BrowserFields;
-    data: TimelineNonEcsData[][];
-    ecsData: Ecs[];
-    header?: ColumnHeaderOptions;
-    timelineId: string;
-    pageSize: number;
-  }) =>
-    getLink(header?.id, header?.type, header?.linkField)
-      ? ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-          const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-          const ecs = pageRowIndex < ecsData.length ? ecsData[pageRowIndex] : null;
-          const linkValues = header && getOr([], header.linkField ?? '', ecs);
-          const eventId = header && get('_id' ?? '', ecs);
-
-          if (pageRowIndex >= data.length) {
-            // data grid expects each cell action always return an element, it crashes if returns null
-            return <></>;
-          }
-
-          const values = getMappedNonEcsValue({
-            data: data[pageRowIndex],
-            fieldName: columnId,
-          });
-
-          const link = getLink(columnId, header?.type, header?.linkField);
-          const value = parseValue(head(values));
-
-          return link && eventId && values && !isEmpty(value) ? (
-            <FormattedFieldValue
-              Component={Component}
-              contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${timelineId}`}
-              eventId={eventId}
-              fieldFormat={header?.format || ''}
-              fieldName={columnId}
-              fieldType={header?.type || ''}
-              isButton={true}
-              isDraggable={false}
-              value={value}
-              truncate={false}
-              title={values.length > 1 ? `${link?.label}: ${value}` : link?.label}
-              linkValue={head(linkValues)}
-              onClick={closePopover}
-            />
-          ) : (
-            // data grid expects each cell action always return an element, it crashes if returns null
-            <></>
-          );
-        }
-      : EmptyComponent,
-];
-
-export const cellActions: TGridCellAction[] = [
+/** the default actions shown in `EuiDataGrid` cells */
+export const defaultCellActions: TGridCellAction[] = [
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
-    ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+    ({ rowIndex, columnId, Component }) => {
       const { timelines, filterManager } = useKibanaServices();
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
-        // data grid expects each cell action always return an element, it crashes if returns null
-        return <></>;
+        return null;
       }
 
       const value = getMappedNonEcsValue({
@@ -141,8 +72,7 @@ export const cellActions: TGridCellAction[] = [
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
-        // data grid expects each cell action always return an element, it crashes if returns null
-        return <></>;
+        return null;
       }
 
       const value = getMappedNonEcsValue({
@@ -170,8 +100,34 @@ export const cellActions: TGridCellAction[] = [
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
-        // data grid expects each cell action always return an element, it crashes if returns null
-        return <></>;
+        return null;
+      }
+
+      const value = getMappedNonEcsValue({
+        data: data[pageRowIndex],
+        fieldName: columnId,
+      });
+
+      return (
+        <>
+          {timelines.getHoverActions().getCopyButton({
+            Component,
+            field: columnId,
+            isHoverAction: false,
+            ownFocus: false,
+            showTooltip: false,
+            value,
+          })}
+        </>
+      );
+    },
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    ({ rowIndex, columnId, Component }) => {
+      const { timelines } = useKibanaServices();
+
+      const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+      if (pageRowIndex >= data.length) {
+        return null;
       }
 
       const value = getMappedNonEcsValue({
@@ -209,14 +165,26 @@ export const cellActions: TGridCellAction[] = [
         </>
       );
     },
-  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+  ({
+      browserFields,
+      data,
+      globalFilters,
+      timelineId,
+      pageSize,
+    }: {
+      browserFields: BrowserFields;
+      data: TimelineNonEcsData[][];
+      globalFilters?: Filter[];
+      timelineId: string;
+      pageSize: number;
+    }) =>
     ({ rowIndex, columnId, Component }) => {
-      const { timelines } = useKibanaServices();
+      const [showTopN, setShowTopN] = useState(false);
+      const onClick = useCallback(() => setShowTopN(!showTopN), [showTopN]);
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
-        // data grid expects each cell action always return an element, it crashes if returns null
-        return <></>;
+        return null;
       }
 
       const value = getMappedNonEcsValue({
@@ -224,20 +192,31 @@ export const cellActions: TGridCellAction[] = [
         fieldName: columnId,
       });
 
-      return (
-        <>
-          {timelines.getHoverActions().getCopyButton({
-            Component,
-            field: columnId,
-            isHoverAction: false,
-            ownFocus: false,
-            showTooltip: false,
-            value,
-          })}
-        </>
+      const showButton = useMemo(
+        () =>
+          allowTopN({
+            browserField: getAllFieldsByName(browserFields)[columnId],
+            fieldName: columnId,
+            hideTopN: false,
+          }),
+        [columnId]
       );
+
+      return showButton ? (
+        <ShowTopNButton
+          Component={Component}
+          enablePopOver
+          data-test-subj="hover-actions-show-top-n"
+          field={columnId}
+          globalFilters={globalFilters}
+          onClick={onClick}
+          onFilterAdded={onFilterAdded}
+          ownFocus={false}
+          showTopN={showTopN}
+          showTooltip={false}
+          timelineId={timelineId}
+          value={value}
+        />
+      ) : null;
     },
 ];
-
-/** the default actions shown in `EuiDataGrid` cells */
-export const defaultCellActions = [...cellActions, ...cellActionLink];

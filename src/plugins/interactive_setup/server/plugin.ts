@@ -67,13 +67,8 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
       core.elasticsearch.config.hosts.length === 1 &&
       DEFAULT_ELASTICSEARCH_HOSTS.includes(core.elasticsearch.config.hosts[0]);
     if (!shouldActiveSetupMode) {
-      const reason = core.elasticsearch.config.credentialsSpecified
-        ? 'Kibana system user credentials are specified'
-        : core.elasticsearch.config.hosts.length > 1
-        ? 'more than one Elasticsearch host is specified'
-        : 'non-default Elasticsearch host is used';
       this.#logger.debug(
-        `Interactive setup mode will not be activated since Elasticsearch connection is already configured: ${reason}.`
+        'Interactive setup mode will not be activated since Elasticsearch connection is already configured.'
       );
       return;
     }

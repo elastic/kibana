@@ -253,12 +253,12 @@ export const SOURCE_OBJ_TYPES = {
     defaultMessage: 'Bugs',
   }),
   ISSUES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.issues', {
-    defaultMessage: 'Issues (including comments)',
+    defaultMessage: 'Issues',
   }),
   PULL_REQUESTS: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.objTypes.pullRequests',
     {
-      defaultMessage: 'Pull Requests (including comments)',
+      defaultMessage: 'Pull Requests',
     }
   ),
   REPOSITORY_LIST: i18n.translate(

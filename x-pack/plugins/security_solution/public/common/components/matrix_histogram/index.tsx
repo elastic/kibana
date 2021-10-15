@@ -79,7 +79,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   legendPosition,
   mapping,
   onError,
-  paddingSize = 'm',
   panelHeight = DEFAULT_PANEL_HEIGHT,
   setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
@@ -201,11 +200,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   return (
     <>
       <InspectButtonContainer show={!isInitialLoading}>
-        <HistogramPanel
-          data-test-subj={`${id}Panel`}
-          height={panelHeight}
-          paddingSize={paddingSize}
-        >
+        <HistogramPanel data-test-subj={`${id}Panel`} height={panelHeight}>
           {loading && !isInitialLoading && (
             <EuiProgress
               data-test-subj="initialLoadingPanelMatrixOverTime"

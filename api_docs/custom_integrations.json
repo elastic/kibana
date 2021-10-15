@@ -290,9 +290,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CustomIntegration",
-        "description": [
-          "\nA definition of a dataintegration, which can be registered with Kibana."
-        ],
+        "description": [],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
         "children": [
@@ -387,7 +385,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\")[]"
+              "(\"custom\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"sample_data\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\" | \"updates_available\")[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -395,13 +393,10 @@
           {
             "parentPluginId": "customIntegrations",
             "id": "def-server.CustomIntegration.shipper",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "shipper",
             "description": [],
-            "signature": [
-              "\"beats\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
-            ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
           },
@@ -420,6 +415,42 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "customIntegrations",
+        "id": "def-server.IntegrationCategoryCount",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntegrationCategoryCount",
+        "description": [],
+        "path": "src/plugins/custom_integrations/common/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-server.IntegrationCategoryCount.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-server.IntegrationCategoryCount.id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"custom\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"sample_data\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\" | \"updates_available\""
+            ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -430,11 +461,9 @@
         "type": "Type",
         "tags": [],
         "label": "IntegrationCategory",
-        "description": [
-          "\nA category applicable to an Integration."
-        ],
+        "description": [],
         "signature": [
-          "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\""
+          "\"custom\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"sample_data\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\" | \"updates_available\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -549,9 +578,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CustomIntegration",
-        "description": [
-          "\nA definition of a dataintegration, which can be registered with Kibana."
-        ],
+        "description": [],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
         "children": [
@@ -646,7 +673,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\")[]"
+              "(\"custom\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"sample_data\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\" | \"updates_available\")[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -654,13 +681,10 @@
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.CustomIntegration.shipper",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "shipper",
             "description": [],
-            "signature": [
-              "\"beats\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
-            ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
           },
@@ -686,9 +710,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CustomIntegrationIcon",
-        "description": [
-          "\nAn icon representing an Integration."
-        ],
+        "description": [],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
         "children": [
@@ -724,9 +746,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IntegrationCategoryCount",
-        "description": [
-          "\nAn object containing the id of an `IntegrationCategory` and the count of all Integrations in that category."
-        ],
+        "description": [],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
         "children": [
@@ -748,7 +768,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\""
+              "\"custom\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"sample_data\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\" | \"updates_available\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -761,31 +781,13 @@
     "misc": [
       {
         "parentPluginId": "customIntegrations",
-        "id": "def-common.category",
-        "type": "Array",
-        "tags": [],
-        "label": "category",
-        "description": [
-          "\nThe list of all available categories."
-        ],
-        "signature": [
-          "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\")[]"
-        ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "customIntegrations",
         "id": "def-common.IntegrationCategory",
         "type": "Type",
         "tags": [],
         "label": "IntegrationCategory",
-        "description": [
-          "\nA category applicable to an Integration."
-        ],
+        "description": [],
         "signature": [
-          "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\""
+          "\"custom\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"sample_data\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\" | \"updates_available\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -840,38 +842,6 @@
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "customIntegrations",
-        "id": "def-common.shipper",
-        "type": "Array",
-        "tags": [],
-        "label": "shipper",
-        "description": [
-          "\nThe list of all known shippers."
-        ],
-        "signature": [
-          "(\"beats\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\")[]"
-        ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "customIntegrations",
-        "id": "def-common.Shipper",
-        "type": "Type",
-        "tags": [],
-        "label": "Shipper",
-        "description": [
-          "\nA shipper-- an internal or external system capable of storing data in ES/Kibana-- applicable to an Integration."
-        ],
-        "signature": [
-          "\"beats\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
-        ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -881,9 +851,7 @@
         "type": "Object",
         "tags": [],
         "label": "INTEGRATION_CATEGORY_DISPLAY",
-        "description": [
-          "\nA map of category names and their corresponding titles."
-        ],
+        "description": [],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
         "children": [
@@ -893,7 +861,9 @@
             "type": "string",
             "tags": [],
             "label": "aws",
-            "description": [],
+            "description": [
+              "// Known EPR"
+            ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
           },
@@ -1148,79 +1118,16 @@
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "customIntegrations",
-        "id": "def-common.SHIPPER_DISPLAY",
-        "type": "Object",
-        "tags": [],
-        "label": "SHIPPER_DISPLAY",
-        "description": [
-          "\nA map of shipper names and their corresponding titles."
-        ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.SHIPPER_DISPLAY.beats",
-            "type": "string",
-            "tags": [],
-            "label": "beats",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.SHIPPER_DISPLAY.language_clients",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.updates_available",
             "type": "string",
             "tags": [],
-            "label": "language_clients",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.SHIPPER_DISPLAY.other",
-            "type": "string",
-            "tags": [],
-            "label": "other",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.SHIPPER_DISPLAY.sample_data",
-            "type": "string",
-            "tags": [],
-            "label": "sample_data",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.SHIPPER_DISPLAY.tests",
-            "type": "string",
-            "tags": [],
-            "label": "tests",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.SHIPPER_DISPLAY.tutorial",
-            "type": "string",
-            "tags": [],
-            "label": "tutorial",
-            "description": [],
+            "label": "updates_available",
+            "description": [
+              "// Internal"
+            ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
           }

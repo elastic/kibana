@@ -996,13 +996,9 @@ export function overridePackageInputs(
   ];
 
   for (const override of inputsOverride) {
-    // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
-    // policy template, so we only match on `type` in that case.
-    let originalInput = override.policy_template
-      ? inputs.find(
-          (i) => i.type === override.type && i.policy_template === override.policy_template
-        )
-      : inputs.find((i) => i.type === override.type);
+    let originalInput = inputs.find(
+      (i) => i.type === override.type && i.policy_template === override.policy_template
+    );
 
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically

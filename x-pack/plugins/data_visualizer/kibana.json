@@ -17,8 +17,7 @@
     "maps",
     "home",
     "lens",
-    "indexPatternFieldEditor",
-    "customIntegrations"
+    "indexPatternFieldEditor"
   ],
   "requiredBundles": [
     "home",

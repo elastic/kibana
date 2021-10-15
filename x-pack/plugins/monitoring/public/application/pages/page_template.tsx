@@ -92,7 +92,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   };
 
   return (
-    <div className="app-container" data-test-subj="monitoringAppContainer">
+    <div className="app-container">
       <ActionMenu>
         <AlertsDropdown />
       </ActionMenu>

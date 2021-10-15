@@ -10,7 +10,6 @@ import React, { useCallback, useMemo, useContext } from 'react';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 import {
   DragEffects,
@@ -146,15 +145,11 @@ interface AddressLinksItemProps extends Omit<AddressLinksProps, 'addresses'> {
 
 const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   address,
-  Component,
   contextId,
   eventId,
   fieldName,
-  isButton,
   isDraggable,
-  onClick,
   truncate,
-  title,
 }) => {
   const key = `address-links-draggable-wrapper-${getUniqueId({
     contextId,
@@ -176,10 +171,6 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   const openNetworkDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
-      if (onClick) {
-        onClick();
-      }
-
       if (eventContext && isInTimelineContext) {
         const { tabType, timelineID } = eventContext;
         const updatedExpandedDetail: TimelineExpandedDetailType = {
@@ -205,41 +196,22 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         }
       }
     },
-    [onClick, eventContext, isInTimelineContext, address, fieldName, dispatch]
+    [eventContext, isInTimelineContext, address, fieldName, dispatch]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
   // When this component is used outside of timeline/alerts table (i.e. in the flyout) we would still like it to link to the IP Overview page
   const content = useMemo(
-    () =>
-      Component ? (
+    () => (
+      <Content field={fieldName} tooltipContent={fieldName}>
         <NetworkDetailsLink
-          Component={Component}
           ip={address}
-          isButton={isButton}
+          isButton={false}
           onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
-          title={title}
         />
-      ) : (
-        <Content field={fieldName} tooltipContent={fieldName}>
-          <NetworkDetailsLink
-            Component={Component}
-            ip={address}
-            isButton={isButton}
-            onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
-            title={title}
-          />
-        </Content>
-      ),
-    [
-      Component,
-      address,
-      fieldName,
-      isButton,
-      isInTimelineContext,
-      openNetworkDetailsSidePanel,
-      title,
-    ]
+      </Content>
+    ),
+    [address, fieldName, isInTimelineContext, openNetworkDetailsSidePanel]
   );
 
   const render = useCallback(
@@ -273,28 +245,20 @@ const AddressLinksItem = React.memo(AddressLinksItemComponent);
 
 interface AddressLinksProps {
   addresses: string[];
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
   fieldName: string;
-  isButton?: boolean;
   isDraggable: boolean;
-  onClick?: () => void;
   truncate?: boolean;
-  title?: string;
 }
 
 const AddressLinksComponent: React.FC<AddressLinksProps> = ({
   addresses,
-  Component,
   contextId,
   eventId,
   fieldName,
-  isButton,
   isDraggable,
-  onClick,
   truncate,
-  title,
 }) => {
   const uniqAddresses = useMemo(() => uniq(addresses), [addresses]);
 
@@ -304,29 +268,14 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
         <AddressLinksItem
           key={address}
           address={address}
-          Component={Component}
           contextId={contextId}
           eventId={eventId}
           fieldName={fieldName}
-          isButton={isButton}
           isDraggable={isDraggable}
-          onClick={onClick}
           truncate={truncate}
-          title={title}
         />
       )),
-    [
-      Component,
-      contextId,
-      eventId,
-      fieldName,
-      isButton,
-      isDraggable,
-      onClick,
-      title,
-      truncate,
-      uniqAddresses,
-    ]
+    [contextId, eventId, fieldName, isDraggable, truncate, uniqAddresses]
   );
 
   return <>{content}</>;
@@ -344,28 +293,13 @@ const AddressLinks = React.memo(
 );
 
 const FormattedIpComponent: React.FC<{
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
   fieldName: string;
-  isButton?: boolean;
   isDraggable: boolean;
-  onClick?: () => void;
-  title?: string;
   truncate?: boolean;
   value: string | object | null | undefined;
-}> = ({
-  Component,
-  contextId,
-  eventId,
-  fieldName,
-  isDraggable,
-  isButton,
-  onClick,
-  title,
-  truncate,
-  value,
-}) => {
+}> = ({ contextId, eventId, fieldName, isDraggable, truncate, value }) => {
   if (isString(value) && !isEmpty(value)) {
     try {
       const addresses = JSON.parse(value);
@@ -373,14 +307,10 @@ const FormattedIpComponent: React.FC<{
         return (
           <AddressLinks
             addresses={addresses}
-            Component={Component}
             contextId={contextId}
             eventId={eventId}
             fieldName={fieldName}
-            isButton={isButton}
             isDraggable={isDraggable}
-            onClick={onClick}
-            title={title}
             truncate={truncate}
           />
         );
@@ -393,15 +323,11 @@ const FormattedIpComponent: React.FC<{
     return (
       <AddressLinks
         addresses={[value]}
-        Component={Component}
         contextId={contextId}
         eventId={eventId}
-        isButton={isButton}
         isDraggable={isDraggable}
-        onClick={onClick}
         fieldName={fieldName}
         truncate={truncate}
-        title={title}
       />
     );
   } else {

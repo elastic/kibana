@@ -6,8 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { ITLSFields } from '../types';
-import { defaultValues as tlsDefaultValues } from '../tls/default_values';
+import { ITLSFields, ConfigKeys, TLSVersion, VerificationMode } from '../types';
 
 interface ITLSFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<ITLSFields>>;
@@ -20,7 +19,32 @@ interface ITLSFieldsContextProvider {
   defaultValues?: ITLSFields;
 }
 
-export const initialValues: ITLSFields = tlsDefaultValues;
+export const initialValues: ITLSFields = {
+  [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+    value: '',
+    isEnabled: false,
+  },
+  [ConfigKeys.TLS_CERTIFICATE]: {
+    value: '',
+    isEnabled: false,
+  },
+  [ConfigKeys.TLS_KEY]: {
+    value: '',
+    isEnabled: false,
+  },
+  [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+    value: '',
+    isEnabled: false,
+  },
+  [ConfigKeys.TLS_VERIFICATION_MODE]: {
+    value: VerificationMode.FULL,
+    isEnabled: false,
+  },
+  [ConfigKeys.TLS_VERSION]: {
+    value: [TLSVersion.ONE_ONE, TLSVersion.ONE_TWO, TLSVersion.ONE_THREE],
+    isEnabled: false,
+  },
+};
 
 const defaultContext: ITLSFieldsContext = {
   setFields: (_fields: React.SetStateAction<ITLSFields>) => {

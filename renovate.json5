@@ -94,15 +94,6 @@
         enabled: true,
       },
       {
-        groupName: 'cypress',
-        packageNames: ['eslint-plugin-cypress'],
-        matchPackagePatterns: ["^cypress"],
-        reviewers: ['Team:apm', 'Team: SecuritySolution'],
-        matchBaseBranches: ['master'],
-        labels: ['buildkite-ci', 'ci:all-cypress-suites'],
-        enabled: true,
-      }
-      {
         groupName: 'platform security modules',
         packageNames: [
           'broadcast-channel',

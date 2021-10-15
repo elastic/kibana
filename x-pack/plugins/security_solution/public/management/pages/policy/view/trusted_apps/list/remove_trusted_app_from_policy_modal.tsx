@@ -48,8 +48,7 @@ export const RemoveTrustedAppFromPolicyModal = memo<RemoveTrustedAppFromPolicyMo
         return i18n.translate(
           'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.successMultiplesToastText',
           {
-            defaultMessage:
-              '{count} trusted applications have been removed from {policyName} policy',
+            defaultMessage: '{count} trusted apps have been removed from {policyName} policy',
             values: { count, policyName },
           }
         );
@@ -58,7 +57,7 @@ export const RemoveTrustedAppFromPolicyModal = memo<RemoveTrustedAppFromPolicyMo
       return i18n.translate(
         'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.successToastText',
         {
-          defaultMessage: '"{trustedAppName}" has been removed from {policyName} policy',
+          defaultMessage: '"{trustedAppName}" has been removed from "{policyName}" policy',
           values: { trustedAppName: trustedApps[0].name, policyName },
         }
       );

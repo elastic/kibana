@@ -180,21 +180,19 @@ const EventRenderedViewComponent = ({
             rowRenderer.isInstance(ecsData)
           );
           return (
-            <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
+            <EuiFlexGroup gutterSize="none" direction="column">
               {reason && <EuiFlexItem>{reason}</EuiFlexItem>}
               {rowRenderersValid.length > 0 &&
                 rowRenderersValid.map((rowRenderer) => (
                   <>
                     <EuiHorizontalRule size="half" margin="xs" />
-                    <EventRenderedFlexItem className="eui-xScroll">
-                      <div className="eui-displayInlineBlock">
-                        {rowRenderer.renderRow({
-                          browserFields,
-                          data: ecsData,
-                          isDraggable: false,
-                          timelineId: 'NONE',
-                        })}
-                      </div>
+                    <EventRenderedFlexItem>
+                      {rowRenderer.renderRow({
+                        browserFields,
+                        data: ecsData,
+                        isDraggable: false,
+                        timelineId: 'NONE',
+                      })}
                     </EventRenderedFlexItem>
                   </>
                 ))}

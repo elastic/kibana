@@ -375,21 +375,21 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   return (
     <StatefulEventsViewer
-      additionalFilters={additionalFiltersComponent}
-      currentFilter={filterGroup}
+      pageFilters={defaultFiltersMemo}
       defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
-      end={to}
       entityType="events"
-      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
+      end={to}
+      currentFilter={filterGroup}
       id={timelineId}
       onRuleChange={onRuleChange}
-      pageFilters={defaultFiltersMemo}
       renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}
+      additionalFilters={additionalFiltersComponent}
+      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
     />
   );
 };

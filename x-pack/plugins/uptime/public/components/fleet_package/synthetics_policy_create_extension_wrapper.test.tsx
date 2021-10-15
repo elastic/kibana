@@ -17,26 +17,12 @@ import { ConfigKeys, DataStream, ScheduleUnit, VerificationMode } from './types'
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../src/plugins/kibana_react/public');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
-    ),
-  };
-});
+jest.mock('./code_editor', () => ({
+  CodeEditor: () => <div>code editor mock</div>,
+}));
 
 const defaultNewPolicy: NewPackagePolicy = {
   name: 'samplePolicyName',
@@ -57,10 +43,6 @@ const defaultNewPolicy: NewPackagePolicy = {
             dataset: 'http',
           },
           vars: {
-            __ui: {
-              value: JSON.stringify({ is_tls_enabled: true }),
-              type: 'yaml',
-            },
             type: {
               value: 'http',
               type: 'text',
@@ -754,6 +736,51 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const { findByLabelText, queryByLabelText } = render(<WrappedComponent />);
     const enableSSL = queryByLabelText('Enable TLS configuration') as HTMLInputElement;
 
+    await waitFor(() => {
+      expect(onChange).toBeCalledWith({
+        isValid: false,
+        updatedPolicy: {
+          ...defaultNewPolicy,
+          inputs: [
+            {
+              ...defaultNewPolicy.inputs[0],
+              streams: [
+                {
+                  ...defaultNewPolicy.inputs[0].streams[0],
+                  vars: {
+                    ...defaultNewPolicy.inputs[0].streams[0].vars,
+                    [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+                      value: null,
+                      type: 'yaml',
+                    },
+                    [ConfigKeys.TLS_CERTIFICATE]: {
+                      value: null,
+                      type: 'yaml',
+                    },
+                    [ConfigKeys.TLS_KEY]: {
+                      value: null,
+                      type: 'yaml',
+                    },
+                    [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+                      value: null,
+                      type: 'text',
+                    },
+                    [ConfigKeys.TLS_VERIFICATION_MODE]: {
+                      value: null,
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            defaultNewPolicy.inputs[1],
+            defaultNewPolicy.inputs[2],
+            defaultNewPolicy.inputs[3],
+          ],
+        },
+      });
+    });
+
     // ensure at least one http advanced option is present
     fireEvent.click(enableSSL);
 
@@ -767,23 +794,27 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       fireEvent.change(ca, { target: { value: 'certificateAuthorities' } });
-      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]);
+      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value);
     });
     await waitFor(() => {
       fireEvent.change(clientCertificate, { target: { value: 'clientCertificate' } });
-      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY]);
+      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY].value);
     });
     await waitFor(() => {
       fireEvent.change(clientKey, { target: { value: 'clientKey' } });
-      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY]);
+      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY].value);
     });
     await waitFor(() => {
       fireEvent.change(clientKeyPassphrase, { target: { value: 'clientKeyPassphrase' } });
-      expect(clientKeyPassphrase.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE]);
+      expect(clientKeyPassphrase.value).toEqual(
+        defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value
+      );
     });
     await waitFor(() => {
       fireEvent.change(verificationMode, { target: { value: VerificationMode.NONE } });
-      expect(verificationMode.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]);
+      expect(verificationMode.value).toEqual(
+        defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE].value
+      );
     });
 
     await waitFor(() => {

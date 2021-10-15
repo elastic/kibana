@@ -42,12 +42,6 @@
   #app-fixed-viewport {
     top: $headerHeight;
   }
-
-  .kbnStickyMenu {
-    position: sticky;
-    max-height: calc(100vh - #{$headerHeight + $euiSize});
-    top: $headerHeight + $euiSize;
-  }
 }
 
 .kbnBody {

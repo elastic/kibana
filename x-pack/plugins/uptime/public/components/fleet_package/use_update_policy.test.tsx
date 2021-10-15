@@ -7,8 +7,8 @@
 
 import { useUpdatePolicy } from './use_update_policy';
 import { renderHook } from '@testing-library/react-hooks';
-import { NewPackagePolicy } from '../../../../../fleet/public';
-import { validate } from '../validation';
+import { NewPackagePolicy } from '../../../../fleet/public';
+import { validate } from './validation';
 import {
   ConfigKeys,
   DataStream,
@@ -20,8 +20,8 @@ import {
   ITLSFields,
   HTTPFields,
   BrowserFields,
-} from '../types';
-import { defaultConfig } from '../synthetics_policy_create_extension';
+} from './types';
+import { defaultConfig } from './synthetics_policy_create_extension';
 
 describe('useBarChartsHooks', () => {
   const newPolicy: NewPackagePolicy = {
@@ -332,10 +332,22 @@ describe('useBarChartsHooks', () => {
   };
 
   const defaultTLSFields: Partial<ITLSFields> = {
-    [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: 'ca',
-    [ConfigKeys.TLS_CERTIFICATE]: 'cert',
-    [ConfigKeys.TLS_KEY]: 'key',
-    [ConfigKeys.TLS_KEY_PASSPHRASE]: 'password',
+    [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+      isEnabled: true,
+      value: 'ca',
+    },
+    [ConfigKeys.TLS_CERTIFICATE]: {
+      isEnabled: true,
+      value: 'cert',
+    },
+    [ConfigKeys.TLS_KEY]: {
+      isEnabled: true,
+      value: 'key',
+    },
+    [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+      isEnabled: true,
+      value: 'password',
+    },
   };
 
   it('handles http data stream', async () => {
@@ -424,7 +436,10 @@ describe('useBarChartsHooks', () => {
         [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: ['test'],
         [ConfigKeys.RESPONSE_STATUS_CHECK]: ['test'],
         [ConfigKeys.TAGS]: ['test'],
-        [ConfigKeys.TLS_VERSION]: [TLSVersion.ONE_ONE],
+        [ConfigKeys.TLS_VERSION]: {
+          value: [TLSVersion.ONE_ONE],
+          isEnabled: true,
+        },
       },
     });
 
@@ -452,7 +467,10 @@ describe('useBarChartsHooks', () => {
         [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
         [ConfigKeys.RESPONSE_STATUS_CHECK]: [],
         [ConfigKeys.TAGS]: [],
-        [ConfigKeys.TLS_VERSION]: [],
+        [ConfigKeys.TLS_VERSION]: {
+          value: [],
+          isEnabled: true,
+        },
       },
     });
 

@@ -18,7 +18,6 @@ import {
   UpdateExecutionLogArgs,
   UnderlyingLogClient,
 } from './types';
-import { truncateMessage } from './utils/normalization';
 
 export interface RuleExecutionLogClientArgs {
   savedObjectsClient: SavedObjectsClientContract;
@@ -53,16 +52,7 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
   }
 
   public async update(args: UpdateExecutionLogArgs) {
-    const { lastFailureMessage, lastSuccessMessage, ...restAttributes } = args.attributes;
-
-    return this.client.update({
-      ...args,
-      attributes: {
-        lastFailureMessage: truncateMessage(lastFailureMessage),
-        lastSuccessMessage: truncateMessage(lastSuccessMessage),
-        ...restAttributes,
-      },
-    });
+    return this.client.update(args);
   }
 
   public async delete(id: string) {
@@ -74,10 +64,6 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
   }
 
   public async logStatusChange(args: LogStatusChangeArgs) {
-    const message = args.message ? truncateMessage(args.message) : args.message;
-    return this.client.logStatusChange({
-      ...args,
-      message,
-    });
+    return this.client.logStatusChange(args);
   }
 }

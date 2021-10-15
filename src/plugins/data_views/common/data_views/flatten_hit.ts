@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-// --------- DEPRECATED ---------
-// This implementation of flattenHit is deprecated and should no longer be used.
-// If you consider adding features to this, please don't but use the `flattenHit`
-// implementation from the data plugin.
-
 import _ from 'lodash';
 import { DataView } from './data_view';
 
@@ -118,4 +113,16 @@ export function flattenHitWrapper(dataView: DataView, metaFields = {}, cache = n
     }
     return decorateFlattened(flattened);
   };
+}
+
+/**
+ * This wraps `flattenHitWrapper` so one single cache can be provided for all uses of that
+ * function. The returned value of this function is what is included in the index patterns
+ * setup contract.
+ *
+ * @public
+ */
+export function createFlattenHitWrapper() {
+  const cache = new WeakMap();
+  return _.partial(flattenHitWrapper, _, _, cache);
 }

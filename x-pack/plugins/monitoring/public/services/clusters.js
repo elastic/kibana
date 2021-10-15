@@ -8,6 +8,7 @@
 import { ajaxErrorHandlersProvider } from '../lib/ajax_error_handler';
 import { Legacy } from '../legacy_shims';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
+import { showInternalMonitoringToast } from '../lib/internal_monitoring_toasts';
 
 function formatClusters(clusters) {
   return clusters.map(formatCluster);
@@ -19,6 +20,8 @@ function formatCluster(cluster) {
   }
   return cluster;
 }
+
+let once = false;
 
 export function monitoringClustersProvider($injector) {
   return async (clusterUuid, ccs, codePaths) => {
@@ -54,6 +57,42 @@ export function monitoringClustersProvider($injector) {
       }
     }
 
+    async function ensureMetricbeatEnabled() {
+      if (Legacy.shims.isCloud) {
+        return;
+      }
+      const globalState = $injector.get('globalState');
+      try {
+        const response = await $http.post(
+          '../api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',
+          {
+            ccs: globalState.ccs,
+          }
+        );
+        const { data } = response;
+        showInternalMonitoringToast({
+          legacyIndices: data.legacy_indices,
+          metricbeatIndices: data.mb_indices,
+        });
+      } catch (err) {
+        const Private = $injector.get('Private');
+        const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+        return ajaxErrorHandlers(err);
+      }
+    }
+
+    if (!once) {
+      once = true;
+      const clusters = await getClusters();
+      if (clusters.length) {
+        try {
+          await ensureMetricbeatEnabled();
+        } catch (_err) {
+          // Intentionally swallow the error as this will retry the next page load
+        }
+      }
+      return clusters;
+    }
     return await getClusters();
   };
 }

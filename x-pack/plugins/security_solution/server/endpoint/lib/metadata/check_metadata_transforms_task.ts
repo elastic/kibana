@@ -119,7 +119,7 @@ export class CheckMetadataTransformsTask {
 
     const { transforms } = transformStatsResponse.body;
     if (!transforms.length) {
-      this.logger.info('no endpoint metadata transforms found');
+      this.logger.info('no OLM metadata transforms found');
       return;
     }
 

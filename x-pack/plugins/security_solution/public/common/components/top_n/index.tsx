@@ -81,8 +81,6 @@ export interface OwnProps {
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
-  paddingSize?: 's' | 'm' | 'l' | 'none';
-  showLegend?: boolean;
   value?: string[] | string | null;
   globalFilters?: Filter[];
 }
@@ -103,8 +101,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
   globalQuery = EMPTY_QUERY,
   kqlMode,
   onFilterAdded,
-  paddingSize,
-  showLegend,
   timelineId,
   toggleTopN,
   value,
@@ -164,9 +160,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       from={timelineId === TimelineId.active ? activeTimelineFrom : from}
       indexPattern={indexPattern}
       options={options}
-      paddingSize={paddingSize}
       query={timelineId === TimelineId.active ? EMPTY_QUERY : globalQuery}
-      showLegend={showLegend}
       setAbsoluteRangeDatePickerTarget={timelineId === TimelineId.active ? 'timeline' : 'global'}
       setQuery={setQuery}
       timelineId={timelineId}

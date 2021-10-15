@@ -3162,7 +3162,7 @@
                 "section": "def-common.DataProvider",
                 "text": "DataProvider"
               },
-              ", \"type\" | \"id\" | \"name\" | \"enabled\" | \"excluded\" | \"kqlQuery\" | \"queryMatch\">[]"
+              ", \"type\" | \"enabled\" | \"id\" | \"name\" | \"excluded\" | \"kqlQuery\" | \"queryMatch\">[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false
@@ -10228,7 +10228,7 @@
             "section": "def-common.RequestBasicOptions",
             "text": "RequestBasicOptions"
           },
-          ", \"id\" | \"defaultIndex\" | \"params\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\">"
+          ", \"id\" | \"params\" | \"defaultIndex\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\">"
         ],
         "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/network/details/index.ts",
         "deprecated": false,
@@ -15658,7 +15658,7 @@
             "section": "def-common.TimelineEventsAllRequestOptions",
             "text": "TimelineEventsAllRequestOptions"
           },
-          ", \"id\" | \"sort\" | \"fields\" | \"defaultIndex\" | \"timerange\" | \"language\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"fieldRequested\" | \"excludeEcsData\" | \"authFilter\">"
+          ", \"id\" | \"sort\" | \"fields\" | \"timerange\" | \"language\" | \"defaultIndex\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"fieldRequested\" | \"excludeEcsData\" | \"authFilter\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
@@ -16280,7 +16280,7 @@
             "section": "def-common.TimelineRequestBasicOptions",
             "text": "TimelineRequestBasicOptions"
           },
-          ", \"id\" | \"defaultIndex\" | \"params\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\">"
+          ", \"id\" | \"params\" | \"defaultIndex\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
@@ -19509,7 +19509,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; enabled: boolean; id: string; name: string; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -19961,7 +19961,7 @@
             "section": "def-common.HostsKpiAuthenticationsStrategyResponse",
             "text": "HostsKpiAuthenticationsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"warning\" | \"total\" | \"authenticationsSuccess\" | \"authenticationsSuccessHistogram\" | \"authenticationsFailure\" | \"authenticationsFailureHistogram\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"authenticationsSuccess\" | \"authenticationsSuccessHistogram\" | \"authenticationsFailure\" | \"authenticationsFailureHistogram\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -19969,7 +19969,7 @@
             "section": "def-common.HostsKpiHostsStrategyResponse",
             "text": "HostsKpiHostsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"warning\" | \"total\" | \"hosts\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"hostsHistogram\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"hosts\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"hostsHistogram\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -19977,7 +19977,7 @@
             "section": "def-common.HostsKpiUniqueIpsStrategyResponse",
             "text": "HostsKpiUniqueIpsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"warning\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueSourceIps\" | \"uniqueSourceIpsHistogram\" | \"uniqueDestinationIps\" | \"uniqueDestinationIpsHistogram\">"
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueSourceIps\" | \"uniqueSourceIpsHistogram\" | \"uniqueDestinationIps\" | \"uniqueDestinationIpsHistogram\">"
         ],
         "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/kpi/index.ts",
         "deprecated": false,
@@ -20486,7 +20486,7 @@
             "section": "def-common.NetworkKpiDnsStrategyResponse",
             "text": "NetworkKpiDnsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"warning\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"dnsQueries\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"dnsQueries\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -20494,7 +20494,7 @@
             "section": "def-common.NetworkKpiNetworkEventsStrategyResponse",
             "text": "NetworkKpiNetworkEventsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"warning\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"networkEvents\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"networkEvents\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -20502,7 +20502,7 @@
             "section": "def-common.NetworkKpiTlsHandshakesStrategyResponse",
             "text": "NetworkKpiTlsHandshakesStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"warning\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"tlsHandshakes\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"tlsHandshakes\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -20510,7 +20510,7 @@
             "section": "def-common.NetworkKpiUniqueFlowsStrategyResponse",
             "text": "NetworkKpiUniqueFlowsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"warning\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueFlowId\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueFlowId\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -20518,7 +20518,7 @@
             "section": "def-common.NetworkKpiUniquePrivateIpsStrategyResponse",
             "text": "NetworkKpiUniquePrivateIpsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"warning\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueSourcePrivateIps\" | \"uniqueSourcePrivateIpsHistogram\" | \"uniqueDestinationPrivateIps\" | \"uniqueDestinationPrivateIpsHistogram\">"
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueSourcePrivateIps\" | \"uniqueSourcePrivateIpsHistogram\" | \"uniqueDestinationPrivateIps\" | \"uniqueDestinationPrivateIpsHistogram\">"
         ],
         "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/network/kpi/index.ts",
         "deprecated": false,

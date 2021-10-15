@@ -63,12 +63,10 @@ interface AlertsHistogramPanelProps {
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
-  paddingSize?: 's' | 'm' | 'l' | 'none';
   titleSize?: EuiTitleSize;
   query?: Query;
   legendPosition?: Position;
   signalIndexName: string | null;
-  showLegend?: boolean;
   showLinkToAlerts?: boolean;
   showTotalAlertsCount?: boolean;
   showStackBy?: boolean;
@@ -87,11 +85,9 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     filters,
     headerChildren,
     onlyField,
-    paddingSize = 'm',
     query,
     legendPosition = 'right',
     signalIndexName,
-    showLegend = true,
     showLinkToAlerts = false,
     showTotalAlertsCount = false,
     showStackBy = true,
@@ -158,7 +154,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     const legendItems: LegendItem[] = useMemo(
       () =>
-        showLegend && alertsData?.aggregations?.alertsByGrouping?.buckets != null
+        alertsData?.aggregations?.alertsByGrouping?.buckets != null
           ? alertsData.aggregations.alertsByGrouping.buckets.map((bucket, i) => ({
               color: i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
               dataProviderId: escapeDataProviderId(
@@ -169,12 +165,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               value: bucket.key,
             }))
           : NO_LEGEND_DATA,
-      [
-        alertsData?.aggregations?.alertsByGrouping.buckets,
-        selectedStackByOption,
-        showLegend,
-        timelineId,
-      ]
+      [alertsData, selectedStackByOption, timelineId]
     );
 
     useEffect(() => {
@@ -263,7 +254,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     return (
       <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>
-        <KpiPanel height={PANEL_HEIGHT} hasBorder paddingSize={paddingSize}>
+        <KpiPanel height={PANEL_HEIGHT} hasBorder>
           <HeaderSection
             id={uniqueQueryId}
             title={titleText}
@@ -297,7 +288,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               legendPosition={legendPosition}
               loading={isLoadingAlerts}
               to={to}
-              showLegend={showLegend}
               updateDateRange={updateDateRange}
             />
           )}

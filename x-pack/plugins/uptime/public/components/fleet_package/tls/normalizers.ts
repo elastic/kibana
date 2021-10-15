@@ -13,17 +13,17 @@ type TLSNormalizerMap = Record<keyof ITLSFields, Normalizer>;
 
 export const tlsNormalizers: TLSNormalizerMap = {
   [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: (fields) =>
-    tlsJsonToObjectNormalizer(
+    tlsYamlToObjectNormalizer(
       fields?.[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]?.value,
       ConfigKeys.TLS_CERTIFICATE_AUTHORITIES
     ),
   [ConfigKeys.TLS_CERTIFICATE]: (fields) =>
-    tlsJsonToObjectNormalizer(
+    tlsYamlToObjectNormalizer(
       fields?.[ConfigKeys.TLS_CERTIFICATE]?.value,
       ConfigKeys.TLS_CERTIFICATE
     ),
   [ConfigKeys.TLS_KEY]: (fields) =>
-    tlsJsonToObjectNormalizer(fields?.[ConfigKeys.TLS_KEY]?.value, ConfigKeys.TLS_KEY),
+    tlsYamlToObjectNormalizer(fields?.[ConfigKeys.TLS_KEY]?.value, ConfigKeys.TLS_KEY),
   [ConfigKeys.TLS_KEY_PASSPHRASE]: (fields) =>
     tlsStringToObjectNormalizer(
       fields?.[ConfigKeys.TLS_KEY_PASSPHRASE]?.value,
@@ -35,10 +35,15 @@ export const tlsNormalizers: TLSNormalizerMap = {
       ConfigKeys.TLS_VERIFICATION_MODE
     ),
   [ConfigKeys.TLS_VERSION]: (fields) =>
-    tlsJsonToObjectNormalizer(fields?.[ConfigKeys.TLS_VERSION]?.value, ConfigKeys.TLS_VERSION),
+    tlsYamlToObjectNormalizer(fields?.[ConfigKeys.TLS_VERSION]?.value, ConfigKeys.TLS_VERSION),
 };
 
-export const tlsStringToObjectNormalizer = (value: string = '', key: keyof ITLSFields) =>
-  value ?? defaultTLSFields[key];
-export const tlsJsonToObjectNormalizer = (value: string = '', key: keyof ITLSFields) =>
-  value ? JSON.parse(value) : defaultTLSFields[key];
+// only add tls settings if they are enabled by the user and isEnabled is true
+export const tlsStringToObjectNormalizer = (value: string = '', key: keyof ITLSFields) => ({
+  value: value ?? defaultTLSFields[key]?.value,
+  isEnabled: Boolean(value),
+});
+export const tlsYamlToObjectNormalizer = (value: string = '', key: keyof ITLSFields) => ({
+  value: value ? JSON.parse(value) : defaultTLSFields[key]?.value,
+  isEnabled: Boolean(value),
+});

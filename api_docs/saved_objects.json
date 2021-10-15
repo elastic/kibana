@@ -562,11 +562,11 @@
         "references": [
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/saved_searches/legacy/saved_searches.ts"
+            "path": "src/plugins/discover/public/saved_searches/saved_searches.ts"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/saved_searches/legacy/saved_searches.ts"
+            "path": "src/plugins/discover/public/saved_searches/saved_searches.ts"
           },
           {
             "plugin": "discover",
@@ -595,6 +595,14 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualizations.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/services.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/services.ts"
           },
           {
             "plugin": "dashboard",
@@ -726,7 +734,7 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"create\" | \"bulkCreate\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
@@ -1479,7 +1487,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"create\" | \"bulkCreate\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"bulkUpdate\">; overlays: ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"bulkUpdate\">; overlays: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1605,7 +1613,17 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  "{ create: <T = unknown>(type: string, attributes: T, options?: ",
+                  "{ get: <T = unknown>(type: string, id: string) => Promise<",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SimpleSavedObject",
+                    "text": "SimpleSavedObject"
+                  },
+                  "<T>>; delete: (type: string, id: string, options?: ",
+                  "SavedObjectsDeleteOptions",
+                  " | undefined) => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -1645,9 +1663,7 @@
                     "section": "def-public.SavedObjectsBatchResponse",
                     "text": "SavedObjectsBatchResponse"
                   },
-                  "<unknown>>; delete: (type: string, id: string, options?: ",
-                  "SavedObjectsDeleteOptions",
-                  " | undefined) => Promise<{}>; find: <T = unknown, A = unknown>(options: Pick<",
+                  "<unknown>>; find: <T = unknown, A = unknown>(options: Pick<",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -1679,15 +1695,7 @@
                     "section": "def-public.ResolvedSimpleSavedObject",
                     "text": "ResolvedSimpleSavedObject"
                   },
-                  "<T>[]; }>; get: <T = unknown>(type: string, id: string) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
-                  },
-                  "<T>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
+                  "<T>[]; }>; resolve: <T = unknown>(type: string, id: string) => Promise<",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -2087,16 +2095,28 @@
         "deprecated": true,
         "references": [
           {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/apps/main/discover_main_route.tsx"
+          },
+          {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/saved_searches/legacy/_saved_search.ts"
+            "path": "src/plugins/discover/public/saved_searches/_saved_search.ts"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/saved_searches/legacy/_saved_search.ts"
+            "path": "src/plugins/discover/public/saved_searches/_saved_search.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/apps/main/discover_main_route.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/apps/main/discover_main_route.tsx"
           },
           {
             "plugin": "visualizations",
@@ -2161,6 +2181,98 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/get_visualization_instance.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/get_visualization_instance.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar_title.tsx"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar_title.tsx"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar_title.tsx"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/sidebar/sidebar.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/sidebar/sidebar.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/sidebar/sidebar_title.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/sidebar/sidebar_title.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/sidebar/sidebar_title.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/utils/get_visualization_instance.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/utils/get_visualization_instance.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/utils/get_visualization_instance.d.ts"
           }
         ],
         "children": [
@@ -3707,7 +3819,7 @@
           "references": [
             {
               "plugin": "discover",
-              "path": "src/plugins/discover/public/saved_searches/legacy/_saved_search.ts"
+              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts"
             },
             {
               "plugin": "visualizations",

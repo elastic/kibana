@@ -12,18 +12,14 @@ import { uiSettingsMock } from '../../../../__mocks__/ui_settings';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
-import { discoverServiceMock } from '../../../../__mocks__/services';
 
 describe('getStateDefaults', () => {
-  const storage = discoverServiceMock.storage;
-
   test('index pattern with timefield', () => {
     savedSearchMock.searchSource = createSearchSourceMock({ index: indexPatternWithTimefieldMock });
     const actual = getStateDefaults({
       config: uiSettingsMock,
       data: dataPluginMock.createStartContract(),
       savedSearch: savedSearchMock,
-      storage,
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -53,7 +49,6 @@ describe('getStateDefaults', () => {
       config: uiSettingsMock,
       data: dataPluginMock.createStartContract(),
       savedSearch: savedSearchMock,
-      storage,
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {

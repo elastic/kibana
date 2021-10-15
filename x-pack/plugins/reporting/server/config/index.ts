@@ -23,39 +23,49 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     unused('capture.viewport'), // deprecated as unused since 7.16
     (settings, fromPath, addDeprecation) => {
       const reporting = get(settings, fromPath);
+      if (reporting?.index) {
+        addDeprecation({
+          title: i18n.translate('xpack.reporting.deprecations.reportingIndex.title', {
+            defaultMessage: 'Setting "{fromPath}.index" is deprecated',
+            values: { fromPath },
+          }),
+          message: i18n.translate('xpack.reporting.deprecations.reportingIndex.description', {
+            defaultMessage: `Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
+          }),
+          correctiveActions: {
+            manualSteps: [
+              i18n.translate('xpack.reporting.deprecations.reportingIndex.manualStepOne', {
+                defaultMessage: `If you rely on this setting to achieve multitenancy you should use Spaces, cross-cluster replication, or cross-cluster search instead.`,
+              }),
+              i18n.translate('xpack.reporting.deprecations.reportingIndex.manualStepTwo', {
+                defaultMessage: `To migrate to Spaces, we encourage using saved object management to export your saved objects from a tenant into the default tenant in a space.`,
+              }),
+            ],
+          },
+        });
+      }
+
       if (reporting?.roles?.enabled !== false) {
         addDeprecation({
-          level: 'warning',
           title: i18n.translate('xpack.reporting.deprecations.reportingRoles.title', {
             defaultMessage: 'Setting "{fromPath}.roles" is deprecated',
             values: { fromPath },
           }),
-          // TODO: once scheduled reports is released, restate this to say that we have no access to scheduled reporting.
-          // https://github.com/elastic/kibana/issues/79905
           message: i18n.translate('xpack.reporting.deprecations.reportingRoles.description', {
             defaultMessage:
-              `Use Kibana application privileges to grant reporting privileges.` +
-              ` Using  "{fromPath}.roles.allow" to grant reporting privileges` +
-              ` prevents users from using API Keys to create reports.` +
-              ` The "{fromPath}.roles.enabled" setting will default to false` +
-              ` in a future release.`,
-            values: { fromPath },
+              `Granting reporting privilege through a "reporting_user" role will not be supported` +
+              ` starting in 8.0. Please set "xpack.reporting.roles.enabled" to "false" and grant reporting privileges to users` +
+              ` using Kibana application privileges **Management > Security > Roles**.`,
           }),
           correctiveActions: {
             manualSteps: [
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOne', {
-                defaultMessage: `Set "xpack.reporting.roles.enabled" to "false" in kibana.yml.`,
+                defaultMessage: `Set 'xpack.reporting.roles.enabled' to 'false' in your kibana configs.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepTwo', {
                 defaultMessage:
-                  `Create one or more roles that grant the Kibana application` +
-                  ` privilege for reporting from **Management > Security > Roles**.`,
-              }),
-              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepThree', {
-                defaultMessage:
-                  `Grant reporting privileges to users by assigning one of the new roles.` +
-                  ` Users assigned a reporting role specified in "xpack.reporting.roles.allow"` +
-                  ` will no longer have reporting privileges, they must be assigned an application privilege based role.`,
+                  `Grant reporting privileges to users using Kibana application privileges` +
+                  ` under **Management > Security > Roles**.`,
               }),
             ],
           },

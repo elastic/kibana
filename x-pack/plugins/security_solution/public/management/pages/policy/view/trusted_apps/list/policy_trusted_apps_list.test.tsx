@@ -282,7 +282,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   it('should show toast message if trusted app list api call fails', async () => {
     const error = new Error('oh no');
     // @ts-expect-error
-    mockedApis.responseProvider.trustedAppsList.mockRejectedValue(error);
+    mockedApis.responseProvider.policyTrustedAppsList.mockRejectedValue(error);
     await render(false);
     await act(async () => {
       await waitForAction('assignedTrustedAppsListStateChanged', {

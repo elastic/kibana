@@ -52,29 +52,29 @@ export const buildEventEnrichmentRawResponseMock = (): IEsSearchResponse => ({
           _score: 6.0637846,
           fields: {
             'event.category': ['threat'],
-            'threat.indicator.file.type': ['html'],
+            'threatintel.indicator.file.type': ['html'],
             'related.hash': [
               '5529de7b60601aeb36f57824ed0e1ae8',
               '15b012e6f626d0f88c2926d2bf4ca394d7b8ee07cc06d2ec05ea76bed3e8a05e',
               '768:NXSFGJ/ooP6FawrB7Bo1MWnF/jRmhJImp:1SFXIqBo1Mwj2p',
             ],
-            'threat.indicator.first_seen': ['2021-05-28T18:33:29.000Z'],
-            'threat.indicator.file.hash.tlsh': [
+            'threatintel.indicator.first_seen': ['2021-05-28T18:33:29.000Z'],
+            'threatintel.indicator.file.hash.tlsh': [
               'FFB20B82F6617061C32784E2712F7A46B179B04FD1EA54A0F28CD8E9CFE4CAA1617F1C',
             ],
             'service.type': ['threatintel'],
-            'threat.indicator.file.hash.ssdeep': [
+            'threatintel.indicator.file.hash.ssdeep': [
               '768:NXSFGJ/ooP6FawrB7Bo1MWnF/jRmhJImp:1SFXIqBo1Mwj2p',
             ],
             'agent.type': ['filebeat'],
             'event.module': ['threatintel'],
-            'threat.indicator.type': ['file'],
+            'threatintel.indicator.type': ['file'],
             'agent.name': ['rylastic.local'],
-            'threat.indicator.file.hash.sha256': [
+            'threatintel.indicator.file.hash.sha256': [
               '15b012e6f626d0f88c2926d2bf4ca394d7b8ee07cc06d2ec05ea76bed3e8a05e',
             ],
             'event.kind': ['enrichment'],
-            'threat.indicator.file.hash.md5': ['5529de7b60601aeb36f57824ed0e1ae8'],
+            'threatintel.indicator.file.hash.md5': ['5529de7b60601aeb36f57824ed0e1ae8'],
             'fileset.name': ['abusemalware'],
             'input.type': ['httpjson'],
             'agent.hostname': ['rylastic.local'],
@@ -89,9 +89,9 @@ export const buildEventEnrichmentRawResponseMock = (): IEsSearchResponse => ({
             'event.type': ['indicator'],
             'event.created': ['2021-05-28T18:33:52.993Z'],
             'agent.ephemeral_id': ['d6b14f65-5bf3-430d-8315-7b5613685979'],
-            'threat.indicator.file.size': [24738],
+            'threatintel.indicator.file.size': [24738],
             'agent.version': ['8.0.0'],
-            'event.dataset': ['ti_abusech.malware'],
+            'event.dataset': ['threatintel.abusemalware'],
           },
           matched_queries: ['file.hash.md5'],
         },
@@ -113,7 +113,7 @@ export const buildEventEnrichmentMock = (
   'ecs.version': ['1.6.0'],
   'event.category': ['threat'],
   'event.created': ['2021-05-28T18:33:52.993Z'],
-  'event.dataset': ['ti_abusech.malware'],
+  'event.dataset': ['threatintel.abusemalware'],
   'event.ingested': ['2021-05-28T18:33:55.086Z'],
   'event.kind': ['enrichment'],
   'event.module': ['threatintel'],
@@ -135,18 +135,20 @@ export const buildEventEnrichmentMock = (
   ],
   'service.type': ['threatintel'],
   tags: ['threatintel-abusemalware', 'forwarded'],
-  'threat.indicator.file.hash.md5': ['5529de7b60601aeb36f57824ed0e1ae8'],
-  'threat.indicator.file.hash.sha256': [
+  'threatintel.indicator.file.hash.md5': ['5529de7b60601aeb36f57824ed0e1ae8'],
+  'threatintel.indicator.file.hash.sha256': [
     '15b012e6f626d0f88c2926d2bf4ca394d7b8ee07cc06d2ec05ea76bed3e8a05e',
   ],
-  'threat.indicator.file.hash.ssdeep': ['768:NXSFGJ/ooP6FawrB7Bo1MWnF/jRmhJImp:1SFXIqBo1Mwj2p'],
-  'threat.indicator.file.hash.tlsh': [
+  'threatintel.indicator.file.hash.ssdeep': [
+    '768:NXSFGJ/ooP6FawrB7Bo1MWnF/jRmhJImp:1SFXIqBo1Mwj2p',
+  ],
+  'threatintel.indicator.file.hash.tlsh': [
     'FFB20B82F6617061C32784E2712F7A46B179B04FD1EA54A0F28CD8E9CFE4CAA1617F1C',
   ],
-  'threat.indicator.file.size': [24738],
-  'threat.indicator.file.type': ['html'],
-  'threat.indicator.first_seen': ['2021-05-28T18:33:29.000Z'],
-  'threat.indicator.type': ['file'],
+  'threatintel.indicator.file.size': [24738],
+  'threatintel.indicator.file.type': ['html'],
+  'threatintel.indicator.first_seen': ['2021-05-28T18:33:29.000Z'],
+  'threatintel.indicator.type': ['file'],
   ...overrides,
 });
 

@@ -249,7 +249,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.confirm"
-                defaultMessage="Assign to {policyName}"
+                defaultMessage="Assing to {policyName}"
                 values={{
                   policyName,
                 }}

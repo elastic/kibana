@@ -878,87 +878,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ruleRegistry",
-        "id": "def-server.RuleDataWriterInitializationError",
-        "type": "Class",
-        "tags": [],
-        "label": "RuleDataWriterInitializationError",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "ruleRegistry",
-            "scope": "server",
-            "docId": "kibRuleRegistryPluginApi",
-            "section": "def-server.RuleDataWriterInitializationError",
-            "text": "RuleDataWriterInitializationError"
-          },
-          " extends Error"
-        ],
-        "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleDataWriterInitializationError.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "ruleRegistry",
-                "id": "def-server.RuleDataWriterInitializationError.Unnamed.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "resourceType",
-                "description": [],
-                "signature": [
-                  "\"index\" | \"namespace\""
-                ],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "ruleRegistry",
-                "id": "def-server.RuleDataWriterInitializationError.Unnamed.$2",
-                "type": "string",
-                "tags": [],
-                "label": "registrationContext",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "ruleRegistry",
-                "id": "def-server.RuleDataWriterInitializationError.Unnamed.$3",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "signature": [
-                  "string | Error"
-                ],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -1166,10 +1085,10 @@
       },
       {
         "parentPluginId": "ruleRegistry",
-        "id": "def-server.createPersistenceRuleTypeWrapper",
+        "id": "def-server.createPersistenceRuleTypeFactory",
         "type": "Function",
         "tags": [],
-        "label": "createPersistenceRuleTypeWrapper",
+        "label": "createPersistenceRuleTypeFactory",
         "description": [],
         "signature": [
           "({ logger, ruleDataClient }: { ruleDataClient: ",
@@ -1188,15 +1107,23 @@
             "section": "def-server.Logger",
             "text": "Logger"
           },
-          "; }) => <TParams extends Record<string, unknown>, TState extends Record<string, unknown>, TInstanceContext extends { [x: string]: unknown; } = {}, TActionGroupIds extends string = never>(type: ",
+          "; }) => <TState extends Record<string, unknown>, TParams extends Record<string, unknown>, TServices extends ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
             "docId": "kibRuleRegistryPluginApi",
-            "section": "def-server.PersistenceAlertType",
-            "text": "PersistenceAlertType"
+            "section": "def-server.PersistenceServices",
+            "text": "PersistenceServices"
           },
-          "<TParams, TState, TInstanceContext, TActionGroupIds>) => { executor: (options: ",
+          "<TAlertInstanceContext>, TAlertInstanceContext extends { [x: string]: unknown; } = {}>(type: ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.AlertTypeWithExecutor",
+            "text": "AlertTypeWithExecutor"
+          },
+          "<TState, TParams, TAlertInstanceContext, TServices>) => { executor: (options: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -1204,15 +1131,7 @@
             "section": "def-server.AlertExecutorOptions",
             "text": "AlertExecutorOptions"
           },
-          "<TParams, TState, { [x: string]: unknown; }, TInstanceContext, ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.WithoutReservedActionGroups",
-            "text": "WithoutReservedActionGroups"
-          },
-          "<TActionGroupIds, never>>) => Promise<void | TState>; id: string; name: string; validate?: { params?: ",
+          "<TParams, TState, { [x: string]: unknown; }, TAlertInstanceContext, never> & { services: TServices; }) => Promise<void | TState>; id: string; name: string; validate?: { params?: ",
           "AlertTypeParamsValidator",
           "<TParams> | undefined; } | undefined; actionGroups: ",
           {
@@ -1222,7 +1141,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<TActionGroupIds>[]; defaultActionGroupId: TActionGroupIds; recoveryActionGroup?: ",
+          "<string>[]; defaultActionGroupId: string; recoveryActionGroup?: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -1230,7 +1149,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<never> | undefined; producer: string; actionVariables?: { context?: ",
+          "<string> | undefined; producer: string; actionVariables?: { context?: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -1264,14 +1183,14 @@
           },
           "<TParams>; injectReferences: (params: TParams, references: ",
           "SavedObjectReference",
-          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; minimumScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; }"
+          "[]) => TParams; } | undefined; isExportable: boolean; ruleTaskTimeout?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
+        "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_factory.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "ruleRegistry",
-            "id": "def-server.createPersistenceRuleTypeWrapper.$1",
+            "id": "def-server.createPersistenceRuleTypeFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "{ logger, ruleDataClient }",
@@ -1295,7 +1214,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
+            "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_factory.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1806,7 +1725,7 @@
               "ApiResponse",
               "<",
               "BulkResponse",
-              ", unknown> | undefined>"
+              ", unknown>>"
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
             "deprecated": false,
@@ -1893,6 +1812,16 @@
         "tags": [],
         "label": "PersistenceServices",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.PersistenceServices",
+            "text": "PersistenceServices"
+          },
+          "<TAlertInstanceContext>"
+        ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,
         "children": [
@@ -1910,7 +1839,7 @@
               "ApiResponse",
               "<",
               "BulkResponse",
-              ", unknown> | undefined>"
+              ", unknown>>"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
@@ -2016,7 +1945,7 @@
             "section": "def-server.AlertType",
             "text": "AlertType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TAlertInstanceContext, string, string>, \"id\" | \"name\" | \"validate\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"actionVariables\" | \"minimumLicenseRequired\" | \"useSavedObjectReferences\" | \"isExportable\" | \"defaultScheduleInterval\" | \"minimumScheduleInterval\" | \"ruleTaskTimeout\"> & { executor: ",
+          "<TParams, TParams, TState, { [x: string]: unknown; }, TAlertInstanceContext, string, string>, \"id\" | \"name\" | \"validate\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"actionVariables\" | \"minimumLicenseRequired\" | \"useSavedObjectReferences\" | \"isExportable\" | \"ruleTaskTimeout\"> & { executor: ",
           "AlertTypeExecutor",
           "<TState, TParams, TAlertInstanceContext, TServices>; }"
         ],
@@ -2026,10 +1955,10 @@
       },
       {
         "parentPluginId": "ruleRegistry",
-        "id": "def-server.CreatePersistenceRuleTypeWrapper",
+        "id": "def-server.CreatePersistenceRuleTypeFactory",
         "type": "Type",
         "tags": [],
-        "label": "CreatePersistenceRuleTypeWrapper",
+        "label": "CreatePersistenceRuleTypeFactory",
         "description": [],
         "signature": [
           "(options: { ruleDataClient: ",
@@ -2048,23 +1977,31 @@
             "section": "def-server.Logger",
             "text": "Logger"
           },
-          "; }) => <TParams extends Record<string, unknown>, TState extends Record<string, unknown>, TInstanceContext extends { [x: string]: unknown; } = {}, TActionGroupIds extends string = never>(type: ",
+          "; }) => <TState extends Record<string, unknown>, TParams extends Record<string, unknown>, TServices extends ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
             "docId": "kibRuleRegistryPluginApi",
-            "section": "def-server.PersistenceAlertType",
-            "text": "PersistenceAlertType"
+            "section": "def-server.PersistenceServices",
+            "text": "PersistenceServices"
           },
-          "<TParams, TState, TInstanceContext, TActionGroupIds>) => ",
+          "<TAlertInstanceContext>, TAlertInstanceContext extends { [x: string]: unknown; } = {}>(type: ",
           {
-            "pluginId": "alerting",
+            "pluginId": "ruleRegistry",
             "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.AlertType",
-            "text": "AlertType"
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.AlertTypeWithExecutor",
+            "text": "AlertTypeWithExecutor"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TInstanceContext, TActionGroupIds, never>"
+          "<TState, TParams, TAlertInstanceContext, TServices>) => ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.AlertTypeWithExecutor",
+            "text": "AlertTypeWithExecutor"
+          },
+          "<TState, TParams, TAlertInstanceContext, TServices>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,
@@ -2072,7 +2009,7 @@
         "children": [
           {
             "parentPluginId": "ruleRegistry",
-            "id": "def-server.CreatePersistenceRuleTypeWrapper.$1",
+            "id": "def-server.CreatePersistenceRuleTypeFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -2274,6 +2211,38 @@
       },
       {
         "parentPluginId": "ruleRegistry",
+        "id": "def-server.PersistenceAlertQueryService",
+        "type": "Type",
+        "tags": [],
+        "label": "PersistenceAlertQueryService",
+        "description": [],
+        "signature": [
+          "(query: ",
+          "SearchRequest",
+          ") => Promise<Record<string, unknown>[]>"
+        ],
+        "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.PersistenceAlertQueryService.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "SearchRequest"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
         "id": "def-server.PersistenceAlertService",
         "type": "Type",
         "tags": [],
@@ -2286,7 +2255,7 @@
           "ApiResponse",
           "<",
           "BulkResponse",
-          ", unknown> | undefined>"
+          ", unknown>>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,
@@ -2319,52 +2288,6 @@
             "deprecated": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ruleRegistry",
-        "id": "def-server.PersistenceAlertType",
-        "type": "Type",
-        "tags": [],
-        "label": "PersistenceAlertType",
-        "description": [],
-        "signature": [
-          "Pick<",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.AlertType",
-            "text": "AlertType"
-          },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TInstanceContext, TActionGroupIds, never>, \"id\" | \"name\" | \"validate\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"actionVariables\" | \"minimumLicenseRequired\" | \"useSavedObjectReferences\" | \"isExportable\" | \"defaultScheduleInterval\" | \"minimumScheduleInterval\" | \"ruleTaskTimeout\"> & { executor: (options: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.AlertExecutorOptions",
-            "text": "AlertExecutorOptions"
-          },
-          "<TParams, TState, { [x: string]: unknown; }, TInstanceContext, ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.WithoutReservedActionGroups",
-            "text": "WithoutReservedActionGroups"
-          },
-          "<TActionGroupIds, never>> & { services: ",
-          {
-            "pluginId": "ruleRegistry",
-            "scope": "server",
-            "docId": "kibRuleRegistryPluginApi",
-            "section": "def-server.PersistenceServices",
-            "text": "PersistenceServices"
-          },
-          "; }) => Promise<void | TState>; }"
-        ],
-        "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
-        "deprecated": false,
         "initialIsOpen": false
       },
       {

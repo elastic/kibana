@@ -9,7 +9,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { IndexPattern, IndexPatternField } from '../../../../../data/public';
-import { flattenHit } from '../../../../../data/common';
 import { SHOW_MULTIFIELDS } from '../../../../common';
 import { getServices } from '../../../kibana_services';
 import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
@@ -96,7 +95,7 @@ export const DocViewerTable = ({
     return null;
   }
 
-  const flattened = flattenHit(hit, indexPattern, { source: true });
+  const flattened = indexPattern?.flattenHit(hit);
   const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
 
   const items: FieldRecord[] = Object.keys(flattened)

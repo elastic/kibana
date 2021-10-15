@@ -117,9 +117,10 @@ export function SyntheticsIntegrationPageProvider({
     /**
      * Finds and returns the enable TLS checkbox
      */
-    async findEnableTLSSwitch() {
+    async findEnableTLSCheckbox() {
       await this.ensureIsOnPackagePage();
-      return await testSubjects.find('syntheticsIsTLSEnabled');
+      const tlsCheckboxContainer = await testSubjects.find('syntheticsIsTLSEnabled');
+      return await tlsCheckboxContainer.findByCssSelector('label');
     },
 
     /**
@@ -320,8 +321,8 @@ export function SyntheticsIntegrationPageProvider({
      * Enables TLS
      */
     async enableTLS() {
-      const tlsSwitch = await this.findEnableTLSSwitch();
-      await tlsSwitch.click();
+      const tlsCheckbox = await this.findEnableTLSCheckbox();
+      await tlsCheckbox.click();
     },
 
     /**

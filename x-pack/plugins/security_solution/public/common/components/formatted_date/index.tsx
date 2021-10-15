@@ -92,27 +92,23 @@ PreferenceFormattedP1DTDate.displayName = 'PreferenceFormattedP1DTDate';
  * - a long representation of the date that includes the day of the week (e.g. Thursday, March 21, 2019 6:47pm)
  * - the raw date value (e.g. 2019-03-22T00:47:46Z)
  */
-
-interface FormattedDateProps {
-  className?: string;
+export const FormattedDate = React.memo<{
   fieldName: string;
   value?: string | number | null;
-}
-export const FormattedDate = React.memo<FormattedDateProps>(
-  ({ value, fieldName, className = '' }): JSX.Element => {
-    if (value == null) {
-      return getOrEmptyTagFromValue(value);
-    }
-    const maybeDate = getMaybeDate(value);
-    return maybeDate.isValid() ? (
-      <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName} className={className}>
-        <PreferenceFormattedDate value={maybeDate.toDate()} />
-      </LocalizedDateTooltip>
-    ) : (
-      getOrEmptyTagFromValue(value)
-    );
+  className?: string;
+}>(({ value, fieldName, className = '' }): JSX.Element => {
+  if (value == null) {
+    return getOrEmptyTagFromValue(value);
   }
-);
+  const maybeDate = getMaybeDate(value);
+  return maybeDate.isValid() ? (
+    <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName} className={className}>
+      <PreferenceFormattedDate value={maybeDate.toDate()} />
+    </LocalizedDateTooltip>
+  ) : (
+    getOrEmptyTagFromValue(value)
+  );
+});
 
 FormattedDate.displayName = 'FormattedDate';
 

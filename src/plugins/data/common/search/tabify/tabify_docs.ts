@@ -11,60 +11,12 @@ import { isPlainObject } from 'lodash';
 import { IndexPattern } from '../..';
 import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
 
-type ValidMetaFieldNames = keyof Pick<
-  estypes.SearchHit,
-  | '_id'
-  | '_ignored'
-  | '_index'
-  | '_node'
-  | '_primary_term'
-  | '_routing'
-  | '_score'
-  | '_seq_no'
-  | '_shard'
-  | '_source'
-  | '_type'
-  | '_version'
->;
-const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
-  '_id',
-  '_ignored',
-  '_index',
-  '_node',
-  '_primary_term',
-  '_routing',
-  '_score',
-  '_seq_no',
-  '_shard',
-  '_source',
-  '_type',
-  '_version',
-];
-
-function isValidMetaFieldName(field: string): field is ValidMetaFieldNames {
-  // Since the array above is more narrowly typed than string[], we cannot use
-  // string to find a value in here. We manually cast it to wider string[] type
-  // so we're able to use `includes` on it.
-  return (VALID_META_FIELD_NAMES as string[]).includes(field);
-}
-
 export interface TabifyDocsOptions {
   shallow?: boolean;
-  /**
-   * If set to `false` the _source of the document, if requested, won't be
-   * merged into the flattened document.
-   */
   source?: boolean;
+  meta?: boolean;
 }
 
-/**
- * Flattens an individual hit (from an ES response) into an object. This will
- * create flattened field names, like `user.name`.
- *
- * @param hit The hit from an ES reponse's hits.hits[]
- * @param indexPattern The index pattern for the requested index if available.
- * @param params Parameters how to flatten the hit
- */
 export function flattenHit(
   hit: estypes.SearchHit,
   indexPattern?: IndexPattern,
@@ -110,36 +62,13 @@ export function flattenHit(
   if (params?.source !== false && hit._source) {
     flatten(hit._source as Record<string, any>);
   }
+  if (params?.meta !== false) {
+    // combine the fields that Discover allows to add as columns
+    const { _id, _index, _type, _score } = hit;
+    flatten({ _id, _index, _score, _type });
+  }
 
-  // Merge all valid meta fields into the flattened object
-  // expect for _source (in case that was specified as a meta field)
-  indexPattern?.metaFields?.forEach((metaFieldName) => {
-    if (!isValidMetaFieldName(metaFieldName) || metaFieldName === '_source') {
-      return;
-    }
-    flat[metaFieldName] = hit[metaFieldName];
-  });
-
-  // Use a proxy to make sure that keys are always returned in a specific order,
-  // so we have a guarantee on the flattened order of keys.
-  return new Proxy(flat, {
-    ownKeys: (target) => {
-      return Reflect.ownKeys(target).sort((a, b) => {
-        const aIsMeta = indexPattern?.metaFields?.includes(String(a));
-        const bIsMeta = indexPattern?.metaFields?.includes(String(b));
-        if (aIsMeta && bIsMeta) {
-          return String(a).localeCompare(String(b));
-        }
-        if (aIsMeta) {
-          return 1;
-        }
-        if (bIsMeta) {
-          return -1;
-        }
-        return String(a).localeCompare(String(b));
-      });
-    },
-  });
+  return flat;
 }
 
 export const tabifyDocs = (

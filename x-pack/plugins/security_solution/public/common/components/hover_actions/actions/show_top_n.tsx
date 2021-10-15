@@ -30,49 +30,33 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 interface Props {
-  className?: string;
   /** When `Component` is used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality.
    * When `Component` is used with `EuiContextMenu`, we pass EuiContextMenuItem to render the right style.
    */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   enablePopOver?: boolean;
   field: string;
-  flush?: 'left' | 'right' | 'both';
   globalFilters?: Filter[];
-  iconSide?: 'left' | 'right';
-  iconType?: string;
-  isExpandable?: boolean;
   onClick: () => void;
   onFilterAdded?: () => void;
   ownFocus: boolean;
-  paddingSize?: 's' | 'm' | 'l' | 'none';
   showTooltip?: boolean;
   showTopN: boolean;
-  showLegend?: boolean;
   timelineId?: string | null;
-  title?: string;
   value?: string[] | string | null;
 }
 
 export const ShowTopNButton: React.FC<Props> = React.memo(
   ({
-    className,
     Component,
     enablePopOver,
     field,
-    flush,
-    iconSide,
-    iconType,
-    isExpandable,
     onClick,
     onFilterAdded,
     ownFocus,
-    paddingSize,
-    showLegend,
     showTooltip = true,
     showTopN,
     timelineId,
-    title,
     value,
     globalFilters,
   }) => {
@@ -86,36 +70,31 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         ? SourcererScopeName.detections
         : SourcererScopeName.default;
     const { browserFields, indexPattern } = useSourcererScope(activeScope);
-    const icon = iconType ?? 'visBarVertical';
-    const side = iconSide ?? 'left';
-    const buttonTitle = title ?? SHOW_TOP(field);
+
     const basicButton = useMemo(
       () =>
         Component ? (
           <Component
-            aria-label={buttonTitle}
-            className={className}
+            aria-label={SHOW_TOP(field)}
             data-test-subj="show-top-field"
-            icon={icon}
-            iconType={icon}
-            iconSide={side}
-            flush={flush}
+            icon="visBarVertical"
+            iconType="visBarVertical"
             onClick={onClick}
-            title={buttonTitle}
+            title={SHOW_TOP(field)}
           >
-            {buttonTitle}
+            {SHOW_TOP(field)}
           </Component>
         ) : (
           <EuiButtonIcon
-            aria-label={buttonTitle}
+            aria-label={SHOW_TOP(field)}
             className="securitySolution__hoverActionButton"
             data-test-subj="show-top-field"
             iconSize="s"
-            iconType={icon}
+            iconType="visBarVertical"
             onClick={onClick}
           />
         ),
-      [Component, buttonTitle, className, flush, icon, onClick, side]
+      [Component, field, onClick]
     );
 
     const button = useMemo(
@@ -128,7 +107,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
                   field,
                   value,
                 })}
-                content={buttonTitle}
+                content={SHOW_TOP(field)}
                 shortcut={SHOW_TOP_N_KEYBOARD_SHORTCUT}
                 showShortcut={ownFocus}
               />
@@ -139,7 +118,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         ) : (
           basicButton
         ),
-      [basicButton, buttonTitle, field, ownFocus, showTooltip, showTopN, value]
+      [basicButton, field, ownFocus, showTooltip, showTopN, value]
     );
 
     const topNPannel = useMemo(
@@ -149,36 +128,14 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           field={field}
           indexPattern={indexPattern}
           onFilterAdded={onFilterAdded}
-          paddingSize={paddingSize}
-          showLegend={showLegend}
           timelineId={timelineId ?? undefined}
           toggleTopN={onClick}
           value={value}
           globalFilters={globalFilters}
         />
       ),
-      [
-        browserFields,
-        field,
-        indexPattern,
-        onFilterAdded,
-        paddingSize,
-        showLegend,
-        timelineId,
-        onClick,
-        value,
-        globalFilters,
-      ]
+      [browserFields, field, indexPattern, onClick, onFilterAdded, timelineId, value, globalFilters]
     );
-
-    if (isExpandable) {
-      return (
-        <>
-          {basicButton}
-          {showTopN && topNPannel}
-        </>
-      );
-    }
 
     return showTopN ? (
       enablePopOver ? (

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { flattenHit, IndexPattern } from '../../../../../../data/common';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 
 /**
@@ -22,7 +22,7 @@ export function calcFieldCounts(
     return {};
   }
   for (const hit of rows) {
-    const fields = Object.keys(flattenHit(hit, indexPattern));
+    const fields = Object.keys(indexPattern.flattenHit(hit));
     for (const fieldName of fields) {
       counts[fieldName] = (counts[fieldName] || 0) + 1;
     }

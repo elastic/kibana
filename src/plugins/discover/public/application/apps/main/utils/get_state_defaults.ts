@@ -6,27 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
-import {
-  DEFAULT_COLUMNS_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../../common';
+import { DEFAULT_COLUMNS_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import { SavedSearch } from '../../../../saved_searches';
 import { DataPublicPluginStart } from '../../../../../../data/public';
 
 import { AppState } from '../services/discover_state';
 import { getDefaultSort, getSortArray } from '../components/doc_table';
-import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
-import { Storage } from '../../../../../../kibana_utils/public';
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
     return [...savedSearch.columns];
-  }
-  if (config.get(SEARCH_FIELDS_FROM_SOURCE) && isEqual(config.get(DEFAULT_COLUMNS_SETTING), [])) {
-    return ['_source'];
   }
   return [...config.get(DEFAULT_COLUMNS_SETTING)];
 }
@@ -35,12 +26,10 @@ export function getStateDefaults({
   config,
   data,
   savedSearch,
-  storage,
 }: {
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
   savedSearch: SavedSearch;
-  storage: Storage;
 }) {
   const { searchSource } = savedSearch;
   const indexPattern = searchSource.getField('index');
@@ -48,7 +37,6 @@ export function getStateDefaults({
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const sort = getSortArray(savedSearch.sort ?? [], indexPattern!);
   const columns = getDefaultColumns(savedSearch, config);
-  const chartHidden = Boolean(storage.get(CHART_HIDDEN_KEY));
 
   const defaultState = {
     query,
@@ -59,13 +47,13 @@ export function getStateDefaults({
     index: indexPattern?.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')),
-    hideChart: chartHidden ? chartHidden : undefined,
+    hideChart: undefined,
     savedQuery: undefined,
   } as AppState;
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
   }
-  if (savedSearch.hideChart !== undefined) {
+  if (savedSearch.hideChart) {
     defaultState.hideChart = savedSearch.hideChart;
   }
 

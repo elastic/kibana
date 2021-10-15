@@ -52,7 +52,6 @@ interface MatrixHistogramBasicProps {
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   panelHeight?: number;
-  paddingSize?: 's' | 'm' | 'l' | 'none';
   setQuery: GlobalTimeArgs['setQuery'];
   startDate: GlobalTimeArgs['from'];
   stackByOptions: MatrixHistogramOption[];

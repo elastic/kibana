@@ -23,9 +23,9 @@ export const CardIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIcon
 ) => {
   const { icons } = props;
   if (icons && icons.length === 1 && icons[0].type === 'eui') {
-    return <EuiIcon size={'xl'} type={icons[0].src} {...props} />;
+    return <EuiIcon size={'xl'} type={icons[0].src} />;
   } else if (icons && icons.length === 1 && icons[0].type === 'svg') {
-    return <EuiIcon size={'xl'} type={icons[0].src} {...props} />;
+    return <EuiIcon size={'xl'} type={icons[0].src} />;
   } else {
     return <PackageIcon {...props} />;
   }

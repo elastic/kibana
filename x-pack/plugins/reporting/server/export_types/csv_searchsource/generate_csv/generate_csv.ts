@@ -356,7 +356,7 @@ export class CsvGenerator {
 
         let table: Datatable | undefined;
         try {
-          table = tabifyDocs(results, index, { shallow: true });
+          table = tabifyDocs(results, index, { shallow: true, meta: true });
         } catch (err) {
           this.logger.error(err);
         }
