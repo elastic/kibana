@@ -12,10 +12,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const dockerServers = getService('dockerServers');
 
   const testPkgArchiveTgz = path.join(
@@ -189,6 +191,17 @@ export default function (providerContext: FtrProviderContext) {
       expect(res.error.text).to.equal(
         '{"statusCode":400,"error":"Bad Request","message":"Name thisIsATypo and version 0.1.4 do not match top-level directory apache-0.1.4"}'
       );
+    });
+
+    it('should not allow users without all access', async () => {
+      const buf = fs.readFileSync(testPkgArchiveTgz);
+      await supertestWithoutAuth
+        .post(`/api/fleet/epm/packages`)
+        .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/gzip')
+        .send(buf)
+        .expect(403);
     });
   });
 }
