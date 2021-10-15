@@ -13,6 +13,8 @@ export interface CurationSuggestion {
   updated_at: string;
   promoted: string[];
   status: 'pending' | 'applied' | 'automated' | 'rejected' | 'disabled';
+  curation_id?: string;
+  operation: 'create' | 'update' | 'delete';
   override_curation_id?: string;
 }
 
@@ -22,7 +24,7 @@ export interface Curation {
   queries: string[];
   promoted: CurationResult[];
   hidden: CurationResult[];
-  organic: Result[];
+  organic?: Result[]; // this field is missing if there are 0 results
   suggestion?: CurationSuggestion;
 }
 

@@ -35,13 +35,14 @@ import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
 import { overridePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
+import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { outputService } from './output';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
   packages: string[];
-  nonFatalErrors: PreconfigurationError[];
+  nonFatalErrors: Array<PreconfigurationError | UpgradeManagedPackagePoliciesResult>;
 }
 
 function isPreconfiguredOutputDifferentFromCurrent(
@@ -95,9 +96,21 @@ export async function ensurePreconfiguredOutputs(
         data.hosts = outputService.getDefaultESHosts();
       }
 
-      if (!existingOutput) {
+      const isCreate = !existingOutput;
+      const isUpdateWithNewData =
+        existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
+      // If a default output already exists, delete it in favor of the preconfigured one
+      if (isCreate || isUpdateWithNewData) {
+        const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+
+        if (defaultOutputId && defaultOutputId !== output.id) {
+          await outputService.delete(soClient, defaultOutputId);
+        }
+      }
+
+      if (isCreate) {
         await outputService.create(soClient, data, { id, overwrite: true });
-      } else if (isPreconfiguredOutputDifferentFromCurrent(existingOutput, data)) {
+      } else if (isUpdateWithNewData) {
         await outputService.update(soClient, id, data);
         // Bump revision of all policies using that output
         if (outputData.is_default) {
@@ -314,16 +327,15 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
   }
 
-  try {
-    const fulfilledPolicyPackagePolicyIds = fulfilledPolicies.flatMap<string>(
-      ({ policy }) => policy?.package_policies as string[]
-    );
+  const fulfilledPolicyPackagePolicyIds = fulfilledPolicies
+    .filter(({ policy }) => policy?.package_policies)
+    .flatMap<string>(({ policy }) => policy?.package_policies as string[]);
 
-    await upgradeManagedPackagePolicies(soClient, esClient, fulfilledPolicyPackagePolicyIds);
-    // Swallow errors that occur when upgrading
-  } catch (error) {
-    appContextService.getLogger().error(error);
-  }
+  const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
+    soClient,
+    esClient,
+    fulfilledPolicyPackagePolicyIds
+  );
 
   return {
     policies: fulfilledPolicies.map((p) =>
@@ -341,7 +353,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           }
     ),
     packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
-    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
+    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies, ...packagePolicyUpgradeResults],
   };
 }
 

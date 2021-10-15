@@ -4,6 +4,8 @@
 
 ## DeprecationsDetails.requireRestart property
 
+(optional) specify the fix for this deprecation requires a full kibana restart.
+
 <b>Signature:</b>
 
 ```typescript

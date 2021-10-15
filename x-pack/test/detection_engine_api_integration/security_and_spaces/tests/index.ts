@@ -33,6 +33,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./get_prepackaged_rules_status'));
       loadTestFile(require.resolve('./import_rules'));
       loadTestFile(require.resolve('./read_rules'));
+      loadTestFile(require.resolve('./resolve_read_rules'));
       loadTestFile(require.resolve('./update_rules'));
       loadTestFile(require.resolve('./update_rules_bulk'));
       loadTestFile(require.resolve('./patch_rules_bulk'));
@@ -49,6 +50,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./runtime'));
       loadTestFile(require.resolve('./throttle'));
       loadTestFile(require.resolve('./ignore_fields'));
+      loadTestFile(require.resolve('./migrations'));
     });
 
     // That split here enable us on using a different ciGroup to run the tests

@@ -53,9 +53,14 @@ function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
 interface Props {
   jobCreationDisabled: boolean;
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
+  refreshCount: number;
 }
 
-export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
+export const AnomalyDetectionPanel: FC<Props> = ({
+  jobCreationDisabled,
+  setLazyJobCount,
+  refreshCount,
+}) => {
   const {
     services: { notifications },
   } = useMlKibana();
@@ -157,7 +162,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
 
   useEffect(() => {
     loadJobs();
-  }, []);
+  }, [refreshCount]);
 
   const onRefresh = () => {
     loadJobs();

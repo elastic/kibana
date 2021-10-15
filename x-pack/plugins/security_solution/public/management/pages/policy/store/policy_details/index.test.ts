@@ -106,7 +106,7 @@ describe('policy details: ', () => {
 
       it('windows process events is enabled', () => {
         const config = policyConfig(getState());
-        expect(config!.windows.events.process).toEqual(true);
+        expect(config.windows.events.process).toEqual(true);
       });
     });
 
@@ -128,7 +128,7 @@ describe('policy details: ', () => {
 
       it('mac file events is enabled', () => {
         const config = policyConfig(getState());
-        expect(config!.mac.events.file).toEqual(true);
+        expect(config.mac.events.file).toEqual(true);
       });
     });
 
@@ -150,7 +150,7 @@ describe('policy details: ', () => {
 
       it('linux file events is enabled', () => {
         const config = policyConfig(getState());
-        expect(config!.linux.events.file).toEqual(true);
+        expect(config.linux.events.file).toEqual(true);
       });
     });
 

@@ -57,6 +57,14 @@ describe('CurationSuggestion', () => {
         },
       },
     ],
+    curation: {
+      promoted: [
+        {
+          id: '4',
+          foo: 'foo',
+        },
+      ],
+    },
     isMetaEngine: true,
     engine: {
       schema: {},
@@ -86,6 +94,27 @@ describe('CurationSuggestion', () => {
   it('loads data on initialization', () => {
     shallow(<CurationSuggestion />);
     expect(actions.loadSuggestion).toHaveBeenCalled();
+  });
+
+  it('shows existing promoted documents', () => {
+    const wrapper = shallow(<CurationSuggestion />);
+    const suggestedResultsPanel = wrapper.find(CurationResultPanel).at(0);
+    // gets populated from 'curation' in state, and converted to results format (i.e, has raw properties, etc.)
+    expect(suggestedResultsPanel.prop('results')).toEqual([
+      {
+        id: {
+          raw: '4',
+          snippet: null,
+        },
+        foo: {
+          raw: 'foo',
+          snippet: null,
+        },
+        _meta: {
+          id: '4',
+        },
+      },
+    ]);
   });
 
   it('shows suggested promoted documents', () => {

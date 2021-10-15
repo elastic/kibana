@@ -610,8 +610,22 @@
               "<unknown>; navigate(options: ",
               "RedirectOptions",
               "<",
-              "SerializableRecord",
-              ">): void; }"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.AnonymousAccessServiceContract",
+                "text": "AnonymousAccessServiceContract"
+              },
+              ") => void; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
@@ -709,7 +723,13 @@
               "<unknown>; navigate(options: ",
               "RedirectOptions",
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">): void; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
