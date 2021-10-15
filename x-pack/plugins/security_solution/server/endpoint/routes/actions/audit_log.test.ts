@@ -178,7 +178,7 @@ describe('Action Log API', () => {
       expect((response.ok.mock.calls[0][0]?.body as ActivityLog).data).toHaveLength(0);
     });
 
-    it('should have actions and action responses', async () => {
+    it.skip('should have actions and action responses', async () => {
       havingActionsAndResponses(
         [
           aMockAction().withAgent(mockID).withAction('isolate').withID(actionID),
