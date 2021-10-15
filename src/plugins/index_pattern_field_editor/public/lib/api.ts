@@ -16,11 +16,13 @@ export const initApi = (httpClient: HttpSetup) => {
     context,
     script,
     document,
+    documentId,
   }: {
     index: string;
     context: FieldPreviewContext;
     script: { source: string } | null;
     document: Record<string, any>;
+    documentId: string;
   }) => {
     return sendRequest<FieldPreviewResponse>(httpClient, {
       path: `${API_BASE_PATH}/field_preview`,
@@ -30,6 +32,7 @@ export const initApi = (httpClient: HttpSetup) => {
         context,
         script,
         document,
+        documentId,
       },
     });
   };
