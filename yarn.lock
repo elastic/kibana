@@ -5810,14 +5810,7 @@
   dependencies:
     "@turf/helpers" "6.x"
 
-"@types/angular-mocks@^1.7.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@types/angular-mocks/-/angular-mocks-1.7.0.tgz#310d999a3c47c10ecd8eef466b5861df84799429"
-  integrity sha512-MeT5vxWBx4Ny5/sNZJjpZdv4K2KGwqQYiRQQZctan1TTaNyiVlFRYbcmheolhM4KKbTWmoxTVeuvGzniTDg1kw==
-  dependencies:
-    "@types/angular" "*"
-
-"@types/angular@*", "@types/angular@^1.6.56":
+"@types/angular@^1.6.56":
   version "1.6.56"
   resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.56.tgz#20124077bd44061e018c7283c0bb83f4b00322dd"
   integrity sha512-HxtqilvklZ7i6XOaiP7uIJIrFXEVEhfbSY45nfv2DeBRngncI58Y4ZOUMiUkcT8sqgLL1ablmbfylChUg7A3GA==
@@ -7908,11 +7901,6 @@ angular-aria@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/angular-aria/-/angular-aria-1.8.0.tgz#97aec9b1e8bafd07d5fab30f98d8ec832e18e25d"
   integrity sha512-eCQI6EwgY6bYHdzIUfDABHnZjoZ3bNYpCsnceQF4bLfbq1QtZ7raRPNca45sj6C9Pfjde6PNcEDvuLozFPYnrQ==
-
-angular-mocks@^1.7.9:
-  version "1.7.9"
-  resolved "https://registry.yarnpkg.com/angular-mocks/-/angular-mocks-1.7.9.tgz#0a3b7e28b9a493b4e3010ed2b0f69a68e9b4f79b"
-  integrity sha512-LQRqqiV3sZ7NTHBnNmLT0bXtE5e81t97+hkJ56oU0k3dqKv1s6F+nBWRlOVzqHWPGFOiPS8ZJVdrS8DFzHyNIA==
 
 angular-recursion@^1.0.5:
   version "1.0.5"
