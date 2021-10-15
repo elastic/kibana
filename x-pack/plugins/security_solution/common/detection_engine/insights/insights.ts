@@ -7,26 +7,25 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { bufferTime } from 'rxjs/operators';
+import moment from 'moment';
+import { Sha256 } from 'src/core/public/utils';
 
 interface AlertContext {
   alert_id: string;
   rule_id?: string;
 }
 
-interface DismissAlertAction {
-  dismiss_timestamp: string;
-}
-interface AcknowledgeAlertAction {
-  acknowledge_timestamp: string;
+interface AlertStatusAction {
+  alert_status: string;
+  action_timestamp: string;
 }
 
 type InsightsContext = AlertContext;
-type InsightsAction = DismissAlertAction | AcknowledgeAlertAction;
+type InsightsAction = AlertStatusAction;
 
 export interface InsightsPayload {
   state: {
     page: string;
-    pageload_timestamp: string;
     cluster_id: string;
     user_id: string;
     session_id: string;
@@ -48,13 +47,44 @@ export class InsightsService {
 
   public start(insights$: Observable<InsightsPayload>, clusterId: string) {
     this.observable = insights$;
+    // Subscription needs to publish events
     this.subscription = this.observable.pipe(bufferTime(10_000)).subscribe();
   }
 
-  public add(alertId: string, sessionId: string) {}
+  private getUserHash(username: string): string {
+    const concatValue = username + this.clusterId;
+    const sha = new Sha256().update(concatValue, 'utf8').digest('hex');
+    return sha;
+  }
 
-  private buildAlertAction(status: string): InsightsAction {
-    return { dismiss_timestamp: '' };
+  public addAlertStatus(
+    alertIds: string[],
+    sessionId: string,
+    ruleId: string,
+    username: string,
+    page: string,
+    status: string
+  ) {
+    const hashedId = this.getUserHash(username);
+    for (let i = 0; i < alertIds.length; i++) {
+      const now = moment().toISOString();
+      const payload = {
+        page,
+        cluster_id: this.clusterId,
+        user_id: hashedId,
+        session_id: sessionId,
+        context: {
+          alert_id: alertIds[i],
+          rule_id: ruleId,
+        },
+        action: {
+          alert_status: status,
+          action_timestamp: now,
+        },
+      };
+      // Observable is still not wired up correctly
+      this.observable.next(payload);
+    }
   }
 
   public stop() {

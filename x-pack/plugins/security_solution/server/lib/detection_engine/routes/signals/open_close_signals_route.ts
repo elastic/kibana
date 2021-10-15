@@ -12,13 +12,17 @@ import {
   SetSignalsStatusSchemaDecoded,
   setSignalsStatusSchema,
 } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
+import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
-export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
+export const setSignalsStatusRoute = (
+  router: SecuritySolutionPluginRouter,
+  security: SetupPlugins['security']
+) => {
   router.post(
     {
       path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -58,6 +62,16 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
         };
       }
       try {
+        // TODO: Add INSIGHTS Payload Creation and publication here.
+        /*
+         InsightsService.addAlertStatusUpdates(
+           alert_ids: string[],
+           status: string,
+           security: SetupPlugins['security'],
+           cluster_id: string,
+
+           )
+        */
         const { body } = await esClient.updateByQuery({
           index: siemClient.getSignalsIndex(),
           conflicts: conflicts ?? 'abort',

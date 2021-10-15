@@ -96,6 +96,7 @@ import {
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { InsightsService } from '../common/detection_engine/insights';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
@@ -165,6 +166,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
+  private insightsService: InsightsService;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -175,6 +177,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
+    // How do we initialize the InsightsService Here? The ClusterID is passed in at constructor time, though it doesn't need to be?
 
     this.logger.debug('plugin initialized');
   }
@@ -295,6 +298,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
+    // TODO: Pass InsightsService into the initRoutes?
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,
