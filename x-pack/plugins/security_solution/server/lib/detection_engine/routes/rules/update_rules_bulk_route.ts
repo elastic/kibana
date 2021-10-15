@@ -82,28 +82,6 @@ export const updateRulesBulkRoute = (
             });
 
             if (rule != null) {
-              const siemNotification = await rulesClient.find({
-                options: {
-                  hasReference: {
-                    type: 'alert',
-                    id: rule.id,
-                  },
-                },
-              });
-
-              await rulesClient.delete({ id: siemNotification.data[0].id });
-
-              const thing2 = await savedObjectsClient.find({
-                type: legacyRuleActionsSavedObjectType,
-              });
-
-              if (rule?.actions != null) {
-                rule.actions = siemNotification.data[0].actions;
-                rule.throttle = siemNotification.data[0].schedule.interval;
-                rule.notifyWhen = 'onThrottleInterval';
-              }
-            }
-            if (rule != null) {
               const ruleStatuses = await ruleStatusClient.find({
                 logsCount: 1,
                 ruleId: rule.id,
