@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const migrationAliasMessage = (legacyIds: string[], newIds: string[]) =>
-  i18n.translate('xpack.security_solution.signals_migrations.aliasMessage', {
+  i18n.translate('xpack.securitySolution.signals_migrations.aliasMessage', {
     defaultMessage: `The following migrations were found by the specified IDs: [{legacyList}], but they should instead be referenced by their newer IDs: [{newList}]. Please submit the request again.`,
     values: {
       legacyList: legacyIds.join(),
@@ -17,7 +17,7 @@ export const migrationAliasMessage = (legacyIds: string[], newIds: string[]) =>
   });
 
 export const migrationConflictMessage = (legacyIds: string[], newIds: string[]) =>
-  i18n.translate('xpack.security_solution.signals_migration.conflictMessage', {
+  i18n.translate('xpack.securitySolution.signals_migration.conflictMessage', {
     defaultMessage: `The following migrations were found by the specified IDs: [{legacyList}], but other saved objects were found to have legacy aliases that conflict with these IDs: [{newList}]. Please resolve these conflicts and submit the request again.`,
     values: {
       legacyList: legacyIds.join(),
