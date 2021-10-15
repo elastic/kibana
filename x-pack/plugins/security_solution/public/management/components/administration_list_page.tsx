@@ -67,7 +67,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
           pageTitle={header}
           description={description}
           bottomBorder={hasBottomBorder}
-          rightSideItems={[actions]}
+          rightSideItems={actions ? [actions] : undefined}
           restrictWidth={restrictWidth}
           data-test-subj={getTestId('header')}
         />

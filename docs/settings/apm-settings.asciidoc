@@ -87,22 +87,22 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.agent.migrations.enabled` {ess-icon}
   | Set to `false` to disable cloud APM migrations. Defaults to `true`.
 
-| `xpack.apm.errorIndices` {ess-icon}
-  | Matcher for all {apm-server-ref}/error-indices.html[error indices]. Defaults to `apm-*`.
+| `xpack.apm.indices.error` {ess-icon}
+  | Matcher for all {apm-server-ref}/error-indices.html[error indices]. Defaults to `logs-apm*,apm-*`.
 
-| `xpack.apm.onboardingIndices` {ess-icon}
+| `xpack.apm.indices.onboarding` {ess-icon}
   | Matcher for all onboarding indices. Defaults to `apm-*`.
 
-| `xpack.apm.spanIndices` {ess-icon}
-  | Matcher for all {apm-server-ref}/span-indices.html[span indices]. Defaults to `apm-*`.
+| `xpack.apm.indices.span` {ess-icon}
+  | Matcher for all {apm-server-ref}/span-indices.html[span indices]. Defaults to `traces-apm*,apm-*`.
 
-| `xpack.apm.transactionIndices` {ess-icon}
-  | Matcher for all {apm-server-ref}/transaction-indices.html[transaction indices]. Defaults to `apm-*`.
+| `xpack.apm.indices.transaction` {ess-icon}
+  | Matcher for all {apm-server-ref}/transaction-indices.html[transaction indices]. Defaults to `traces-apm*,apm-*`.
 
-| `xpack.apm.metricsIndices` {ess-icon}
-  | Matcher for all {apm-server-ref}/metricset-indices.html[metrics indices]. Defaults to `apm-*`.
+| `xpack.apm.indices.metric` {ess-icon}
+  | Matcher for all {apm-server-ref}/metricset-indices.html[metrics indices]. Defaults to `metrics-apm*,apm-*`.
 
-| `xpack.apm.sourcemapIndices` {ess-icon}
+| `xpack.apm.indices.sourcemap` {ess-icon}
   | Matcher for all {apm-server-ref}/sourcemap-indices.html[source map indices]. Defaults to `apm-*`.
 
 |===
