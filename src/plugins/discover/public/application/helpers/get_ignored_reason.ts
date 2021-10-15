@@ -17,6 +17,15 @@ export enum IgnoredReason {
 
 // TODO: Writing unit tests
 
+/**
+ * Returns the reason why a specific field was ignored in the response.
+ * Will return undefined if the field had no ignored values in it.
+ * This implementation will make some assumptions based on specific types
+ * of ignored values can only happen with specific field types in Elasticsearch.
+ *
+ * @param field Either the data view field or the strnig name of it.
+ * @param ignoredFields The hit._ignored value of the hit to validate.
+ */
 export function getIgnoredReason(
   field: DataViewField | string,
   ignoredFields: estypes.SearchHit['_ignored']

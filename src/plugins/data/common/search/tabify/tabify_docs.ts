@@ -57,7 +57,8 @@ export interface TabifyDocsOptions {
   source?: boolean;
   /**
    * If set to `true` values that have been ignored in ES (ignored_field_values)
-   * will be merged into the flattened document.
+   * will be merged into the flattened document. This will only have an effect if
+   * the `hit` has been retrieved using the `fields` option.
    */
   includeIgnoredValues?: boolean;
 }
@@ -114,17 +115,25 @@ export function flattenHit(hit: Hit, indexPattern?: IndexPattern, params?: Tabif
   flatten(hit.fields || {});
   if (params?.source !== false && hit._source) {
     flatten(hit._source as Record<string, any>);
-  }
-
-  if (params?.includeIgnoredValues && hit.ignored_field_values) {
+  } else if (params?.includeIgnoredValues && hit.ignored_field_values) {
+    // If enabled merge the ignored_field_values into the flattened hit. This will
+    // merge values that are not actually indexed by ES (i.e. ignored), e.g. because
+    // they were above the `ignore_above` limit or malformed for specific types.
+    // This API will only contain the values that were actually ignored, i.e. for the same
+    // field there might exist another value in the `fields` response, why this logic
+    // merged them both together. We do not merge this (even if enabled) in case source has been
+    // merged, since we would otherwise duplicate values, since ignore_field_values and _source
+    // contain the same values.
     Object.entries(hit.ignored_field_values).forEach(([fieldName, fieldValue]) => {
       if (flat[fieldName]) {
+        // If there was already a value from the fields API, make sure we're merging both together
         if (Array.isArray(flat[fieldName])) {
           flat[fieldName] = [...flat[fieldName], ...fieldValue];
         } else {
           flat[fieldName] = [flat[fieldName], ...fieldValue];
         }
       } else {
+        // If no previous value was assigned we can simply use the value from `ignored_field_values` as it is
         flat[fieldName] = fieldValue;
       }
     });

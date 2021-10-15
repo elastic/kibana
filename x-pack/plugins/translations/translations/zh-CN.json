@@ -2432,7 +2432,7 @@
     "discover.docTable.tableRow.filterOutValueButtonTooltip": "筛除值",
     "discover.docTable.tableRow.toggleRowDetailsButtonAriaLabel": "切换行详细信息",
     "discover.docTable.tableRow.viewSingleDocumentLinkText": "查看单个文档",
-  "discover.docTable.tableRow.viewSurroundingDocumentsLinkText": "查看周围文档",
+    "discover.docTable.tableRow.viewSurroundingDocumentsLinkText": "查看周围文档",
     "discover.docTable.totalDocuments": "{totalDocuments} 个文档",
     "discover.documentsAriaLabel": "文档",
     "discover.docViews.json.jsonTitle": "JSON",
