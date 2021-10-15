@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { IndexPatternsContract } from '../../../../../../../../../src/plugins/data/public';
+import type { ApplicationStart } from 'kibana/public';
+import type { DataViewsContract } from '../../../../../../../../../src/plugins/data_views/public';
 import { mlJobService } from '../../../../services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { Datafeed, Job } from '../../../../../../common/types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export async function preConfiguredJobRedirect(
-  indexPatterns: IndexPatternsContract,
+  indexPatterns: DataViewsContract,
   basePath: string,
   navigateToUrl: ApplicationStart['navigateToUrl']
 ) {
