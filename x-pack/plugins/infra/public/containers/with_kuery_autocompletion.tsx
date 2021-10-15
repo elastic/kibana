@@ -83,7 +83,6 @@ class WithKueryAutocompletionComponent extends React.Component<
         query: expression,
         selectionStart: cursorPosition,
         selectionEnd: cursorPosition,
-        // @ts-expect-error (until data service updates to new types)
         indexPatterns: [indexPattern],
         boolFilter: [],
       })) || [];

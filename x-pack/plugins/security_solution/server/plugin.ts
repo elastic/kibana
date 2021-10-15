@@ -361,6 +361,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.lists = plugins.lists;
       this.manifestTask = new ManifestTask({
         endpointAppContext: endpointContext,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         taskManager: plugins.taskManager!,
       });
     }
@@ -386,6 +387,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
       endpointAppContext: endpointContext,
       core,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       taskManager: plugins.taskManager!,
     });
 
@@ -444,7 +446,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       // License related start
       licenseService.start(this.licensing$);
       this.policyWatcher = new PolicyWatcher(
-        plugins.fleet!.packagePolicyService,
+        plugins.fleet.packagePolicyService,
         core.savedObjects,
         core.elasticsearch,
         logger
@@ -452,6 +454,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.policyWatcher.start(licenseService);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
 
     this.endpointAppContextService.start({
@@ -461,14 +464,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       agentPolicyService: plugins.fleet?.agentPolicyService,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.agentService!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.agentPolicyService!,
         logger
       ),
       appClientFactory: this.appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
-      config: this.config!,
+      config: this.config,
       cases: plugins.cases,
       logger,
       manifestManager,
@@ -492,6 +497,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
 
     this.checkMetadataTransformsTask?.start({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       taskManager: plugins.taskManager!,
     });
 

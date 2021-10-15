@@ -17,6 +17,7 @@ const deprecationContext = configDeprecationsMock.createContext();
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);
   const generatedDeprecations: Array<{ message: string; level?: 'warning' | 'critical' }> = [];
+  const configPaths: string[] = [];
   const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
@@ -25,11 +26,14 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
       context: deprecationContext,
     })),
     () =>
-      ({ message, level }) =>
-        generatedDeprecations.push({ message, level })
+      ({ message, level, configPath }) => {
+        generatedDeprecations.push({ message, level });
+        configPaths.push(configPath);
+      }
   );
   return {
     deprecations: generatedDeprecations,
+    configPaths,
     migrated,
   };
 };
@@ -453,7 +457,7 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { deprecations } = applyConfigDeprecations(cloneDeep(config));
+    const { deprecations, configPaths } = applyConfigDeprecations(cloneDeep(config));
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -462,6 +466,8 @@ describe('Config Deprecations', () => {
         },
       ]
     `);
+
+    expect(configPaths).toEqual(['xpack.security.authc.providers.saml.saml1.maxRedirectURLSize']);
   });
 
   it(`warns when 'xpack.security.authc.providers' is an array of strings`, () => {
