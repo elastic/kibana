@@ -24,8 +24,26 @@ import { defaultConfig } from './synthetics_policy_create_extension';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
+
+jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../src/plugins/kibana_react/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
 
 const defaultValidation = centralValidation[DataStream.HTTP];
 
@@ -127,15 +145,11 @@ describe('<CustomFields />', () => {
     expect(verificationMode).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value);
-      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY].value);
-      expect(clientKeyPassphrase.value).toEqual(
-        defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value
-      );
-      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE].value);
-      expect(verificationMode.value).toEqual(
-        defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE].value
-      );
+      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]);
+      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY]);
+      expect(clientKeyPassphrase.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE]);
+      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE]);
+      expect(verificationMode.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]);
     });
   });
 
@@ -185,6 +199,9 @@ describe('<CustomFields />', () => {
     expect(queryByLabelText('URL')).not.toBeInTheDocument();
     expect(queryByLabelText('Max redirects')).not.toBeInTheDocument();
 
+    // expect tls options to be available for TCP
+    expect(queryByLabelText('Enable TLS configuration')).toBeInTheDocument();
+
     // ensure at least one tcp advanced option is present
     let advancedOptionsButton = getByText('Advanced TCP options');
     fireEvent.click(advancedOptionsButton);
@@ -196,6 +213,9 @@ describe('<CustomFields />', () => {
 
     // expect ICMP fields to be in the DOM
     expect(getByLabelText('Wait in seconds')).toBeInTheDocument();
+
+    // expect tls options not be available for ICMP
+    expect(queryByLabelText('Enable TLS configuration')).not.toBeInTheDocument();
 
     // expect TCP fields not to be in the DOM
     expect(queryByLabelText('Proxy URL')).not.toBeInTheDocument();
@@ -211,6 +231,10 @@ describe('<CustomFields />', () => {
         /To create a "Browser" monitor, please ensure you are using the elastic-agent-complete Docker container, which contains the dependencies to run these mon/
       )
     ).toBeInTheDocument();
+
+    // expect tls options to be available for browser
+    expect(queryByLabelText('Zip Proxy URL')).toBeInTheDocument();
+    expect(queryByLabelText('Enable TLS configuration for Zip URL')).toBeInTheDocument();
 
     // ensure at least one browser advanced option is present
     advancedOptionsButton = getByText('Advanced Browser options');

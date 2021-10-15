@@ -55,6 +55,7 @@ export const defaultConfig: PolicyConfig = {
   [DataStream.BROWSER]: {
     ...defaultBrowserSimpleFields,
     ...defaultBrowserAdvancedFields,
+    ...defaultTLSFields,
   },
 };
 
@@ -64,7 +65,7 @@ export const defaultConfig: PolicyConfig = {
  */
 export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
-    const { monitorType } = usePolicyConfigContext();
+    const { monitorType, isTLSEnabled, isZipUrlTLSEnabled } = usePolicyConfigContext();
     const { fields: httpSimpleFields } = useHTTPSimpleFieldsContext();
     const { fields: tcpSimpleFields } = useTCPSimpleFieldsContext();
     const { fields: icmpSimpleFields } = useICMPSimpleFieldsContext();
@@ -74,17 +75,27 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
     const { fields: browserAdvancedFields } = useBrowserAdvancedFieldsContext();
     const { fields: tlsFields } = useTLSFieldsContext();
 
+    const metaData = useMemo(
+      () => ({
+        is_tls_enabled: isTLSEnabled,
+        is_zip_url_tls_enabled: isZipUrlTLSEnabled,
+      }),
+      [isTLSEnabled, isZipUrlTLSEnabled]
+    );
+
     const policyConfig: PolicyConfig = {
       [DataStream.HTTP]: {
         ...httpSimpleFields,
         ...httpAdvancedFields,
         ...tlsFields,
+        [ConfigKeys.METADATA]: metaData,
         [ConfigKeys.NAME]: newPolicy.name,
       } as HTTPFields,
       [DataStream.TCP]: {
         ...tcpSimpleFields,
         ...tcpAdvancedFields,
         ...tlsFields,
+        [ConfigKeys.METADATA]: metaData,
         [ConfigKeys.NAME]: newPolicy.name,
       } as TCPFields,
       [DataStream.ICMP]: {
@@ -94,6 +105,8 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
       [DataStream.BROWSER]: {
         ...browserSimpleFields,
         ...browserAdvancedFields,
+        ...tlsFields,
+        [ConfigKeys.METADATA]: metaData,
         [ConfigKeys.NAME]: newPolicy.name,
       } as BrowserFields,
     };
