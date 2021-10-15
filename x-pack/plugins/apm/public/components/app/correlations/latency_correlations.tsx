@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -53,8 +54,11 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
+import { useTransactionColors } from './use_transaction_colors';
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
+  const transactionColors = useTransactionColors();
+
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -277,6 +281,37 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           <LatencyCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {selectedHistogram && (
+        <EuiText color="subdued" size="xs">
+          {i18n.translate(
+            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartDescription',
+            {
+              defaultMessage:
+                'Log-log plot for latency (x) by transactions (y) with overlapping bands for',
+            }
+          )}
+          <br />
+          <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
+            {i18n.translate(
+              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllTransactions',
+              {
+                defaultMessage: 'all transactions',
+              }
+            )}
+          </span>{' '}
+          {i18n.translate(
+            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAnd',
+            {
+              defaultMessage: 'and',
+            }
+          )}{' '}
+          <span style={{ color: transactionColors.FOCUS_TRANSACTION }}>
+            {selectedHistogram?.fieldName}:{selectedHistogram?.fieldValue}
+          </span>
+          .
+        </EuiText>
+      )}
 
       <EuiSpacer size="s" />
 

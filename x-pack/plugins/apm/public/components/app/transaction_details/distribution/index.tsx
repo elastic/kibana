@@ -30,13 +30,13 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
 
 import {
   TransactionDistributionChart,
   TransactionDistributionChartData,
 } from '../../../shared/charts/transaction_distribution_chart';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
+import { useTransactionColors } from '../../correlations/use_transaction_colors';
 import { getOverallHistogram } from '../../correlations/utils/get_overall_histogram';
 
 import type { TabContentProps } from '../types';
@@ -74,8 +74,7 @@ export function TransactionDistribution({
   selection,
   traceSamples,
 }: TransactionDistributionProps) {
-  const euiTheme = useTheme();
-  const chartPalette = [euiTheme.eui.euiColorVis1, euiTheme.eui.euiColorVis7];
+  const transactionColors = useTransactionColors();
 
   const {
     core: { notifications },
@@ -222,9 +221,36 @@ export function TransactionDistribution({
       </EuiFlexGroup>
 
       <EuiText color="subdued" size="xs">
-        Log-log plot for latency (x) by transactions (y) with overlapping bands
-        for <span style={{ color: chartPalette[0] }}>all transactions</span> and{' '}
-        <span style={{ color: chartPalette[1] }}>all failed transactions</span>.
+        {i18n.translate(
+          'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartDescription',
+          {
+            defaultMessage:
+              'Log-log plot for latency (x) by transactions (y) with overlapping bands for',
+          }
+        )}{' '}
+        <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
+          {i18n.translate(
+            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllTransactions',
+            {
+              defaultMessage: 'all transactions',
+            }
+          )}
+        </span>{' '}
+        {i18n.translate(
+          'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAnd',
+          {
+            defaultMessage: 'and',
+          }
+        )}{' '}
+        <span style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}>
+          {i18n.translate(
+            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllFailedTransactions',
+            {
+              defaultMessage: 'all failed transactions',
+            }
+          )}
+        </span>
+        .
       </EuiText>
 
       <EuiSpacer size="s" />
@@ -236,7 +262,10 @@ export function TransactionDistribution({
         markerValue={response.percentileThresholdValue ?? 0}
         onChartSelection={onTrackedChartSelection as BrushEndListener}
         hasData={hasData}
-        palette={chartPalette}
+        palette={[
+          transactionColors.ALL_TRANSACTIONS,
+          transactionColors.ALL_FAILED_TRANSACTIONS,
+        ]}
         selection={selection}
         status={status}
       />

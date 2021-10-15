@@ -42,6 +42,7 @@ import {
 } from '../../../../common/search_strategies/constants';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSearchStrategy } from '../../../hooks/use_search_strategy';
 import { useTheme } from '../../../hooks/use_theme';
@@ -62,8 +63,7 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
-import { useTheme } from '../../../hooks/use_theme';
+import { useTransactionColors } from './use_transaction_colors';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -71,11 +71,7 @@ export function FailedTransactionsCorrelations({
   onFilter: () => void;
 }) {
   const euiTheme = useTheme();
-  const chartPalette = [
-    euiTheme.eui.euiColorVis1,
-    euiTheme.eui.euiColorVis7,
-    euiTheme.eui.euiColorVis2,
-  ];
+  const transactionColors = useTransactionColors();
 
   const {
     core: { notifications, uiSettings },
@@ -104,7 +100,6 @@ export function FailedTransactionsCorrelations({
     'apmFailedTransactionsShowAdvancedStats',
     false
   );
-  const euiTheme = useTheme();
 
   const toggleShowStats = useCallback(() => {
     setShowStats(!showStats);
@@ -495,15 +490,38 @@ export function FailedTransactionsCorrelations({
 
       {selectedTerm && (
         <EuiText color="subdued" size="xs">
-          Log-log plot for latency (x) by transactions (y) with overlapping
-          bands for
+          {i18n.translate(
+            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartDescription',
+            {
+              defaultMessage:
+                'Log-log plot for latency (x) by transactions (y) with overlapping bands for',
+            }
+          )}
           <br />
-          <span style={{ color: chartPalette[0] }}>all transactions</span>,{' '}
-          <span style={{ color: chartPalette[1] }}>
-            all failed transactions
+          <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
+            {i18n.translate(
+              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllTransactions',
+              {
+                defaultMessage: 'all transactions',
+              }
+            )}
+          </span>
+          ,{' '}
+          <span style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}>
+            {i18n.translate(
+              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllFailedTransactions',
+              {
+                defaultMessage: 'all failed transactions',
+              }
+            )}
           </span>{' '}
-          and{' '}
-          <span style={{ color: chartPalette[2] }}>
+          {i18n.translate(
+            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAnd',
+            {
+              defaultMessage: 'and',
+            }
+          )}{' '}
+          <span style={{ color: transactionColors.FOCUS_TRANSACTION }}>
             {selectedTerm?.fieldName}:{selectedTerm?.fieldValue}
           </span>
           .
@@ -517,7 +535,11 @@ export function FailedTransactionsCorrelations({
         markerValue={response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}
-        palette={chartPalette}
+        palette={[
+          transactionColors.ALL_TRANSACTIONS,
+          transactionColors.ALL_FAILED_TRANSACTIONS,
+          transactionColors.FOCUS_TRANSACTION,
+        ]}
         status={status}
       />
 
