@@ -12,20 +12,42 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const clusterList = getService('monitoringClusterList');
+  const browser = getService('browser');
+
+  const assertTimePickerRange = async (start, end) => {
+    const timeConfig = await PageObjects.timePicker.getTimeConfig();
+    expect(timeConfig.start).to.eql(start);
+    expect(timeConfig.end).to.eql(end);
+  };
 
   describe('Timefilter', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
+    const from = 'Aug 15, 2017 @ 21:00:00.000';
+    const to = 'Aug 16, 2017 @ 00:00:00.000';
+
     before(async () => {
       await setup('x-pack/test/functional/es_archives/monitoring/multicluster', {
-        from: 'Aug 15, 2017 @ 21:00:00.000',
-        to: 'Aug 16, 2017 @ 00:00:00.000',
+        from,
+        to,
       });
       await clusterList.assertDefaults();
+      await clusterList.closeAlertsModal();
     });
 
     after(async () => {
       await tearDown();
+    });
+
+    it('syncs timepicker with url hash updates', async () => {
+      await assertTimePickerRange(from, to);
+
+      await browser.execute(() => {
+        const hash = window.location.hash;
+        window.location.hash = hash.replace(/time:\(([^)]+)\)/, 'time:(from:now-15m,to:now)');
+      });
+
+      await assertTimePickerRange('~ 15 minutes ago', 'now');
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/48910
