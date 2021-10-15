@@ -38,25 +38,28 @@ export function installBrowser(
     const binaryPath = paths.getBinaryPath(p);
     const binaryChecksum = await md5(binaryPath).catch(() => '');
 
-    try {
-      if (binaryChecksum !== p.binaryChecksum) {
-        logger.warning(
-          `Found browser binary checksum for ${p.platform}/${p.architecture} ` +
-            `is ${binaryChecksum} but ${p.binaryChecksum} was expected. Re-installing...`
-        );
+    if (binaryChecksum !== p.binaryChecksum) {
+      logger.warning(
+        `Found browser binary checksum for ${p.platform}/${p.architecture} ` +
+          `is ${binaryChecksum} but ${p.binaryChecksum} was expected. Re-installing...`
+      );
+      try {
         await del(chromiumPath);
-        await ensureBrowserDownloaded(logger);
+      } catch (err) {
+        logger.error(err);
+      }
 
+      try {
+        await ensureBrowserDownloaded(logger);
         const archive = path.join(paths.archivesPath, p.architecture, p.archiveFilename);
         logger.info(`Extracting [${archive}] to [${chromiumPath}]`);
         await extract(archive, chromiumPath);
+      } catch (err) {
+        logger.error(err);
       }
-
-      logger.info(`Browser executable: ${binaryPath}`);
-    } catch (err) {
-      // Avoid crashing the server if unable to download the browsers (usually in a dev environment)
-      logger.error(err);
     }
+
+    logger.info(`Browser executable: ${binaryPath}`);
 
     binaryPath$.next(binaryPath); // subscribers wait for download and extract to complete
   };
