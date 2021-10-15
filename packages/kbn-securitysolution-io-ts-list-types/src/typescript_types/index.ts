@@ -43,6 +43,7 @@ export interface UseExceptionListsProps {
   initialPagination?: Pagination;
   showTrustedApps: boolean;
   showEventFilters: boolean;
+  showHostIsolationExceptions: boolean;
 }
 
 export interface UseExceptionListProps {
