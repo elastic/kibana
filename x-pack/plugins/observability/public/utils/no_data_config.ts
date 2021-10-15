@@ -26,7 +26,7 @@ export function getNoDataConfig({
       actions: {
         beats: {
           title: i18n.translate('xpack.observability.noDataConfig.beatsCard.title', {
-            defaultMessage: 'Add an integration',
+            defaultMessage: 'Add integrations',
           }),
           description: i18n.translate('xpack.observability.noDataConfig.beatsCard.description', {
             defaultMessage:
