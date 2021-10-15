@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-require('./ensure_node_preserve_symlinks');
+// require('./ensure_node_preserve_symlinks');
 require('./no_transpilation_dist');
 require('./polyfill');
