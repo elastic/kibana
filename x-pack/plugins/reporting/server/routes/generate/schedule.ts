@@ -75,7 +75,10 @@ export function registerSchedulingRoutes(reporting: ReportingCore, logger: Level
           return res.badRequest({ body: err });
         }
         logger.error(err);
-        throw err;
+        return res.customError({
+          statusCode: err?.statusCode ?? 500,
+          body: { message: err.message },
+        });
       }
     })
   );
