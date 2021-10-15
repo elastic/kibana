@@ -12,21 +12,45 @@ import { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_
 import { Writer } from './writer';
 import { Message, MessageTypes } from './message';
 
-export class ToolingLog {
-  private indentWidth = 0;
-  private writers: Writer[];
-  private readonly written$: Rx.Subject<Message>;
+export interface ToolingLogOptions {
+  /**
+   * type name for this logger, will be assigned to the "source"
+   * properties of messages produced by this logger
+   */
+  type?: string;
+  /**
+   * parent ToolingLog. When a ToolingLog has a parent they will both
+   * share indent and writers state. Changing the indent width or
+   * writers on either log will update the other too.
+   */
+  parent?: ToolingLog;
+}
 
-  constructor(writerConfig?: ToolingLogTextWriterConfig) {
-    this.writers = writerConfig ? [new ToolingLogTextWriter(writerConfig)] : [];
-    this.written$ = new Rx.Subject();
+export class ToolingLog {
+  private indentWidth$: Rx.BehaviorSubject<number>;
+  private writers$: Rx.BehaviorSubject<Writer[]>;
+  private readonly written$: Rx.Subject<Message>;
+  private readonly type: string | undefined;
+
+  constructor(writerConfig?: ToolingLogTextWriterConfig, options?: ToolingLogOptions) {
+    this.indentWidth$ = options?.parent ? options.parent.indentWidth$ : new Rx.BehaviorSubject(0);
+
+    this.writers$ = options?.parent
+      ? options.parent.writers$
+      : new Rx.BehaviorSubject<Writer[]>([]);
+    if (!options?.parent && writerConfig) {
+      this.writers$.next([new ToolingLogTextWriter(writerConfig)]);
+    }
+
+    this.written$ = options?.parent ? options.parent.written$ : new Rx.Subject();
+    this.type = options?.type;
   }
 
   /**
    * Get the current indentation level of the ToolingLog
    */
   public getIndent() {
-    return this.indentWidth;
+    return this.indentWidth$.getValue();
   }
 
   /**
@@ -39,8 +63,8 @@ export class ToolingLog {
    * @param block a function to run and reset any indentation changes after
    */
   public indent<T>(delta = 0, block?: () => Promise<T>) {
-    const originalWidth = this.indentWidth;
-    this.indentWidth = Math.max(this.indentWidth + delta, 0);
+    const originalWidth = this.indentWidth$.getValue();
+    this.indentWidth$.next(Math.max(originalWidth + delta, 0));
     if (!block) {
       return;
     }
@@ -49,7 +73,7 @@ export class ToolingLog {
       try {
         return await block();
       } finally {
-        this.indentWidth = originalWidth;
+        this.indentWidth$.next(originalWidth);
       }
     })();
   }
@@ -83,26 +107,40 @@ export class ToolingLog {
   }
 
   public getWriters() {
-    return this.writers.slice(0);
+    return [...this.writers$.getValue()];
   }
 
   public setWriters(writers: Writer[]) {
-    this.writers = [...writers];
+    this.writers$.next([...writers]);
   }
 
   public getWritten$() {
     return this.written$.asObservable();
   }
 
-  private sendToWriters(type: MessageTypes, args: any[]) {
-    const msg = {
+  /**
+   * Create a new ToolingLog which sets a different "type", allowing messages to be filtered out by "source"
+   * @param type A string that will be passed along with messages from this logger which can be used to filter messages with `ignoreSources`
+   */
+  public withType(type: string) {
+    return new ToolingLog(undefined, {
       type,
-      indent: this.indentWidth,
+      parent: this,
+    });
+  }
+
+  private sendToWriters(type: MessageTypes, args: any[]) {
+    const indent = this.indentWidth$.getValue();
+    const writers = this.writers$.getValue();
+    const msg: Message = {
+      type,
+      indent,
+      source: this.type,
       args,
     };
 
     let written = false;
-    for (const writer of this.writers) {
+    for (const writer of writers) {
       if (writer.write(msg)) {
         written = true;
       }

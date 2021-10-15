@@ -10,20 +10,6 @@ import { transformDataToNdjson } from './';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
-export const getOutputSample = () => ({
-  rule_id: 'rule-1',
-  output_index: '.siem-signals',
-  risk_score: 50,
-  description: 'some description',
-  from: 'now-5m',
-  to: 'now',
-  index: ['index-1'],
-  name: 'some-name',
-  severity: 'low',
-  interval: '5m',
-  type: 'query',
-});
-
 const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE) => ({
   author: [],
   id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
@@ -59,10 +45,6 @@ const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE) => ({
   interval: '5m',
   exceptions_list: [],
 });
-
-export const getSampleAsNdjson = (sample: unknown): string => {
-  return `${JSON.stringify(sample)}\n`;
-};
 
 describe('transformDataToNdjson', () => {
   test('if rules are empty it returns an empty string', () => {
