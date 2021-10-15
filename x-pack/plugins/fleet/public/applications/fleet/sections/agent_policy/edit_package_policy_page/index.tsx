@@ -200,10 +200,19 @@ export const EditPackagePolicyForm = memo<{
 
             if (packageData?.response) {
               setPackageInfo(packageData.response);
-              setValidationResults(
-                validatePackagePolicy(newPackagePolicy, packageData.response, safeLoad)
+
+              const newValidationResults = validatePackagePolicy(
+                newPackagePolicy,
+                packageData.response,
+                safeLoad
               );
-              setFormState('VALID');
+              setValidationResults(newValidationResults);
+
+              if (validationHasErrors(newValidationResults)) {
+                setFormState('INVALID');
+              } else {
+                setFormState('VALID');
+              }
             }
           }
         }
@@ -687,7 +696,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
                 <h2 id="FleetPackagePolicyPreviousVersionFlyoutTitle">
                   <FormattedMessage
                     id="xpack.fleet.upgradePackagePolicy.previousVersionFlyout.title"
-                    defaultMessage="'{name}' package policy"
+                    defaultMessage="'{name}' integration policy"
                     values={{ name: currentPackagePolicy?.name }}
                   />
                 </h2>
