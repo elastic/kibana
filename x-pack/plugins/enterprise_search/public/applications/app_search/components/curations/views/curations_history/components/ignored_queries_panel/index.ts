@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { IgnoredSuggestionsPanel } from './ignored_suggestions_panel';
+export { IgnoredQueriesPanel } from './ignored_queries_panel';

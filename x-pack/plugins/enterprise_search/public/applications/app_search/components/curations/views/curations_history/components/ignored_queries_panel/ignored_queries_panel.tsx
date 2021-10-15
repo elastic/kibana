@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { DataPanel } from '../../../../../data_panel';
 import { CurationSuggestion } from '../../../../types';
 
-export const IgnoredSuggestionsPanel: React.FC = () => {
+export const IgnoredQueriesPanel: React.FC = () => {
   const ignoredSuggestions: CurationSuggestion[] = [];
 
   const allowSuggestion = (query: string) => alert(query);

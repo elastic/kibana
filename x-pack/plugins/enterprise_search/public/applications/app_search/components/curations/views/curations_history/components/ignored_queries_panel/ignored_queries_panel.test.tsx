@@ -11,13 +11,13 @@ import { shallow } from 'enzyme';
 
 import { EuiBasicTable } from '@elastic/eui';
 
-import { DataPanel } from '../../../../data_panel';
+import { DataPanel } from '../../../../../data_panel';
 
-import { IgnoredSuggestionsPanel } from './ignored_suggestions_panel';
+import { IgnoredQueriesPanel } from '../ignored_queries_panel';
 
-describe('IgnoredSuggestionsPanel', () => {
+describe('IgnoredQueriesPanel', () => {
   it('renders', () => {
-    const wrapper = shallow(<IgnoredSuggestionsPanel />);
+    const wrapper = shallow(<IgnoredQueriesPanel />);
 
     expect(wrapper.is(DataPanel)).toBe(true);
     expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
