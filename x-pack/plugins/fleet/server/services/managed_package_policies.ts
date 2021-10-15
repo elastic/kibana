@@ -8,7 +8,6 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
 import type { UpgradePackagePolicyDryRunResponseItem } from '../../common';
-import { AUTO_UPDATE_PACKAGES } from '../../common';
 
 import { appContextService } from './app_context';
 import { getInstallation, getPackageInfo } from './epm/packages';
