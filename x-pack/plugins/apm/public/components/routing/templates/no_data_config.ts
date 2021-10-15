@@ -25,11 +25,11 @@ export function getNoDataConfig({
       }),
       actions: {
         elasticAgent: {
-          title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
+          title: i18n.translate('xpack.apm.ux.overview.agent.title', {
             defaultMessage: 'Add the APM integration',
           }),
           description: i18n.translate(
-            'xpack.apm.ux.overview.beatsCard.description',
+            'xpack.apm.ux.overview.agent.description',
             {
               defaultMessage:
                 'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
