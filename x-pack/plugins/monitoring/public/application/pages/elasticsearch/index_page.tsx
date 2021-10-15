@@ -13,7 +13,7 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { IndexReact } from '../../../components/elasticsearch/index/index_react';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useCharts } from '../../hooks/use_charts';
 import { ItemTemplate } from './item_template';
@@ -23,13 +23,8 @@ import { indicesByNodes } from '../../../components/elasticsearch/shard_allocati
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
+import { RULE_LARGE_SHARD_SIZE, ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
 
 export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -119,6 +114,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
       pageType="indices"
     >
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}

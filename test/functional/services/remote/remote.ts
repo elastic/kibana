@@ -44,7 +44,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   }
 
   consoleLog$.subscribe(({ message, level }) => {
-    log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
+    log[level === 'SEVERE' || level === 'error' ? 'warning' : 'debug'](
       `browser[${level}] ${message}`
     );
   });

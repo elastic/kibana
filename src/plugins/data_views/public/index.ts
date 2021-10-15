@@ -14,7 +14,6 @@ export {
   validateDataView,
 } from '../common/lib';
 export {
-  flattenHitWrapper,
   formatHitProvider,
   onRedirectNoIndexPattern,
   onUnsupportedTimePattern,

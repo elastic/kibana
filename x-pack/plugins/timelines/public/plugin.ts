@@ -45,7 +45,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
     }
     return {
       getHoverActions: () => {
-        return getHoverActions(this._store!);
+        return getHoverActions(this._store);
       },
       getTGrid: (props: TGridProps) => {
         if (props.type === 'standalone' && this._store) {
@@ -73,6 +73,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getFieldBrowser: (props: FieldBrowserProps) => {
         return getFieldsBrowserLazy(props, {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           store: this._store!,
         });
       },
@@ -90,6 +91,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getAddToCaseAction: (props) => {
         return getAddToCaseLazy(props, {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           store: this._store!,
           storage: this._storage,
           setStore: this.setStore.bind(this),
@@ -97,6 +99,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getAddToCasePopover: (props) => {
         return getAddToCasePopoverLazy(props, {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           store: this._store!,
           storage: this._storage,
           setStore: this.setStore.bind(this),
@@ -104,6 +107,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getAddToExistingCaseButton: (props) => {
         return getAddToExistingCaseButtonLazy(props, {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           store: this._store!,
           storage: this._storage,
           setStore: this.setStore.bind(this),
@@ -111,6 +115,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getAddToNewCaseButton: (props) => {
         return getAddToNewCaseButtonLazy(props, {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           store: this._store!,
           storage: this._storage,
           setStore: this.setStore.bind(this),

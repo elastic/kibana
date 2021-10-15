@@ -25,6 +25,7 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
 } from '@elastic/eui';
+import { Dispatch } from 'redux';
 import {
   policyDetails,
   getCurrentArtifactsLocation,
@@ -42,10 +43,12 @@ import {
 } from '../../policy_hooks';
 import { PolicyArtifactsAssignableList } from '../../artifacts/assignable';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
+import { AppAction } from '../../../../../../common/store/actions';
+import { MaybeImmutable, TrustedApp } from '../../../../../../../common/endpoint/types';
 
 export const PolicyTrustedAppsFlyout = React.memo(() => {
   usePolicyTrustedAppsNotification();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<Dispatch<AppAction>>();
   const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -85,9 +88,15 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
   const handleOnConfirmAction = useCallback(() => {
     dispatch({
       type: 'policyArtifactsUpdateTrustedApps',
-      payload: { trustedAppIds: selectedArtifactIds },
+      payload: {
+        action: 'assign',
+        artifacts: selectedArtifactIds.map<MaybeImmutable<TrustedApp>>((selectedId) => {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          return assignableArtifactsList?.data?.find((trustedApp) => trustedApp.id === selectedId)!;
+        }),
+      },
     });
-  }, [dispatch, selectedArtifactIds]);
+  }, [assignableArtifactsList?.data, dispatch, selectedArtifactIds]);
 
   const handleOnSearch = useCallback(
     (filter) => {
@@ -241,7 +250,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.confirm"
-                defaultMessage="Assing to {policyName}"
+                defaultMessage="Assign to {policyName}"
                 values={{
                   policyName,
                 }}

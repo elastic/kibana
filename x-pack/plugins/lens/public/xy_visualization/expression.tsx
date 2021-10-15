@@ -67,6 +67,7 @@ import {
   getThresholdRequiredPaddings,
   ThresholdAnnotations,
 } from './expression_thresholds';
+import { computeOverallDataDomain } from './threshold_helpers';
 
 declare global {
   interface Window {
@@ -250,6 +251,10 @@ export function XYChart({
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
+  const layersById = filteredLayers.reduce((memo, layer) => {
+    memo[layer.layerId] = layer;
+    return memo;
+  }, {} as Record<string, LayerArgs>);
 
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
     datatables: Object.values(data.tables),
@@ -386,7 +391,7 @@ export function XYChart({
     const extent = axis.groupId === 'left' ? yLeftExtent : yRightExtent;
     const hasBarOrArea = Boolean(
       axis.series.some((series) => {
-        const seriesType = filteredLayers.find((l) => l.layerId === series.layer)?.seriesType;
+        const seriesType = layersById[series.layer]?.seriesType;
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
     );
@@ -406,20 +411,15 @@ export function XYChart({
       );
       if (!fit && axisHasThreshold) {
         // Remove this once the chart will support automatic annotation fit for other type of charts
-        for (const series of axis.series) {
-          const table = data.tables[series.layer];
-          for (const row of table.rows) {
-            for (const column of table.columns) {
-              if (column.id === series.accessor) {
-                const value = row[column.id];
-                if (typeof value === 'number') {
-                  // keep the 0 in view
-                  max = Math.max(value, max || 0, 0);
-                  min = Math.min(value, min || 0, 0);
-                }
-              }
-            }
-          }
+        const { min: computedMin, max: computedMax } = computeOverallDataDomain(
+          filteredLayers,
+          axis.series.map(({ accessor }) => accessor),
+          data.tables
+        );
+
+        if (computedMin != null && computedMax != null) {
+          max = Math.max(computedMax, max || 0);
+          min = Math.min(computedMin, min || 0);
         }
         for (const { layerId, yConfig } of thresholdLayers) {
           const table = data.tables[layerId];
@@ -927,6 +927,7 @@ export function XYChart({
             right: Boolean(yAxesMap.right),
           }}
           isHorizontal={shouldRotate}
+          thresholdPaddingMap={thresholdPaddings}
         />
       ) : null}
     </Chart>

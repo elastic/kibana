@@ -1387,13 +1387,21 @@
             "signature": [
               "(fieldName: string, format: ",
               {
-                "pluginId": "expressions",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<Record<string, any>>) => void"
+              "<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              ">) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -1421,13 +1429,21 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "expressions",
+                    "pluginId": "fieldFormats",
                     "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
+                    "docId": "kibFieldFormatsPluginApi",
                     "section": "def-common.SerializedFieldFormat",
                     "text": "SerializedFieldFormat"
                   },
-                  "<Record<string, any>>"
+                  "<",
+                  {
+                    "pluginId": "fieldFormats",
+                    "scope": "common",
+                    "docId": "kibFieldFormatsPluginApi",
+                    "section": "def-common.FieldFormatParams",
+                    "text": "FieldFormatParams"
+                  },
+                  ">"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
                 "deprecated": false,
@@ -1677,7 +1693,7 @@
             "section": "def-common.DataViewsService",
             "text": "DataViewsService"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, ",
+          ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">, ",
           "DataViewsPublicSetupDependencies",
           ", ",
           "DataViewsPublicStartDependencies",
@@ -1712,7 +1728,7 @@
                 "section": "def-common.DataViewsService",
                 "text": "DataViewsService"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">>, { expressions }: ",
+              ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">>, { expressions }: ",
               "DataViewsPublicSetupDependencies",
               ") => ",
               {
@@ -1751,7 +1767,7 @@
                     "section": "def-common.DataViewsService",
                     "text": "DataViewsService"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">>"
+                  ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">>"
                 ],
                 "path": "src/plugins/data_views/public/plugin.ts",
                 "deprecated": false,
@@ -1800,7 +1816,7 @@
                 "section": "def-common.DataViewsService",
                 "text": "DataViewsService"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
+              ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">"
             ],
             "path": "src/plugins/data_views/public/plugin.ts",
             "deprecated": false,
@@ -1874,14 +1890,34 @@
             "parentPluginId": "dataViews",
             "id": "def-public.DataViewsService.ensureDefaultDataView",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "ensureDefaultDataView",
             "description": [],
             "signature": [
               "() => Promise<unknown> | undefined"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
-            "deprecated": false,
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/apps/main/discover_main_route.tsx"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/application/lib/load_saved_dashboard_state.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/plugin.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/plugin.ts"
+              }
+            ],
             "returnComment": [],
             "children": []
           },
@@ -3013,6 +3049,33 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsService.getDefaultDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultDataView",
+            "description": [
+              "\nReturns the default data view as an object. If no default is found, or it is missing\nanother data view is selected as default and returned."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": [
+              "default data view"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -3535,18 +3598,6 @@
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_app_index_pattern.tsx"
           },
           {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/log_sources/resolved_log_source_configuration.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/log_sources/resolved_log_source_configuration.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/log_sources/resolved_log_source_configuration.ts"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/embeddable/types.ts"
           },
@@ -3719,30 +3770,6 @@
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/types.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/types.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-          },
-          {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/SelectedFilters.tsx"
           },
@@ -3871,14 +3898,6 @@
             "path": "x-pack/plugins/transform/common/types/index_pattern.ts"
           },
           {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/server/routes/existing_fields.test.ts"
           },
@@ -3909,14 +3928,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/common/dependency_mocks/index_patterns.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/common/dependency_mocks/index_patterns.d.ts"
           },
           {
             "plugin": "lens",
@@ -4824,6 +4835,18 @@
           },
           {
             "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts"
           },
           {
@@ -4841,18 +4864,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/utils/observability_index_patterns.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
           },
           {
             "plugin": "observability",
@@ -5061,250 +5072,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/field_format_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/field_format_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_grid/common.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_grid/common.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_grid/common.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_grid/common.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/data_loader/data_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/data_loader/data_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/data_loader/data_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/scatterplot_matrix/use_scatterplot_field_options.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/scatterplot_matrix/use_scatterplot_field_options.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/scatterplot_matrix/scatterplot_matrix.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/scatterplot_matrix/scatterplot_matrix.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/single_metric_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/single_metric_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/multi_metric_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/multi_metric_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/population_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/population_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/advanced_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/advanced_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/categorization_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/categorization_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/rare_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/rare_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator_factory.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator_factory.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/expandable_section/expandable_section_results.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/expandable_section/expandable_section_results.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/outlier_exploration/use_outlier_data.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/outlier_exploration/use_outlier_data.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/use_exploration_results.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/use_exploration_results.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/exploration_results_table.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/exploration_results_table.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/ml_context.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/ml_context.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/common/use_results_view_config.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/common/use_results_view_config.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/common/use_results_view_config.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
           },
           {
             "plugin": "apm",
@@ -5607,22 +5374,6 @@
             "path": "x-pack/plugins/maps/target/types/public/components/geo_index_pattern_select.d.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities._service.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities._service.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
           },
@@ -5633,14 +5384,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/__mocks__/index_pattern.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/__mocks__/index_pattern.ts"
           },
           {
             "plugin": "maps",
@@ -5705,14 +5448,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/filter_editor/filter_editor.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/public/application/components/full_time_range_selector/full_time_range_selector.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/public/application/components/full_time_range_selector/full_time_range_selector.d.ts"
           },
           {
             "plugin": "dataVisualizer",
@@ -8116,7 +7851,7 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"delete\" | \"create\" | \"find\" | \"resolve\" | \"update\">"
+                  ", \"create\" | \"delete\" | \"find\" | \"resolve\" | \"update\">"
                 ],
                 "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
                 "deprecated": false,
@@ -8501,7 +8236,7 @@
             "signature": [
               "<T = any>() => Promise<Record<string, Pick<",
               "UiSettingsParams",
-              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\"> & ",
+              "<unknown>, \"type\" | \"description\" | \"name\" | \"options\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\"> & ",
               "UserProvidedValues",
               "<T>>>"
             ],
@@ -9392,15 +9127,7 @@
         "\nData plugin public Start contract"
       ],
       "signature": [
-        "{ get: (id: string) => Promise<",
-        {
-          "pluginId": "dataViews",
-          "scope": "common",
-          "docId": "kibDataViewsPluginApi",
-          "section": "def-common.DataView",
-          "text": "DataView"
-        },
-        ">; delete: (indexPatternId: string) => Promise<{}>; create: (spec: ",
+        "{ create: (spec: ",
         {
           "pluginId": "dataViews",
           "scope": "common",
@@ -9416,7 +9143,7 @@
           "section": "def-common.DataView",
           "text": "DataView"
         },
-        ">; find: (search: string, size?: number) => Promise<",
+        ">; delete: (indexPatternId: string) => Promise<{}>; find: (search: string, size?: number) => Promise<",
         {
           "pluginId": "dataViews",
           "scope": "common",
@@ -9424,7 +9151,15 @@
           "section": "def-common.DataView",
           "text": "DataView"
         },
-        "[]>; ensureDefaultDataView: ",
+        "[]>; get: (id: string) => Promise<",
+        {
+          "pluginId": "dataViews",
+          "scope": "common",
+          "docId": "kibDataViewsPluginApi",
+          "section": "def-common.DataView",
+          "text": "DataView"
+        },
+        ">; ensureDefaultDataView: ",
         "EnsureDefaultDataView",
         "; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
         {
@@ -9590,7 +9325,15 @@
           "section": "def-common.DataView",
           "text": "DataView"
         },
-        ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; }"
+        ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; getDefaultDataView: () => Promise<",
+        {
+          "pluginId": "dataViews",
+          "scope": "common",
+          "docId": "kibDataViewsPluginApi",
+          "section": "def-common.DataView",
+          "text": "DataView"
+        },
+        " | undefined>; }"
       ],
       "path": "src/plugins/data_views/public/types.ts",
       "deprecated": false,
@@ -9807,7 +9550,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -9831,7 +9574,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -10241,7 +9984,7 @@
             "section": "def-server.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
+          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -10351,7 +10094,7 @@
             "section": "def-server.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, index: string) => Promise<",
+          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, index: string) => Promise<",
           "SavedObject",
           "<",
           {
@@ -10382,7 +10125,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
             ],
             "path": "src/plugins/data_views/server/utils.ts",
             "deprecated": false,
@@ -10797,7 +10540,7 @@
               "section": "def-server.SavedObjectsClient",
               "text": "SavedObjectsClient"
             },
-            ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
+            ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
             {
               "pluginId": "core",
               "scope": "server",
@@ -10827,25 +10570,7 @@
               "label": "savedObjectsClient",
               "description": [],
               "signature": [
-                "{ get: <T = unknown>(type: string, id: string, options?: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectsBaseOptions",
-                  "text": "SavedObjectsBaseOptions"
-                },
-                ") => Promise<",
-                "SavedObject",
-                "<T>>; delete: (type: string, id: string, options?: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectsDeleteOptions",
-                  "text": "SavedObjectsDeleteOptions"
-                },
-                ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+                "{ create: <T = unknown>(type: string, attributes: T, options?: ",
                 {
                   "pluginId": "core",
                   "scope": "server",
@@ -10903,7 +10628,15 @@
                   "section": "def-server.SavedObjectsCheckConflictsResponse",
                   "text": "SavedObjectsCheckConflictsResponse"
                 },
-                ">; find: <T = unknown, A = unknown>(options: ",
+                ">; delete: (type: string, id: string, options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsDeleteOptions",
+                  "text": "SavedObjectsDeleteOptions"
+                },
+                ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
                 {
                   "pluginId": "core",
                   "scope": "server",
@@ -10967,6 +10700,16 @@
                   "section": "def-server.SavedObjectsBulkResolveResponse",
                   "text": "SavedObjectsBulkResolveResponse"
                 },
+                "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBaseOptions",
+                  "text": "SavedObjectsBaseOptions"
+                },
+                ") => Promise<",
+                "SavedObject",
                 "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
                 {
                   "pluginId": "core",
@@ -11166,7 +10909,7 @@
               "signature": [
                 "Pick<",
                 "KibanaClient",
-                ", \"get\" | \"delete\" | \"monitoring\" | \"security\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                ", \"monitoring\" | \"security\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
                 "TransportRequestParams",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -11199,7 +10942,7 @@
               "section": "def-server.SavedObjectsClient",
               "text": "SavedObjectsClient"
             },
-            ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
+            ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
             {
               "pluginId": "core",
               "scope": "server",
@@ -11283,25 +11026,7 @@
               "label": "savedObjectsClient",
               "description": [],
               "signature": [
-                "{ get: <T = unknown>(type: string, id: string, options?: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectsBaseOptions",
-                  "text": "SavedObjectsBaseOptions"
-                },
-                ") => Promise<",
-                "SavedObject",
-                "<T>>; delete: (type: string, id: string, options?: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectsDeleteOptions",
-                  "text": "SavedObjectsDeleteOptions"
-                },
-                ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+                "{ create: <T = unknown>(type: string, attributes: T, options?: ",
                 {
                   "pluginId": "core",
                   "scope": "server",
@@ -11359,7 +11084,15 @@
                   "section": "def-server.SavedObjectsCheckConflictsResponse",
                   "text": "SavedObjectsCheckConflictsResponse"
                 },
-                ">; find: <T = unknown, A = unknown>(options: ",
+                ">; delete: (type: string, id: string, options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsDeleteOptions",
+                  "text": "SavedObjectsDeleteOptions"
+                },
+                ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
                 {
                   "pluginId": "core",
                   "scope": "server",
@@ -11423,6 +11156,16 @@
                   "section": "def-server.SavedObjectsBulkResolveResponse",
                   "text": "SavedObjectsBulkResolveResponse"
                 },
+                "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBaseOptions",
+                  "text": "SavedObjectsBaseOptions"
+                },
+                ") => Promise<",
+                "SavedObject",
                 "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
                 {
                   "pluginId": "core",
@@ -11622,7 +11365,7 @@
               "signature": [
                 "Pick<",
                 "KibanaClient",
-                ", \"get\" | \"delete\" | \"monitoring\" | \"security\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                ", \"monitoring\" | \"security\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
                 "TransportRequestParams",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -13042,13 +12785,21 @@
             "signature": [
               "(fieldName: string, format: ",
               {
-                "pluginId": "expressions",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<Record<string, any>>) => void"
+              "<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              ">) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -13076,13 +12827,21 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "expressions",
+                    "pluginId": "fieldFormats",
                     "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
+                    "docId": "kibFieldFormatsPluginApi",
                     "section": "def-common.SerializedFieldFormat",
                     "text": "SerializedFieldFormat"
                   },
-                  "<Record<string, any>>"
+                  "<",
+                  {
+                    "pluginId": "fieldFormats",
+                    "scope": "common",
+                    "docId": "kibFieldFormatsPluginApi",
+                    "section": "def-common.FieldFormatParams",
+                    "text": "FieldFormatParams"
+                  },
+                  ">"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
                 "deprecated": false,
@@ -13814,14 +13573,34 @@
             "parentPluginId": "dataViews",
             "id": "def-common.DataViewsService.ensureDefaultDataView",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "ensureDefaultDataView",
             "description": [],
             "signature": [
               "() => Promise<unknown> | undefined"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
-            "deprecated": false,
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/apps/main/discover_main_route.tsx"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/application/lib/load_saved_dashboard_state.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/plugin.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/plugin.ts"
+              }
+            ],
             "returnComment": [],
             "children": []
           },
@@ -14953,6 +14732,33 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsService.getDefaultDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultDataView",
+            "description": [
+              "\nReturns the default data view as an object. If no default is found, or it is missing\nanother data view is selected as default and returned."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": [
+              "default data view"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -15528,18 +15334,6 @@
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_app_index_pattern.tsx"
           },
           {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/log_sources/resolved_log_source_configuration.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/log_sources/resolved_log_source_configuration.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/log_sources/resolved_log_source_configuration.ts"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/embeddable/types.ts"
           },
@@ -15712,30 +15506,6 @@
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/types.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/types.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-          },
-          {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/SelectedFilters.tsx"
           },
@@ -15864,14 +15634,6 @@
             "path": "x-pack/plugins/transform/common/types/index_pattern.ts"
           },
           {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/server/routes/existing_fields.test.ts"
           },
@@ -15902,14 +15664,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/common/dependency_mocks/index_patterns.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/common/dependency_mocks/index_patterns.d.ts"
           },
           {
             "plugin": "lens",
@@ -16817,6 +16571,18 @@
           },
           {
             "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
+          },
+          {
+            "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts"
           },
           {
@@ -16834,18 +16600,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/utils/observability_index_patterns.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx"
           },
           {
             "plugin": "observability",
@@ -17054,250 +16808,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/field_format_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/field_format_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_grid/common.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_grid/common.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_grid/common.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_grid/common.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/data_loader/data_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/data_loader/data_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/data_loader/data_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/scatterplot_matrix/use_scatterplot_field_options.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/scatterplot_matrix/use_scatterplot_field_options.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/scatterplot_matrix/scatterplot_matrix.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/scatterplot_matrix/scatterplot_matrix.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/single_metric_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/single_metric_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/multi_metric_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/multi_metric_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/population_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/population_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/advanced_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/advanced_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/categorization_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/categorization_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/rare_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/rare_job_creator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator_factory.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator_factory.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/expandable_section/expandable_section_results.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/expandable_section/expandable_section_results.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/outlier_exploration/use_outlier_data.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/outlier_exploration/use_outlier_data.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/use_exploration_results.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/use_exploration_results.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/exploration_results_table.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/exploration_results_table.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/ml_context.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/ml_context.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/common/use_results_view_config.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/common/use_results_view_config.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/common/use_results_view_config.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
           },
           {
             "plugin": "apm",
@@ -17600,22 +17110,6 @@
             "path": "x-pack/plugins/maps/target/types/public/components/geo_index_pattern_select.d.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities._service.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities._service.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
           },
@@ -17626,14 +17120,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/__mocks__/index_pattern.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/__mocks__/index_pattern.ts"
           },
           {
             "plugin": "maps",
@@ -17698,14 +17184,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/filter_editor/filter_editor.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/public/application/components/full_time_range_selector/full_time_range_selector.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/public/application/components/full_time_range_selector/full_time_range_selector.d.ts"
           },
           {
             "plugin": "dataVisualizer",
@@ -20238,7 +19716,7 @@
             "section": "def-common.IndexPatternLoadExpressionFunctionDefinition",
             "text": "IndexPatternLoadExpressionFunctionDefinition"
           },
-          ", \"type\" | \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"name\" | \"disabled\" | \"help\" | \"inputTypes\" | \"args\" | \"aliases\" | \"context\">"
+          ", \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"type\" | \"name\" | \"disabled\" | \"help\" | \"inputTypes\" | \"args\" | \"aliases\" | \"context\">"
         ],
         "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
         "deprecated": false,
@@ -20765,13 +20243,21 @@
             "signature": [
               "Record<string, ",
               {
-                "pluginId": "expressions",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<Record<string, any>>> | undefined"
+              "<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              ">> | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -20964,13 +20450,21 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "expressions",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<Record<string, any>> | undefined"
+              "<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "> | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -21268,13 +20762,21 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "expressions",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<Record<string, any>> | undefined"
+              "<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "> | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -21730,14 +21232,6 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_grid/common.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_grid/common.ts"
-          },
-          {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/waffle/metric_control/custom_metric_form.tsx"
           },
@@ -21908,34 +21402,6 @@
           {
             "plugin": "stackAlerts",
             "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/util_components/single_field_select.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/field_types_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/field_types_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/field_types_utils.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/field_types_utils.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/field_types_utils.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/field_types_utils.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/field_types_utils.test.ts"
           },
           {
             "plugin": "infra",
@@ -22732,142 +22198,6 @@
             "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
           },
           {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/containers/with_kuery_autocompletion.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/containers/with_kuery_autocompletion.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/kuery_bar.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/kuery_bar.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_recognizer/data_recognizer.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/data_recognizer/data_recognizer.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/load_new_job_capabilities.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/load_new_job_capabilities.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/toolbars/toolbar.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/toolbars/toolbar.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/utils/kuery.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/utils/kuery.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/metric_threshold/hooks/use_metrics_explorer_chart_data.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/metric_threshold/hooks/use_metrics_explorer_chart_data.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/metric_threshold/components/expression_chart.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/metric_threshold/components/expression_chart.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/containers/logs/log_filter/log_filter_state.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/containers/logs/log_filter/log_filter_state.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/containers/with_source/with_source.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/containers/with_source/with_source.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/toolbar.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/toolbar.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/hooks/use_metric_explorer_state.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/hooks/use_metric_explorer_state.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/index.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/index.tsx"
-          },
-          {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
           },
@@ -22898,14 +22228,6 @@
           {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
@@ -23120,38 +22442,6 @@
             "path": "x-pack/plugins/timelines/public/mock/index_pattern.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/common/search_strategy/index_fields/index.d.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/common/search_strategy/index_fields/index.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/containers/with_kuery_autocompletion.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/containers/with_kuery_autocompletion.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/containers/with_source/with_source.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/containers/with_source/with_source.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/index_pattern_context.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/index_pattern_context.ts"
-          },
-          {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/target/types/public/components/kuery_bar/with_kuery_autocompletion.d.ts"
           },
@@ -23194,30 +22484,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/target/types/public/network/components/network_top_countries_table/columns.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/metric_threshold/components/expression_chart.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/metric_threshold/components/expression_chart.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/metric_threshold/hooks/use_metrics_explorer_chart_data.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/metric_threshold/hooks/use_metrics_explorer_chart_data.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/index.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/index.d.ts"
           },
           {
             "plugin": "monitoring",
@@ -23268,34 +22534,6 @@
             "path": "x-pack/plugins/security_solution/target/types/public/ueba/pages/details/types.d.ts"
           },
           {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/hooks/use_metric_explorer_state.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/hooks/use_metric_explorer_state.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/public/application/jobs/new_job/common/index_pattern_context.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/public/application/jobs/new_job/common/index_pattern_context.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/public/application/jobs/new_job/common/index_pattern_context.d.ts"
-          },
-          {
             "plugin": "indexPatternManagement",
             "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
           },
@@ -23328,68 +22566,12 @@
             "path": "src/plugins/index_pattern_management/target/types/public/components/edit_index_pattern/index_header/index_header.d.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_query_bar/exploration_query_bar.tsx"
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_query_bar/exploration_query_bar.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_clone/clone_action_name.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_clone/clone_action_name.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_delete/use_delete_action.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_delete/use_delete_action.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/components/custom_url_editor/utils.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/components/custom_url_editor/utils.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/components/custom_url_editor/editor.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/components/custom_url_editor/editor.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/jobs_list/components/edit_job_flyout/edit_utils.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/jobs_list/components/edit_job_flyout/edit_utils.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/jobs_list/components/edit_job_flyout/tabs/custom_urls.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/jobs_list/components/edit_job_flyout/tabs/custom_urls.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/index.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/index.tsx"
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
@@ -23492,48 +22674,12 @@
             "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
           },
           {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/mock/index_pattern.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/mock/index_pattern.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/common/dependency_mocks/index_patterns.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/common/dependency_mocks/index_patterns.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/explorer/components/explorer_query_bar/explorer_query_bar.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/explorer/components/explorer_query_bar/explorer_query_bar.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/explorer/components/explorer_query_bar/explorer_query_bar.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/utils/new_job_utils.test.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/utils/new_job_utils.test.ts"
           },
           {
             "plugin": "data",
@@ -23705,9 +22851,9 @@
             "signature": [
               "Record<string, ",
               {
-                "pluginId": "expressions",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
@@ -24303,7 +23449,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"boolean\" | \"date\" | \"keyword\" | \"geo_point\" | \"ip\" | \"long\" | \"double\""
+              "\"boolean\" | \"keyword\" | \"date\" | \"geo_point\" | \"ip\" | \"long\" | \"double\""
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -25152,15 +24298,7 @@
         "label": "DataViewsContract",
         "description": [],
         "signature": [
-          "{ get: (id: string) => Promise<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          ">; delete: (indexPatternId: string) => Promise<{}>; create: (spec: ",
+          "{ create: (spec: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25176,7 +24314,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; find: (search: string, size?: number) => Promise<",
+          ">; delete: (indexPatternId: string) => Promise<{}>; find: (search: string, size?: number) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25184,7 +24322,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[]>; ensureDefaultDataView: ",
+          "[]>; get: (id: string) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; ensureDefaultDataView: ",
           "EnsureDefaultDataView",
           "; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
           {
@@ -25350,7 +24496,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; }"
+          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; getDefaultDataView: () => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined>; }"
         ],
         "path": "src/plugins/data_views/common/data_views/data_views.ts",
         "deprecated": false,
@@ -25366,13 +24520,21 @@
         "signature": [
           "{ [x: string]: ",
           {
-            "pluginId": "expressions",
+            "pluginId": "fieldFormats",
             "scope": "common",
-            "docId": "kibExpressionsPluginApi",
+            "docId": "kibFieldFormatsPluginApi",
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<Record<string, any>>; }"
+          "<",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormatParams",
+            "text": "FieldFormatParams"
+          },
+          ">; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -25441,19 +24603,19 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualization_references/controls_references.ts"
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/controls_references.ts"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualization_references/controls_references.ts"
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/controls_references.ts"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualization_references/timeseries_references.ts"
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualization_references/timeseries_references.ts"
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
           },
           {
             "plugin": "dashboard",
@@ -25536,14 +24698,6 @@
             "path": "src/plugins/discover/public/application/apps/main/components/sidebar/discover_index_pattern.tsx"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
           },
@@ -25576,34 +24730,6 @@
             "path": "src/plugins/data/server/index.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-          },
-          {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/apps/main/components/sidebar/discover_sidebar_responsive.tsx"
           },
@@ -25638,22 +24764,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/apps/main/discover_main_route.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/common/types/kibana.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/common/types/kibana.d.ts"
           }
         ],
         "initialIsOpen": false
@@ -25807,15 +24917,7 @@
         "label": "IndexPatternsContract",
         "description": [],
         "signature": [
-          "{ get: (id: string) => Promise<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          ">; delete: (indexPatternId: string) => Promise<{}>; create: (spec: ",
+          "{ create: (spec: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25831,7 +24933,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; find: (search: string, size?: number) => Promise<",
+          ">; delete: (indexPatternId: string) => Promise<{}>; find: (search: string, size?: number) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25839,7 +24941,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[]>; ensureDefaultDataView: ",
+          "[]>; get: (id: string) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; ensureDefaultDataView: ",
           "EnsureDefaultDataView",
           "; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
           {
@@ -26005,7 +25115,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; }"
+          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; getDefaultDataView: () => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined>; }"
         ],
         "path": "src/plugins/data_views/common/data_views/data_views.ts",
         "deprecated": true,
@@ -26069,50 +25187,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/apps/main/utils/resolve_index_pattern.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/log_sources/resolved_log_source_configuration.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/log_sources/resolved_log_source_configuration.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/log_sources/resolved_log_source_configuration.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/log_sources/resolved_log_source_configuration.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/containers/logs/log_source/log_source.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/containers/logs/log_source/log_source.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/common/dependency_mocks/index_patterns.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/common/dependency_mocks/index_patterns.d.ts"
           },
           {
             "plugin": "observability",
@@ -26375,66 +25449,6 @@
             "path": "x-pack/plugins/maps/public/lazy_load_bundle/index.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/dependency_cache.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/dependency_cache.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/routing/resolvers.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/routing/resolvers.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/preconfigured_job_redirect.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/preconfigured_job_redirect.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/load_new_job_capabilities.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/load_new_job_capabilities.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/routing/router.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/routing/router.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/ml_context.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/ml_context.ts"
-          },
-          {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/application.ts"
           },
@@ -26497,30 +25511,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/lazy_load_bundle/index.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/__mocks__/index_patterns.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/contexts/ml/__mocks__/index_patterns.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/public/application/routing/router.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/public/application/routing/router.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/public/application/util/dependency_cache.d.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/target/types/public/application/util/dependency_cache.d.ts"
           },
           {
             "plugin": "security",
@@ -26968,7 +25958,7 @@
         "label": "RuntimeType",
         "description": [],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"geo_point\" | \"ip\" | \"long\" | \"double\""
+          "\"boolean\" | \"keyword\" | \"date\" | \"geo_point\" | \"ip\" | \"long\" | \"double\""
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
