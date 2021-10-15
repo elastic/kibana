@@ -11,7 +11,10 @@ import { IHttpFetchError } from 'src/core/public';
 
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/search_strategies/constants';
 import type { RawResponseBase } from '../../../../common/search_strategies/types';
-import type { LatencyCorrelationsRawResponse } from '../../../../common/search_strategies/latency_correlations/types';
+import type {
+  LatencyCorrelation,
+  LatencyCorrelationsRawResponse,
+} from '../../../../common/search_strategies/latency_correlations/types';
 
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -71,6 +74,7 @@ export function useLatencyCorrelations() {
   );
 
   const startFetch = useCallback(async () => {
+    // TODO re-implemented cancelling
     setFetchState({
       ...getInitialProgress(),
       isRunning: true,
@@ -88,7 +92,7 @@ export function useLatencyCorrelations() {
     };
 
     try {
-      const data = await callApmApi({
+      const rawResponseUpdate = (await callApmApi({
         endpoint: 'GET /internal/apm/latency/overall_distribution',
         signal: null,
         params: {
@@ -97,30 +101,87 @@ export function useLatencyCorrelations() {
             percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD + '',
           },
         },
-      });
+      })) as Response;
 
-      setRawResponse(data);
-    } catch (e) {
-      // const err = e as Error | IHttpFetchError;
-      // const message = error.body?.message ?? error.response?.statusText;
+      setRawResponse(rawResponseUpdate);
       setFetchState({
-        error: e as Error,
+        loaded: 5,
       });
-      return;
-    }
 
-    setFetchState({
-      loaded: 0.05,
-    });
-
-    try {
-      const data = await callApmApi({
+      const { fieldCandidates } = await callApmApi({
         endpoint: 'GET /internal/apm/correlations/field_candidates',
         signal: null,
         params: {
           query,
         },
       });
+
+      setFetchState({
+        loaded: 10,
+      });
+
+      const { fieldValuePairs } = await callApmApi({
+        endpoint: 'GET /internal/apm/correlations/field_value_pairs',
+        signal: null,
+        params: {
+          query: {
+            ...query,
+            fieldCandidates,
+          },
+        },
+      });
+      setFetchState({
+        loaded: 20,
+      });
+
+      const fieldsToSample = new Set<string>();
+      const latencyCorrelations: LatencyCorrelation[] = [];
+      let loadCounter = 0;
+      for (const { fieldName, fieldValue } of fieldValuePairs) {
+        const significantCorrelations = await callApmApi({
+          endpoint: 'GET /internal/apm/correlations/significant_correlations',
+          signal: null,
+          params: {
+            query: {
+              ...query,
+              fieldName,
+              fieldValue: fieldValue + '',
+            },
+          },
+        });
+
+        if (significantCorrelations.latencyCorrelations.length > 0) {
+          fieldsToSample.add(fieldName);
+          latencyCorrelations.push(
+            ...significantCorrelations.latencyCorrelations
+          );
+          rawResponseUpdate.latencyCorrelations = latencyCorrelations;
+          setRawResponse(rawResponseUpdate);
+        }
+
+        loadCounter++;
+        setFetchState({
+          loaded: 20 + Math.round((loadCounter / fieldValuePairs.length) * 80),
+        });
+      }
+
+      const fieldStats = await callApmApi({
+        endpoint: 'POST /internal/apm/correlations/field_stats',
+        signal: null,
+        params: {
+          body: {
+            ...query,
+            fieldsToSample: [...fieldsToSample],
+          },
+        },
+      });
+
+      rawResponseUpdate.fieldStats = fieldStats.stats;
+      setRawResponse(rawResponseUpdate);
+
+      setFetchState({
+        loaded: 100,
+      });
     } catch (e) {
       // const err = e as Error | IHttpFetchError;
       // const message = error.body?.message ?? error.response?.statusText;
@@ -129,10 +190,6 @@ export function useLatencyCorrelations() {
       });
       return;
     }
-
-    setFetchState({
-      loaded: 0.05,
-    });
 
     setFetchState({
       isRunning: false,

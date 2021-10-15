@@ -15,7 +15,6 @@ import type {
 } from '../../../../common/search_strategies/types';
 
 import type { SearchServiceLog } from '../search_service_log';
-import type { LatencyCorrelationsSearchServiceState } from '../latency_correlations/latency_correlations_search_service_state';
 import { TERMS_SIZE } from '../constants';
 
 import { getQueryWithParams } from './get_query_with_params';
@@ -44,16 +43,18 @@ const fetchTransactionDurationFieldTerms = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   fieldName: string,
-  addLogMessage: SearchServiceLog['addLogMessage']
+  addLogMessage?: SearchServiceLog['addLogMessage']
 ): Promise<FieldValuePair[]> => {
   try {
     const resp = await esClient.search(getTermsAggRequest(params, fieldName));
 
     if (resp.body.aggregations === undefined) {
-      addLogMessage(
-        `Failed to fetch terms for field candidate ${fieldName} fieldValuePairs, no aggregations returned.`,
-        JSON.stringify(resp)
-      );
+      if (addLogMessage) {
+        addLogMessage(
+          `Failed to fetch terms for field candidate ${fieldName} fieldValuePairs, no aggregations returned.`,
+          JSON.stringify(resp)
+        );
+      }
       return [];
     }
     const buckets = (
@@ -69,10 +70,12 @@ const fetchTransactionDurationFieldTerms = async (
       }));
     }
   } catch (e) {
-    addLogMessage(
-      `Failed to fetch terms for field candidate ${fieldName} fieldValuePairs.`,
-      JSON.stringify(e)
-    );
+    if (addLogMessage) {
+      addLogMessage(
+        `Failed to fetch terms for field candidate ${fieldName} fieldValuePairs.`,
+        JSON.stringify(e)
+      );
+    }
   }
 
   return [];
@@ -95,8 +98,7 @@ export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   fieldCandidates: string[],
-  state: LatencyCorrelationsSearchServiceState,
-  addLogMessage: SearchServiceLog['addLogMessage']
+  addLogMessage?: SearchServiceLog['addLogMessage']
 ): Promise<FieldValuePair[]> => {
   let fieldValuePairsProgress = 1;
 
@@ -110,9 +112,6 @@ export const fetchTransactionDurationFieldValuePairs = async (
         addLogMessage
       );
 
-      state.setProgress({
-        loadedFieldValuePairs: fieldValuePairsProgress / fieldCandidates.length,
-      });
       fieldValuePairsProgress++;
 
       return fieldTerms;

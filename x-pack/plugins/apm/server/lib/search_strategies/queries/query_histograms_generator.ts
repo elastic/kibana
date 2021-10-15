@@ -15,7 +15,6 @@ import type {
 } from '../../../../common/search_strategies/types';
 
 import type { SearchServiceLog } from '../search_service_log';
-import type { LatencyCorrelationsSearchServiceState } from '../latency_correlations/latency_correlations_search_service_state';
 import { CORRELATION_THRESHOLD, KS_TEST_THRESHOLD } from '../constants';
 
 import { getPrioritizedFieldValuePairs } from './get_prioritized_field_value_pairs';
@@ -26,7 +25,6 @@ export async function* fetchTransactionDurationHistograms(
   esClient: ElasticsearchClient,
   addLogMessage: SearchServiceLog['addLogMessage'],
   params: SearchStrategyParams,
-  state: LatencyCorrelationsSearchServiceState,
   expectations: number[],
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
@@ -35,8 +33,7 @@ export async function* fetchTransactionDurationHistograms(
   fieldValuePairs: FieldValuePair[]
 ) {
   for (const item of getPrioritizedFieldValuePairs(fieldValuePairs)) {
-    if (params === undefined || item === undefined || state.getIsCancelled()) {
-      state.setIsRunning(false);
+    if (params === undefined || item === undefined) {
       return;
     }
 
@@ -52,11 +49,6 @@ export async function* fetchTransactionDurationHistograms(
         totalDocCount,
         [item]
       );
-
-      if (state.getIsCancelled()) {
-        state.setIsRunning(false);
-        return;
-      }
 
       if (
         correlation !== null &&
@@ -87,9 +79,10 @@ export async function* fetchTransactionDurationHistograms(
         `Failed to fetch correlation/kstest for '${item.fieldName}/${item.fieldValue}'`,
         JSON.stringify(e)
       );
-      if (params?.index.includes(':')) {
-        state.setCcsWarning(true);
-      }
+      // TODO return CCS warning
+      // if (params?.index.includes(':')) {
+      //   state.setCcsWarning(true);
+      // }
       yield undefined;
     }
   }

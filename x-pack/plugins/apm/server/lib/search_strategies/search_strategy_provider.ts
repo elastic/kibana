@@ -26,10 +26,6 @@ import type {
   SearchStrategyClientParams,
 } from '../../../common/search_strategies/types';
 import type {
-  LatencyCorrelationsParams,
-  LatencyCorrelationsRawResponse,
-} from '../../../common/search_strategies/latency_correlations/types';
-import type {
   FailedTransactionsCorrelationsParams,
   FailedTransactionsCorrelationsRawResponse,
 } from '../../../common/search_strategies/failed_transactions_correlations/types';
@@ -76,21 +72,6 @@ export function searchStrategyProvider(
   IKibanaSearchResponse<
     FailedTransactionsCorrelationsRawResponse & RawResponseBase
   >
->;
-
-// Latency Correlations function overload
-export function searchStrategyProvider(
-  searchServiceProvider: SearchServiceProvider<
-    LatencyCorrelationsParams & SearchStrategyClientParams,
-    LatencyCorrelationsRawResponse & RawResponseBase
-  >,
-  getApmIndices: () => Promise<ApmIndicesConfig>,
-  includeFrozen: boolean
-): ISearchStrategy<
-  IKibanaSearchRequest<
-    LatencyCorrelationsParams & RawSearchStrategyClientParams
-  >,
-  IKibanaSearchResponse<LatencyCorrelationsRawResponse & RawResponseBase>
 >;
 
 export function searchStrategyProvider<TRequestParams, TResponseParams>(

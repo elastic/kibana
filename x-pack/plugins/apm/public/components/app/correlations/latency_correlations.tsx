@@ -31,16 +31,12 @@ import {
 } from '../../../../../observability/public';
 
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
-import {
-  APM_SEARCH_STRATEGIES,
-  DEFAULT_PERCENTILE_THRESHOLD,
-} from '../../../../common/search_strategies/constants';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/search_strategies/constants';
 import { LatencyCorrelation } from '../../../../common/search_strategies/latency_correlations/types';
 import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useSearchStrategy } from '../../../hooks/use_search_strategy';
 
 import {
   TransactionDistributionChart,
@@ -70,19 +66,12 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const lt = useLatencyCorrelations();
-
-  const { progress, response, startFetch, cancelFetch } = useSearchStrategy(
-    APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
-    {
-      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-      analyzeCorrelations: true,
-    }
-  );
+  const { progress, response, startFetch, cancelFetch } =
+    useLatencyCorrelations();
   const progressNormalized = progress.loaded / progress.total;
   const { overallHistogram, hasData, status } = getOverallHistogram(
-    lt.response,
-    lt.progress.isRunning
+    response,
+    progress.isRunning
   );
 
   const fieldStats: Record<string, FieldStats> | undefined = useMemo(() => {
@@ -363,7 +352,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
       <TransactionDistributionChart
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-        markerValue={lt.response.percentileThresholdValue ?? 0}
+        markerValue={response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}
         status={status}
@@ -387,10 +376,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       <CorrelationsProgressControls
         progress={progressNormalized}
         isRunning={progress.isRunning}
-        onRefresh={() => {
-          startFetch();
-          lt.startFetch();
-        }}
+        onRefresh={startFetch}
         onCancel={cancelFetch}
       />
 
