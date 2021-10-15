@@ -10,20 +10,20 @@ import { useRouteSpy } from '../route/use_route_spy';
 import { SecurityPageName } from '../../../app/types';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 
+// Used to detect if we're on a top level page that is empty and set page background color to match the subdued Empty State
+const isPageNameWithEmptyView = (currentName: string) => {
+  const pageNamesWithEmptyView: string[] = [
+    SecurityPageName.hosts,
+    SecurityPageName.network,
+    SecurityPageName.timelines,
+    SecurityPageName.overview,
+  ];
+  return pageNamesWithEmptyView.includes(currentName);
+};
+
 export const useShowPagesWithEmptyView = () => {
   const [{ pageName }] = useRouteSpy();
   const { indicesExist } = useSourcererScope();
-
-  // Used to detect if we're on a top level page that is empty and set page background color to match the subdued Empty State
-  const isPageNameWithEmptyView = (currentName: string) => {
-    const pageNamesWithEmptyView: string[] = [
-      SecurityPageName.hosts,
-      SecurityPageName.network,
-      SecurityPageName.timelines,
-      SecurityPageName.overview,
-    ];
-    return pageNamesWithEmptyView.includes(currentName);
-  };
 
   const shouldShowEmptyState = isPageNameWithEmptyView(pageName) && !indicesExist;
 
