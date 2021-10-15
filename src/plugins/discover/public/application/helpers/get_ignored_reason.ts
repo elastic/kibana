@@ -15,8 +15,6 @@ export enum IgnoredReason {
   UNKNOWN = 'unknown',
 }
 
-// TODO: Writing unit tests
-
 /**
  * Returns the reason why a specific field was ignored in the response.
  * Will return undefined if the field had no ignored values in it.
