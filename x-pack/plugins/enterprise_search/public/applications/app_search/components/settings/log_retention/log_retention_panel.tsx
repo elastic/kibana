@@ -32,6 +32,7 @@ export const LogRetentionPanel: React.FC = () => {
   const hasILM = logRetention !== null;
   const analyticsLogRetentionSettings = logRetention?.[LogRetentionOptions.Analytics];
   const apiLogRetentionSettings = logRetention?.[LogRetentionOptions.API];
+  const crawlerLogRetentionSettings = logRetention?.[LogRetentionOptions.Crawler];
 
   useEffect(() => {
     fetchLogRetention();
@@ -98,6 +99,33 @@ export const LogRetentionPanel: React.FC = () => {
           onChange={() => toggleLogRetention(LogRetentionOptions.API)}
           disabled={isLogRetentionUpdating}
           data-test-subj="LogRetentionPanelAPISwitch"
+        />
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiText>
+        <EuiSwitch
+          label={
+            <>
+              <strong>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.settings.logRetention.crawler.label',
+                  {
+                    defaultMessage: 'Web Crawler Logs',
+                  }
+                )}
+              </strong>
+              {': '}
+              {hasILM && (
+                <EuiTextColor color="subdued">
+                  <LogRetentionMessage type={LogRetentionOptions.Crawler} />
+                </EuiTextColor>
+              )}
+            </>
+          }
+          checked={!!crawlerLogRetentionSettings?.enabled}
+          onChange={() => toggleLogRetention(LogRetentionOptions.Crawler)}
+          disabled={isLogRetentionUpdating}
+          data-test-subj="LogRetentionPanelCrawlerSwitch"
         />
       </EuiText>
       <EuiSpacer size="l" />

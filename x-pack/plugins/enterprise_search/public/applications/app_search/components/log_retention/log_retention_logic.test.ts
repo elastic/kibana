@@ -33,6 +33,11 @@ describe('LogRetentionLogic', () => {
       enabled: true,
       retention_policy: { is_default: true, min_age_days: 180 },
     },
+    crawler: {
+      disabled_at: null,
+      enabled: true,
+      retention_policy: { is_default: true, min_age_days: 180 },
+    },
   };
 
   const TYPICAL_CLIENT_LOG_RETENTION = {
@@ -42,6 +47,11 @@ describe('LogRetentionLogic', () => {
       retentionPolicy: { isDefault: true, minAgeDays: 180 },
     },
     api: {
+      disabledAt: null,
+      enabled: true,
+      retentionPolicy: { isDefault: true, minAgeDays: 180 },
+    },
+    crawler: {
       disabledAt: null,
       enabled: true,
       retentionPolicy: { isDefault: true, minAgeDays: 180 },
@@ -146,6 +156,11 @@ describe('LogRetentionLogic', () => {
               enabled: true,
               retentionPolicy: null,
             },
+            crawler: {
+              disabledAt: null,
+              enabled: true,
+              retentionPolicy: null,
+            },
           });
 
           expect(LogRetentionLogic.values).toEqual({
@@ -157,6 +172,11 @@ describe('LogRetentionLogic', () => {
                 retentionPolicy: null,
               },
               analytics: {
+                disabledAt: null,
+                enabled: true,
+                retentionPolicy: null,
+              },
+              crawler: {
                 disabledAt: null,
                 enabled: true,
                 retentionPolicy: null,
