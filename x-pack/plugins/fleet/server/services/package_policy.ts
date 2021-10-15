@@ -66,6 +66,7 @@ import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
+import { createUpgradeUsage } from './upgrade_usage';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -576,6 +577,12 @@ class PackagePolicyService {
           name: packagePolicy.name,
           success: true,
         });
+        createUpgradeUsage(soClient, {
+          package_name: packageInfo.name,
+          current_version: packagePolicy.package.version,
+          new_version: packageInfo.version,
+          status: 'success',
+        });
         await removeOldAssets({
           soClient,
           pkgName: packageInfo.name,
@@ -626,6 +633,16 @@ class PackagePolicyService {
       );
 
       const hasErrors = 'errors' in updatedPackagePolicy;
+
+      if (hasErrors) {
+        createUpgradeUsage(soClient, {
+          package_name: packageInfo.name,
+          current_version: packagePolicy.package.version,
+          new_version: packageInfo.version,
+          status: hasErrors ? 'failure' : 'success',
+          error: updatedPackagePolicy.errors,
+        });
+      }
 
       return {
         name: updatedPackagePolicy.name,

@@ -18,6 +18,7 @@ import { getPackageUsage } from './package_collectors';
 import type { PackageUsage } from './package_collectors';
 import { getFleetServerUsage } from './fleet_server_collector';
 import type { FleetServerUsage } from './fleet_server_collector';
+import { getPackagePolicyUpgradeUsage } from './package_upgrade_collectors';
 
 interface Usage {
   agents_enabled: boolean;
@@ -48,6 +49,7 @@ export function registerFleetUsageCollector(
         agents: await getAgentUsage(config, soClient, esClient),
         fleet_server: await getFleetServerUsage(soClient, esClient),
         packages: await getPackageUsage(soClient),
+        package_policy_upgrades: await getPackagePolicyUpgradeUsage(soClient),
       };
     },
     schema: {
@@ -143,6 +145,7 @@ export function registerFleetUsageCollector(
           enabled: { type: 'boolean' },
         },
       },
+      // TODO add package_policy_upgrades schema
     },
   });
 

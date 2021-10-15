@@ -369,6 +369,30 @@ const getSavedObjectTypes = (
       },
     },
   },
+  // TODO create constant
+  ['package-policy-upgrade-telemetry']: {
+    name: 'package-policy-upgrade-telemetry',
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        package_name: { type: 'keyword' },
+        current_version: { type: 'keyword' },
+        new_version: { type: 'keyword' },
+        status: { type: 'keyword' },
+        error: {
+          type: 'nested',
+          properties: {
+            key: { type: 'keyword' },
+            message: { type: 'text' },
+          },
+        },
+      },
+    },
+  },
 });
 
 export function registerSavedObjects(
