@@ -11,7 +11,7 @@ export interface FullAgentConfigMap {
   apiVersion: string;
   kind: string;
   metadata: Metadata;
-  data: FullAgentPolicy;
+  data: AgentYML;
 }
 
 interface Metadata {
@@ -22,4 +22,8 @@ interface Metadata {
 
 interface Labels {
   'k8s-app': string;
+}
+
+interface AgentYML {
+  'agent.yml': FullAgentPolicy;
 }

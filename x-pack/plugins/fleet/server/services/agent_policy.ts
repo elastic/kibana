@@ -741,7 +741,9 @@ class AgentPolicyService {
             'k8s-app': 'elastic-agent',
           },
         },
-        data: fullAgentPolicy,
+        data: {
+          'agent.yml': fullAgentPolicy,
+        },
       };
 
       const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
@@ -749,7 +751,8 @@ class AgentPolicyService {
         'VERSION',
         appContextService.getKibanaVersion()
       );
-      return [configMapYaml, updateManifestVersion].join('\n');
+      const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
+      return [fixedAgentYML, updateManifestVersion].join('\n');
     } else {
       return '';
     }

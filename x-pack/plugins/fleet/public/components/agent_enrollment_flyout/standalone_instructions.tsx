@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiSteps,
   EuiText,
@@ -55,7 +55,6 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
     'IS_LOADING'
   );
   const [yaml, setYaml] = useState<string | string>('');
-  const [downloadLink, setDownloadLink] = useState<string | undefined>();
   const runInstructions =
     isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS;
 
@@ -88,14 +87,8 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
           return;
         }
         let query = { standalone: true, kubernetes: false };
-        let downloandLinkUrl = `${agentPolicyRouteService.getInfoFullDownloadPath(
-          selectedPolicyId
-        )}?standalone=true`;
         if (isK8s === 'IS_KUBERNETES') {
           query = { standalone: true, kubernetes: true };
-          downloandLinkUrl = `${agentPolicyRouteService.getInfoFullDownloadPath(
-            selectedPolicyId
-          )}?kubernetes=true`;
         }
         const res = await sendGetOneAgentPolicyFull(selectedPolicyId, query);
         if (res.error) {
@@ -106,7 +99,6 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
           throw new Error('No data while fetching full agent policy');
         }
         setFullAgentPolicy(res.data.item);
-        setDownloadLink(core.http.basePath.prepend(downloandLinkUrl));
       } catch (error) {
         notifications.toasts.addError(error, {
           title: 'Error',
@@ -118,7 +110,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
     }
   }, [selectedPolicyId, notifications.toasts, isK8s, core.http.basePath]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (isK8s === 'IS_KUBERNETES') {
       if (typeof fullAgentPolicy === 'object') {
         return;
@@ -154,6 +146,18 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
         }}
       />
     );
+
+  let downloadLink = '';
+  if (selectedPolicyId) {
+    downloadLink =
+      isK8s === 'IS_KUBERNETES'
+        ? core.http.basePath.prepend(
+            `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?kubernetes=true`
+          )
+        : core.http.basePath.prepend(
+            `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?standalone=true`
+          );
+  }
 
   function downloadMsg() {
     if (isK8s === 'IS_KUBERNETES') {
