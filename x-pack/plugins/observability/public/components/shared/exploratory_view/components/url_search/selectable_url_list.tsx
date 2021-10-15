@@ -6,12 +6,13 @@
  */
 
 import React, {
-  FormEvent,
   SetStateAction,
   useRef,
   useState,
   KeyboardEvent,
   useEffect,
+  ReactNode,
+  FormEventHandler,
 } from 'react';
 import {
   EuiFlexGroup,
@@ -23,71 +24,59 @@ import {
   EuiSelectableMessage,
   EuiPopoverFooter,
   EuiButton,
-  EuiText,
-  EuiIcon,
-  EuiBadge,
   EuiButtonIcon,
+  EuiSelectableOption,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import useEvent from 'react-use/lib/useEvent';
-import {
-  formatOptions,
-  selectableRenderOptions,
-  UrlOption,
-} from './RenderOption';
-import { I18LABELS } from '../../translations';
-import { useUiSetting$ } from '../../../../../../../../../src/plugins/kibana_react/public';
+import classNames from 'classnames';
+import { I18LABELS } from './translations';
 
-const StyledRow = styled.div<{
-  darkMode: boolean;
-}>`
-  text-align: center;
-  padding: 8px 0px;
-  background-color: ${(props) =>
-    props.darkMode
-      ? euiDarkVars.euiPageBackgroundColor
-      : euiLightVars.euiPageBackgroundColor};
-  border-bottom: 1px solid
-    ${(props) =>
-      props.darkMode
-        ? euiDarkVars.euiColorLightestShade
-        : euiLightVars.euiColorLightestShade};
-`;
+export type UrlOption<T = { [key: string]: any }> = {
+  meta?: string[];
+  isNewWildcard?: boolean;
+  isWildcard?: boolean;
+  title: string;
+} & EuiSelectableOption<T>;
 
-interface Props {
+export interface SelectableUrlListProps {
   data: {
     items: UrlOption[];
     total?: number;
   };
   loading: boolean;
-  onInputChange: (e: FormEvent<HTMLInputElement>) => void;
-  onTermChange: () => void;
-  onApply: () => void;
-  onChange: (updatedOptions: UrlOption[]) => void;
+  rowHeight?: number;
+  onInputChange: (val: string) => void;
+  onSelectionApply: () => void;
+  onSelectionChange: (updatedOptions: UrlOption[]) => void;
   searchValue: string;
   popoverIsOpen: boolean;
   initialValue?: string;
   setPopoverIsOpen: React.Dispatch<SetStateAction<boolean>>;
+  renderOption?: (option: UrlOption, searchValue: string) => ReactNode;
+  hasChanged: () => boolean;
 }
-
+export const formatOptions = (options: EuiSelectableOption[]) => {
+  return options.map((item: EuiSelectableOption) => ({
+    title: item.label,
+    ...item,
+    className: classNames('euiSelectableTemplateSitewide__listItem', item.className),
+  }));
+};
 export function SelectableUrlList({
   data,
   loading,
   onInputChange,
-  onTermChange,
-  onChange,
-  onApply,
+  onSelectionChange,
+  onSelectionApply,
   searchValue,
   popoverIsOpen,
   setPopoverIsOpen,
   initialValue,
-}: Props) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
+  renderOption,
+  rowHeight,
+  hasChanged,
+}: SelectableUrlListProps) {
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
 
   const titleRef = useRef<HTMLDivElement>(null);
@@ -96,8 +85,7 @@ export function SelectableUrlList({
 
   const onEnterKey = (evt: KeyboardEvent<HTMLInputElement>) => {
     if (evt.key.toLowerCase() === 'enter') {
-      onTermChange();
-      onApply();
+      onSelectionApply();
       setPopoverIsOpen(false);
     }
   };
@@ -109,8 +97,8 @@ export function SelectableUrlList({
     }
   };
 
-  const onSearchInput = (e: React.FormEvent<HTMLInputElement>) => {
-    onInputChange(e);
+  const onSearchInput: FormEventHandler<HTMLInputElement> = (e) => {
+    onInputChange((e.target as HTMLInputElement).value);
     setPopoverIsOpen(true);
   };
 
@@ -123,14 +111,11 @@ export function SelectableUrlList({
   useEvent('escape', () => setPopoverIsOpen(false), searchRef);
 
   useEffect(() => {
-    if (searchRef && initialValue) {
-      searchRef.value = initialValue;
+    if (searchRef && searchRef.value !== searchValue) {
+      searchRef.value = searchValue;
+      searchRef.dispatchEvent(new Event('change'));
     }
-
-    // only want to call it at initial render to set value
-    // coming from initial value/url
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchRef]);
+  }, [searchRef, searchValue]);
 
   const loadingMessage = (
     <EuiSelectableMessage style={{ minHeight: 300 }}>
@@ -161,7 +146,7 @@ export function SelectableUrlList({
             <EuiButtonIcon
               color="text"
               onClick={() => closePopover()}
-              aria-label={i18n.translate('xpack.apm.csm.search.url.close', {
+              aria-label={i18n.translate('xpack.observability.search.url.close', {
                 defaultMessage: 'Close',
               })}
               iconType={'cross'}
@@ -175,10 +160,9 @@ export function SelectableUrlList({
   return (
     <EuiSelectable
       searchable
-      onChange={onChange}
-      isLoading={loading}
-      options={formattedOptions}
-      renderOption={selectableRenderOptions}
+      onChange={onSelectionChange}
+      options={searchValue !== searchRef?.value ? [] : formattedOptions}
+      renderOption={renderOption}
       singleSelection={false}
       searchProps={{
         isClearable: true,
@@ -189,7 +173,7 @@ export function SelectableUrlList({
         'aria-label': I18LABELS.filterByUrl,
       }}
       listProps={{
-        rowHeight: 68,
+        rowHeight,
         showIcons: true,
         onFocusBadge: false,
       }}
@@ -197,6 +181,7 @@ export function SelectableUrlList({
       emptyMessage={emptyMessage}
       noMatchesMessage={emptyMessage}
       allowExclusions={true}
+      isPreFiltered={searchValue !== searchRef?.value}
     >
       {(list, search) => (
         <EuiPopover
@@ -216,24 +201,6 @@ export function SelectableUrlList({
             }}
           >
             <PopOverTitle />
-            {searchValue && (
-              <StyledRow darkMode={darkMode}>
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.apm.ux.url.hitEnter.include"
-                    defaultMessage="Hit {icon} or click apply to include all urls matching {searchValue}"
-                    values={{
-                      searchValue: <strong>{searchValue}</strong>,
-                      icon: (
-                        <EuiBadge color="hollow">
-                          Enter <EuiIcon type="returnKey" />
-                        </EuiBadge>
-                      ),
-                    }}
-                  />
-                </EuiText>
-              </StyledRow>
-            )}
             {list}
             <EuiPopoverFooter paddingSize="s">
               <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
@@ -242,12 +209,12 @@ export function SelectableUrlList({
                     fill
                     size="s"
                     onClick={() => {
-                      onTermChange();
-                      onApply();
+                      onSelectionApply();
                       closePopover();
                     }}
+                    isDisabled={!hasChanged()}
                   >
-                    {i18n.translate('xpack.apm.apply.label', {
+                    {i18n.translate('xpack.observability.apply.label', {
                       defaultMessage: 'Apply',
                     })}
                   </EuiButton>
@@ -260,3 +227,6 @@ export function SelectableUrlList({
     </EuiSelectable>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default SelectableUrlList;
