@@ -27,6 +27,10 @@ import { getServices } from '../../../kibana_services';
       }
     },
   },
+  fieldFormats: {
+    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+  },
 }));
 
 const indexPattern = {
@@ -65,7 +69,7 @@ const indexPattern = {
     ],
   },
   metaFields: ['_index', '_score'],
-  flattenHit: jest.fn(),
+  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
   formatHit: jest.fn((hit) => hit._source),
 } as unknown as IndexPattern;
 
@@ -359,19 +363,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
       ],
     },
     metaFields: ['_index', '_type', '_score', '_id'],
-    flattenHit: jest.fn((hit) => {
-      const result = {} as Record<string, unknown>;
-      Object.keys(hit).forEach((key) => {
-        if (key !== 'fields') {
-          result[key] = hit[key];
-        } else {
-          Object.keys(hit.fields).forEach((field) => {
-            result[field] = hit.fields[field];
-          });
-        }
-      });
-      return result;
-    }),
+    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
     formatHit: jest.fn((hit) => {
       const result = {} as Record<string, unknown>;
       Object.keys(hit).forEach((key) => {

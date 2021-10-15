@@ -73,7 +73,6 @@ const indexPattern = {
   title: 'the-index-pattern-title',
   metaFields: ['_index', '_score'],
   formatField: jest.fn(),
-  flattenHit: undefined,
   formatHit: jest.fn((hit) => (hit.fields ? hit.fields : hit._source)),
   fields,
   getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
@@ -81,7 +80,7 @@ const indexPattern = {
   getFieldByName: jest.fn(() => ({})),
   timeFieldName: '',
   docvalueFields: [],
-  getFormatterForField: () => ({ convert: () => 'formatted' }),
+  getFormatterForField: () => ({ convert: (value: unknown) => value }),
 } as unknown as IndexPattern;
 
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;

@@ -25,6 +25,9 @@ jest.mock('../../../kibana_services', () => ({
     uiSettings: {
       get: jest.fn(),
     },
+    fieldFormats: {
+      getDefaultInstance: jest.fn(() => ({ convert: (value) => value })),
+    },
   }),
 }));
 
@@ -368,7 +371,7 @@ describe('Discover grid cell rendering', function () {
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": "formatted",
+              "__html": "100",
             }
           }
         />
