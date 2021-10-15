@@ -8,6 +8,7 @@
 import type { IRouter } from 'src/core/server';
 
 import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
+import type { FleetRequestHandlerContext } from '../../types';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
@@ -38,7 +39,7 @@ import {
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: IRouter<FleetRequestHandlerContext>) => {
   router.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
