@@ -11,9 +11,15 @@ const Path = require('path');
 
 const { REPO_ROOT } = require('@kbn/dev-utils');
 
+// process.env.CI_PARALLEL_PROCESS_NUMBER
 const KIBANA_ROOT = Path.resolve(__dirname, '../../../../../');
-const KIBANA_ROOT2 = Fs.realpathSync(REPO_ROOT).includes('parallel')
-  ? Path.resolve(Fs.realpathSync(REPO_ROOT), '../../')
+const KIBANA_ROOT2 = Fs.realpathSync(REPO_ROOT).includes(
+  `parallel${Path.separator}${process.env.CI_PARALLEL_PROCESS_NUMBER}${Path.separator}`
+)
+  ? Fs.realpathSync(REPO_ROOT).replace(
+      `parallel${Path.separator}${process.env.CI_PARALLEL_PROCESS_NUMBER}${Path.separator}`,
+      ''
+    )
   : Fs.realpathSync(REPO_ROOT);
 const testMap = [
   Path.resolve(KIBANA_ROOT2, 'test'),
