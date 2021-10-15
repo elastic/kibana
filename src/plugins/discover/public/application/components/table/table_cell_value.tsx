@@ -31,7 +31,7 @@ export const TableFieldValue = ({ maxHeight, formattedValue, field }: TableField
       )}
       <div
         className="kbnDocViewer__value"
-        css={isCollapsed && getTruncateStyles(maxHeight)}
+        css={isCollapsed ? getTruncateStyles(maxHeight) : undefined}
         data-test-subj={`tableDocViewRow-${field}-value`}
         /*
          * Justification for dangerouslySetInnerHTML:

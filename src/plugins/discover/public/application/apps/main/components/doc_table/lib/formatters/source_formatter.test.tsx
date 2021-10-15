@@ -11,7 +11,7 @@ import { hit, indexPattern } from './mocks';
 
 describe('_source formatter', () => {
   it('should format properly', () => {
-    const element = formatSource({ hit, indexPattern, isShortDots: true });
+    const element = formatSource({ hit, indexPattern, isShortDots: true, maxHeight: 115 });
     expect(element).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
@@ -34,6 +34,7 @@ describe('_source formatter', () => {
             ],
           ]
         }
+        maxHeight={115}
       />
     `);
   });

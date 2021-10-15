@@ -13,6 +13,7 @@ import { DiscoverServices } from '../../../../../../../build_services';
 import { indexPattern, hit } from './mocks';
 
 describe('Row formatter', () => {
+  const maxHeight = 115;
   const fieldsToShow = indexPattern.fields.getAll().map((fld) => fld.name);
 
   // Realistic response with alphabetical insertion order
@@ -39,7 +40,7 @@ describe('Row formatter', () => {
   });
 
   it('formats document properly', () => {
-    expect(formatRow(hit, indexPattern, fieldsToShow)).toMatchInlineSnapshot(`
+    expect(formatRow(hit, indexPattern, fieldsToShow, maxHeight)).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -73,6 +74,7 @@ describe('Row formatter', () => {
             ],
           ]
         }
+        maxHeight={115}
       />
     `);
   });
@@ -83,7 +85,7 @@ describe('Row formatter', () => {
         get: () => 1,
       },
     } as unknown as DiscoverServices);
-    expect(formatRow(hit, indexPattern, [])).toMatchInlineSnapshot(`
+    expect(formatRow(hit, indexPattern, [], maxHeight)).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -93,13 +95,15 @@ describe('Row formatter', () => {
             ],
           ]
         }
+        maxHeight={115}
       />
     `);
   });
 
   it('formats document with highlighted fields first', () => {
-    expect(formatRow({ ...hit, highlight: { number: '42' } }, indexPattern, fieldsToShow))
-      .toMatchInlineSnapshot(`
+    expect(
+      formatRow({ ...hit, highlight: { number: '42' } }, indexPattern, fieldsToShow, maxHeight)
+    ).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -133,6 +137,7 @@ describe('Row formatter', () => {
             ],
           ]
         }
+        maxHeight={115}
       />
     `);
   });
@@ -155,7 +160,8 @@ describe('Row formatter', () => {
           'object.value': [5, 10],
           getByName: jest.fn(),
         },
-        indexPattern
+        indexPattern,
+        maxHeight
       )
     ).toMatchInlineSnapshot(`
       <TemplateComponent
@@ -167,6 +173,7 @@ describe('Row formatter', () => {
             ],
           ]
         }
+        maxHeight={115}
       />
     `);
   });
@@ -182,7 +189,8 @@ describe('Row formatter', () => {
       formatTopLevelObject(
         { fields: { 'a.zzz': [100], 'a.ccc': [50] } },
         { 'a.zzz': [100], 'a.ccc': [50], getByName: jest.fn() },
-        indexPattern
+        indexPattern,
+        maxHeight
       )
     );
     expect(formatted.indexOf('<dt>a.ccc:</dt>')).toBeLessThan(formatted.indexOf('<dt>a.zzz:</dt>'));
@@ -211,7 +219,8 @@ describe('Row formatter', () => {
           'object.keys': ['a', 'b'],
           getByName: jest.fn(),
         },
-        indexPattern
+        indexPattern,
+        maxHeight
       )
     ).toMatchInlineSnapshot(`
       <TemplateComponent
@@ -227,6 +236,7 @@ describe('Row formatter', () => {
             ],
           ]
         }
+        maxHeight={115}
       />
     `);
   });
@@ -245,7 +255,8 @@ describe('Row formatter', () => {
           'object.value': [5, 10],
           getByName: jest.fn(),
         },
-        indexPattern
+        indexPattern,
+        maxHeight
       )
     ).toMatchInlineSnapshot(`
       <TemplateComponent
@@ -257,6 +268,7 @@ describe('Row formatter', () => {
             ],
           ]
         }
+        maxHeight={115}
       />
     `);
   });

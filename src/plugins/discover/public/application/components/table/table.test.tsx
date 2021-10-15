@@ -235,8 +235,6 @@ describe('DocViewTable at Discover Context', () => {
     const btn = findTestSubject(component, `collapseBtn`);
     const html = component.html();
 
-    expect(component.html()).toContain('truncate-by-height');
-
     expect(btn.length).toBe(1);
     btn.simulate('click');
     expect(component.html() !== html).toBeTruthy();
