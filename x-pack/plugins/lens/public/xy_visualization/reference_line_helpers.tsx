@@ -15,17 +15,17 @@ import { isPercentageSeries, isStackedChart } from './state_helpers';
 import type { XYState } from './types';
 import { checkScaleOperation } from './visualization_helpers';
 
-export interface ThresholdBase {
+export interface ReferenceLineBase {
   label: 'x' | 'yRight' | 'yLeft';
 }
 
 /**
- * Return the threshold layers groups to show based on multiple criteria:
+ * Return the reference layers groups to show based on multiple criteria:
  * * what groups are current defined in data layers
- * * what existing threshold are currently defined in data thresholds
+ * * what existing reference line are currently defined in reference layers
  */
-export function getGroupsToShow<T extends ThresholdBase & { config?: YConfig[] }>(
-  thresholdLayers: T[],
+export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig[] }>(
+  referenceLayers: T[],
   state: XYState | undefined,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   tables: Record<string, Datatable> | undefined
@@ -37,16 +37,16 @@ export function getGroupsToShow<T extends ThresholdBase & { config?: YConfig[] }
     ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
   );
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
-  return thresholdLayers
+  return referenceLayers
     .filter(({ label, config }: T) => groupsAvailable[label] || config?.length)
     .map((layer) => ({ ...layer, valid: groupsAvailable[layer.label] }));
 }
 
 /**
- * Returns the threshold layers groups to show based on what groups are current defined in data layers.
+ * Returns the reference layers groups to show based on what groups are current defined in data layers.
  */
-export function getGroupsRelatedToData<T extends ThresholdBase>(
-  thresholdLayers: T[],
+export function getGroupsRelatedToData<T extends ReferenceLineBase>(
+  referenceLayers: T[],
   state: XYState | undefined,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   tables: Record<string, Datatable> | undefined
@@ -58,7 +58,7 @@ export function getGroupsRelatedToData<T extends ThresholdBase>(
     ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
   );
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
-  return thresholdLayers.filter(({ label }: T) => groupsAvailable[label]);
+  return referenceLayers.filter(({ label }: T) => groupsAvailable[label]);
 }
 /**
  * Returns a dictionary with the groups filled in all the data layers
@@ -90,7 +90,7 @@ export function getStaticValue(
     return fallbackValue;
   }
 
-  // filter and organize data dimensions into threshold groups
+  // filter and organize data dimensions into reference layer groups
   // now pick the columnId in the active data
   const {
     dataLayers: filteredLayers,
@@ -128,29 +128,22 @@ function getAccessorCriteriaForGroup(
           ...rest,
           accessors: [xAccessor] as string[],
         })),
-        // need the untouched ones for some checks later on
+        // need the untouched ones to check if there are invalid layers from the filtered ones
+        // to perform the checks the original accessor structure needs to be accessed
         untouchedDataLayers: filteredDataLayers,
         accessors: filteredDataLayers.map(({ xAccessor }) => xAccessor) as string[],
       };
     }
-    case 'yLeft': {
-      const { left } = groupAxesByType(dataLayers, activeData);
-      const leftIds = new Set(left.map(({ layer }) => layer));
-      const filteredDataLayers = dataLayers.filter(({ layerId }) => leftIds.has(layerId));
-      return {
-        dataLayers: filteredDataLayers,
-        untouchedDataLayers: filteredDataLayers,
-        accessors: left.map(({ accessor }) => accessor),
-      };
-    }
+    case 'yLeft':
     case 'yRight': {
-      const { right } = groupAxesByType(dataLayers, activeData);
-      const rightIds = new Set(right.map(({ layer }) => layer));
+      const prop = groupId === 'yLeft' ? 'left' : 'right';
+      const { [prop]: axis } = groupAxesByType(dataLayers, activeData);
+      const rightIds = new Set(axis.map(({ layer }) => layer));
       const filteredDataLayers = dataLayers.filter(({ layerId }) => rightIds.has(layerId));
       return {
         dataLayers: filteredDataLayers,
         untouchedDataLayers: filteredDataLayers,
-        accessors: right.map(({ accessor }) => accessor),
+        accessors: axis.map(({ accessor }) => accessor),
       };
     }
   }
@@ -224,11 +217,11 @@ function computeStaticValueForGroup(
   activeData: NonNullable<FramePublicAPI['activeData']>,
   minZeroOrNegativeBase: boolean = true
 ) {
-  const defaultThresholdFactor = 3 / 4;
+  const defaultReferenceLineFactor = 3 / 4;
 
   if (dataLayers.length && accessorIds.length) {
     if (dataLayers.some(({ seriesType }) => isPercentageSeries(seriesType))) {
-      return defaultThresholdFactor;
+      return defaultReferenceLineFactor;
     }
 
     const { min, max } = computeOverallDataDomain(dataLayers, accessorIds, activeData);
@@ -237,7 +230,7 @@ function computeStaticValueForGroup(
       // Custom axis bounds can go below 0, so consider also lower values than 0
       const finalMinValue = minZeroOrNegativeBase ? Math.min(0, min) : min;
       const interval = max - finalMinValue;
-      return Number((finalMinValue + interval * defaultThresholdFactor).toFixed(2));
+      return Number((finalMinValue + interval * defaultReferenceLineFactor).toFixed(2));
     }
   }
 }
