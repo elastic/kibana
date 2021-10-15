@@ -71,7 +71,10 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
         // Return 200 with error object
         const handleCustomError = () => {
           return res.ok({
-            body: { values: [], ...error.body },
+            body: {
+              values: [],
+              error: error.body.error.failed_shards[0]?.reason ?? {},
+            },
           });
         };
 
