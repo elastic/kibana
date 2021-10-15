@@ -219,10 +219,19 @@ export const EditPackagePolicyForm = memo<{
 
             if (packageData?.response) {
               setPackageInfo(packageData.response);
-              setValidationResults(
-                validatePackagePolicy(newPackagePolicy, packageData.response, safeLoad)
+
+              const newValidationResults = validatePackagePolicy(
+                newPackagePolicy,
+                packageData.response,
+                safeLoad
               );
-              setFormState('VALID');
+              setValidationResults(newValidationResults);
+
+              if (validationHasErrors(newValidationResults)) {
+                setFormState('INVALID');
+              } else {
+                setFormState('VALID');
+              }
             }
           }
         }
