@@ -26,7 +26,32 @@
             "description": "The total number of namespaces where actions are in use."
           }
         },
-        "count_by_type": {
+        "count_active_email_connectors_by_service_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "exchange_server": {
+              "type": "long"
+            },
+            "gmail": {
+              "type": "long"
+            },
+            "outlook365": {
+              "type": "long"
+            },
+            "elastic_cloud": {
+              "type": "long"
+            },
+            "ses-log": {
+              "type": "long"
+            },
+            "other": {
+              "type": "long"
+            }
+          }
+        },
+        "count_active_by_type": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
@@ -66,7 +91,7 @@
             }
           }
         },
-        "count_active_by_type": {
+        "count_by_type": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
