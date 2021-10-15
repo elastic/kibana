@@ -7,7 +7,7 @@
  */
 
 import { EuiFilterButton, EuiFilterGroup, EuiPopover } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { Subject } from 'rxjs';
 
@@ -37,11 +37,13 @@ export const OptionsListComponent = ({
   const [searchString, setSearchString] = useState('');
 
   // Redux embeddable Context to get state from Embeddable input
-  const { useEmbeddableSelector } = useReduxEmbeddableContext<
-    OptionsListEmbeddableInput,
-    typeof optionsListReducers
-  >();
-  const { twoLineLayout, selectedOptions } = useEmbeddableSelector((state) => state);
+  const {
+    useEmbeddableDispatch,
+    useEmbeddableSelector,
+    actions: { replaceSelection },
+  } = useReduxEmbeddableContext<OptionsListEmbeddableInput, typeof optionsListReducers>();
+  const dispatch = useEmbeddableDispatch();
+  const { twoLineLayout, selectedOptions, singleSelect } = useEmbeddableSelector((state) => state);
 
   // useStateObservable to get component state from Embeddable
   const { availableOptions, loading } = useStateObservable<OptionsListComponentState>(
@@ -50,6 +52,13 @@ export const OptionsListComponent = ({
       loading: true,
     }
   );
+
+  // remove all other selections if this control is single select
+  useEffect(() => {
+    if (singleSelect && selectedOptions && selectedOptions?.length > 1) {
+      dispatch(replaceSelection(selectedOptions[0]));
+    }
+  }, [selectedOptions, singleSelect, dispatch, replaceSelection]);
 
   const updateSearchString = useCallback(
     (newSearchString: string) => {

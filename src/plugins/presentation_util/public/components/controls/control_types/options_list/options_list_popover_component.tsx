@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiFilterSelectItem,
   EuiLoadingChart,
@@ -51,13 +51,6 @@ export const OptionsListPopover = ({
   // track selectedOptions in a set for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
   const [showOnlySelected, setShowOnlySelected] = useState(false);
-
-  // remove all other selections if this control is single select
-  useEffect(() => {
-    if (singleSelect && selectedOptions && selectedOptions?.length > 1) {
-      dispatch(replaceSelection(selectedOptions[0]));
-    }
-  }, [selectedOptions, singleSelect, dispatch, replaceSelection]);
 
   return (
     <>
