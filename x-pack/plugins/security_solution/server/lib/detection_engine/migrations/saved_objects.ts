@@ -55,6 +55,7 @@ export const signalsMigrationMappings: SavedObjectsType['mappings'] = {
 export const type: SavedObjectsType = {
   name: signalsMigrationType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: signalsMigrationMappings,
 };
