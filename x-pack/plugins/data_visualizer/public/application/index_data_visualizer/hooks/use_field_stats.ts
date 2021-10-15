@@ -9,7 +9,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type {
-  FieldStatsSearchStrategyProgress,
+  DataStatsFetchProgress,
   FieldStatsSearchStrategyReturnBase,
   OverallStatsSearchStrategyParams,
   FieldStatsCommonRequestParams,
@@ -23,19 +23,8 @@ import {
 } from '../../../../common/utils/query_utils';
 import { getFieldStats } from '../search_strategy/requests/get_field_stats';
 import type { FieldStats, FieldStatsError } from '../../../../common/types/field_stats';
+import { getInitialProgress, getReducer } from '../progress_utils';
 
-const getInitialProgress = (): FieldStatsSearchStrategyProgress => ({
-  isRunning: false,
-  loaded: 0,
-  total: 100,
-});
-
-const getReducer =
-  <T>() =>
-  (prev: T, update: Partial<T>): T => ({
-    ...prev,
-    ...update,
-  });
 interface FieldStatsParams {
   metricConfigs: FieldRequestConfig[];
   nonMetricConfigs: FieldRequestConfig[];
@@ -54,9 +43,8 @@ export function useFieldStatsSearchStrategy(
   } = useDataVisualizerKibana();
 
   const [fieldStats, setFieldStats] = useState<Map<string, FieldStats>>();
-
   const [fetchState, setFetchState] = useReducer(
-    getReducer<FieldStatsSearchStrategyProgress>(),
+    getReducer<DataStatsFetchProgress>(),
     getInitialProgress()
   );
 
@@ -146,6 +134,11 @@ export function useFieldStatsSearchStrategy(
             return map;
           }, new Map<string, FieldStats>());
 
+          setFetchState({
+            loaded: (resp.length / sortedConfigs.length) * 100,
+            isRunning: true,
+          });
+
           setFieldStats(statsMap);
         }
       },
@@ -155,8 +148,16 @@ export function useFieldStatsSearchStrategy(
             defaultMessage: 'Error fetching field statistics',
           }),
         });
+        setFetchState({
+          isRunning: false,
+          error,
+        });
       },
-      complete: () => console.log('useOverallStats'),
+      complete: () => {
+        setFetchState({
+          isRunning: false,
+        });
+      },
     });
   }, [data, toasts, searchStrategyParams, fieldStatsParams, initialDataVisualizerListState]);
 

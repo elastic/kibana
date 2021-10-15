@@ -31,14 +31,12 @@ import {
 } from '../../../../common';
 import { kbnTypeToJobType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
-import {
-  DataVisualizerGridEmbeddableInput,
-  DataVisualizerGridInput,
-} from '../embeddables/grid_embeddable/grid_embeddable';
+import { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
 import { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
+import { Dictionary } from '../../common/util/url_state';
 
 const defaults = getDefaultPageState();
 
@@ -49,8 +47,7 @@ function isDisplayField(fieldName: string): boolean {
 export const useDataVisualizerGridData = (
   input: DataVisualizerGridInput,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
-  globalState,
-  setGlobalState
+  onUpdate?: (params: string | Dictionary<any>) => void
 ) => {
   const { services } = useDataVisualizerKibana();
   const { uiSettings, data } = services;
@@ -137,7 +134,6 @@ export const useDataVisualizerGridData = (
     autoRefreshSelector: true,
   });
 
-  const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded, setMetricsLoaded] = useState(defaults.metricsLoaded);
   const [metricsStats, setMetricsStats] = useState<undefined | MetricFieldsStats>();
@@ -146,66 +142,71 @@ export const useDataVisualizerGridData = (
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
 
   /** Search strategy **/
-  const fieldStatsRequest: OverallStatsSearchStrategyParams | undefined = useMemo(() => {
-    // Obtain the interval to use for date histogram aggregations
-    // (such as the document count chart). Aim for 75 bars.
-    const buckets = _timeBuckets;
+  const fieldStatsRequest: OverallStatsSearchStrategyParams | undefined = useMemo(
+    () => {
+      // Obtain the interval to use for date histogram aggregations
+      // (such as the document count chart). Aim for 75 bars.
+      const buckets = _timeBuckets;
 
-    const tf = timefilter as any;
+      const tf = timefilter as any;
 
-    if (!buckets || !tf || !currentIndexPattern) return;
+      if (!buckets || !tf || !currentIndexPattern) return;
 
-    const activeBounds = tf.getActiveBounds();
-    let earliest: number | undefined;
-    let latest: number | undefined;
-    if (activeBounds !== undefined && currentIndexPattern.timeFieldName !== undefined) {
-      earliest = tf.getActiveBounds().min.valueOf();
-      latest = tf.getActiveBounds().max.valueOf();
-    }
-
-    const bounds = tf.getActiveBounds();
-    const BAR_TARGET = 75;
-    buckets.setInterval('auto');
-    buckets.setBounds(bounds);
-    buckets.setBarTarget(BAR_TARGET);
-    const aggInterval = buckets.getInterval();
-
-    const aggregatableFields: string[] = [];
-    const nonAggregatableFields: string[] = [];
-    currentIndexPattern.fields.forEach((field) => {
-      const fieldName = field.displayName !== undefined ? field.displayName : field.name;
-      if (!OMIT_FIELDS.includes(fieldName)) {
-        if (field.aggregatable === true && !NON_AGGREGATABLE_FIELD_TYPES.has(field.type)) {
-          aggregatableFields.push(field.name);
-        } else {
-          nonAggregatableFields.push(field.name);
-        }
+      const activeBounds = tf.getActiveBounds();
+      let earliest: number | undefined;
+      let latest: number | undefined;
+      if (activeBounds !== undefined && currentIndexPattern.timeFieldName !== undefined) {
+        earliest = tf.getActiveBounds().min.valueOf();
+        latest = tf.getActiveBounds().max.valueOf();
       }
-    });
-    return {
-      earliest,
-      latest,
-      aggInterval,
-      intervalMs: aggInterval?.asMilliseconds(),
-      searchQuery,
+
+      const bounds = tf.getActiveBounds();
+      const BAR_TARGET = 75;
+      buckets.setInterval('auto');
+      buckets.setBounds(bounds);
+      buckets.setBarTarget(BAR_TARGET);
+      const aggInterval = buckets.getInterval();
+
+      const aggregatableFields: string[] = [];
+      const nonAggregatableFields: string[] = [];
+      currentIndexPattern.fields.forEach((field) => {
+        const fieldName = field.displayName !== undefined ? field.displayName : field.name;
+        if (!OMIT_FIELDS.includes(fieldName)) {
+          if (field.aggregatable === true && !NON_AGGREGATABLE_FIELD_TYPES.has(field.type)) {
+            aggregatableFields.push(field.name);
+          } else {
+            nonAggregatableFields.push(field.name);
+          }
+        }
+      });
+      return {
+        earliest,
+        latest,
+        aggInterval,
+        intervalMs: aggInterval?.asMilliseconds(),
+        searchQuery,
+        samplerShardSize,
+        sessionId: searchSessionId,
+        index: currentIndexPattern.title,
+        timeFieldName: currentIndexPattern.timeFieldName,
+        runtimeFieldMap: currentIndexPattern.getComputedFields().runtimeFields,
+        aggregatableFields,
+        nonAggregatableFields,
+        lastRefresh,
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      _timeBuckets,
+      timefilter,
+      currentIndexPattern.id,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(searchQuery),
       samplerShardSize,
-      sessionId: searchSessionId,
-      index: currentIndexPattern.title,
-      timeFieldName: currentIndexPattern.timeFieldName,
-      runtimeFieldMap: currentIndexPattern.getComputedFields().runtimeFields,
-      aggregatableFields,
-      nonAggregatableFields,
+      searchSessionId,
       lastRefresh,
-    };
-  }, [
-    _timeBuckets,
-    timefilter,
-    currentIndexPattern.id,
-    JSON.stringify(searchQuery),
-    samplerShardSize,
-    searchSessionId,
-    lastRefresh,
-  ]);
+    ]
+  );
 
   useEffect(() => console.log('_timeBuckets', _timeBuckets), [_timeBuckets]);
   useEffect(() => console.log('timefilter', timefilter), [timefilter]);
@@ -241,11 +242,16 @@ export const useDataVisualizerGridData = (
     return { metricConfigs: existMetricFields, nonMetricConfigs: existNonMetricFields };
   }, [metricConfigs, nonMetricConfigs]);
 
-  const overallStats = useOverallStats(fieldStatsRequest);
+  const { overallStats, progress: overallStatsProgress } = useOverallStats(fieldStatsRequest);
   const strategyResponse = useFieldStatsSearchStrategy(
     fieldStatsRequest,
     configsWithoutStats,
     dataVisualizerListStateRef.current
+  );
+
+  const combinedProgress = useMemo(
+    () => overallStatsProgress.loaded * 0.2 + strategyResponse.progress.loaded * 0.8,
+    [overallStatsProgress.loaded, strategyResponse.progress.loaded]
   );
 
   useEffect(() => {
@@ -253,8 +259,8 @@ export const useDataVisualizerGridData = (
       timefilter.getTimeUpdate$(),
       dataVisualizerRefresh$
     ).subscribe(() => {
-      if (setGlobalState) {
-        setGlobalState({
+      if (onUpdate) {
+        onUpdate({
           time: timefilter.getTime(),
           refreshInterval: timefilter.getRefreshInterval(),
         });
@@ -507,9 +513,8 @@ export const useDataVisualizerGridData = (
     return [actionColumn];
   }, [input.indexPattern, services, searchQueryLanguage, searchString]);
 
-  console.log('overallStats.documentCountStats', overallStats.documentCountStats);
   return {
-    progress: strategyResponse.progress,
+    progress: combinedProgress,
     configs,
     searchQueryLanguage,
     searchString,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
 import { combineLatest, forkJoin, of, Subscription } from 'rxjs';
 import { mergeMap, switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -24,11 +24,15 @@ import {
 import { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { extractErrorProperties } from '../utils/error_utils';
-import { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
+import {
+  DataStatsFetchProgress,
+  OverallStatsSearchStrategyParams,
+} from '../../../../common/types/field_stats';
 import {
   getDocumentCountStatsRequest,
   processDocumentCountStats,
 } from '../search_strategy/requests/get_document_stats';
+import { getInitialProgress, getReducer } from '../progress_utils';
 
 function displayError(toastNotifications: ToastsStart, indexPattern: string, err: any) {
   if (err.statusCode === 500) {
@@ -58,7 +62,10 @@ function displayError(toastNotifications: ToastsStart, indexPattern: string, err
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   searchStrategyParams: TParams | undefined
-): OverallStats {
+): {
+  progress: DataStatsFetchProgress;
+  overallStats: OverallStats;
+} {
   const {
     services: {
       data,
@@ -67,6 +74,10 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   } = useDataVisualizerKibana();
 
   const [stats, setOverallStats] = useState<OverallStats>(getDefaultPageState().overallStats);
+  const [fetchState, setFetchState] = useReducer(
+    getReducer<DataStatsFetchProgress>(),
+    getInitialProgress()
+  );
 
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
@@ -76,6 +87,11 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
     if (!searchStrategyParams) return;
+
+    setFetchState({
+      ...getInitialProgress(),
+      error: undefined,
+    });
 
     const {
       aggregatableFields,
@@ -199,8 +215,17 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       },
       error: (error) => {
         displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
+        setFetchState({
+          isRunning: false,
+          error,
+        });
       },
-      complete: () => console.log('useOverallStats'),
+      complete: () => {
+        setFetchState({
+          loaded: 100,
+          isRunning: false,
+        });
+      },
     });
   }, [data.search, searchStrategyParams, toasts]);
 
@@ -216,5 +241,11 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     return cancelFetch;
   }, [startFetch, cancelFetch]);
 
-  return useMemo(() => stats, [stats]);
+  return useMemo(
+    () => ({
+      progress: fetchState,
+      overallStats: stats,
+    }),
+    [stats, fetchState]
+  );
 }

@@ -321,8 +321,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
 
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
-
-  console.log('documentCountStats', documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded, setMetricsLoaded] = useState(defaults.metricsLoaded);
   const [metricsStats, setMetricsStats] = useState<undefined | MetricFieldsStats>();

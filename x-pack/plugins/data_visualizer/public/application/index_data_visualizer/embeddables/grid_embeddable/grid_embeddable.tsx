@@ -104,7 +104,7 @@ export const EmbeddableWrapper = ({
 
   return (
     <div>
-      <EuiProgress value={progress.loaded} max={progress.total} size={'xs'} />
+      <EuiProgress value={progress} max={100} size={'xs'} />
       <DataVisualizerTable<FieldVisConfig>
         items={configs}
         pageState={dataVisualizerListState}

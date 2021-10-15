@@ -43,7 +43,6 @@ import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
 import { OMIT_FIELDS } from '../../../../../common';
-import { useTimefilter } from '../../hooks/use_time_filter';
 import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
@@ -259,7 +258,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     documentCountStats,
     metricsStats,
     timefilter,
-  } = useDataVisualizerGridData(input, dataVisualizerListState, globalState, setGlobalState);
+  } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
 
   useEffect(() => {
     if (globalState?.time !== undefined) {

@@ -220,13 +220,13 @@ export interface OverallStatsSearchStrategyParams {
 }
 
 export interface FieldStatsSearchStrategyReturnBase {
-  progress: FieldStatsSearchStrategyProgress;
+  progress: DataStatsFetchProgress;
   fieldStats: Map<string, FieldStats> | undefined;
   startFetch: () => void;
   cancelFetch: () => void;
 }
 
-export interface FieldStatsSearchStrategyProgress {
+export interface DataStatsFetchProgress {
   error?: Error;
   isRunning: boolean;
   loaded: number;
