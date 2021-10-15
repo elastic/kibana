@@ -97,13 +97,18 @@ export const useDataVisualizerGridData = (
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    currentSavedSearch,
-    currentIndexPattern,
-    dataVisualizerListState.searchQuery,
+    currentSavedSearch?.id,
+    currentIndexPattern.id,
+    // dataVisualizerListState.searchQuery,
     dataVisualizerListState.searchString,
     dataVisualizerListState.searchQueryLanguage,
-    currentQuery,
-    currentFilters,
+    JSON.stringify({
+      searchQuery: dataVisualizerListState.searchQuery,
+      currentQuery,
+      currentFilters,
+    }),
+    // currentQuery,
+    // currentFilters,
   ]);
 
   useEffect(() => {
@@ -190,12 +195,25 @@ export const useDataVisualizerGridData = (
   }, [
     _timeBuckets,
     timefilter,
-    currentIndexPattern,
-    searchQuery,
+    currentIndexPattern.id,
+    JSON.stringify(searchQuery),
     samplerShardSize,
     searchSessionId,
     lastRefresh,
   ]);
+
+  useEffect(() => console.log('_timeBuckets', _timeBuckets), [_timeBuckets]);
+  useEffect(() => console.log('timefilter', timefilter), [timefilter]);
+  useEffect(
+    () => console.log('currentIndexPattern', currentIndexPattern.id),
+    [currentIndexPattern.id]
+  );
+  useEffect(
+    () => console.log('searchQuery', JSON.stringify(searchQuery)),
+    [JSON.stringify(searchQuery)]
+  );
+  useEffect(() => console.log('samplerShardSize', samplerShardSize), [samplerShardSize]);
+  useEffect(() => console.log('searchSessionId', searchSessionId), [searchSessionId]);
 
   const configsWithoutStats = useMemo(() => {
     const existMetricFields: FieldRequestConfig[] = metricConfigs.map((config) => {

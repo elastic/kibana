@@ -156,6 +156,7 @@ export function useFieldStatsSearchStrategy(
           }),
         });
       },
+      complete: () => console.log('useOverallStats'),
     });
   }, [data, toasts, searchStrategyParams, fieldStatsParams, initialDataVisualizerListState]);
 

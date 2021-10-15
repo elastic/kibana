@@ -172,6 +172,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       error: (error) => {
         displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
       },
+      complete: () => console.log('useOverallStats'),
     });
   }, [data.search, searchStrategyParams, toasts]);
 
