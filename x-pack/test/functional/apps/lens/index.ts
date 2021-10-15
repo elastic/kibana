@@ -44,7 +44,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./runtime_fields'));
       loadTestFile(require.resolve('./dashboard'));
-      loadTestFile(require.resolve('./persistent_context'));
       loadTestFile(require.resolve('./colors'));
       loadTestFile(require.resolve('./chart_data'));
       loadTestFile(require.resolve('./time_shift'));
@@ -56,6 +55,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./heatmap'));
       loadTestFile(require.resolve('./thresholds'));
       loadTestFile(require.resolve('./inspector'));
+      loadTestFile(require.resolve('./persistent_context'));
 
       // has to be last one in the suite because it overrides saved objects
       loadTestFile(require.resolve('./rollup'));
