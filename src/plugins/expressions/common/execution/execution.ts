@@ -198,10 +198,8 @@ export class Execution<
       ast,
     });
 
-    const inspectorAdapters = {
-      ...createDefaultInspectorAdapters(),
-      ...((execution.params.inspectorAdapters as InspectorAdapters) || {}),
-    };
+    const inspectorAdapters =
+      (execution.params.inspectorAdapters as InspectorAdapters) || createDefaultInspectorAdapters();
 
     this.context = {
       getSearchContext: () => this.execution.params.searchContext || {},
