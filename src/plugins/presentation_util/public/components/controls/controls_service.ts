@@ -8,12 +8,12 @@
 
 import { EmbeddableFactory } from '../../../../embeddable/public';
 import {
-  ControlTypeRegistry,
   InputControlEmbeddable,
+  ControlTypeRegistry,
   InputControlFactory,
-  InputControlInput,
   InputControlOutput,
-} from './types';
+  InputControlInput,
+} from '../../services/controls';
 
 export class ControlsService {
   private controlsFactoriesMap: ControlTypeRegistry = {};

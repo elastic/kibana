@@ -76,7 +76,7 @@ If you change the default, you must also configure the `setup.template.name` and
 See {apm-server-ref}/configuration-template.html[Load the Elasticsearch index template].
 If the Elasticsearch index template has already been successfully loaded to the index,
 you can customize the indices that the APM app uses to display data.
-Navigate to *APM* > *Settings* > *Indices*, and change all `xpack.apm.*Pattern` values to
+Navigate to *APM* > *Settings* > *Indices*, and change all `xpack.apm.indices.*` values to
 include the new index pattern. For example: `customIndexName-*`.
 
 [float]
