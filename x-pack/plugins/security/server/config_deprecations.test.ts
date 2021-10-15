@@ -353,7 +353,7 @@ describe('Config Deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Use the new object format instead of an array of provider types.",
-        "Use only one of these providers. When both providers are set, the login page will only use the \\"token\\" provider.",
+        "Use only one of these providers. When both providers are set, Kibana only uses the \\"token\\" provider.",
       ]
     `);
   });

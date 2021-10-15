@@ -220,7 +220,8 @@ const deprecations: ConfigDeprecationProvider = () => [
         }),
         message: i18n.translate('core.deprecations.elasticsearchSSL.message', {
           defaultMessage:
-            'Use both settings to enable Kibana to use Mutual TLS authentication with Elasticsearch.',
+            'Use both "{existingSetting}" and "{missingSetting}" to enable Kibana to use Mutual TLS authentication with Elasticsearch.',
+          values: { existingSetting, missingSetting },
         }),
         level: 'warning',
         documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/elasticsearch-mutual-tls.html`,
@@ -232,7 +233,7 @@ const deprecations: ConfigDeprecationProvider = () => [
             }),
             i18n.translate('core.deprecations.elasticsearchSSL.manualSteps2', {
               defaultMessage:
-                'Alternatively, if you do not want to use Mutual TLS authentication, remove "{existingSetting}" from kibana.yml.',
+                'Alternatively, if you don\'t want to use Mutual TLS authentication, remove "{existingSetting}" from kibana.yml.',
               values: { existingSetting },
             }),
           ],

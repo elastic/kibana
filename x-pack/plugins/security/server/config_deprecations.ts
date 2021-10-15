@@ -107,7 +107,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
         }),
         message: i18n.translate('xpack.security.deprecations.basicAndTokenProvidersMessage', {
           defaultMessage:
-            'Use only one of these providers. When both providers are set, the login page only uses the "{tokenProvider}" provider.',
+            'Use only one of these providers. When both providers are set, Kibana only uses the "{tokenProvider}" provider.',
           values: { tokenProvider },
         }),
         level: 'warning',
@@ -116,7 +116,8 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           manualSteps: [
             i18n.translate('xpack.security.deprecations.basicAndTokenProviders.manualSteps1', {
               defaultMessage:
-                'Remove "xpack.security.authc.providers.basic.<provider-name>" from kibana.yml.',
+                'Remove the "{basicProvider}" provider from "xpack.security.authc.providers" in kibana.yml.',
+              values: { basicProvider },
             }),
           ],
         },

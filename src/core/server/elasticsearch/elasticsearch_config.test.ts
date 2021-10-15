@@ -322,7 +322,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'elastic' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Configure Kibana to use a service account token to authenticate to Elasticsearch.",
+        "Kibana is configured to authenticate to Elasticsearch with the \\"elastic\\" user. Use a service account token instead.",
       ]
     `);
   });
@@ -331,7 +331,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'kibana' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Configure Kibana to use a service account token to authenticate to Elasticsearch.",
+        "Kibana is configured to authenticate to Elasticsearch with the \\"kibana\\" user. Use a service account token instead.",
       ]
     `);
   });
@@ -350,7 +350,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ ssl: { key: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Use both settings to enable Kibana to use Mutual TLS authentication with Elasticsearch.",
+        "Use both \\"elasticsearch.ssl.key\\" and \\"elasticsearch.ssl.certificate\\" to enable Kibana to use Mutual TLS authentication with Elasticsearch.",
       ]
     `);
   });
@@ -359,7 +359,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ ssl: { certificate: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Use both settings to enable Kibana to use Mutual TLS authentication with Elasticsearch.",
+        "Use both \\"elasticsearch.ssl.certificate\\" and \\"elasticsearch.ssl.key\\" to enable Kibana to use Mutual TLS authentication with Elasticsearch.",
       ]
     `);
   });
