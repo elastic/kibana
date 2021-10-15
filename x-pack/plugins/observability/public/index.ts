@@ -46,6 +46,7 @@ export {
   HeaderMenuPortal,
   FieldValueSuggestions,
   FilterValueLabel,
+  SelectableUrlList,
 } from './components/shared/';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';

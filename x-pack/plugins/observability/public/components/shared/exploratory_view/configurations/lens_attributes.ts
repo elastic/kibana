@@ -561,14 +561,14 @@ export class LensAttributes {
       }
     });
 
-    const rFilters = urlFiltersToKueryString(filters ?? []);
+    const urlFilters = urlFiltersToKueryString(filters ?? []);
     if (!baseFilters) {
-      return rFilters;
+      return urlFilters;
     }
-    if (!rFilters) {
+    if (!urlFilters) {
       return baseFilters;
     }
-    return `${rFilters} and ${baseFilters}`;
+    return `${urlFilters} and ${baseFilters}`;
   }
 
   getTimeShift(mainLayerConfig: LayerConfig, layerConfig: LayerConfig, index: number) {
