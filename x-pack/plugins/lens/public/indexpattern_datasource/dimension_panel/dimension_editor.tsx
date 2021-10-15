@@ -151,13 +151,24 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const addStaticValueColumn = (prevLayer = props.state.layers[props.layerId]) => {
     if (selectedColumn?.operationType !== staticValueOperationName) {
       trackUiEvent(`indexpattern_dimension_operation_static_value`);
-      return insertOrReplaceColumn({
+      const layer = insertOrReplaceColumn({
         layer: prevLayer,
         indexPattern: currentIndexPattern,
         columnId,
         op: staticValueOperationName,
         visualizationGroups: dimensionGroups,
       });
+      const value = props.activeData?.[layerId]?.rows[0]?.[columnId];
+      // replace the default value with the one from the active data
+      if (value != null) {
+        return updateColumnParam({
+          layer,
+          columnId,
+          paramName: 'value',
+          value: props.activeData?.[layerId]?.rows[0]?.[columnId],
+        });
+      }
+      return layer;
     }
     return prevLayer;
   };
