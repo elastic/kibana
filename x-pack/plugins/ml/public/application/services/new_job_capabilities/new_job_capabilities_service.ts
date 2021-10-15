@@ -11,7 +11,8 @@ import {
   FieldId,
   EVENT_RATE_FIELD_ID,
 } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { ml } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
@@ -36,7 +37,7 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
   }
 
   public async initializeFromIndexPattern(
-    indexPattern: IIndexPattern,
+    indexPattern: DataView,
     includeEventRateField = true,
     removeTextFields = true
   ) {

@@ -16,8 +16,6 @@ export const ALERT_CHECKBOX = '[data-test-subj="select-event"].euiCheckbox__inpu
 
 export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
-export const ALERT_ID = '[data-test-subj="draggable-content-_id"]';
-
 export const ALERT_RISK_SCORE_HEADER =
   '[data-test-subj="dataGridHeaderCell-signal.rule.risk_score"]';
 
@@ -45,25 +43,16 @@ export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-d
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 
-export const MARK_SELECTED_ALERTS_ACKNOWLEDGED_BTN =
-  '[data-test-subj="markSelectedAlertsAcknowledgedButton"]';
-
 export const NUMBER_OF_ALERTS =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
 
 export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
-export const OPEN_SELECTED_ALERTS_BTN = '[data-test-subj="openSelectedAlertsButton"]';
-
 export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
-
-export const SELECT_EVENT_CHECKBOX = '[data-test-subj="select-event"]';
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
-
-export const SHOWING_ALERTS = '[data-test-subj="showingAlerts"]';
 
 export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="selectedShowBulkActionsButton"]';
 
