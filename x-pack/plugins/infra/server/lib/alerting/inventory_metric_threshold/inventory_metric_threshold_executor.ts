@@ -112,6 +112,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     );
     const inventoryItems = Object.keys(first(results)!);
     for (const item of inventoryItems) {
+      console.log(item, '!!item');
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = results.every((result) => {
         // Grab the result of the most recent bucket
@@ -138,6 +139,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         reason = results
           .map((result) =>
             buildReasonWithVerboseMetricName(
+              item,
               result[item],
               buildFiredAlertReason,
               nextState === AlertStates.WARNING
@@ -151,19 +153,23 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
          */
         // } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
         // reason = results
-        //   .map((result) => buildReasonWithVerboseMetricName(result[item], buildRecoveredAlertReason))
+        //   .map((result) => buildReasonWithVerboseMetricName(item, result[item], buildRecoveredAlertReason))
         //   .join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
           reason = results
             .filter((result) => result[item].isNoData)
-            .map((result) => buildReasonWithVerboseMetricName(result[item], buildNoDataAlertReason))
+            .map((result) =>
+              buildReasonWithVerboseMetricName(item, result[item], buildNoDataAlertReason)
+            )
             .join('\n');
         } else if (nextState === AlertStates.ERROR) {
           reason = results
             .filter((result) => result[item].isError)
-            .map((result) => buildReasonWithVerboseMetricName(result[item], buildErrorAlertReason))
+            .map((result) =>
+              buildReasonWithVerboseMetricName(item, result[item], buildErrorAlertReason)
+            )
             .join('\n');
         }
       }
@@ -199,6 +205,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
   });
 
 const buildReasonWithVerboseMetricName = (
+  groupName: string,
   resultItem: any,
   buildReason: (r: any) => string,
   useWarningThreshold?: boolean
@@ -206,6 +213,7 @@ const buildReasonWithVerboseMetricName = (
   if (!resultItem) return '';
   const resultWithVerboseMetricName = {
     ...resultItem,
+    groupName,
     metric:
       toMetricOpt(resultItem.metric)?.text ||
       (resultItem.metric === 'custom'
