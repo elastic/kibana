@@ -45,6 +45,7 @@ export function registerSourceEnginesRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:name/source_engines/bulk_create',
+      hasJsonResponse: false,
     })
   );
 
@@ -60,6 +61,7 @@ export function registerSourceEnginesRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:name/source_engines/:source_engine_name',
+      hasJsonResponse: false,
     })
   );
 }
