@@ -105,7 +105,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       type: 'render',
       as: EXPRESSION_METRIC_NAME,
       value: {
-        visData: input as Datatable,
+        visData: table,
         visType,
         visConfig: {
           metric: {
