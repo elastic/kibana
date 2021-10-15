@@ -147,9 +147,10 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
-  if (hasAnyData === undefined) {
+  if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
+
   const noDataConfig = getNoDataConfig({
     hasData,
     basePath: core.http.basePath,

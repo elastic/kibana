@@ -28,7 +28,7 @@ export const AllCasesPage = React.memo(() => {
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();
 
-  if (hasAnyData === undefined) {
+  if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
 
