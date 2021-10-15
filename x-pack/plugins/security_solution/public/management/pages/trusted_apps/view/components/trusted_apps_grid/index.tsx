@@ -121,7 +121,7 @@ export const TrustedAppsGrid = memo(() => {
               href: getAppUrl({ path: currentPagePath }),
             },
             onCancelNavigateTo: [
-              APP_ID,
+              APP_UI_ID,
               {
                 path: currentPagePath,
               },
