@@ -111,7 +111,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
   const applyDataView = useCallback(() => {
     if (newDataViewTitle === '') {
-      // ERROR HERE
+      console.error('data view title is empty'); // eslint-disable-line no-console
       return;
     }
 
@@ -126,7 +126,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
-              id="xpack.ml.importExport.importButton"
+              id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.title"
               defaultMessage="Change data view"
             />
           </EuiModalHeaderTitle>
@@ -135,13 +135,16 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
         <EuiModalBody>
           {step === 0 && (
             <>
-              Really? You really want to change the Data View?
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.description"
+                defaultMessage="Really? You really want to change the Data View?"
+              />
               <EuiSpacer size="s" />
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty onClick={onClose} isDisabled={validating} flush="left">
                     <FormattedMessage
-                      id="xpack.ml.importExport.importFlyout.closeButton"
+                      id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.cancelButton"
                       defaultMessage="Cancel"
                     />
                   </EuiButtonEmpty>
@@ -154,7 +157,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                     data-test-subj="mlJobMgmtImportImportButton"
                   >
                     <FormattedMessage
-                      id="xpack.ml.importExport.importFlyout.closeButton.importButton"
+                      id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.nextButton"
                       defaultMessage="Next"
                     />
                   </EuiButton>
@@ -165,7 +168,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
           {step === 1 && (
             <>
               <FormattedMessage
-                id="xpack.ml.importExport.importFlyout.closeButton"
+                id="xpack.ml.newJob.wizard.datafeedStep.dataView.step1.title"
                 defaultMessage="Select new Data View for job"
               />
 
@@ -176,7 +179,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                 onChoose={onDataViewSelected}
                 showFilter
                 noItemsMessage={i18n.translate(
-                  'xpack.ml.dataFrame.analytics.create.searchSelection.notFoundLabel',
+                  'xpack.ml.newJob.wizard.datafeedStep.dataView.step1.noMatchingError',
                   {
                     defaultMessage: 'No matching indices or saved searches found.',
                   }
@@ -186,9 +189,9 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                     type: 'index-pattern',
                     getIconForSavedObject: () => 'indexPatternApp',
                     name: i18n.translate(
-                      'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern',
+                      'xpack.ml.newJob.wizard.datafeedStep.dataView.step1.dataView',
                       {
-                        defaultMessage: 'Index pattern',
+                        defaultMessage: 'Data view',
                       }
                     ),
                   },
@@ -202,7 +205,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
           {step === 2 && (
             <>
               <FormattedMessage
-                id="xpack.ml.importExport.importFlyout.closeButton"
+                id="xpack.ml.newJob.wizard.datafeedStep.dataView.step2.title"
                 defaultMessage="Changing {dv1} for {dv2}"
                 values={{ dv1: currentDataViewTitle, dv2: newDataViewTitle }}
               />
@@ -213,7 +216,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                 <>
                   <EuiLoadingSpinner />
                   <FormattedMessage
-                    id="xpack.ml.importExport.importFlyout.closeButton"
+                    id="xpack.ml.newJob.wizard.datafeedStep.dataView.step2.validatingText"
                     defaultMessage=" Checking compatibility of Data View with job"
                   />
                 </>
@@ -234,7 +237,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                     flush="left"
                   >
                     <FormattedMessage
-                      id="xpack.ml.importExport.importFlyout.closeButton"
+                      id="xpack.ml.newJob.wizard.datafeedStep.dataView.step2.backButton"
                       defaultMessage="Back"
                     />
                   </EuiButtonEmpty>
@@ -246,7 +249,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                     data-test-subj="mlJobsImportButton"
                   >
                     <FormattedMessage
-                      id="xpack.ml.importExport.importButton"
+                      id="xpack.ml.newJob.wizard.datafeedStep.dataView.step2.ApplyButton"
                       defaultMessage="Apply"
                     />
                   </EuiButton>
@@ -267,13 +270,16 @@ const ValidationMessage: FC<{
   if (validationResponse === null) {
     return (
       <EuiCallOut
-        title={i18n.translate('xpack.ml.dataGrid.dataGridNoDataCalloutTitle', {
-          defaultMessage: 'Data View valid',
-        })}
+        title={i18n.translate(
+          'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.title',
+          {
+            defaultMessage: 'Data View valid',
+          }
+        )}
         color="primary"
       >
         <FormattedMessage
-          id="xpack.ml.importExport.importFlyout.closeButton"
+          id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.message"
           defaultMessage="No detectors have been configured, so changing to this Data View should be ok."
         />
       </EuiCallOut>
@@ -283,13 +289,16 @@ const ValidationMessage: FC<{
     if (validationResponse.documentsFound === true) {
       return (
         <EuiCallOut
-          title={i18n.translate('xpack.ml.dataGrid.dataGridNoDataCalloutTitle', {
-            defaultMessage: 'Data View valid',
-          })}
+          title={i18n.translate(
+            'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.valid.title',
+            {
+              defaultMessage: 'Data View valid',
+            }
+          )}
           color="primary"
         >
           <FormattedMessage
-            id="xpack.ml.importExport.importFlyout.closeButton"
+            id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.valid.message"
             defaultMessage="This Data View appears to be a good match for this job."
           />
         </EuiCallOut>
@@ -297,13 +306,16 @@ const ValidationMessage: FC<{
     } else {
       return (
         <EuiCallOut
-          title={i18n.translate('xpack.ml.dataGrid.dataGridNoDataCalloutTitle', {
-            defaultMessage: 'Data View possibly invalid',
-          })}
+          title={i18n.translate(
+            'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.possiblyInvalid.title',
+            {
+              defaultMessage: 'Data View possibly invalid',
+            }
+          )}
           color="warning"
         >
           <FormattedMessage
-            id="xpack.ml.importExport.importFlyout.closeButton"
+            id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.possiblyInvalid.message"
             defaultMessage="This Data View produced no results when previewing the datafeed. This could be due to there being no documents in {dataViewTitle}."
             values={{ dataViewTitle }}
           />
@@ -313,13 +325,16 @@ const ValidationMessage: FC<{
   } else {
     return (
       <EuiCallOut
-        title={i18n.translate('xpack.ml.dataGrid.dataGridNoDataCalloutTitle', {
-          defaultMessage: 'Data View invalid',
-        })}
+        title={i18n.translate(
+          'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.title',
+          {
+            defaultMessage: 'Data View invalid',
+          }
+        )}
         color="danger"
       >
         <FormattedMessage
-          id="xpack.ml.importExport.importFlyout.closeButton"
+          id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.message"
           defaultMessage="This Data View produced an error when attempting preview the datafeed. This could be due to fields selected for this job not existing in {dataViewTitle}."
           values={{ dataViewTitle }}
         />
@@ -327,7 +342,7 @@ const ValidationMessage: FC<{
         <EuiSpacer size="s" />
 
         <FormattedMessage
-          id="xpack.ml.importExport.importFlyout.closeButton"
+          id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.reason"
           defaultMessage="Reason:"
         />
 

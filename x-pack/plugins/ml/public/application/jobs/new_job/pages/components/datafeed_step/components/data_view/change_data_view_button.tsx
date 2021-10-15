@@ -26,7 +26,7 @@ export const ChangeDataView: FC<{ isDisabled: boolean; onClick(): void }> = ({ i
           data-test-subj="mlJobsImportButton"
         >
           <FormattedMessage
-            id="xpack.ml.importExport.importButton"
+            id="xpack.ml.newJob.wizard.datafeedStep.dataView.changeDataView.button"
             defaultMessage="Change Data View"
           />
         </EuiButtonEmpty>

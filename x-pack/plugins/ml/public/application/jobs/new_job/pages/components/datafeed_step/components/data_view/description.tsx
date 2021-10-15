@@ -19,7 +19,7 @@ export const Description: FC = memo(({ children }) => {
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
-          id="xpack.ml.newJob.wizard.datafeedStep.timeField.description"
+          id="xpack.ml.newJob.wizard.datafeedStep.dataView.description"
           defaultMessage="The currently selected Data View being used for this job. Change this text."
         />
       }
