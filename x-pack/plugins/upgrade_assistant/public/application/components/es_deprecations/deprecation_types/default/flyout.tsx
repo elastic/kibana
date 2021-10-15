@@ -17,12 +17,11 @@ import {
   EuiTitle,
   EuiText,
   EuiTextColor,
-  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { DeprecationBadge } from '../../../shared';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
 
 export interface DefaultDeprecationFlyoutProps {
   deprecation: EnrichedDeprecationInfo;
@@ -40,12 +39,6 @@ const i18nTexts = {
         },
       }
     ),
-  learnMoreLinkLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.deprecationDetailsFlyout.learnMoreLinkLabel',
-    {
-      defaultMessage: 'Learn more about this deprecation',
-    }
-  ),
   closeButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.deprecationDetailsFlyout.closeButtonLabel',
     {
@@ -80,9 +73,7 @@ export const DefaultDeprecationFlyout = ({
         <EuiText>
           <p className="eui-textBreakWord">{details}</p>
           <p>
-            <EuiLink target="_blank" href={url}>
-              {i18nTexts.learnMoreLinkLabel}
-            </EuiLink>
+            <DeprecationFlyoutLearnMoreLink documentationUrl={url} />
           </p>
         </EuiText>
       </EuiFlyoutBody>

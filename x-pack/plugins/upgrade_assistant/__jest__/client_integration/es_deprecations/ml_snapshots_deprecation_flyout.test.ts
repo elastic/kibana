@@ -35,16 +35,19 @@ describe('Machine learning deprecation flyout', () => {
       testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
     });
 
-    const { find, exists, actions, component } = testBed;
-
+    const { actions, component } = testBed;
     component.update();
-
     await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
+  });
+
+  test('renders a flyout with deprecation details', async () => {
+    const { find, exists } = testBed;
 
     expect(exists('mlSnapshotDetails')).toBe(true);
     expect(find('mlSnapshotDetails.flyoutTitle').text()).toContain(
       'Upgrade or delete model snapshot'
     );
+    expect(find('mlSnapshotDetails.documentationLink').props().href).toBe(mlDeprecation.url);
   });
 
   describe('upgrade snapshots', () => {

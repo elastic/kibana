@@ -19,7 +19,6 @@ import {
   EuiTitle,
   EuiText,
   EuiTextColor,
-  EuiLink,
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
@@ -30,7 +29,7 @@ import {
   ResponseError,
 } from '../../../../../../common/types';
 import type { Status } from '../../../types';
-import { DeprecationBadge } from '../../../shared';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
 
 export interface RemoveIndexSettingsFlyoutProps {
   deprecation: EnrichedDeprecationInfo;
@@ -53,12 +52,6 @@ const i18nTexts = {
         },
       }
     ),
-  learnMoreLinkLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.removeSettingsFlyout.learnMoreLinkLabel',
-    {
-      defaultMessage: 'Learn more about this deprecation',
-    }
-  ),
   removeButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.removeSettingsFlyout.removeButtonLabel',
     {
@@ -146,9 +139,7 @@ export const RemoveIndexSettingsFlyout = ({
         <EuiText>
           <p>{details}</p>
           <p>
-            <EuiLink target="_blank" href={url}>
-              {i18nTexts.learnMoreLinkLabel}
-            </EuiLink>
+            <DeprecationFlyoutLearnMoreLink documentationUrl={url} />
           </p>
         </EuiText>
 
