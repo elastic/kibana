@@ -9,7 +9,6 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
 import { HttpFetchQuery, HttpSetup } from 'src/core/public';
 import * as t from 'io-ts';
-import { startsWith } from 'lodash';
 import { FETCH_STATUS, AddInspectorRequest } from '../../../../observability/public';
 
 function isObject(value: unknown) {
