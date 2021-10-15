@@ -13,12 +13,12 @@ import {
   IEmbeddable,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
+  isErrorEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
-import { EmbeddableInput } from '../../expression_types';
-import { RendererFactory } from '../../../types';
+import { RendererFactory, EmbeddableInput } from '../../../types';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 
 const { embeddable: strings } = RendererStrings;
@@ -71,16 +71,27 @@ export const embeddableRendererFactory = (
           throw new EmbeddableFactoryNotFoundError(embeddableType);
         }
 
-        const embeddablePromise = factory
-          .createFromSavedObject(input.id, input)
-          .then((embeddable) => {
-            // stores embeddable in registrey
-            embeddablesRegistry[uniqueId] = embeddable;
-            return embeddable;
-          });
-        embeddablesRegistry[uniqueId] = embeddablePromise;
+        const embeddableInput = { ...input, id: uniqueId };
 
-        const embeddableObject = await (async () => embeddablePromise)();
+        const embeddablePromise = input.savedObjectId
+          ? factory
+              .createFromSavedObject(input.savedObjectId, embeddableInput)
+              .then((embeddable) => {
+                // stores embeddable in registrey
+                embeddablesRegistry[uniqueId] = embeddable;
+                return embeddable;
+              })
+          : factory.create(embeddableInput).then((embeddable) => {
+              if (!embeddable || isErrorEmbeddable(embeddable)) {
+                return;
+              }
+              // stores embeddable in registry
+              embeddablesRegistry[uniqueId] = embeddable as IEmbeddable;
+              return embeddable;
+            });
+        embeddablesRegistry[uniqueId] = embeddablePromise as Promise<IEmbeddable>;
+
+        const embeddableObject = (await (async () => embeddablePromise)()) as IEmbeddable;
 
         const palettes = await plugins.charts.palettes.getPalettes();
 
