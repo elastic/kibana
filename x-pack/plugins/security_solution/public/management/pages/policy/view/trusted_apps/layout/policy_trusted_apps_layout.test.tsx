@@ -132,4 +132,17 @@ describe('Policy trusted apps layout', () => {
     });
     expect(component.queryByTestId('assign-ta-button')).toBeNull();
   });
+  it('should hide the `Assign trusted applications` button when there is data and the license is downgraded to gold or below', async () => {
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    TrustedAppsHttpServiceMock.mockImplementation(() => {
+      return {
+        getTrustedAppsList: () => getMockListResponse(),
+      };
+    });
+    const component = render();
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234'));
+
+    await waitForAction('assignedTrustedAppsListStateChanged');
+    expect(component.queryByTestId('assignTrustedAppButton')).toBeNull();
+  });
 });

@@ -21,8 +21,20 @@ import {
 } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_ID } from '../../../../../../../common/constants';
+import { licenseService } from '../../../../../../common/hooks/use_license';
 
 jest.mock('../../../../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('when rendering the PolicyTrustedAppsList', () => {
   // The index (zero based) of the card created by the generator that is policy specific
@@ -300,9 +312,5 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     );
   });
 
-  describe('license is downgraded to gold or below', () => {
-    it('does not show remove option in actions menu', () => {
-      // expect remove option to not be there
-    });
-  });
+  it.todo('does not show remove option in actions menu if license is downgraded to gold or below');
 });

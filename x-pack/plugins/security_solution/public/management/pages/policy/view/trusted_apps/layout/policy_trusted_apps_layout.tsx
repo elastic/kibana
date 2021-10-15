@@ -43,6 +43,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
       <EuiButton
         fill
         iconType="plusInCircle"
+        data-test-subj="assignTrustedAppButton"
         onClick={() =>
           navigateCallback({
             show: 'list',
