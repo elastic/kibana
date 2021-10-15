@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo } from 'react';
-import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
-import { useTrackPageview } from '../../../../observability/public';
+import { useMemo } from 'react';
 import {
   PolicyConfig,
   DataStream,
@@ -86,8 +84,8 @@ export const usePolicy = (name: string) => {
         ...httpAdvancedFields,
         ...tlsFields,
         [ConfigKeys.METADATA]: {
-          ...metadata,
           ...httpSimpleFields[ConfigKeys.METADATA],
+          ...metadata,
         },
         [ConfigKeys.NAME]: name,
       } as HTTPFields,
@@ -96,8 +94,8 @@ export const usePolicy = (name: string) => {
         ...tcpAdvancedFields,
         ...tlsFields,
         [ConfigKeys.METADATA]: {
-          ...metadata,
           ...tcpSimpleFields[ConfigKeys.METADATA],
+          ...metadata,
         },
         [ConfigKeys.NAME]: name,
       } as TCPFields,
@@ -109,8 +107,8 @@ export const usePolicy = (name: string) => {
         ...browserSimpleFields,
         ...browserAdvancedFields,
         [ConfigKeys.METADATA]: {
-          ...metadata,
           ...browserSimpleFields[ConfigKeys.METADATA],
+          ...metadata,
         },
         [ConfigKeys.NAME]: name,
       } as BrowserFields,

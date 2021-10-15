@@ -335,7 +335,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
       autoFocus="selected"
       onTabClick={(tab) => {
         if (tab.id !== sourceType) {
-          setConfig(defaultConfig);
+          setConfig(defaultValues);
         }
         setSourceType(tab.id as SourceType);
       }}
