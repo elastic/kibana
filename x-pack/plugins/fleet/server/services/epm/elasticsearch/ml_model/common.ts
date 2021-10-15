@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { installPipelines, isTopLevelPipeline } from './install';
-
-export { deletePreviousPipelines, deletePipeline } from './remove';
+export { getAsset } from '../../archive';
