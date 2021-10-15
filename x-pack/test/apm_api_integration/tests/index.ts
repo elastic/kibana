@@ -233,6 +233,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./error_rate/service_apis'));
     });
 
+    describe('latency/service_apis', function () {
+      loadTestFile(require.resolve('./latency/service_apis'));
+    });
+
     registry.run(providerContext);
   });
 }
