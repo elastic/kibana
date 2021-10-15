@@ -159,6 +159,7 @@ export const getPendingActionCounts = async (
       },
       { ignore: [404] }
     )
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     .then((result) => result.body?.hits?.hits?.map((a) => a._source!) || [])
     .catch(catchAndWrapError);
 
@@ -231,6 +232,7 @@ const fetchActionResponseIds = async (
       },
       { ignore: [404] }
     )
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     .then((result) => result.body?.hits?.hits?.map((a) => a._source!) || [])
     .catch(catchAndWrapError);
 

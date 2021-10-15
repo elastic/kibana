@@ -165,6 +165,7 @@ export const isolationRequestHandler = function (
         },
       } as Omit<EndpointAction, 'agents' | 'user_id'>,
       user: {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         id: user!.username,
       },
     };
