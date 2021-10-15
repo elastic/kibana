@@ -12,13 +12,14 @@ import { luceneStringToDsl } from './lucene_string_to_dsl';
 import { decorateQuery } from './decorate_query';
 import { MatchAllFilter, Query } from '../filters';
 import { fields } from '../filters/stubs';
-import { IndexPatternBase } from './types';
+import { DataViewBase } from './types';
 
 jest.mock('../kuery/grammar');
 
 describe('build query', () => {
-  const indexPattern: IndexPatternBase = {
+  const indexPattern: DataViewBase = {
     fields,
+    title: 'dataView',
   };
 
   describe('buildEsQuery', () => {
