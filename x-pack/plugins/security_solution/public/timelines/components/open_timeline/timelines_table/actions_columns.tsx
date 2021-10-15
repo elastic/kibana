@@ -40,6 +40,7 @@ export const getActionsColumns = ({
       onOpenTimeline({
         duplicate: true,
         timelineType: TimelineType.default,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineId: savedObjectId!,
       });
     },
@@ -58,6 +59,7 @@ export const getActionsColumns = ({
       onOpenTimeline({
         duplicate: true,
         timelineType: TimelineType.template,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineId: savedObjectId!,
       });
     },
