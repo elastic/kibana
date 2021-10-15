@@ -12,6 +12,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 import { signalsMigrationSOClient } from './saved_objects_client';
 import { SignalsMigrationSO, signalsMigrationSOs } from './saved_objects_schema';
+import * as i18n from './translations';
 
 class MigrationResponseError extends Error {
   public readonly statusCode: number;
@@ -42,8 +43,27 @@ export const getMigrationSavedObjectsById = async ({
   const objects = ids.map((id) => ({ id }));
   const bulkResponse = await client.bulkGet(objects);
   const migrations = bulkResponse.resolved_objects.map((object) => object.saved_object);
-  const error = migrations.find((migration) => migration.error)?.error;
+  const resolvedConflicts = bulkResponse.resolved_objects.filter(
+    (object) => object.outcome === 'conflict'
+  );
+  if (resolvedConflicts.length > 0) {
+    const legacyIds = resolvedConflicts.map((object) => object.saved_object.id);
+    const newIds = resolvedConflicts.map((object) => object.alias_target_id!);
 
+    throw new MigrationResponseError(i18n.migrationConflictMessage(legacyIds, newIds), 400);
+  }
+
+  const resolvedAliases = bulkResponse.resolved_objects.filter(
+    (object) => object.outcome === 'aliasMatch'
+  );
+  if (resolvedAliases.length > 0) {
+    const legacyIds = resolvedAliases.map((object) => object.saved_object.id);
+    const newIds = resolvedAliases.map((object) => object.alias_target_id!);
+
+    throw new MigrationResponseError(i18n.migrationAliasMessage(legacyIds, newIds), 400);
+  }
+
+  const error = migrations.find((migration) => migration.error)?.error;
   if (error) {
     throw new MigrationResponseError(error.message, error.statusCode);
   }
