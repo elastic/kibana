@@ -426,14 +426,14 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -455,7 +455,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -501,7 +501,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -809,14 +809,14 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -838,7 +838,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -884,7 +884,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -1192,14 +1192,14 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -1221,7 +1221,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -1267,7 +1267,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -1575,14 +1575,14 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -1604,7 +1604,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -1650,7 +1650,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -1958,14 +1958,14 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -1987,7 +1987,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -2033,7 +2033,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -2341,14 +2341,14 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -2370,7 +2370,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -2416,7 +2416,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -2724,14 +2724,14 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -2753,7 +2753,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -2799,7 +2799,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -3107,14 +3107,14 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -3136,7 +3136,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -3182,7 +3182,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -3490,14 +3490,14 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -3519,7 +3519,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -3565,7 +3565,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -3873,14 +3873,14 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -3902,7 +3902,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -3948,7 +3948,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -4563,14 +4563,14 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -4592,7 +4592,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -4638,7 +4638,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -4946,14 +4946,14 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -4975,7 +4975,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -5021,7 +5021,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -5329,14 +5329,14 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -5358,7 +5358,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -5404,7 +5404,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -5712,14 +5712,14 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -5741,7 +5741,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -5787,7 +5787,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -6095,14 +6095,14 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -6124,7 +6124,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -6170,7 +6170,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -6478,14 +6478,14 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -6507,7 +6507,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -6553,7 +6553,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -6861,14 +6861,14 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -6890,7 +6890,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -6936,7 +6936,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -7244,14 +7244,14 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -7273,7 +7273,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -7319,7 +7319,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -7627,14 +7627,14 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -7656,7 +7656,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -7702,7 +7702,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -8010,14 +8010,14 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -8039,7 +8039,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -8085,7 +8085,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -8657,14 +8657,14 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -8686,7 +8686,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -8732,7 +8732,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -9040,14 +9040,14 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -9069,7 +9069,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -9115,7 +9115,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -9423,14 +9423,14 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -9452,7 +9452,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -9498,7 +9498,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -9806,14 +9806,14 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -9835,7 +9835,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -9881,7 +9881,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -10189,14 +10189,14 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -10218,7 +10218,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -10264,7 +10264,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -10572,14 +10572,14 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -10601,7 +10601,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -10647,7 +10647,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -10955,14 +10955,14 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -10984,7 +10984,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -11030,7 +11030,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -11338,14 +11338,14 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -11367,7 +11367,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -11413,7 +11413,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -11721,14 +11721,14 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -11750,7 +11750,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -11796,7 +11796,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div
@@ -12104,14 +12104,14 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder c4"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                 data-test-subj="trustedAppCard-header"
               >
                 <div
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
                       class="euiFlexItem"
@@ -12133,7 +12133,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-updated"
                           >
                             <div
@@ -12179,7 +12179,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow"
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow"
                             data-test-subj="trustedAppCard-header-created"
                           >
                             <div

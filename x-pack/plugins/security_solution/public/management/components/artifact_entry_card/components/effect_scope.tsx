@@ -93,7 +93,7 @@ export const WithContextMenu = memo<WithContextMenuProps>(
   ({ policies, loadingPoliciesList = false, children, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const additionalInfoOnHover = useMemo(
+    const hoverInfo = useMemo(
       () => (
         <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="popout">
           <FormattedMessage
@@ -112,7 +112,7 @@ export const WithContextMenu = memo<WithContextMenuProps>(
         anchorPosition={policies.length > 1 ? 'rightCenter' : 'rightUp'}
         data-test-subj={dataTestSubj}
         loading={loadingPoliciesList}
-        additionalInfoOnHover={additionalInfoOnHover}
+        hoverInfo={hoverInfo}
         button={
           <EuiButtonEmpty size="xs" data-test-subj={getTestId('button')}>
             {children}

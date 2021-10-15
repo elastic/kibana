@@ -139,11 +139,9 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
   });
 
   it('should display view details button when prop', () => {
-    render({ displayLinkButtonOnHover: true });
+    render({ hoverInfo: 'test' });
     clickMenuTriggerButton();
-    expect(renderResult.getByTestId('testMenu-item-1').textContent).toEqual(
-      'click me 2View details'
-    );
+    expect(renderResult.getByTestId('testMenu-item-1').textContent).toEqual('click me 2test');
   });
 
   it("shouldn't display view details button when no prop", () => {

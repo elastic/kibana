@@ -29,7 +29,7 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
    */
   textTruncate?: boolean;
   /** Displays an additional info when hover an item */
-  additionalInfoOnHover?: React.ReactNode;
+  hoverInfo?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -44,6 +44,11 @@ const StyledEuiContextMenuItem = styled(EuiContextMenuItem)`
   }
 `;
 
+const StyledEuiFlexItem = styled('div')`
+  max-width: 50%;
+  padding-right: 10px;
+`;
+
 /**
  * Just like `EuiContextMenuItem`, but allows for additional props to be defined which will
  * allow navigation to a URL path via React Router
@@ -55,7 +60,7 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
     navigateOptions,
     onClick,
     textTruncate,
-    additionalInfoOnHover,
+    hoverInfo,
     children,
     ...otherMenuItemProps
   }) => {
@@ -83,18 +88,12 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
               >
                 {children}
               </div>
-              <EuiFlexItem className="additional-info" grow={false}>
-                {additionalInfoOnHover}
-              </EuiFlexItem>
+              <StyledEuiFlexItem className="additional-info">{hoverInfo}</StyledEuiFlexItem>
             </>
           ) : (
             <>
-              <EuiFlexGroup alignItems="center" gutterSize="none">
-                {children}
-              </EuiFlexGroup>
-              <EuiFlexItem className="additional-info" grow={false}>
-                {additionalInfoOnHover}
-              </EuiFlexItem>
+              <EuiFlexItem>{children}</EuiFlexItem>
+              <StyledEuiFlexItem className="additional-info">{hoverInfo}</StyledEuiFlexItem>
             </>
           )}
         </EuiFlexGroup>
