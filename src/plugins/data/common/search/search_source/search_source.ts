@@ -75,7 +75,13 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, IndexPattern, IndexPatternField } from '../..';
+import {
+  AggConfigSerialized,
+  IIndexPattern,
+  IndexPattern,
+  IndexPatternField,
+  SerializedSearchSourceFields,
+} from '../..';
 import {
   AggConfigs,
   EsQuerySortValue,
@@ -846,10 +852,17 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false) {
+  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
     const { filter: originalFilters, size: omit, ...searchSourceFields } = this.getFields();
-    let serializedSearchSourceFields: SearchSourceFields = {
+    let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
+      filter: [],
+      aggs: [],
+      parent: undefined,
+      sort:
+        searchSourceFields.sort && !Array.isArray(searchSourceFields.sort)
+          ? [searchSourceFields.sort]
+          : searchSourceFields.sort,
       index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
     };
     if (originalFilters) {
@@ -858,6 +871,17 @@ export class SearchSource {
         ...serializedSearchSourceFields,
         filter: filters,
       };
+    }
+    if (searchSourceFields.aggs) {
+      let aggs = searchSourceFields.aggs;
+      if (typeof aggs === 'function') {
+        aggs = (searchSourceFields.aggs as Function)();
+      }
+      if (aggs instanceof AggConfigs) {
+        serializedSearchSourceFields.aggs = aggs.getAll().map((agg) => agg.serialize());
+      } else {
+        serializedSearchSourceFields.aggs = aggs as AggConfigSerialized[];
+      }
     }
     if (recurse && this.getParent()) {
       serializedSearchSourceFields.parent = this.getParent()!.getSerializedFields(recurse);
