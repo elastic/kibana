@@ -99,7 +99,7 @@ export const findTrustedAppExceptionItemItemByIdOrItemId = async (
 ): Promise<ExceptionListItemSchema | null> => {
   const trustedAppExceptionItem = await exceptionsListClient.getExceptionListItem({
     itemId: id,
-    id: '',
+    id: undefined,
     namespaceType: 'agnostic',
   });
 
