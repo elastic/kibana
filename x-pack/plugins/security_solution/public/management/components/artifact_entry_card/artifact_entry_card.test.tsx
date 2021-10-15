@@ -12,6 +12,8 @@ import { act, fireEvent, getByTestId } from '@testing-library/react';
 import { AnyArtifact } from './types';
 import { isTrustedApp } from './utils';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
+import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
+import { TrustedApp } from '../../../../common/endpoint/types';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -107,6 +109,22 @@ describe.each([
 
     expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
       ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS /one/two/three'
+    );
+  });
+
+  it('should display multiple OSs in the criteria conditions', () => {
+    if (isTrustedApp(item)) {
+      // Trusted apps does not support multiple OS, so this is just so the test will pass
+      // for the trusted app run (the top level `describe()` uses a `.each()`)
+      item.os = [OS_LINUX, OS_MAC, OS_WINDOWS].join(', ') as TrustedApp['os'];
+    } else {
+      item.os_types = ['linux', 'macos', 'windows'];
+    }
+
+    render();
+
+    expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
+      ` OSIS ${OS_LINUX}, ${OS_MAC}, ${OS_WINDOWS}AND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS /one/two/three`
     );
   });
 
