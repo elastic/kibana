@@ -289,7 +289,7 @@ describe('Config Deprecations', () => {
       Array [
         Object {
           "level": "warning",
-          "message": "Use the new ECS-compliant audit logger. The legacy audit logger will be removed in 8.0.",
+          "message": "Use the new ECS-compliant audit logger.",
         },
       ]
     `);
@@ -335,7 +335,7 @@ describe('Config Deprecations', () => {
       Array [
         Object {
           "level": "warning",
-          "message": "Use the new ECS-compliant audit logger. The legacy audit logger will be removed in 8.0.",
+          "message": "Use the new ECS-compliant audit logger.",
         },
       ]
     `);

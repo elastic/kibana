@@ -49,8 +49,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     });
 
     const message = i18n.translate('xpack.security.deprecations.auditLoggerMessage', {
-      defaultMessage:
-        'Use the new ECS-compliant audit logger. The legacy audit logger will be removed in 8.0.',
+      defaultMessage: 'Use the new ECS-compliant audit logger.',
     });
 
     const documentationUrl = `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#audit-logging-settings`;
