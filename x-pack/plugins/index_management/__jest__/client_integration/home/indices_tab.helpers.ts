@@ -50,6 +50,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
     const contextMenu = find('indexContextMenu');
     contextMenu.find(`button[data-test-subj="${optionDataTestSubject}"]`).simulate('click');
   };
+
   const clickIncludeHiddenIndicesToggle = () => {
     const { find } = testBed;
     find('indexTableIncludeHiddenIndicesToggle').simulate('click');

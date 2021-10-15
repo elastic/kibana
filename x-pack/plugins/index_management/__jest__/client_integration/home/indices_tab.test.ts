@@ -194,5 +194,14 @@ describe('<IndexManagementHome />', () => {
       const latestRequest = server.requests[server.requests.length - 1];
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/close`);
     });
+
+    test('should be able to flush index', async () => {
+      const { actions } = testBed;
+      await actions.clickManageContextMenuButton();
+      await actions.clickContextMenuOption('flushIndexMenuButton');
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/flush`);
+    });
   });
 });
