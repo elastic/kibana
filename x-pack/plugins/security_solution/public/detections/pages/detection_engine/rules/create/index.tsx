@@ -401,6 +401,7 @@ const CreateRulePageComponent: React.FC = () => {
               >
                 <EuiHorizontalRule margin="m" />
                 <StepScheduleRule
+                  ruleType={ruleType}
                   addPadding={true}
                   defaultValues={stepsData.current[RuleStep.scheduleRule].data}
                   descriptionColumns="singleSplit"
