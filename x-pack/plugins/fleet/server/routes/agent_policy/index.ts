@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
-
 import { PLUGIN_ID, AGENT_POLICY_API_ROUTES } from '../../constants';
 import {
   GetAgentPoliciesRequestSchema,
@@ -17,6 +15,7 @@ import {
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
 } from '../../types';
+import type { FleetRouter } from '../../types/request_context';
 
 import {
   getAgentPoliciesHandler,
@@ -29,19 +28,21 @@ import {
   downloadFullAgentPolicy,
 } from './handlers';
 
-export const registerRoutes = (router: IRouter) => {
-  // List
-  router.get(
+export const registerRoutes = (routers: { superuser: FleetRouter; fleetSetup: FleetRouter }) => {
+  // List - Fleet Server needs access to run setup
+  routers.fleetSetup.get(
     {
       path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
       validate: GetAgentPoliciesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      // Disable this tag and the automatic RBAC support until elastic/fleet-server access is removed in 8.0
+      // Required to allow elastic/fleet-server to access this API.
+      // options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getAgentPoliciesHandler
   );
 
   // Get one
-  router.get(
+  routers.superuser.get(
     {
       path: AGENT_POLICY_API_ROUTES.INFO_PATTERN,
       validate: GetOneAgentPolicyRequestSchema,
@@ -51,7 +52,7 @@ export const registerRoutes = (router: IRouter) => {
   );
 
   // Create
-  router.post(
+  routers.superuser.post(
     {
       path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
       validate: CreateAgentPolicyRequestSchema,
@@ -61,7 +62,7 @@ export const registerRoutes = (router: IRouter) => {
   );
 
   // Update
-  router.put(
+  routers.superuser.put(
     {
       path: AGENT_POLICY_API_ROUTES.UPDATE_PATTERN,
       validate: UpdateAgentPolicyRequestSchema,
@@ -71,7 +72,7 @@ export const registerRoutes = (router: IRouter) => {
   );
 
   // Copy
-  router.post(
+  routers.superuser.post(
     {
       path: AGENT_POLICY_API_ROUTES.COPY_PATTERN,
       validate: CopyAgentPolicyRequestSchema,
@@ -81,7 +82,7 @@ export const registerRoutes = (router: IRouter) => {
   );
 
   // Delete
-  router.post(
+  routers.superuser.post(
     {
       path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
       validate: DeleteAgentPolicyRequestSchema,
@@ -91,7 +92,7 @@ export const registerRoutes = (router: IRouter) => {
   );
 
   // Get one full agent policy
-  router.get(
+  routers.superuser.get(
     {
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN,
       validate: GetFullAgentPolicyRequestSchema,
@@ -101,7 +102,7 @@ export const registerRoutes = (router: IRouter) => {
   );
 
   // Download one full agent policy
-  router.get(
+  routers.superuser.get(
     {
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
       validate: GetFullAgentPolicyRequestSchema,
