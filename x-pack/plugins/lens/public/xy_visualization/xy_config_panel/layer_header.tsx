@@ -34,7 +34,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
     return (
       <StaticHeader
         icon={LensIconChartBarReferenceLine}
-        label={i18n.translate('xpack.lens.xyChart.layerReference lineLabel', {
+        label={i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
           defaultMessage: 'Reference lines',
         })}
       />
