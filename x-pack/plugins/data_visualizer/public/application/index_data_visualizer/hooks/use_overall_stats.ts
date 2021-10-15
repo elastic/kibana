@@ -164,7 +164,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         : of(undefined);
 
     const documentCountStats$ =
-      intervalMs !== undefined && intervalMs > 0
+      timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
         ? data.search.search(
             {
               params: getDocumentCountStatsRequest(searchStrategyParams),
@@ -221,6 +221,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         });
       },
       complete: () => {
+        console.log('useOverallStats called', intervalMs);
         setFetchState({
           loaded: 100,
           isRunning: false,

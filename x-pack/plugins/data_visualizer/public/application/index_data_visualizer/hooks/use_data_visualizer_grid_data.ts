@@ -101,7 +101,6 @@ export const useDataVisualizerGridData = (
   }, [
     currentSavedSearch?.id,
     currentIndexPattern.id,
-    // dataVisualizerListState.searchQuery,
     dataVisualizerListState.searchString,
     dataVisualizerListState.searchQueryLanguage,
     JSON.stringify({
@@ -109,8 +108,6 @@ export const useDataVisualizerGridData = (
       currentQuery,
       currentFilters,
     }),
-    // currentQuery,
-    // currentFilters,
   ]);
 
   useEffect(() => {
@@ -293,17 +290,6 @@ export const useDataVisualizerGridData = (
         return existsF.fieldName === f.spec.name;
       });
     });
-
-    // @todo: remove
-    // Add a config for 'document count', identified by no field name if indexpattern is time based.
-    // if (currentIndexPattern.timeFieldName !== undefined) {
-    //   configs.push({
-    //     type: JOB_FIELD_TYPES.NUMBER,
-    //     existsInDocs: true,
-    //     loading: true,
-    //     aggregatable: true,
-    //   });
-    // }
 
     if (metricsLoaded === false) {
       setMetricsLoaded(true);
@@ -524,5 +510,6 @@ export const useDataVisualizerGridData = (
     metricsStats,
     overallStats,
     timefilter,
+    setLastRefresh,
   };
 };

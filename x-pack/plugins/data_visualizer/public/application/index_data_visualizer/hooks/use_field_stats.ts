@@ -154,6 +154,7 @@ export function useFieldStatsSearchStrategy(
         });
       },
       complete: () => {
+        console.log('useFieldStats called');
         setFetchState({
           isRunning: false,
         });

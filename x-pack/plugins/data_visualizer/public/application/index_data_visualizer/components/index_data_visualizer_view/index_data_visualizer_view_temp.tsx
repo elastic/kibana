@@ -183,22 +183,22 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     [currentIndexPattern, toasts]
   );
 
-  useEffect(() => {
-    if (globalState?.time !== undefined) {
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
-      setLastRefresh(Date.now());
-    }
-  }, [globalState, timefilter]);
+  // useEffect(() => {
+  //   if (globalState?.time !== undefined) {
+  //     timefilter.setTime({
+  //       from: globalState.time.from,
+  //       to: globalState.time.to,
+  //     });
+  //     setLastRefresh(Date.now());
+  //   }
+  // }, [globalState, timefilter]);
 
-  useEffect(() => {
-    if (globalState?.refreshInterval !== undefined) {
-      timefilter.setRefreshInterval(globalState.refreshInterval);
-      setLastRefresh(Date.now());
-    }
-  }, [globalState, timefilter]);
+  // useEffect(() => {
+  //   if (globalState?.refreshInterval !== undefined) {
+  //     timefilter.setRefreshInterval(globalState.refreshInterval);
+  //     setLastRefresh(Date.now());
+  //   }
+  // }, [globalState, timefilter]);
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
@@ -374,21 +374,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     ]
   );
 
-  useEffect(() => {
-    const timeUpdateSubscription = merge(
-      timefilter.getTimeUpdate$(),
-      dataVisualizerRefresh$
-    ).subscribe(() => {
-      setGlobalState({
-        time: timefilter.getTime(),
-        refreshInterval: timefilter.getRefreshInterval(),
-      });
-      setLastRefresh(Date.now());
-    });
-    return () => {
-      timeUpdateSubscription.unsubscribe();
-    };
-  });
+  // useEffect(dataVisualizerRefresh$
 
   useEffect(() => {
     loadOverallStats();
@@ -624,14 +610,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
     // @todo: REMOVE
     // Add a config for 'document count', identified by no field name if indexpattern is time based.
-    // if (currentIndexPattern.timeFieldName !== undefined) {
-    //   configs.push({
-    //     type: JOB_FIELD_TYPES.NUMBER,
-    //     existsInDocs: true,
-    //     loading: true,
-    //     aggregatable: true,
-    //   });
-    // }
+    if (currentIndexPattern.timeFieldName !== undefined) {
+      configs.push({
+        type: JOB_FIELD_TYPES.NUMBER,
+        existsInDocs: true,
+        loading: true,
+        aggregatable: true,
+      });
+    }
 
     if (metricsLoaded === false) {
       setMetricsLoaded(true);
@@ -873,6 +859,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   }, [currentIndexPattern, services, searchQueryLanguage, searchString]);
 
   const helpLink = docLinks.links.ml.guide;
+  console.log('documentCountStats', documentCountStats);
 
   return (
     <Fragment>
@@ -924,7 +911,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   {overallStats?.totalCount !== undefined && (
                     <EuiFlexItem grow={true}>
                       <DocumentCountContent
-                        config={documentCountStats}
+                        documentCountStats={
+                          documentCountStats
+                            ? {
+                                ...documentCountStats.stats,
+                                ...documentCountStats.stats.documentCounts,
+                              }
+                            : undefined
+                        }
                         totalCount={overallStats.totalCount}
                       />
                     </EuiFlexItem>

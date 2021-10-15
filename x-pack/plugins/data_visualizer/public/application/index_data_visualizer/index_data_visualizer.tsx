@@ -17,7 +17,7 @@ import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
-} from './components/index_data_visualizer_view';
+} from './components/index_data_visualizer_view/index_data_visualizer_view';
 import {
   Accessor,
   Provider as UrlStateContextProvider,

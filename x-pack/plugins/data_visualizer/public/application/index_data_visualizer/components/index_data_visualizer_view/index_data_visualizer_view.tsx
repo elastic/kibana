@@ -258,6 +258,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     documentCountStats,
     metricsStats,
     timefilter,
+    setLastRefresh,
   } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
 
   useEffect(() => {
@@ -266,14 +267,18 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         from: globalState.time.from,
         to: globalState.time.to,
       });
+      setLastRefresh(Date.now());
     }
-  }, [globalState, timefilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.time), timefilter]);
 
   useEffect(() => {
     if (globalState?.refreshInterval !== undefined) {
       timefilter.setRefreshInterval(globalState.refreshInterval);
+      setLastRefresh(Date.now());
     }
-  }, [globalState, timefilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
 
   const onAddFilter = useCallback(
     (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
