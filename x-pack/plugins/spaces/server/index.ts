@@ -7,7 +7,7 @@
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 
-import { ConfigSchema, spacesConfigDeprecationProvider } from './config';
+import { ConfigSchema } from './config';
 import { SpacesPlugin } from './plugin';
 
 // These exports are part of public Spaces plugin contract, any change in signature of exported
@@ -33,7 +33,6 @@ export type {
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
-  deprecations: spacesConfigDeprecationProvider,
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SpacesPlugin(initializerContext);
