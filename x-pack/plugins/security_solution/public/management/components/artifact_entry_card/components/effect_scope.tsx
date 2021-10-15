@@ -7,6 +7,7 @@
 
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { CommonProps, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import styled from 'styled-components';
 import {
   GLOBAL_EFFECT_SCOPE,
   POLICY_EFFECT_SCOPE,
@@ -23,6 +24,9 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 //          So something like: `<EffectScope perPolicyCount={3} />`
 //          This should dispaly it as "Applied t o 3 policies", but NOT as a menu with links
 
+const StyledWithContextMenuShiftedWrapper = styled('div')`
+  margin-left: -10px;
+`;
 export interface EffectScopeProps extends Pick<CommonProps, 'data-test-subj'> {
   /** If set (even if empty), then effect scope will be policy specific. Else, it shows as global */
   policies?: ContextMenuItemNavByRouterProps[];
@@ -57,13 +61,15 @@ export const EffectScope = memo<EffectScopeProps>(
     );
 
     return policies && policies.length ? (
-      <WithContextMenu
-        policies={policies}
-        loadingPoliciesList={loadingPoliciesList}
-        data-test-subj={getTestId('popupMenu')}
-      >
-        {effectiveScopeLabel}
-      </WithContextMenu>
+      <StyledWithContextMenuShiftedWrapper>
+        <WithContextMenu
+          policies={policies}
+          loadingPoliciesList={loadingPoliciesList}
+          data-test-subj={getTestId('popupMenu')}
+        >
+          {effectiveScopeLabel}
+        </WithContextMenu>
+      </StyledWithContextMenuShiftedWrapper>
     ) : (
       effectiveScopeLabel
     );
@@ -85,10 +91,12 @@ export const WithContextMenu = memo<WithContextMenuProps>(
     return (
       <ContextMenuWithRouterSupport
         scroll
+        panelPaddingSize="none"
         items={policies}
-        anchorPosition="rightCenter"
+        anchorPosition={policies.length > 1 ? 'rightCenter' : 'rightUp'}
         data-test-subj={dataTestSubj}
         loading={loadingPoliciesList}
+        displayLinkButtonOnHover
         button={
           <EuiButtonEmpty size="xs" data-test-subj={getTestId('button')}>
             {children}

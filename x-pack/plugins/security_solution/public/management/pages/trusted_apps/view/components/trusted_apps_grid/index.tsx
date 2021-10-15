@@ -129,6 +129,7 @@ export const TrustedAppsGrid = memo(() => {
             navigateOptions: {
               path: policyDetailsPath,
               state: routeState,
+              openInNewTab: true,
             },
             href: getAppUrl({ path: policyDetailsPath }),
             children: policyListById[policyId]?.name ?? policyId,

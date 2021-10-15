@@ -38,6 +38,7 @@ export interface ContextMenuWithRouterSupportProps
   scroll?: boolean;
   title?: string;
   loading?: boolean;
+  displayLinkButtonOnHover?: boolean;
 }
 
 /**
@@ -55,6 +56,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
     title,
     scroll = false,
     loading = false,
+    displayLinkButtonOnHover = false,
     ...commonProps
   }) => {
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
@@ -83,6 +85,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
             key={uuid.v4()}
             data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-${index}`)}
             textTruncate={Boolean(maxWidth) || itemProps.textTruncate}
+            displayLinkButtonOnHover={displayLinkButtonOnHover}
             onClick={(ev) => {
               handleCloseMenu();
               if (itemProps.onClick) {
@@ -92,7 +95,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           />
         );
       });
-    }, [getTestId, handleCloseMenu, items, maxWidth, loading]);
+    }, [getTestId, handleCloseMenu, items, maxWidth, loading, displayLinkButtonOnHover]);
 
     type AdditionalPanelProps = Partial<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>>;
     const additionalContextMenuPanelProps = useMemo<AdditionalPanelProps>(() => {
@@ -131,8 +134,12 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         isOpen={isOpen}
         closePopover={handleCloseMenu}
       >
-        {title ? <EuiPopoverTitle>{title}</EuiPopoverTitle> : null}
-        <EuiContextMenuPanel {...additionalContextMenuPanelProps} items={menuItems} />
+        {title ? <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle> : null}
+        <EuiContextMenuPanel
+          hasFocus={false}
+          {...additionalContextMenuPanelProps}
+          items={menuItems}
+        />
       </EuiPopover>
     );
   }
