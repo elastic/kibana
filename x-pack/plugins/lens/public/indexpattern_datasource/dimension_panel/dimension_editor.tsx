@@ -26,6 +26,7 @@ import {
   insertOrReplaceColumn,
   replaceColumn,
   updateColumnParam,
+  updateDefaultLabels,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
   canTransition,
@@ -161,12 +162,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
       const value = props.activeData?.[layerId]?.rows[0]?.[columnId];
       // replace the default value with the one from the active data
       if (value != null) {
-        return updateColumnParam({
-          layer,
-          columnId,
-          paramName: 'value',
-          value: props.activeData?.[layerId]?.rows[0]?.[columnId],
-        });
+        return updateDefaultLabels(
+          updateColumnParam({
+            layer,
+            columnId,
+            paramName: 'value',
+            value: props.activeData?.[layerId]?.rows[0]?.[columnId],
+          }),
+          currentIndexPattern
+        );
       }
       return layer;
     }
