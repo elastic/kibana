@@ -42,7 +42,7 @@ describe('Indicator Match Alerts', () => {
           {
             field: 'file.hash.md5',
             type: 'mapping',
-            value: 'threatintel.indicator.file.hash.md5',
+            value: 'threat.indicator.file.hash.md5',
           },
         ],
       },

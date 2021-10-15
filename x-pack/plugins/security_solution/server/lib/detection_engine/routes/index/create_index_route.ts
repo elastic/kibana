@@ -58,8 +58,7 @@ export const createIndexRoute = (
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        await createDetectionIndex(context, siemClient!, ruleDataService, ruleRegistryEnabled);
-
+        await createDetectionIndex(context, siemClient, ruleDataService, ruleRegistryEnabled);
         return response.ok({ body: { acknowledged: true } });
       } catch (err) {
         const error = transformError(err);

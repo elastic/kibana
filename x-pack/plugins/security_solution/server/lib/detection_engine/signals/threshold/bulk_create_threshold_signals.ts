@@ -115,6 +115,7 @@ const getTransformedHits = (
             ? [
                 {
                   field: threshold.cardinality[0].field,
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   value: bucket.cardinality_count!.value,
                 },
               ]
@@ -130,6 +131,7 @@ const getTransformedHits = (
   };
 
   return getCombinations(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     (results.aggregations![aggParts.name] as { buckets: TermAggregationBucket[] }).buckets,
     0,
     aggParts.field

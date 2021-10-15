@@ -80,7 +80,7 @@ describe('NetworkHttp Table Component', () => {
         </TestProviders>
       );
 
-      expect(store.getState().network.page.queries!.http.sort).toEqual({
+      expect(store.getState().network.page.queries?.http.sort).toEqual({
         direction: 'desc',
       });
 
@@ -88,7 +88,7 @@ describe('NetworkHttp Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries!.http.sort).toEqual({
+      expect(store.getState().network.page.queries?.http.sort).toEqual({
         direction: 'asc',
       });
       expect(wrapper.find('.euiTable thead tr th button').first().find('svg')).toBeTruthy();
