@@ -31,7 +31,10 @@ import {
 } from '../../../../common';
 import { kbnTypeToJobType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
-import { DataVisualizerGridEmbeddableInput } from '../embeddables/grid_embeddable/grid_embeddable';
+import {
+  DataVisualizerGridEmbeddableInput,
+  DataVisualizerGridInput,
+} from '../embeddables/grid_embeddable/grid_embeddable';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
@@ -44,8 +47,10 @@ function isDisplayField(fieldName: string): boolean {
 }
 
 export const useDataVisualizerGridData = (
-  input: DataVisualizerGridEmbeddableInput,
-  dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>
+  input: DataVisualizerGridInput,
+  dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
+  globalState,
+  setGlobalState
 ) => {
   const { services } = useDataVisualizerKibana();
   const { uiSettings, data } = services;
@@ -248,6 +253,12 @@ export const useDataVisualizerGridData = (
       timefilter.getTimeUpdate$(),
       dataVisualizerRefresh$
     ).subscribe(() => {
+      if (setGlobalState) {
+        setGlobalState({
+          time: timefilter.getTime(),
+          refreshInterval: timefilter.getRefreshInterval(),
+        });
+      }
       setLastRefresh(Date.now());
     });
     return () => {
@@ -506,5 +517,7 @@ export const useDataVisualizerGridData = (
     extendedColumns,
     documentCountStats: overallStats.documentCountStats,
     metricsStats,
+    overallStats,
+    timefilter,
   };
 };

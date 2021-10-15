@@ -182,8 +182,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           return of({
             documentCountStats: processDocumentCountStats(
               documentCountStatsResp?.rawResponse,
-              intervalMs
-            ).documentCounts,
+              searchStrategyParams
+            ),
             ...nonAggregatableOverallStats,
             ...aggregatableOverallStats,
           });

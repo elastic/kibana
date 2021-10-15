@@ -36,15 +36,15 @@ import {
 } from '../../../common/components/stats_table';
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { getDefaultDataVisualizerListState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
-import { DataVisualizerTableState } from '../../../../../common';
+import { DataVisualizerTableState, SavedSearchSavedObject } from '../../../../../common';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
-export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
+export interface DataVisualizerGridInput {
   indexPattern: IndexPattern;
-  savedSearch?: SavedSearch;
+  savedSearch?: SavedSearch | SavedSearchSavedObject | null;
   query?: Query;
   visibleFieldNames?: string[];
   filters?: Filter[];
@@ -54,6 +54,7 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
    */
   onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
+export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
 export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;

@@ -59,15 +59,15 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
 
 export const processDocumentCountStats = (
   body: estypes.SearchResponse | undefined,
-  intervalMs: number | undefined
-): DocumentCountStats => {
-  if (!body || intervalMs === undefined) {
-    return {
-      documentCounts: {
-        interval: 0,
-        buckets: {},
-      },
-    };
+  params: OverallStatsSearchStrategyParams
+): DocumentCountStats | undefined => {
+  if (
+    !body ||
+    params.intervalMs === undefined ||
+    params.earliest === undefined ||
+    params.latest === undefined
+  ) {
+    return undefined;
   }
   const buckets: { [key: string]: number } = {};
   const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
@@ -81,9 +81,9 @@ export const processDocumentCountStats = (
   });
 
   return {
-    documentCounts: {
-      interval: intervalMs,
-      buckets,
-    },
+    interval: params.intervalMs,
+    buckets,
+    timeRangeEarliest: params.earliest,
+    timeRangeLatest: params.latest,
   };
 };

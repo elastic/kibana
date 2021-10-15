@@ -71,18 +71,20 @@ export function createMergedEsQuery(
     }
     const filterQuery = buildQueryFromFilters(filters, indexPattern);
 
-    if (Array.isArray(combinedQuery.bool.filter) === false) {
-      combinedQuery.bool.filter =
-        combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
-    }
+    if (combinedQuery.bool) {
+      if (Array.isArray(combinedQuery.bool.filter) === false) {
+        combinedQuery.bool.filter =
+          combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
+      }
 
-    if (Array.isArray(combinedQuery.bool.must_not) === false) {
-      combinedQuery.bool.must_not =
-        combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
-    }
+      if (Array.isArray(combinedQuery.bool.must_not) === false) {
+        combinedQuery.bool.must_not =
+          combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
+      }
 
-    combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
-    combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
+      combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
+      combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
+    }
   } else {
     combinedQuery = buildEsQuery(
       indexPattern,

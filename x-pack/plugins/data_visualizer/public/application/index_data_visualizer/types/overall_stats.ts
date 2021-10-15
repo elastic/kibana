@@ -21,7 +21,7 @@ export type NonAggregatableField = Omit<AggregatableField, 'stats'>;
 
 export interface OverallStats {
   totalCount: number;
-  documentCountStats?: DocumentCountStats['documentCounts'];
+  documentCountStats?: DocumentCountStats;
   aggregatableExistsFields: AggregatableField[];
   aggregatableNotExistsFields: AggregatableField[];
   nonAggregatableExistsFields: NonAggregatableField[];
