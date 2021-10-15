@@ -6,6 +6,7 @@
  */
 
 import chunk from 'lodash/fp/chunk';
+import moment from 'moment';
 import { getThreatList, getThreatListCount } from './get_threat_list';
 
 import { CreateThreatSignalsOptions } from './types';
@@ -46,6 +47,14 @@ export const createThreatSignals = async ({
   const params = ruleSO.attributes.params;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
   const perPage = concurrentSearches * itemsPerSearch;
+  const interval = ruleSO.attributes.schedule.interval;
+  const executionEnd = moment().add(interval);
+  const verifyExecutionCanProceed = () => {
+    if (moment().isAfter(executionEnd)) {
+      const message = `Rule execution has exceeded its allotted interval (${interval}) and has been cancelled.`;
+      throw new Error(message);
+    }
+  };
 
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
@@ -99,6 +108,7 @@ export const createThreatSignals = async ({
   });
 
   while (threatList.hits.hits.length !== 0) {
+    verifyExecutionCanProceed();
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
     logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
