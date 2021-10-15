@@ -274,7 +274,7 @@
           "\nGiven an array of lists and optionally a field this will return all\nthe lists that match against the field based on the types from the field\n\nNOTE: That we support one additional property from \"FieldSpec\" located here:\nsrc/plugins/data/common/index_patterns/fields/types.ts\nThis type property is esTypes. If it exists and is on there we will read off the esTypes."
         ],
         "signature": [
-          "(lists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[], field?: (",
+          "(lists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[], field?: (",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -282,7 +282,7 @@
             "section": "def-common.DataViewFieldBase",
             "text": "DataViewFieldBase"
           },
-          " & { esTypes?: string[] | undefined; }) | undefined) => { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+          " & { esTypes?: string[] | undefined; }) | undefined) => { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
         "deprecated": false,
@@ -297,7 +297,7 @@
               "The lists to match against the field"
             ],
             "signature": [
-              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
             "deprecated": false,
