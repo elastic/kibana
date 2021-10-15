@@ -7,4 +7,12 @@
  */
 
 require('./ensure_node_preserve_symlinks');
-require('./no_transpilation_dist');
+
+// The following require statements MUST be executed before any others - BEGIN
+require('./exit_on_warning');
+require('./harden');
+// The following require statements MUST be executed before any others - END
+
+require('symbol-observable');
+require('source-map-support/register');
+require('./node_version_validator');
