@@ -53,9 +53,7 @@ export const upgradeManagedPackagePolicies = async (
       packageInfo.version === installedPackage?.version;
 
     const shouldUpgradePolicies =
-      !isPolicyVersionAlignedWithInstalledVersion &&
-      (AUTO_UPDATE_PACKAGES.some((pkg) => pkg.name === packageInfo.name) ||
-        packageInfo.keepPoliciesUpToDate);
+      !isPolicyVersionAlignedWithInstalledVersion && packageInfo.keepPoliciesUpToDate;
 
     if (shouldUpgradePolicies) {
       // Since upgrades don't report diffs/errors, we need to perform a dry run first in order
