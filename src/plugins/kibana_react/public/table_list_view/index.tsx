@@ -13,10 +13,12 @@ import type { TableListViewProps } from './table_list_view';
 
 const LazyTableListView = React.lazy(() => import('./table_list_view'));
 
-export const TableListView: React.FunctionComponent<TableListViewProps> = (props) => {
-  return (
-    <React.Suspense fallback={null}>
-      <LazyTableListView {...props} />
-    </React.Suspense>
-  );
+export const TableListView = <V extends {}>(props: TableListViewProps<V>) => {
+  // Type '{}' is not assignable to type 'V'.
+  // '{}' is assignable to the constraint of type 'V',
+  // but 'V' could be instantiated with a different subtype of constraint '{}'.
+  // @ts-expect-error
+  const Lazy = <LazyTableListView {...props} />;
+
+  return <React.Suspense fallback={null}>{Lazy}</React.Suspense>;
 };
