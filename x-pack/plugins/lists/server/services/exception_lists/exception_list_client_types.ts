@@ -220,3 +220,9 @@ export interface FindExceptionListOptions {
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
 }
+
+export interface ExportExceptionListAndItemsOptions {
+  listId: ListIdOrUndefined;
+  id: IdOrUndefined;
+  namespaceType: NamespaceType;
+}

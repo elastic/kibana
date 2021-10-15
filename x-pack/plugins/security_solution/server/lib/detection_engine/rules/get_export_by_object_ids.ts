@@ -8,6 +8,7 @@
 import { chunk } from 'lodash';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
+import { ExceptionListClient } from '../../../../../lists/server';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { RulesClient } from '../../../../../alerting/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
@@ -15,7 +16,7 @@ import { isAlertType } from '../rules/types';
 import { transformAlertToRule } from '../routes/rules/utils';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
-
+import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 interface ExportSuccessRule {
   statusCode: 200;
   rule: Partial<RulesSchema>;
@@ -34,18 +35,26 @@ export interface RulesErrors {
 
 export const getExportByObjectIds = async (
   rulesClient: RulesClient,
+  exceptionsClient: ExceptionListClient | undefined,
   objects: Array<{ rule_id: string }>,
   isRuleRegistryEnabled: boolean
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
+  exceptionLists: string | null;
 }> => {
+  // Retrieve rules, these aren't the rule SOs, just the params
   const rulesAndErrors = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
-  // We do not support importing/exporting actions. When we do, delete this line of code
-  const rulesWithoutActions = rulesAndErrors.rules.map((rule) => ({ ...rule, actions: [] }));
-  const rulesNdjson = transformDataToNdjson(rulesWithoutActions);
-  const exportDetails = getExportDetailsNdjson(rulesWithoutActions, rulesAndErrors.missingRules);
-  return { rulesNdjson, exportDetails };
+  // Grab all relevant exception lists associated
+  // NOTE: soon enough we won't be stripping the actions, so this should
+  // update to just return the exceptionLists
+  const { rules, exceptionLists } = await getRuleExceptionsForExport(
+    rulesAndErrors.rules,
+    exceptionsClient
+  );
+  const rulesNdjson = transformDataToNdjson(rules);
+  const exportDetails = getExportDetailsNdjson(rules, rulesAndErrors.missingRules);
+  return { rulesNdjson, exportDetails, exceptionLists };
 };
 
 export const getRulesFromObjects = async (

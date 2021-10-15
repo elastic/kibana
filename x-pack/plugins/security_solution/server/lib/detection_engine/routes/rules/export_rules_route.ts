@@ -44,6 +44,7 @@ export const exportRulesRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const rulesClient = context.alerting?.getRulesClient();
+      const exceptionsClient = context.lists?.getExceptionListClient();
 
       if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
@@ -69,14 +70,19 @@ export const exportRulesRoute = (
           }
         }
 
-        const exported =
+        const exportedRules =
           request.body?.objects != null
-            ? await getExportByObjectIds(rulesClient, request.body.objects, isRuleRegistryEnabled)
+            ? await getExportByObjectIds(
+                rulesClient,
+                exceptionsClient,
+                request.body.objects,
+                isRuleRegistryEnabled
+              )
             : await getExportAll(rulesClient, isRuleRegistryEnabled);
 
         const responseBody = request.query.exclude_export_details
-          ? exported.rulesNdjson
-          : `${exported.rulesNdjson}${exported.exportDetails}`;
+          ? exportedRules.rulesNdjson
+          : `${exportedRules.rulesNdjson}${exportedRules.exportDetails}${exportedRules.exceptionLists}`;
 
         return response.ok({
           headers: {
