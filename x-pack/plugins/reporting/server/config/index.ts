@@ -64,7 +64,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
             defaultMessage:
               `Use Kibana application privileges to grant reporting privileges.` +
               ` Using  "{fromPath}.roles.allow" to grant reporting privileges` +
-              ` prevents users from using API Keys to create reports.` +
+              ` is deprecated.` +
               ` The "{fromPath}.roles.enabled" setting will default to false` +
               ` in a future release.`,
             values: { fromPath },
