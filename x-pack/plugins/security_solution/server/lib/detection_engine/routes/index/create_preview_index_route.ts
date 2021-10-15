@@ -47,7 +47,7 @@ export const createPreviewIndexRoute = (
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        await createPreviewIndex(context, siemClient!, ruleRegistryEnabled);
+        await createPreviewIndex(context, siemClient, ruleRegistryEnabled);
 
         return response.ok({ body: { acknowledged: true } });
       } catch (err) {
