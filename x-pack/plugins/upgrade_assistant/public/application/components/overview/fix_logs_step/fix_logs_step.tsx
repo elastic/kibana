@@ -8,7 +8,7 @@ import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiSpacer, EuiPanel, EuiLink, EuiCallOut, EuiCode } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiLink, EuiCallOut, EuiCode } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { useAppContext } from '../../../app_context';
