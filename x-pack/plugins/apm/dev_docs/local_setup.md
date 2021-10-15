@@ -13,19 +13,25 @@ yarn start --no-base-path
 
 To access an elasticsearch instance that has live data you have two options:
 
-#### A. Connect to Elasticsearch on Cloud (internal devs only)
+#### A. Cloud-based ES Cluster (internal devs only)
 
-Find the credentials for the cluster [here](https://github.com/elastic/observability-dev/blob/master/docs/observability-clusters.md)
+Use the [oblt-cli](https://github.com/elastic/observability-test-environments/blob/master/tools/oblt_cli/README.md) to connect to a cloud-based ES cluster.
 
-#### B. Start Elastic Stack and APM data generators
+#### B. Local ES Cluster
 
+##### Start Elasticsearch and APM data generators (_Docker Compose is required_)
 ```
 git clone git@github.com:elastic/apm-integration-testing.git
 cd apm-integration-testing/
 ./scripts/compose.py start master --all --no-kibana
 ```
 
-_Docker Compose is required_
+##### Connect Kibana to Elasticsearch:
+```yml
+elasticsearch.hosts: http://localhost:9200
+elasticsearch.username: admin
+elasticsearch.password: changeme
+```
 
 ### Setup default APM users
 
