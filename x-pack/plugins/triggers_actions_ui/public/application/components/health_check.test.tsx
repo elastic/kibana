@@ -81,7 +81,7 @@ describe('health check', () => {
     expect(queryByText('should render')).toBeInTheDocument();
   });
 
-  test('renders warning if TLS is required', async () => {
+  test('renders warning if API keys are disabled', async () => {
     useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       is_sufficiently_secure: false,
       has_permanent_encryption_key: true,
