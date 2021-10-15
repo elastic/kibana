@@ -9,12 +9,20 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { DiscoverPlugin } from './plugin';
 
+export {
+  getSavedSearch,
+  getSavedSearchFullPathUrl,
+  getSavedSearchUrl,
+  getSavedSearchUrlConflictMessage,
+  throwErrorOnSavedSearchUrlConflict,
+  SavedSearch,
+} from './saved_searches';
+
 export { DiscoverSetup, DiscoverStart } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DiscoverPlugin(initializerContext);
 }
 
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
 export { ISearchEmbeddable, SEARCH_EMBEDDABLE_TYPE, SearchInput } from './application/embeddable';
 export { loadSharingDataHelpers } from './shared';
 

@@ -98,6 +98,7 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
+          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -172,6 +173,7 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
+          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -223,6 +225,7 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
+          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -312,6 +315,7 @@ describe('Screenshot Observable Pipeline', () => {
                     },
                   ],
                   "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
+                  "renderErrors": undefined,
                   "screenshots": Array [
                     Object {
                       "data": Object {
@@ -354,6 +358,7 @@ describe('Screenshot Observable Pipeline', () => {
                     },
                   ],
                   "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
+                  "renderErrors": undefined,
                   "screenshots": Array [
                     Object {
                       "data": Object {
@@ -460,6 +465,7 @@ describe('Screenshot Observable Pipeline', () => {
               },
             ],
             "error": undefined,
+            "renderErrors": undefined,
             "screenshots": Array [
               Object {
                 "data": Object {
