@@ -322,9 +322,9 @@ export class CoreUsageDataService
       },
       environment: {
         memory: {
-          heapSizeLimit: this.opsMetrics.process.memory.heap.size_limit,
-          heapTotalBytes: this.opsMetrics.process.memory.heap.total_in_bytes,
-          heapUsedBytes: this.opsMetrics.process.memory.heap.used_in_bytes,
+          heapSizeLimit: this.opsMetrics.processes[0].memory.heap.size_limit,
+          heapTotalBytes: this.opsMetrics.processes[0].memory.heap.total_in_bytes,
+          heapUsedBytes: this.opsMetrics.processes[0].memory.heap.used_in_bytes,
         },
       },
       services: {

@@ -16,7 +16,9 @@ import { OpsMetrics } from '..';
  * @internal
  */
 export function getEcsOpsMetricsLog(metrics: OpsMetrics) {
-  const { process, os } = metrics;
+  const { processes, os } = metrics;
+  const process = processes[0];
+
   const processMemoryUsedInBytes = process?.memory?.heap?.used_in_bytes;
   const processMemoryUsedInBytesMsg = processMemoryUsedInBytes
     ? `memory: ${numeral(processMemoryUsedInBytes).format('0.0b')} `

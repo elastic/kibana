@@ -47,14 +47,14 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
       name: i18n.translate('core.statusPage.metricsTiles.columns.heapTotalHeader', {
         defaultMessage: 'Heap total',
       }),
-      value: metrics.process.memory.heap.size_limit,
+      value: metrics.processes[0].memory.heap.size_limit,
       type: 'byte',
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.heapUsedHeader', {
         defaultMessage: 'Heap used',
       }),
-      value: metrics.process.memory.heap.used_in_bytes,
+      value: metrics.processes[0].memory.heap.used_in_bytes,
       type: 'byte',
     },
     {
