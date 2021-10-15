@@ -71,7 +71,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
         setIsK8s('IS_NOT_KUBERNETES');
         return;
       }
-      const k8s = (pkg: PackagePolicy) => pkg.name.includes(FLEET_KUBERNETES_PACKAGE);
+      const k8s = (pkg: PackagePolicy) => pkg.package?.name === FLEET_KUBERNETES_PACKAGE;
       setIsK8s(
         (agentPol.package_policies as PackagePolicy[]).some(k8s)
           ? 'IS_KUBERNETES'
