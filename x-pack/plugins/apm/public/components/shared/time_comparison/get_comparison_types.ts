@@ -16,12 +16,13 @@ export function getComparisonTypes({
   start?: string;
   end?: string;
 }) {
-  const momentStart = moment(start);
-  const momentEnd = moment(end);
+  const momentStart = moment(start).startOf('second');
+  const momentEnd = moment(end).startOf('second');
 
   const dateDiff = getDateDifference({
     start: momentStart,
     end: momentEnd,
+    precise: true,
     unitOfTime: 'days',
   });
 
