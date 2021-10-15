@@ -391,7 +391,7 @@ describe('indicator match', () => {
       });
 
       describe('Schedule', () => {
-        it('By default IM rule has 1h time interval and lookback by default', () => {
+        it('IM rule has 1h time interval and lookback by default', () => {
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
           fillAboutRuleAndContinue(getNewThreatIndicatorRule());
