@@ -274,57 +274,58 @@ describe('Body', () => {
         .prop<EuiDataGridColumn[]>('columns')
         .find((c) => c.id === 'signal.rule.risk_score')?.cellActions
     ).toBeUndefined();
-    test('it does NOT render switches for hiding columns in the `EuiDataGrid` `Columns` popover', async () => {
-      render(
-        <TestProviders>
-          <BodyComponent {...props} />
-        </TestProviders>
-      );
+  });
 
-      // Click the `EuidDataGrid` `Columns` button to open the popover:
-      fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+  test('it does NOT render switches for hiding columns in the `EuiDataGrid` `Columns` popover', async () => {
+    render(
+      <TestProviders>
+        <BodyComponent {...props} />
+      </TestProviders>
+    );
 
-      // `EuiDataGrid` renders switches for hiding in the `Columns` popover when `showColumnSelector.allowHide` is `true`
-      const switches = await screen.queryAllByRole('switch');
+    // Click the `EuidDataGrid` `Columns` button to open the popover:
+    fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
 
-      expect(switches.length).toBe(0); // no switches are rendered, because `allowHide` is `false`
+    // `EuiDataGrid` renders switches for hiding in the `Columns` popover when `showColumnSelector.allowHide` is `true`
+    const switches = await screen.queryAllByRole('switch');
+
+    expect(switches.length).toBe(0); // no switches are rendered, because `allowHide` is `false`
+  });
+
+  test('it dispatches the `REMOVE_COLUMN` action when a user clicks `Remove column` in the column header popover', async () => {
+    render(
+      <TestProviders>
+        <BodyComponent {...props} />
+      </TestProviders>
+    );
+
+    // click the `@timestamp` column header to display the popover
+    fireEvent.click(screen.getByText('@timestamp'));
+
+    // click the `Remove column` action in the popover
+    fireEvent.click(await screen.getByText(REMOVE_COLUMN));
+
+    expect(mockDispatch).toBeCalledWith({
+      payload: { columnId: '@timestamp', id: 'timeline-test' },
+      type: 'x-pack/timelines/t-grid/REMOVE_COLUMN',
     });
+  });
 
-    test('it dispatches the `REMOVE_COLUMN` action when a user clicks `Remove column` in the column header popover', async () => {
-      render(
-        <TestProviders>
-          <BodyComponent {...props} />
-        </TestProviders>
-      );
+  test('it dispatches the `UPDATE_COLUMN_WIDTH` action when a user resizes a column', async () => {
+    render(
+      <TestProviders>
+        <BodyComponent {...props} />
+      </TestProviders>
+    );
 
-      // click the `@timestamp` column header to display the popover
-      fireEvent.click(screen.getByText('@timestamp'));
+    // simulate resizing the column
+    fireEvent.mouseDown(screen.getAllByTestId('dataGridColumnResizer')[0]);
+    fireEvent.mouseMove(screen.getAllByTestId('dataGridColumnResizer')[0]);
+    fireEvent.mouseUp(screen.getAllByTestId('dataGridColumnResizer')[0]);
 
-      // click the `Remove column` action in the popover
-      fireEvent.click(await screen.getByText(REMOVE_COLUMN));
-
-      expect(mockDispatch).toBeCalledWith({
-        payload: { columnId: '@timestamp', id: 'timeline-test' },
-        type: 'x-pack/timelines/t-grid/REMOVE_COLUMN',
-      });
-    });
-
-    test('it dispatches the `UPDATE_COLUMN_WIDTH` action when a user resizes a column', async () => {
-      render(
-        <TestProviders>
-          <BodyComponent {...props} />
-        </TestProviders>
-      );
-
-      // simulate resizing the column
-      fireEvent.mouseDown(screen.getAllByTestId('dataGridColumnResizer')[0]);
-      fireEvent.mouseMove(screen.getAllByTestId('dataGridColumnResizer')[0]);
-      fireEvent.mouseUp(screen.getAllByTestId('dataGridColumnResizer')[0]);
-
-      expect(mockDispatch).toBeCalledWith({
-        payload: { columnId: '@timestamp', id: 'timeline-test', width: NaN },
-        type: 'x-pack/timelines/t-grid/UPDATE_COLUMN_WIDTH',
-      });
+    expect(mockDispatch).toBeCalledWith({
+      payload: { columnId: '@timestamp', id: 'timeline-test', width: NaN },
+      type: 'x-pack/timelines/t-grid/UPDATE_COLUMN_WIDTH',
     });
   });
 });
