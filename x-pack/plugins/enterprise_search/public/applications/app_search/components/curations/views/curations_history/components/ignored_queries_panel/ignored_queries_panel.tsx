@@ -5,55 +5,67 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { CustomItemAction, EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { useActions, useValues } from 'kea';
+
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import {
+  convertMetaToPagination,
+  handlePageChange,
+} from '../../../../../../../shared/table_pagination';
+
 import { DataPanel } from '../../../../../data_panel';
-import { CurationSuggestion } from '../../../../types';
+
+import { IgnoredQueriesLogic } from './ignored_queries_logic';
 
 export const IgnoredQueriesPanel: React.FC = () => {
-  const ignoredSuggestions: CurationSuggestion[] = [];
+  const { dataLoading, ignoredQueries, meta } = useValues(IgnoredQueriesLogic);
+  const { allowIgnoredQuery, loadIgnoredQueries, onPaginate } = useActions(IgnoredQueriesLogic);
 
-  const allowSuggestion = (query: string) => alert(query);
+  useEffect(() => {
+    loadIgnoredQueries();
+  }, [meta.page.current]);
 
-  const actions: Array<CustomItemAction<CurationSuggestion>> = [
+  const columns: Array<EuiBasicTableColumn<string>> = [
     {
-      render: (item: CurationSuggestion) => {
-        return (
-          <EuiLink onClick={() => allowSuggestion(item.query)} color="primary">
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestions.allowButtonLabel',
-              {
-                defaultMessage: 'Allow',
-              }
-            )}
-          </EuiLink>
-        );
-      },
-    },
-  ];
-
-  const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
-    {
-      field: 'query',
+      render: (query: string) => query,
       name: i18n.translate(
         'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestionsPanel.queryColumnName',
         {
           defaultMessage: 'Query',
         }
       ),
-      sortable: true,
     },
     {
-      actions,
+      actions: [
+        {
+          type: 'button',
+          name: i18n.translate(
+            'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestions.allowButtonLabel',
+            {
+              defaultMessage: 'Allow',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestions.allowButtonDescription',
+            {
+              defaultMessage: 'Enable suggestions for this query',
+            }
+          ),
+          onClick: (query) => allowIgnoredQuery(query),
+          color: 'primary',
+        },
+      ],
     },
   ];
 
   return (
     <DataPanel
+      isLoading={dataLoading}
       title={
         <h2>
           {i18n.translate(
@@ -77,7 +89,17 @@ export const IgnoredQueriesPanel: React.FC = () => {
       iconType="eyeClosed"
       hasBorder
     >
-      <EuiBasicTable items={ignoredSuggestions} itemId="query" columns={columns} />
+      <EuiBasicTable
+        items={ignoredQueries}
+        itemId="query"
+        columns={columns}
+        hasActions
+        pagination={{
+          ...convertMetaToPagination(meta),
+          hidePerPageOptions: true,
+        }}
+        onChange={handlePageChange(onPaginate)}
+      />
     </DataPanel>
   );
 };
