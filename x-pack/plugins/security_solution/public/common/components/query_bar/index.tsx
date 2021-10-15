@@ -18,7 +18,6 @@ import {
   SavedQueryTimeFilter,
 } from '../../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { dataViewToIndexPattern } from '../../utils/data_view_to_index_pattern';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
@@ -103,7 +102,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const CustomButton = <>{null}</>;
-    const indexPatterns = useMemo(() => [dataViewToIndexPattern(indexPattern)], [indexPattern]);
+    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
     return (
       <SearchBar

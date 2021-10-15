@@ -42,7 +42,6 @@ import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
-import { dataViewToIndexPattern } from '../../../../common/utils/data_view_to_index_pattern';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -85,9 +84,7 @@ export const buildQueryBarDescription = ({
                   {indexPatterns != null ? (
                     <esFilters.FilterLabel
                       filter={filter}
-                      valueLabel={esFilters.getDisplayValueFromFilter(filter, [
-                        dataViewToIndexPattern(indexPatterns),
-                      ])}
+                      valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
                     />
                   ) : (
                     <EuiLoadingSpinner size="m" />
