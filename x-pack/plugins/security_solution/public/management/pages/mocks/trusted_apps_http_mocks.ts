@@ -75,6 +75,7 @@ export const trustedAppPutHttpMocks = httpHandlerMockFactory<TrustedAppPutHttpMo
       const response: PutTrustedAppUpdateResponse = {
         data: {
           ...(body as unknown as PutTrustedAppUpdateRequest),
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           id: path.split('/').pop()!,
           created_at: '2021-10-12T16:02:55.856Z',
           created_by: 'elastic',
