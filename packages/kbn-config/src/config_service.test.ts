@@ -382,6 +382,7 @@ test('logs deprecation if schema is not present and "enabled" is used', async ()
         "foo",
         Array [
           Object {
+            "configPath": "foo.enabled",
             "correctiveActions": Object {
               "manualSteps": Array [
                 "Remove \\"foo.enabled\\" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.",
@@ -452,10 +453,12 @@ test('logs deprecation warning during validation', async () => {
   mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
     const addDeprecation = createAddDeprecation!('');
     addDeprecation({
+      configPath: 'test1',
       message: 'some deprecation message',
       correctiveActions: { manualSteps: ['do X'] },
     });
     addDeprecation({
+      configPath: 'test2',
       message: 'another deprecation message',
       correctiveActions: { manualSteps: ['do Y'] },
     });
@@ -521,11 +524,13 @@ test('does not log warnings for silent deprecations during validation', async ()
     .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
       const addDeprecation = createAddDeprecation!('');
       addDeprecation({
+        configPath: 'test1',
         message: 'some deprecation message',
         correctiveActions: { manualSteps: ['do X'] },
         silent: true,
       });
       addDeprecation({
+        configPath: 'test2',
         message: 'another deprecation message',
         correctiveActions: { manualSteps: ['do Y'] },
       });
@@ -534,6 +539,7 @@ test('does not log warnings for silent deprecations during validation', async ()
     .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
       const addDeprecation = createAddDeprecation!('');
       addDeprecation({
+        configPath: 'silent',
         message: 'I am silent',
         silent: true,
         correctiveActions: { manualSteps: ['do Z'] },
@@ -617,6 +623,7 @@ describe('getHandledDeprecatedConfigs', () => {
       deprecations.forEach((deprecation) => {
         const addDeprecation = createAddDeprecation!(deprecation.path);
         addDeprecation({
+          configPath: 'test1',
           message: `some deprecation message`,
           documentationUrl: 'some-url',
           correctiveActions: { manualSteps: ['do X'] },
@@ -633,6 +640,7 @@ describe('getHandledDeprecatedConfigs', () => {
           "base",
           Array [
             Object {
+              "configPath": "test1",
               "correctiveActions": Object {
                 "manualSteps": Array [
                   "do X",
