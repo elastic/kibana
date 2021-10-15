@@ -9,26 +9,22 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { IndexPattern, IndexPatternField } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../common/lib/kibana';
 
 import * as i18n from './translations';
-import { useIndexFields } from '../../../common/containers/source';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 interface CreateFieldButtonProps {
   selectedDataViewId: string;
   onClick: () => void;
-  scopeId: SourcererScopeName;
+  onCreateField: (field: IndexPatternField) => void;
 }
 const StyledButton = styled(EuiButton)`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 
 export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
-  ({ selectedDataViewId, onClick: onClickParam, scopeId }) => {
-    const { indexFieldsSearch } = useIndexFields(scopeId, false);
-
+  ({ selectedDataViewId, onClick: onClickParam, onCreateField }) => {
     const {
       indexPatternFieldEditor,
       data: { dataViews },
@@ -46,13 +42,11 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       if (dataView) {
         indexPatternFieldEditor?.openEditor({
           ctx: { indexPattern: dataView },
-          onSave: () => {
-            indexFieldsSearch(selectedDataViewId);
-          },
+          onSave: onCreateField,
         });
       }
       onClickParam();
-    }, [indexPatternFieldEditor, dataView, selectedDataViewId, onClickParam, indexFieldsSearch]);
+    }, [indexPatternFieldEditor, dataView, onClickParam, onCreateField]);
 
     if (!indexPatternFieldEditor?.userPermissions.editIndexPattern()) {
       return null;

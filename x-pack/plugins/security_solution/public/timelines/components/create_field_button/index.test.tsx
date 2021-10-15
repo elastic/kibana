@@ -7,7 +7,6 @@
 
 import { render, fireEvent, act, screen } from '@testing-library/react';
 import React from 'react';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { CreateFieldButton } from './index';
 import {
   indexPatternFieldEditorPluginMock,
@@ -22,8 +21,6 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');
-
-jest.mock('../../../common/containers/source', () => ({ useIndexFields: () => ({}) }));
 
 const runAllPromises = () => new Promise(setImmediate);
 
@@ -41,9 +38,11 @@ describe('CreateFieldButton', () => {
       <CreateFieldButton
         selectedDataViewId={'dataViewId'}
         onClick={() => undefined}
-        scopeId={SourcererScopeName.timeline}
+        onCreateField={() => undefined}
       />,
-      { wrapper: TestProviders }
+      {
+        wrapper: TestProviders,
+      }
     );
 
     expect(screen.getByRole('button')).toBeInTheDocument();
@@ -55,9 +54,11 @@ describe('CreateFieldButton', () => {
       <CreateFieldButton
         selectedDataViewId={'dataViewId'}
         onClick={() => undefined}
-        scopeId={SourcererScopeName.timeline}
+        onCreateField={() => undefined}
       />,
-      { wrapper: TestProviders }
+      {
+        wrapper: TestProviders,
+      }
     );
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
@@ -73,9 +74,11 @@ describe('CreateFieldButton', () => {
         <CreateFieldButton
           selectedDataViewId={'dataViewId'}
           onClick={onClickParam}
-          scopeId={SourcererScopeName.timeline}
+          onCreateField={() => undefined}
         />,
-        { wrapper: TestProviders }
+        {
+          wrapper: TestProviders,
+        }
       );
       await runAllPromises();
     });

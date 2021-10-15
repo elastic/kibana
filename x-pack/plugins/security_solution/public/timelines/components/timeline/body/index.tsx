@@ -8,7 +8,7 @@
 import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import {
@@ -17,6 +17,7 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
   CreateFieldComponentType,
+  tGridActions,
 } from '../../../../../../timelines/public';
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
@@ -28,7 +29,7 @@ import {
   TimelineId,
   TimelineTabs,
 } from '../../../../../common/types/timeline';
-import { BrowserFields } from '../../../../common/containers/source';
+import { BrowserFields, useIndexFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { inputsModel, sourcererSelectors, State } from '../../../../common/store';
 import { TimelineModel } from '../../../store/timeline/model';
@@ -47,6 +48,8 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { CreateFieldButton } from '../../create_field_button';
 import { SelectedDataView } from '../../../../common/store/sourcerer/selectors';
+import { IndexPatternField } from '../../../../../../../../src/plugins/data/public';
+import { defaultColumnHeaderType } from './column_headers/default_headers';
 
 interface OwnProps {
   activePage: number;
@@ -233,18 +236,37 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       getSelectedDataView(state, SourcererScopeName.timeline)
     );
 
+    const dispatch = useDispatch();
+    const { indexFieldsSearch } = useIndexFields(SourcererScopeName.timeline, false);
+
     const createFieldComponent = useMemo(() => {
+      const onCreateField = (field: IndexPatternField) => {
+        // Fetch updated list of fields
+        indexFieldsSearch(dataViewId);
+        // Add the new field to the event table
+        dispatch(
+          tGridActions.upsertColumn({
+            column: {
+              columnHeaderType: defaultColumnHeaderType,
+              id: field.name,
+              initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+            },
+            id,
+            index: 0,
+          })
+        );
+      };
       // It receives onClick props from field browser in order to close the modal.
       const CreateFieldButtonComponent: CreateFieldComponentType = ({ onClick }) => (
         <CreateFieldButton
           selectedDataViewId={dataViewId}
           onClick={onClick}
-          scopeId={SourcererScopeName.timeline}
+          onCreateField={onCreateField}
         />
       );
 
       return CreateFieldButtonComponent;
-    }, [dataViewId]);
+    }, [dataViewId, dispatch, id, indexFieldsSearch]);
 
     return (
       <>

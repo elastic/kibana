@@ -16,7 +16,7 @@ import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter, IndexPatternField } from '../../../../../../../src/plugins/data/public';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -31,8 +31,11 @@ import { defaultControlColumn } from '../../../timelines/components/timeline/bod
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import { CreateFieldButton } from '../../../timelines/components/create_field';
-import { CreateFieldComponentType } from '../../../../../timelines/public';
+import { CreateFieldButton } from '../../../timelines/components/create_field_button';
+import { CreateFieldComponentType, tGridActions } from '../../../../../timelines/public';
+import { useIndexFields } from '../../containers/source';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
@@ -175,18 +178,37 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, [id, timelineQuery, globalQuery]);
   const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
 
+  const { indexFieldsSearch } = useIndexFields(scopeId, false);
+
   const createFieldComponent = useMemo(() => {
+    const onCreateField = (field: IndexPatternField) => {
+      // Fetch updated list of fields
+      indexFieldsSearch(selectedDataViewId);
+      // Add the new field to the event table
+      dispatch(
+        tGridActions.upsertColumn({
+          column: {
+            columnHeaderType: defaultColumnHeaderType,
+            id: field.name,
+            initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+          },
+          id,
+          index: 1,
+        })
+      );
+    };
+
     // It receives onClick props from field browser in order to close the modal.
     const CreateFieldButtonComponent: CreateFieldComponentType = ({ onClick }) => (
       <CreateFieldButton
         selectedDataViewId={selectedDataViewId}
         onClick={onClick}
-        scopeId={scopeId}
+        onCreateField={onCreateField}
       />
     );
 
     return CreateFieldButtonComponent;
-  }, [selectedDataViewId, scopeId]);
+  }, [selectedDataViewId, dispatch, id, indexFieldsSearch]);
 
   return (
     <>
