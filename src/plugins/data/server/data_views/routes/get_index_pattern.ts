@@ -10,47 +10,56 @@ import { schema } from '@kbn/config-schema';
 import { handleErrors } from './util/handle_errors';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+import { SPECIFIC_DATA_VIEW_PATH, SPECIFIC_DATA_VIEW_PATH_LEGACY } from '../constants';
 
-export const registerGetIndexPatternRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
-) => {
-  router.get(
-    {
-      path: '/api/index_patterns/index_pattern/{id}',
-      validate: {
-        params: schema.object(
-          {
-            id: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
-            }),
-          },
-          { unknowns: 'allow' }
-        ),
+const getDataViewRouteFactory =
+  (path: string) =>
+  (
+    router: IRouter,
+    getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
+  ) => {
+    router.get(
+      {
+        path,
+        validate: {
+          params: schema.object(
+            {
+              id: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
+            },
+            { unknowns: 'allow' }
+          ),
+        },
       },
-    },
-    router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatterns }] = await getStartServices();
-        const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient
-        );
-        const id = req.params.id;
-        const indexPattern = await indexPatternsService.get(id);
+      router.handleLegacyErrors(
+        handleErrors(async (ctx, req, res) => {
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const [, , { indexPatterns }] = await getStartServices();
+          const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient
+          );
+          const id = req.params.id;
+          const indexPattern = await indexPatternsService.get(id);
 
-        return res.ok({
-          headers: {
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            index_pattern: indexPattern.toSpec(),
-          }),
-        });
-      })
-    )
-  );
-};
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              index_pattern: indexPattern.toSpec(),
+            }),
+          });
+        })
+      )
+    );
+  };
+
+export const registerGetDataViewRoute = getDataViewRouteFactory(SPECIFIC_DATA_VIEW_PATH);
+
+export const registerGetDataViewRouteLegacy = getDataViewRouteFactory(
+  SPECIFIC_DATA_VIEW_PATH_LEGACY
+);

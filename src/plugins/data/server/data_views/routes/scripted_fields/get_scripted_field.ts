@@ -11,62 +11,73 @@ import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import { IRouter, StartServicesAccessor } from '../../../../../../core/server';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../../plugin';
+import { SPECIFIC_SCRIPTED_FIELD_PATH, SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY } from '../../constants';
 
-export const registerGetScriptedFieldRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
-) => {
-  router.get(
-    {
-      path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
-      validate: {
-        params: schema.object(
-          {
-            id: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
-            }),
-            name: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
-            }),
-          },
-          { unknowns: 'allow' }
-        ),
+export const getScriptedFieldRouteFactory =
+  (path: string) =>
+  (
+    router: IRouter,
+    getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
+  ) => {
+    router.get(
+      {
+        path,
+        validate: {
+          params: schema.object(
+            {
+              id: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
+              name: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
+            },
+            { unknowns: 'allow' }
+          ),
+        },
       },
-    },
-    router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatterns }] = await getStartServices();
-        const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient
-        );
-        const id = req.params.id;
-        const name = req.params.name;
+      router.handleLegacyErrors(
+        handleErrors(async (ctx, req, res) => {
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const [, , { indexPatterns }] = await getStartServices();
+          const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient
+          );
+          const id = req.params.id;
+          const name = req.params.name;
 
-        const indexPattern = await indexPatternsService.get(id);
-        const field = indexPattern.fields.getByName(name);
+          const indexPattern = await indexPatternsService.get(id);
+          const field = indexPattern.fields.getByName(name);
 
-        if (!field) {
-          throw new ErrorIndexPatternFieldNotFound(id, name);
-        }
+          if (!field) {
+            throw new ErrorIndexPatternFieldNotFound(id, name);
+          }
 
-        if (!field.scripted) {
-          throw new Error('Only scripted fields can be retrieved.');
-        }
+          if (!field.scripted) {
+            throw new Error('Only scripted fields can be retrieved.');
+          }
 
-        return res.ok({
-          headers: {
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            field: field.toSpec(),
-          }),
-        });
-      })
-    )
-  );
-};
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              field: field.toSpec(),
+            }),
+          });
+        })
+      )
+    );
+  };
+
+export const registerGetScriptedFieldRoute = getScriptedFieldRouteFactory(
+  SPECIFIC_SCRIPTED_FIELD_PATH
+);
+
+export const registerGetScriptedFieldRouteLegacy = getScriptedFieldRouteFactory(
+  SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY
+);

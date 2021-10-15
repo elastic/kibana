@@ -15,6 +15,7 @@ import {
 } from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+import { SPECIFIC_DATA_VIEW_PATH, SPECIFIC_DATA_VIEW_PATH_LEGACY } from '../constants';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
@@ -35,132 +36,140 @@ const indexPatternUpdateSchema = schema.object({
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSpecSchema)),
 });
 
-export const registerUpdateIndexPatternRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
-) => {
-  router.post(
-    {
-      path: '/api/index_patterns/index_pattern/{id}',
-      validate: {
-        params: schema.object(
-          {
-            id: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
-            }),
-          },
-          { unknowns: 'allow' }
-        ),
-        body: schema.object({
-          refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-          index_pattern: indexPatternUpdateSchema,
-        }),
-      },
-    },
-    router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatterns }] = await getStartServices();
-        const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient
-        );
-        const id = req.params.id;
-
-        const indexPattern = await indexPatternsService.get(id);
-
-        const {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          refresh_fields = true,
-          index_pattern: {
-            title,
-            timeFieldName,
-            intervalName,
-            sourceFilters,
-            fieldFormats,
-            type,
-            typeMeta,
-            fields,
-            runtimeFieldMap,
-          },
-        } = req.body;
-
-        let changeCount = 0;
-        let doRefreshFields = false;
-
-        if (title !== undefined && title !== indexPattern.title) {
-          changeCount++;
-          indexPattern.title = title;
-        }
-
-        if (timeFieldName !== undefined && timeFieldName !== indexPattern.timeFieldName) {
-          changeCount++;
-          indexPattern.timeFieldName = timeFieldName;
-        }
-
-        if (intervalName !== undefined && intervalName !== indexPattern.intervalName) {
-          changeCount++;
-          indexPattern.intervalName = intervalName;
-        }
-
-        if (sourceFilters !== undefined) {
-          changeCount++;
-          indexPattern.sourceFilters = sourceFilters;
-        }
-
-        if (fieldFormats !== undefined) {
-          changeCount++;
-          indexPattern.fieldFormatMap = fieldFormats;
-        }
-
-        if (type !== undefined) {
-          changeCount++;
-          indexPattern.type = type;
-        }
-
-        if (typeMeta !== undefined) {
-          changeCount++;
-          indexPattern.typeMeta = typeMeta;
-        }
-
-        if (fields !== undefined) {
-          changeCount++;
-          doRefreshFields = true;
-          indexPattern.fields.replaceAll(
-            Object.values(fields || {}).map((field) => ({
-              ...field,
-              aggregatable: true,
-              searchable: true,
-            }))
-          );
-        }
-
-        if (runtimeFieldMap !== undefined) {
-          changeCount++;
-          indexPattern.replaceAllRuntimeFields(runtimeFieldMap);
-        }
-
-        if (changeCount < 1) {
-          throw new Error('Index pattern change set is empty.');
-        }
-
-        await indexPatternsService.updateSavedObject(indexPattern);
-
-        if (doRefreshFields && refresh_fields) {
-          await indexPatternsService.refreshFields(indexPattern);
-        }
-
-        return res.ok({
-          headers: {
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            index_pattern: indexPattern.toSpec(),
+export const updateDataViewRouteFactory =
+  (path: string) =>
+  (
+    router: IRouter,
+    getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
+  ) => {
+    router.post(
+      {
+        path,
+        validate: {
+          params: schema.object(
+            {
+              id: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
+            },
+            { unknowns: 'allow' }
+          ),
+          body: schema.object({
+            refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
+            index_pattern: indexPatternUpdateSchema,
           }),
-        });
-      })
-    )
-  );
-};
+        },
+      },
+      router.handleLegacyErrors(
+        handleErrors(async (ctx, req, res) => {
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const [, , { indexPatterns }] = await getStartServices();
+          const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient
+          );
+          const id = req.params.id;
+
+          const indexPattern = await indexPatternsService.get(id);
+
+          const {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            refresh_fields = true,
+            index_pattern: {
+              title,
+              timeFieldName,
+              intervalName,
+              sourceFilters,
+              fieldFormats,
+              type,
+              typeMeta,
+              fields,
+              runtimeFieldMap,
+            },
+          } = req.body;
+
+          let changeCount = 0;
+          let doRefreshFields = false;
+
+          if (title !== undefined && title !== indexPattern.title) {
+            changeCount++;
+            indexPattern.title = title;
+          }
+
+          if (timeFieldName !== undefined && timeFieldName !== indexPattern.timeFieldName) {
+            changeCount++;
+            indexPattern.timeFieldName = timeFieldName;
+          }
+
+          if (intervalName !== undefined && intervalName !== indexPattern.intervalName) {
+            changeCount++;
+            indexPattern.intervalName = intervalName;
+          }
+
+          if (sourceFilters !== undefined) {
+            changeCount++;
+            indexPattern.sourceFilters = sourceFilters;
+          }
+
+          if (fieldFormats !== undefined) {
+            changeCount++;
+            indexPattern.fieldFormatMap = fieldFormats;
+          }
+
+          if (type !== undefined) {
+            changeCount++;
+            indexPattern.type = type;
+          }
+
+          if (typeMeta !== undefined) {
+            changeCount++;
+            indexPattern.typeMeta = typeMeta;
+          }
+
+          if (fields !== undefined) {
+            changeCount++;
+            doRefreshFields = true;
+            indexPattern.fields.replaceAll(
+              Object.values(fields || {}).map((field) => ({
+                ...field,
+                aggregatable: true,
+                searchable: true,
+              }))
+            );
+          }
+
+          if (runtimeFieldMap !== undefined) {
+            changeCount++;
+            indexPattern.replaceAllRuntimeFields(runtimeFieldMap);
+          }
+
+          if (changeCount < 1) {
+            throw new Error('Index pattern change set is empty.');
+          }
+
+          await indexPatternsService.updateSavedObject(indexPattern);
+
+          if (doRefreshFields && refresh_fields) {
+            await indexPatternsService.refreshFields(indexPattern);
+          }
+
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              index_pattern: indexPattern.toSpec(),
+            }),
+          });
+        })
+      )
+    );
+  };
+
+export const registerUpdateDataViewRoute = updateDataViewRouteFactory(SPECIFIC_DATA_VIEW_PATH);
+
+export const registerUpdateDataViewRouteLegacy = updateDataViewRouteFactory(
+  SPECIFIC_DATA_VIEW_PATH_LEGACY
+);

@@ -11,6 +11,7 @@ import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../../core/server';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../../plugin';
+import { SPECIFIC_DATA_VIEW_PATH, SPECIFIC_DATA_VIEW_PATH_LEGACY } from '../../constants';
 
 const updateFieldsActionRouteFactory = (path: string) => {
   return (
@@ -116,9 +117,9 @@ const updateFieldsActionRouteFactory = (path: string) => {
 };
 
 export const registerUpdateFieldsRouteLegacy = updateFieldsActionRouteFactory(
-  '/api/data_views/data_view/{id}/fields'
+  `${SPECIFIC_DATA_VIEW_PATH}/fields`
 );
 
 export const registerUpdateFieldsRoute = updateFieldsActionRouteFactory(
-  '/api/index_patterns/index_pattern/{id}/fields'
+  `${SPECIFIC_DATA_VIEW_PATH_LEGACY}/fields`
 );

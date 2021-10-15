@@ -16,6 +16,7 @@ import {
 } from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+import { DATA_VIEW_PATH, DATA_VIEW_PATH_LEGACY } from '../constants';
 
 const indexPatternSpecSchema = schema.object({
   title: schema.string(),
@@ -93,10 +94,7 @@ const registerCreateDataViewRouteFactory =
     );
   };
 
-export const registerCreateDataViewRoute = registerCreateDataViewRouteFactory(
-  '/api/data_views/data_view'
-);
+export const registerCreateDataViewRoute = registerCreateDataViewRouteFactory(DATA_VIEW_PATH);
 
-export const registerCreateIndexPatternRoute = registerCreateDataViewRouteFactory(
-  '/api/index_patterns/index_pattern'
-);
+export const registerCreateDataViewRouteLegacy =
+  registerCreateDataViewRouteFactory(DATA_VIEW_PATH_LEGACY);
