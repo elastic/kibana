@@ -59,6 +59,7 @@ import { CorrelationsProgressControls } from './progress_controls';
 import { useTransactionColors } from './use_transaction_colors';
 import { CorrelationsContextPopover } from './context_popover';
 import { OnAddFilter } from './context_popover/top_values';
+import { useLatencyCorrelations } from './use_latency_correlations';
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const transactionColors = useTransactionColors();
@@ -69,6 +70,8 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 
+  const lt = useLatencyCorrelations();
+
   const { progress, response, startFetch, cancelFetch } = useSearchStrategy(
     APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
     {
@@ -78,8 +81,8 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   );
   const progressNormalized = progress.loaded / progress.total;
   const { overallHistogram, hasData, status } = getOverallHistogram(
-    response,
-    progress.isRunning
+    lt.response,
+    lt.progress.isRunning
   );
 
   const fieldStats: Record<string, FieldStats> | undefined = useMemo(() => {
@@ -360,7 +363,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
       <TransactionDistributionChart
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-        markerValue={response.percentileThresholdValue ?? 0}
+        markerValue={lt.response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}
         status={status}
@@ -384,7 +387,10 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       <CorrelationsProgressControls
         progress={progressNormalized}
         isRunning={progress.isRunning}
-        onRefresh={startFetch}
+        onRefresh={() => {
+          startFetch();
+          lt.startFetch();
+        }}
         onCancel={cancelFetch}
       />
 
