@@ -133,7 +133,7 @@ function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
   const beforeLabel = i18n.translate('xpack.lens.xyChart.referenceLineFill.before', {
     defaultMessage: 'Before',
   });
-  const afterLabel = i18n.translate('xpack.lens.xyChart.referenceLineFill.right', {
+  const afterLabel = i18n.translate('xpack.lens.xyChart.referenceLineFill.after', {
     defaultMessage: 'After',
   });
 
