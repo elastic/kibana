@@ -469,12 +469,12 @@ describe.each([
 
   describe('transformAlertsToRules', () => {
     test('given an empty array returns an empty array', () => {
-      expect(transformAlertsToRules([])).toEqual([]);
+      expect(transformAlertsToRules([], {})).toEqual([]);
     });
 
     test('given single alert will return the alert transformed', () => {
       const result1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
-      const transformed = transformAlertsToRules([result1]);
+      const transformed = transformAlertsToRules([result1], {});
       const expected = getOutputRuleAlertForRest();
       expect(transformed).toEqual([expected]);
     });
@@ -485,7 +485,7 @@ describe.each([
       result2.id = 'some other id';
       result2.params.ruleId = 'some other id';
 
-      const transformed = transformAlertsToRules([result1, result2]);
+      const transformed = transformAlertsToRules([result1, result2], {});
       const expected1 = getOutputRuleAlertForRest();
       const expected2 = getOutputRuleAlertForRest();
       expected2.id = 'some other id';

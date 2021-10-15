@@ -9,21 +9,33 @@ import {
   getAlertMock,
   getFindResultWithSingleHit,
   FindHit,
+  getEmptySavedObjectsResponse,
 } from '../routes/__mocks__/request_responses';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
+
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { requestContextMock } from '../routes/__mocks__/request_context';
 
 describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('getExportAll - %s', (_, isRuleRegistryEnabled) => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  const { clients } = requestContextMock.createTools();
+
+  beforeEach(async () => {
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
+  });
+
   test('it exports everything from the alerts client', async () => {
     const rulesClient = rulesClientMock.create();
     const result = getFindResultWithSingleHit(isRuleRegistryEnabled);
     const alert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+
     alert.params = {
       ...alert.params,
       filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
@@ -35,7 +47,12 @@ describe.each([
     result.data = [alert];
     rulesClient.find.mockResolvedValue(result);
 
-    const exports = await getExportAll(rulesClient, isRuleRegistryEnabled);
+    const exports = await getExportAll(
+      rulesClient,
+      clients.savedObjectsClient,
+      logger,
+      isRuleRegistryEnabled
+    );
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
     expect(rulesJson).toEqual({
@@ -97,7 +114,12 @@ describe.each([
 
     rulesClient.find.mockResolvedValue(findResult);
 
-    const exports = await getExportAll(rulesClient, isRuleRegistryEnabled);
+    const exports = await getExportAll(
+      rulesClient,
+      clients.savedObjectsClient,
+      logger,
+      isRuleRegistryEnabled
+    );
     expect(exports).toEqual({
       rulesNdjson: '',
       exportDetails: '{"exported_count":0,"missing_rules":[],"missing_rules_count":0}\n',
