@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
+const Fs = require('path');
 const Path = require('path');
 
 const { REPO_ROOT } = require('@kbn/dev-utils');
 
-const KIBANA_ROOT = Path.resolve(__dirname, '../../../../../');
+// const KIBANA_ROOT = Path.resolve(__dirname, '../../../../../');
 
-console.log(Path.resolve(REPO_ROOT, 'test'));
-console.log(require('fs').realpathSync(Path.resolve(REPO_ROOT, 'test')));
-console.log(Path.resolve(KIBANA_ROOT, 'test'));
-throw new Error('FAIL CI');
+// console.log(Path.resolve(REPO_ROOT, 'test'));
+// console.log(require('fs').realpathSync(Path.resolve(REPO_ROOT, 'test')));
+// console.log(Path.resolve(KIBANA_ROOT, 'test'));
+// throw new Error('FAIL CI');
 
 // modifies all future calls to require() to automatically
 // compile the required source with babel
@@ -29,7 +30,7 @@ require('@babel/register')({
     // TODO: should should probably remove this link back to the source
     Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
     Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
-  ],
+  ].map((path) => Fs.realpathSync(path)),
   babelrc: false,
   presets: [require.resolve('@kbn/babel-preset/node_preset')],
   extensions: ['.js', '.ts', '.tsx'],
