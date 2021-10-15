@@ -89,6 +89,7 @@ describe('interpreter/functions#selectFilter', () => {
             "query": Object {},
           },
         ],
+        "type": "kibana_context",
       }
     `);
   });
@@ -119,6 +120,7 @@ describe('interpreter/functions#selectFilter', () => {
             "query": Object {},
           },
         ],
+        "type": "kibana_context",
       }
     `);
   });
@@ -135,6 +137,7 @@ describe('interpreter/functions#selectFilter', () => {
             "query": Object {},
           },
         ],
+        "type": "kibana_context",
       }
     `);
   });
@@ -171,6 +174,7 @@ describe('interpreter/functions#selectFilter', () => {
             "query": Object {},
           },
         ],
+        "type": "kibana_context",
       }
     `);
   });
@@ -194,6 +198,7 @@ describe('interpreter/functions#selectFilter', () => {
             "query": Object {},
           },
         ],
+        "type": "kibana_context",
       }
     `);
   });
@@ -211,6 +216,7 @@ describe('interpreter/functions#selectFilter', () => {
             "query": Object {},
           },
         ],
+        "type": "kibana_context",
       }
     `);
   });
