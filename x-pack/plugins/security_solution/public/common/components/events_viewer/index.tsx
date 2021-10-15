@@ -184,7 +184,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               browserFields,
               bulkActions,
               columns,
-              dataProviders: dataProviders!,
+              dataProviders,
               defaultCellActions,
               deletedEventIds,
               docValueFields,
@@ -202,7 +202,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               isLive,
               isLoadingIndexPattern,
               itemsPerPage,
-              itemsPerPageOptions: itemsPerPageOptions!,
+              itemsPerPageOptions,
               kqlMode,
               leadingControlColumns,
               onRuleChange,
@@ -224,7 +224,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               columns={columns}
               docValueFields={docValueFields}
               id={id}
-              dataProviders={dataProviders!}
+              dataProviders={dataProviders}
               deletedEventIds={deletedEventIds}
               end={end}
               isLoadingIndexPattern={isLoadingIndexPattern}
@@ -232,8 +232,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               indexNames={selectedPatterns}
               indexPattern={indexPattern}
               isLive={isLive}
-              itemsPerPage={itemsPerPage!}
-              itemsPerPageOptions={itemsPerPageOptions!}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
               kqlMode={kqlMode}
               query={query}
               onRuleChange={onRuleChange}

@@ -1130,8 +1130,8 @@ describe('Timeline', () => {
       const newAndProvider = update.foo.dataProviders[indexProvider].and.find(
         (i) => i.id === '456'
       );
-      expect(oldAndProvider!.enabled).toEqual(false);
-      expect(newAndProvider!.enabled).toEqual(true);
+      expect(oldAndProvider?.enabled).toEqual(false);
+      expect(newAndProvider?.enabled).toEqual(true);
     });
   });
 
@@ -1390,8 +1390,8 @@ describe('Timeline', () => {
       const newAndProvider = update.foo.dataProviders[indexProvider].and.find(
         (i) => i.id === '456'
       );
-      expect(oldAndProvider!.excluded).toEqual(true);
-      expect(newAndProvider!.excluded).toEqual(false);
+      expect(oldAndProvider?.excluded).toEqual(true);
+      expect(newAndProvider?.excluded).toEqual(false);
     });
   });
 
