@@ -38,8 +38,7 @@
     "lens",
     "lists",
     "home",
-    "telemetry",
-    "telemetryManagementSection"
+    "telemetry"
   ],
   "server": true,
   "ui": true,
