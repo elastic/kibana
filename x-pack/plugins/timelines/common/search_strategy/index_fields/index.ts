@@ -25,11 +25,6 @@ export interface FieldInfo {
   type?: string;
 }
 
-// without omitting:
-// TS2430: Interface 'IndexField' incorrectly extends interface 'FieldSpec'.
-// Types of property 'format' are incompatible.
-// Type 'string | null | undefined' is not assignable to type 'SerializedFieldFormat<FieldFormatParams> | undefined'.
-// Type 'null' is not assignable to type 'SerializedFieldFormat<FieldFormatParams> | undefined'.
 export interface IndexField extends Omit<FieldSpec, 'format'> {
   /** Where the field belong */
   category: string;
