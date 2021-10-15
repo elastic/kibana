@@ -35,6 +35,7 @@ export const deprecateEndpointConfigs: ConfigDeprecation = (
       }
 
       addDeprecation({
+        configPath: fullConfigPath,
         title: i18n.translate('telemetry.endpointConfigs.deprecationTitle', {
           defaultMessage: 'Setting "{configPath}" is deprecated',
           values: { configPath: fullConfigPath },

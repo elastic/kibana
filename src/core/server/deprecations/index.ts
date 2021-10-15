@@ -7,7 +7,10 @@
  */
 
 export type {
+  BaseDeprecationDetails,
   DeprecationsDetails,
+  ConfigDeprecationDetails,
+  FeatureDeprecationDetails,
   GetDeprecationsContext,
   RegisterDeprecationsConfig,
   DeprecationsGetResponse,
@@ -21,3 +24,4 @@ export type {
 } from './deprecations_service';
 
 export { DeprecationsService } from './deprecations_service';
+export { config } from './deprecation_config';

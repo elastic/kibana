@@ -50,7 +50,7 @@ import {
   ServiceConfigDescriptor,
 } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
-import { DeprecationsService } from './deprecations';
+import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
 import { config as executionContextConfig } from './execution_context';
@@ -203,7 +203,7 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const deprecationsSetup = this.deprecations.setup({
+    const deprecationsSetup = await this.deprecations.setup({
       http: httpSetup,
     });
 
@@ -381,6 +381,7 @@ export class Server {
       statusConfig,
       pidConfig,
       i18nConfig,
+      deprecationConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
