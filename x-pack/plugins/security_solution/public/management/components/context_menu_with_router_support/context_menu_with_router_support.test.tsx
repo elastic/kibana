@@ -137,4 +137,18 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
     expect(renderResult.getByTestId('testMenu-item-loading-1')).not.toBeNull();
     expect(renderResult.getByTestId('testMenu-item-loading-2')).not.toBeNull();
   });
+
+  it('should display view details button when prop', () => {
+    render({ displayLinkButtonOnHover: true });
+    clickMenuTriggerButton();
+    expect(renderResult.getByTestId('testMenu-item-1').textContent).toEqual(
+      'click me 2View details'
+    );
+  });
+
+  it("shouldn't display view details button when no prop", () => {
+    render();
+    clickMenuTriggerButton();
+    expect(renderResult.getByTestId('testMenu-item-1').textContent).toEqual('click me 2');
+  });
 });

@@ -75,6 +75,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           return (
             <EuiLoadingContent
               lines={1}
+              key={uuid.v4()}
               data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-loading-${index}`)}
             />
           );
