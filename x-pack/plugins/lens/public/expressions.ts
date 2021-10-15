@@ -33,14 +33,14 @@ import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
 import { metricChart } from '../common/expressions/metric_chart/metric_chart';
-import { firstDatatable } from '../common/expressions';
+import { lensMultitable } from '../common/expressions';
 
 export const setupExpressions = (
   expressions: ExpressionsSetup,
   formatFactory: Parameters<typeof getDatatable>[0],
   getTimeZone: Parameters<typeof getTimeScale>[0]
 ) => {
-  [firstDatatable].forEach((expressionType) => expressions.registerType(expressionType));
+  [lensMultitable].forEach((expressionType) => expressions.registerType(expressionType));
 
   [
     pie,

@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import {
-  Datatable,
-  ExpressionTypeDefinition,
-} from '../../../../../../src/plugins/expressions/common';
+import { ExpressionTypeDefinition } from '../../../../../../src/plugins/expressions/common';
 import { LensMultiTable } from '../../types';
 
 const name = 'first_datatable';
 
-type Input = LensMultiTable | Datatable;
+type Input = LensMultiTable;
 
-export type FirstDatatableExpressionTypeDefinition = ExpressionTypeDefinition<
+export type LensMultitableExpressionTypeDefinition = ExpressionTypeDefinition<
   typeof name,
   Input,
   Input
 >;
 
-export const firstDatatable: FirstDatatableExpressionTypeDefinition = {
+export const lensMultitable: LensMultitableExpressionTypeDefinition = {
   name,
   to: {
     datatable: (input: Input) => {
-      return input.type === 'datatable' ? input : Object.values(input.tables)[0];
+      return Object.values(input.tables)[0];
     },
   },
 };
