@@ -59,6 +59,7 @@ interface MlJobSelectProps {
 }
 
 const renderJobOption = (option: MlJobOption) => (
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   <JobDisplay id={option.value!.id} description={option.value!.description} />
 );
 
@@ -69,6 +70,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
   const mlUrl = useKibana().services.application.getUrlForApp('ml');
   const handleJobSelect = useCallback(
     (selectedJobOptions: MlJobOption[]): void => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const selectedJobIds = selectedJobOptions.map((option) => option.value!.id);
       field.setValue(selectedJobIds);
     },
