@@ -28,9 +28,8 @@ export function ApmBackendContextProvider({
   children: React.ReactNode;
 }) {
   const {
-    path: { backendName },
-    query: { rangeFrom, rangeTo },
-  } = useApmParams('/backends/{backendName}/overview');
+    query: { backendName, rangeFrom, rangeTo },
+  } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

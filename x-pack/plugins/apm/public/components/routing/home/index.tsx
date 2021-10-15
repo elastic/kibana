@@ -108,10 +108,10 @@ export const home = {
       }),
       children: [
         {
-          path: '/backends/{backendName}/overview',
+          path: '/backends/overview',
           element: <BackendDetailOverview />,
           params: t.type({
-            path: t.type({
+            query: t.type({
               backendName: t.string,
             }),
           }),
