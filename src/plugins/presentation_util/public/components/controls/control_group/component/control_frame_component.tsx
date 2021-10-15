@@ -89,13 +89,13 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
 
   const form = (
     <EuiFormControlLayout
-      className={'controlFrame--formControlLayout'}
+      className={'controlFrame__formControlLayout'}
       fullWidth
       prepend={
         <>
           {customPrepend ?? null}
           {usingTwoLineLayout ? undefined : (
-            <EuiFormLabel className="controlFrame--formControlLayout__label" htmlFor={embeddableId}>
+            <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
               {title}
             </EuiFormLabel>
           )}
@@ -103,7 +103,7 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
       }
     >
       <div
-        className={classNames('controlFrame--control', {
+        className={classNames('controlFrame__control', {
           'controlFrame--twoLine': controlStyle === 'twoLine',
           'controlFrame--oneLine': controlStyle === 'oneLine',
         })}

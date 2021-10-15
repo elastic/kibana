@@ -112,8 +112,8 @@ export const CreateControlButton = () => {
   if (getInputControlTypes().length === 0) return null;
 
   const commonButtonProps = {
-    iconType: 'plus',
-    color: 'text' as EuiButtonIconColor,
+    iconType: 'plusInCircle',
+    color: 'primary' as EuiButtonIconColor,
     'data-test-subj': 'inputControlsSortingButton',
     'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };

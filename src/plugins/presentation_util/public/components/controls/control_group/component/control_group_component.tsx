@@ -8,7 +8,15 @@
 
 import '../control_group.scss';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
@@ -57,7 +65,7 @@ export const ControlGroup = () => {
   const dispatch = useEmbeddableDispatch();
 
   // current state
-  const { panels } = useEmbeddableSelector((state) => state);
+  const { panels, controlStyle } = useEmbeddableSelector((state) => state);
 
   const idsInOrder = useMemo(
     () =>
@@ -71,10 +79,10 @@ export const ControlGroup = () => {
   );
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const draggingIndex = useMemo(
-    () => (draggingId ? idsInOrder.indexOf(draggingId) : -1),
-    [idsInOrder, draggingId]
-  );
+  const draggingIndex = useMemo(() => (draggingId ? idsInOrder.indexOf(draggingId) : -1), [
+    idsInOrder,
+    draggingId,
+  ]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -92,63 +100,94 @@ export const ControlGroup = () => {
     setDraggingId(null);
   };
 
+  const emptyState = !(idsInOrder && idsInOrder.length > 0);
+
   return (
-    <EuiFlexGroup wrap={false} direction="row" alignItems="center" className="superWrapper">
-      <EuiFlexItem>
-        <DndContext
-          onDragStart={({ active }) => setDraggingId(active.id)}
-          onDragEnd={onDragEnd}
-          onDragCancel={() => setDraggingId(null)}
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          layoutMeasuring={{
-            strategy: LayoutMeasuringStrategy.Always,
-          }}
-        >
-          <SortableContext items={idsInOrder} strategy={rectSortingStrategy}>
-            <EuiFlexGroup
-              className={classNames('controlGroup', { 'controlGroup-isDragging': draggingId })}
-              alignItems="center"
-              gutterSize={'m'}
-              wrap={true}
+    <EuiPanel
+      borderRadius="m"
+      className={classNames('controlsWrapper', {
+        'controlsWrapper--empty': emptyState,
+        'controlsWrapper--twoLine': controlStyle === 'twoLine',
+      })}
+    >
+      {idsInOrder.length > 0 ? (
+        <EuiFlexGroup gutterSize="m" wrap={false} direction="row" alignItems="center">
+          <EuiFlexItem>
+            <DndContext
+              onDragStart={({ active }) => setDraggingId(active.id)}
+              onDragEnd={onDragEnd}
+              onDragCancel={() => setDraggingId(null)}
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              layoutMeasuring={{
+                strategy: LayoutMeasuringStrategy.Always,
+              }}
             >
-              {idsInOrder.map(
-                (controlId, index) =>
-                  panels[controlId] && (
-                    <SortableControl
-                      dragInfo={{ index, draggingIndex }}
-                      embeddableId={controlId}
-                      key={controlId}
-                    />
-                  )
-              )}
-            </EuiFlexGroup>
-          </SortableContext>
-          <DragOverlay>{draggingId ? <ControlClone draggingId={draggingId} /> : null}</DragOverlay>
-        </DndContext>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
-          <EuiFlexItem>
-            <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
-              <EuiButtonIcon
-                aria-label={ControlGroupStrings.management.getManageButtonTitle()}
-                iconType="gear"
-                color="text"
-                data-test-subj="inputControlsSortingButton"
-                onClick={() =>
-                  openFlyout(forwardAllContext(<EditControlGroup />, reduxContainerContext))
-                }
-              />
-            </EuiToolTip>
+              <SortableContext items={idsInOrder} strategy={rectSortingStrategy}>
+                <EuiFlexGroup
+                  className={classNames('controlGroup', { 'controlGroup-isDragging': draggingId })}
+                  alignItems="center"
+                  gutterSize={'m'}
+                  wrap={true}
+                >
+                  {idsInOrder.map(
+                    (controlId, index) =>
+                      panels[controlId] && (
+                        <SortableControl
+                          dragInfo={{ index, draggingIndex }}
+                          embeddableId={controlId}
+                          key={controlId}
+                        />
+                      )
+                  )}
+                </EuiFlexGroup>
+              </SortableContext>
+              <DragOverlay>
+                {draggingId ? <ControlClone draggingId={draggingId} /> : null}
+              </DragOverlay>
+            </DndContext>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
-              <CreateControlButton />
-            </EuiToolTip>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup className="groupEditActions" gutterSize="xs">
+              <EuiFlexItem>
+                <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
+                  <EuiButtonIcon
+                    aria-label={ControlGroupStrings.management.getManageButtonTitle()}
+                    iconType="gear"
+                    color="subdued"
+                    data-test-subj="inputControlsSortingButton"
+                    onClick={() =>
+                      openFlyout(forwardAllContext(<EditControlGroup />, reduxContainerContext))
+                    }
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
+                  <CreateControlButton />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      ) : (
+        <>
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexItem grow={1}>
+              <EuiText className="emptyStateText eui-textCenter" size="s">
+                <p>Controls let you filter and interact with your dashboard data</p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <div className="addControlButton">
+                <EuiButton size="s" color="primary">
+                  Add control
+                </EuiButton>
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+    </EuiPanel>
   );
 };
