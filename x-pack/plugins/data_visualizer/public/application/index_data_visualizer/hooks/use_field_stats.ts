@@ -71,6 +71,7 @@ export function useFieldStatsSearchStrategy(
       ...getInitialProgress(),
       error: undefined,
     });
+    setFieldStats(undefined);
 
     if (!searchStrategyParams || !fieldStatsParams) return;
     if (

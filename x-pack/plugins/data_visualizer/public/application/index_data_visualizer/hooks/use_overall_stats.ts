@@ -10,7 +10,6 @@ import { combineLatest, forkJoin, of, Subscription } from 'rxjs';
 import { mergeMap, switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ToastsStart } from 'kibana/public';
-import { OverallStatsSearchStrategyParams } from '../../../../common/search_strategy/types';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   checkAggregatableFieldsExistRequest,
@@ -25,6 +24,7 @@ import {
 import { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { extractErrorProperties } from '../utils/error_utils';
+import { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
 
 function displayError(toastNotifications: ToastsStart, indexPattern: string, err: any) {
   if (err.statusCode === 500) {
