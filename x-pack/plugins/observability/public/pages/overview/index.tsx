@@ -70,6 +70,7 @@ export function OverviewPage({ routeParams }: Props) {
     hasData,
     basePath: core.http.basePath,
     docsLink: core.docLinks.links.observability.guide,
+    isDarkMode: core.uiSettings.get('theme:darkMode'),
   });
 
   const alerts = (hasDataMap.alert?.hasData as Alert[]) || [];

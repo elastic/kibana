@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { KibanaPageTemplateProps, useKibana } from '../../../../../src/plugins/kibana_react/public';
+import type { KibanaPageTemplateProps } from '@kbn/react-page-template';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { UptimeSettingsContext } from '../contexts';
 import { ClientPluginsStart } from './plugin';
 import { indexStatusSelector } from '../state/selectors';
@@ -17,7 +18,7 @@ export function useNoDataConfig(): KibanaPageTemplateProps['noDataConfig'] {
   const { basePath } = useContext(UptimeSettingsContext);
 
   const {
-    services: { docLinks },
+    services: { docLinks, http, uiSettings },
   } = useKibana<ClientPluginsStart>();
 
   const { data } = useSelector(indexStatusSelector);
@@ -41,6 +42,8 @@ export function useNoDataConfig(): KibanaPageTemplateProps['noDataConfig'] {
         },
       },
       docsLink: docLinks!.links.observability.guide,
+      addBasePath: http!.basePath.prepend,
+      isDarkMode: uiSettings!.get('theme:darkMode'),
     };
   }
 }

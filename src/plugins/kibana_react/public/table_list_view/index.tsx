@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
 export type { TableListViewProps } from './table_list_view';
 import type { TableListViewProps } from './table_list_view';
 
 const LazyTableListView = React.lazy(() => import('./table_list_view'));
 
-export const TableListView = <V extends {}>(props: TableListViewProps<V>) => {
+export const TableListView = <V extends {}>(props: PropsWithChildren<TableListViewProps<V>>) => {
   // Type '{}' is not assignable to type 'V'.
   // '{}' is assignable to the constraint of type 'V',
   // but 'V' could be instantiated with a different subtype of constraint '{}'.

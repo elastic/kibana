@@ -31,6 +31,7 @@ export function LandingPage() {
     hasData: false,
     basePath: core.http.basePath,
     docsLink: core.docLinks.links.observability.guide,
+    isDarkMode: core.uiSettings.get('theme:darkMode'),
   });
 
   return (

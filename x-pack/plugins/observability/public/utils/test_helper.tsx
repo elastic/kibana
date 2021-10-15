@@ -9,11 +9,9 @@ import { render as testLibRender } from '@testing-library/react';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { KibanaPageTemplate } from '@kbn/react-page-template';
 import { of } from 'rxjs';
-import {
-  KibanaContextProvider,
-  KibanaPageTemplate,
-} from '../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import translations from '../../../translations/translations/ja-JP.json';
 import { PluginContext } from '../context/plugin_context';
 import { ObservabilityPublicPluginsStart } from '../plugin';

@@ -7,11 +7,9 @@
 
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { KibanaPageTemplate } from '@kbn/react-page-template';
 import { CoreStart } from '../../../../../../src/core/public';
-import {
-  createKibanaReactContext,
-  KibanaPageTemplate,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
 import { casesFeatureId } from '../../../common';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
 import { AllCasesPage } from './all_cases';

@@ -93,6 +93,8 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       },
     },
     docsLink: docLinks.links.kibana,
+    addBasePath,
+    isDarkMode: IS_DARK_THEME,
   };
 
   // Show card for console if none of the manage data plugins are available, most likely in OSS

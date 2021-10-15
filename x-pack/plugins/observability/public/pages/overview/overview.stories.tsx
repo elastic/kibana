@@ -10,6 +10,7 @@ import { storiesOf } from '@storybook/react';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { KibanaPageTemplate } from '@kbn/react-page-template';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
@@ -23,10 +24,7 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import {
-  createKibanaReactContext,
-  KibanaPageTemplate,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
 import { ApmIndicesConfig } from '../../../common/typings';
 
 function unregisterAll() {

@@ -6,15 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { KibanaPageTemplateProps } from '@kbn/react-page-template';
 import { IBasePath } from '../../../../../src/core/public';
-import { KibanaPageTemplateProps } from '../../../../../src/plugins/kibana_react/public';
 
 export function getNoDataConfig({
   docsLink,
   basePath,
   hasData,
+  isDarkMode,
 }: {
   docsLink: string;
+  isDarkMode: boolean;
   basePath: IBasePath;
   hasData?: boolean;
 }): KibanaPageTemplateProps['noDataConfig'] {
@@ -33,6 +35,8 @@ export function getNoDataConfig({
         },
       },
       docsLink,
+      addBasePath: basePath.prepend,
+      isDarkMode,
     };
   }
 }
