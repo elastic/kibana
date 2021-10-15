@@ -18,6 +18,14 @@ interface Props {
 }
 
 export const History: React.FC<Props> = ({ query, engineName }) => {
+  const filters = [
+    `appsearch.search_relevance_suggestions.query: ${query}`,
+    'event.kind: event',
+    'event.dataset: search-relevance-suggestions',
+    `appsearch.search_relevance_suggestions.engine: ${engineName}`,
+    'event.action: curation_suggestion',
+  ];
+
   return (
     <DataPanel
       iconType="tableDensityNormal"
@@ -41,30 +49,8 @@ export const History: React.FC<Props> = ({ query, engineName }) => {
     >
       <EntSearchLogStream
         hoursAgo={720}
-        query={`appsearch.search_relevance_suggestions.query: ${query} and event.kind: event and event.dataset: search-relevance-suggestions and appsearch.search_relevance_suggestions.engine : ${engineName}`}
-        columns={[
-          { type: 'timestamp' },
-          {
-            type: 'field',
-            field: 'appsearch.search_relevance_suggestions.query',
-            header: 'Query',
-          },
-          {
-            type: 'field',
-            field: 'event.type',
-            header: 'Event type',
-          },
-          {
-            type: 'field',
-            field: 'appsearch.search_relevance_suggestions.suggestion.new_status',
-            header: 'Status',
-          },
-          {
-            type: 'field',
-            field: 'appsearch.search_relevance_suggestions.suggestion.curation.promoted_docs',
-            header: 'Promoted documents',
-          },
-        ]}
+        query={filters.join(' and ')}
+        columns={[{ type: 'timestamp' }, { type: 'message' }]}
       />
     </DataPanel>
   );

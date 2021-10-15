@@ -17,7 +17,7 @@ describe('History', () => {
   it('renders', () => {
     const wrapper = shallow(<History engineName="foo" query="some text" />);
     expect(wrapper.find(EntSearchLogStream).prop('query')).toEqual(
-      'appsearch.search_relevance_suggestions.query: some text and event.kind: event and event.dataset: search-relevance-suggestions and appsearch.search_relevance_suggestions.engine : foo'
+      'appsearch.search_relevance_suggestions.query: some text and event.kind: event and event.dataset: search-relevance-suggestions and appsearch.search_relevance_suggestions.engine: foo and event.action: curation_suggestion'
     );
   });
 });
