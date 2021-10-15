@@ -13,7 +13,7 @@ import { kibanaService } from '../state/kibana_service';
 async function fetchUptimeOverviewData({
   absoluteTime,
   relativeTime,
-  bucketSize,
+  intervalString,
 }: FetchDataParams) {
   const start = new Date(absoluteTime.start).toISOString();
   const end = new Date(absoluteTime.end).toISOString();
@@ -22,7 +22,11 @@ async function fetchUptimeOverviewData({
     dateRangeEnd: end,
   });
 
-  const pings = await fetchPingHistogram({ dateStart: start, dateEnd: end, bucketSize });
+  const pings = await fetchPingHistogram({
+    dateStart: start,
+    dateEnd: end,
+    bucketSize: intervalString,
+  });
 
   const response: UptimeFetchDataResponse = {
     appLink: `/app/uptime?dateRangeStart=${relativeTime.start}&dateRangeEnd=${relativeTime.end}`,

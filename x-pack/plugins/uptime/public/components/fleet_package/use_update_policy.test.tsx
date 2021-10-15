@@ -332,22 +332,10 @@ describe('useBarChartsHooks', () => {
   };
 
   const defaultTLSFields: Partial<ITLSFields> = {
-    [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
-      isEnabled: true,
-      value: 'ca',
-    },
-    [ConfigKeys.TLS_CERTIFICATE]: {
-      isEnabled: true,
-      value: 'cert',
-    },
-    [ConfigKeys.TLS_KEY]: {
-      isEnabled: true,
-      value: 'key',
-    },
-    [ConfigKeys.TLS_KEY_PASSPHRASE]: {
-      isEnabled: true,
-      value: 'password',
-    },
+    [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: 'ca',
+    [ConfigKeys.TLS_CERTIFICATE]: 'cert',
+    [ConfigKeys.TLS_KEY]: 'key',
+    [ConfigKeys.TLS_KEY_PASSPHRASE]: 'password',
   };
 
   it('handles http data stream', async () => {
@@ -436,10 +424,7 @@ describe('useBarChartsHooks', () => {
         [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: ['test'],
         [ConfigKeys.RESPONSE_STATUS_CHECK]: ['test'],
         [ConfigKeys.TAGS]: ['test'],
-        [ConfigKeys.TLS_VERSION]: {
-          value: [TLSVersion.ONE_ONE],
-          isEnabled: true,
-        },
+        [ConfigKeys.TLS_VERSION]: [TLSVersion.ONE_ONE],
       },
     });
 
@@ -467,10 +452,7 @@ describe('useBarChartsHooks', () => {
         [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
         [ConfigKeys.RESPONSE_STATUS_CHECK]: [],
         [ConfigKeys.TAGS]: [],
-        [ConfigKeys.TLS_VERSION]: {
-          value: [],
-          isEnabled: true,
-        },
+        [ConfigKeys.TLS_VERSION]: [],
       },
     });
 

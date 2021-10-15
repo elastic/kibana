@@ -23,6 +23,7 @@ export function EuiMonitoringSSPTable({
   ...props
 }) {
   const [queryText, setQueryText] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
   const [page, setPage] = React.useState({
     index: pagination.pageIndex,
     size: pagination.pageSize,
@@ -72,7 +73,9 @@ export function EuiMonitoringSSPTable({
     setSort({ sort });
     // angular version
     if (props.fetchMoreData) {
+      setIsLoading(true);
       await props.fetchMoreData({ page, sort: { sort }, queryText });
+      setIsLoading(false);
       onTableChange({ page, sort });
     }
     // react version
@@ -87,7 +90,9 @@ export function EuiMonitoringSSPTable({
     setQueryText(queryText);
     // angular version
     if (props.fetchMoreData) {
+      setIsLoading(true);
       await props.fetchMoreData({ page: newPage, sort, queryText });
+      setIsLoading(false);
     } else {
       // react version
       onTableChange({ page, sort: sort.sort, queryText });
@@ -105,6 +110,7 @@ export function EuiMonitoringSSPTable({
         pagination={pagination}
         onChange={onChange}
         columns={columns}
+        loading={props.isLoading || isLoading}
       />
       {footerContent}
     </div>

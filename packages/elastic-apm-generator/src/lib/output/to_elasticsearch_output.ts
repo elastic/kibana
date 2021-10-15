@@ -14,10 +14,12 @@ export function toElasticsearchOutput(events: Fields[], versionOverride?: string
   return events.map((event) => {
     const values = {
       ...event,
+      ...getObserverDefaults(),
       '@timestamp': new Date(event['@timestamp']!).toISOString(),
       'timestamp.us': event['@timestamp']! * 1000,
       'ecs.version': '1.4',
-      ...getObserverDefaults(),
+      'service.node.name':
+        event['service.node.name'] || event['container.id'] || event['host.name'],
     };
 
     const document = {};
