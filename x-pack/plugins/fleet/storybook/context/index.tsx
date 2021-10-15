@@ -27,6 +27,9 @@ import { getHttp } from './http';
 import { getUiSettings } from './ui_settings';
 import { getNotifications } from './notifications';
 import { stubbedStartServices } from './stubs';
+import { getDocLinks } from './doc_links';
+import { getCloud } from './cloud';
+import { getShare } from './share';
 
 // TODO: clintandrewhall - this is not ideal, or complete.  The root context of Fleet applications
 // requires full start contracts of its dependencies.  As a result, we have to mock all of those contracts
@@ -35,6 +38,7 @@ import { stubbedStartServices } from './stubs';
 //
 // Expect this to grow as components that are given Stories need access to mocked services.
 export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
+  storyContext,
   children: storyChildren,
 }) => {
   const basepath = '';
@@ -42,11 +46,15 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
   const history = new ScopedHistory(browserHistory, basepath);
 
   const startServices: FleetStartServices = {
+    ...stubbedStartServices,
     application: getApplication(),
     chrome: getChrome(),
+    cloud: getCloud({ isCloudEnabled: storyContext?.args.isCloudEnabled }),
+    customIntegrations: {
+      ContextProvider: getStorybookContextProvider(),
+    },
+    docLinks: getDocLinks(),
     http: getHttp(),
-    notifications: getNotifications(),
-    uiSettings: getUiSettings(),
     i18n: {
       Context: function I18nContext({ children }) {
         return <I18nProvider>{children}</I18nProvider>;
@@ -55,16 +63,18 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
     injectedMetadata: {
       getInjectedVar: () => null,
     },
-    customIntegrations: {
-      ContextProvider: getStorybookContextProvider(),
-    },
-    ...stubbedStartServices,
+    notifications: getNotifications(),
+    share: getShare(),
+    uiSettings: getUiSettings(),
   };
 
   setHttpClient(startServices.http);
   setCustomIntegrations({
     getAppendCustomIntegrations: async () => [],
-    getReplacementCustomIntegrations: async () => [],
+    getReplacementCustomIntegrations: async () => {
+      const { integrations } = await import('./fixtures/replacement_integrations');
+      return integrations;
+    },
   });
 
   const config = {
@@ -76,12 +86,20 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
   } as unknown as FleetConfigType;
 
   const extensions = {};
-
   const kibanaVersion = '1.2.3';
+  const setHeaderActionMenu = () => {};
 
   return (
     <IntegrationsAppContext
-      {...{ kibanaVersion, basepath, config, history, startServices, extensions }}
+      {...{
+        kibanaVersion,
+        basepath,
+        config,
+        history,
+        startServices,
+        extensions,
+        setHeaderActionMenu,
+      }}
     >
       {storyChildren}
     </IntegrationsAppContext>

@@ -116,7 +116,7 @@ Object {
 
   test('getInUseTotalCount', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockReturnValueOnce(
       // @ts-expect-error not full search response
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
@@ -134,28 +134,35 @@ Object {
         },
       })
     );
-    const actionsBulkGet = jest.fn();
-    actionsBulkGet.mockReturnValue({
-      saved_objects: [
-        {
-          id: '1',
-          attributes: {
-            actionTypeId: '.server-log',
-          },
-        },
-        {
-          id: '123',
-          attributes: {
-            actionTypeId: '.slack',
-          },
-        },
-      ],
-    });
-    const telemetry = await getInUseTotalCount(mockEsClient, actionsBulkGet, 'test');
 
-    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-    expect(actionsBulkGet).toHaveBeenCalledTimes(1);
+    mockEsClient.search.mockReturnValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: [
+            {
+              _source: {
+                action: {
+                  id: '1',
+                  actionTypeId: '.server-log',
+                },
+              },
+            },
+            {
+              _source: {
+                action: {
+                  id: '2',
+                  actionTypeId: '.slack',
+                },
+              },
+            },
+          ],
+        },
+      })
+    );
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
 
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
   "countByAlertHistoryConnectorType": 0,
@@ -170,7 +177,7 @@ Object {
 
   test('getInUseTotalCount should count preconfigured alert history connector usage', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockReturnValueOnce(
       // @ts-expect-error not full search response
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
@@ -202,28 +209,34 @@ Object {
         },
       })
     );
-    const actionsBulkGet = jest.fn();
-    actionsBulkGet.mockReturnValue({
-      saved_objects: [
-        {
-          id: '1',
-          attributes: {
-            actionTypeId: '.server-log',
-          },
+    mockEsClient.search.mockReturnValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: [
+            {
+              _source: {
+                action: {
+                  id: '1',
+                  actionTypeId: '.server-log',
+                },
+              },
+            },
+            {
+              _source: {
+                action: {
+                  id: '2',
+                  actionTypeId: '.slack',
+                },
+              },
+            },
+          ],
         },
-        {
-          id: '123',
-          attributes: {
-            actionTypeId: '.slack',
-          },
-        },
-      ],
-    });
-    const telemetry = await getInUseTotalCount(mockEsClient, actionsBulkGet, 'test');
+      })
+    );
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
 
-    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-    expect(actionsBulkGet).toHaveBeenCalledTimes(1);
-
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
   "countByAlertHistoryConnectorType": 1,
@@ -359,7 +372,7 @@ Object {
 
   test('getInUseTotalCount() accounts for preconfigured connectors', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockReturnValueOnce(
       // @ts-expect-error not full search response
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
@@ -399,34 +412,42 @@ Object {
         },
       })
     );
-    const actionsBulkGet = jest.fn();
-    actionsBulkGet.mockReturnValue({
-      saved_objects: [
-        {
-          id: '1',
-          attributes: {
-            actionTypeId: '.server-log',
-          },
+    mockEsClient.search.mockReturnValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: [
+            {
+              _source: {
+                action: {
+                  id: '1',
+                  actionTypeId: '.server-log',
+                },
+              },
+            },
+            {
+              _source: {
+                action: {
+                  id: '2',
+                  actionTypeId: '.slack',
+                },
+              },
+            },
+            {
+              _source: {
+                action: {
+                  id: '3',
+                  actionTypeId: '.email',
+                },
+              },
+            },
+          ],
         },
-        {
-          id: '123',
-          attributes: {
-            actionTypeId: '.slack',
-          },
-        },
-        {
-          id: '456',
-          attributes: {
-            actionTypeId: '.email',
-          },
-        },
-      ],
-    });
-    const telemetry = await getInUseTotalCount(mockEsClient, actionsBulkGet, 'test');
+      })
+    );
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
 
-    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-    expect(actionsBulkGet).toHaveBeenCalledTimes(1);
-
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
   "countByAlertHistoryConnectorType": 1,

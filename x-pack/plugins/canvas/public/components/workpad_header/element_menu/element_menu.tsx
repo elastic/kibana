@@ -5,44 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-import { connect } from 'react-redux';
-import { compose, withProps } from 'recompose';
-import { Dispatch } from 'redux';
-import { State, ElementSpec } from '../../../../types';
-// @ts-expect-error untyped local
-import { elementsRegistry } from '../../../lib/elements_registry';
-import { ElementMenu as Component, Props as ComponentProps } from './element_menu.component';
-// @ts-expect-error untyped local
-import { addElement } from '../../../state/actions/elements';
-import { getSelectedPage } from '../../../state/selectors/workpad';
-import { AddEmbeddablePanel } from '../../embeddable_flyout';
-
-interface StateProps {
-  pageId: string;
-}
-
-interface DispatchProps {
-  addElement: (pageId: string) => (partialElement: ElementSpec) => void;
-}
-
-const mapStateToProps = (state: State) => ({
-  pageId: getSelectedPage(state),
-});
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  addElement: (pageId: string) => (element: ElementSpec) => dispatch(addElement(pageId, element)),
-});
-
-const mergeProps = (stateProps: StateProps, dispatchProps: DispatchProps) => ({
-  ...stateProps,
-  ...dispatchProps,
-  addElement: dispatchProps.addElement(stateProps.pageId),
-  // Moved this section out of the main component to enable stories
-  renderEmbedPanel: (onClose: () => void) => <AddEmbeddablePanel onClose={onClose} />,
-});
-
-export const ElementMenu = compose<ComponentProps, {}>(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withProps(() => ({ elements: elementsRegistry.toJS() }))
-)(Component);
+export * from './element_menu.component';
