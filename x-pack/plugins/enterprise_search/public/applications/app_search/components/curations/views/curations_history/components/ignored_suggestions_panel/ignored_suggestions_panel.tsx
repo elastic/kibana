@@ -9,8 +9,10 @@ import React from 'react';
 
 import { CustomItemAction, EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 
-import { DataPanel } from '../../../../data_panel';
-import { CurationSuggestion } from '../../../types';
+import { i18n } from '@kbn/i18n';
+
+import { DataPanel } from '../../../../../data_panel';
+import { CurationSuggestion } from '../../../../types';
 
 export const IgnoredSuggestionsPanel: React.FC = () => {
   const ignoredSuggestions: CurationSuggestion[] = [];
@@ -22,7 +24,12 @@ export const IgnoredSuggestionsPanel: React.FC = () => {
       render: (item: CurationSuggestion) => {
         return (
           <EuiLink onClick={() => allowSuggestion(item.query)} color="primary">
-            Allow
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestions.allowButtonLabel',
+              {
+                defaultMessage: 'Allow',
+              }
+            )}
           </EuiLink>
         );
       },
@@ -32,7 +39,12 @@ export const IgnoredSuggestionsPanel: React.FC = () => {
   const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
     {
       field: 'query',
-      name: 'Query',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestionsPanel.queryColumnName',
+        {
+          defaultMessage: 'Query',
+        }
+      ),
       sortable: true,
     },
     {
@@ -42,8 +54,26 @@ export const IgnoredSuggestionsPanel: React.FC = () => {
 
   return (
     <DataPanel
-      title={<h2>Ignored queries</h2>}
-      subtitle={<span>You won’t be notified about suggestions for these queries</span>}
+      title={
+        <h2>
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestionsPanel.title',
+            {
+              defaultMessage: 'Ignored queries',
+            }
+          )}
+        </h2>
+      }
+      subtitle={
+        <span>
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestionsPanel.description',
+            {
+              defaultMessage: 'You won’t be notified about suggestions for these queries',
+            }
+          )}
+        </span>
+      }
       iconType="eyeClosed"
       hasBorder
     >
