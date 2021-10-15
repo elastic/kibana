@@ -129,9 +129,6 @@ export enum ConfigKeys {
 export interface Metadata {
   is_tls_enabled?: boolean;
   is_zip_url_tls_enabled?: boolean;
-}
-
-export interface Metadata {
   script_source?: {
     is_generated_script: boolean;
     file_name: string;
