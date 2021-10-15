@@ -8,10 +8,10 @@ import { service, timerange } from '@elastic/apm-generator';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
+import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import { roundNumber } from '../../utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
@@ -89,7 +89,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const serviceInventoryLatency = serviceInventoryAPIResponse.body.items[0].latency;
 
     const latencyChartApiMean = meanBy(
-      serviceLantencyAPIResponse.body.currentPeriod.latencyTimeseries,
+      serviceLantencyAPIResponse.body.currentPeriod.latencyTimeseries.filter(
+        (item) => isFiniteNumber(item.y) && item.y > 0
+      ),
       'y'
     );
 
@@ -130,21 +132,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await traceData.index([
           ...timerange(start, end)
             .interval('1m')
-            .rate(80)
+            .rate(GO_PROD_RATE)
             .flatMap((timestamp) =>
               serviceGoProdInstance
                 .transaction('GET /api/product/list')
-                .duration(1000)
+                .duration(GO_PROD_DURATION)
                 .timestamp(timestamp)
                 .serialize()
             ),
           ...timerange(start, end)
             .interval('1m')
-            .rate(20)
+            .rate(GO_DEV_RATE)
             .flatMap((timestamp) =>
               serviceGoDevInstance
                 .transaction('GET /api/product/:id')
-                .duration(500)
+                .duration(GO_DEV_DURATION)
                 .timestamp(timestamp)
                 .serialize()
             ),
@@ -161,17 +163,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]);
         });
 
-        it('returns same latency value for Transaction-based and Metric-based data', () => {
-          console.log('### caue ~ latencyTransactionValues', {
-            latencyTransactionValues,
-            latencyMetricValues,
-          });
+        it('returns same avg latency value for Transaction-based and Metric-based data', () => {
+          const expectedLatencyAvgValueMs =
+            ((GO_PROD_RATE * GO_PROD_DURATION + GO_DEV_RATE * GO_DEV_DURATION) /
+              (GO_PROD_RATE + GO_DEV_RATE)) *
+            1000;
           [
-            ...Object.values(latencyTransactionValues),
-            ...Object.values(latencyMetricValues),
-          ].forEach((value) =>
-            expect(roundNumber(value)).to.be.equal(roundNumber(GO_PROD_DURATION + GO_DEV_DURATION))
-          );
+            latencyTransactionValues.latencyChartApiMean,
+            latencyTransactionValues.serviceInventoryLatency,
+            latencyMetricValues.latencyChartApiMean,
+            latencyMetricValues.serviceInventoryLatency,
+          ].forEach((value) => expect(value).to.be.equal(expectedLatencyAvgValueMs));
+        });
+
+        it('returns same sum latency value for Transaction-based and Metric-based data', () => {
+          const expectedLatencySumValueMs = (GO_PROD_DURATION + GO_DEV_DURATION) * 1000;
+          [
+            latencyTransactionValues.transactionsGroupLatencySum,
+            latencyTransactionValues.serviceInstancesLatencySum,
+            latencyMetricValues.transactionsGroupLatencySum,
+            latencyMetricValues.serviceInstancesLatencySum,
+          ].forEach((value) => expect(value).to.be.equal(expectedLatencySumValueMs));
         });
       });
     });
