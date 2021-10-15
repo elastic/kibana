@@ -2216,60 +2216,6 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
-        "id": "def-common.isMissingFilter",
-        "type": "Function",
-        "tags": [],
-        "label": "isMissingFilter",
-        "description": [],
-        "signature": [
-          "(filter: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          ") => filter is ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.MissingFilter",
-            "text": "MissingFilter"
-          }
-        ],
-        "path": "packages/kbn-es-query/src/filters/build_filters/missing_filter.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.isMissingFilter.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "filter",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              }
-            ],
-            "path": "packages/kbn-es-query/src/filters/build_filters/missing_filter.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "`true` if a filter is an `MissingFilter`"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
         "id": "def-common.isPhraseFilter",
         "type": "Function",
         "tags": [],
@@ -3876,7 +3822,7 @@
             "section": "def-common.FilterMeta",
             "text": "FilterMeta"
           },
-          "; exists?: { field: string; } | undefined; }"
+          "; query: { exists?: { field: string; } | undefined; }; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/exists_filter.ts",
         "deprecated": false,
@@ -3906,14 +3852,6 @@
             "docId": "kibKbnEsQueryPluginApi",
             "section": "def-common.MatchAllFilter",
             "text": "MatchAllFilter"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.MissingFilter",
-            "text": "MissingFilter"
           },
           " | ",
           {
@@ -4069,40 +4007,11 @@
           },
           " & { meta: ",
           "MatchAllFilterMeta",
-          "; match_all: ",
+          "; query: { match_all: ",
           "QueryDslMatchAllQuery",
-          "; }"
+          "; }; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/match_all_filter.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
-        "id": "def-common.MissingFilter",
-        "type": "Type",
-        "tags": [],
-        "label": "MissingFilter",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          " & { meta: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.FilterMeta",
-            "text": "FilterMeta"
-          },
-          "; missing: { field: string; }; }"
-        ],
-        "path": "packages/kbn-es-query/src/filters/build_filters/missing_filter.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4224,7 +4133,7 @@
             "section": "def-common.RangeFilterMeta",
             "text": "RangeFilterMeta"
           },
-          "; range: { [key: string]: ",
+          "; query: { range: { [key: string]: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -4232,7 +4141,7 @@
             "section": "def-common.RangeFilterParams",
             "text": "RangeFilterParams"
           },
-          "; }; }"
+          "; }; }; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/range_filter.ts",
         "deprecated": false,
@@ -4315,9 +4224,9 @@
             "section": "def-common.RangeFilterMeta",
             "text": "RangeFilterMeta"
           },
-          "; script: { script: ",
+          "; query: { script: { script: ",
           "InlineScript",
-          "; }; }"
+          "; }; }; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/range_filter.ts",
         "deprecated": false,

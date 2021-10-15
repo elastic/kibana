@@ -11,21 +11,15 @@ import { useParams } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useCharts } from '../../hooks/use_charts';
 import { ItemTemplate } from './item_template';
 // @ts-ignore
 import { AdvancedIndex } from '../../../components/elasticsearch/index/advanced';
-
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
+import { RULE_LARGE_SHARD_SIZE, ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clusters }) => {
@@ -95,6 +89,7 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clust
   return (
     <ItemTemplate title={title} getPageData={getPageData} id={index} pageType="indices">
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}

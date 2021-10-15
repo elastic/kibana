@@ -12,17 +12,19 @@ const body = JSON.parse(`
 {
     "filters": [
         {
-            "bool": {
-                "must": [
-                    {
-                        "query_string": {
-                            "analyze_wildcard": true,
-                            "query": "*"
-                        }
-                    }
-                ],
-                "must_not": []
-            }
+           "query": {
+                "bool": {
+                  "must": [
+                      {
+                          "query_string": {
+                              "analyze_wildcard": true,
+                              "query": "*"
+                          }
+                      }
+                  ],
+                  "must_not": []
+              }
+           }
         }
     ],
     "panels": [

@@ -15,18 +15,12 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { CcrShardReact } from '../../../components/elasticsearch/ccr_shard';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { RULE_CCR_READ_EXCEPTIONS } from '../../../../common/constants';
+import { RULE_CCR_READ_EXCEPTIONS, ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
 
 export const ElasticsearchCcrShardPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -114,6 +108,7 @@ export const ElasticsearchCcrShardPage: React.FC<ComponentProps> = ({ clusters }
       data-test-subj="elasticsearchCcrShardPage"
     >
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         instance={instance}
         render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>

@@ -23,8 +23,12 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
-import { EnrichedDeprecationInfo, IndexSettingAction } from '../../../../../../common/types';
-import type { ResponseError } from '../../../../lib/api';
+
+import {
+  EnrichedDeprecationInfo,
+  IndexSettingAction,
+  ResponseError,
+} from '../../../../../../common/types';
 import type { Status } from '../../../types';
 import { DeprecationBadge } from '../../../shared';
 

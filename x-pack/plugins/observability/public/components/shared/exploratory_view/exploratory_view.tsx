@@ -96,11 +96,7 @@ export function ExploratoryView({
     <Wrapper>
       {lens ? (
         <>
-          <ExploratoryViewHeader
-            lensAttributes={lensAttributes}
-            seriesId={0}
-            lastUpdated={lastUpdated}
-          />
+          <ExploratoryViewHeader lensAttributes={lensAttributes} lastUpdated={lastUpdated} />
           <LensWrapper ref={wrapperRef} height={height}>
             <EuiResizableContainer
               style={{ height: '100%' }}
@@ -187,6 +183,10 @@ const Wrapper = styled(EuiPanel)`
   width: 100%;
   overflow-x: auto;
   position: relative;
+
+  .echLegendItem__action {
+    display: none;
+  }
 `;
 
 const ShowPreview = styled(EuiButtonEmpty)`
