@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { mountWithIntl } from '@kbn/test/jest';
 import { act } from '@testing-library/react';
 
