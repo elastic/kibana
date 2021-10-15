@@ -6,21 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
-
 const TRUNCATE_GRADIENT_HEIGHT = 5;
 
 export const getTruncateStyles = (maxHeight: number) => {
-  // emotion does not applies the first style
-  return css`
-    display: inline-block;
-    display: inline-block;
-    max-height: ${maxHeight > 0 ? `${maxHeight}px !important` : 'none'};
-    overflow: hidden;
-    &:before {
-      top: ${maxHeight > 0
-        ? maxHeight - TRUNCATE_GRADIENT_HEIGHT
-        : TRUNCATE_GRADIENT_HEIGHT * -1}px;
-    }
-  `;
+  return {
+    display: 'inline-block',
+    maxHeight: maxHeight > 0 ? maxHeight : 'none',
+    overflow: 'hidden',
+    '&:before': {
+      top: maxHeight > 0 ? maxHeight - TRUNCATE_GRADIENT_HEIGHT : TRUNCATE_GRADIENT_HEIGHT * -1,
+    },
+  };
 };
