@@ -19,6 +19,7 @@ export interface SearchExceptionsProps {
   policyList?: ImmutableArray<PolicyData>;
   defaultExcludedPolicies?: string;
   defaultIncludedPolicies?: string;
+  hideRefreshButton?: boolean;
   onSearch(query: string, includedPolicies?: string, excludedPolicies?: string): void;
 }
 
@@ -31,6 +32,7 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     policyList,
     defaultIncludedPolicies,
     defaultExcludedPolicies,
+    hideRefreshButton = false,
   }) => {
     const { isPlatinumPlus } = useEndpointPrivileges();
     const [query, setQuery] = useState<string>(defaultValue);
@@ -101,13 +103,15 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
           </EuiFlexItem>
         ) : null}
 
-        <EuiFlexItem grow={false} onClick={handleOnSearch} data-test-subj="searchButton">
-          <EuiButton iconType="refresh">
-            {i18n.translate('xpack.securitySolution.management.search.button', {
-              defaultMessage: 'Refresh',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
+        {!hideRefreshButton ? (
+          <EuiFlexItem grow={false} onClick={handleOnSearch} data-test-subj="searchButton">
+            <EuiButton iconType="refresh">
+              {i18n.translate('xpack.securitySolution.management.search.button', {
+                defaultMessage: 'Refresh',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   }

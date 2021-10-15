@@ -7,7 +7,7 @@
 
 import type { Observable, Subscription } from 'rxjs';
 
-import type { ILicense } from '../../../licensing/common/types';
+import type { ILicense, LicenseType } from '../../../licensing/common/types';
 
 // Generic license service class that works with the license observable
 // Both server and client plugins instancates a singleton version of this class
@@ -51,6 +51,13 @@ export class LicenseService {
       this.licenseInformation?.isAvailable &&
       this.licenseInformation?.isActive &&
       this.licenseInformation?.hasAtLeast('enterprise')
+    );
+  }
+  public hasAtLeast(licenseType: LicenseType) {
+    return (
+      this.licenseInformation?.isAvailable &&
+      this.licenseInformation?.isActive &&
+      this.licenseInformation?.hasAtLeast(licenseType)
     );
   }
 }
