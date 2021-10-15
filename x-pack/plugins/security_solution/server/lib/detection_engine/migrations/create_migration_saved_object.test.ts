@@ -17,7 +17,6 @@ describe('createMigrationSavedObjects', () => {
   });
 
   it('returns the SavedObject if valid', () => {
-    // @ts-expect-error response mock is missing a few fields
     soClient.create.mockResolvedValue(getSignalsMigrationSavedObjectMock());
     const { attributes } = getSignalsMigrationSavedObjectMock();
 
@@ -37,7 +36,6 @@ describe('createMigrationSavedObjects', () => {
   });
 
   it('does not pass excess fields', async () => {
-    // @ts-expect-error response mock is missing a few fields
     soClient.create.mockResolvedValue(getSignalsMigrationSavedObjectMock());
     const { attributes } = getSignalsMigrationSavedObjectMock();
     const attributesWithExtra = { ...attributes, extra: true };
