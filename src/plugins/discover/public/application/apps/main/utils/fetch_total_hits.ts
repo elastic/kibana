@@ -11,7 +11,7 @@ import { filter } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
   isCompleteResponse,
-  SearchSource,
+  ISearchSource,
 } from '../../../../../../data/public';
 import { Adapters } from '../../../../../../inspector/common';
 import { FetchStatus } from '../../../types';
@@ -20,7 +20,7 @@ import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messa
 
 export function fetchTotalHits(
   data$: SavedSearchData,
-  searchSource: SearchSource,
+  searchSource: ISearchSource,
   {
     abortController,
     data,

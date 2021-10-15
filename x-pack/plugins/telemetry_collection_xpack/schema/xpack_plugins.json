@@ -20,6 +20,12 @@
             "description": "The total number of preconfigured alert history connectors used by rules."
           }
         },
+        "count_actions_namespaces": {
+          "type": "long",
+          "_meta": {
+            "description": "The total number of namespaces where actions are in use."
+          }
+        },
         "count_by_type": {
           "properties": {
             "DYNAMIC_KEY": {

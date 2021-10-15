@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
+import type { DataViewsContract } from '../../../../../../../../src/plugins/data_views/public';
 
 export const indexPatternsMock = new (class {
   fieldFormats = [];
@@ -19,4 +19,4 @@ export const indexPatternsMock = new (class {
   getIds = jest.fn();
   getTitles = jest.fn();
   make = jest.fn();
-})() as unknown as IndexPatternsContract;
+})() as unknown as DataViewsContract;
