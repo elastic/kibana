@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import axios from 'axios';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
@@ -13,49 +12,53 @@ import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 import { Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { TelemetryEvent } from './types';
+/*
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { TelemetryReceiver } from './receiver';
+*/
+// /import { TelemetryReceiver } from './receiver';
 import { allowlistEventFields, copyAllowlistedFields } from './filters';
-import { createTelemetryTaskConfigs } from './tasks';
+// /import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
-import { TelemetryEvent } from './types';
-import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
-import { SecurityTelemetryTask, SecurityTelemetryTaskConfig } from './task';
+// /import { TelemetryEvent } from './types';
+// /import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
+import { TELEMETRY_USAGE_LABEL_PREFIX } from './constants';
+// /import { SecurityTelemetryTask, SecurityTelemetryTaskConfig } from './task';
 
-const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
+const USAGE_LABEL_PREFIX: string[] = TELEMETRY_USAGE_LABEL_PREFIX.concat(['sender']);
 
 export class TelemetryEventsSender {
-  private readonly initialCheckDelayMs = 10 * 1000;
-  private readonly checkIntervalMs = 60 * 1000;
+  // /private readonly initialCheckDelayMs = 10 * 1000;
+  // /private readonly checkIntervalMs = 60 * 1000;
   private readonly logger: Logger;
-  private maxQueueSize = TELEMETRY_MAX_BUFFER_SIZE;
+  // /private maxQueueSize = TELEMETRY_MAX_BUFFER_SIZE;
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
-  private intervalId?: NodeJS.Timeout;
-  private isSending = false;
-  private receiver: TelemetryReceiver | undefined;
-  private queue: TelemetryEvent[] = [];
-  private isOptedIn?: boolean = true; // Assume true until the first check
+  // /private intervalId?: NodeJS.Timeout;
+  // /private isSending = false;
+  // /private receiver: TelemetryReceiver | undefined;
+  // /private queue: TelemetryEvent[] = [];
+  // /private isOptedIn?: boolean = true; // Assume true until the first check
 
   private telemetryUsageCounter?: UsageCounter;
-  private telemetryTasks?: SecurityTelemetryTask[];
+  // /private telemetryTasks?: SecurityTelemetryTask[];
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
 
   public setup(
-    telemetryReceiver: TelemetryReceiver,
+    // /telemetryReceiver: TelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
-    taskManager?: TaskManagerSetupContract,
+    // /taskManager?: TaskManagerSetupContract,
     telemetryUsageCounter?: UsageCounter
   ) {
     this.telemetrySetup = telemetrySetup;
     this.telemetryUsageCounter = telemetryUsageCounter;
-
+    /*  
     if (taskManager) {
       this.telemetryTasks = createTelemetryTaskConfigs().map(
         (config: SecurityTelemetryTaskConfig) => {
@@ -65,122 +68,40 @@ export class TelemetryEventsSender {
         }
       );
     }
+    */
   }
 
   public start(
-    telemetryStart?: TelemetryPluginStart,
-    taskManager?: TaskManagerStartContract,
-    receiver?: TelemetryReceiver
+    telemetryStart?: TelemetryPluginStart
+    // /taskManager?: TaskManagerStartContract,
+    // /receiver?: TelemetryReceiver
   ) {
     this.telemetryStart = telemetryStart;
-    this.receiver = receiver;
+    // /this.receiver = receiver;
 
+    /*
     if (taskManager && this.telemetryTasks) {
       this.logger.debug(`Starting security telemetry tasks`);
       this.telemetryTasks.forEach((task) => task.start(taskManager));
     }
+    */
 
     this.logger.debug(`Starting local task`);
+    /*
     setTimeout(() => {
       this.sendIfDue();
       this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
     }, this.initialCheckDelayMs);
+    */
   }
 
   public stop() {
+    /*
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
-  }
-
-  public queueTelemetryEvents(events: TelemetryEvent[]) {
-    const qlength = this.queue.length;
-
-    if (events.length === 0) {
-      return;
-    }
-
-    this.logger.debug(`Queue events`);
-
-    if (qlength >= this.maxQueueSize) {
-      // we're full already
-      return;
-    }
-
-    if (events.length > this.maxQueueSize - qlength) {
-      this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
-        counterType: 'docs_lost',
-        incrementBy: events.length,
-      });
-      this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
-        counterType: 'num_capacity_exceeded',
-        incrementBy: 1,
-      });
-      this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
-    } else {
-      this.queue.push(...this.processEvents(events));
-    }
-  }
-
-  public async isTelemetryOptedIn() {
-    this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
-    return this.isOptedIn === true;
-  }
-
-  private async sendIfDue() {
-    if (this.isSending) {
-      return;
-    }
-
-    if (this.queue.length === 0) {
-      return;
-    }
-
-    try {
-      this.isSending = true;
-
-      this.isOptedIn = await this.isTelemetryOptedIn();
-      if (!this.isOptedIn) {
-        this.logger.debug(`Telemetry is not opted-in.`);
-        this.queue = [];
-        this.isSending = false;
-        return;
-      }
-
-      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
-        this.fetchTelemetryUrl('alerts-endpoint'),
-        this.receiver?.fetchClusterInfo(),
-        this.receiver?.fetchLicenseInfo(),
-      ]);
-
-      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
-      this.logger.debug(
-        `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
-      );
-
-      const toSend: TelemetryEvent[] = cloneDeep(this.queue).map((event) => ({
-        ...event,
-        ...(licenseInfo ? { license: this.receiver?.copyLicenseFields(licenseInfo) } : {}),
-        cluster_uuid: clusterInfo?.cluster_uuid,
-        cluster_name: clusterInfo?.cluster_name,
-      }));
-      this.queue = [];
-
-      await this.sendEvents(
-        toSend,
-        telemetryUrl,
-        'alerts-endpoint',
-        clusterInfo?.cluster_uuid,
-        clusterInfo?.version?.number,
-        licenseInfo?.uid
-      );
-    } catch (err) {
-      this.logger.warn(`Error sending telemetry events data: ${err}`);
-      this.queue = [];
-    }
-    this.isSending = false;
+    */
+    this.logger.debug('Stopping Telemetry Sender.');
   }
 
   public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
@@ -189,41 +110,7 @@ export class TelemetryEventsSender {
     });
   }
 
-  /**
-   * This function sends events to the elastic telemetry channel. Caution is required
-   * because it does no allowlist filtering at send time. The function call site is
-   * responsible for ensuring sure no sensitive material is in telemetry events.
-   *
-   * @param channel the elastic telemetry channel
-   * @param toSend telemetry events
-   */
-  public async sendOnDemand(channel: string, toSend: unknown[]) {
-    try {
-      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
-        this.fetchTelemetryUrl(channel),
-        this.receiver?.fetchClusterInfo(),
-        this.receiver?.fetchLicenseInfo(),
-      ]);
-
-      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
-      this.logger.debug(
-        `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
-      );
-
-      await this.sendEvents(
-        toSend,
-        telemetryUrl,
-        channel,
-        clusterInfo?.cluster_uuid,
-        clusterInfo?.version?.number,
-        licenseInfo?.uid
-      );
-    } catch (err) {
-      this.logger.warn(`Error sending telemetry events data: ${err}`);
-    }
-  }
-
-  private async fetchTelemetryUrl(channel: string): Promise<string> {
+  public async fetchTelemetryUrl(channel: string): Promise<string> {
     const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
@@ -244,7 +131,7 @@ export class TelemetryEventsSender {
     return url.toString();
   }
 
-  private async sendEvents(
+  public async sendEvents(
     events: unknown[],
     telemetryUrl: string,
     channel: string,
@@ -264,12 +151,12 @@ export class TelemetryEventsSender {
         },
       });
       this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterName: createUsageCounterLabel(USAGE_LABEL_PREFIX.concat(['payloads', channel])),
         counterType: resp.status.toString(),
         incrementBy: 1,
       });
       this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterName: createUsageCounterLabel(USAGE_LABEL_PREFIX.concat(['payloads', channel])),
         counterType: 'docs_sent',
         incrementBy: events.length,
       });
@@ -279,12 +166,12 @@ export class TelemetryEventsSender {
         `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
       );
       this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterName: createUsageCounterLabel(USAGE_LABEL_PREFIX.concat(['payloads', channel])),
         counterType: 'docs_lost',
         incrementBy: events.length,
       });
       this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterName: createUsageCounterLabel(USAGE_LABEL_PREFIX.concat(['payloads', channel])),
         counterType: 'num_exceptions',
         incrementBy: 1,
       });

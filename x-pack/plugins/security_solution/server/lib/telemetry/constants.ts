@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const TELEMETRY_USAGE_LABEL_PREFIX: string[] = ['security_telemetry'];
+
 export const TELEMETRY_MAX_BUFFER_SIZE = 100;
 
 export const MAX_SECURITY_LIST_TELEMETRY_BATCH = 100;
