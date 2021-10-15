@@ -37,6 +37,7 @@ import { APP_ID } from '../../../../../../../common/constants';
 import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+import { RemoveTrustedAppFromPolicyModal } from './remove_trusted_app_from_policy_modal';
 
 const DATA_TEST_SUBJ = 'policyTrustedAppsGrid';
 
@@ -56,6 +57,8 @@ export const PolicyTrustedAppsList = memo(() => {
   const trustedAppsApiError = usePolicyDetailsSelector(getPolicyTrustedAppListError);
 
   const [isCardExpanded, setCardExpanded] = useState<Record<string, boolean>>({});
+  const [trustedAppsForRemoval, setTrustedAppsForRemoval] = useState<typeof trustedAppItems>([]);
+  const [showRemovalModal, setShowRemovalModal] = useState<boolean>(false);
 
   const handlePageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
     ({ pageIndex, pageSize }) => {
@@ -100,6 +103,7 @@ export const PolicyTrustedAppsList = memo(() => {
     const newCardProps = new Map();
 
     for (const trustedApp of trustedAppItems) {
+      const isGlobal = trustedApp.effectScope.type === 'global';
       const viewUrlPath = getTrustedAppsListPath({ id: trustedApp.id, show: 'edit' });
       const assignedPoliciesMenuItems: ArtifactEntryCollapsibleCardProps['policies'] =
         trustedApp.effectScope.type === 'global'
@@ -142,6 +146,29 @@ export const PolicyTrustedAppsList = memo(() => {
             navigateOptions: { path: viewUrlPath },
             'data-test-subj': getTestId('viewFullDetailsAction'),
           },
+          {
+            icon: 'trash',
+            children: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.trustedApps.list.removeAction',
+              { defaultMessage: 'Remove from policy' }
+            ),
+            onClick: () => {
+              setTrustedAppsForRemoval([trustedApp]);
+              setShowRemovalModal(true);
+            },
+            disabled: isGlobal,
+            toolTipContent: isGlobal
+              ? i18n.translate(
+                  'xpack.securitySolution.endpoint.policy.trustedApps.list.removeActionNotAllowed',
+                  {
+                    defaultMessage:
+                      'Globally applied trusted applications cannot be removed from policy.',
+                  }
+                )
+              : undefined,
+            toolTipPosition: 'top',
+            'data-test-subj': getTestId('removeAction'),
+          },
         ],
         policies: assignedPoliciesMenuItems,
       };
@@ -154,10 +181,20 @@ export const PolicyTrustedAppsList = memo(() => {
 
   const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
     (item) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return cardProps.get(item as Immutable<TrustedApp>)!;
     },
     [cardProps]
   );
+
+  const handleRemoveModalClose = useCallback(() => {
+    setShowRemovalModal(false);
+  }, []);
+
+  // Anytime a new set of data (trusted apps) is retrieved, reset the card expand state
+  useEffect(() => {
+    setCardExpanded({});
+  }, [trustedAppItems]);
 
   // if an error occurred while loading the data, show toast
   useEffect(() => {
@@ -170,18 +207,13 @@ export const PolicyTrustedAppsList = memo(() => {
     }
   }, [toasts, trustedAppsApiError]);
 
-  // Anytime a new set of data (trusted apps) is retrieved, reset the card expand state
-  useEffect(() => {
-    setCardExpanded({});
-  }, [trustedAppItems]);
-
   if (hasTrustedApps.loading || isTrustedAppExistsCheckLoading) {
     return (
       <EuiPageTemplate template="centeredContent">
         <EuiLoadingSpinner
           className="essentialAnimation"
           size="xl"
-          data-test-subj={DATA_TEST_SUBJ}
+          data-test-subj={getTestId('loading')}
         />
       </EuiPageTemplate>
     );
@@ -205,6 +237,13 @@ export const PolicyTrustedAppsList = memo(() => {
         pagination={pagination as Pagination}
         data-test-subj={DATA_TEST_SUBJ}
       />
+
+      {showRemovalModal && (
+        <RemoveTrustedAppFromPolicyModal
+          trustedApps={trustedAppsForRemoval}
+          onClose={handleRemoveModalClose}
+        />
+      )}
     </>
   );
 });
