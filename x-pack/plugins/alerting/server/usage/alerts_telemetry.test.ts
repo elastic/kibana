@@ -18,7 +18,14 @@ describe('alerts telemetry', () => {
         aggregations: {
           byAlertTypeId: {
             value: {
-              types: { '.index-threshold': 2, 'logs.alert.document.count': 1, 'document.test.': 1 },
+              ruleTypes: {
+                '.index-threshold': 2,
+                'logs.alert.document.count': 1,
+                'document.test.': 1,
+              },
+              namespaces: {
+                default: 1,
+              },
             },
           },
         },

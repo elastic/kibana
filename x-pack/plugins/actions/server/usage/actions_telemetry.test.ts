@@ -109,6 +109,7 @@ Object {
     "another.type__": 1,
     "some.type": 1,
   },
+  "countNamespaces": 1,
   "countTotal": 4,
 }
 `);
@@ -146,6 +147,7 @@ Object {
                   id: '1',
                   actionTypeId: '.server-log',
                 },
+                namespaces: ['default'],
               },
             },
             {
@@ -154,6 +156,7 @@ Object {
                   id: '2',
                   actionTypeId: '.slack',
                 },
+                namespaces: ['default'],
               },
             },
           ],
@@ -170,6 +173,7 @@ Object {
     "__server-log": 1,
     "__slack": 1,
   },
+  "countNamespaces": 1,
   "countTotal": 2,
 }
 `);
@@ -220,6 +224,7 @@ Object {
                   id: '1',
                   actionTypeId: '.server-log',
                 },
+                namespaces: ['default'],
               },
             },
             {
@@ -228,6 +233,7 @@ Object {
                   id: '2',
                   actionTypeId: '.slack',
                 },
+                namespaces: ['default'],
               },
             },
           ],
@@ -245,6 +251,7 @@ Object {
     "__server-log": 1,
     "__slack": 1,
   },
+  "countNamespaces": 1,
   "countTotal": 4,
 }
 `);
@@ -460,6 +467,9 @@ Object {
     "__server-log": 1,
     "__slack": 1,
   },
+  "countEmailByService": Object {
+    "other": 1,
+  },
   "countNamespaces": 1,
   "countTotal": 6,
 }
@@ -555,6 +565,9 @@ Object {
     "__index": 1,
     "__server-log": 1,
     "__slack": 1,
+  },
+  "countEmailByService": Object {
+    "other": 1,
   },
   "countNamespaces": 3,
   "countTotal": 6,
