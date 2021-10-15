@@ -181,7 +181,9 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           manualSteps: [
             i18n.translate('xpack.security.deprecations.idleTimeout.manualStepOneMessage', {
               defaultMessage:
-                'To configure a custom timeout, set "xpack.security.session.idleTimeout". Use the format <count>[ms|s|m|h|d|w|M|Y], for example, 20m, 24h, 7d, 1w. A value of 0 disables the timeout.',
+                'To configure a custom timeout, set "xpack.security.session.idleTimeout". Use the format <count>⁠[ms|s|m|h|d|w|M|Y], for example, 20m, 24h, 7d, 1w. A value of 0 disables the timeout.',
+              description:
+                'Please preserve a Word Joiner (U+2060) symbol after <count> in translation.',
             }),
           ],
         },
@@ -202,7 +204,9 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           manualSteps: [
             i18n.translate('xpack.security.deprecations.lifespan.manualStepOneMessage', {
               defaultMessage:
-                'To configure a custom timeout, set "xpack.security.session.lifespan". Use the format <count>[ms|s|m|h|d|w|M|Y], for example, 20m, 24h, 7d, 1w. A value of 0 disables the timeout.',
+                'To configure a custom timeout, set "xpack.security.session.lifespan". Use the format <count>⁠[ms|s|m|h|d|w|M|Y], for example, 20m, 24h, 7d, 1w. A value of 0 disables the timeout.',
+              description:
+                'Please preserve a Word Joiner (U+2060) symbol after <count> in translation.',
             }),
           ],
         },
