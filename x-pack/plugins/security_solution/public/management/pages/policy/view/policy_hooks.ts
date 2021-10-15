@@ -71,6 +71,8 @@ export const usePolicyTrustedAppsNotification = () => {
 
   if (updateSuccessfull && updatedArtifacts && !wasAlreadyHandled.has(updatedArtifacts)) {
     wasAlreadyHandled.add(updatedArtifacts);
+    const updateCount = updatedArtifacts.length;
+
     toasts.addSuccess({
       title: i18n.translate(
         'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.title',
@@ -78,20 +80,29 @@ export const usePolicyTrustedAppsNotification = () => {
           defaultMessage: 'Success',
         }
       ),
-      text: i18n.translate(
-        'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.text',
-        {
-          defaultMessage: '"{names}" has been added to your trusted applications list.',
-          values: { names: updatedArtifacts.map((artifact) => artifact.data.name).join(', ') },
-        }
-      ),
+      text:
+        updateCount > 1
+          ? i18n.translate(
+              'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.textMultiples',
+              {
+                defaultMessage: '{count} trusted applications have been added to your list.',
+                values: { count: updateCount },
+              }
+            )
+          : i18n.translate(
+              'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.textSingle',
+              {
+                defaultMessage: '"{name}" has been added to your trusted applications list.',
+                values: { name: updatedArtifacts[0].data.name },
+              }
+            ),
     });
   } else if (updateFailed) {
-    toasts.addSuccess(
+    toasts.addDanger(
       i18n.translate(
         'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastError.text',
         {
-          defaultMessage: 'An error occurred updating artifacts',
+          defaultMessage: `An error occurred updating artifacts`,
         }
       )
     );

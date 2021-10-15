@@ -10,11 +10,11 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
+import { flattenHit } from '../../../../../../../../data/common';
 import { DocViewer } from '../../../../../components/doc_viewer/doc_viewer';
 import { FilterManager, IndexPattern } from '../../../../../../../../data/public';
 import { TableCell } from './table_row/table_cell';
 import { ElasticSearchHit, DocViewFilterFn } from '../../../../../doc_views/doc_views_types';
-import { trimAngularSpan } from '../../../../../components/table/table_helper';
 import { getContextUrl } from '../../../../../helpers/get_context_url';
 import { getSingleDocUrl } from '../../../../../helpers/get_single_doc_url';
 import { TableRowDetails } from './table_row_details';
@@ -58,7 +58,7 @@ export const TableRow = ({
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
 
-  const flattenedRow = useMemo(() => indexPattern.flattenHit(row), [indexPattern, row]);
+  const flattenedRow = useMemo(() => flattenHit(row, indexPattern), [indexPattern, row]);
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
 
   // toggle display of the rows details, a full list of the fields from each row
@@ -68,8 +68,7 @@ export const TableRow = ({
    * Fill an element with the value of a field
    */
   const displayField = (fieldName: string) => {
-    const text = indexPattern.formatField(row, fieldName);
-    const formattedField = trimAngularSpan(String(text));
+    const formattedField = indexPattern.formatField(row, fieldName);
 
     // field formatters take care of escaping
     // eslint-disable-next-line react/no-danger

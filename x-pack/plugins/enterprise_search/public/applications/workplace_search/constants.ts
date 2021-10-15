@@ -253,12 +253,12 @@ export const SOURCE_OBJ_TYPES = {
     defaultMessage: 'Bugs',
   }),
   ISSUES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.issues', {
-    defaultMessage: 'Issues',
+    defaultMessage: 'Issues (including comments)',
   }),
   PULL_REQUESTS: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.objTypes.pullRequests',
     {
-      defaultMessage: 'Pull Requests',
+      defaultMessage: 'Pull Requests (including comments)',
     }
   ),
   REPOSITORY_LIST: i18n.translate(
@@ -768,8 +768,8 @@ export const BETWEEN_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSea
   defaultMessage: 'between',
 });
 
-export const EVERY_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.everyLabel', {
-  defaultMessage: 'every',
+export const ON_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.onLabel', {
+  defaultMessage: 'on',
 });
 
 export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {

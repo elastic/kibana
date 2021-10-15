@@ -11,5 +11,5 @@ import type { DecoratorFn } from '@storybook/react';
 import { StorybookContext } from './context';
 
 export const decorator: DecoratorFn = (story, storybook) => {
-  return <StorybookContext>{story()}</StorybookContext>;
+  return <StorybookContext storyContext={storybook}>{story()}</StorybookContext>;
 };

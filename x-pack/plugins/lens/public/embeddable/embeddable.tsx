@@ -286,8 +286,9 @@ export class Embeddable
           defaultMessage: `You've encountered a URL conflict`,
         }),
         longMessage: (
-          <this.deps.spaces.ui.components.getSavedObjectConflictMessage
-            json={sharingSavedObjectProps.errorJSON!}
+          <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
+            targetType={DOC_TYPE}
+            sourceId={sharingSavedObjectProps.sourceId!}
           />
         ),
       };

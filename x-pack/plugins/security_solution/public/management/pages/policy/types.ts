@@ -16,6 +16,8 @@ import {
   PostTrustedAppCreateResponse,
   MaybeImmutable,
   GetTrustedAppsListResponse,
+  TrustedApp,
+  PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
@@ -78,6 +80,11 @@ export interface PolicyAssignedTrustedApps {
   artifacts: GetTrustedAppsListResponse;
 }
 
+export interface PolicyRemoveTrustedApps {
+  artifacts: TrustedApp[];
+  response: PutTrustedAppUpdateResponse[];
+}
+
 /**
  * Policy artifacts store state
  */
@@ -90,10 +97,14 @@ export interface PolicyArtifactsState {
   assignableListEntriesExist: AsyncResourceState<boolean>;
   /** A list of trusted apps going to be updated  */
   trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
+  /** Represents if there is any trusted app existing  */
+  doesAnyTrustedAppExists: AsyncResourceState<boolean>;
   /** List of artifacts currently assigned to the policy (body specific and global) */
   assignedList: AsyncResourceState<PolicyAssignedTrustedApps>;
   /** A list of all available polices */
   policies: AsyncResourceState<GetPolicyListResponse>;
+  /** list of artifacts to remove. Holds the ids that were removed and the API response */
+  removeList: AsyncResourceState<PolicyRemoveTrustedApps>;
 }
 
 export enum OS {
@@ -164,8 +175,8 @@ export type PolicyProtection =
       UIPolicyConfig['windows'],
       'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
     >
-  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection'>
-  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection'>;
+  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection' | 'memory_protection'>
+  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection' | 'memory_protection'>;
 
 export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
 

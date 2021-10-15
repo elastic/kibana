@@ -96,6 +96,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     setRefreshRulesData,
     selectedTab,
   }) => {
+    const docLinks = useKibana().services.docLinks;
     const [initLoading, setInitLoading] = useState(true);
 
     const {
@@ -299,8 +300,8 @@ export const RulesTables = React.memo<RulesTableProps>(
     ]);
 
     const monitoringColumns = useMemo(
-      () => getMonitoringColumns(navigateToApp, formatUrl),
-      [navigateToApp, formatUrl]
+      () => getMonitoringColumns(navigateToApp, formatUrl, docLinks),
+      [navigateToApp, formatUrl, docLinks]
     );
 
     useEffect(() => {
