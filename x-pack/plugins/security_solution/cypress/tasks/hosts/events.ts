@@ -7,14 +7,12 @@
 
 import { drag, drop } from '../common';
 import {
-  CLOSE_MODAL,
   EVENTS_VIEWER_FIELDS_BUTTON,
   EVENTS_VIEWER_PAGINATION,
   FIELDS_BROWSER_CONTAINER,
   HOST_GEO_CITY_NAME_CHECKBOX,
   HOST_GEO_COUNTRY_NAME_CHECKBOX,
   INSPECT_QUERY,
-  LOAD_MORE,
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
 import { DATAGRID_HEADERS } from '../../screens/timeline';
@@ -32,19 +30,9 @@ export const addsHostGeoCountryNameToHeader = () => {
   });
 };
 
-export const closeModal = () => {
-  cy.get(CLOSE_MODAL).click();
-};
-
-export const loadMoreEvents = () => {
-  cy.get(LOAD_MORE).click({ force: true });
-};
-
 export const openEventsViewerFieldsBrowser = () => {
   cy.get(EVENTS_VIEWER_FIELDS_BUTTON).click({ force: true });
-
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
-
   cy.get(FIELDS_BROWSER_CONTAINER).should('exist');
 };
 

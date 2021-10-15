@@ -178,6 +178,7 @@ const deprecations: ConfigDeprecationProvider = () => [
     }
     if (es.username === 'elastic') {
       addDeprecation({
+        configPath: `${fromPath}.username`,
         message: `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`,
         correctiveActions: {
           manualSteps: [`Replace [${fromPath}.username] from "elastic" to "kibana_system".`],
@@ -185,6 +186,7 @@ const deprecations: ConfigDeprecationProvider = () => [
       });
     } else if (es.username === 'kibana') {
       addDeprecation({
+        configPath: `${fromPath}.username`,
         message: `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`,
         correctiveActions: {
           manualSteps: [`Replace [${fromPath}.username] from "kibana" to "kibana_system".`],
@@ -193,6 +195,7 @@ const deprecations: ConfigDeprecationProvider = () => [
     }
     if (es.ssl?.key !== undefined && es.ssl?.certificate === undefined) {
       addDeprecation({
+        configPath: `${fromPath}.ssl.key`,
         message: `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
         correctiveActions: {
           manualSteps: [
@@ -202,6 +205,7 @@ const deprecations: ConfigDeprecationProvider = () => [
       });
     } else if (es.ssl?.certificate !== undefined && es.ssl?.key === undefined) {
       addDeprecation({
+        configPath: `${fromPath}.ssl.certificate`,
         message: `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
         correctiveActions: {
           manualSteps: [
@@ -211,6 +215,7 @@ const deprecations: ConfigDeprecationProvider = () => [
       });
     } else if (es.logQueries === true) {
       addDeprecation({
+        configPath: `${fromPath}.logQueries`,
         message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers".`,
         correctiveActions: {
           manualSteps: [

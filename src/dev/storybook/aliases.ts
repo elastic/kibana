@@ -25,6 +25,7 @@ export const storybookAliases = {
   expression_reveal_image: 'src/plugins/expression_reveal_image/.storybook',
   expression_shape: 'src/plugins/expression_shape/.storybook',
   expression_tagcloud: 'src/plugins/chart_expressions/expression_tagcloud/.storybook',
+  expression_metric_vis: 'src/plugins/chart_expressions/expression_metric/.storybook',
   fleet: 'x-pack/plugins/fleet/storybook',
   infra: 'x-pack/plugins/infra/.storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',

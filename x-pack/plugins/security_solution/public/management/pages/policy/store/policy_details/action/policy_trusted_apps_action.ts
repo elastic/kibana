@@ -8,8 +8,10 @@
 import { Action } from 'redux';
 import { AsyncResourceState } from '../../../../../state';
 import {
-  PostTrustedAppCreateResponse,
+  PutTrustedAppUpdateResponse,
   GetTrustedAppsListResponse,
+  TrustedApp,
+  MaybeImmutable,
 } from '../../../../../../../common/endpoint/types';
 import { PolicyArtifactsState } from '../../../types';
 
@@ -21,13 +23,14 @@ export interface PolicyArtifactsAssignableListPageDataChanged {
 export interface PolicyArtifactsUpdateTrustedApps {
   type: 'policyArtifactsUpdateTrustedApps';
   payload: {
-    trustedAppIds: string[];
+    action: 'assign' | 'remove';
+    artifacts: MaybeImmutable<TrustedApp[]>;
   };
 }
 
 export interface PolicyArtifactsUpdateTrustedAppsChanged {
   type: 'policyArtifactsUpdateTrustedAppsChanged';
-  payload: AsyncResourceState<PostTrustedAppCreateResponse[]>;
+  payload: AsyncResourceState<PutTrustedAppUpdateResponse[]>;
 }
 
 export interface PolicyArtifactsAssignableListExistDataChanged {
@@ -38,6 +41,11 @@ export interface PolicyArtifactsAssignableListExistDataChanged {
 export interface PolicyArtifactsAssignableListPageDataFilter {
   type: 'policyArtifactsAssignableListPageDataFilter';
   payload: { filter: string };
+}
+
+export interface PolicyArtifactsDeosAnyTrustedAppExists {
+  type: 'policyArtifactsDeosAnyTrustedAppExists';
+  payload: AsyncResourceState<boolean>;
 }
 
 export interface AssignedTrustedAppsListStateChanged
@@ -53,6 +61,13 @@ export interface PolicyDetailsListOfAllPoliciesStateChanged
 export type PolicyDetailsTrustedAppsForceListDataRefresh =
   Action<'policyDetailsTrustedAppsForceListDataRefresh'>;
 
+export type PolicyDetailsArtifactsResetRemove = Action<'policyDetailsArtifactsResetRemove'>;
+
+export interface PolicyDetailsTrustedAppsRemoveListStateChanged
+  extends Action<'policyDetailsTrustedAppsRemoveListStateChanged'> {
+  payload: PolicyArtifactsState['removeList'];
+}
+
 /**
  * All of the possible actions for Trusted Apps under the Policy Details store
  */
@@ -62,6 +77,9 @@ export type PolicyTrustedAppsAction =
   | PolicyArtifactsUpdateTrustedAppsChanged
   | PolicyArtifactsAssignableListExistDataChanged
   | PolicyArtifactsAssignableListPageDataFilter
+  | PolicyArtifactsDeosAnyTrustedAppExists
   | AssignedTrustedAppsListStateChanged
   | PolicyDetailsListOfAllPoliciesStateChanged
-  | PolicyDetailsTrustedAppsForceListDataRefresh;
+  | PolicyDetailsTrustedAppsForceListDataRefresh
+  | PolicyDetailsTrustedAppsRemoveListStateChanged
+  | PolicyDetailsArtifactsResetRemove;

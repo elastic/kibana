@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiLoadingSpinner, EuiSpacer, EuiText, Pagination } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiText, Pagination, EuiPageTemplate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,10 +19,12 @@ import {
   doesPolicyHaveTrustedApps,
   getCurrentArtifactsLocation,
   getPolicyTrustedAppList,
+  getPolicyTrustedAppListError,
   getPolicyTrustedAppsListPagination,
   getTrustedAppsAllPoliciesById,
   isPolicyTrustedAppListLoading,
   policyIdFromParams,
+  doesTrustedAppExistsLoading,
 } from '../../../store/policy_details/selectors';
 import {
   getPolicyDetailPath,
@@ -30,25 +32,33 @@ import {
   getTrustedAppsListPath,
 } from '../../../../../common/routing';
 import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
-import { useAppUrl } from '../../../../../../common/lib/kibana';
+import { useAppUrl, useToasts } from '../../../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../../../common/constants';
 import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
+import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+import { RemoveTrustedAppFromPolicyModal } from './remove_trusted_app_from_policy_modal';
+
+const DATA_TEST_SUBJ = 'policyTrustedAppsGrid';
 
 export const PolicyTrustedAppsList = memo(() => {
+  const getTestId = useTestIdGenerator(DATA_TEST_SUBJ);
+  const toasts = useToasts();
   const history = useHistory();
   const { getAppUrl } = useAppUrl();
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
   const hasTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
   const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
+  const isTrustedAppExistsCheckLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
   const trustedAppItems = usePolicyDetailsSelector(getPolicyTrustedAppList);
   const pagination = usePolicyDetailsSelector(getPolicyTrustedAppsListPagination);
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const allPoliciesById = usePolicyDetailsSelector(getTrustedAppsAllPoliciesById);
+  const trustedAppsApiError = usePolicyDetailsSelector(getPolicyTrustedAppListError);
 
   const [isCardExpanded, setCardExpanded] = useState<Record<string, boolean>>({});
-
-  // TODO:PT show load errors if any
+  const [trustedAppsForRemoval, setTrustedAppsForRemoval] = useState<typeof trustedAppItems>([]);
+  const [showRemovalModal, setShowRemovalModal] = useState<boolean>(false);
 
   const handlePageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
     ({ pageIndex, pageSize }) => {
@@ -93,6 +103,7 @@ export const PolicyTrustedAppsList = memo(() => {
     const newCardProps = new Map();
 
     for (const trustedApp of trustedAppItems) {
+      const isGlobal = trustedApp.effectScope.type === 'global';
       const viewUrlPath = getTrustedAppsListPath({ id: trustedApp.id, show: 'edit' });
       const assignedPoliciesMenuItems: ArtifactEntryCollapsibleCardProps['policies'] =
         trustedApp.effectScope.type === 'global'
@@ -133,6 +144,30 @@ export const PolicyTrustedAppsList = memo(() => {
             href: getAppUrl({ appId: APP_ID, path: viewUrlPath }),
             navigateAppId: APP_ID,
             navigateOptions: { path: viewUrlPath },
+            'data-test-subj': getTestId('viewFullDetailsAction'),
+          },
+          {
+            icon: 'trash',
+            children: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.trustedApps.list.removeAction',
+              { defaultMessage: 'Remove from policy' }
+            ),
+            onClick: () => {
+              setTrustedAppsForRemoval([trustedApp]);
+              setShowRemovalModal(true);
+            },
+            disabled: isGlobal,
+            toolTipContent: isGlobal
+              ? i18n.translate(
+                  'xpack.securitySolution.endpoint.policy.trustedApps.list.removeActionNotAllowed',
+                  {
+                    defaultMessage:
+                      'Globally applied trusted applications cannot be removed from policy.',
+                  }
+                )
+              : undefined,
+            toolTipPosition: 'top',
+            'data-test-subj': getTestId('removeAction'),
           },
         ],
         policies: assignedPoliciesMenuItems,
@@ -142,31 +177,46 @@ export const PolicyTrustedAppsList = memo(() => {
     }
 
     return newCardProps;
-  }, [allPoliciesById, getAppUrl, isCardExpanded, trustedAppItems]);
+  }, [allPoliciesById, getAppUrl, getTestId, isCardExpanded, trustedAppItems]);
 
   const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
     (item) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return cardProps.get(item as Immutable<TrustedApp>)!;
     },
     [cardProps]
   );
+
+  const handleRemoveModalClose = useCallback(() => {
+    setShowRemovalModal(false);
+  }, []);
 
   // Anytime a new set of data (trusted apps) is retrieved, reset the card expand state
   useEffect(() => {
     setCardExpanded({});
   }, [trustedAppItems]);
 
-  if (hasTrustedApps.loading) {
-    return (
-      <div>
-        <EuiLoadingSpinner className="essentialAnimation" size="xl" />
-      </div>
-    );
-  }
+  // if an error occurred while loading the data, show toast
+  useEffect(() => {
+    if (trustedAppsApiError) {
+      toasts.addError(trustedAppsApiError as unknown as Error, {
+        title: i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.list.apiError', {
+          defaultMessage: 'Error while retrieving list of trusted applications',
+        }),
+      });
+    }
+  }, [toasts, trustedAppsApiError]);
 
-  if (!hasTrustedApps.hasTrustedApps) {
-    // TODO: implement empty state (task #1645)
-    return <div>{'No trusted application'}</div>;
+  if (hasTrustedApps.loading || isTrustedAppExistsCheckLoading) {
+    return (
+      <EuiPageTemplate template="centeredContent">
+        <EuiLoadingSpinner
+          className="essentialAnimation"
+          size="xl"
+          data-test-subj={getTestId('loading')}
+        />
+      </EuiPageTemplate>
+    );
   }
 
   return (
@@ -183,9 +233,17 @@ export const PolicyTrustedAppsList = memo(() => {
         onExpandCollapse={handleExpandCollapse}
         cardComponentProps={provideCardProps}
         loading={isLoading}
+        error={trustedAppsApiError?.message}
         pagination={pagination as Pagination}
-        data-test-subj="policyTrustedAppsGrid"
+        data-test-subj={DATA_TEST_SUBJ}
       />
+
+      {showRemovalModal && (
+        <RemoveTrustedAppFromPolicyModal
+          trustedApps={trustedAppsForRemoval}
+          onClose={handleRemoveModalClose}
+        />
+      )}
     </>
   );
 });
