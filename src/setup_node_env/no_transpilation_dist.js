@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
-import ExampleSecurityPayload from './example_security_payload';
+// The following require statements MUST be executed before any others - BEGIN
+require('./exit_on_warning');
+require('./harden');
+// The following require statements MUST be executed before any others - END
 
-describe('example security payload', () => {
-  it('renders as expected', () => {
-    expect(shallowWithIntl(<ExampleSecurityPayload />)).toMatchSnapshot();
-  });
-});
+require('symbol-observable');
+require('source-map-support/register');
+require('./node_version_validator');
