@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ALERT_FLYOUT, CELL_TEXT, JSON_LINES, TABLE_ROWS } from '../../screens/alerts_details';
+import { ALERT_FLYOUT, CELL_TEXT, JSON_TEXT, TABLE_ROWS } from '../../screens/alerts_details';
 
 import {
   expandFirstAlert,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
-import { openJsonView, openTable, scrollJsonViewToBottom } from '../../tasks/alerts_details';
+import { openJsonView, openTable } from '../../tasks/alerts_details';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad } from '../../tasks/es_archiver';
@@ -36,20 +36,14 @@ describe('Alert details with unmapped fields', () => {
   });
 
   it('Displays the unmapped field on the JSON view', () => {
-    const expectedUnmappedField = { line: 2, text: '  "unmapped": "This is the unmapped field"' };
+    const expectedUnmappedValue = 'This is the unmapped field';
 
     openJsonView();
-    scrollJsonViewToBottom();
 
-    cy.get(ALERT_FLYOUT)
-      .find(JSON_LINES)
-      .then((elements) => {
-        const length = elements.length;
-        cy.wrap(elements)
-          .eq(length - expectedUnmappedField.line)
-          .invoke('text')
-          .should('include', expectedUnmappedField.text);
-      });
+    cy.get(JSON_TEXT).then((x) => {
+      const parsed = JSON.parse(x.text());
+      expect(parsed._source.unmapped).to.equal(expectedUnmappedValue);
+    });
   });
 
   it('Displays the unmapped field on the table', () => {

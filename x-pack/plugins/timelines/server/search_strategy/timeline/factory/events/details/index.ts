@@ -57,10 +57,14 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     );
 
     const data = unionBy('field', fieldsData, sourceData);
+
+    const rawEventData = response.rawResponse.hits.hits[0];
+
     return {
       ...response,
       data,
       inspect,
+      rawEventData,
     };
   },
 };
