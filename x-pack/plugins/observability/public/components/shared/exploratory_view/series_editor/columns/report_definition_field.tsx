@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { ExistsFilter } from '@kbn/es-query';
+import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
@@ -19,12 +19,23 @@ import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_valu
 interface Props {
   seriesId: number;
   series: SeriesUrl;
+  singleSelection?: boolean;
+  keepHistory?: boolean;
   field: string | { field: string; nested: string };
   seriesConfig: SeriesConfig;
   onChange: (field: string, value?: string[]) => void;
+  filters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
 }
 
-export function ReportDefinitionField({ series, field: fieldProp, seriesConfig, onChange }: Props) {
+export function ReportDefinitionField({
+  singleSelection,
+  keepHistory,
+  series,
+  field: fieldProp,
+  seriesConfig,
+  onChange,
+  filters,
+}: Props) {
   const { indexPattern } = useAppIndexPatternContext(series.dataType);
 
   const field = typeof fieldProp === 'string' ? fieldProp : fieldProp.field;
@@ -35,15 +46,17 @@ export function ReportDefinitionField({ series, field: fieldProp, seriesConfig, 
 
   const queryFilters = useMemo(() => {
     const filtersN: ESFilter[] = [];
-    (baseFilters ?? []).forEach((qFilter: PersistableFilter | ExistsFilter) => {
-      if (qFilter.query) {
-        filtersN.push(qFilter.query);
-      }
-      const existFilter = qFilter as ExistsFilter;
-      if (existFilter.query.exists) {
-        filtersN.push({ exists: existFilter.query.exists });
-      }
-    });
+    (baseFilters ?? [])
+      .concat(filters ?? [])
+      .forEach((qFilter: PersistableFilter | ExistsFilter) => {
+        if (qFilter.query) {
+          filtersN.push(qFilter.query);
+        }
+        const existFilter = qFilter as ExistsFilter;
+        if (existFilter.query.exists) {
+          filtersN.push({ exists: existFilter.query.exists });
+        }
+      });
 
     if (!isEmpty(selectedReportDefinitions)) {
       definitionFields.forEach((fieldObj) => {
@@ -83,6 +96,8 @@ export function ReportDefinitionField({ series, field: fieldProp, seriesConfig, 
       usePrependLabel={false}
       compressed={false}
       required={isEmpty(selectedReportDefinitions)}
+      singleSelection={singleSelection}
+      keepHistory={keepHistory}
     />
   );
 }

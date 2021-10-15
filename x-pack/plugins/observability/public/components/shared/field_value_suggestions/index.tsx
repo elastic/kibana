@@ -34,6 +34,7 @@ export function FieldValueSuggestions({
   allowExclusions = true,
   cardinalityField,
   asCombobox = true,
+  keepHistory = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
@@ -45,7 +46,7 @@ export function FieldValueSuggestions({
     filters,
     time,
     cardinalityField,
-    keepHistory: true,
+    keepHistory,
   });
 
   const SelectionComponent = asCombobox ? FieldValueCombobox : FieldValueSelection;
@@ -71,7 +72,7 @@ export function FieldValueSuggestions({
       asFilterButton={asFilterButton}
       usePrependLabel={usePrependLabel}
       allowExclusions={allowExclusions}
-      allowAllValuesSelection={allowAllValuesSelection}
+      allowAllValuesSelection={singleSelection ? false : allowAllValuesSelection}
       required={required}
     />
   );

@@ -34,6 +34,7 @@ import {
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_STEP_NAME,
 } from '../constants/field_names/synthetics';
+import { buildExistsFilter } from '../utils';
 const SUMMARY_UP = 'summary.up';
 const SUMMARY_DOWN = 'summary.down';
 
@@ -63,8 +64,8 @@ export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesCon
     baseFilters: [],
     palette: { type: 'palette', name: 'status' },
     definitionFields: [
-      { field: 'monitor.name', nested: 'synthetics.step.name.keyword' },
-      'url.full',
+      { field: 'monitor.name', nested: 'synthetics.step.name.keyword', singleSelection: true },
+      { field: 'url.full', filters: buildExistsFilter('summary.up', indexPattern) },
     ],
     metricOptions: [
       {

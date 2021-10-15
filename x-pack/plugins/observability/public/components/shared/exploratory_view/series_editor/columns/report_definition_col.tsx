@@ -50,10 +50,12 @@ export function ReportDefinitionCol({
     <EuiFlexGroup gutterSize="s">
       {definitionFields.map((field) => {
         const fieldStr = typeof field === 'string' ? field : field.field;
+        const singleSelection = typeof field !== 'string' && field.singleSelection;
+        const filters = typeof field !== 'string' ? field.filters : undefined;
 
         let nestedFieldElement;
 
-        if (typeof field !== 'string' && hasFieldDataSelected(field.field)) {
+        if (typeof field !== 'string' && field.nested && hasFieldDataSelected(field.field)) {
           nestedFieldElement = (
             <EuiFlexItem key={field.nested} grow={1}>
               <ReportDefinitionField
@@ -62,6 +64,8 @@ export function ReportDefinitionCol({
                 seriesConfig={seriesConfig}
                 field={field.nested}
                 onChange={onChange}
+                keepHistory={false}
+                singleSelection={singleSelection}
               />
             </EuiFlexItem>
           );
@@ -74,8 +78,10 @@ export function ReportDefinitionCol({
                 seriesId={seriesId}
                 series={series}
                 seriesConfig={seriesConfig}
-                field={field}
+                field={fieldStr}
                 onChange={onChange}
+                singleSelection={singleSelection}
+                filters={filters}
               />
             </EuiFlexItem>
             {nestedFieldElement}
