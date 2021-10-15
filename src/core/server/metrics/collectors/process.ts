@@ -11,15 +11,6 @@ import { OpsProcessMetrics, MetricsCollector } from './types';
 import { EventLoopDelaysMonitor } from '../event_loop_delays';
 
 export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics[]> {
-  static getMainThreadMetrics(processes: OpsProcessMetrics[]): undefined | OpsProcessMetrics {
-    /**
-     * Currently Kibana does not support multi-processes.
-     * Once we have multiple processes we can add a `name` field
-     * and filter on `name === 'server_worker'` to get the main thread.
-     */
-    return processes[0];
-  }
-
   private readonly eventLoopDelayMonitor = new EventLoopDelaysMonitor();
 
   private getCurrentPidMetrics(): OpsProcessMetrics {

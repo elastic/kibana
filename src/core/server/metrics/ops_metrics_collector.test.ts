@@ -42,7 +42,6 @@ describe('OpsMetricsCollector', () => {
 
       expect(metrics).toEqual({
         collected_at: expect.any(Date),
-        process: 'processMetrics',
         processes: ['processMetrics'],
         os: 'osMetrics',
         requests: 'serverRequestsMetrics',

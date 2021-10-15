@@ -36,12 +36,6 @@ export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
 
     return {
       collected_at: new Date(),
-      /**
-       * Kibana does not yet support multi-process nodes.
-       * `processes` is just an Array(1) only returning the current process's data
-       *  which is why we can just use processes[0] for `process`
-       */
-      process: processes[0],
       processes,
       os,
       ...server,
