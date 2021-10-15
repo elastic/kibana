@@ -32,8 +32,6 @@ jest.mock('../../../timelines/containers', () => ({
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
-jest.mock('../../../common/containers/source', () => ({ useIndexFields: () => ({}) }));
-
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));

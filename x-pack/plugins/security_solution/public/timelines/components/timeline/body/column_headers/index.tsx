@@ -32,12 +32,13 @@ import {
 } from '../../styles';
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
-import { CreateFieldComponentType } from '../../../../../../../timelines/public';
+
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { useCreateFieldButton } from '../../../create_field_button';
 
 interface Props {
   actionsColumnWidth: number;
   browserFields: BrowserFields;
-  createFieldComponent: CreateFieldComponentType;
   columnHeaders: ColumnHeaderOptions[];
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
@@ -88,7 +89,6 @@ export const ColumnHeadersComponent = ({
   actionsColumnWidth,
   browserFields,
   columnHeaders,
-  createFieldComponent,
   isEventViewer = false,
   isSelectAllChecked,
   onSelectAll,
@@ -170,6 +170,11 @@ export const ColumnHeadersComponent = ({
     () =>
       trailingControlColumns ? trailingControlColumns.map((column) => column.headerCellRender) : [],
     [trailingControlColumns]
+  );
+
+  const createFieldComponent = useCreateFieldButton(
+    SourcererScopeName.timeline,
+    timelineId as TimelineId
   );
 
   const LeadingHeaderActions = useMemo(() => {

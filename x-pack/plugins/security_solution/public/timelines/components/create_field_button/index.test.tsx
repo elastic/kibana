@@ -16,6 +16,8 @@ import {
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { DataView } from '../../../../../../../src/plugins/data/common';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { TimelineId } from '../../../../common';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
@@ -38,7 +40,8 @@ describe('CreateFieldButton', () => {
       <CreateFieldButton
         selectedDataViewId={'dataViewId'}
         onClick={() => undefined}
-        onCreateField={() => undefined}
+        sourcererScope={SourcererScopeName.timeline}
+        timelineId={TimelineId.detectionsPage}
       />,
       {
         wrapper: TestProviders,
@@ -54,7 +57,8 @@ describe('CreateFieldButton', () => {
       <CreateFieldButton
         selectedDataViewId={'dataViewId'}
         onClick={() => undefined}
-        onCreateField={() => undefined}
+        sourcererScope={SourcererScopeName.timeline}
+        timelineId={TimelineId.detectionsPage}
       />,
       {
         wrapper: TestProviders,
@@ -74,7 +78,8 @@ describe('CreateFieldButton', () => {
         <CreateFieldButton
           selectedDataViewId={'dataViewId'}
           onClick={onClickParam}
-          onCreateField={() => undefined}
+          sourcererScope={SourcererScopeName.timeline}
+          timelineId={TimelineId.detectionsPage}
         />,
         {
           wrapper: TestProviders,

@@ -7,6 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CREATE_FIELD = i18n.translate('xpack.timelines.fieldBrowser.createFieldButton', {
-  defaultMessage: 'Create field',
-});
+export const CREATE_FIELD = i18n.translate(
+  'xpack.securitySolution.fieldBrowser.createFieldButton',
+  {
+    defaultMessage: 'Create field',
+  }
+);

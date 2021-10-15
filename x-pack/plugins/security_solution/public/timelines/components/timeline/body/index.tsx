@@ -8,7 +8,7 @@
 import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import {
@@ -16,8 +16,6 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-  CreateFieldComponentType,
-  tGridActions,
 } from '../../../../../../timelines/public';
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
@@ -29,9 +27,9 @@ import {
   TimelineId,
   TimelineTabs,
 } from '../../../../../common/types/timeline';
-import { BrowserFields, useIndexFields } from '../../../../common/containers/source';
+import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
-import { inputsModel, sourcererSelectors, State } from '../../../../common/store';
+import { inputsModel, State } from '../../../../common/store';
 import { TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -45,11 +43,6 @@ import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { CreateFieldButton } from '../../create_field_button';
-import { SelectedDataView } from '../../../../common/store/sourcerer/selectors';
-import { IndexPatternField } from '../../../../../../../../src/plugins/data/public';
-import { defaultColumnHeaderType } from './column_headers/default_headers';
 
 interface OwnProps {
   activePage: number;
@@ -231,43 +224,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [columnHeaders.length, containerRef, data.length]
     );
 
-    const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
-    const { dataViewId } = useDeepEqualSelector<SelectedDataView>((state) =>
-      getSelectedDataView(state, SourcererScopeName.timeline)
-    );
-
-    const dispatch = useDispatch();
-    const { indexFieldsSearch } = useIndexFields(SourcererScopeName.timeline, false);
-
-    const createFieldComponent = useMemo(() => {
-      const onCreateField = (field: IndexPatternField) => {
-        // Fetch updated list of fields
-        indexFieldsSearch(dataViewId);
-        // Add the new field to the event table
-        dispatch(
-          tGridActions.upsertColumn({
-            column: {
-              columnHeaderType: defaultColumnHeaderType,
-              id: field.name,
-              initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-            },
-            id,
-            index: 0,
-          })
-        );
-      };
-      // It receives onClick props from field browser in order to close the modal.
-      const CreateFieldButtonComponent: CreateFieldComponentType = ({ onClick }) => (
-        <CreateFieldButton
-          selectedDataViewId={dataViewId}
-          onClick={onClick}
-          onCreateField={onCreateField}
-        />
-      );
-
-      return CreateFieldButtonComponent;
-    }, [dataViewId, dispatch, id, indexFieldsSearch]);
-
     return (
       <>
         <TimelineBody data-test-subj="timeline-body" ref={containerRef}>
@@ -284,7 +240,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               actionsColumnWidth={actionsColumnWidth}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
-              createFieldComponent={createFieldComponent}
               isEventViewer={isEventViewer}
               isSelectAllChecked={isSelectAllChecked}
               onSelectAll={onSelectAll}
