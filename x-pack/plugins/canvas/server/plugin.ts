@@ -82,7 +82,7 @@ export class CanvasPlugin implements Plugin {
     const globalConfig = this.initializerContext.config.legacy.get();
     registerCanvasUsageCollector(plugins.usageCollection, globalConfig.kibana.index);
 
-    setupInterpreter(expressionsFork);
+    setupInterpreter(expressionsFork, { embeddablesService: plugins.embeddable });
 
     coreSetup.getStartServices().then(([_, depsStart]) => {
       const strategy = essqlSearchStrategyProvider();

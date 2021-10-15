@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { embeddable } from '../../../canvas_plugin_src/functions/external/embeddable';
+import { embeddableFunctionFactory } from '../../../canvas_plugin_src/functions/external/embeddable';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 
-export const help: FunctionHelp<FunctionFactory<typeof embeddable>> = {
+export const help: FunctionHelp<FunctionFactory<ReturnType<typeof embeddableFunctionFactory>>> = {
   help: i18n.translate('xpack.canvas.functions.embeddableHelpText', {
     defaultMessage: `Returns an embeddable with the provided configuration`,
   }),

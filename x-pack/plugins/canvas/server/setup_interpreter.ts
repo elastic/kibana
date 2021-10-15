@@ -6,10 +6,18 @@
  */
 
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { EmbeddableSetup } from 'src/plugins/embeddable/server';
 import { functions } from '../canvas_plugin_src/functions/server';
-import { functions as externalFunctions } from '../canvas_plugin_src/functions/external';
+import { initFunctions as initExternalFunctions } from '../canvas_plugin_src/functions/external';
 
-export function setupInterpreter(expressions: ExpressionsServerSetup) {
+interface InterpreterDependencies {
+  embeddablesService: EmbeddableSetup;
+}
+
+export function setupInterpreter(
+  expressions: ExpressionsServerSetup,
+  dependencies: InterpreterDependencies
+) {
   functions.forEach((f) => expressions.registerFunction(f));
   externalFunctions.forEach((f) => expressions.registerFunction(f));
 }
