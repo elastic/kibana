@@ -22,6 +22,7 @@ import {
   axisTitlesVisibilityConfig,
   getTimeScale,
   getDatatable,
+  firstDatatable,
 } from '../../common/expressions';
 import { getFormatFactory, getTimeZoneFactory } from './utils';
 
@@ -32,6 +33,8 @@ export const setupExpressions = (
   core: CoreSetup<PluginStartContract>,
   expressions: ExpressionsServerSetup
 ) => {
+  [firstDatatable].forEach((expressionType) => expressions.registerType(expressionType));
+
   [
     pie,
     xyChart,

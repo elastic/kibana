@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 
 import { visType } from '../types';
-import { Datatable } from '../../../../expressions/common';
 import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
 import { ColorMode } from '../../../../charts/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
@@ -18,7 +17,7 @@ import { EXPRESSION_METRIC_NAME } from '../constants';
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
   type: 'render',
-  inputTypes: ['lens_multitable', 'datatable'],
+  inputTypes: ['datatable'],
   help: i18n.translate('expressionMetricVis.function.help', {
     defaultMessage: 'Metric visualization',
   }),
@@ -74,8 +73,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
   },
   fn(input, args, handlers) {
-    const table: Datatable = input.type === 'datatable' ? input : Object.values(input.tables)[0];
-
     if (args.percentageMode && !args.palette?.params) {
       throw new Error('Palette must be provided when using percentageMode');
     }
@@ -97,7 +94,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           }),
         ]);
       }
-      const logTable = prepareLogTable(table, argsTable);
+      const logTable = prepareLogTable(input, argsTable);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
@@ -105,7 +102,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       type: 'render',
       as: EXPRESSION_METRIC_NAME,
       value: {
-        visData: table,
+        visData: input,
         visType,
         visConfig: {
           metric: {

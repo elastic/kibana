@@ -26,16 +26,8 @@ export interface MetricArguments {
   metric: ExpressionValueVisDimension[];
   bucket?: ExpressionValueVisDimension;
 }
-interface LensMultiTable {
-  type: 'lens_multitable';
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
-}
 
-export type MetricInput = Datatable | LensMultiTable;
+export type MetricInput = Datatable;
 
 export interface MetricVisRenderConfig {
   visType: typeof visType;
