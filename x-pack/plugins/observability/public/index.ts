@@ -82,5 +82,8 @@ export type {
 export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
 export type { ExploratoryEmbeddableProps } from './components/shared/exploratory_view/embeddable/embeddable';
 
-export { InspectorContextProvider } from './context/inspector/inspector_context';
+export {
+  InspectorContextProvider,
+  AddInspectorRequest,
+} from './context/inspector/inspector_context';
 export { useInspectorContext } from './context/inspector/use_inspector_context';

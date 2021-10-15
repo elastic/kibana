@@ -10,15 +10,18 @@ import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { ESFilter } from '../../../../../src/core/types/elasticsearch';
 import { createEsParams, useEsSearch } from './use_es_search';
+import { IInspectorInfo } from '../../../../../src/plugins/data/common';
 
 export interface Props {
   sourceField: string;
+  label: string;
   query?: string;
   indexPatternTitle?: string;
   filters?: ESFilter[];
   time?: { from: string; to: string };
   keepHistory?: boolean;
   cardinalityField?: string;
+  inspector?: IInspectorInfo;
 }
 
 export interface ListItem {
@@ -36,6 +39,7 @@ export const useValuesList = ({
   query = '',
   filters,
   time,
+  label,
   keepHistory,
   cardinalityField,
 }: Props): { values: ListItem[]; loading?: boolean } => {
@@ -117,7 +121,8 @@ export const useValuesList = ({
         },
       },
     }),
-    [debouncedQuery, from, to, JSON.stringify(filters), indexPatternTitle, sourceField]
+    [debouncedQuery, from, to, JSON.stringify(filters), indexPatternTitle, sourceField],
+    { name: `get${label.replace(/\s/g, '')}ValuesList` }
   );
 
   useEffect(() => {
