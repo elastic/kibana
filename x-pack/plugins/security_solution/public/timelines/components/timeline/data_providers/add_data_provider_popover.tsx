@@ -113,7 +113,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         width: 400,
         content: (
           <StatefulEditDataProvider
-            browserFields={browserFields!}
+            browserFields={browserFields}
             field=""
             isExcluded={false}
             onDataProviderEdited={handleDataProviderEdited}
@@ -131,7 +131,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         width: 400,
         content: (
           <StatefulEditDataProvider
-            browserFields={browserFields!}
+            browserFields={browserFields}
             field=""
             isExcluded={false}
             onDataProviderEdited={handleDataProviderEdited}
@@ -182,7 +182,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
 
     return (
       <StatefulEditDataProvider
-        browserFields={browserFields!}
+        browserFields={browserFields}
         field=""
         isExcluded={false}
         onDataProviderEdited={handleDataProviderEdited}

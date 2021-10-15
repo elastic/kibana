@@ -54,8 +54,8 @@ describe('Update kqlMode for timeline', () => {
   it('should be able to update timeline kqlMode with filter', () => {
     cy.get(TIMELINE_KQLMODE_FILTER).click();
     cy.wait('@update').then(({ response }) => {
-      cy.wrap(response!.statusCode).should('eql', 200);
-      cy.wrap(response!.body.data.persistTimeline.timeline.kqlMode).should('eql', 'filter');
+      cy.wrap(response?.statusCode).should('eql', 200);
+      cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'filter');
       cy.get(ADD_FILTER).should('exist');
     });
   });
@@ -63,8 +63,8 @@ describe('Update kqlMode for timeline', () => {
   it('should be able to update timeline kqlMode with search', () => {
     cy.get(TIMELINE_KQLMODE_SEARCH).click();
     cy.wait('@update').then(({ response }) => {
-      cy.wrap(response!.statusCode).should('eql', 200);
-      cy.wrap(response!.body.data.persistTimeline.timeline.kqlMode).should('eql', 'search');
+      cy.wrap(response?.statusCode).should('eql', 200);
+      cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'search');
       cy.get(ADD_FILTER).should('not.exist');
     });
   });

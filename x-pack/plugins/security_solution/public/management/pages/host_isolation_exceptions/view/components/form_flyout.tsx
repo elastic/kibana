@@ -97,7 +97,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
       if (!exceptionToEdit || location.id !== exceptionToEdit.id) {
         dispatch({
           type: 'hostIsolationExceptionsMarkToEdit',
-          payload: { id: location.id! },
+          payload: { id: location.id },
         });
       } else {
         setException(exceptionToEdit);

@@ -54,6 +54,7 @@ export const useSetBreadcrumbs = () => {
 
                   dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
 
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   navigateToUrl(breadcrumb.href!);
                 },
               }

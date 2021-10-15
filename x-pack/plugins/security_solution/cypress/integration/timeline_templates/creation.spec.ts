@@ -70,7 +70,7 @@ describe('Timeline Templates', () => {
     addNameToTimeline(getTimeline().title);
 
     cy.wait('@timeline').then(({ response }) => {
-      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+      const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
 
       addDescriptionToTimeline(getTimeline().description);
       addNotesToTimeline(getTimeline().notes);

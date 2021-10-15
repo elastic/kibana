@@ -229,8 +229,8 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) =>
-      has('lastSuccess.timestamp', node) && node.lastSuccess!.timestamp != null ? (
-        <FormattedRelativePreferenceDate value={node.lastSuccess!.timestamp} />
+      has('lastSuccess.timestamp', node) && node.lastSuccess?.timestamp != null ? (
+        <FormattedRelativePreferenceDate value={node.lastSuccess?.timestamp} />
       ) : (
         getEmptyTagValue()
       ),
@@ -264,8 +264,8 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) =>
-      has('lastFailure.timestamp', node) && node.lastFailure!.timestamp != null ? (
-        <FormattedRelativePreferenceDate value={node.lastFailure!.timestamp} />
+      has('lastFailure.timestamp', node) && node.lastFailure?.timestamp != null ? (
+        <FormattedRelativePreferenceDate value={node.lastFailure?.timestamp} />
       ) : (
         getEmptyTagValue()
       ),

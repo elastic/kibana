@@ -89,6 +89,7 @@ const getOverflowButtonLazy = (props: OverflowButtonProps) => {
 };
 
 export const getHoverActions = (store?: Store): HoverActionsConfig => ({
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   getAddToTimelineButton: getAddToTimelineButtonLazy.bind(null, store!),
   getColumnToggleButton: getColumnToggleButtonLazy,
   getCopyButton: getCopyButtonLazy,

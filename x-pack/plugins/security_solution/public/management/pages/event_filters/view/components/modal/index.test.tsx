@@ -81,7 +81,7 @@ describe('Event filter modal', () => {
       await waitForAction('eventFiltersInitForm');
     });
 
-    expect(getState().form!.entry).not.toBeUndefined();
+    expect(getState().form?.entry).not.toBeUndefined();
   });
 
   it('should set OS with the enriched data', async () => {
@@ -90,7 +90,7 @@ describe('Event filter modal', () => {
       await waitForAction('eventFiltersInitForm');
     });
 
-    expect(getState().form!.entry?.os_types).toContain('linux');
+    expect(getState().form?.entry?.os_types).toContain('linux');
   });
 
   it('should confirm form when button is disabled', async () => {
@@ -103,7 +103,7 @@ describe('Event filter modal', () => {
     act(() => {
       fireEvent.click(confirmButton);
     });
-    expect(getState().form!.submissionResourceState.type).toBe('UninitialisedResourceState');
+    expect(getState().form?.submissionResourceState.type).toBe('UninitialisedResourceState');
   });
 
   it('should confirm form when button is enabled', async () => {
@@ -116,7 +116,7 @@ describe('Event filter modal', () => {
       type: 'eventFiltersChangeForm',
       payload: {
         entry: {
-          ...(getState().form!.entry as CreateExceptionListItemSchema),
+          ...(getState().form?.entry as CreateExceptionListItemSchema),
           name: 'test',
         },
         hasNameError: false,
@@ -126,7 +126,7 @@ describe('Event filter modal', () => {
     act(() => {
       fireEvent.click(confirmButton);
     });
-    expect(getState().form!.submissionResourceState.type).toBe('LoadingResourceState');
+    expect(getState().form?.submissionResourceState.type).toBe('LoadingResourceState');
     expect(confirmButton.hasAttribute('disabled')).toBeTruthy();
   });
 
@@ -143,7 +143,7 @@ describe('Event filter modal', () => {
         type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: getState().form!.entry as ExceptionListItemSchema,
+          data: getState().form?.entry as ExceptionListItemSchema,
         },
       });
     });

@@ -53,11 +53,11 @@ describe('When on the host isolation exceptions delete modal', () => {
 
     const submitButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
     const cancelButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
     act(() => {
       fireEvent.click(submitButton);
@@ -72,7 +72,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     render();
     const cancelButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
     const waiter = waitForAction('hostIsolationExceptionsMarkToDelete', {
       validate: ({ payload }) => {
@@ -96,7 +96,7 @@ describe('When on the host isolation exceptions delete modal', () => {
 
     const submitButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
     await act(async () => {
       fireEvent.click(submitButton);
@@ -121,7 +121,7 @@ describe('When on the host isolation exceptions delete modal', () => {
 
     const submitButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
     await act(async () => {
       fireEvent.click(submitButton);

@@ -135,6 +135,7 @@ export class ManifestTask {
         }
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       if (oldManifest! == null) {
         this.logger.debug('Last computed manifest not available yet');
         return;

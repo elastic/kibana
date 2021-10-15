@@ -71,7 +71,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-    const typeData = data[flowTarget]!;
+    const typeData = data[flowTarget];
     const column: DescriptionList[] = [
       {
         title: i18n.LOCATION,

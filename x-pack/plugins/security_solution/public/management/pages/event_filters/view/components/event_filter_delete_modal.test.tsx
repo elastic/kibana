@@ -30,12 +30,12 @@ describe('When event filters delete modal is shown', () => {
   const getConfirmButton = () =>
     renderResult.baseElement.querySelector(
       '[data-test-subj="eventFilterDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
   const getCancelButton = () =>
     renderResult.baseElement.querySelector(
       '[data-test-subj="eventFilterDeleteModalCancelButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
   const getCurrentState = () => store.getState().management.eventFilters;
 

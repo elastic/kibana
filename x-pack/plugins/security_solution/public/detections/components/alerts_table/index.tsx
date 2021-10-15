@@ -142,14 +142,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const setEventsLoadingCallback = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      setEventsLoading!({ id: timelineId, eventIds, isLoading });
+      setEventsLoading({ id: timelineId, eventIds, isLoading });
     },
     [setEventsLoading, timelineId]
   );
 
   const setEventsDeletedCallback = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      setEventsDeleted!({ id: timelineId, eventIds, isDeleted });
+      setEventsDeleted({ id: timelineId, eventIds, isDeleted });
     },
     [setEventsDeleted, timelineId]
   );
@@ -216,7 +216,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
-    clearSelected!({ id: timelineId });
+    clearSelected({ id: timelineId });
     dispatch(
       timelineActions.setTGridSelectAll({
         id: timelineId,

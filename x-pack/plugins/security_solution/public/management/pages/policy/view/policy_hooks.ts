@@ -93,7 +93,7 @@ export const usePolicyTrustedAppsNotification = () => {
               'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.textSingle',
               {
                 defaultMessage: '"{name}" has been added to your trusted applications list.',
-                values: { name: updatedArtifacts[0]!.data.name },
+                values: { name: updatedArtifacts[0].data.name },
               }
             ),
     });

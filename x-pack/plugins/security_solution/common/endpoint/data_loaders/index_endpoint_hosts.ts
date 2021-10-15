@@ -161,7 +161,7 @@ export async function indexEndpointHostDocs({
         const indexedAgentResponse = await indexFleetAgentForHost(
           client,
           kbnClient,
-          hostMetadata!,
+          hostMetadata,
           realPolicies[appliedPolicyId].policy_id,
           kibanaVersion
         );

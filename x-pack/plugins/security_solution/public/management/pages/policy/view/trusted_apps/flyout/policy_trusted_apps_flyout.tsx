@@ -91,6 +91,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
       payload: {
         action: 'assign',
         artifacts: selectedArtifactIds.map<MaybeImmutable<TrustedApp>>((selectedId) => {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           return assignableArtifactsList?.data?.find((trustedApp) => trustedApp.id === selectedId)!;
         }),
       },

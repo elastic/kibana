@@ -127,7 +127,7 @@ export const getColumnsWithTimestamp = ({
 export const getExampleText = (example: string | number | null | undefined): string =>
   !isEmpty(example) ? `Example: ${example}` : '';
 
-export const getIconFromType = (type: string | null) => {
+export const getIconFromType = (type: string | null | undefined) => {
   switch (type) {
     case 'string': // fall through
     case 'keyword':

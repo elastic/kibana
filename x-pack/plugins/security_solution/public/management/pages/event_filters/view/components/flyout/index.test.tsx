@@ -80,7 +80,7 @@ describe('Event filter flyout', () => {
     });
 
     expect(getFormEntryState(getState())).not.toBeUndefined();
-    expect(getFormEntryState(getState())!.entries[0].field).toBe('');
+    expect(getFormEntryState(getState())?.entries[0].field).toBe('');
   });
 
   it('should confirm form when button is disabled', () => {
@@ -98,7 +98,7 @@ describe('Event filter flyout', () => {
       type: 'eventFiltersChangeForm',
       payload: {
         entry: {
-          ...(getState().form!.entry as CreateExceptionListItemSchema),
+          ...(getState().form?.entry as CreateExceptionListItemSchema),
           name: 'test',
           os_types: ['windows'],
         },
@@ -125,7 +125,7 @@ describe('Event filter flyout', () => {
         type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: getState().form!.entry as ExceptionListItemSchema,
+          data: getState().form?.entry as ExceptionListItemSchema,
         },
       });
     });
@@ -193,6 +193,6 @@ describe('Event filter flyout', () => {
     });
 
     expect(getFormEntryState(getState())).not.toBeUndefined();
-    expect(getFormEntryState(getState())!.item_id).toBe(createdEventFilterEntryMock().item_id);
+    expect(getFormEntryState(getState())?.item_id).toBe(createdEventFilterEntryMock().item_id);
   });
 });

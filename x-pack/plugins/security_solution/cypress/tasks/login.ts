@@ -57,7 +57,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  */
 export const getUrlWithRoute = (role: ROLES, route: string) => {
   const url = Cypress.config().baseUrl;
-  const kibana = new URL(url!);
+  const kibana = new URL(String(url));
   const theUrl = `${Url.format({
     auth: `${role}:changeme`,
     username: role,
@@ -83,7 +83,7 @@ interface User {
  */
 export const constructUrlWithUser = (user: User, route: string) => {
   const url = Cypress.config().baseUrl;
-  const kibana = new URL(url!);
+  const kibana = new URL(String(url));
   const hostname = kibana.hostname;
   const username = user.username;
   const password = user.password;

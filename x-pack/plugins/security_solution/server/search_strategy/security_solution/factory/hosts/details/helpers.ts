@@ -223,6 +223,7 @@ export const getHostEndpoint = async (
           endpointPolicy: endpointData.Endpoint.policy.applied.name,
           policyStatus: endpointData.Endpoint.policy.applied.status,
           sensorVersion: endpointData.agent.version,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           elasticAgentStatus: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus!),
           isolation: endpointData.Endpoint.state?.isolation ?? false,
           pendingActions,
