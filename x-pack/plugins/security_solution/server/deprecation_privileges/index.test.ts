@@ -473,8 +473,8 @@ describe('deprecations', () => {
             },
             "deprecationType": "feature",
             "level": "warning",
-            "message": "The \\"Security\\" feature will be split into two separate features in 8.0. The \\"first_role\\" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.",
-            "title": "The \\"first_role\\" role needs to be updated",
+            "message": "The Security feature will be split into the Security and Cases features in 8.0. The \\"first_role\\" role grants access to the Security feature only. Update the role to also grant access to the Cases feature.",
+            "title": "The Security feature is changing",
           },
         ]
       `);
@@ -608,8 +608,8 @@ describe('deprecations', () => {
             },
             "deprecationType": "feature",
             "level": "warning",
-            "message": "The \\"Security\\" feature will be split into two separate features in 8.0. The \\"second_role\\" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.",
-            "title": "The \\"second_role\\" role needs to be updated",
+            "message": "The Security feature will be split into the Security and Cases features in 8.0. The \\"second_role\\" role grants access to the Security feature only. Update the role to also grant access to the Cases feature.",
+            "title": "The Security feature is changing",
           },
         ]
       `);
@@ -772,13 +772,13 @@ describe('deprecations', () => {
       });
       const response = await getDeprecations(mockContext);
       expect(response).toEqual([
-        expect.objectContaining({ title: 'The "role_siem_all" role needs to be updated' }),
-        expect.objectContaining({ title: 'The "role_siem_read" role needs to be updated' }),
+        expect.objectContaining({ message: expect.stringMatching(/"role_siem_all"/) }),
+        expect.objectContaining({ message: expect.stringMatching(/"role_siem_read"/) }),
         expect.objectContaining({
-          title: 'The "role_siem_minimal_all_cases_all_cases_read" role needs to be updated',
+          message: expect.stringMatching(/"role_siem_minimal_all_cases_all_cases_read"/),
         }),
         expect.objectContaining({
-          title: 'The "role_siem_minimal_read_cases_read" role needs to be updated',
+          message: expect.stringMatching(/"role_siem_minimal_read_cases_read"/),
         }),
         // the fifth_role and sixth_role have been filtered out because they do not grant access to Cases
       ]);
