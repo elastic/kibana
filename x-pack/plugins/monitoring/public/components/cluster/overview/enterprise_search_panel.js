@@ -121,7 +121,7 @@ export function EnterpriseSearchPanel(props) {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
-                  <h3>
+                  <h3 data-test-subj="entSearchTotalNodes">
                     <FormattedMessage
                       id="xpack.monitoring.cluster.overview.entSearchPanel.nodesTotalLinkLabel"
                       defaultMessage="Nodes: {nodesTotal}"
