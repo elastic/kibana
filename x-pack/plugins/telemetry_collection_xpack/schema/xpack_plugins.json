@@ -20,33 +20,42 @@
             "description": "The total number of preconfigured alert history connectors used by rules."
           }
         },
-        "count_actions_namespaces": {
-          "type": "long",
-          "_meta": {
-            "description": "The total number of namespaces where actions are in use."
-          }
-        },
-        "count_active_email_connectors_by_service_type": {
+        "count_by_type": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
             },
-            "exchange_server": {
+            "__email": {
               "type": "long"
             },
-            "gmail": {
+            "__index": {
               "type": "long"
             },
-            "outlook365": {
+            "__pagerduty": {
               "type": "long"
             },
-            "elastic_cloud": {
+            "__swimlane": {
               "type": "long"
             },
-            "ses-log": {
+            "__server-log": {
               "type": "long"
             },
-            "other": {
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
               "type": "long"
             }
           }
@@ -91,45 +100,33 @@
             }
           }
         },
-        "count_by_type": {
+        "count_active_email_connectors_by_service_type": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
             },
-            "__email": {
+            "exchange_server": {
               "type": "long"
             },
-            "__index": {
+            "gmail": {
               "type": "long"
             },
-            "__pagerduty": {
+            "outlook365": {
               "type": "long"
             },
-            "__swimlane": {
+            "elastic_cloud": {
               "type": "long"
             },
-            "__server-log": {
+            "other": {
               "type": "long"
             },
-            "__slack": {
-              "type": "long"
-            },
-            "__webhook": {
-              "type": "long"
-            },
-            "__servicenow": {
-              "type": "long"
-            },
-            "__jira": {
-              "type": "long"
-            },
-            "__resilient": {
-              "type": "long"
-            },
-            "__teams": {
+            "ses": {
               "type": "long"
             }
           }
+        },
+        "count_actions_namespaces": {
+          "type": "long"
         }
       }
     },
@@ -143,12 +140,6 @@
         },
         "count_disabled_total": {
           "type": "long"
-        },
-        "count_rules_namespaces": {
-          "type": "long",
-          "_meta": {
-            "description": "The total number of namespaces where rules are in use."
-          }
         },
         "throttle_time": {
           "properties": {
@@ -358,6 +349,9 @@
               "type": "long"
             }
           }
+        },
+        "count_rules_namespaces": {
+          "type": "long"
         }
       }
     },
@@ -7314,6 +7308,9 @@
           "items": {
             "type": "keyword"
           }
+        },
+        "failed_tasks": {
+          "type": "long"
         }
       }
     },
