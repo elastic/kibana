@@ -95,7 +95,7 @@
 #  type: file
 #  fileName: /var/logs/kibana.log
 #  layout:
-#    type: pattern
+#    type: json
 
 # Logs queries sent to Elasticsearch.
 #logging.loggers:
