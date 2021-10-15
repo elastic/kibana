@@ -30,7 +30,12 @@ export const DateFieldValue = memo<DateFieldProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
-      <EuiFlexGroup responsive={false} gutterSize="m" data-test-subj={dataTestSubj}>
+      <EuiFlexGroup
+        responsive={false}
+        alignItems="flexStart"
+        gutterSize="m"
+        data-test-subj={dataTestSubj}
+      >
         <StyledEuiFlexItem grow={false}>
           <EuiIcon type="calendar" />
         </StyledEuiFlexItem>
