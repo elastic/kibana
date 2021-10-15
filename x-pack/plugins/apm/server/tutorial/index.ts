@@ -67,7 +67,7 @@ export const tutorialProvider =
       ],
     };
 
-    if (apmConfig['xpack.apm.ui.enabled']) {
+    if (apmConfig.ui.enabled) {
       // @ts-expect-error artifacts.application is readonly
       artifacts.application = {
         path: '/app/apm',
@@ -103,6 +103,8 @@ It allows you to monitor the performance of thousands of applications in real ti
         }
       ),
       euiIconType: 'apmApp',
+      eprPackageOverlap: 'apm',
+      integrationBrowserCategories: ['web'],
       artifacts,
       customStatusCheckName: 'apm_fleet_server_status_check',
       onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),

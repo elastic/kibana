@@ -429,7 +429,7 @@ class AgentPolicyService {
       throw new Error('Copied agent policy not found');
     }
 
-    await this.createFleetPolicyChangeAction(soClient, newAgentPolicy.id);
+    await this.createFleetServerPolicy(soClient, newAgentPolicy.id);
 
     return updatedAgentPolicy;
   }
@@ -655,10 +655,11 @@ class AgentPolicyService {
     };
   }
 
-  public async createFleetPolicyChangeAction(
+  public async createFleetServerPolicy(
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
   ) {
+    // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
     const defaultOutputId = await outputService.getDefaultOutputId(soClient);
 
@@ -666,14 +667,6 @@ class AgentPolicyService {
       return;
     }
 
-    await this.createFleetPolicyChangeFleetServer(soClient, esClient, agentPolicyId);
-  }
-
-  public async createFleetPolicyChangeFleetServer(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    agentPolicyId: string
-  ) {
     const policy = await agentPolicyService.get(soClient, agentPolicyId);
     const fullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
     if (!policy || !fullPolicy || !fullPolicy.revision) {

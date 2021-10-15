@@ -8,12 +8,7 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-} from 'kibana/server';
+import { SavedObject, SavedObjectAttributes, SavedObjectsFindResult } from 'kibana/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -105,14 +100,14 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 import { RulesClient, PartialAlert } from '../../../../../alerting/server';
-import { Alert, SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 import { ruleTypeMappings } from '../signals/utils';
 
-export type RuleAlertType = Alert<RuleParams>;
+export type RuleAlertType = SanitizedAlert<RuleParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
@@ -214,12 +209,6 @@ export const isRuleStatusSavedObjectType = (
   obj: unknown
 ): obj is SavedObject<IRuleSavedAttributesSavedObjectAttributes> => {
   return get('attributes', obj) != null;
-};
-
-export const isRuleStatusFindType = (
-  obj: unknown
-): obj is SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => {
-  return get('saved_objects', obj) != null;
 };
 
 export interface CreateRulesOptions {

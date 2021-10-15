@@ -310,7 +310,7 @@
         "label": "InfraConfig",
         "description": [],
         "signature": [
-          "{ readonly sources?: Readonly<{ default?: Readonly<{ fields?: Readonly<{ host?: string | undefined; message?: string[] | undefined; container?: string | undefined; timestamp?: string | undefined; tiebreaker?: string | undefined; pod?: string | undefined; } & {}> | undefined; logAlias?: string | undefined; metricAlias?: string | undefined; } & {}> | undefined; } & {}> | undefined; readonly enabled: boolean; readonly inventory: Readonly<{} & { compositeSize: number; }>; }"
+          "any"
         ],
         "path": "x-pack/plugins/infra/server/plugin.ts",
         "deprecated": false,

@@ -254,6 +254,16 @@ export const CaseResponseRt = rt.intersection([
   }),
 ]);
 
+export const CaseResolveResponseRt = rt.intersection([
+  rt.type({
+    case: CaseResponseRt,
+    outcome: rt.union([rt.literal('exactMatch'), rt.literal('aliasMatch'), rt.literal('conflict')]),
+  }),
+  rt.partial({
+    alias_target_id: rt.string,
+  }),
+]);
+
 export const CasesFindResponseRt = rt.intersection([
   rt.type({
     cases: rt.array(CaseResponseRt),
@@ -319,6 +329,7 @@ export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 export type CasesClientPostRequest = rt.TypeOf<typeof CasesClientPostRequestRt>;
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
+export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;

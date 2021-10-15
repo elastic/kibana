@@ -17,8 +17,6 @@
 }
 
 .lnsFormula__editor {
-  border-bottom: $euiBorderThin;
-
   .lnsIndexPatternDimensionEditor-isFullscreen & {
     border-bottom: none;
     display: flex;
@@ -32,7 +30,7 @@
 
 .lnsFormula__editorHeader,
 .lnsFormula__editorFooter {
-  padding: $euiSizeS;
+  padding: $euiSizeS $euiSize;
 }
 
 .lnsFormula__editorFooter {
@@ -130,7 +128,7 @@
 }
 
 .lnsFormula__docsSearch {
-  padding: $euiSizeS;
+  padding: $euiSize;
 }
 
 .lnsFormula__docsNav {
@@ -138,7 +136,7 @@
 }
 
 .lnsFormula__docsNavGroup {
-  padding: $euiSizeS;
+  padding: $euiSize;
 
   & + & {
     border-top: $euiBorderThin;

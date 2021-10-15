@@ -48,7 +48,10 @@ export class DataVisualizerPlugin
       DataVisualizerStartDependencies
     >
 {
-  public setup(core: CoreSetup, plugins: DataVisualizerSetupDependencies) {
+  public setup(
+    core: CoreSetup<DataVisualizerStartDependencies, DataVisualizerPluginStart>,
+    plugins: DataVisualizerSetupDependencies
+  ) {
     if (plugins.home) {
       registerHomeAddData(plugins.home);
       registerHomeFeatureCatalogue(plugins.home);

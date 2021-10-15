@@ -103,7 +103,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  describe('create alert', function () {
+  // FLAKY https://github.com/elastic/kibana/issues/112749
+  describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -235,6 +236,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterSave).to.eql([

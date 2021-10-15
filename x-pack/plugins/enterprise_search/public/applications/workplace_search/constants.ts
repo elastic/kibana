@@ -48,6 +48,21 @@ export const NAV = {
   SCHEMA: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.schema', {
     defaultMessage: 'Schema',
   }),
+  SYNCHRONIZATION: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.synchronization', {
+    defaultMessage: 'Synchronization',
+  }),
+  SYNCHRONIZATION_FREQUENCY: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.synchronizationFrequency',
+    {
+      defaultMessage: 'Frequency',
+    }
+  ),
+  SYNCHRONIZATION_OBJECTS_AND_ASSETS: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.synchronizationObjectsAndAssets',
+    {
+      defaultMessage: 'Objects and assets',
+    }
+  ),
   DISPLAY_SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.displaySettings', {
     defaultMessage: 'Display Settings',
   }),
@@ -238,12 +253,12 @@ export const SOURCE_OBJ_TYPES = {
     defaultMessage: 'Bugs',
   }),
   ISSUES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.issues', {
-    defaultMessage: 'Issues',
+    defaultMessage: 'Issues (including comments)',
   }),
   PULL_REQUESTS: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.objTypes.pullRequests',
     {
-      defaultMessage: 'Pull Requests',
+      defaultMessage: 'Pull Requests (including comments)',
     }
   ),
   REPOSITORY_LIST: i18n.translate(
@@ -744,6 +759,18 @@ export const DESCRIPTION_LABEL = i18n.translate(
     defaultMessage: 'Description',
   }
 );
+
+export const BLOCK_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.blockLabel', {
+  defaultMessage: 'Block',
+});
+
+export const BETWEEN_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.betweenLabel', {
+  defaultMessage: 'between',
+});
+
+export const ON_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.onLabel', {
+  defaultMessage: 'on',
+});
 
 export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {
   defaultMessage: 'and',

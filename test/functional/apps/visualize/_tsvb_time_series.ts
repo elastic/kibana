@@ -17,6 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timeToVisualize',
     'dashboard',
   ]);
+  const security = getService('security');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
@@ -27,6 +28,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('visual builder', function describeIndexTests() {
     before(async () => {
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'long_window_logstash',
+        'test_logstash_reader',
+      ]);
       await visualize.initTests();
     });
     beforeEach(async () => {

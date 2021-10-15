@@ -7,9 +7,7 @@
  */
 
 import { ElasticsearchClient } from '../../../../';
-import { InternalCoreStart } from '../../../../internal_types';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
-import { Root } from '../../../../root';
 import { SavedObjectsRawDoc } from '../../../serialization';
 import {
   bulkOverwriteTransformedDocuments,
@@ -43,35 +41,27 @@ import * as Option from 'fp-ts/lib/Option';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../../migrations/core';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
+import Path from 'path';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
       license: 'basic',
+      dataArchive: Path.join(__dirname, './archives', '7.7.2_xpack_100k_obj.zip'),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
 });
 let esServer: kbnTestServer.TestElasticsearchUtils;
 
-describe('migration actions', () => {
-  let root: Root;
-  let start: InternalCoreStart;
+// Failing: See https://github.com/elastic/kibana/issues/113697
+describe.skip('migration actions', () => {
   let client: ElasticsearchClient;
 
   beforeAll(async () => {
     esServer = await startES();
-    root = kbnTestServer.createRootWithCorePlugins({
-      server: {
-        basePath: '/hello',
-      },
-    });
-
-    await root.preboot();
-    await root.setup();
-    start = await root.start();
-    client = start.elasticsearch.client.asInternalUser;
+    client = esServer.es.getClient();
 
     // Create test fixture data:
     await createIndex({
@@ -117,7 +107,6 @@ describe('migration actions', () => {
 
   afterAll(async () => {
     await esServer.stop();
-    await root.shutdown();
   });
 
   describe('fetchIndices', () => {
@@ -320,14 +309,14 @@ describe('migration actions', () => {
       });
       expect.assertions(1);
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Right",
-                        "right": Object {
-                          "acknowledged": true,
-                          "shardsAcknowledged": true,
-                        },
-                      }
-                  `);
+          Object {
+            "_tag": "Right",
+            "right": Object {
+              "acknowledged": true,
+              "shardsAcknowledged": true,
+            },
+          }
+      `);
     });
     it('resolves right after waiting for index status to be yellow if clone target already existed', async () => {
       expect.assertions(2);
@@ -803,9 +792,14 @@ describe('migration actions', () => {
               `);
     });
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
+      await waitForIndexStatusYellow({
+        client,
+        index: '.kibana_1',
+      })();
+
       const res = (await reindex({
         client,
-        sourceIndex: 'existing_index_with_docs',
+        sourceIndex: '.kibana_1',
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,

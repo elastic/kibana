@@ -8,8 +8,10 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
+import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const browser = getService('browser');
   const pageObjects = getPageObjects([
     'common',
     'endpoint',
@@ -20,8 +22,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
+  const endpointTestResources = getService('endpointTestResources');
 
-  describe('When on the Endpoint Policy Details Page', function () {
+  // FLAKY https://github.com/elastic/kibana/issues/100296
+  describe.skip('When on the Endpoint Policy Details Page', function () {
+    let indexedData: IndexedHostsAndAlertsResponse;
+    before(async () => {
+      const endpointPackage = await policyTestResources.getEndpointPackage();
+      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
+      indexedData = await endpointTestResources.loadEndpointData();
+      await browser.refresh();
+    });
+    after(async () => {
+      await endpointTestResources.unloadEndpointData(indexedData);
+    });
     describe('with an invalid policy id', () => {
       it('should display an error', async () => {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
@@ -878,6 +892,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.packagePolicy.id
         );
         expect(await testSubjects.isSelected('policyWindowsEvent_dns')).to.be(wasSelected);
+      });
+
+      it('should show trusted apps card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('fleetTrustedAppsCard');
+        await (await testSubjects.find('linkToTrustedApps')).click();
+        await testSubjects.existOrFail('policyDetailsPage');
+        await (await testSubjects.find('policyDetailsBackLink')).click();
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
     });
   });

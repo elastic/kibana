@@ -190,11 +190,7 @@ async function migrateAgentPolicies() {
 
       // @ts-expect-error value is number | TotalHits
       if (res.body.hits.total.value === 0) {
-        return agentPolicyService.createFleetPolicyChangeFleetServer(
-          soClient,
-          esClient,
-          agentPolicy.id
-        );
+        return agentPolicyService.createFleetServerPolicy(soClient, agentPolicy.id);
       }
     })
   );
