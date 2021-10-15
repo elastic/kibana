@@ -69,7 +69,6 @@ exports[`NoDataPage render 1`] = `
     >
       <ElasticAgentCard
         addBasePath={[Function]}
-        isDarkMode={false}
         solution="Elastic"
       />
     </EuiFlexItem>

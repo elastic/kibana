@@ -12,7 +12,6 @@ exports[`ElasticAgentCard props button 1`] = `
   }
   href="/app/integrations/browse"
   image="test-file-stub"
-  isDarkMode={false}
   paddingSize="l"
   title="Add Elastic Agent"
 />
@@ -30,7 +29,6 @@ exports[`ElasticAgentCard props href 1`] = `
   }
   href="#"
   image="test-file-stub"
-  isDarkMode={false}
   paddingSize="l"
   title="Add Elastic Agent"
 />
