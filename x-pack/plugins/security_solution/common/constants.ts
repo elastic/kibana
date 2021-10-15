@@ -10,6 +10,7 @@ import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
 
 export const APP_ID = 'securitySolution';
+export const CASES_FEATURE_ID = 'securitySolutionCases';
 export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';
@@ -60,10 +61,10 @@ export const DEFAULT_SPACE_ID = 'default';
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.enrichments.
-export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
+export const DEFAULT_INDICATOR_SOURCE_PATH = 'threat.indicator';
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex';
-export const DEFAULT_THREAT_INDEX_VALUE = ['filebeat-*'];
+export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'];
 export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 export enum SecurityPageName {
