@@ -27,9 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens query context', () => {
     before(async () => {
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
-      );
       await security.testUser.setRoles(
         ['global_discover_read', 'global_visualize_read', 'test_logstash_reader'],
         false
@@ -37,9 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
-      );
       await security.testUser.restoreDefaults();
     });
 
