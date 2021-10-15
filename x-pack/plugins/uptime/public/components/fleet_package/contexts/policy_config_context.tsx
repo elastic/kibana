@@ -9,15 +9,23 @@ import React, { createContext, useContext, useMemo, useState } from 'react';
 import { DataStream } from '../types';
 
 interface IPolicyConfigContext {
-  setMonitorType: React.Dispatch<React.SetStateAction<DataStream>>;
   monitorType: DataStream;
+  setMonitorType: React.Dispatch<React.SetStateAction<DataStream>>;
+  isTLSEnabled?: boolean;
+  setIsTLSEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  isZipUrlTLSEnabled?: boolean;
+  setIsZipUrlTLSEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   defaultMonitorType: DataStream;
-  isEditable?: boolean;
+  defaultIsTLSEnabled?: boolean;
+  defaultIsZipUrlTLSEnabled?: boolean;
+  isEditable: boolean;
 }
 
 interface IPolicyConfigContextProvider {
   children: React.ReactNode;
   defaultMonitorType?: DataStream;
+  defaultIsTLSEnabled?: boolean;
+  defaultIsZipUrlTLSEnabled?: boolean;
   isEditable?: boolean;
 }
 
@@ -26,6 +34,14 @@ export const initialValue = DataStream.HTTP;
 const defaultContext: IPolicyConfigContext = {
   setMonitorType: (_monitorType: React.SetStateAction<DataStream>) => {
     throw new Error('setMonitorType was not initialized, set it when you invoke the context');
+  },
+  setIsTLSEnabled: (_isTLSEnabled: React.SetStateAction<boolean>) => {
+    throw new Error('setIsTLSEnabled was not initialized, set it when you invoke the context');
+  },
+  setIsZipUrlTLSEnabled: (_isZipUrlTLSEnabled: React.SetStateAction<boolean>) => {
+    throw new Error(
+      'setIsZipUrlTLSEnabled was not initialized, set it when you invoke the context'
+    );
   },
   monitorType: initialValue, // mutable
   defaultMonitorType: initialValue, // immutable,
@@ -37,13 +53,36 @@ export const PolicyConfigContext = createContext(defaultContext);
 export const PolicyConfigContextProvider = ({
   children,
   defaultMonitorType = initialValue,
+  defaultIsTLSEnabled = false,
+  defaultIsZipUrlTLSEnabled = false,
   isEditable = false,
 }: IPolicyConfigContextProvider) => {
   const [monitorType, setMonitorType] = useState<DataStream>(defaultMonitorType);
+  const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
+  const [isZipUrlTLSEnabled, setIsZipUrlTLSEnabled] = useState<boolean>(defaultIsZipUrlTLSEnabled);
 
   const value = useMemo(() => {
-    return { monitorType, setMonitorType, defaultMonitorType, isEditable };
-  }, [monitorType, defaultMonitorType, isEditable]);
+    return {
+      monitorType,
+      setMonitorType,
+      defaultMonitorType,
+      isTLSEnabled,
+      isZipUrlTLSEnabled,
+      setIsTLSEnabled,
+      setIsZipUrlTLSEnabled,
+      defaultIsTLSEnabled,
+      defaultIsZipUrlTLSEnabled,
+      isEditable,
+    };
+  }, [
+    monitorType,
+    defaultMonitorType,
+    isTLSEnabled,
+    isZipUrlTLSEnabled,
+    defaultIsTLSEnabled,
+    defaultIsZipUrlTLSEnabled,
+    isEditable,
+  ]);
 
   return <PolicyConfigContext.Provider value={value} children={children} />;
 };
