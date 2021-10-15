@@ -8,8 +8,3 @@
 
 export { formatESMsg } from './format_es_msg';
 export { formatMsg } from './format_msg';
-export {
-  isAngularHttpError,
-  formatAngularHttpError,
-  AngularHttpError,
-} from './format_angular_http_error';
