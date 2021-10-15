@@ -7,14 +7,14 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useDataGridColumns } from './use_data_grid_columns';
+import { useColumns } from './use_data_grid_columns';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { configMock } from '../../__mocks__/config';
 import { indexPatternsMock } from '../../__mocks__/index_patterns';
 import { AppState } from '../apps/context/services/context_state';
 import { Capabilities } from '../../../../../core/types';
 
-describe('useDataGridColumns', () => {
+describe('useColumns', () => {
   const defaultProps = {
     capabilities: { discover: { save: true } } as unknown as Capabilities,
     config: configMock,
@@ -29,7 +29,7 @@ describe('useDataGridColumns', () => {
 
   test('should return valid result', () => {
     const { result } = renderHook(() => {
-      return useDataGridColumns(defaultProps);
+      return useColumns(defaultProps);
     });
 
     expect(result.current.columns).toEqual(['Time', 'message']);
@@ -41,7 +41,7 @@ describe('useDataGridColumns', () => {
 
   test('should skip _source column when useNewFieldsApi is set to true', () => {
     const { result } = renderHook(() => {
-      return useDataGridColumns({
+      return useColumns({
         ...defaultProps,
         state: {
           columns: ['Time', '_source'],
@@ -55,7 +55,7 @@ describe('useDataGridColumns', () => {
 
   test('should return empty columns array', () => {
     const { result } = renderHook(() => {
-      return useDataGridColumns({
+      return useColumns({
         ...defaultProps,
         state: {
           columns: [],
