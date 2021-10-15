@@ -13,15 +13,12 @@ const { log: defaultLog } = require('./log');
 
 exports.NativeRealm = class NativeRealm {
   constructor({ elasticPassword, port, log = defaultLog, ssl = false, caCert }) {
-    this._client = new Client({
-      node: `${ssl ? 'https' : 'http'}://elastic:${elasticPassword}@localhost:${port}`,
-      ssl: ssl
-        ? {
-            ca: caCert,
-            rejectUnauthorized: true,
-          }
-        : undefined,
-    });
+    const auth = { username: 'elastic', password: elasticPassword };
+    this._client = new Client(
+      ssl
+        ? { node: `https://localhost:${port}`, ssl: { ca: caCert, rejectUnauthorized: true }, auth }
+        : { node: `http://localhost:${port}`, auth }
+    );
     this._elasticPassword = elasticPassword;
     this._log = log;
   }

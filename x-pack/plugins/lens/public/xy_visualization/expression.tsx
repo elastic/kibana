@@ -64,9 +64,10 @@ import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
 import {
   computeChartMargins,
-  getThresholdRequiredPaddings,
-  ThresholdAnnotations,
-} from './expression_thresholds';
+  getReferenceLineRequiredPaddings,
+  ReferenceLineAnnotations,
+} from './expression_reference_lines';
+import { computeOverallDataDomain } from './reference_line_helpers';
 
 declare global {
   interface Window {
@@ -250,6 +251,10 @@ export function XYChart({
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
+  const layersById = filteredLayers.reduce((memo, layer) => {
+    memo[layer.layerId] = layer;
+    return memo;
+  }, {} as Record<string, LayerArgs>);
 
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
     datatables: Object.values(data.tables),
@@ -259,7 +264,9 @@ export function XYChart({
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return <EmptyPlaceholder icon={icon} />;
   }
-  const thresholdLayers = layers.filter((layer) => layer.layerType === layerTypes.THRESHOLD);
+  const referenceLineLayers = layers.filter(
+    (layer) => layer.layerType === layerTypes.REFERENCELINE
+  );
 
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
@@ -327,7 +334,7 @@ export function XYChart({
     left: yAxesConfiguration.find(({ groupId }) => groupId === 'left'),
     right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
   };
-  const thresholdPaddings = getThresholdRequiredPaddings(thresholdLayers, yAxesMap);
+  const referenceLinePaddings = getReferenceLineRequiredPaddings(referenceLineLayers, yAxesMap);
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
@@ -359,9 +366,9 @@ export function XYChart({
             ? args.labelsOrientation?.yRight || 0
             : args.labelsOrientation?.yLeft || 0,
         padding:
-          thresholdPaddings[groupId] != null
+          referenceLinePaddings[groupId] != null
             ? {
-                inner: thresholdPaddings[groupId],
+                inner: referenceLinePaddings[groupId],
               }
             : undefined,
       },
@@ -372,9 +379,9 @@ export function XYChart({
             : axisTitlesVisibilitySettings?.yLeft,
         // if labels are not visible add the padding to the title
         padding:
-          !tickVisible && thresholdPaddings[groupId] != null
+          !tickVisible && referenceLinePaddings[groupId] != null
             ? {
-                inner: thresholdPaddings[groupId],
+                inner: referenceLinePaddings[groupId],
               }
             : undefined,
       },
@@ -386,7 +393,7 @@ export function XYChart({
     const extent = axis.groupId === 'left' ? yLeftExtent : yRightExtent;
     const hasBarOrArea = Boolean(
       axis.series.some((series) => {
-        const seriesType = filteredLayers.find((l) => l.layerId === series.layer)?.seriesType;
+        const seriesType = layersById[series.layer]?.seriesType;
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
     );
@@ -401,27 +408,22 @@ export function XYChart({
         max = extent.upperBound ?? NaN;
       }
     } else {
-      const axisHasThreshold = thresholdLayers.some(({ yConfig }) =>
+      const axisHasReferenceLine = referenceLineLayers.some(({ yConfig }) =>
         yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
       );
-      if (!fit && axisHasThreshold) {
+      if (!fit && axisHasReferenceLine) {
         // Remove this once the chart will support automatic annotation fit for other type of charts
-        for (const series of axis.series) {
-          const table = data.tables[series.layer];
-          for (const row of table.rows) {
-            for (const column of table.columns) {
-              if (column.id === series.accessor) {
-                const value = row[column.id];
-                if (typeof value === 'number') {
-                  // keep the 0 in view
-                  max = Math.max(value, max || 0, 0);
-                  min = Math.min(value, min || 0, 0);
-                }
-              }
-            }
-          }
+        const { min: computedMin, max: computedMax } = computeOverallDataDomain(
+          filteredLayers,
+          axis.series.map(({ accessor }) => accessor),
+          data.tables
+        );
+
+        if (computedMin != null && computedMax != null) {
+          max = Math.max(computedMax, max || 0);
+          min = Math.min(computedMin, min || 0);
         }
-        for (const { layerId, yConfig } of thresholdLayers) {
+        for (const { layerId, yConfig } of referenceLineLayers) {
           const table = data.tables[layerId];
           for (const { axisMode, forAccessor } of yConfig || []) {
             if (axis.groupId === axisMode) {
@@ -575,11 +577,11 @@ export function XYChart({
           legend: {
             labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
           },
-          // if not title or labels are shown for axes, add some padding if required by threshold markers
+          // if not title or labels are shown for axes, add some padding if required by reference line markers
           chartMargins: {
             ...chartTheme.chartPaddings,
             ...computeChartMargins(
-              thresholdPaddings,
+              referenceLinePaddings,
               tickLabelsVisibilitySettings,
               axisTitlesVisibilitySettings,
               yAxesMap,
@@ -622,13 +624,15 @@ export function XYChart({
             visible: tickLabelsVisibilitySettings?.x,
             rotation: labelsOrientation?.x,
             padding:
-              thresholdPaddings.bottom != null ? { inner: thresholdPaddings.bottom } : undefined,
+              referenceLinePaddings.bottom != null
+                ? { inner: referenceLinePaddings.bottom }
+                : undefined,
           },
           axisTitle: {
             visible: axisTitlesVisibilitySettings.x,
             padding:
-              !tickLabelsVisibilitySettings?.x && thresholdPaddings.bottom != null
-                ? { inner: thresholdPaddings.bottom }
+              !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
+                ? { inner: referenceLinePaddings.bottom }
                 : undefined,
           },
         }}
@@ -911,9 +915,9 @@ export function XYChart({
           }
         })
       )}
-      {thresholdLayers.length ? (
-        <ThresholdAnnotations
-          thresholdLayers={thresholdLayers}
+      {referenceLineLayers.length ? (
+        <ReferenceLineAnnotations
+          layers={referenceLineLayers}
           data={data}
           syncColors={syncColors}
           paletteService={paletteService}
@@ -927,7 +931,7 @@ export function XYChart({
             right: Boolean(yAxesMap.right),
           }}
           isHorizontal={shouldRotate}
-          thresholdPaddingMap={thresholdPaddings}
+          paddingMap={referenceLinePaddings}
         />
       ) : null}
     </Chart>
