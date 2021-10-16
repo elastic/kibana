@@ -143,7 +143,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         });
       },
       [isGlobal, onChange]
-    )!;
+    );
 
     const handleGlobalButtonChange = useCallback(
       (selectedId) => {

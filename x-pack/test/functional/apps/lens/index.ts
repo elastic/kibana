@@ -59,7 +59,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./lens_tagging'));
       loadTestFile(require.resolve('./formula'));
       loadTestFile(require.resolve('./heatmap'));
-      loadTestFile(require.resolve('./thresholds'));
+      loadTestFile(require.resolve('./reference_lines'));
       loadTestFile(require.resolve('./inspector'));
 
       // has to be last one in the suite because it overrides saved objects
