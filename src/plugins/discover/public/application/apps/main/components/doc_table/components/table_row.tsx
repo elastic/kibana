@@ -72,7 +72,12 @@ export const TableRow = ({
    * Fill an element with the value of a field
    */
   const displayField = (fieldName: string) => {
-    // TODO: move decision if _source here and call formatRow in case
+    // If we're formatting the _source column, don't use the regular field formatter,
+    // but our Discover mechanism to format a hit in a better human-readable way.
+    if (fieldName === '_source') {
+      return formatRow(row, indexPattern, fieldsToShow);
+    }
+
     const formattedField = formatFieldValue(
       flattenedRow[fieldName],
       row,
@@ -178,11 +183,7 @@ export const TableRow = ({
             key={column}
             timefield={false}
             sourcefield={column === '_source'}
-            formatted={
-              column === '_source'
-                ? formatRow(row, indexPattern, fieldsToShow)
-                : displayField(column)
-            }
+            formatted={displayField(column)}
             filterable={isFilterable}
             column={column}
             inlineFilter={inlineFilter}
