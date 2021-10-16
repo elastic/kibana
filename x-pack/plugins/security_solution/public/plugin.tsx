@@ -98,7 +98,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initTelemetry(
       {
         usageCollection: plugins.usageCollection,
-        telemetryManagementSection: plugins.telemetryManagementSection,
       },
       APP_UI_ID
     );
