@@ -24871,7 +24871,6 @@
     "xpack.timelines.timeline.fieldTooltip": "字段",
     "xpack.timelines.timeline.flyout.pane.removeColumnButtonLabel": "移除列",
     "xpack.timelines.timeline.fullScreenButton": "全屏",
-    "xpack.timelines.timeline.hideColumnLabel": "隐藏列",
     "xpack.timelines.timeline.openedAlertFailedToastMessage": "无法打开告警",
     "xpack.timelines.timeline.openedAlertSuccessToastMessage": "已成功打开 {totalAlerts} 个{totalAlerts, plural, other {告警}}。",
     "xpack.timelines.timeline.openSelectedTitle": "打开所选",

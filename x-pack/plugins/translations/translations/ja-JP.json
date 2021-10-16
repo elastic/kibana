@@ -24455,7 +24455,6 @@
     "xpack.timelines.timeline.fieldTooltip": "フィールド",
     "xpack.timelines.timeline.flyout.pane.removeColumnButtonLabel": "列を削除",
     "xpack.timelines.timeline.fullScreenButton": "全画面",
-    "xpack.timelines.timeline.hideColumnLabel": "列を非表示",
     "xpack.timelines.timeline.openedAlertFailedToastMessage": "アラートを開けませんでした",
     "xpack.timelines.timeline.openSelectedTitle": "選択した項目を開く",
     "xpack.timelines.timeline.properties.timelineToggleButtonAriaLabel": "タイムライン {title} を{isOpen, select, false {開く} true {閉じる} other {切り替える}}",
