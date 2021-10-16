@@ -20,6 +20,8 @@ describe('legacy_migrations', () => {
     test('it migrates both a "ruleAlertId" and a actions array with 1 element into the references array', () => {
       const doc = {
         attributes: {
+          ruleThrottle: '1d',
+          alertThrottle: '1d',
           ruleAlertId: '123',
           actions: [
             {
@@ -37,6 +39,8 @@ describe('legacy_migrations', () => {
         )
       ).toEqual({
         attributes: {
+          ruleThrottle: '1d',
+          alertThrottle: '1d',
           actions: [
             {
               actionRef: 'action_0',
