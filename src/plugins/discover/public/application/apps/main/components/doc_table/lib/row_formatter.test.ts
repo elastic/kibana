@@ -165,6 +165,66 @@ describe('Row formatter', () => {
                 }
               />,
             ],
+            Array [
+              "foo",
+              <span
+                dangerouslySetInnerHTML={
+                  Object {
+                    "__html": "bar",
+                  }
+                }
+              />,
+            ],
+            Array [
+              "hello",
+              <span
+                dangerouslySetInnerHTML={
+                  Object {
+                    "__html": "<h1>World</h1>",
+                  }
+                }
+              />,
+            ],
+            Array [
+              "number",
+              <span
+                dangerouslySetInnerHTML={
+                  Object {
+                    "__html": 42,
+                  }
+                }
+              />,
+            ],
+            Array [
+              "_id",
+              <span
+                dangerouslySetInnerHTML={
+                  Object {
+                    "__html": "a",
+                  }
+                }
+              />,
+            ],
+            Array [
+              "_score",
+              <span
+                dangerouslySetInnerHTML={
+                  Object {
+                    "__html": 1,
+                  }
+                }
+              />,
+            ],
+            Array [
+              "_type",
+              <span
+                dangerouslySetInnerHTML={
+                  Object {
+                    "__html": "doc",
+                  }
+                }
+              />,
+            ],
           ]
         }
       />
@@ -274,7 +334,7 @@ describe('Row formatter', () => {
         indexPattern
       )
     ).toMatchInlineSnapshot(`
-      <TemplateComponent
+      <TemplateComponentRaw
         defPairs={
           Array [
             Array [
@@ -330,7 +390,7 @@ describe('Row formatter', () => {
         indexPattern
       )
     ).toMatchInlineSnapshot(`
-      <TemplateComponent
+      <TemplateComponentRaw
         defPairs={
           Array [
             Array [
@@ -364,7 +424,7 @@ describe('Row formatter', () => {
         indexPattern
       )
     ).toMatchInlineSnapshot(`
-      <TemplateComponent
+      <TemplateComponentRaw
         defPairs={
           Array [
             Array [
