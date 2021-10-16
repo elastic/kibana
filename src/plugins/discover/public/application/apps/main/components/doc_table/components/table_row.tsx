@@ -85,7 +85,11 @@ export const TableRow = ({
       mapping(fieldName)
     );
 
-    return <div className="truncate-by-height">{formattedField}</div>;
+    return (
+      // formatFieldValue always returns sanitized HTML
+      // eslint-disable-next-line react/no-danger
+      <div className="truncate-by-height" dangerouslySetInnerHTML={{ __html: formattedField }} />
+    );
   };
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {

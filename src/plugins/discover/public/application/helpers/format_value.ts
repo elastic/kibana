@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { DataView, DataViewField, KBN_FIELD_TYPES } from '../../../../data/common';
 import { getServices } from '../../kibana_services';
@@ -21,28 +20,22 @@ import { getServices } from '../../kibana_services';
  * @param hit The actual search hit (required to get highlight information from)
  * @param dataView The data view if available
  * @param field The field that value was from if available
+ * @returns An sanitized HTML string, that is safe to be applied via dangerouslySetInnerHTML
  */
 export function formatFieldValue(
   value: unknown,
   hit: estypes.SearchHit,
   dataView?: DataView,
   field?: DataViewField
-): React.ReactElement {
-  // We rely on field formatters to always produce safe and escaped HTML, thus we can set it
-  // here as HTML
-  // eslint-disable-next-line react/no-danger
-  const render = (html: string) => <span dangerouslySetInnerHTML={{ __html: html }} />;
-
+): string {
   if (!dataView || !field) {
     // If either no field is available or no data view, we'll use the default
     // string formatter to format that field.
-    return render(
-      getServices()
-        .fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
-        .convert(value, 'html', { hit, field })
-    );
+    return getServices()
+      .fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
+      .convert(value, 'html', { hit, field });
   }
 
   // If we have a data view and field we use that fields field formatter
-  return render(dataView.getFormatterForField(field).convert(value, 'html', { hit, field }));
+  return dataView.getFormatterForField(field).convert(value, 'html', { hit, field });
 }

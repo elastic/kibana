@@ -16,7 +16,7 @@ import { formatHit } from '../../../../../helpers/format_hit';
 import './row_formatter.scss';
 
 interface Props {
-  defPairs: Array<[string, JSX.Element]>;
+  defPairs: Array<[string, string]>;
 }
 const TemplateComponent = ({ defPairs }: Props) => {
   return (
@@ -24,26 +24,10 @@ const TemplateComponent = ({ defPairs }: Props) => {
       {defPairs.map((pair, idx) => (
         <Fragment key={idx}>
           <dt>{pair[0]}:</dt>
-          <dd className="rowFormatter__value">{pair[1]}</dd>{' '}
-        </Fragment>
-      ))}
-    </dl>
-  );
-};
-
-interface RawProps {
-  defPairs: Array<[string, unknown]>;
-}
-const TemplateComponentRaw = ({ defPairs }: RawProps) => {
-  return (
-    <dl className={'source truncate-by-height'}>
-      {defPairs.map((pair, idx) => (
-        <Fragment key={idx}>
-          <dt>{pair[0]}:</dt>
           <dd
             className="rowFormatter__value"
-            // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
-            dangerouslySetInnerHTML={{ __html: `${pair[1]}` }} // eslint-disable-line react/no-danger
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: pair[1] }}
           />{' '}
         </Fragment>
       ))}
@@ -68,8 +52,8 @@ export const formatTopLevelObject = (
   indexPattern: IndexPattern
 ) => {
   const highlights = row.highlight ?? {};
-  const highlightPairs: Array<[string, unknown]> = [];
-  const sourcePairs: Array<[string, unknown]> = [];
+  const highlightPairs: Array<[string, string]> = [];
+  const sourcePairs: Array<[string, string]> = [];
   const sorted = Object.entries(fields).sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
   sorted.forEach(([key, values]) => {
     const field = indexPattern.getFieldByName(key);
@@ -91,7 +75,5 @@ export const formatTopLevelObject = (
     pairs.push([displayKey ? displayKey : key, formatted]);
   });
   const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
-  return (
-    <TemplateComponentRaw defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />
-  );
+  return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
 };

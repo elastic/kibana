@@ -154,9 +154,10 @@ export const getRenderCellValueFn =
           {pairs.map(([key, value]) => (
             <Fragment key={key}>
               <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription className="dscDiscoverGrid__descriptionListDescription">
-                {value}
-              </EuiDescriptionListDescription>
+              <EuiDescriptionListDescription
+                className="dscDiscoverGrid__descriptionListDescription"
+                dangerouslySetInnerHTML={{ __html: value }}
+              />
             </Fragment>
           ))}
         </EuiDescriptionList>
@@ -172,5 +173,13 @@ export const getRenderCellValueFn =
       return <span>{JSON.stringify(rowFlattened[columnId])}</span>;
     }
 
-    return formatFieldValue(rowFlattened[columnId], row, indexPattern, field);
+    return (
+      <span
+        // formatFieldValue guarantees sanitized values
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: formatFieldValue(rowFlattened[columnId], row, indexPattern, field),
+        }}
+      />
+    );
   };

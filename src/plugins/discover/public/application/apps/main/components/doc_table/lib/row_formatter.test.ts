@@ -67,73 +67,31 @@ describe('Row formatter', () => {
           Array [
             Array [
               "also",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "with \\"quotes\\" or 'single quotes'",
-                  }
-                }
-              />,
+              "with \\"quotes\\" or 'single quotes'",
             ],
             Array [
               "foo",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "bar",
-                  }
-                }
-              />,
+              "bar",
             ],
             Array [
               "hello",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "<h1>World</h1>",
-                  }
-                }
-              />,
+              "<h1>World</h1>",
             ],
             Array [
               "number",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": 42,
-                  }
-                }
-              />,
+              42,
             ],
             Array [
               "_id",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "a",
-                  }
-                }
-              />,
+              "a",
             ],
             Array [
               "_score",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": 1,
-                  }
-                }
-              />,
+              1,
             ],
             Array [
               "_type",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "doc",
-                  }
-                }
-              />,
+              "doc",
             ],
           ]
         }
@@ -157,73 +115,31 @@ describe('Row formatter', () => {
           Array [
             Array [
               "also",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "with \\"quotes\\" or 'single quotes'",
-                  }
-                }
-              />,
+              "with \\"quotes\\" or 'single quotes'",
             ],
             Array [
               "foo",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "bar",
-                  }
-                }
-              />,
+              "bar",
             ],
             Array [
               "hello",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "<h1>World</h1>",
-                  }
-                }
-              />,
+              "<h1>World</h1>",
             ],
             Array [
               "number",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": 42,
-                  }
-                }
-              />,
+              42,
             ],
             Array [
               "_id",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "a",
-                  }
-                }
-              />,
+              "a",
             ],
             Array [
               "_score",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": 1,
-                  }
-                }
-              />,
+              1,
             ],
             Array [
               "_type",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "doc",
-                  }
-                }
-              />,
+              "doc",
             ],
           ]
         }
@@ -239,73 +155,31 @@ describe('Row formatter', () => {
           Array [
             Array [
               "number",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": 42,
-                  }
-                }
-              />,
+              42,
             ],
             Array [
               "also",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "with \\"quotes\\" or 'single quotes'",
-                  }
-                }
-              />,
+              "with \\"quotes\\" or 'single quotes'",
             ],
             Array [
               "foo",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "bar",
-                  }
-                }
-              />,
+              "bar",
             ],
             Array [
               "hello",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "<h1>World</h1>",
-                  }
-                }
-              />,
+              "<h1>World</h1>",
             ],
             Array [
               "_id",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "a",
-                  }
-                }
-              />,
+              "a",
             ],
             Array [
               "_score",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": 1,
-                  }
-                }
-              />,
+              1,
             ],
             Array [
               "_type",
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": "doc",
-                  }
-                }
-              />,
+              "doc",
             ],
           ]
         }
@@ -334,7 +208,7 @@ describe('Row formatter', () => {
         indexPattern
       )
     ).toMatchInlineSnapshot(`
-      <TemplateComponentRaw
+      <TemplateComponent
         defPairs={
           Array [
             Array [
@@ -390,7 +264,7 @@ describe('Row formatter', () => {
         indexPattern
       )
     ).toMatchInlineSnapshot(`
-      <TemplateComponentRaw
+      <TemplateComponent
         defPairs={
           Array [
             Array [
@@ -424,7 +298,7 @@ describe('Row formatter', () => {
         indexPattern
       )
     ).toMatchInlineSnapshot(`
-      <TemplateComponentRaw
+      <TemplateComponent
         defPairs={
           Array [
             Array [

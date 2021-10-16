@@ -17,7 +17,7 @@ import { formatFieldValue } from './format_value';
 
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
 
-type FormattedHit = Array<[string, JSX.Element]>;
+type FormattedHit = Array<[fieldName: string, formattedValue: string]>;
 
 export function formatHit(
   hit: estypes.SearchHit,
@@ -33,8 +33,8 @@ export function formatHit(
   // Keys are sorted in the hits object
   const flattened = flattenHit(hit, dataView, { includeIgnoredValues: true, source: true });
 
-  const highlightPairs: Array<[string, JSX.Element]> = [];
-  const sourcePairs: Array<[string, JSX.Element]> = [];
+  const highlightPairs: Array<[fieldName: string, formattedValue: string]> = [];
+  const sourcePairs: Array<[fieldName: string, formattedValue: string]> = [];
   Object.entries(flattened).forEach(([key, val]) => {
     const displayKey = dataView.fields.getByName(key)?.displayName;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;

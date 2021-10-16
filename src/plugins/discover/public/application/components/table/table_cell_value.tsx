@@ -125,9 +125,13 @@ export const TableFieldValue = ({
           )}
         </EuiFlexGroup>
       )}
-      <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
-        {formattedValue}
-      </div>
+      <div
+        className={valueClassName}
+        data-test-subj={`tableDocViewRow-${field}-value`}
+        // Value returned from formatFieldValue is always sanitized
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: formattedValue }}
+      />
     </Fragment>
   );
 };
