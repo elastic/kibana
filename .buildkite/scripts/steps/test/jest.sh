@@ -10,4 +10,4 @@ is_test_execution_step
 
 echo '--- Jest'
 checks-reporter-with-killswitch "Jest Unit Tests" \
-  node scripts/jest --ci --verbose --maxWorkers=10
+  node --expose-gc scripts/jest --ci --verbose --maxWorkers=10 --logHeapUsage
