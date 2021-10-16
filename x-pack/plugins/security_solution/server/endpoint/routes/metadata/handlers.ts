@@ -102,28 +102,47 @@ export const getMetadataListRequestHandler = function (
       context.core.savedObjects.client
     );
 
-    const doesUnitedIndexExist = await endpointMetadataService.doesUnitedIndexExist(
-      context.core.elasticsearch.client.asCurrentUser
-    );
+    let doesUnitedIndexExist = false;
+    let didUnitedIndexError = false;
+    let body: HostResultList = {
+      hosts: [],
+      total: 0,
+      request_page_size: 0,
+      request_page_index: 0,
+    };
+    try {
+      doesUnitedIndexExist = await endpointMetadataService.doesUnitedIndexExist(
+        context.core.elasticsearch.client.asCurrentUser
+      );
+    } catch (error) {
+      // for better UX, try legacy query instead of immediately failing on united index error
+      didUnitedIndexError = true;
+    }
 
-    const body = doesUnitedIndexExist
-      ? await endpointMetadataService.getHostMetadataList(
-          context.core.elasticsearch.client.asCurrentUser,
-          context.core.savedObjects.client,
-          request,
-          endpointAppContext,
-          endpointPolicies
-        )
-      : await legacyListMetadataQuery(
-          context,
-          request,
-          endpointAppContext,
-          logger,
-          endpointPolicies
-        );
-    return response.ok({
-      body,
-    });
+    if (!doesUnitedIndexExist || didUnitedIndexError) {
+      body = await legacyListMetadataQuery(
+        context,
+        request,
+        endpointAppContext,
+        logger,
+        endpointPolicies
+      );
+      return response.ok({ body });
+    }
+
+    try {
+      body = await endpointMetadataService.getHostMetadataList(
+        context.core.elasticsearch.client.asCurrentUser,
+        context.core.savedObjects.client,
+        request,
+        endpointAppContext,
+        endpointPolicies
+      );
+    } catch (error) {
+      return errorHandler(logger, response, error);
+    }
+
+    return response.ok({ body });
   };
 };
 
