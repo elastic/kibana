@@ -58,6 +58,7 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
     <EuiToolTip content={getToolTipContent()}>
       <EuiFlexGroup
         gutterSize="xs"
+        responsive={false}
         alignItems="center"
         css={css`
           cursor: help;
