@@ -58,7 +58,7 @@ require('@babel/register')({
   //   Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
   //   Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
   // ].map((path) => Fs.realpathSync(path)),
-  only: testMap,
+  only: testMap2,
   babelrc: false,
   presets: [require.resolve('@kbn/babel-preset/node_preset')],
   extensions: ['.js', '.ts', '.tsx'],
