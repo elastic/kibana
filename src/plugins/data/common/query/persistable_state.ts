@@ -8,7 +8,6 @@
 
 import uuid from 'uuid';
 import { Filter } from '@kbn/es-query';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '../../../../core/types';
 
 export const extract = (filters: Filter[]) => {

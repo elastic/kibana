@@ -26,7 +26,6 @@ import {
 import { PersistableStateService } from '../../../../kibana_utils/common/persistable_state';
 import {
   getAllMigrations,
-  migrateToLatest,
   inject,
   extract,
   telemetry,
