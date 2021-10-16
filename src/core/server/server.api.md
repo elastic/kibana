@@ -1038,11 +1038,10 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
 
 // @public
-export type Headers = {
-    [header in KnownHeaders]?: string | string[] | undefined;
-} & {
+export interface Headers {
+    // (undocumented)
     [header: string]: string | string[] | undefined;
-};
+}
 
 // @public (undocumented)
 export interface HttpAuth {
@@ -1361,14 +1360,32 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 export const kibanaResponseFactory: {
     custom: <T extends string | Record<string, any> | Error | Buffer | Stream | {
         message: string | Error;
-        attributes?: Record<string, any> | undefined;
+        attributes?: ResponseErrorAttributes | undefined;
     } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
-    badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>;
+    badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
     redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
@@ -1767,7 +1784,7 @@ export type ResponseError = string | Error | {
 export type ResponseErrorAttributes = Record<string, any>;
 
 // @public
-export type ResponseHeaders = Record<KnownHeaders, string | string[]> | Record<string, string | string[]>;
+export type ResponseHeaders = Record<string, string | string[]>;
 
 // @public
 export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
