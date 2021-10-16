@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { ActionResult, PreConfiguredAction } from '../types';
@@ -81,7 +82,8 @@ export async function getTotalCount(
 
 export async function getInUseTotalCount(
   esClient: ElasticsearchClient,
-  kibanaIndex: string
+  kibanaIndex: string,
+  referenceType?: string
 ): Promise<{
   countTotal: number;
   countByType: Record<string, number>;
@@ -162,6 +164,63 @@ export async function getInUseTotalCount(
     },
   };
 
+  const mustQuery = [
+    {
+      bool: {
+        should: [
+          {
+            nested: {
+              path: 'references',
+              query: {
+                bool: {
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'references.type': 'action',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            nested: {
+              path: 'alert.actions',
+              query: {
+                bool: {
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          prefix: {
+                            'alert.actions.actionRef': {
+                              value: 'preconfigured:',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  ] as QueryDslQueryContainer[];
+
+  if (!!referenceType) {
+    mustQuery.push({
+      term: { type: referenceType },
+    });
+  }
+
   const { body: actionResults } = await esClient.search({
     index: kibanaIndex,
     body: {
@@ -174,54 +233,7 @@ export async function getInUseTotalCount(
                   type: 'action_task_params',
                 },
               },
-              must: {
-                bool: {
-                  should: [
-                    {
-                      nested: {
-                        path: 'references',
-                        query: {
-                          bool: {
-                            filter: {
-                              bool: {
-                                must: [
-                                  {
-                                    term: {
-                                      'references.type': 'action',
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                    {
-                      nested: {
-                        path: 'alert.actions',
-                        query: {
-                          bool: {
-                            filter: {
-                              bool: {
-                                must: [
-                                  {
-                                    prefix: {
-                                      'alert.actions.actionRef': {
-                                        value: 'preconfigured:',
-                                      },
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
+              must: mustQuery,
             },
           },
         },
@@ -332,6 +344,19 @@ export async function getInUseTotalCount(
     countEmailByService,
     countNamespaces: namespacesList.size,
   };
+}
+
+export async function getInUseByAlertingTotalCounts(
+  esClient: ElasticsearchClient,
+  kibanaIndex: string
+): Promise<{
+  countTotal: number;
+  countByType: Record<string, number>;
+  countByAlertHistoryConnectorType: number;
+  countEmailByService: Record<string, number>;
+  countNamespaces: number;
+}> {
+  return await getInUseTotalCount(esClient, kibanaIndex, 'alert');
 }
 
 function replaceFirstAndLastDotSymbols(strToReplace: string) {
