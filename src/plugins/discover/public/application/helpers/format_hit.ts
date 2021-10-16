@@ -14,13 +14,21 @@ import { formatFieldValue } from './format_value';
 
 // TODO: Test coverage
 // TODO: documentation
-// TODO: Build cache
+
+const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
+
+type FormattedHit = Array<[string, JSX.Element]>;
 
 export function formatHit(
   hit: estypes.SearchHit,
   dataView: DataView,
   fieldsToShow: string[]
-): Array<[string, JSX.Element]> {
+): FormattedHit {
+  const cached = formattedHitCache.get(hit);
+  if (cached) {
+    return cached;
+  }
+
   const highlights = hit.highlight ?? {};
   // Keys are sorted in the hits object
   const flattened = flattenHit(hit, dataView, { includeIgnoredValues: true, source: true });
@@ -40,5 +48,7 @@ export function formatHit(
     }
   });
   const maxEntries = getServices().uiSettings.get<number>(MAX_DOC_FIELDS_DISPLAYED);
-  return [...highlightPairs, ...sourcePairs].slice(0, maxEntries);
+  const formatted = [...highlightPairs, ...sourcePairs].slice(0, maxEntries);
+  formattedHitCache.set(hit, formatted);
+  return formatted;
 }
