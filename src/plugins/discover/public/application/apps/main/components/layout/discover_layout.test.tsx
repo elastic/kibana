@@ -40,6 +40,9 @@ jest.mock('../../../../../kibana_services', () => ({
       getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
       getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
     },
+    uiSettings: {
+      get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
+    },
   }),
 }));
 

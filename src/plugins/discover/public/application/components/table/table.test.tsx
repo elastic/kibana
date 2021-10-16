@@ -70,7 +70,6 @@ const indexPattern = {
   },
   metaFields: ['_index', '_score'],
   getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-  formatHit: jest.fn((hit) => hit._source),
 } as unknown as IndexPattern;
 
 indexPattern.fields.getByName = (name: string) => {
@@ -364,19 +363,6 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     },
     metaFields: ['_index', '_type', '_score', '_id'],
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-    formatHit: jest.fn((hit) => {
-      const result = {} as Record<string, unknown>;
-      Object.keys(hit).forEach((key) => {
-        if (key !== 'fields') {
-          result[key] = hit[key];
-        } else {
-          Object.keys(hit.fields).forEach((field) => {
-            result[field] = hit.fields[field];
-          });
-        }
-      });
-      return result;
-    }),
   } as unknown as IndexPattern;
 
   indexPatterneCommerce.fields.getByName = (name: string) => {

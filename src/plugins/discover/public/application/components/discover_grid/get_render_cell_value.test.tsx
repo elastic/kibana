@@ -129,23 +129,57 @@ describe('Discover grid cell rendering', function () {
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": ".gz",
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": ".gz",
+              }
             }
-          }
-        />
+          />
+        </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>
           bytes
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 100,
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": 100,
+              }
             }
-          }
-        />
+          />
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>
+          _index
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="dscDiscoverGrid__descriptionListDescription"
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "test",
+              }
+            }
+          />
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>
+          _score
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="dscDiscoverGrid__descriptionListDescription"
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": 1,
+              }
+            }
+          />
+        </EuiDescriptionListDescription>
       </EuiDescriptionList>
     `);
   });
@@ -223,27 +257,61 @@ describe('Discover grid cell rendering', function () {
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": Array [
-                ".gz",
-              ],
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": Array [
+                  ".gz",
+                ],
+              }
             }
-          }
-        />
+          />
+        </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>
           bytes
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": Array [
-                100,
-              ],
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": Array [
+                  100,
+                ],
+              }
             }
-          }
-        />
+          />
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>
+          _index
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="dscDiscoverGrid__descriptionListDescription"
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "test",
+              }
+            }
+          />
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>
+          _score
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="dscDiscoverGrid__descriptionListDescription"
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": 1,
+              }
+            }
+          />
+        </EuiDescriptionListDescription>
       </EuiDescriptionList>
     `);
   });
@@ -279,14 +347,61 @@ describe('Discover grid cell rendering', function () {
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": Array [
-                ".gz",
-              ],
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": Array [
+                  ".gz",
+                ],
+              }
             }
-          }
-        />
+          />
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>
+          bytes
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="dscDiscoverGrid__descriptionListDescription"
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": Array [
+                  100,
+                ],
+              }
+            }
+          />
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>
+          _index
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="dscDiscoverGrid__descriptionListDescription"
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "test",
+              }
+            }
+          />
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>
+          _score
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="dscDiscoverGrid__descriptionListDescription"
+        >
+          <span
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": 1,
+              }
+            }
+          />
+        </EuiDescriptionListDescription>
       </EuiDescriptionList>
     `);
   });
@@ -524,6 +639,6 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`"<span>-</span>"`);
+    expect(component.html()).toMatchInlineSnapshot(`"<span></span>"`);
   });
 });

@@ -115,42 +115,7 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
         "deserialize": [MockFunction],
         "getByFieldType": [MockFunction],
         "getDefaultConfig": [MockFunction],
-        "getDefaultInstance": [MockFunction] {
-          "calls": Array [
-            Array [
-              "string",
-            ],
-            Array [
-              "string",
-            ],
-            Array [
-              "string",
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": Object {
-                "convert": [MockFunction],
-                "getConverterFor": [MockFunction],
-              },
-            },
-            Object {
-              "type": "return",
-              "value": Object {
-                "convert": [MockFunction],
-                "getConverterFor": [MockFunction],
-              },
-            },
-            Object {
-              "type": "return",
-              "value": Object {
-                "convert": [MockFunction],
-                "getConverterFor": [MockFunction],
-              },
-            },
-          ],
-        },
+        "getDefaultInstance": [MockFunction],
         "getDefaultInstanceCacheResolver": [MockFunction],
         "getDefaultInstancePlain": [MockFunction],
         "getDefaultType": [MockFunction],
@@ -651,8 +616,6 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
         },
       ],
       "flattenHit": [Function],
-      "formatField": [Function],
-      "formatHit": [Function],
       "getFieldAttrs": [Function],
       "getOriginalSavedObjectBody": [Function],
       "id": "logstash-*",

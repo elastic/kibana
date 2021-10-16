@@ -16,7 +16,7 @@ import { formatHit } from '../../../../../helpers/format_hit';
 import './row_formatter.scss';
 
 interface Props {
-  defPairs: Array<[string, unknown]>;
+  defPairs: Array<[string, JSX.Element]>;
 }
 const TemplateComponent = ({ defPairs }: Props) => {
   return (
@@ -24,11 +24,7 @@ const TemplateComponent = ({ defPairs }: Props) => {
       {defPairs.map((pair, idx) => (
         <Fragment key={idx}>
           <dt>{pair[0]}:</dt>
-          <dd
-            className="rowFormatter__value"
-            // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
-            dangerouslySetInnerHTML={{ __html: `${pair[1]}` }} // eslint-disable-line react/no-danger
-          />{' '}
+          <dd className="rowFormatter__value">{pair[1]}</dd>{' '}
         </Fragment>
       ))}
     </dl>

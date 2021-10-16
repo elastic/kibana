@@ -7,32 +7,36 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { DataView } from '../../../../data/common';
+import { DataView, flattenHit } from '../../../../data/common';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 import { getServices } from '../../kibana_services';
+import { formatFieldValue } from './format_value';
 
 // TODO: Test coverage
 // TODO: documentation
+// TODO: Build cache
 
 export function formatHit(
   hit: estypes.SearchHit,
   dataView: DataView,
   fieldsToShow: string[]
-): Array<[string, string]> {
+): Array<[string, JSX.Element]> {
   const highlights = hit.highlight ?? {};
   // Keys are sorted in the hits object
-  const formatted = dataView.formatHit(hit);
-  const highlightPairs: Array<[string, string]> = [];
-  const sourcePairs: Array<[string, string]> = [];
-  Object.entries(formatted).forEach(([key, val]) => {
+  const flattened = flattenHit(hit, dataView, { includeIgnoredValues: true, source: true });
+
+  const highlightPairs: Array<[string, JSX.Element]> = [];
+  const sourcePairs: Array<[string, JSX.Element]> = [];
+  Object.entries(flattened).forEach(([key, val]) => {
     const displayKey = dataView.fields.getByName(key)?.displayName;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
+    const formattedValue = formatFieldValue(val, hit, dataView, dataView.fields.getByName(key));
     if (displayKey) {
       if (fieldsToShow.includes(key)) {
-        pairs.push([displayKey, val as string]);
+        pairs.push([displayKey, formattedValue]);
       }
     } else {
-      pairs.push([key, val as string]);
+      pairs.push([key, formattedValue]);
     }
   });
   const maxEntries = getServices().uiSettings.get<number>(MAX_DOC_FIELDS_DISPLAYED);

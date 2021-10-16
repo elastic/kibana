@@ -39,14 +39,10 @@ export function formatFieldValue(
     return render(
       getServices()
         .fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
-        .convert(value, 'html', { hit, field, indexPattern: dataView })
+        .convert(value, 'html', { hit, field })
     );
   }
 
   // If we have a data view and field we use that fields field formatter
-  return render(
-    dataView
-      .getFormatterForField(field)
-      .convert(value, 'html', { hit, field, indexPattern: dataView })
-  );
+  return render(dataView.getFormatterForField(field).convert(value, 'html', { hit, field }));
 }

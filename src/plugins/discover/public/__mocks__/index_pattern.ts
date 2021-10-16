@@ -72,8 +72,6 @@ const indexPattern = {
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
   metaFields: ['_index', '_score'],
-  formatField: jest.fn(),
-  formatHit: jest.fn((hit) => (hit.fields ? hit.fields : hit._source)),
   fields,
   getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
   getSourceFiltering: () => ({}),
