@@ -173,8 +173,7 @@ export class ScreenshotObservableHandler {
             logger
           );
         }),
-        mergeMap(async () => {
-          return await Promise.all([
+        mergeMap(() => Promise.all([
             getTimeRange(driver, layout, logger),
             getElementPositionAndAttributes(driver, layout, logger),
             getRenderErrors(driver, layout, logger),
