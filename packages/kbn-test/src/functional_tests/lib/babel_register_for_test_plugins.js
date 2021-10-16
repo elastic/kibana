@@ -13,13 +13,16 @@ const { REPO_ROOT } = require('@kbn/dev-utils');
 
 // process.env.CI_PARALLEL_PROCESS_NUMBER
 const KIBANA_ROOT = Path.resolve(__dirname, '../../../../../');
-const KIBANA_ROOT2 = Fs.realpathSync(REPO_ROOT).includes(
-  `parallel${Path.separator}${process.env.CI_PARALLEL_PROCESS_NUMBER}${Path.separator}`
-)
-  ? Fs.realpathSync(REPO_ROOT).replace(
-      `parallel${Path.separator}${process.env.CI_PARALLEL_PROCESS_NUMBER}${Path.separator}`,
-      ''
-    )
+// const KIBANA_ROOT2 = Fs.realpathSync(REPO_ROOT).includes(
+//   `parallel${Path.separator}${process.env.CI_PARALLEL_PROCESS_NUMBER}${Path.separator}`
+// )
+//   ? Fs.realpathSync(REPO_ROOT).replace(
+//       `parallel${Path.separator}${process.env.CI_PARALLEL_PROCESS_NUMBER}${Path.separator}`,
+//       ''
+//     )
+//   : Fs.realpathSync(REPO_ROOT);
+const KIBANA_ROOT2 = process.env.CI_PARALLEL_PROCESS_NUMBER
+  ? Path.join(Fs.realpathSync(REPO_ROOT), 'parallel', process.env.CI_PARALLEL_PROCESS_NUMBER)
   : Fs.realpathSync(REPO_ROOT);
 const testMap = [
   Path.resolve(KIBANA_ROOT2, 'test'),
@@ -64,7 +67,7 @@ require('@babel/register')({
   //   Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
   //   Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
   // ].map((path) => Fs.realpathSync(path)),
-  only: testMap2,
+  only: testMap,
   babelrc: false,
   presets: [require.resolve('@kbn/babel-preset/node_preset')],
   extensions: ['.js', '.ts', '.tsx'],
