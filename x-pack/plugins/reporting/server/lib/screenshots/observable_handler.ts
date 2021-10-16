@@ -164,7 +164,7 @@ export class ScreenshotObservableHandler {
           const apmPositionElements = apmTrans?.startSpan('position_elements', 'correction');
           // position panel elements for print layout
           await layout.positionElements?.(driver, logger);
-          if (apmPositionElements) apmPositionElements.end();
+          apmPositionElements?.end();
 
           await waitForRenderComplete(
             durationToNumber(this.captureConfig.loadDelay),
