@@ -64,7 +64,7 @@ class Main extends React.Component<{}, State> {
         lastRenderHandler.destroy();
       }
 
-      lastRenderHandler = getExpressions().render(this.chartRef.current!, context, {
+      lastRenderHandler = await getExpressions().render(this.chartRef.current!, context, {
         onRenderError: (el: HTMLElement, error: unknown, handler: IInterpreterRenderHandlers) => {
           this.setState({
             expression: 'Render error!\n\n' + JSON.stringify(error),

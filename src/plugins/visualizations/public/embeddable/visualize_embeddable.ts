@@ -30,7 +30,7 @@ import {
 } from '../../../../plugins/embeddable/public';
 import {
   IExpressionLoaderParams,
-  ExpressionsStart,
+  ExpressionLoader,
   ExpressionRenderError,
   ExpressionAstExpression,
 } from '../../../../plugins/expressions/public';
@@ -80,8 +80,6 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
 };
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
 export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
-
-type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>

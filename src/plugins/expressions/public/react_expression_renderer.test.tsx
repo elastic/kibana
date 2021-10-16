@@ -15,8 +15,7 @@ import { ExpressionLoader } from './loader';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from '../common';
-import { RenderErrorHandlerFnType } from './types';
-import { ExpressionRendererEvent } from './render';
+import { RenderErrorHandlerFnType, ExpressionRendererEvent } from './types';
 
 jest.mock('./loader', () => {
   return {

@@ -28,6 +28,8 @@ export type {
   ExpressionRenderError,
   ExpressionRendererEvent,
 } from './types';
+export type { ExpressionLoader } from './loader';
+export type { ExpressionRenderHandler } from './render';
 export type {
   ExpressionRendererComponent,
   ReactExpressionRendererProps,
