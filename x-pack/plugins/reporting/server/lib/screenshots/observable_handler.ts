@@ -162,10 +162,8 @@ export class ScreenshotObservableHandler {
           await injectCustomCss(driver, layout, logger);
 
           const apmPositionElements = apmTrans?.startSpan('position_elements', 'correction');
-          if (layout.positionElements) {
-            // position panel elements for print layout
-            await layout.positionElements(driver, logger);
-          }
+          // position panel elements for print layout
+          await layout.positionElements?.(driver, logger);
           if (apmPositionElements) apmPositionElements.end();
 
           await waitForRenderComplete(
