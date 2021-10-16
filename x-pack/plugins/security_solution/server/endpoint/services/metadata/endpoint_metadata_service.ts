@@ -51,6 +51,7 @@ import {
 import { EndpointError } from '../../errors';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 import { EndpointAppContext } from '../../types';
+import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -259,17 +260,51 @@ export class EndpointMetadataService {
     );
   }
 
-  // Retrieve list of host metadata. Only supports new united index.
+  /**
+   * Returns whether the united metadata index exists
+   *
+   * @param esClient
+   *
+   * @throws
+   */
+  async doesUnitedIndexExist(esClient: ElasticsearchClient): Promise<boolean> {
+    try {
+      await esClient.search({
+        index: METADATA_UNITED_INDEX,
+        size: 1,
+      });
+      return true;
+    } catch (error) {
+      const errorType = error?.meta?.body?.error?.type ?? '';
+      // only index not found is expected
+      if (errorType !== 'index_not_found_exception') {
+        const err = wrapErrorIfNeeded(error);
+        this.logger?.error(err);
+        throw err;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Retrieve list of host metadata. Only supports new united index.
+   *
+   * @param esClient
+   * @param soClient
+   * @param request
+   * @param endpointAppContext
+   * @param endpointPolicies
+   *
+   * @throws
+   */
   async getHostMetadataList(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     request: KibanaRequest,
     endpointAppContext: EndpointAppContext,
     endpointPolicies: PackagePolicy[]
-  ): Promise<{
-    unitedIndexExists: boolean;
-    unitedQueryResponse: HostResultList;
-  }> {
+  ): Promise<HostResultList> {
     const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
     const unitedIndexQuery = await buildUnitedIndexQuery(
       request,
@@ -281,29 +316,17 @@ export class EndpointMetadataService {
     try {
       unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadata>(unitedIndexQuery);
     } catch (error) {
-      const errorType = error?.meta?.body?.error?.type ?? '';
-
-      // no united index means that the endpoint package hasn't been upgraded yet
-      // this is expected so we fall back to the legacy query
-      // errors other than index_not_found_exception are unexpected
-      if (errorType !== 'index_not_found_exception') {
-        const err = wrapErrorIfNeeded(error);
-        this.logger?.error(err);
-        throw err;
-      }
-      return {
-        unitedIndexExists: false,
-        unitedQueryResponse: {} as HostResultList,
-      };
+      const err = wrapErrorIfNeeded(error);
+      this.logger?.error(err);
+      throw err;
     }
 
     const { hits: docs, total: docsCount } = unitedMetadataQueryResponse?.body?.hits || {};
     const agentPolicyIds: string[] = docs.map((doc) => doc._source?.united?.agent?.policy_id ?? '');
 
     const agentPolicies =
-      (await this.agentPolicyService
-        .getByIds(soClient, agentPolicyIds)
-        ?.catch(catchAndWrapError)) ?? [];
+      (await this.agentPolicyService.getByIds(soClient, agentPolicyIds).catch(catchAndWrapError)) ??
+      [];
 
     const agentPoliciesMap: Record<string, AgentPolicy> = agentPolicies.reduce(
       (acc, agentPolicy) => ({
@@ -355,19 +378,14 @@ export class EndpointMetadataService {
               revision: endpointPolicy?.revision || 0,
             },
           },
-        } as HostInfo;
+        };
       });
 
-    const unitedQueryResponse: HostResultList = {
+    return {
       request_page_size: unitedIndexQuery.size,
       request_page_index: unitedIndexQuery.from,
       total: (docsCount as SearchTotalHits).value,
       hosts,
-    };
-
-    return {
-      unitedIndexExists: true,
-      unitedQueryResponse,
     };
   }
 }

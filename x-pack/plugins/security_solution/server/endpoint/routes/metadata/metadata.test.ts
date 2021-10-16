@@ -78,6 +78,9 @@ describe('test endpoint route', () => {
   let mockAgentService: Required<
     ReturnType<typeof createMockEndpointAppContextServiceStartContract>
   >['agentService'];
+  let mockAgentPolicyService: Required<
+    ReturnType<typeof createMockEndpointAppContextServiceStartContract>
+  >['agentPolicyService'];
   let endpointAppContextService: EndpointAppContextService;
   let startContract: EndpointAppContextServiceStartContract;
   const noUnenrolledAgent = {
@@ -139,6 +142,7 @@ describe('test endpoint route', () => {
       );
       endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
       mockAgentService = startContract.agentService!;
+      mockAgentPolicyService = startContract.agentPolicyService!;
 
       registerEndpointRoutes(routerMock, {
         logFactory: loggingSystemMock.create(),
@@ -196,7 +200,7 @@ describe('test endpoint route', () => {
               page_size: 10,
             },
             {
-              page_index: 1,
+              page_index: 0,
             },
           ],
 
@@ -209,13 +213,13 @@ describe('test endpoint route', () => {
 
       mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
       mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+      mockAgentPolicyService.getByIds = jest.fn().mockResolvedValueOnce([]);
       const metadata = new EndpointDocGenerator().generateHostMetadata();
       const esSearchMock = mockScopedClient.asCurrentUser.search as jest.Mock;
-      esSearchMock.mockImplementationOnce(() =>
-        Promise.resolve({
-          body: unitedMetadataSearchResponseMock(metadata),
-        })
-      );
+      esSearchMock.mockResolvedValueOnce({});
+      esSearchMock.mockResolvedValueOnce({
+        body: unitedMetadataSearchResponseMock(metadata),
+      });
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
         path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
       )!;
@@ -226,9 +230,11 @@ describe('test endpoint route', () => {
         mockResponse
       );
 
-      expect(esSearchMock).toHaveBeenCalledTimes(1);
+      expect(esSearchMock).toHaveBeenCalledTimes(2);
       expect(esSearchMock.mock.calls[0][0]?.index).toEqual(METADATA_UNITED_INDEX);
-      expect(esSearchMock.mock.calls[0][0]?.body?.query).toEqual({
+      expect(esSearchMock.mock.calls[0][0]?.size).toEqual(1);
+      expect(esSearchMock.mock.calls[1][0]?.index).toEqual(METADATA_UNITED_INDEX);
+      expect(esSearchMock.mock.calls[1][0]?.body?.query).toEqual({
         bool: {
           must: [
             {
@@ -364,7 +370,7 @@ describe('test endpoint route', () => {
       expect(endpointResultList.hosts.length).toEqual(1);
       expect(endpointResultList.hosts[0].metadata).toEqual(metadata);
       expect(endpointResultList.total).toEqual(1);
-      expect(endpointResultList.request_page_index).toEqual(10);
+      expect(endpointResultList.request_page_index).toEqual(0);
       expect(endpointResultList.request_page_size).toEqual(10);
     });
   });

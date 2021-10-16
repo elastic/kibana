@@ -39,7 +39,7 @@ import {
   queryResponseToHostListResult,
   queryResponseToHostResult,
 } from './support/query_strategies';
-import { NotFoundError } from '../../errors';
+import { EndpointError, NotFoundError } from '../../errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
 
 export interface MetadataRequestContext {
@@ -93,7 +93,7 @@ export const getMetadataListRequestHandler = function (
   return async (context, request, response) => {
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
     if (!endpointMetadataService) {
-      throw new Error('endpoint metadata service not available');
+      throw new EndpointError('endpoint metadata service not available');
     }
 
     const endpointPolicies = await getAllEndpointPackagePolicies(
@@ -102,28 +102,27 @@ export const getMetadataListRequestHandler = function (
       context.core.savedObjects.client
     );
 
-    const { unitedIndexExists, unitedQueryResponse } =
-      await endpointMetadataService.getHostMetadataList(
-        context.core.elasticsearch.client.asCurrentUser,
-        context.core.savedObjects.client,
-        request,
-        endpointAppContext,
-        endpointPolicies
-      );
-    if (unitedIndexExists) {
-      return response.ok({
-        body: unitedQueryResponse,
-      });
-    }
+    const doesUnitedIndexExist = await endpointMetadataService.doesUnitedIndexExist(
+      context.core.elasticsearch.client.asCurrentUser
+    );
 
+    const body = doesUnitedIndexExist
+      ? await endpointMetadataService.getHostMetadataList(
+          context.core.elasticsearch.client.asCurrentUser,
+          context.core.savedObjects.client,
+          request,
+          endpointAppContext,
+          endpointPolicies
+        )
+      : await legacyListMetadataQuery(
+          context,
+          request,
+          endpointAppContext,
+          logger,
+          endpointPolicies
+        );
     return response.ok({
-      body: await legacyListMetadataQuery(
-        context,
-        request,
-        endpointAppContext,
-        logger,
-        endpointPolicies
-      ),
+      body,
     });
   };
 };

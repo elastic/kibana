@@ -81,6 +81,35 @@ describe('EndpointMetadataService', () => {
     });
   });
 
+  describe('#doesUnitedIndexExist', () => {
+    it('should return true if united index found', async () => {
+      const esMockResponse = elasticsearchServiceMock.createSuccessTransportRequestPromise(
+        unitedMetadataSearchResponseMock()
+      );
+      esClient.search.mockResolvedValue(esMockResponse);
+      const doesIndexExist = await metadataService.doesUnitedIndexExist(esClient);
+
+      expect(doesIndexExist).toEqual(true);
+    });
+
+    it('should return false if united index not found', async () => {
+      const esMockResponse = elasticsearchServiceMock.createErrorTransportRequestPromise({
+        meta: { body: { error: { type: 'index_not_found_exception' } } },
+      });
+      esClient.search.mockResolvedValue(esMockResponse);
+      const doesIndexExist = await metadataService.doesUnitedIndexExist(esClient);
+
+      expect(doesIndexExist).toEqual(false);
+    });
+
+    it('should throw wrapped error if es error other than index not found', async () => {
+      const esMockResponse = elasticsearchServiceMock.createErrorTransportRequestPromise({});
+      esClient.search.mockResolvedValue(esMockResponse);
+      const response = metadataService.doesUnitedIndexExist(esClient);
+      await expect(response).rejects.toThrow(EndpointError);
+    });
+  });
+
   describe('#getHostMetadataList', () => {
     let soClient: ReturnType<typeof savedObjectsClientMock.create>;
     let mockRequest: KibanaRequest;
@@ -107,26 +136,7 @@ describe('EndpointMetadataService', () => {
       esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     });
 
-    it('should return false if united index not found', async () => {
-      const esMockResponse = elasticsearchServiceMock.createErrorTransportRequestPromise({
-        meta: { body: { error: { type: 'index_not_found_exception' } } },
-      });
-      esClient.search.mockResolvedValue(esMockResponse);
-      const metadataListResponse = await metadataService.getHostMetadataList(
-        esClient,
-        soClient,
-        mockRequest,
-        endpointAppContextMock,
-        []
-      );
-
-      expect(metadataListResponse).toEqual({
-        unitedIndexExists: false,
-        unitedQueryResponse: {},
-      });
-    });
-
-    it('should throw wrapped error if es error other than index not found', async () => {
+    it('should throw wrapped error if es error', async () => {
       const esMockResponse = elasticsearchServiceMock.createErrorTransportRequestPromise({});
       esClient.search.mockResolvedValue(esMockResponse);
       const metadataListResponse = metadataService.getHostMetadataList(
@@ -185,34 +195,31 @@ describe('EndpointMetadataService', () => {
       expect(esClient.search).toBeCalledWith(unitedIndexQuery);
       expect(agentPolicyServiceMock.getByIds).toBeCalledWith(soClient, agentPolicyIds);
       expect(metadataListResponse).toEqual({
-        unitedIndexExists: true,
-        unitedQueryResponse: {
-          request_page_size: 10,
-          request_page_index: 0,
-          total: 1,
-          hosts: [
-            {
-              metadata: endpointMetadataDoc,
-              host_status: 'unhealthy',
-              policy_info: {
-                agent: {
-                  applied: {
-                    id: mockAgent.policy_id,
-                    revision: mockAgent.policy_revision,
-                  },
-                  configured: {
-                    id: agentPolicies[0].id,
-                    revision: agentPolicies[0].revision,
-                  },
+        request_page_size: 10,
+        request_page_index: 0,
+        total: 1,
+        hosts: [
+          {
+            metadata: endpointMetadataDoc,
+            host_status: 'unhealthy',
+            policy_info: {
+              agent: {
+                applied: {
+                  id: mockAgent.policy_id,
+                  revision: mockAgent.policy_revision,
                 },
-                endpoint: {
-                  id: packagePolicies[0].id,
-                  revision: packagePolicies[0].revision,
+                configured: {
+                  id: agentPolicies[0].id,
+                  revision: agentPolicies[0].revision,
                 },
               },
+              endpoint: {
+                id: packagePolicies[0].id,
+                revision: packagePolicies[0].revision,
+              },
             },
-          ],
-        },
+          },
+        ],
       });
     });
   });
