@@ -92,9 +92,6 @@ export function FailedTransactionsCorrelations({
     progress.isRunning
   );
 
-  const [selectedSignificantTerm, setSelectedSignificantTerm] =
-    useState<FailedTransactionsCorrelation | null>(null);
-
   const history = useHistory();
   const [showStats, setShowStats] = useLocalStorage(
     'apmFailedTransactionsShowAdvancedStats',
@@ -399,7 +396,29 @@ export function FailedTransactionsCorrelations({
     [response.failedTransactionsCorrelations, sortField, sortDirection]
   );
 
-  const selectedTerm = selectedSignificantTerm ?? correlationTerms?.[0];
+  const [pinnedSignificantTerm, setPinnedSignificantTerm] =
+    useState<FailedTransactionsCorrelation | null>(null);
+  const [selectedSignificantTerm, setSelectedSignificantTerm] =
+    useState<FailedTransactionsCorrelation | null>(null);
+
+  const selectedTerm = useMemo(() => {
+    if (!correlationTerms) {
+      return;
+    } else if (selectedSignificantTerm) {
+      return correlationTerms?.find(
+        (h) =>
+          h.fieldName === selectedSignificantTerm.fieldName &&
+          h.fieldValue === selectedSignificantTerm.fieldValue
+      );
+    } else if (pinnedSignificantTerm) {
+      return correlationTerms.find(
+        (h) =>
+          h.fieldName === pinnedSignificantTerm.fieldName &&
+          h.fieldValue === pinnedSignificantTerm.fieldValue
+      );
+    }
+    return correlationTerms[0];
+  }, [correlationTerms, pinnedSignificantTerm, selectedSignificantTerm]);
 
   const showCorrelationsTable =
     progress.isRunning || correlationTerms.length > 0;
@@ -617,6 +636,7 @@ export function FailedTransactionsCorrelations({
             status={
               progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS
             }
+            setPinnedSignificantTerm={setPinnedSignificantTerm}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             selectedTerm={selectedTerm}
             onTableChange={onTableChange}

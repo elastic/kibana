@@ -92,6 +92,8 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     }
   }, [progress.error, notifications.toasts]);
 
+  const [pinnedSignificantTerm, setPinnedSignificantTerm] =
+    useState<LatencyCorrelation | null>(null);
   const [selectedSignificantTerm, setSelectedSignificantTerm] =
     useState<LatencyCorrelation | null>(null);
 
@@ -227,15 +229,24 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     [response.latencyCorrelations, sortField, sortDirection]
   );
 
-  const selectedHistogram = useMemo(
-    () =>
-      histogramTerms?.find(
+  const selectedHistogram = useMemo(() => {
+    if (!histogramTerms) {
+      return;
+    } else if (selectedSignificantTerm) {
+      return histogramTerms?.find(
         (h) =>
-          h.fieldName === selectedSignificantTerm?.fieldName &&
-          h.fieldValue === selectedSignificantTerm?.fieldValue
-      ) ?? histogramTerms?.[0],
-    [histogramTerms, selectedSignificantTerm]
-  );
+          h.fieldName === selectedSignificantTerm.fieldName &&
+          h.fieldValue === selectedSignificantTerm.fieldValue
+      );
+    } else if (pinnedSignificantTerm) {
+      return histogramTerms.find(
+        (h) =>
+          h.fieldName === pinnedSignificantTerm.fieldName &&
+          h.fieldValue === pinnedSignificantTerm.fieldValue
+      );
+    }
+    return histogramTerms[0];
+  }, [histogramTerms, pinnedSignificantTerm, selectedSignificantTerm]);
 
   const showCorrelationsTable = progress.isRunning || histogramTerms.length > 0;
   const showCorrelationsEmptyStatePrompt =
@@ -363,6 +374,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             status={
               progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS
             }
+            setPinnedSignificantTerm={setPinnedSignificantTerm}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             selectedTerm={selectedHistogram}
             onTableChange={onTableChange}
