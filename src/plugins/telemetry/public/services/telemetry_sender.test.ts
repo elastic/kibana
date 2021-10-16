@@ -260,22 +260,15 @@ describe('TelemetrySender', () => {
     });
   });
   describe('startChecking', () => {
-    let originalSetInterval: typeof window['setInterval'];
-    let mockSetInterval: jest.Mock<typeof window['setInterval']>;
-
-    beforeAll(() => {
-      originalSetInterval = window.setInterval;
-    });
-
-    beforeEach(() => (window.setInterval = mockSetInterval = jest.fn()));
-    afterAll(() => (window.setInterval = originalSetInterval));
+    beforeEach(() => jest.useFakeTimers());
+    afterAll(() => jest.useRealTimers());
 
     it('calls sendIfDue every 60000 ms', () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService);
       telemetrySender.startChecking();
-      expect(mockSetInterval).toBeCalledTimes(1);
-      expect(mockSetInterval).toBeCalledWith(telemetrySender['sendIfDue'], 60000);
+      expect(setInterval).toBeCalledTimes(1);
+      expect(setInterval).toBeCalledWith(telemetrySender['sendIfDue'], 60000);
     });
   });
 });

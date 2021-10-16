@@ -21,11 +21,12 @@ import { mockGlobalState } from './global_state';
 import { TimelineState } from '../../timelines/store/timeline/types';
 import { defaultHeaders } from '../../timelines/components/timeline/body/column_headers/default_headers';
 
-interface Global extends NodeJS.Global {
+type GlobalThis = typeof globalThis;
+interface Global extends GlobalThis {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  window?: any;
+  window: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  document?: any;
+  document: any;
 }
 
 export const globalNode: Global = global;

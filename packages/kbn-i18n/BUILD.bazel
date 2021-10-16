@@ -48,6 +48,7 @@ TYPES_DEPS = [
   "@npm//tslib",
   "@npm//@types/intl-relativeformat",
   "@npm//@types/jest",
+  "@npm//@types/node",
   "@npm//@types/prop-types",
   "@npm//@types/react",
   "@npm//@types/react-intl",

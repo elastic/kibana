@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { EventLoopDelayMonitor } from 'perf_hooks';
+import type { IntervalHistogram as PerfIntervalHistogram } from 'perf_hooks';
 import { monitorEventLoopDelay } from 'perf_hooks';
 import type { IntervalHistogram } from '../types';
 
 export class EventLoopDelaysMonitor {
-  private readonly loopMonitor: EventLoopDelayMonitor;
+  private readonly loopMonitor: PerfIntervalHistogram;
   private fromTimestamp: Date;
 
   /**
