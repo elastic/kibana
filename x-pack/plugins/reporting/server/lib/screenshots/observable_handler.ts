@@ -8,12 +8,17 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, mergeMap, timeout } from 'rxjs/operators';
-import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
+import { numberToDuration } from '../../../common/schema_utils';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { getChromiumDisconnectedError } from '../../browsers/chromium';
-import { CaptureConfig } from '../../types';
-import { PageSetupResults, ScreenshotObservableOpts, ScreenshotResults } from './';
+import {
+  PageSetupResults,
+  PhaseInstance,
+  PhaseTimeouts,
+  ScreenshotObservableOpts,
+  ScreenshotResults,
+} from './';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getRenderErrors } from './get_render_errors';
@@ -24,51 +29,20 @@ import { openUrl } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
-interface PhaseInstance {
-  timeoutValue: moment.Duration | number;
-  configValue: string;
-  label: string;
-}
-
 export class ScreenshotObservableHandler {
   private conditionalHeaders: ScreenshotObservableOpts['conditionalHeaders'];
   private layout: ScreenshotObservableOpts['layout'];
   private logger: ScreenshotObservableOpts['logger'];
   private waitErrorRegistered = false;
 
-  private readonly OPEN_URL: PhaseInstance = {
-    timeoutValue: this.captureConfig.timeouts.openUrl,
-    configValue: `xpack.reporting.capture.timeouts.openUrl`,
-    label: 'open URL',
-  };
-  private readonly WAIT_FOR_ELEMENTS: PhaseInstance = {
-    timeoutValue: this.captureConfig.timeouts.waitForElements,
-    configValue: `xpack.reporting.capture.timeouts.waitForElements`,
-    label: 'wait for elements',
-  };
-  private readonly RENDER_COMPLETE: PhaseInstance = {
-    timeoutValue: this.captureConfig.timeouts.renderComplete,
-    configValue: `xpack.reporting.capture.timeouts.renderComplete`,
-    label: 'render complete',
-  };
-
-  private readonly timeouts: {
-    openUrl: number;
-    waitForElements: number;
-  };
-
   constructor(
     private readonly driver: HeadlessChromiumDriver,
-    private captureConfig: CaptureConfig,
-    opts: ScreenshotObservableOpts
+    opts: ScreenshotObservableOpts,
+    private timeouts: PhaseTimeouts
   ) {
     this.conditionalHeaders = opts.conditionalHeaders;
     this.layout = opts.layout;
     this.logger = opts.logger;
-    this.timeouts = {
-      openUrl: durationToNumber(captureConfig.timeouts.openUrl),
-      waitForElements: durationToNumber(captureConfig.timeouts.waitForElements),
-    };
   }
 
   /*
@@ -80,7 +54,7 @@ export class ScreenshotObservableHandler {
     const { timeoutValue, label, configValue } = phase;
     return (source: Rx.Observable<O>) => {
       return source.pipe(
-        timeout(durationToNumber(timeoutValue)),
+        timeout(timeoutValue),
         catchError((error: string | Error) => {
           if (this.waitErrorRegistered) {
             throw error; // do not create a stack of errors within the error
@@ -108,7 +82,7 @@ export class ScreenshotObservableHandler {
   private openUrl(index: number, urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple) {
     return mergeMap(() =>
       openUrl(
-        this.timeouts.openUrl, // internal timeout
+        this.timeouts.openUrl.timeoutValue,
         this.driver,
         index,
         urlOrUrlLocatorTuple,
@@ -120,28 +94,16 @@ export class ScreenshotObservableHandler {
 
   private waitForElements() {
     const driver = this.driver;
+    const waitTimeout = this.timeouts.waitForElements.timeoutValue;
     return (withPageOpen: Rx.Observable<void>) =>
       withPageOpen.pipe(
-        mergeMap(() =>
-          getNumberOfItems(
-            this.timeouts.waitForElements, // internal timeout
-            driver,
-            this.layout,
-            this.logger
-          )
-        ),
+        mergeMap(() => getNumberOfItems(waitTimeout, driver, this.layout, this.logger)),
         mergeMap(async (itemsCount) => {
           // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
           const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
           await Promise.all([
             driver.setViewport(viewport, this.logger),
-            waitForVisualizations(
-              this.timeouts.waitForElements, // internal timeout
-              driver,
-              itemsCount,
-              this.layout,
-              this.logger
-            ),
+            waitForVisualizations(waitTimeout, driver, itemsCount, this.layout, this.logger),
           ]);
         })
       );
@@ -164,12 +126,7 @@ export class ScreenshotObservableHandler {
           await layout.positionElements?.(driver, logger);
           apmPositionElements?.end();
 
-          await waitForRenderComplete(
-            durationToNumber(this.captureConfig.loadDelay),
-            driver,
-            layout,
-            logger
-          );
+          await waitForRenderComplete(this.timeouts.loadDelay, driver, layout, logger);
         }),
         mergeMap(() =>
           Promise.all([
@@ -193,11 +150,11 @@ export class ScreenshotObservableHandler {
     return (initial: Rx.Observable<unknown>) =>
       initial.pipe(
         this.openUrl(index, urlOrUrlLocatorTuple),
-        this.waitUntil(this.OPEN_URL),
+        this.waitUntil(this.timeouts.openUrl),
         this.waitForElements(),
-        this.waitUntil(this.WAIT_FOR_ELEMENTS),
+        this.waitUntil(this.timeouts.waitForElements),
         this.completeRender(apmTrans),
-        this.waitUntil(this.RENDER_COMPLETE)
+        this.waitUntil(this.timeouts.renderComplete)
       );
   }
 

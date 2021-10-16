@@ -8,9 +8,9 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
+import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
-import { ScreenshotObservableHandler } from './observable_handler';
 import {
   ElementPosition,
   ElementsPositionAndAttribute,
@@ -18,8 +18,28 @@ import {
   ScreenshotObservableOpts,
   ScreenshotResults,
 } from './';
+import { ScreenshotObservableHandler } from './observable_handler';
 
 export { ElementPosition, ElementsPositionAndAttribute, ScreenshotResults };
+
+const getTimeouts = (captureConfig: CaptureConfig) => ({
+  openUrl: {
+    timeoutValue: durationToNumber(captureConfig.timeouts.openUrl),
+    configValue: `xpack.reporting.capture.timeouts.openUrl`,
+    label: 'open URL',
+  },
+  waitForElements: {
+    timeoutValue: durationToNumber(captureConfig.timeouts.waitForElements),
+    configValue: `xpack.reporting.capture.timeouts.waitForElements`,
+    label: 'wait for elements',
+  },
+  renderComplete: {
+    timeoutValue: durationToNumber(captureConfig.timeouts.renderComplete),
+    configValue: `xpack.reporting.capture.timeouts.renderComplete`,
+    label: 'render complete',
+  },
+  loadDelay: durationToNumber(captureConfig.loadDelay),
+});
 
 export function getScreenshots$(
   captureConfig: CaptureConfig,
@@ -35,7 +55,7 @@ export function getScreenshots$(
       apmCreatePage?.end();
       exit$.subscribe({ error: () => apmTrans?.end() });
 
-      const screen = new ScreenshotObservableHandler(driver, captureConfig, opts);
+      const screen = new ScreenshotObservableHandler(driver, opts, getTimeouts(captureConfig));
 
       return Rx.from(opts.urlsOrUrlLocatorTuples).pipe(
         concatMap((urlOrUrlLocatorTuple, index) => {

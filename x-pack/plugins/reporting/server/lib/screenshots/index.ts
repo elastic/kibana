@@ -12,6 +12,19 @@ import { LayoutInstance } from '../layouts';
 
 export { getScreenshots$ } from './observable';
 
+export interface PhaseInstance {
+  timeoutValue: number;
+  configValue: string;
+  label: string;
+}
+
+export interface PhaseTimeouts {
+  openUrl: PhaseInstance;
+  waitForElements: PhaseInstance;
+  renderComplete: PhaseInstance;
+  loadDelay: number;
+}
+
 export interface ScreenshotObservableOpts {
   logger: LevelLogger;
   urlsOrUrlLocatorTuples: UrlOrUrlLocatorTuple[];
