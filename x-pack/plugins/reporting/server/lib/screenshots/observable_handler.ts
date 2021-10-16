@@ -208,9 +208,7 @@ export class ScreenshotObservableHandler {
         mergeMap(async (data: PageSetupResults): Promise<ScreenshotResults> => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
 
-          const elements = data.elementsPositionAndAttributes
-            ? data.elementsPositionAndAttributes
-            : getDefaultElementPosition(this.layout.getViewport(1));
+          const elements = data.elementsPositionAndAttributes ?? getDefaultElementPosition(this.layout.getViewport(1));
           const screenshots = await getScreenshots(this.driver, elements, this.logger);
           const { timeRange, error: setupError } = data;
 
