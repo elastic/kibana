@@ -98,6 +98,7 @@ describe('helpers', () => {
   describe('getColumnHeaders', () => {
     // additional properties used by `EuiDataGrid`:
     const actions = {
+      showHide: false,
       showSortAsc: true,
       showSortDesc: true,
     };

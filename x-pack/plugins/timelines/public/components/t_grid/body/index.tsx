@@ -75,6 +75,7 @@ import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { useDataGridHeightHack } from './height_hack';
 import { Filter } from '../../../../../../../src/plugins/data/public';
+import { REMOVE_COLUMN } from './column_headers/translations';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
@@ -497,7 +498,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               showFullScreenSelector: false,
             }
           : {
-              showColumnSelector: { allowHide: true, allowReorder: true },
+              showColumnSelector: { allowHide: false, allowReorder: true },
               showSortSelector: true,
               showFullScreenSelector: true,
             }),
@@ -559,13 +560,32 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [columnHeaders, dispatch, id, loadPage]
     );
 
-    const [visibleColumns, setVisibleColumns] = useState(() =>
-      columnHeaders.map(({ id: cid }) => cid)
-    ); // initializes to the full set of columns
+    const visibleColumns = useMemo(() => columnHeaders.map(({ id: cid }) => cid), [columnHeaders]); // the full set of columns
 
-    useEffect(() => {
-      setVisibleColumns(columnHeaders.map(({ id: cid }) => cid));
-    }, [columnHeaders]);
+    const onColumnResize = useCallback(
+      ({ columnId, width }: { columnId: string; width: number }) => {
+        dispatch(
+          tGridActions.updateColumnWidth({
+            columnId,
+            id,
+            width,
+          })
+        );
+      },
+      [dispatch, id]
+    );
+
+    const onSetVisibleColumns = useCallback(
+      (newVisibleColumns: string[]) => {
+        dispatch(
+          tGridActions.updateColumnOrder({
+            columnIds: newVisibleColumns,
+            id,
+          })
+        );
+      },
+      [dispatch, id]
+    );
 
     const setEventsLoading = useCallback<SetEventsLoading>(
       ({ eventIds, isLoading: loading }) => {
@@ -654,6 +674,19 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
           return {
             ...header,
+            actions: {
+              ...header.actions,
+              additional: [
+                {
+                  iconType: 'cross',
+                  label: REMOVE_COLUMN,
+                  onClick: () => {
+                    dispatch(tGridActions.removeColumn({ id, columnId: header.id }));
+                  },
+                  size: 'xs',
+                },
+              ],
+            },
             ...(hasCellActions(header.id)
               ? {
                   cellActions:
@@ -663,7 +696,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               : {}),
           };
         }),
-      [columnHeaders, defaultCellActions, browserFields, data, pageSize, id]
+      [columnHeaders, defaultCellActions, browserFields, data, pageSize, id, dispatch]
     );
 
     const renderTGridCellValue = useMemo(() => {
@@ -761,7 +794,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 data-test-subj="body-data-grid"
                 aria-label={i18n.TGRID_BODY_ARIA_LABEL}
                 columns={columnsWithCellActions}
-                columnVisibility={{ visibleColumns, setVisibleColumns }}
+                columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
                 gridStyle={gridStyle}
                 leadingControlColumns={leadingTGridControlColumns}
                 trailingControlColumns={trailingTGridControlColumns}
@@ -769,6 +802,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 rowCount={totalItems}
                 renderCellValue={renderTGridCellValue}
                 sorting={{ columns: sortingColumns, onSort }}
+                onColumnResize={onColumnResize}
                 pagination={{
                   pageIndex: activePage,
                   pageSize,
