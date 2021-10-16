@@ -66,14 +66,11 @@ describe('ScreenshotObservableHandler', () => {
     it('catches TimeoutError and references the timeout config in a custom message', async () => {
       const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
       const test$ = Rx.interval(1000).pipe(
-        screenshots.waitUntil(
-          {
-            timeoutValue: 200,
-            configValue: 'test.config.value',
-            label: 'Test Config',
-          },
-          (outer) => outer.pipe()
-        )
+        screenshots.waitUntil({
+          timeoutValue: 200,
+          configValue: 'test.config.value',
+          label: 'Test Config',
+        })
       );
 
       const testPipeline = () => test$.toPromise();
@@ -85,14 +82,11 @@ describe('ScreenshotObservableHandler', () => {
     it('catches other Errors and explains where they were thrown', async () => {
       const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
       const test$ = Rx.throwError(new Error(`Test Error to Throw`)).pipe(
-        screenshots.waitUntil(
-          {
-            timeoutValue: 200,
-            configValue: 'test.config.value',
-            label: 'Test Config',
-          },
-          (outer) => outer.pipe()
-        )
+        screenshots.waitUntil({
+          timeoutValue: 200,
+          configValue: 'test.config.value',
+          label: 'Test Config',
+        })
       );
 
       const testPipeline = () => test$.toPromise();
@@ -104,14 +98,11 @@ describe('ScreenshotObservableHandler', () => {
     it('is a pass-through if there is no Error', async () => {
       const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
       const test$ = Rx.of('nice to see you').pipe(
-        screenshots.waitUntil(
-          {
-            timeoutValue: 20,
-            configValue: 'xxxxxxxxxxxxxxxxx',
-            label: 'xxxxxxxxxxx',
-          },
-          (outer) => outer.pipe()
-        )
+        screenshots.waitUntil({
+          timeoutValue: 20,
+          configValue: 'xxxxxxxxxxxxxxxxx',
+          label: 'xxxxxxxxxxx',
+        })
       );
 
       await expect(test$.toPromise()).resolves.toBe(`nice to see you`);

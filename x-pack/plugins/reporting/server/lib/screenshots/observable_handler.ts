@@ -76,11 +76,10 @@ export class ScreenshotObservableHandler {
    * decorates a TimeoutError to specify which phase of page capture has timed
    * out.
    */
-  public waitUntil<O, P>(phase: PhaseInstance, chain: Rx.OperatorFunction<O, P>) {
+  public waitUntil<O>(phase: PhaseInstance) {
     const { timeoutValue, label, configValue } = phase;
     return (source: Rx.Observable<O>) => {
       return source.pipe(
-        chain,
         timeout(durationToNumber(timeoutValue)),
         catchError((error: string | Error) => {
           if (this.waitErrorRegistered) {
@@ -193,9 +192,12 @@ export class ScreenshotObservableHandler {
   ) {
     return (initial: Rx.Observable<unknown>) =>
       initial.pipe(
-        this.waitUntil(this.OPEN_URL, this.openUrl(index, urlOrUrlLocatorTuple)),
-        this.waitUntil(this.WAIT_FOR_ELEMENTS, this.waitForElements()),
-        this.waitUntil(this.RENDER_COMPLETE, this.completeRender(apmTrans))
+        this.openUrl(index, urlOrUrlLocatorTuple),
+        this.waitUntil(this.OPEN_URL),
+        this.waitForElements(),
+        this.waitUntil(this.WAIT_FOR_ELEMENTS),
+        this.completeRender(apmTrans),
+        this.waitUntil(this.RENDER_COMPLETE)
       );
   }
 
