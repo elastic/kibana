@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { ProcRunner } from '@kbn/dev-utils';
+import { realpathSync } from 'fs';
 import { resolve, relative } from 'path';
 import { KIBANA_ROOT, KIBANA_EXEC, KIBANA_EXEC_PATH } from './paths';
 import type { Config } from '../../functional_test_runner';
@@ -15,9 +16,8 @@ function extendNodeOptions(installDir?: string) {
     return {};
   }
 
-  const testOnlyRegisterPath = relative(
-    installDir,
-    require.resolve('./babel_register_for_test_plugins')
+  const testOnlyRegisterPath = realpathSync(
+    relative(installDir, require.resolve('./babel_register_for_test_plugins'))
   );
 
   return {
