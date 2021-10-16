@@ -19,8 +19,20 @@ import { createLoadedResourceState, isLoadedResourceState } from '../../../../..
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
+import { licenseService } from '../../../../../../common/hooks/use_license';
 
 jest.mock('../../../../trusted_apps/service');
+jest.mock('../../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 let mockedContext: AppContextTestRender;
 let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
@@ -105,5 +117,32 @@ describe('Policy trusted apps layout', () => {
     await waitForAction('assignedTrustedAppsListStateChanged');
 
     expect(component.getByTestId('policyDetailsTrustedAppsCount')).not.toBeNull();
+  });
+
+  it('should hide assign button on empty state with unassigned policies when downgraded to a gold or below license', async () => {
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    const component = render();
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234'));
+
+    await waitForAction('assignedTrustedAppsListStateChanged');
+
+    mockedContext.store.dispatch({
+      type: 'policyArtifactsDeosAnyTrustedAppExists',
+      payload: createLoadedResourceState(true),
+    });
+    expect(component.queryByTestId('assign-ta-button')).toBeNull();
+  });
+  it('should hide the `Assign trusted applications` button when there is data and the license is downgraded to gold or below', async () => {
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    TrustedAppsHttpServiceMock.mockImplementation(() => {
+      return {
+        getTrustedAppsList: () => getMockListResponse(),
+      };
+    });
+    const component = render();
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234'));
+
+    await waitForAction('assignedTrustedAppsListStateChanged');
+    expect(component.queryByTestId('assignTrustedAppButton')).toBeNull();
   });
 });
