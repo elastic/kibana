@@ -121,8 +121,8 @@ export class ScreenshotObservableHandler {
 
   private waitForElements() {
     const driver = this.driver;
-    return (withPageOpen: Rx.Observable<void>) => {
-      return withPageOpen.pipe(
+    return (withPageOpen: Rx.Observable<void>) =>
+      withPageOpen.pipe(
         mergeMap(() =>
           getNumberOfItems(
             this.timeouts.waitForElements, // internal timeout
@@ -146,7 +146,6 @@ export class ScreenshotObservableHandler {
           ]);
         })
       );
-    };
   }
 
   private completeRender(apmTrans: apm.Transaction | null) {
@@ -154,8 +153,8 @@ export class ScreenshotObservableHandler {
     const layout = this.layout;
     const logger = this.logger;
 
-    return (withElements: Rx.Observable<void>) => {
-      return withElements.pipe(
+    return (withElements: Rx.Observable<void>) =>
+      withElements.pipe(
         mergeMap(async () => {
           // Waiting till _after_ elements have rendered before injecting our CSS
           // allows for them to be displayed properly in many cases
@@ -185,7 +184,6 @@ export class ScreenshotObservableHandler {
           }))
         )
       );
-    };
   }
 
   public setupPage(
@@ -193,18 +191,17 @@ export class ScreenshotObservableHandler {
     urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
     apmTrans: apm.Transaction | null
   ) {
-    return (initial: Rx.Observable<unknown>) => {
-      return initial.pipe(
+    return (initial: Rx.Observable<unknown>) =>
+      initial.pipe(
         this.waitUntil(this.OPEN_URL, this.openUrl(index, urlOrUrlLocatorTuple)),
         this.waitUntil(this.WAIT_FOR_ELEMENTS, this.waitForElements()),
         this.waitUntil(this.RENDER_COMPLETE, this.completeRender(apmTrans))
       );
-    };
   }
 
   public getScreenshots() {
-    return (withRenderComplete: Rx.Observable<PageSetupResults>) => {
-      return withRenderComplete.pipe(
+    return (withRenderComplete: Rx.Observable<PageSetupResults>) =>
+      withRenderComplete.pipe(
         mergeMap(async (data: PageSetupResults): Promise<ScreenshotResults> => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
 
@@ -222,7 +219,6 @@ export class ScreenshotObservableHandler {
           };
         })
       );
-    };
   }
 
   public checkPageIsOpen() {
