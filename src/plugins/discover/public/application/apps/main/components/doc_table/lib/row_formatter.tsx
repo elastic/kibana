@@ -31,6 +31,26 @@ const TemplateComponent = ({ defPairs }: Props) => {
   );
 };
 
+interface RawProps {
+  defPairs: Array<[string, unknown]>;
+}
+const TemplateComponentRaw = ({ defPairs }: RawProps) => {
+  return (
+    <dl className={'source truncate-by-height'}>
+      {defPairs.map((pair, idx) => (
+        <Fragment key={idx}>
+          <dt>{pair[0]}:</dt>
+          <dd
+            className="rowFormatter__value"
+            // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
+            dangerouslySetInnerHTML={{ __html: `${pair[1]}` }} // eslint-disable-line react/no-danger
+          />{' '}
+        </Fragment>
+      ))}
+    </dl>
+  );
+};
+
 export const formatRow = (
   hit: estypes.SearchHit,
   indexPattern: IndexPattern,
@@ -71,5 +91,7 @@ export const formatTopLevelObject = (
     pairs.push([displayKey ? displayKey : key, formatted]);
   });
   const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
-  return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
+  return (
+    <TemplateComponentRaw defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />
+  );
 };
