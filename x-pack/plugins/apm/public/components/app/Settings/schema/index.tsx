@@ -55,7 +55,7 @@ export function Schema() {
   const cloudApmMigrationEnabled = !!data.cloud_apm_migration_enabled;
   const hasCloudAgentPolicy = !!data.has_cloud_agent_policy;
   const cloudApmPackagePolicy = data.cloud_apm_package_policy;
-  const hasCloudApmPackagePolicy = !!cloudApmPackagePolicy; // !!data.has_cloud_apm_package_policy;
+  const hasCloudApmPackagePolicy = !!cloudApmPackagePolicy;
   const hasRequiredRole = !!data.has_required_role;
 
   function updateLocalStorage(newStatus: FETCH_STATUS) {
