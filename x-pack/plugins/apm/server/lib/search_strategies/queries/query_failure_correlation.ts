@@ -7,6 +7,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
 import { SearchStrategyParams } from '../../../../common/search_strategies/types';
+import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { fetchTransactionDurationRanges } from './query_ranges';
@@ -88,7 +89,7 @@ export const fetchFailedTransactionsCorrelationPValues = async (
   }>;
 
   // Using for of to sequentially augment the results with histogram data.
-  const result = [];
+  const result: FailedTransactionsCorrelation[] = [];
   for (const bucket of overallResult.buckets) {
     // Scale the score into a value from 0 - 1
     // using a concave piecewise linear function in -log(p-value)

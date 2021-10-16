@@ -6,6 +6,8 @@
  */
 
 export { fetchFailedTransactionsCorrelationPValues } from './query_failure_correlation';
+export { fetchPValues } from './query_p_values';
+export { fetchSignificantCorrelations } from './query_significant_correlations';
 export { fetchTransactionDurationFieldCandidates } from './query_field_candidates';
 export { fetchTransactionDurationFieldValuePairs } from './query_field_value_pairs';
 export { fetchTransactionDurationFractions } from './query_fractions';

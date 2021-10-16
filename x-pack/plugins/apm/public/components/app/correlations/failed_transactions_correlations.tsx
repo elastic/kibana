@@ -36,16 +36,12 @@ import {
 
 import { asPercent } from '../../../../common/utils/formatters';
 import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
-import {
-  APM_SEARCH_STRATEGIES,
-  DEFAULT_PERCENTILE_THRESHOLD,
-} from '../../../../common/search_strategies/constants';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/search_strategies/constants';
 import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useSearchStrategy } from '../../../hooks/use_search_strategy';
 import { useTheme } from '../../../hooks/use_theme';
 
 import { ImpactBar } from '../../shared/ImpactBar';
@@ -68,6 +64,8 @@ import { useTransactionColors } from './use_transaction_colors';
 import { CorrelationsContextPopover } from './context_popover';
 import { OnAddFilter } from './context_popover/top_values';
 
+import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
+
 export function FailedTransactionsCorrelations({
   onFilter,
 }: {
@@ -83,12 +81,8 @@ export function FailedTransactionsCorrelations({
 
   const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const { progress, response, startFetch, cancelFetch } = useSearchStrategy(
-    APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS,
-    {
-      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-    }
-  );
+  const { progress, response, startFetch, cancelFetch } =
+    useFailedTransactionsCorrelations();
 
   const fieldStats: Record<string, FieldStats> | undefined = useMemo(() => {
     return response.fieldStats?.reduce((obj, field) => {

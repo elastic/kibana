@@ -10,12 +10,14 @@ import { chunk } from 'lodash';
 
 import { IHttpFetchError } from 'src/core/public';
 
+import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../../common/event_outcome';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/search_strategies/constants';
 import type { RawResponseBase } from '../../../../common/search_strategies/types';
 import type {
-  LatencyCorrelation,
-  LatencyCorrelationsRawResponse,
-} from '../../../../common/search_strategies/latency_correlations/types';
+  FailedTransactionsCorrelation,
+  FailedTransactionsCorrelationsRawResponse,
+} from '../../../../common/search_strategies/failed_transactions_correlations/types';
 
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -24,7 +26,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 
-type Response = LatencyCorrelationsRawResponse & RawResponseBase;
+type Response = FailedTransactionsCorrelationsRawResponse & RawResponseBase;
 
 interface SearchStrategyProgress {
   error?: Error | IHttpFetchError;
@@ -52,7 +54,7 @@ const getReducer =
     ...update,
   });
 
-export function useLatencyCorrelations() {
+export function useFailedTransactionsCorrelations() {
   const { serviceName, transactionType } = useApmServiceContext();
 
   const { urlParams } = useUrlParams();
@@ -102,7 +104,21 @@ export function useLatencyCorrelations() {
         params: {
           body: {
             ...query,
-            percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD + '',
+            percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+          },
+        },
+      })) as Response;
+
+      const { overallHistogram: errorHistogram } = (await callApmApi({
+        endpoint: 'POST /internal/apm/latency/overall_distribution',
+        signal: null,
+        params: {
+          body: {
+            ...query,
+            percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+            termFilters: [
+              { fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure },
+            ],
           },
         },
       })) as Response;
@@ -111,12 +127,15 @@ export function useLatencyCorrelations() {
         return;
       }
 
-      setRawResponse(rawResponseUpdate);
+      setRawResponse({
+        ...rawResponseUpdate,
+        errorHistogram,
+      });
       setFetchState({
         loaded: 5,
       });
 
-      const { fieldCandidates } = await callApmApi({
+      const { fieldCandidates: candidates } = await callApmApi({
         endpoint: 'GET /internal/apm/correlations/field_candidates',
         signal: null,
         params: {
@@ -128,53 +147,38 @@ export function useLatencyCorrelations() {
         return;
       }
 
+      const fieldCandidates = candidates.filter((t) => !(t === EVENT_OUTCOME));
+
       setFetchState({
         loaded: 10,
       });
 
-      const { fieldValuePairs } = await callApmApi({
-        endpoint: 'GET /internal/apm/correlations/field_value_pairs',
-        signal: null,
-        params: {
-          query: {
-            ...query,
-            fieldCandidates,
-          },
-        },
-      });
-
-      if (isCancelledRef.current) {
-        return;
-      }
-
-      setFetchState({
-        loaded: 20,
-      });
-
+      const failedTransactionsCorrelations: FailedTransactionsCorrelation[] =
+        [];
       const fieldsToSample = new Set<string>();
-      const latencyCorrelations: LatencyCorrelation[] = [];
       const chunkSize = 10;
       let loadCounter = 0;
 
-      const fieldValuePairChunks = chunk(fieldValuePairs, chunkSize);
+      const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
 
-      for (const fieldValuePairChunk of fieldValuePairChunks) {
-        const significantCorrelations = await callApmApi({
-          endpoint: 'POST /internal/apm/correlations/significant_correlations',
+      for (const fieldCandidatesChunk of fieldCandidatesChunks) {
+        const pValues = await callApmApi({
+          endpoint: 'POST /internal/apm/correlations/p_values',
           signal: null,
           params: {
-            body: { ...query, fieldValuePairs: fieldValuePairChunk },
+            body: { ...query, fieldCandidates: fieldCandidatesChunk },
           },
         });
 
-        if (significantCorrelations.latencyCorrelations.length > 0) {
-          significantCorrelations.latencyCorrelations.forEach((d) => {
+        if (pValues.failedTransactionsCorrelations.length > 0) {
+          pValues.failedTransactionsCorrelations.forEach((d) => {
             fieldsToSample.add(d.fieldName);
           });
-          latencyCorrelations.push(
-            ...significantCorrelations.latencyCorrelations
+          failedTransactionsCorrelations.push(
+            ...pValues.failedTransactionsCorrelations
           );
-          rawResponseUpdate.latencyCorrelations = latencyCorrelations;
+          rawResponseUpdate.failedTransactionsCorrelations =
+            failedTransactionsCorrelations;
           setRawResponse(rawResponseUpdate);
         }
 
@@ -184,7 +188,7 @@ export function useLatencyCorrelations() {
 
         loadCounter += chunkSize;
         setFetchState({
-          loaded: 20 + Math.round((loadCounter / fieldValuePairs.length) * 80),
+          loaded: 20 + Math.round((loadCounter / fieldCandidates.length) * 80),
         });
       }
 

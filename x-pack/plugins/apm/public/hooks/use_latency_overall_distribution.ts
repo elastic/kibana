@@ -34,9 +34,9 @@ export function useLatencyOverallDistribution() {
     (callApmApi) => {
       if (serviceName && environment && start && end) {
         return callApmApi({
-          endpoint: 'GET /internal/apm/latency/overall_distribution',
+          endpoint: 'POST /internal/apm/latency/overall_distribution',
           params: {
-            query: {
+            body: {
               serviceName,
               transactionName,
               transactionType,

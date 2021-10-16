@@ -6,24 +6,17 @@
  */
 
 import * as t from 'io-ts';
-import { range } from 'lodash';
 
-// import { toNumberRt } from '@kbn/io-ts-utils';
-
-import type { FieldValuePair } from '../../common/search_strategies/types';
-import type { LatencyCorrelation } from '../../common/search_strategies/latency_correlations/types';
+import { toNumberRt } from '@kbn/io-ts-utils';
 
 import { setupRequest } from '../lib/helpers/setup_request';
 import {
+  fetchPValues,
+  fetchSignificantCorrelations,
   fetchTransactionDurationFieldCandidates,
   fetchTransactionDurationFieldValuePairs,
-  fetchTransactionDurationFractions,
-  fetchTransactionDurationHistogramRangeSteps,
-  fetchTransactionDurationHistograms,
-  fetchTransactionDurationPercentiles,
 } from '../lib/search_strategies/queries';
 import { fetchFieldsStats } from '../lib/search_strategies/queries/field_stats/get_fields_stats';
-import { computeExpectationsAndRanges } from '../lib/search_strategies/utils';
 
 import { withApmSpan } from '../utils/with_apm_span';
 
@@ -138,9 +131,9 @@ const fieldValuePairsRoute = createApmServerRoute({
 });
 
 const significantCorrelationsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/correlations/significant_correlations',
+  endpoint: 'POST /internal/apm/correlations/significant_correlations',
   params: t.type({
-    query: t.intersection([
+    body: t.intersection([
       t.partial({
         serviceName: t.string,
         transactionName: t.string,
@@ -150,8 +143,12 @@ const significantCorrelationsRoute = createApmServerRoute({
       kueryRt,
       rangeRt,
       t.type({
-        fieldName: t.string, // t.array(t.string),
-        fieldValue: t.string, // t.array(t.union([t.string, toNumberRt])),
+        fieldValuePairs: t.array(
+          t.type({
+            fieldName: t.string,
+            fieldValue: t.union([t.string, toNumberRt]),
+          })
+        ),
       }),
     ]),
   }),
@@ -160,71 +157,63 @@ const significantCorrelationsRoute = createApmServerRoute({
     const { indices } = await setupRequest(resources);
     const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
 
-    const { fieldName, fieldValue, ...params } = resources.params.query;
-    const fieldValuePairs: FieldValuePair[] = [
-      {
-        fieldName,
-        fieldValue,
-      },
-    ];
+    const { fieldValuePairs, ...params } = resources.params.body;
 
     const paramsWithIndex = {
       ...params,
       index: indices.transaction,
     };
 
-    return withApmSpan('get_significant_correlations', async () => {
-      // Create an array of ranges [2, 4, 6, ..., 98]
-      const percentileAggregationPercents = range(2, 100, 2);
-      const { percentiles: percentilesRecords } =
-        await fetchTransactionDurationPercentiles(
+    return withApmSpan(
+      'get_significant_correlations',
+      async () =>
+        await fetchSignificantCorrelations(
           esClient,
           paramsWithIndex,
-          percentileAggregationPercents
-        );
-      const percentiles = Object.values(percentilesRecords);
+          fieldValuePairs
+        )
+    );
+  },
+});
 
-      const { expectations, ranges } =
-        computeExpectationsAndRanges(percentiles);
+const pValuesRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/correlations/p_values',
+  params: t.type({
+    body: t.intersection([
+      t.partial({
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
+      }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.type({
+        fieldCandidates: t.array(t.string),
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const { indices } = await setupRequest(resources);
+    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
 
-      const { fractions, totalDocCount } =
-        await fetchTransactionDurationFractions(
-          esClient,
-          paramsWithIndex,
-          ranges
-        );
+    const { fieldCandidates, ...params } = resources.params.body;
 
-      const histogramRangeSteps =
-        await fetchTransactionDurationHistogramRangeSteps(
-          esClient,
-          paramsWithIndex
-        );
+    const paramsWithIndex = {
+      ...params,
+      index: indices.transaction,
+    };
 
-      const latencyCorrelations: LatencyCorrelation[] = [];
-
-      for await (const item of fetchTransactionDurationHistograms(
-        esClient,
-        () => {},
-        paramsWithIndex,
-        expectations,
-        ranges,
-        fractions,
-        histogramRangeSteps,
-        totalDocCount,
-        fieldValuePairs
-      )) {
-        if (item !== undefined) {
-          latencyCorrelations.push(item);
-        }
-      }
-
-      // TODO Fix CCS warning
-      return { latencyCorrelations, ccsWarning: false };
-    });
+    return withApmSpan(
+      'get_p_values',
+      async () => await fetchPValues(esClient, paramsWithIndex, fieldCandidates)
+    );
   },
 });
 
 export const correlationsRouteRepository = createApmServerRouteRepository()
+  .add(pValuesRoute)
   .add(fieldCandidatesRoute)
   .add(fieldStatsRoute)
   .add(fieldValuePairsRoute)
