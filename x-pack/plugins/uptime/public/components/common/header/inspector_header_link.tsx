@@ -14,13 +14,11 @@ import { ClientPluginsStart } from '../../../apps/plugin';
 
 export function InspectorHeaderLink() {
   const {
-    services: { inspector },
+    services: { inspector, uiSettings },
   } = useKibana<ClientPluginsStart>();
 
   const { inspectorAdapters } = useInspectorContext();
-  const {
-    services: { uiSettings },
-  } = useKibana();
+
   const isInspectorEnabled = uiSettings?.get<boolean>(enableInspectEsQueries);
 
   const inspect = () => {
