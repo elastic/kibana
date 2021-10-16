@@ -88,7 +88,7 @@ const createInternalPrebootContractMock = () => {
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     getServerInfo: jest.fn(),
-    server: ({
+    server: {
       name: 'http-preboot-server-test',
       version: 'kibana',
       route: jest.fn(),
@@ -96,7 +96,7 @@ const createInternalPrebootContractMock = () => {
       stop: jest.fn(),
       config: jest.fn().mockReturnValue(configMock.create()),
       // @ts-expect-error somehow it thinks that `Server` isn't a `Construtable`
-    } as unknown) as jest.MockedClass<Server>,
+    } as unknown as jest.MockedClass<Server>,
   };
   return mock;
 };

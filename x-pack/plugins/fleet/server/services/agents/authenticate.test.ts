@@ -32,12 +32,12 @@ describe('test agent autenticate services', () => {
         },
       },
     });
-    await authenticateAgentWithAccessToken(mockEsClient, ({
+    await authenticateAgentWithAccessToken(mockEsClient, {
       auth: { isAuthenticated: true },
       headers: {
         authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',
       },
-    } as unknown) as KibanaRequest);
+    } as unknown as KibanaRequest);
   });
 
   it('should throw if the request is not authenticated', async () => {
@@ -62,12 +62,12 @@ describe('test agent autenticate services', () => {
       },
     });
     expect(
-      authenticateAgentWithAccessToken(mockEsClient, ({
+      authenticateAgentWithAccessToken(mockEsClient, {
         auth: { isAuthenticated: false },
         headers: {
           authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',
         },
-      } as unknown) as KibanaRequest)
+      } as unknown as KibanaRequest)
     ).rejects.toThrow(/Request not authenticated/);
   });
 
@@ -94,12 +94,12 @@ describe('test agent autenticate services', () => {
       },
     });
     expect(
-      authenticateAgentWithAccessToken(mockEsClient, ({
+      authenticateAgentWithAccessToken(mockEsClient, {
         auth: { isAuthenticated: true },
         headers: {
           authorization: 'aaaa',
         },
-      } as unknown) as KibanaRequest)
+      } as unknown as KibanaRequest)
     ).rejects.toThrow(/Authorization header is malformed/);
   });
 
@@ -124,12 +124,12 @@ describe('test agent autenticate services', () => {
       },
     });
     expect(
-      authenticateAgentWithAccessToken(mockEsClient, ({
+      authenticateAgentWithAccessToken(mockEsClient, {
         auth: { isAuthenticated: true },
         headers: {
           authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',
         },
-      } as unknown) as KibanaRequest)
+      } as unknown as KibanaRequest)
     ).rejects.toThrow(/Agent inactive/);
   });
 
@@ -145,12 +145,12 @@ describe('test agent autenticate services', () => {
       },
     });
     expect(
-      authenticateAgentWithAccessToken(mockEsClient, ({
+      authenticateAgentWithAccessToken(mockEsClient, {
         auth: { isAuthenticated: true },
         headers: {
           authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',
         },
-      } as unknown) as KibanaRequest)
+      } as unknown as KibanaRequest)
     ).rejects.toThrow(/Agent not found/);
   });
 });

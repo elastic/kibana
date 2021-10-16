@@ -99,7 +99,7 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
     // No elasticsearch support for pre-indexed shapes and geo_point spatial queries.
     if (
       window.location.href.length +
-        rison.encode((filter as unknown) as RisonObject).length +
+        rison.encode(filter as unknown as RisonObject).length +
         META_OVERHEAD >
       URL_MAX_LENGTH
     ) {
