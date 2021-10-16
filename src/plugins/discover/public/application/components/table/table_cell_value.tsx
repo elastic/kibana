@@ -30,30 +30,26 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
       case IgnoredReason.IGNORE_ABOVE:
         return multiValue
           ? i18n.translate('discover.docView.table.ignored.multiAboveTooltip', {
-              defaultMessage:
-                'This field contains one or more values that are too long and are thus not searchable or filterable.',
+              defaultMessage: `One or more values in this field are too long and can't be searched or filtered.`,
             })
           : i18n.translate('discover.docView.table.ignored.singleAboveTooltip', {
-              defaultMessage:
-                'The value in this field is too long and thus not searchable or filterable.',
+              defaultMessage: `The value in this field is too long and and can't be searched or filtered.`,
             });
       case IgnoredReason.MALFORMED:
         return multiValue
           ? i18n.translate('discover.docView.table.ignored.multiMalformedTooltip', {
-              defaultMessage:
-                'This field contains one or more values that are malformed and are thus not searchable or filterable.',
+              defaultMessage: `This field has one or more malformed values that can't be searched or filtered.`,
             })
           : i18n.translate('discover.docView.table.ignored.singleMalformedTooltip', {
-              defaultMessage: `The value in this field is malformed and not parsable. It's not searchable or filterable.`,
+              defaultMessage: `The value in this field is malformed and can't be searched or filtered.`,
             });
       case IgnoredReason.UNKNOWN:
         return multiValue
           ? i18n.translate('discover.docView.table.ignored.multiUnknownTooltip', {
-              defaultMessage:
-                'This field contains one or more values that are ignored by Elasticsearch and are thus not searchable or filterable.',
+              defaultMessage: `One or more values in this field were ignored by Elasticsearch and can't be searched or filtered.`,
             })
           : i18n.translate('discover.docView.table.ignored.singleUnknownTooltip', {
-              defaultMessage: `The value in this field is ignored by Elasticsearch. It's not searchable or filterable.`,
+              defaultMessage: `The value in this field was ignored by Elasticsearch and can't be searched or filtered.`,
             });
     }
   };
