@@ -18,7 +18,11 @@ import {
   toMountPoint,
 } from '../../../../../kibana_react/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
-import { esFilters, connectToQueryState } from '../../../../../data/public';
+import {
+  esFilters,
+  connectToQueryState,
+  SerializedSearchSourceFields,
+} from '../../../../../data/public';
 import {
   VisualizeServices,
   VisualizeAppStateContainer,
@@ -109,7 +113,11 @@ export const useVisualizeAppState = (
             ...visState,
             data: {
               aggs,
-              searchSource: { ...visSearchSource, query, filter },
+              searchSource: {
+                ...visSearchSource,
+                query,
+                filter,
+              } as unknown as SerializedSearchSourceFields,
               savedSearchId: instance.vis.data.savedSearchId,
             },
           })

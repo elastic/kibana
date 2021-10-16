@@ -29,7 +29,7 @@ export interface ISearchStartSearchSource {
    * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
    * @param fields
    */
-  create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
+  create: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
   /**
    * creates empty {@link SearchSource}
    */

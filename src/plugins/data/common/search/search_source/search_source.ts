@@ -856,8 +856,8 @@ export class SearchSource {
     const { filter: originalFilters, size: omit, ...searchSourceFields } = this.getFields();
     let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
-      filter: [],
-      aggs: [],
+      filter: undefined,
+      aggs: undefined,
       parent: undefined,
       sort:
         searchSourceFields.sort && !Array.isArray(searchSourceFields.sort)
