@@ -46,9 +46,7 @@ export class ScreenshotObservableHandler {
   }
 
   /*
-   * This "external timeout" wraps a chain of observable operators, and
-   * decorates a TimeoutError to specify which phase of page capture has timed
-   * out.
+   * Decorates a TimeoutError with context of the phase that has timed out.
    */
   public waitUntil<O>(phase: PhaseInstance) {
     const { timeoutValue, label, configValue } = phase;
