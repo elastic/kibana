@@ -78,8 +78,8 @@ export class ScreenshotObservableHandler {
    */
   public waitUntil<O, P>(phase: PhaseInstance, chain: Rx.OperatorFunction<O, P>) {
     const { timeoutValue, label, configValue } = phase;
-    return (o: Rx.Observable<O>) => {
-      return o.pipe(
+    return (source: Rx.Observable<O>) => {
+      return source.pipe(
         chain,
         timeout(durationToNumber(timeoutValue)),
         catchError((error: string | Error) => {

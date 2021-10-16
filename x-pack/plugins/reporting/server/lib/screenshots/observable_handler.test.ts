@@ -62,89 +62,88 @@ describe('ScreenshotObservableHandler', () => {
     driver.isPageOpen = jest.fn().mockImplementation(() => true);
   });
 
-  it('instantiates', () => {
-    const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
-    expect(screenshots).not.toEqual(null);
+  describe('waitUntil', () => {
+    it('catches TimeoutError and references the timeout config in a custom message', async () => {
+      const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
+      const test$ = Rx.interval(1000).pipe(
+        screenshots.waitUntil(
+          {
+            timeoutValue: 200,
+            configValue: 'test.config.value',
+            label: 'Test Config',
+          },
+          (outer) => outer.pipe()
+        )
+      );
+
+      const testPipeline = () => test$.toPromise();
+      await expect(testPipeline).rejects.toMatchInlineSnapshot(
+        `[Error: The "Test Config" phase took longer than 0.2 seconds. You may need to increase "test.config.value": TimeoutError: Timeout has occurred]`
+      );
+    });
+
+    it('catches other Errors and explains where they were thrown', async () => {
+      const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
+      const test$ = Rx.throwError(new Error(`Test Error to Throw`)).pipe(
+        screenshots.waitUntil(
+          {
+            timeoutValue: 200,
+            configValue: 'test.config.value',
+            label: 'Test Config',
+          },
+          (outer) => outer.pipe()
+        )
+      );
+
+      const testPipeline = () => test$.toPromise();
+      await expect(testPipeline).rejects.toMatchInlineSnapshot(
+        `[Error: The "Test Config" phase encountered an error: Error: Test Error to Throw]`
+      );
+    });
+
+    it('is a pass-through if there is no Error', async () => {
+      const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
+      const test$ = Rx.of('nice to see you').pipe(
+        screenshots.waitUntil(
+          {
+            timeoutValue: 20,
+            configValue: 'xxxxxxxxxxxxxxxxx',
+            label: 'xxxxxxxxxxx',
+          },
+          (outer) => outer.pipe()
+        )
+      );
+
+      await expect(test$.toPromise()).resolves.toBe(`nice to see you`);
+    });
   });
 
-  it('waitUntil catches TimeoutError and references the timeout config in a custom message', async () => {
-    const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
-    const test$ = Rx.interval(1000).pipe(
-      screenshots.waitUntil(
-        {
-          timeoutValue: 200,
-          configValue: 'test.config.value',
-          label: 'Test Config',
-        },
-        (outer) => outer.pipe()
-      )
-    );
+  describe('checkPageIsOpen', () => {
+    it('throws a decorated Error when page is not open', async () => {
+      driver.isPageOpen = jest.fn().mockImplementation(() => false);
+      const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
+      const test$ = Rx.of(234455).pipe(
+        map((input) => {
+          screenshots.checkPageIsOpen();
+          return input;
+        })
+      );
 
-    const testPipeline = () => test$.toPromise();
-    await expect(testPipeline).rejects.toMatchInlineSnapshot(
-      `[Error: The "Test Config" phase took longer than 0.2 seconds. You may need to increase "test.config.value": TimeoutError: Timeout has occurred]`
-    );
-  });
+      await expect(test$.toPromise()).rejects.toMatchInlineSnapshot(
+        `[Error: Browser was closed unexpectedly! Check the server logs for more info.]`
+      );
+    });
 
-  it('waitUntil catches other Errors and explains where they were thrown', async () => {
-    const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
-    const test$ = Rx.throwError(new Error(`Test Error to Throw`)).pipe(
-      screenshots.waitUntil(
-        {
-          timeoutValue: 200,
-          configValue: 'test.config.value',
-          label: 'Test Config',
-        },
-        (outer) => outer.pipe()
-      )
-    );
+    it('is a pass-through when the page is open', async () => {
+      const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
+      const test$ = Rx.of(234455).pipe(
+        map((input) => {
+          screenshots.checkPageIsOpen();
+          return input;
+        })
+      );
 
-    const testPipeline = () => test$.toPromise();
-    await expect(testPipeline).rejects.toMatchInlineSnapshot(
-      `[Error: The "Test Config" phase encountered an error: Error: Test Error to Throw]`
-    );
-  });
-
-  it('waitUntil is a pass-through if there is no Error', async () => {
-    const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
-    const test$ = Rx.of('nice to see you').pipe(
-      screenshots.waitUntil(
-        {
-          timeoutValue: 20,
-          configValue: 'xxxxxxxxxxxxxxxxx',
-          label: 'xxxxxxxxxxx',
-        },
-        (outer) => outer.pipe()
-      )
-    );
-
-    await expect(test$.toPromise()).resolves.toBe(`nice to see you`);
-  });
-
-  it('checkPageIsOpen throws a decorated Error when page is not open', async () => {
-    driver.isPageOpen = jest.fn().mockImplementation(() => false);
-    const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
-    const test$ = Rx.of(234455).pipe(
-      map((input) => {
-        screenshots.checkPageIsOpen();
-        return input;
-      })
-    );
-
-    await expect(test$.toPromise()).rejects.toMatchInlineSnapshot(
-      `[Error: Browser was closed unexpectedly! Check the server logs for more info.]`
-    );
-  });
-
-  it('checkPageIsOpen is a pass-through when the page is open', async () => {
-    const screenshots = new ScreenshotObservableHandler(driver, captureConfig, opts);
-    const test$ = Rx.of(234455).pipe(
-      map((input) => {
-        screenshots.checkPageIsOpen();
-        return input;
-      })
-    );
-
-    await expect(test$.toPromise()).resolves.toBe(234455);
+      await expect(test$.toPromise()).resolves.toBe(234455);
+    });
   });
 });
