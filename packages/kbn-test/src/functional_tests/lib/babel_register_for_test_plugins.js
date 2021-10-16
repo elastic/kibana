@@ -11,6 +11,8 @@ const Path = require('path');
 
 const { REPO_ROOT } = require('@kbn/dev-utils');
 
+console.log(process.env);
+
 // process.env.CI_PARALLEL_PROCESS_NUMBER
 const KIBANA_ROOT = Path.resolve(__dirname, '../../../../../');
 // const KIBANA_ROOT2 = Fs.realpathSync(REPO_ROOT).includes(
