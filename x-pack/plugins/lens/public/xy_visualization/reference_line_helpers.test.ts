@@ -7,7 +7,7 @@
 
 import { XYLayerConfig } from '../../common/expressions';
 import { FramePublicAPI } from '../types';
-import { computeOverallDataDomain, getStaticValue } from './threshold_helpers';
+import { computeOverallDataDomain, getStaticValue } from './reference_line_helpers';
 
 function getActiveData(json: Array<{ id: string; rows: Array<Record<string, number | null>> }>) {
   return json.reduce((memo, { id, rows }) => {
@@ -25,7 +25,7 @@ function getActiveData(json: Array<{ id: string; rows: Array<Record<string, numb
   }, {} as NonNullable<FramePublicAPI['activeData']>);
 }
 
-describe('threshold helpers', () => {
+describe('reference_line helpers', () => {
   describe('getStaticValue', () => {
     const hasDateHistogram = () => false;
     const hasAllNumberHistogram = () => true;
