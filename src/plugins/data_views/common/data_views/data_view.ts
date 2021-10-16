@@ -44,8 +44,6 @@ interface SavedObjectBody {
   type?: string;
 }
 
-type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
-
 export class DataView implements IIndexPattern {
   public id?: string;
   public title: string = '';
