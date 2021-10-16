@@ -7,7 +7,7 @@
  */
 
 import { keyBy } from 'lodash';
-import { map as mapAsync } from 'bluebird';
+import { delay, map as mapAsync } from 'bluebird';
 import { FtrService } from '../../ftr_provider_context';
 
 export class SavedObjectsPageObject extends FtrService {
@@ -18,6 +18,8 @@ export class SavedObjectsPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly config = this.ctx.getService('config');
+  private readonly defaultTryTimeout = this.config.get('timeouts.try');
 
   async searchForObject(objectName: string) {
     const searchBox = await this.testSubjects.find('savedObjectSearchBar');
@@ -98,15 +100,22 @@ export class SavedObjectsPageObject extends FtrService {
     await this.testSubjects.click('importSavedObjectsConfirmBtn');
   }
 
+  async sleep(sleepMilliseconds: number) {
+    this.log.debug(`... sleep(${sleepMilliseconds}) start`);
+    await delay(sleepMilliseconds);
+    this.log.debug(`... sleep(${sleepMilliseconds}) end`);
+  }
+
   async waitTableIsLoaded() {
-    return this.retry.try(async () => {
+    await this.sleep(501);
+    return await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
       const isLoaded = await this.find.existsByDisplayedByCssSelector(
         '*[data-test-subj="savedObjectsTable"] :not(.euiBasicTable-loading)'
       );
-
       if (isLoaded) {
         return true;
       } else {
+        this.log.debug(`still waiting for the table to load ${isLoaded}`);
         throw new Error('Waiting');
       }
     });
@@ -157,8 +166,10 @@ export class SavedObjectsPageObject extends FtrService {
   }
 
   async clickInspectByTitle(title: string) {
+    this.log.debug(`inspecting ${title} object through the context menu`);
     const table = keyBy(await this.getElementsInTable(), 'title');
     if (table[title].menuElement) {
+      this.log.debug(`${title} has a menuElement`);
       await table[title].menuElement?.click();
       // Wait for context menu to render
       const menuPanel = await this.find.byCssSelector('.euiContextMenuPanel');
@@ -166,6 +177,9 @@ export class SavedObjectsPageObject extends FtrService {
       await panelButton.click();
     } else {
       // or the action elements are on the row without the menu
+      this.log.debug(
+        `${title} doesn't have a menu element, trying to copy the object instead using`
+      );
       await table[title].copySaveObjectsElement?.click();
     }
   }
@@ -232,12 +246,16 @@ export class SavedObjectsPageObject extends FtrService {
   }
 
   async getRowTitles() {
-    await this.waitTableIsLoaded();
-    const table = await this.testSubjects.find('savedObjectsTable');
-    const $ = await table.parseDomContent();
-    return $.findTestSubjects('savedObjectsTableRowTitle')
-      .toArray()
-      .map((cell) => $(cell).find('.euiTableCellContent').text());
+    const isLoaded = await this.waitTableIsLoaded();
+    if (isLoaded) {
+      const table = await this.testSubjects.find('savedObjectsTable');
+      const $ = await table.parseDomContent();
+      return $.findTestSubjects('savedObjectsTableRowTitle')
+        .toArray()
+        .map((cell) => $(cell).find('.euiTableCellContent').text());
+    } else {
+      return ['Nothing Found'];
+    }
   }
 
   async getRelationshipFlyout() {
