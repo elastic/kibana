@@ -71,12 +71,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('allows to delete a saved object', async () => {
       await PageObjects.settings.navigateTo();
-
       await PageObjects.settings.clickKibanaSavedObjects();
-
       let objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Dashboard')).to.be(true);
-
       await PageObjects.savedObjects.clickInspectByTitle('A Dashboard');
       await PageObjects.common.navigateToUrl('management', 'kibana/objects/dashboard/i-exist', {
         shouldUseHashForSubUrl: false,
