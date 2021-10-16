@@ -33,8 +33,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     return bools.every((currBool) => currBool === true);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/68400
-  // describe.skip('saved objects inspect page', () => {
   describe('saved objects inspect page', () => {
     beforeEach(async () => {
       await esArchiver.load(
@@ -50,12 +48,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('allows to view the saved object', async () => {
       await PageObjects.settings.navigateTo();
-
       await PageObjects.settings.clickKibanaSavedObjects();
-
       const objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Dashboard')).to.be(true);
-
       await PageObjects.common.navigateToUrl('management', 'kibana/objects/dashboard/i-exist', {
         shouldUseHashForSubUrl: false,
       });
