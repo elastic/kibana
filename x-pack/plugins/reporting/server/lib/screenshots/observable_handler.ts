@@ -107,20 +107,16 @@ export class ScreenshotObservableHandler {
   }
 
   private openUrl(index: number, urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple) {
-    return (initial: Rx.Observable<unknown>) => {
-      return initial.pipe(
-        mergeMap(() =>
-          openUrl(
-            this.timeouts.openUrl, // internal timeout
-            this.driver,
-            index,
-            urlOrUrlLocatorTuple,
-            this.conditionalHeaders,
-            this.logger
-          )
-        )
-      );
-    };
+    return mergeMap(() =>
+      openUrl(
+        this.timeouts.openUrl, // internal timeout
+        this.driver,
+        index,
+        urlOrUrlLocatorTuple,
+        this.conditionalHeaders,
+        this.logger
+      )
+    );
   }
 
   private waitForElements() {
