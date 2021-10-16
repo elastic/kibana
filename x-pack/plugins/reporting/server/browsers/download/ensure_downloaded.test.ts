@@ -101,8 +101,8 @@ describe('ensureBrowserDownloaded', () => {
       paths[0].sort();
       paths[1].sort();
       expect(paths).toMatchObject([
-        ['chrome-mac.zip', 'chrome-win.zip', 'chromium-d163fd7-linux_x64.zip'],
-        ['chrome-mac.zip', 'chromium-d163fd7-linux_arm64.zip'],
+        ['chrome-mac.zip', 'chrome-win.zip', 'chromium-70f5d88-linux_x64.zip'],
+        ['chrome-mac.zip', 'chromium-70f5d88-linux_arm64.zip'],
       ]);
     });
 
