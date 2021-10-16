@@ -246,16 +246,12 @@ export class SavedObjectsPageObject extends FtrService {
   }
 
   async getRowTitles() {
-    const isLoaded = await this.waitTableIsLoaded();
-    if (isLoaded) {
-      const table = await this.testSubjects.find('savedObjectsTable');
-      const $ = await table.parseDomContent();
-      return $.findTestSubjects('savedObjectsTableRowTitle')
-        .toArray()
-        .map((cell) => $(cell).find('.euiTableCellContent').text());
-    } else {
-      return ['Nothing Found'];
-    }
+    await this.waitTableIsLoaded();
+    const table = await this.testSubjects.find('savedObjectsTable');
+    const $ = await table.parseDomContent();
+    return $.findTestSubjects('savedObjectsTableRowTitle')
+      .toArray()
+      .map((cell) => $(cell).find('.euiTableCellContent').text());
   }
 
   async getRelationshipFlyout() {
