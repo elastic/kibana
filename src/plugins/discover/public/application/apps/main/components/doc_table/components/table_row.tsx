@@ -72,6 +72,7 @@ export const TableRow = ({
    * Fill an element with the value of a field
    */
   const displayField = (fieldName: string) => {
+    // TODO: move decision if _source here and call formatRow in case
     const formattedField = formatFieldValue(
       flattenedRow[fieldName],
       row,
@@ -79,11 +80,7 @@ export const TableRow = ({
       mapping(fieldName)
     );
 
-    // field formatters take care of escaping
-    // eslint-disable-next-line react/no-danger
-    const fieldElement = <span dangerouslySetInnerHTML={{ __html: formattedField }} />;
-
-    return <div className="truncate-by-height">{fieldElement}</div>;
+    return <div className="truncate-by-height">{formattedField}</div>;
   };
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
@@ -181,7 +178,11 @@ export const TableRow = ({
             key={column}
             timefield={false}
             sourcefield={column === '_source'}
-            formatted={displayField(column)}
+            formatted={
+              column === '_source'
+                ? formatRow(row, indexPattern, fieldsToShow)
+                : displayField(column)
+            }
             filterable={isFilterable}
             column={column}
             inlineFilter={inlineFilter}

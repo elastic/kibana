@@ -100,7 +100,7 @@ export const TableFieldValue = ({
 }: TableFieldValueProps) => {
   const [fieldOpen, setFieldOpen] = useState(false);
 
-  const value = String(formattedValue);
+  const value = String(rawValue);
   const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
   const isCollapsed = isCollapsible && !fieldOpen;
 
@@ -128,16 +128,9 @@ export const TableFieldValue = ({
           )}
         </EuiFlexGroup>
       )}
-      <div
-        className={valueClassName}
-        data-test-subj={`tableDocViewRow-${field}-value`}
-        /*
-         * Justification for dangerouslySetInnerHTML:
-         * We just use values encoded by our field formatters
-         */
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: value }}
-      />
+      <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
+        {formattedValue}
+      </div>
     </Fragment>
   );
 };

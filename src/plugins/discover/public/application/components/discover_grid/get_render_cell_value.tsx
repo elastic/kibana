@@ -192,12 +192,5 @@ export const getRenderCellValueFn =
       return <span>{JSON.stringify(rowFlattened[columnId])}</span>;
     }
 
-    const valueFormatted = formatFieldValue(rowFlattened[columnId], row, indexPattern, field);
-    if (typeof valueFormatted === 'undefined') {
-      return <span>-</span>;
-    }
-    return (
-      // eslint-disable-next-line react/no-danger
-      <span dangerouslySetInnerHTML={{ __html: valueFormatted }} />
-    );
+    return formatFieldValue(rowFlattened[columnId], row, indexPattern, field);
   };

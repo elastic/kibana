@@ -47,7 +47,7 @@ export interface FieldRecord {
     fieldMapping?: IndexPatternField;
   };
   value: {
-    formattedValue: string;
+    formattedValue: JSX.Element;
     ignored?: IgnoredReason;
   };
 }
