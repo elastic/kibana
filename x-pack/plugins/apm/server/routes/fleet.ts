@@ -92,7 +92,7 @@ const fleetAgentsRoute = createApmServerRoute({
 });
 
 const saveApmServerSchemaRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/fleet/apm_server_schema',
+  endpoint: 'POST /api/apm/fleet/apm_server_schema',
   options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     body: t.type({
@@ -143,11 +143,13 @@ const getMigrationCheckRoute = createApmServerRoute({
           fleetPluginStart,
         })
       : undefined;
+    const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
     return {
       has_cloud_agent_policy: !!cloudAgentPolicy,
-      has_cloud_apm_package_policy: !!getApmPackagePolicy(cloudAgentPolicy),
+      has_cloud_apm_package_policy: !!apmPackagePolicy,
       cloud_apm_migration_enabled: cloudApmMigrationEnabled,
       has_required_role: hasRequiredRole,
+      cloud_apm_package_policy: apmPackagePolicy,
     };
   },
 });
@@ -189,13 +191,34 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   },
 });
 
+const devRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/fleet/dev',
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const { plugins, context } = resources;
+    if (!plugins.fleet || !plugins.security) {
+      throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
+    }
+    const fleetPluginStart = await plugins.fleet.start();
+    const savedObjectsClient = context.core.savedObjects.client;
+
+    const cloudAgentPolicy = await getCloudAgentPolicy({
+      savedObjectsClient,
+      fleetPluginStart,
+    });
+    const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
+    return { apmPackagePolicy };
+  },
+});
+
 export const apmFleetRouteRepository = createApmServerRouteRepository()
   .add(hasFleetDataRoute)
   .add(fleetAgentsRoute)
   .add(saveApmServerSchemaRoute)
   .add(getUnsupportedApmServerSchemaRoute)
   .add(getMigrationCheckRoute)
-  .add(createCloudApmPackagePolicyRoute);
+  .add(createCloudApmPackagePolicyRoute)
+  .add(devRoute);
 
 const FLEET_SECURITY_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.fleet.fleetSecurityRequired',

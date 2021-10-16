@@ -15,13 +15,20 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import SemVer from 'semver';
+import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../../../common/fleet';
+import { PackagePolicy } from '../../../../../../fleet/common/types';
 import { APMLink } from '../../../shared/Links/apm/APMLink';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
-import { useFleetCloudAgentPolicyHref } from '../../../shared/Links/kibana';
+import {
+  useFleetCloudAgentPolicyHref,
+  useUpgradeApmPackagePolicyHref,
+} from '../../../shared/Links/kibana';
 import rocketLaunchGraphic from './blog-rocket-720x420.png';
 import { MigrationInProgressPanel } from './migration_in_progress_panel';
 
@@ -34,6 +41,7 @@ interface Props {
   cloudApmMigrationEnabled: boolean;
   hasCloudAgentPolicy: boolean;
   hasRequiredRole: boolean;
+  cloudApmPackagePolicy: PackagePolicy | undefined;
 }
 export function SchemaOverview({
   onSwitch,
@@ -44,10 +52,13 @@ export function SchemaOverview({
   cloudApmMigrationEnabled,
   hasCloudAgentPolicy,
   hasRequiredRole,
+  cloudApmPackagePolicy,
 }: Props) {
-  const fleetCloudAgentPolicyHref = useFleetCloudAgentPolicyHref();
   const isDisabled =
     !cloudApmMigrationEnabled || !hasCloudAgentPolicy || !hasRequiredRole;
+  const packageVersion = cloudApmPackagePolicy?.package?.version;
+  const isUpgradeAvailable =
+    packageVersion && SemVer.lt(packageVersion, SUPPORTED_APM_PACKAGE_VERSION);
 
   if (isLoading) {
     return (
@@ -76,54 +87,13 @@ export function SchemaOverview({
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem />
           <EuiFlexItem grow={2}>
-            <EuiCard
-              icon={
-                <EuiIcon
-                  size="xxl"
-                  type="checkInCircleFilled"
-                  color="success"
-                />
-              }
-              title={i18n.translate('xpack.apm.settings.schema.success.title', {
-                defaultMessage: 'Elastic Agent successfully setup!',
-              })}
-              description={i18n.translate(
-                'xpack.apm.settings.schema.success.description',
-                {
-                  defaultMessage:
-                    'Your APM integration is now setup and ready to receive data from your currently instrumented agents. Feel free to review the policies applied to your integtration.',
-                }
-              )}
-              footer={
-                <div>
-                  <EuiButton href={fleetCloudAgentPolicyHref}>
-                    {i18n.translate(
-                      'xpack.apm.settings.schema.success.viewIntegrationInFleet.buttonText',
-                      { defaultMessage: 'View the APM integration in Fleet' }
-                    )}
-                  </EuiButton>
-                  <EuiSpacer size="xs" />
-                  <EuiText size="s">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.apm.settings.schema.success.returnText"
-                        defaultMessage="or simply return to the {serviceInventoryLink}."
-                        values={{
-                          serviceInventoryLink: (
-                            <APMLink path="/services">
-                              {i18n.translate(
-                                'xpack.apm.settings.schema.success.returnText.serviceInventoryLink',
-                                { defaultMessage: 'Service inventory' }
-                              )}
-                            </APMLink>
-                          ),
-                        }}
-                      />
-                    </p>
-                  </EuiText>
-                </div>
-              }
-            />
+            {isUpgradeAvailable ? (
+              <UpgradeAvailableCard
+                apmPackagePolicyId={cloudApmPackagePolicy?.id}
+              />
+            ) : (
+              <SuccessfulMigrationCard />
+            )}
           </EuiFlexItem>
           <EuiFlexItem />
         </EuiFlexGroup>
@@ -311,4 +281,95 @@ function getDisabledReason({
       />
     );
   }
+}
+
+function SuccessfulMigrationCard() {
+  return (
+    <EuiCard
+      icon={<EuiIcon size="xxl" type="checkInCircleFilled" color="success" />}
+      title={i18n.translate('xpack.apm.settings.schema.success.title', {
+        defaultMessage: 'Elastic Agent successfully setup!',
+      })}
+      description={i18n.translate(
+        'xpack.apm.settings.schema.success.description',
+        {
+          defaultMessage:
+            'Your APM integration is now setup and ready to receive data from your currently instrumented agents. Feel free to review the policies applied to your integtration.',
+        }
+      )}
+      footer={<CardFooter />}
+    />
+  );
+}
+
+function UpgradeAvailableCard({
+  apmPackagePolicyId,
+}: {
+  apmPackagePolicyId: string | undefined;
+}) {
+  const upgradeApmPackagePolicyHref =
+    useUpgradeApmPackagePolicyHref(apmPackagePolicyId);
+
+  return (
+    <EuiCard
+      icon={<EuiIcon size="xxl" type="alert" color="warning" />}
+      title={i18n.translate(
+        'xpack.apm.settings.schema.upgradeAvailable.title',
+        {
+          defaultMessage: 'APM integration upgrade available!',
+        }
+      )}
+      description={
+        <FormattedMessage
+          id="xpack.apm.settings.upgradeAvailable.description"
+          defaultMessage="Although your APM integration is setup, a new version of the APM integration is available for upgrade with your fleet policy. {upgradePackagePolicyLink} to get the most out your setup!"
+          values={{
+            upgradePackagePolicyLink: (
+              <EuiLink href={upgradeApmPackagePolicyHref}>
+                {i18n.translate(
+                  'xpack.apm.settings.schema.upgradeAvailable.upgradePackagePolicyLink',
+                  { defaultMessage: 'Upgrade your APM integration' }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      }
+      footer={<CardFooter />}
+    />
+  );
+}
+
+function CardFooter() {
+  const fleetCloudAgentPolicyHref = useFleetCloudAgentPolicyHref();
+
+  return (
+    <div>
+      <EuiButton href={fleetCloudAgentPolicyHref}>
+        {i18n.translate(
+          'xpack.apm.settings.schema.success.viewIntegrationInFleet.buttonText',
+          { defaultMessage: 'View the APM integration in Fleet' }
+        )}
+      </EuiButton>
+      <EuiSpacer size="xs" />
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.apm.settings.schema.success.returnText"
+            defaultMessage="or simply return to the {serviceInventoryLink}."
+            values={{
+              serviceInventoryLink: (
+                <APMLink path="/services">
+                  {i18n.translate(
+                    'xpack.apm.settings.schema.success.returnText.serviceInventoryLink',
+                    { defaultMessage: 'Service inventory' }
+                  )}
+                </APMLink>
+              ),
+            }}
+          />
+        </p>
+      </EuiText>
+    </div>
+  );
 }
