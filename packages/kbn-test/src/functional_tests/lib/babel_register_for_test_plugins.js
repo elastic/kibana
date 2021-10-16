@@ -33,6 +33,12 @@ const testMap = [
 
 const testMap2 = testMap.map((path) => Fs.realpathSync(path));
 
+console.log('REAL REPO ROOT 1: ');
+console.log(Fs.realpathSync(REPO_ROOT));
+
+console.log('REAL REPO ROOT 2: ');
+console.log(Fs.realpathSync(Fs.realpathSync(REPO_ROOT)));
+
 console.log('SIMPLE REPO ROOT: ');
 console.log(Path.resolve(REPO_ROOT, 'test'));
 console.log('REAL PATH REPO ROOT: ');
