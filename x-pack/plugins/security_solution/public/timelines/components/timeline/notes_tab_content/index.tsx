@@ -95,8 +95,11 @@ const ParticipantsComponent: React.FC<ParticipantsProps> = ({ users }) => {
   const List = useMemo(
     () =>
       users.map((user) => (
-        <Fragment key={user.updatedBy!}>
-          <UsernameWithAvatar key={user.updatedBy!} username={user.updatedBy!} />
+        <Fragment key={user.updatedBy === null ? undefined : user.updatedBy}>
+          <UsernameWithAvatar
+            key={user.updatedBy === null ? undefined : user.updatedBy}
+            username={String(user.updatedBy)}
+          />
           <EuiSpacer size="s" />
         </Fragment>
       )),
