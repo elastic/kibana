@@ -21,7 +21,7 @@ export enum IgnoredReason {
  * This implementation will make some assumptions based on specific types
  * of ignored values can only happen with specific field types in Elasticsearch.
  *
- * @param field Either the data view field or the strnig name of it.
+ * @param field Either the data view field or the string name of it.
  * @param ignoredFields The hit._ignored value of the hit to validate.
  */
 export function getIgnoredReason(
