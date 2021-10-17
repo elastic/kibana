@@ -494,7 +494,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql([[], ['word eight', 'word nine', 'word ten']]);
       });
 
-      it('will return only the empty array for results if we have a list that includes all text', async () => {
+      // FLAKY https://github.com/elastic/kibana/issues/113418
+      it.skip('will return only the empty array for results if we have a list that includes all text', async () => {
         await importFile(
           supertest,
           'text',
