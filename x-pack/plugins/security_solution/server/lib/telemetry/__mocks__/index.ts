@@ -8,8 +8,24 @@
 import { ConcreteTaskInstance, TaskStatus } from '../../../../../task_manager/server';
 import { TelemetryEventsSender } from '../sender';
 import { TelemetryReceiver } from '../receiver';
+import { TelemetryCoordinator } from '../coordinator';
 import { SecurityTelemetryTaskConfig } from '../task';
 import { PackagePolicy } from '../../../../../fleet/common/types/models/package_policy';
+
+export const createMockTelemetryCoordinator = (
+  enableTelemetry?: boolean
+): jest.Mocked<TelemetryCoordinator> => {
+  return {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+    fetchTelemetryUrl: jest.fn(),
+    queueTelemetryEvents: jest.fn(),
+    isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemetry ?? jest.fn()),
+    sendIfDue: jest.fn(),
+    sendOnDemand: jest.fn(),
+  } as unknown as jest.Mocked<TelemetryCoordinator>;
+};
 
 /**
  * Creates a mocked Telemetry Events Sender

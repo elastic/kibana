@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { createTelemetryDetectionRuleListsTaskConfig } from './detection_rule';
-import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import { createMockTelemetryCoordinator } from '../__mocks__';
 
 describe('security detection rule task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -21,18 +21,16 @@ describe('security detection rule task test', () => {
       last: undefined,
       current: new Date().toISOString(),
     };
-    const mockTelemetryEventsSender = createMockTelemetryEventsSender();
-    const mockTelemetryReceiver = createMockTelemetryReceiver();
+    const mockTelemetryCoordinator = createMockTelemetryCoordinator();
     const telemetryDetectionRuleListsTaskConfig = createTelemetryDetectionRuleListsTaskConfig(1);
 
     await telemetryDetectionRuleListsTaskConfig.runTask(
       'test-id',
       logger,
-      mockTelemetryReceiver,
-      mockTelemetryEventsSender,
+      mockTelemetryCoordinator,
       testTaskExecutionPeriod
     );
 
-    expect(mockTelemetryReceiver.fetchDetectionRules).toHaveBeenCalled();
+    expect(mockTelemetryCoordinator.receiver.fetchDetectionRules).toHaveBeenCalled();
   });
 });

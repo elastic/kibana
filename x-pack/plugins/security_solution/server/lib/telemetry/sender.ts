@@ -13,94 +13,34 @@ import { Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { TelemetryEvent } from './types';
-/*
-import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '../../../../task_manager/server';
-*/
-// /import { TelemetryReceiver } from './receiver';
 import { allowlistEventFields, copyAllowlistedFields } from './filters';
-// /import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
-// /import { TelemetryEvent } from './types';
-// /import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 import { TELEMETRY_USAGE_LABEL_PREFIX } from './constants';
-// /import { SecurityTelemetryTask, SecurityTelemetryTaskConfig } from './task';
 
 const USAGE_LABEL_PREFIX: string[] = TELEMETRY_USAGE_LABEL_PREFIX.concat(['sender']);
 
 export class TelemetryEventsSender {
-  // /private readonly initialCheckDelayMs = 10 * 1000;
-  // /private readonly checkIntervalMs = 60 * 1000;
   private readonly logger: Logger;
-  // /private maxQueueSize = TELEMETRY_MAX_BUFFER_SIZE;
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
-  // /private intervalId?: NodeJS.Timeout;
-  // /private isSending = false;
-  // /private receiver: TelemetryReceiver | undefined;
-  // /private queue: TelemetryEvent[] = [];
-  // /private isOptedIn?: boolean = true; // Assume true until the first check
 
   private telemetryUsageCounter?: UsageCounter;
-  // /private telemetryTasks?: SecurityTelemetryTask[];
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
 
-  public setup(
-    // /telemetryReceiver: TelemetryReceiver,
-    telemetrySetup?: TelemetryPluginSetup,
-    // /taskManager?: TaskManagerSetupContract,
-    telemetryUsageCounter?: UsageCounter
-  ) {
+  public setup(telemetrySetup?: TelemetryPluginSetup, telemetryUsageCounter?: UsageCounter) {
     this.telemetrySetup = telemetrySetup;
     this.telemetryUsageCounter = telemetryUsageCounter;
-    /*  
-    if (taskManager) {
-      this.telemetryTasks = createTelemetryTaskConfigs().map(
-        (config: SecurityTelemetryTaskConfig) => {
-          const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
-          task.register(taskManager);
-          return task;
-        }
-      );
-    }
-    */
   }
 
-  public start(
-    telemetryStart?: TelemetryPluginStart
-    // /taskManager?: TaskManagerStartContract,
-    // /receiver?: TelemetryReceiver
-  ) {
+  public start(telemetryStart?: TelemetryPluginStart) {
     this.telemetryStart = telemetryStart;
-    // /this.receiver = receiver;
-
-    /*
-    if (taskManager && this.telemetryTasks) {
-      this.logger.debug(`Starting security telemetry tasks`);
-      this.telemetryTasks.forEach((task) => task.start(taskManager));
-    }
-    */
-
     this.logger.debug(`Starting local task`);
-    /*
-    setTimeout(() => {
-      this.sendIfDue();
-      this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
-    }, this.initialCheckDelayMs);
-    */
   }
 
   public stop() {
-    /*
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
-    */
     this.logger.debug('Stopping Telemetry Sender.');
   }
 

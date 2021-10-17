@@ -7,9 +7,8 @@
 
 import { Logger } from 'src/core/server';
 import { getPreviousDiagTaskTimestamp } from '../helpers';
-import { TelemetryEventsSender } from '../sender';
+import { TelemetryCoordinator } from '../coordinator';
 import { TelemetryEvent } from '../types';
-import { TelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 
 export function createTelemetryDiagnosticsTaskConfig() {
@@ -23,15 +22,14 @@ export function createTelemetryDiagnosticsTaskConfig() {
     runTask: async (
       taskId: string,
       logger: Logger,
-      receiver: TelemetryReceiver,
-      sender: TelemetryEventsSender,
+      coordinator: TelemetryCoordinator,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       if (!taskExecutionPeriod.last) {
         throw new Error('last execution timestamp is required');
       }
 
-      const response = await receiver.fetchDiagnosticAlerts(
+      const response = await coordinator.receiver.fetchDiagnosticAlerts(
         taskExecutionPeriod.last,
         taskExecutionPeriod.current
       );
@@ -46,7 +44,7 @@ export function createTelemetryDiagnosticsTaskConfig() {
       const diagAlerts: TelemetryEvent[] = hits.flatMap((h) =>
         h._source != null ? [h._source] : []
       );
-      sender.queueTelemetryEvents(diagAlerts);
+      coordinator.queueTelemetryEvents(diagAlerts);
       return diagAlerts.length;
     },
   };

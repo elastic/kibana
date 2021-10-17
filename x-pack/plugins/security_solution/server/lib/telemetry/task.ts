@@ -12,8 +12,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { TelemetryReceiver } from './receiver';
-import { TelemetryEventsSender } from './sender';
+import { TelemetryCoordinator } from './coordinator';
 
 export interface SecurityTelemetryTaskConfig {
   type: string;
@@ -29,7 +28,7 @@ export type SecurityTelemetryTaskRunner = (
   taskId: string,
   logger: Logger,
   receiver: TelemetryReceiver,
-  sender: TelemetryEventsSender,
+  coordinator: TelemetryEventsSender,
   taskExecutionPeriod: TaskExecutionPeriod
 ) => Promise<number>;
 
@@ -46,19 +45,16 @@ export type LastExecutionTimestampCalculator = (
 export class SecurityTelemetryTask {
   private readonly config: SecurityTelemetryTaskConfig;
   private readonly logger: Logger;
-  private readonly sender: TelemetryEventsSender;
-  private readonly receiver: TelemetryReceiver;
+  private readonly coordinator: TelemetryCoordinator;
 
   constructor(
     config: SecurityTelemetryTaskConfig,
     logger: Logger,
-    sender: TelemetryEventsSender,
-    receiver: TelemetryReceiver
+    coordinator: TelemetryCoordinator
   ) {
     this.config = config;
     this.logger = logger;
-    this.sender = sender;
-    this.receiver = receiver;
+    this.coordinator = coordinator;
   }
 
   public getLastExecutionTime = (
@@ -136,13 +132,19 @@ export class SecurityTelemetryTask {
       return 0;
     }
 
-    const isOptedIn = await this.sender.isTelemetryOptedIn();
+    const isOptedIn = await this.coordinator.isTelemetryOptedIn();
     if (!isOptedIn) {
       this.logger.debug(`[task ${taskId}]: telemetry is not opted-in`);
       return 0;
     }
 
     this.logger.debug(`[task ${taskId}]: running task`);
-    return this.config.runTask(taskId, this.logger, this.receiver, this.sender, executionPeriod);
+    return this.config.runTask(
+      taskId,
+      this.logger,
+      this.receiver,
+      this.coordinator,
+      executionPeriod
+    );
   };
 }

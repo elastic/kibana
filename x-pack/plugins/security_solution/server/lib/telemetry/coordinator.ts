@@ -36,12 +36,13 @@ export class TelemetryCoordinator {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private telemetryUsageCounter?: UsageCounter;
   private telemetryTasks?: SecurityTelemetryTask[];
-  private sender: TelemetryEventsSender;
-  private receiver: TelemetryReceiver | undefined;
+  public sender: TelemetryEventsSender;
+  public receiver: TelemetryReceiver;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
     this.sender = new TelemetryEventsSender(this.logger);
+    this.receiver = new TelemetryReceiver(this.logger);
   }
 
   public async isTelemetryOptedIn() {
@@ -178,12 +179,7 @@ export class TelemetryCoordinator {
     if (taskManager) {
       this.telemetryTasks = createTelemetryTaskConfigs().map(
         (config: SecurityTelemetryTaskConfig) => {
-          const task = new SecurityTelemetryTask(
-            config,
-            this.logger,
-            this.sender,
-            telemetryReceiver
-          );
+          const task = new SecurityTelemetryTask(config, this.logger, this);
           task.register(taskManager);
           return task;
         }
@@ -192,9 +188,9 @@ export class TelemetryCoordinator {
   }
 
   public start(
+    receiver: TelemetryReceiver,
     telemetryStart?: TelemetryPluginStart,
-    taskManager?: TaskManagerStartContract,
-    receiver?: TelemetryReceiver
+    taskManager?: TaskManagerStartContract
   ) {
     this.telemetryStart = telemetryStart;
     this.receiver = receiver;

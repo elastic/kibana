@@ -6,13 +6,12 @@
  */
 
 import { Logger } from 'src/core/server';
-import { TelemetryEventsSender } from '../sender';
+import { TelemetryCoordinator } from '../coordinator';
 import {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
   EndpointPolicyResponseDocument,
 } from '../types';
-import { TelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 import {
   batchTelemetryRecords,
@@ -44,8 +43,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
     runTask: async (
       taskId: string,
       logger: Logger,
-      receiver: TelemetryReceiver,
-      sender: TelemetryEventsSender,
+      coordinator: TelemetryCoordinator,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       if (!taskExecutionPeriod.last) {
@@ -53,7 +51,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       }
 
       const endpointData = await fetchEndpointData(
-        receiver,
+        coordinator,
         taskExecutionPeriod.last,
         taskExecutionPeriod.current
       );
@@ -122,7 +120,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           policyInfo !== undefined &&
           !endpointPolicyCache.has(policyInfo)
         ) {
-          const agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
+          const agentPolicy = await coordinator.receiver.fetchPolicyConfigs(policyInfo);
           const packagePolicies = agentPolicy?.package_policies;
 
           if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
@@ -235,7 +233,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          * Send the documents in a batches of maxTelemetryBatch
          */
         batchTelemetryRecords(telemetryPayloads, maxTelemetryBatch).forEach((telemetryBatch) =>
-          sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, telemetryBatch)
+          coordinator.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, telemetryBatch)
         );
         return telemetryPayloads.length;
       } catch (err) {
@@ -247,14 +245,14 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 }
 
 async function fetchEndpointData(
-  receiver: TelemetryReceiver,
+  coordinator: TelemetryCoordinator,
   executeFrom: string,
   executeTo: string
 ) {
   const [fleetAgentsResponse, epMetricsResponse, policyResponse] = await Promise.allSettled([
-    receiver.fetchFleetAgents(),
-    receiver.fetchEndpointMetrics(executeFrom, executeTo),
-    receiver.fetchEndpointPolicyResponses(executeFrom, executeTo),
+    coordinator.receiver.fetchFleetAgents(),
+    coordinator.receiver.fetchEndpointMetrics(executeFrom, executeTo),
+    coordinator.receiver.fetchEndpointPolicyResponses(executeFrom, executeTo),
   ]);
 
   return {

@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { createTelemetrySecurityListTaskConfig } from './security_lists';
-import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import { createMockTelemetryCoordinator } from '../__mocks__';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -25,21 +25,21 @@ describe('security list telemetry task test', () => {
       last: undefined,
       current: new Date().toISOString(),
     };
-    const mockTelemetryEventsSender = createMockTelemetryEventsSender();
-    const mockTelemetryReceiver = createMockTelemetryReceiver();
+    const mockTelemetryCoordinator = createMockTelemetryCoordinator();
     const telemetrySecurityListTaskConfig = createTelemetrySecurityListTaskConfig(1);
 
     await telemetrySecurityListTaskConfig.runTask(
       'test-id',
       logger,
-      mockTelemetryReceiver,
-      mockTelemetryEventsSender,
+      mockTelemetryCoordinator,
       testTaskExecutionPeriod
     );
 
-    expect(mockTelemetryReceiver.fetchTrustedApplications).toHaveBeenCalled();
-    expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(ENDPOINT_LIST_ID);
-    expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(
+    expect(mockTelemetryCoordinator.receiver.fetchTrustedApplications).toHaveBeenCalled();
+    expect(mockTelemetryCoordinator.receiver.fetchEndpointList).toHaveBeenCalledWith(
+      ENDPOINT_LIST_ID
+    );
+    expect(mockTelemetryCoordinator.receiver.fetchEndpointList).toHaveBeenCalledWith(
       ENDPOINT_EVENT_FILTERS_LIST_ID
     );
   });

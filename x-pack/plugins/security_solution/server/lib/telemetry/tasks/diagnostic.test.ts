@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
-import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import { createMockTelemetryCoordinator } from '../__mocks__';
 
 describe('diagnostics telemetry task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -26,24 +26,22 @@ describe('diagnostics telemetry task test', () => {
       last: new Date().toISOString(),
       current: new Date().toISOString(),
     };
-    const mockTelemetryEventsSender = createMockTelemetryEventsSender();
-    const mockTelemetryReceiver = createMockTelemetryReceiver(testDiagnosticsAlerts);
+    const mockTelemetryCoordinator = createMockTelemetryCoordinator();
     const telemetryDiagnoticsTaskConfig = createTelemetryDiagnosticsTaskConfig();
 
     await telemetryDiagnoticsTaskConfig.runTask(
       'test-id',
       logger,
-      mockTelemetryReceiver,
-      mockTelemetryEventsSender,
+      mockTelemetryCoordinator,
       testTaskExecutionPeriod
     );
 
-    expect(mockTelemetryReceiver.fetchDiagnosticAlerts).toHaveBeenCalledWith(
+    expect(mockTelemetryCoordinator.receiver.fetchDiagnosticAlerts).toHaveBeenCalledWith(
       testTaskExecutionPeriod.last,
       testTaskExecutionPeriod.current
     );
 
-    expect(mockTelemetryEventsSender.queueTelemetryEvents).toHaveBeenCalledWith(
+    expect(mockTelemetryCoordinator.queueTelemetryEvents).toHaveBeenCalledWith(
       testDiagnosticsAlerts.hits.hits.flatMap((doc) => [doc._source])
     );
   });

@@ -8,8 +8,7 @@
 import { Logger } from 'src/core/server';
 import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS } from '../constants';
 import { batchTelemetryRecords, templateExceptionList } from '../helpers';
-import { TelemetryEventsSender } from '../sender';
-import { TelemetryReceiver } from '../receiver';
+import { TelemetryCoordinator } from '../coordinator';
 import { ExceptionListItem, RuleSearchResult } from '../types';
 import { TaskExecutionPeriod } from '../task';
 
@@ -23,13 +22,12 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
     runTask: async (
       taskId: string,
       logger: Logger,
-      receiver: TelemetryReceiver,
-      sender: TelemetryEventsSender,
+      coordinator: TelemetryCoordinator,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       // Lists Telemetry: Detection Rules
 
-      const { body: prebuiltRules } = await receiver.fetchDetectionRules();
+      const { body: prebuiltRules } = await coordinator.receiver.fetchDetectionRules();
 
       if (!prebuiltRules) {
         logger.debug('no prebuilt rules found');
@@ -60,7 +58,10 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         const ruleVersion = item.alert.params.version;
 
         for (const ex of item.alert.params.exceptionsList) {
-          const listItem = await receiver.fetchDetectionExceptionList(ex.list_id, ruleVersion);
+          const listItem = await coordinator.receiver.fetchDetectionExceptionList(
+            ex.list_id,
+            ruleVersion
+          );
           for (const exceptionItem of listItem.data) {
             detectionRuleExceptions.push(exceptionItem);
           }
@@ -73,7 +74,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       );
 
       batchTelemetryRecords(detectionRuleExceptionsJson, maxTelemetryBatch).forEach((batch) => {
-        sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+        coordinator.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
       });
 
       return detectionRuleExceptions.length;

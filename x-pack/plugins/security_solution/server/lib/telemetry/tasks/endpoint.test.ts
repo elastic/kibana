@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { createTelemetryEndpointTaskConfig } from './endpoint';
-import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import { createMockTelemetryCoordinator } from '../__mocks__';
 
 describe('endpoint telemetry task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -21,24 +21,22 @@ describe('endpoint telemetry task test', () => {
       last: new Date().toISOString(),
       current: new Date().toISOString(),
     };
-    const mockTelemetryEventsSender = createMockTelemetryEventsSender();
-    const mockTelemetryReceiver = createMockTelemetryReceiver();
+    const mockTelemetryCoordinator = createMockTelemetryCoordinator();
     const telemetryEndpointTaskConfig = createTelemetryEndpointTaskConfig(1);
 
     await telemetryEndpointTaskConfig.runTask(
       'test-id',
       logger,
-      mockTelemetryReceiver,
-      mockTelemetryEventsSender,
+      mockTelemetryCoordinator,
       testTaskExecutionPeriod
     );
 
-    expect(mockTelemetryReceiver.fetchFleetAgents).toHaveBeenCalled();
-    expect(mockTelemetryReceiver.fetchEndpointMetrics).toHaveBeenCalledWith(
+    expect(mockTelemetryCoordinator.receiver.fetchFleetAgents).toHaveBeenCalled();
+    expect(mockTelemetryCoordinator.receiver.fetchEndpointMetrics).toHaveBeenCalledWith(
       testTaskExecutionPeriod.last,
       testTaskExecutionPeriod.current
     );
-    expect(mockTelemetryReceiver.fetchEndpointPolicyResponses).toHaveBeenCalledWith(
+    expect(mockTelemetryCoordinator.receiver.fetchEndpointPolicyResponses).toHaveBeenCalledWith(
       testTaskExecutionPeriod.last,
       testTaskExecutionPeriod.current
     );
