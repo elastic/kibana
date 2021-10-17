@@ -15,7 +15,6 @@ import {
   PluginInitializerContext,
 } from 'src/core/server';
 import { isEmpty, mapValues } from 'lodash';
-import { SavedObjectsClient } from '../../../../src/core/server';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';

@@ -14,7 +14,6 @@ import type {
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
 
-import type { SearchServiceLog } from '../search_service_log';
 import { CORRELATION_THRESHOLD, KS_TEST_THRESHOLD } from '../constants';
 
 import { getPrioritizedFieldValuePairs } from './get_prioritized_field_value_pairs';
@@ -23,7 +22,6 @@ import { fetchTransactionDurationRanges } from './query_ranges';
 
 export async function* fetchTransactionDurationHistograms(
   esClient: ElasticsearchClient,
-  addLogMessage: SearchServiceLog['addLogMessage'],
   params: SearchStrategyParams,
   expectations: number[],
   ranges: estypes.AggregationsAggregationRange[],
@@ -75,10 +73,10 @@ export async function* fetchTransactionDurationHistograms(
       // don't fail the whole process for individual correlation queries,
       // just add the error to the internal log and check if we'd want to set the
       // cross-cluster search compatibility warning to true.
-      addLogMessage(
-        `Failed to fetch correlation/kstest for '${item.fieldName}/${item.fieldValue}'`,
-        JSON.stringify(e)
-      );
+      // addLogMessage(
+      //   `Failed to fetch correlation/kstest for '${item.fieldName}/${item.fieldValue}'`,
+      //   JSON.stringify(e)
+      // );
       // TODO return CCS warning
       // if (params?.index.includes(':')) {
       //   state.setCcsWarning(true);

@@ -10,9 +10,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
-import { searchServiceLogProvider } from '../search_service_log';
-import { latencyCorrelationsSearchServiceStateProvider } from '../latency_correlations/latency_correlations_search_service_state';
-
 import {
   fetchTransactionDurationFieldValuePairs,
   getTermsAggRequest,
@@ -66,20 +63,16 @@ describe('query_field_value_pairs', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const { addLogMessage, getLogMessages } = searchServiceLogProvider();
-      const state = latencyCorrelationsSearchServiceStateProvider();
-
       const resp = await fetchTransactionDurationFieldValuePairs(
         esClientMock,
         params,
-        fieldCandidates,
-        state,
-        addLogMessage
+        fieldCandidates
       );
 
-      const { progress } = state.getState();
+      // TODO PROGRESS
+      // const { progress } = state.getState();
 
-      expect(progress.loadedFieldValuePairs).toBe(1);
+      // expect(progress.loadedFieldValuePairs).toBe(1);
       expect(resp).toEqual([
         { fieldName: 'myFieldCandidate1', fieldValue: 'myValue1' },
         { fieldName: 'myFieldCandidate1', fieldValue: 'myValue2' },
@@ -89,7 +82,8 @@ describe('query_field_value_pairs', () => {
         { fieldName: 'myFieldCandidate3', fieldValue: 'myValue2' },
       ]);
       expect(esClientSearchMock).toHaveBeenCalledTimes(3);
-      expect(getLogMessages()).toEqual([]);
+      // TODO Log
+      // expect(getLogMessages()).toEqual([]);
     });
   });
 });

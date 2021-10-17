@@ -10,9 +10,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
-import { searchServiceLogProvider } from '../search_service_log';
-import { latencyCorrelationsSearchServiceStateProvider } from '../latency_correlations/latency_correlations_search_service_state';
-
 import { fetchTransactionDurationHistograms } from './query_histograms_generator';
 
 const params = {
@@ -54,17 +51,12 @@ describe('query_histograms_generator', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const state = latencyCorrelationsSearchServiceStateProvider();
-      const { addLogMessage, getLogMessages } = searchServiceLogProvider();
-
       let loadedHistograms = 0;
       const items = [];
 
       for await (const item of fetchTransactionDurationHistograms(
         esClientMock,
-        addLogMessage,
         params,
-        state,
         expectations,
         ranges,
         fractions,
@@ -81,11 +73,11 @@ describe('query_histograms_generator', () => {
       expect(items.length).toEqual(0);
       expect(loadedHistograms).toEqual(3);
       expect(esClientSearchMock).toHaveBeenCalledTimes(3);
-      expect(getLogMessages().map((d) => d.split(': ')[1])).toEqual([
-        "Failed to fetch correlation/kstest for 'the-field-name-1/the-field-value-1'",
-        "Failed to fetch correlation/kstest for 'the-field-name-2/the-field-value-2'",
-        "Failed to fetch correlation/kstest for 'the-field-name-2/the-field-value-3'",
-      ]);
+      // expect(getLogMessages().map((d) => d.split(': ')[1])).toEqual([
+      //   "Failed to fetch correlation/kstest for 'the-field-name-1/the-field-value-1'",
+      //   "Failed to fetch correlation/kstest for 'the-field-name-2/the-field-value-2'",
+      //   "Failed to fetch correlation/kstest for 'the-field-name-2/the-field-value-3'",
+      // ]);
     });
 
     it('returns items with correlation and ks-test value', async () => {
@@ -112,17 +104,12 @@ describe('query_histograms_generator', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const state = latencyCorrelationsSearchServiceStateProvider();
-      const { addLogMessage, getLogMessages } = searchServiceLogProvider();
-
       let loadedHistograms = 0;
       const items = [];
 
       for await (const item of fetchTransactionDurationHistograms(
         esClientMock,
-        addLogMessage,
         params,
-        state,
         expectations,
         ranges,
         fractions,
@@ -139,7 +126,7 @@ describe('query_histograms_generator', () => {
       expect(items.length).toEqual(3);
       expect(loadedHistograms).toEqual(3);
       expect(esClientSearchMock).toHaveBeenCalledTimes(6);
-      expect(getLogMessages().length).toEqual(0);
+      // expect(getLogMessages().length).toEqual(0);
     });
   });
 });

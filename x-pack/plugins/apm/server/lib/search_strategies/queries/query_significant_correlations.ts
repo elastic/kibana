@@ -55,7 +55,6 @@ export const fetchSignificantCorrelations = async (
 
   for await (const item of fetchTransactionDurationHistograms(
     esClient,
-    () => {},
     paramsWithIndex,
     expectations,
     ranges,

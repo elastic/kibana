@@ -14,7 +14,6 @@ import type {
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
 
-import type { SearchServiceLog } from '../search_service_log';
 import { TERMS_SIZE } from '../constants';
 
 import { getQueryWithParams } from './get_query_with_params';
@@ -42,19 +41,19 @@ export const getTermsAggRequest = (
 const fetchTransactionDurationFieldTerms = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
-  fieldName: string,
-  addLogMessage?: SearchServiceLog['addLogMessage']
+  fieldName: string
 ): Promise<FieldValuePair[]> => {
   try {
     const resp = await esClient.search(getTermsAggRequest(params, fieldName));
 
     if (resp.body.aggregations === undefined) {
-      if (addLogMessage) {
-        addLogMessage(
-          `Failed to fetch terms for field candidate ${fieldName} fieldValuePairs, no aggregations returned.`,
-          JSON.stringify(resp)
-        );
-      }
+      // TODO LOG
+      // if (addLogMessage) {
+      //   addLogMessage(
+      //     `Failed to fetch terms for field candidate ${fieldName} fieldValuePairs, no aggregations returned.`,
+      //     JSON.stringify(resp)
+      //   );
+      // }
       return [];
     }
     const buckets = (
@@ -70,12 +69,13 @@ const fetchTransactionDurationFieldTerms = async (
       }));
     }
   } catch (e) {
-    if (addLogMessage) {
-      addLogMessage(
-        `Failed to fetch terms for field candidate ${fieldName} fieldValuePairs.`,
-        JSON.stringify(e)
-      );
-    }
+    // TODO LOG
+    // if (addLogMessage) {
+    //   addLogMessage(
+    //     `Failed to fetch terms for field candidate ${fieldName} fieldValuePairs.`,
+    //     JSON.stringify(e)
+    //   );
+    // }
   }
 
   return [];
@@ -97,24 +97,16 @@ async function fetchInSequence(
 export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
-  fieldCandidates: string[],
-  addLogMessage?: SearchServiceLog['addLogMessage']
+  fieldCandidates: string[]
 ): Promise<FieldValuePair[]> => {
-  let fieldValuePairsProgress = 1;
-
   return await fetchInSequence(
     fieldCandidates,
     async function (fieldCandidate: string) {
-      const fieldTerms = await fetchTransactionDurationFieldTerms(
+      return await fetchTransactionDurationFieldTerms(
         esClient,
         params,
-        fieldCandidate,
-        addLogMessage
+        fieldCandidate
       );
-
-      fieldValuePairsProgress++;
-
-      return fieldTerms;
     }
   );
 };
