@@ -14,8 +14,8 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getHistogramIntervalRequest,
   getHistogramRangeSteps,
-} from '../search_strategies/queries/query_histogram_range_steps';
-import { getTransactionDurationRangesRequest } from '../search_strategies/queries/query_ranges';
+} from '../correlations/queries/query_histogram_range_steps';
+import { getTransactionDurationRangesRequest } from '../correlations/queries/query_ranges';
 
 import { getPercentileThresholdValue } from './get_percentile_threshold_value';
 import type {

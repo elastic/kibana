@@ -9,14 +9,14 @@ import { ElasticsearchClient } from 'kibana/server';
 import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { estypes } from '@elastic/elasticsearch';
 import { FieldValuePair } from '../../../../../common/correlations/types';
-import { getQueryWithParams } from '../get_query_with_params';
-import { buildSamplerAggregation } from '../../utils/field_stats_utils';
 import {
   FieldStatsCommonRequestParams,
   KeywordFieldStats,
   Aggs,
   TopValueBucket,
 } from '../../../../../common/correlations/field_stats_types';
+import { buildSamplerAggregation } from '../../utils/field_stats_utils';
+import { getQueryWithParams } from '../get_query_with_params';
 
 export const getKeywordFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,

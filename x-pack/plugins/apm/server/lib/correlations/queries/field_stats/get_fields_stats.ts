@@ -12,13 +12,13 @@ import {
   FieldValuePair,
   SearchStrategyParams,
 } from '../../../../../common/correlations/types';
-import { getRequestBase } from '../get_request_base';
-import { fetchKeywordFieldStats } from './get_keyword_field_stats';
-import { fetchNumericFieldStats } from './get_numeric_field_stats';
 import {
   FieldStats,
   FieldStatsCommonRequestParams,
 } from '../../../../../common/correlations/field_stats_types';
+import { getRequestBase } from '../get_request_base';
+import { fetchKeywordFieldStats } from './get_keyword_field_stats';
+import { fetchNumericFieldStats } from './get_numeric_field_stats';
 import { fetchBooleanFieldStats } from './get_boolean_field_stats';
 
 export const fetchFieldsStats = async (

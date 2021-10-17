@@ -15,8 +15,8 @@ import {
   fetchSignificantCorrelations,
   fetchTransactionDurationFieldCandidates,
   fetchTransactionDurationFieldValuePairs,
-} from '../lib/search_strategies/queries';
-import { fetchFieldsStats } from '../lib/search_strategies/queries/field_stats/get_fields_stats';
+} from '../lib/correlations/queries';
+import { fetchFieldsStats } from '../lib/correlations/queries/field_stats/get_fields_stats';
 
 import { withApmSpan } from '../utils/with_apm_span';
 
