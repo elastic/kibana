@@ -40,7 +40,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
   const { openDocumentCreation } = useActions(DocumentCreationLogic);
 
   const { search } = useLocation() as Location;
-  const { method } = parseQueryParams(search) as unknown as { method: string };
+  const { method } = parseQueryParams(search);
 
   useEffect(() => {
     switch (method) {

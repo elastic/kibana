@@ -44,14 +44,16 @@ import { EngineCreationLogic } from './engine_creation_logic';
 
 export const EngineCreation: React.FC = () => {
   const { search } = useLocation() as Location;
-  const { method } = parseQueryParams(search) as unknown as { method: string };
+  const { method } = parseQueryParams(search);
 
   const { name, rawName, language, isLoading } = useValues(EngineCreationLogic);
   const { setIngestionMethod, setLanguage, setRawName, submitEngine } =
     useActions(EngineCreationLogic);
 
   useEffect(() => {
-    setIngestionMethod(method || '');
+    if (typeof method === 'string') {
+      setIngestionMethod(method);
+    }
   }, []);
 
   return (
