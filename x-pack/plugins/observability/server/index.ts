@@ -24,7 +24,6 @@ export const config: PluginConfigDescriptor = {
     unsafe: true,
   },
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     annotations: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       index: schema.string({ defaultValue: 'observability-annotations' }),
@@ -34,7 +33,6 @@ export const config: PluginConfigDescriptor = {
       cases: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     }),
   }),
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };
 
 export type ObservabilityConfig = TypeOf<typeof config.schema>;
