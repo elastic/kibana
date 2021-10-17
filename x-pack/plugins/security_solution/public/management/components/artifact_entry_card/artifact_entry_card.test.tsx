@@ -10,12 +10,12 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../../common
 import { ArtifactEntryCard, ArtifactEntryCardProps } from './artifact_entry_card';
 import { act, fireEvent, getByTestId } from '@testing-library/react';
 import { AnyArtifact } from './types';
-import { isTrustedApp } from './hooks/use_normalized_artifact';
-import { getTrustedAppProvider, getExceptionProvider } from './test_utils';
+import { isTrustedApp } from './utils';
+import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 
 describe.each([
-  ['trusted apps', getTrustedAppProvider],
-  ['exceptions/event filters', getExceptionProvider],
+  ['trusted apps', getTrustedAppProviderMock],
+  ['exceptions/event filters', getExceptionProviderMock],
 ])('when using the ArtifactEntryCard component with %s', (_, generateItem) => {
   let item: AnyArtifact;
   let appTestContext: AppContextTestRender;
@@ -48,10 +48,10 @@ describe.each([
       'some internal app'
     );
     expect(renderResult.getByTestId('testCard-subHeader-touchedBy-createdBy').textContent).toEqual(
-      'Created byJJusta'
+      'Created byMMarty'
     );
     expect(renderResult.getByTestId('testCard-subHeader-touchedBy-updatedBy').textContent).toEqual(
-      'Updated byMMara'
+      'Updated byEEllamae'
     );
   });
 

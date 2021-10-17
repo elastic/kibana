@@ -4,6 +4,8 @@
 
 ## DeprecationsDetails.documentationUrl property
 
+(optional) link to the documentation for more details on the deprecation.
+
 <b>Signature:</b>
 
 ```typescript

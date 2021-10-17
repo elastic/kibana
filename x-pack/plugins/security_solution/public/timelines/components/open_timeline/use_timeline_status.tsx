@@ -97,6 +97,7 @@ export const useTimelineStatus = ({
             onClick={onFilterClicked.bind(null, tab.id)}
             withNext={tab.withNext}
             isDisabled={tab.disabled}
+            data-test-subj={tab.name}
           >
             {tab.name}
           </EuiFilterButton>

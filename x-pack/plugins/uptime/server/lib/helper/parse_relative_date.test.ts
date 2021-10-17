@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { parseRelativeDate } from './get_histogram_interval';
 import { Moment } from 'moment';
+import { parseRelativeDate } from '../../../common/lib/get_histogram_interval';
 
 describe('Parsing a relative end date properly', () => {
   it('converts the upper range of relative end dates to now', async () => {

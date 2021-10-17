@@ -1249,7 +1249,7 @@
             "tags": [],
             "label": "fetch",
             "description": [
-              "Makes an HTTP request. Defaults to a GET request unless overriden. See {@link HttpHandler} for options."
+              "Makes an HTTP request. Defaults to a GET request unless overridden. See {@link HttpHandler} for options."
             ],
             "signature": [
               {
@@ -2248,9 +2248,21 @@
             ],
             "signature": [
               "{ readonly path: string; readonly method: ",
-              "RecursiveReadonly",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonly",
+                "text": "RecursiveReadonly"
+              },
               "<Method>; readonly options: ",
-              "RecursiveReadonly",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonly",
+                "text": "RecursiveReadonly"
+              },
               "<",
               {
                 "pluginId": "core",
@@ -2469,7 +2481,13 @@
             "text": "RouteValidationError"
           },
           " extends ",
-          "SchemaTypeError"
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.SchemaTypeError",
+            "text": "SchemaTypeError"
+          }
         ],
         "path": "src/core/server/http/router/validator/validator_error.ts",
         "deprecated": false,
@@ -8150,9 +8168,21 @@
               "\nValidation logic for the URL params"
             ],
             "signature": [
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<any> | ",
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<P> | ",
               {
                 "pluginId": "core",
@@ -8176,9 +8206,21 @@
               "\nValidation logic for the Query params"
             ],
             "signature": [
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<any> | ",
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<Q> | ",
               {
                 "pluginId": "core",
@@ -8202,9 +8244,21 @@
               "\nValidation logic for the body payload"
             ],
             "signature": [
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<any> | ",
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<B> | ",
               {
                 "pluginId": "core",
@@ -12515,9 +12569,21 @@
           "\nAllowed property validation options: either @kbn/config-schema validations or custom validation functions\n\nSee {@link RouteValidationFunction} for custom validation.\n"
         ],
         "signature": [
-          "ObjectType",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ObjectType",
+            "text": "ObjectType"
+          },
           "<any> | ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
           "<T> | ",
           {
             "pluginId": "core",
