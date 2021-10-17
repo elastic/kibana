@@ -16,9 +16,7 @@ import {
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
-  getEventLog,
 } from '../../../common/lib';
-import { validateEvent } from '../../../spaces_only/tests/alerting/event_log';
 
 // eslint-disable-next-line import/no-default-export
 export default function createDisableAlertTests({ getService }: FtrProviderContext) {
@@ -377,66 +375,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
-        });
-
-        it('should create recovered-instance events for all alert instances', async () => {
-          // pattern of when the alert should fire
-          const pattern = {
-            instance: [false, true, true, false, false, true, true, true],
-          };
-          const { body: createdRule } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestAlertData({
-                rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
-                throttle: null,
-                params: {
-                  pattern,
-                },
-                actions: [],
-              })
-            )
-            .expect(200);
-          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
-
-          const ruleId = createdRule.id;
-
-          await alertUtils.getDisableRequest(ruleId);
-
-          const events = await retry.try(async () => {
-            return await getEventLog({
-              getService,
-              spaceId: space.id,
-              type: 'alert',
-              id: ruleId,
-              provider: 'alerting',
-              actions: new Map([
-                // make sure the counts of the # of events per type are as expected
-                ['execute', { gte: 9 }],
-                ['new-instance', { equal: 2 }],
-                ['recovered-instance', { equal: 2 }],
-              ]),
-            });
-          });
-
-          const event = events[0];
-          expect(event).to.be.ok();
-
-          validateEvent(event, {
-            spaceId: space.id,
-            savedObjects: [
-              { type: 'alert', id: ruleId, rel: 'primary', type_id: 'test.patternFiring' },
-            ],
-            message: '',
-            rule: {
-              id: ruleId,
-              category: createdRule.body.rule_type_id,
-              license: 'basic',
-              ruleset: 'alertsFixture',
-            },
-          });
         });
       });
     }

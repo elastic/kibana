@@ -141,7 +141,7 @@ describe('createAlertEventLogRecordObject', () => {
         ruleId: '1',
         ruleName: 'test name',
         ruleType,
-        action: 'recovered-instance',
+        action: 'execute-action',
         instanceId: 'test1',
         group: 'group 1',
         message: 'action execution start',
@@ -168,7 +168,7 @@ describe('createAlertEventLogRecordObject', () => {
       })
     ).toStrictEqual({
       event: {
-        action: 'recovered-instance',
+        action: 'execute-action',
         category: ['alerts'],
         duration: 5,
         end: '1970-01-01T00:05:00.000Z',
