@@ -13,7 +13,10 @@ import type {
   FieldValuePair,
   SearchStrategyParams,
 } from '../../../../common/correlations/types';
-import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
+import {
+  isLatencyCorrelation,
+  LatencyCorrelation,
+} from '../../../../common/correlations/latency_correlations/types';
 
 import {
   fetchTransactionDurationFractions,
@@ -52,6 +55,7 @@ export const fetchSignificantCorrelations = async (
   );
 
   const latencyCorrelations: LatencyCorrelation[] = [];
+  let ccsWarning = false;
 
   for await (const item of fetchTransactionDurationHistograms(
     esClient,
@@ -63,11 +67,15 @@ export const fetchSignificantCorrelations = async (
     totalDocCount,
     fieldValuePairs
   )) {
-    if (item !== undefined) {
+    if (isLatencyCorrelation(item)) {
       latencyCorrelations.push(item);
+    } else if (
+      {}.hasOwnProperty.call(item, 'error') &&
+      paramsWithIndex?.index.includes(':')
+    ) {
+      ccsWarning = true;
     }
   }
 
-  // TODO Fix CCS warning
-  return { latencyCorrelations, ccsWarning: false, totalDocCount };
+  return { latencyCorrelations, ccsWarning, totalDocCount };
 };

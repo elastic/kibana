@@ -47,6 +47,7 @@ describe('query_fractions', () => {
         } => {
           return {
             body: {
+              hits: { total: { value: 3 } },
               aggregations: {
                 latency_ranges: {
                   buckets: [{ doc_count: 1 }, { doc_count: 2 }],

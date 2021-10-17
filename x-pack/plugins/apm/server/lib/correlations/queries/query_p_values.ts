@@ -40,6 +40,8 @@ export const fetchPValues = async (
     )
   );
 
+  let ccsWarning = false;
+
   results.forEach((result, idx) => {
     if (result.status === 'fulfilled') {
       failedTransactionsCorrelations.push(
@@ -50,14 +52,10 @@ export const fetchPValues = async (
             record.pValue < ERROR_CORRELATION_THRESHOLD
         )
       );
-    } else {
-      // If one of the fields in the batch had an error
-      // addLogMessage(
-      //   `Error getting error correlation for field ${fieldCandidates[idx]}: ${result.reason}.`
-      // );
+    } else if (paramsWithIndex?.index.includes(':')) {
+      ccsWarning = true;
     }
   });
 
-  // TODO Fix CCS warning
-  return { failedTransactionsCorrelations, ccsWarning: false };
+  return { failedTransactionsCorrelations, ccsWarning };
 };

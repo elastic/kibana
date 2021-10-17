@@ -14,6 +14,8 @@ import type {
   SearchStrategyParams,
 } from '../../../../common/correlations/types';
 
+import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
+
 import { CORRELATION_THRESHOLD, KS_TEST_THRESHOLD } from '../constants';
 
 import { getPrioritizedFieldValuePairs } from './get_prioritized_field_value_pairs';
@@ -65,23 +67,12 @@ export async function* fetchTransactionDurationHistograms(
           correlation,
           ksTest,
           histogram: logHistogram,
-        };
+        } as LatencyCorrelation;
       } else {
         yield undefined;
       }
     } catch (e) {
-      // don't fail the whole process for individual correlation queries,
-      // just add the error to the internal log and check if we'd want to set the
-      // cross-cluster search compatibility warning to true.
-      // addLogMessage(
-      //   `Failed to fetch correlation/kstest for '${item.fieldName}/${item.fieldValue}'`,
-      //   JSON.stringify(e)
-      // );
-      // TODO return CCS warning
-      // if (params?.index.includes(':')) {
-      //   state.setCcsWarning(true);
-      // }
-      yield undefined;
+      yield { error: e };
     }
   }
 }

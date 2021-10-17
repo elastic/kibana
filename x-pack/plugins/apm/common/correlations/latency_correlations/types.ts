@@ -14,19 +14,12 @@ export interface LatencyCorrelation extends FieldValuePair {
   ksTest: number;
 }
 
-export interface LatencyCorrelationSearchServiceProgress {
-  started: number;
-  loadedHistogramStepsize: number;
-  loadedOverallHistogram: number;
-  loadedFieldCandidates: number;
-  loadedFieldValuePairs: number;
-  loadedHistograms: number;
-}
-
-export interface LatencyCorrelationsParams {
-  percentileThreshold: number;
-  analyzeCorrelations: boolean;
-}
+export const isLatencyCorrelation = (arg: unknown): arg is LatencyCorrelation =>
+  typeof arg === 'object' &&
+  arg !== null &&
+  Object.keys(arg).length === 5 &&
+  Object.keys(arg).includes('correlation') &&
+  !Object.keys(arg).includes('error');
 
 export interface LatencyCorrelationsRawResponse {
   log: string[];
