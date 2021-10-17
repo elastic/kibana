@@ -23,6 +23,11 @@ interface LiveQueryProps {
   query?: string;
   savedQueryId?: string;
   ecs_mapping?: unknown;
+  agentsField?: boolean;
+  queryField?: boolean;
+  ecsMappingField?: boolean;
+  enabled?: boolean;
+  formType?: 'steps' | 'simple';
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -34,6 +39,11 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   savedQueryId,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   ecs_mapping,
+  agentsField,
+  queryField,
+  ecsMappingField,
+  formType,
+  enabled,
 }) => {
   const { data: hasActionResultsPrivileges, isFetched } = useActionResultsPrivileges();
 
@@ -90,7 +100,15 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   }
 
   return (
-    <LiveQueryForm singleAgentMode={!!agentId} defaultValue={defaultValue} onSuccess={onSuccess} />
+    <LiveQueryForm
+      agentsField={agentId ? !agentId : agentsField}
+      queryField={queryField}
+      ecsMappingField={ecsMappingField}
+      defaultValue={defaultValue}
+      onSuccess={onSuccess}
+      formType={formType}
+      enabled={enabled}
+    />
   );
 };
 

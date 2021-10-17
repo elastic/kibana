@@ -8,21 +8,27 @@
 import { isArray, isEmpty, map } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
-import { useMemo } from 'react';
+import { RefObject, useMemo } from 'react';
 
 import { useForm } from '../../shared_imports';
 import { createFormSchema } from '../../packs/queries/schema';
 import { PackFormData } from '../../packs/queries/use_pack_query_form';
 import { useSavedQueries } from '../use_saved_queries';
+import { SavedQueryFormRefObject } from '.';
 
 const SAVED_QUERY_FORM_ID = 'savedQueryForm';
 
 interface UseSavedQueryFormProps {
   defaultValue?: unknown;
   handleSubmit: (payload: unknown) => Promise<void>;
+  savedQueryFormRef: RefObject<SavedQueryFormRefObject>;
 }
 
-export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryFormProps) => {
+export const useSavedQueryForm = ({
+  defaultValue,
+  handleSubmit,
+  savedQueryFormRef,
+}: UseSavedQueryFormProps) => {
   const { data } = useSavedQueries({});
   const ids: string[] = useMemo<string[]>(
     () => map(data?.saved_objects, 'attributes.id') ?? [],
@@ -42,9 +48,14 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
     id: SAVED_QUERY_FORM_ID + uuid.v4(),
     schema: formSchema,
     onSubmit: async (formData, isValid) => {
+      const ecsFieldValue = await savedQueryFormRef?.current?.validateEcsMapping();
+
       if (isValid) {
         try {
-          await handleSubmit(formData);
+          await handleSubmit({
+            ...formData,
+            ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
+          });
           // eslint-disable-next-line no-empty
         } catch (e) {}
       }

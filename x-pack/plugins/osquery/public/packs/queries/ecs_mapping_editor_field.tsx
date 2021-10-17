@@ -18,6 +18,7 @@ import React, {
   MutableRefObject,
 } from 'react';
 import {
+  EuiFormLabel,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -91,15 +92,11 @@ const StyledFieldSpan = styled.span`
 
 // align the icon to the inputs
 const StyledButtonWrapper = styled.div`
-  margin-top: 30px;
-`;
-
-const ECSFieldColumn = styled(EuiFlexGroup)`
-  max-width: 100%;
+  margin-top: 11px;
 `;
 
 const ECSFieldWrapper = styled(EuiFlexItem)`
-  max-width: calc(100% - 66px);
+  max-width: 100%;
 `;
 
 const singleSelection = { asPlainText: true };
@@ -195,7 +192,8 @@ export const ECSComboboxField: React.FC<ECSComboboxFieldProps> = ({
   return (
     <EuiFormRow
       label={field.label}
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      // @ts-expect-error update types
+      helpText={selectedOptions[0]?.value?.description}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
@@ -283,7 +281,8 @@ export const OsqueryColumnField: React.FC<OsqueryColumnFieldProps> = ({
   return (
     <EuiFormRow
       label={field.label}
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      // @ts-expect-error update types
+      helpText={selectedOptions[0]?.value?.description}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
@@ -412,9 +411,6 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
     const currentFormData = useRef(defaultValue);
     const formSchema = {
       key: {
-        label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.ecsFieldLabel', {
-          defaultMessage: 'ECS field',
-        }),
         type: FIELD_TYPES.COMBO_BOX,
         fieldsToValidateOnChange: ['value.field'],
         validations: [
@@ -424,9 +420,6 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
         ],
       },
       'value.field': {
-        label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldLabel', {
-          defaultMessage: 'Osquery result',
-        }),
         type: FIELD_TYPES.COMBO_BOX,
         fieldsToValidateOnChange: ['key'],
         validations: [
@@ -501,24 +494,27 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
       <Form form={form}>
         <EuiFlexGroup alignItems="flexStart" gutterSize="s">
           <EuiFlexItem>
-            <CommonUseField
-              path="value.field"
-              component={OsqueryColumnField}
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              euiFieldProps={{
-                label: 'Osquery result',
-                options: osquerySchemaOptions,
-                isDisabled,
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ECSFieldColumn alignItems="flexStart" gutterSize="s" wrap>
+            <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
+              <EuiFlexItem>
+                <CommonUseField
+                  path="value.field"
+                  component={OsqueryColumnField}
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  euiFieldProps={{
+                    options: osquerySchemaOptions,
+                    isDisabled,
+                  }}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <StyledButtonWrapper>
                   <EuiIcon type="arrowRight" />
                 </StyledButtonWrapper>
               </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
               <ECSFieldWrapper>
                 <CommonUseField
                   path="key"
@@ -558,7 +554,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                   </StyledButtonWrapper>
                 </EuiFlexItem>
               )}
-            </ECSFieldColumn>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
@@ -870,6 +866,25 @@ export const ECSMappingEditorField = ({
               defaultMessage="Use the fields below to map results from this query to ECS fields."
             />
           </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldLabel"
+              defaultMessage="Osquery result"
+            />
+          </EuiFormLabel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="xpack.osquery.pack.queryFlyoutForm.ecsFieldLabel"
+              defaultMessage="ECS field"
+            />
+          </EuiFormLabel>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
