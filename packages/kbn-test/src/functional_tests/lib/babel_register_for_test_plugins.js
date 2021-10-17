@@ -59,24 +59,41 @@ const REPO_ROOT = Path.resolve(
 // console.log(testMap2);
 // // throw new Error('FAIL CI');
 
+const testMap = [
+  Path.resolve(REPO_ROOT, 'test'),
+  Path.resolve(REPO_ROOT, 'x-pack/test'),
+  Path.resolve(REPO_ROOT, 'examples'),
+  Path.resolve(REPO_ROOT, 'x-pack/examples'),
+  // TODO: should should probably remove this link back to the source
+  Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
+  Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
+].map((path) =>
+  process.env.JENKINS_HOME
+    ? Path.join(path, 'parallel', process.env.CI_PARALLEL_PROCESS_NUMBER)
+    : path
+);
+
+console.log('TEST PATHS: ');
+console.log(testMap);
+
 // modifies all future calls to require() to automatically
 // compile the required source with babel
 require('@babel/register')({
   ignore: [/[\/\\](node_modules|target|dist)[\/\\]/],
-  only: [
-    Path.resolve(REPO_ROOT, 'test'),
-    Path.resolve(REPO_ROOT, 'x-pack/test'),
-    Path.resolve(REPO_ROOT, 'examples'),
-    Path.resolve(REPO_ROOT, 'x-pack/examples'),
-    // TODO: should should probably remove this link back to the source
-    Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
-    Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
-  ].map((path) =>
-    process.env.JENKINS_HOME
-      ? Path.join(path, 'parallel', process.env.CI_PARALLEL_PROCESS_NUMBER)
-      : path
-  ),
-  // only: testMap,
+  // only: [
+  //   Path.resolve(REPO_ROOT, 'test'),
+  //   Path.resolve(REPO_ROOT, 'x-pack/test'),
+  //   Path.resolve(REPO_ROOT, 'examples'),
+  //   Path.resolve(REPO_ROOT, 'x-pack/examples'),
+  //   // TODO: should should probably remove this link back to the source
+  //   Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
+  //   Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
+  // ].map((path) =>
+  //   process.env.JENKINS_HOME
+  //     ? Path.join(path, 'parallel', process.env.CI_PARALLEL_PROCESS_NUMBER)
+  //     : path
+  // ),
+  only: testMap,
   babelrc: false,
   presets: [require.resolve('@kbn/babel-preset/node_preset')],
   extensions: ['.js', '.ts', '.tsx'],
