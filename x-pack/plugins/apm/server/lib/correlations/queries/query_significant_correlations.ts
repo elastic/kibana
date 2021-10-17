@@ -70,6 +70,8 @@ export const fetchSignificantCorrelations = async (
     if (isLatencyCorrelation(item)) {
       latencyCorrelations.push(item);
     } else if (
+      typeof item === 'object' &&
+      item !== null &&
       {}.hasOwnProperty.call(item, 'error') &&
       paramsWithIndex?.index.includes(':')
     ) {

@@ -25,10 +25,7 @@ import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/tab
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  enableInspectEsQueries,
-  useUiTracker,
-} from '../../../../../observability/public';
+import { useUiTracker } from '../../../../../observability/public';
 
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
@@ -48,7 +45,6 @@ import { CorrelationsTable } from './correlations_table';
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
 import { isErrorMessage } from './utils/is_error_message';
 import { getOverallHistogram } from './utils/get_overall_histogram';
-import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
@@ -61,10 +57,8 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const transactionColors = useTransactionColors();
 
   const {
-    core: { notifications, uiSettings },
+    core: { notifications },
   } = useApmPluginContext();
-
-  const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 
   const { progress, response, startFetch, cancelFetch } =
     useLatencyCorrelations();
@@ -407,7 +401,6 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         )}
         {showCorrelationsEmptyStatePrompt && <CorrelationsEmptyStatePrompt />}
       </div>
-      {displayLog && <CorrelationsLog logMessages={response.log ?? []} />}
     </div>
   );
 }

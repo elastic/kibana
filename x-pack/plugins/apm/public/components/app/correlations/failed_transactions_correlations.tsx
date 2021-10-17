@@ -29,10 +29,7 @@ import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  enableInspectEsQueries,
-  useUiTracker,
-} from '../../../../../observability/public';
+import { useUiTracker } from '../../../../../observability/public';
 
 import { asPercent } from '../../../../common/utils/formatters';
 import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
@@ -56,7 +53,6 @@ import {
   TransactionDistributionChart,
   TransactionDistributionChartData,
 } from '../../shared/charts/transaction_distribution_chart';
-import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
@@ -75,11 +71,9 @@ export function FailedTransactionsCorrelations({
   const transactionColors = useTransactionColors();
 
   const {
-    core: { notifications, uiSettings },
+    core: { notifications },
   } = useApmPluginContext();
   const trackApmEvent = useUiTracker({ app: 'apm' });
-
-  const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
   const { progress, response, startFetch, cancelFetch } =
     useFailedTransactionsCorrelations();
@@ -648,7 +642,6 @@ export function FailedTransactionsCorrelations({
         )}
         {showCorrelationsEmptyStatePrompt && <CorrelationsEmptyStatePrompt />}
       </div>
-      {inspectEnabled && <CorrelationsLog logMessages={response.log ?? []} />}
     </div>
   );
 }
