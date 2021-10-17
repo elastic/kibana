@@ -168,51 +168,29 @@ export class ConfigService {
 
   public async isEnabledAtPath(path: ConfigPath) {
     const namespace = pathToString(path);
+    const hasSchema = this.schemas.has(namespace);
 
-    const validatedConfig = this.schemas.has(namespace)
+    const config = await this.config$.pipe(first()).toPromise();
+    if (!hasSchema && config.has(path)) {
+      // Throw if there is no schema, but a config exists at the path.
+      throw new Error(`No validation schema has been defined for [${namespace}]`);
+    }
+
+    const validatedConfig = hasSchema
       ? await this.atPath<{ enabled?: boolean }>(path).pipe(first()).toPromise()
       : undefined;
 
-    const enabledPath = createPluginEnabledPath(path);
-    const config = await this.config$.pipe(first()).toPromise();
-
-    // if plugin hasn't got a config schema, we try to read "enabled" directly
-    const isEnabled = validatedConfig?.enabled ?? config.get(enabledPath);
-
-    // if we implicitly added an `enabled` config to a plugin without a schema,
-    // we log a deprecation warning, as this will not be supported in 8.0
-    if (validatedConfig?.enabled === undefined && isEnabled !== undefined) {
-      const deprecationPath = pathToString(enabledPath);
-      const deprecatedConfigDetails: DeprecatedConfigDetails = {
-        configPath: deprecationPath,
-        title: `Setting "${deprecationPath}" is deprecated`,
-        message: `Configuring "${deprecationPath}" is deprecated and will be removed in 8.0.0.`,
-        correctiveActions: {
-          manualSteps: [
-            `Remove "${deprecationPath}" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.`,
-          ],
-        },
-      };
-      this.deprecationLog.warn(deprecatedConfigDetails.message);
-      this.markDeprecatedConfigAsHandled(namespace, deprecatedConfigDetails);
-    }
-
-    // not declared. consider that plugin is enabled by default
-    if (isEnabled === undefined) {
-      return true;
-    }
-
-    if (isEnabled === false) {
-      // If the plugin is _not_ enabled, we mark the entire plugin path as
-      // handled, as it's expected that it won't be used.
+    const isDisabled = validatedConfig?.enabled === false;
+    if (isDisabled) {
+      // If the plugin is explicitly disabled, we mark the entire plugin
+      // path as handled, as it's expected that it won't be used.
       this.markAsHandled(path);
       return false;
     }
 
-    // If plugin enabled we mark the enabled path as handled, as we for example
-    // can have plugins that don't have _any_ config except for this field, and
-    // therefore have no reason to try to get the config.
-    this.markAsHandled(enabledPath);
+    // If the schema exists and the config is explicitly set to true,
+    // _or_ if the `enabled` config is undefined, then we treat the
+    // plugin as enabled.
     return true;
   }
 
@@ -285,13 +263,6 @@ export class ConfigService {
     this.handledDeprecatedConfigs.set(domainId, handledDeprecatedConfig);
   }
 }
-
-const createPluginEnabledPath = (configPath: string | string[]) => {
-  if (Array.isArray(configPath)) {
-    return configPath.concat('enabled');
-  }
-  return `${configPath}.enabled`;
-};
 
 const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.') : path);
 

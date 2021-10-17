@@ -20,7 +20,6 @@ export { ExceptionListClient } from './services/exception_lists/exception_list_c
 export type { ListPluginSetup, ListsApiRequestHandlerContext } from './types';
 
 export const config: PluginConfigDescriptor = {
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: ConfigSchema,
 };
 export const plugin = (initializerContext: PluginInitializerContext): ListPlugin =>
