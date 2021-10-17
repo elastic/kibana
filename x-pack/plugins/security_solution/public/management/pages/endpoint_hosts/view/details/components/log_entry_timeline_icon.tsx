@@ -11,11 +11,13 @@ import { EuiAvatar, EuiAvatarProps } from '@elastic/eui';
 export const LogEntryTimelineIcon = memo(
   ({
     avatarColor,
+    avatarIconColor,
     avatarSize,
     iconType,
     isResponseEvent,
   }: {
     avatarColor: EuiAvatarProps['color'];
+    avatarIconColor?: EuiAvatarProps['iconColor'];
     avatarSize: EuiAvatarProps['size'];
     iconType: EuiAvatarProps['iconType'];
     isResponseEvent: boolean;
@@ -25,7 +27,7 @@ export const LogEntryTimelineIcon = memo(
         name="Timeline Icon"
         size={avatarSize ?? 's'}
         color={avatarColor}
-        iconColor="default"
+        iconColor={avatarIconColor ?? 'default'}
         iconType={iconType ?? 'dot'}
       />
     );

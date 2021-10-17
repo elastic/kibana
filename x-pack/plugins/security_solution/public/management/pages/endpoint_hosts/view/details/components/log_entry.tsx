@@ -26,6 +26,7 @@ const useLogEntryUIProps = (
 ): {
   actionEventTitle: string;
   avatarColor: EuiAvatarProps['color'];
+  avatarIconColor: EuiAvatarProps['iconColor'];
   avatarSize: EuiAvatarProps['size'];
   commentText: string;
   commentType: EuiCommentProps['type'];
@@ -43,6 +44,7 @@ const useLogEntryUIProps = (
     let commentType: EuiCommentProps['type'] = 'update';
     let commentText: string = '';
     let avatarColor: EuiAvatarProps['color'] = theme.euiColorLightestShade;
+    let avatarIconColor: EuiAvatarProps['iconColor'];
     let avatarSize: EuiAvatarProps['size'] = 's';
     let isIsolateAction: boolean = false;
     let isResponseEvent: boolean = false;
@@ -61,6 +63,25 @@ const useLogEntryUIProps = (
       username = logEntry.item.data.user_id;
       if (logEntry.item.data.data) {
         const data = logEntry.item.data.data;
+        if (data.command === 'isolate') {
+          iconType = 'lock';
+          isIsolateAction = true;
+        }
+        if (commentText) {
+          displayComment = true;
+        }
+      }
+    }
+    if (logEntry.type === ActivityLogItemTypes.ACTION) {
+      avatarSize = 'm';
+      commentType = 'regular';
+      commentText = logEntry.item.data.EndpointActions.data.comment?.trim() ?? '';
+      displayResponseEvent = false;
+      iconType = 'lockOpen';
+      username = logEntry.item.data.user.id;
+      avatarIconColor = theme.euiColorSuccess;
+      if (logEntry.item.data.EndpointActions.data) {
+        const data = logEntry.item.data.EndpointActions.data;
         if (data.command === 'isolate') {
           iconType = 'lock';
           isIsolateAction = true;
@@ -130,6 +151,7 @@ const useLogEntryUIProps = (
     return {
       actionEventTitle,
       avatarColor,
+      avatarIconColor,
       avatarSize,
       commentText,
       commentType,
@@ -170,6 +192,7 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
   const {
     actionEventTitle,
     avatarColor,
+    avatarIconColor,
     avatarSize,
     commentText,
     commentType,
@@ -188,7 +211,9 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
       timestamp={<FormattedRelativePreferenceDate value={logEntry.item.data['@timestamp']} />}
       event={<b>{displayResponseEvent ? responseEventTitle : actionEventTitle}</b>}
       timelineIcon={
-        <LogEntryTimelineIcon {...{ avatarSize, iconType, isResponseEvent, avatarColor }} />
+        <LogEntryTimelineIcon
+          {...{ avatarSize, iconType, isResponseEvent, avatarColor, avatarIconColor }}
+        />
       }
       data-test-subj="timelineEntry"
     >
