@@ -33,6 +33,12 @@ interface SearchStrategyProgress {
   total: number;
 }
 
+function getLatencyCorrelationsSortedByCorrelation(
+  latencyCorrelations: LatencyCorrelation[]
+) {
+  return latencyCorrelations.sort((a, b) => b.correlation - a.correlation);
+}
+
 const getInitialRawResponse = (): Response =>
   ({
     ccsWarning: false,
@@ -174,7 +180,8 @@ export function useLatencyCorrelations() {
           latencyCorrelations.push(
             ...significantCorrelations.latencyCorrelations
           );
-          rawResponseUpdate.latencyCorrelations = latencyCorrelations;
+          rawResponseUpdate.latencyCorrelations =
+            getLatencyCorrelationsSortedByCorrelation(latencyCorrelations);
           setRawResponse(rawResponseUpdate);
         }
 

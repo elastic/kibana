@@ -69,5 +69,5 @@ export const fetchSignificantCorrelations = async (
   }
 
   // TODO Fix CCS warning
-  return { latencyCorrelations, ccsWarning: false };
+  return { latencyCorrelations, ccsWarning: false, totalDocCount };
 };

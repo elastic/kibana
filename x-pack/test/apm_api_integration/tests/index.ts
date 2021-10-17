@@ -28,13 +28,13 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./alerts/rule_registry'));
     });
 
-    // correlations
-    describe('correlations/failed_transactions', function () {
+    describe('correlations', function () {
       loadTestFile(require.resolve('./correlations/failed_transactions'));
-    });
-
-    describe('correlations/latency', function () {
+      loadTestFile(require.resolve('./correlations/field_candidates'));
+      loadTestFile(require.resolve('./correlations/field_value_pairs'));
       loadTestFile(require.resolve('./correlations/latency'));
+      loadTestFile(require.resolve('./correlations/p_values'));
+      loadTestFile(require.resolve('./correlations/significant_correlations'));
     });
 
     describe('metadata/event_metadata', function () {

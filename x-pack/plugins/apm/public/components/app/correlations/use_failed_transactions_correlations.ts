@@ -35,6 +35,12 @@ interface SearchStrategyProgress {
   total: number;
 }
 
+function getFailedTransactionsCorrelationsSortedByScore(
+  failedTransactionsCorrelations: FailedTransactionsCorrelation[]
+) {
+  return failedTransactionsCorrelations.sort((a, b) => b.score - a.score);
+}
+
 const getInitialRawResponse = (): Response =>
   ({
     ccsWarning: false,
@@ -178,7 +184,9 @@ export function useFailedTransactionsCorrelations() {
             ...pValues.failedTransactionsCorrelations
           );
           rawResponseUpdate.failedTransactionsCorrelations =
-            failedTransactionsCorrelations;
+            getFailedTransactionsCorrelationsSortedByScore(
+              failedTransactionsCorrelations
+            );
           setRawResponse(rawResponseUpdate);
         }
 

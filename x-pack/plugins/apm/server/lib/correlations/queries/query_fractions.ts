@@ -44,6 +44,14 @@ export const fetchTransactionDurationFractions = async (
   const resp = await esClient.search(
     getTransactionDurationRangesRequest(params, ranges)
   );
+
+  if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
+    return {
+      fractions: [],
+      totalDocCount: 0,
+    };
+  }
+
   if (resp.body.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationFractions failed, did not return aggregations.'
