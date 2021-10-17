@@ -179,17 +179,3 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
       });
     });
   });
-
-  async function waitForEvents(id: string, actions: string[]) {
-    await retry.try(async () => {
-      return await getEventLog({
-        getService,
-        spaceId: Spaces.space1.id,
-        type: 'alert',
-        id,
-        provider: 'alerting',
-        actions: new Map(actions.map((action) => [action, { gte: 1 }])),
-      });
-    });
-  }
-}
