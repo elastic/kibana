@@ -38,8 +38,8 @@ export class IlmPolicyManager {
    * Create the Reporting ILM policy
    */
   public async createIlmPolicy(): Promise<void> {
+    // @ts-expect-error expects policy to be present
     await this.client.ilm.putLifecycle({
-      policy: ILM_POLICY_NAME,
       body: reportingIlmPolicy,
     });
   }

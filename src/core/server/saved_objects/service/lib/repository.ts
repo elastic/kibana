@@ -361,12 +361,11 @@ export class SavedObjectsRepository {
       refresh,
       body: raw._source,
       ...(overwrite && version ? decodeRequestVersion(version) : {}),
-      require_alias: true,
     };
 
     const { body, statusCode, headers } =
       id && overwrite
-        ? await this.client.index(requestParams)
+        ? await this.client.index({ ...requestParams, require_alias: true })
         : await this.client.create(requestParams);
 
     // throw if we can't verify a 404 response is from Elasticsearch

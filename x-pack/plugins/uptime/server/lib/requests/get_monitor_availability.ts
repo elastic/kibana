@@ -147,11 +147,8 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
       },
     };
 
-    // @ts-expect-error AggregationsBucketsPath is not valid
     const { body: result } = await uptimeEsClient.search({ body: esParams });
-    // @ts-expect-error aggregation is not valid
     afterKey = result?.aggregations?.monitors?.after_key as AfterKey;
-    // @ts-expect-error aggregation is not valid
     queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || []));
   } while (afterKey !== undefined);
 

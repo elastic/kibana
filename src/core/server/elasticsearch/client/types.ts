@@ -11,7 +11,7 @@ import type {
   TransportResult,
   TransportRequestOptions,
   TransportRequestParams,
-} from '@elastic/transport';
+} from '@elastic/elasticsearch';
 
 /**
  * Client used to query the elasticsearch cluster.

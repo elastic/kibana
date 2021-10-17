@@ -40,7 +40,7 @@ export async function termsAggSuggestions(
   const result = await esClient.search(
     { index, body },
     {
-      abortController: { signal: abortSignal },
+      signal: abortSignal,
     }
   );
 

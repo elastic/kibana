@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '../../../../../../core/server/mocks';
 import { pluginInitializerContextConfigMock } from '../../../../../../core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';

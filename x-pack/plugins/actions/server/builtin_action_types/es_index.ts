@@ -105,7 +105,9 @@ async function executor(
     const err = find(result.items, 'index.error.reason');
     if (err) {
       return wrapErr(
+        // @ts-expect-error error_details is not comptible with error: ErrorCause | string
         `${err.index?.error?.reason}${
+          // @ts-expect-error error_details is not comptible with error: ErrorCause | string
           err.index?.error?.caused_by ? ` (${err.index?.error?.caused_by?.reason})` : ''
         }`,
         actionId,

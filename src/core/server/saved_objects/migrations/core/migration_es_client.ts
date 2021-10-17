@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Client } from '@elastic/elasticsearch';
-import type { TransportRequestOptions } from '@elastic/transport';
+import type { Client, TransportRequestOptions } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 

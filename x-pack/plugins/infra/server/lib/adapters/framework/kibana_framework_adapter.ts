@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportRequestParams } from '@elastic/transport';
+import { TransportRequestParams } from '@elastic/elasticsearch';
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 import {
   InfraRouteConfig,

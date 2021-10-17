@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Client } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
-import { Transport } from '@elastic/transport';
 import type {
+  Client,
   TransportRequestParams,
   TransportRequestOptions,
   TransportResult,
-} from '@elastic/transport';
+} from '@elastic/elasticsearch';
+import { Transport } from '@elastic/transport';
 
 class KibanaTransport extends Transport {
   request(params: TransportRequestParams, options?: TransportRequestOptions) {

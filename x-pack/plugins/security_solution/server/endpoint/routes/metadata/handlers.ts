@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { TypeOf } from '@kbn/config-schema';

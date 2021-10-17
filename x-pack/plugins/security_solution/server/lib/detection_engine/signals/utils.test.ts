@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import { TransportResult } from '@elastic/transport';
+import { TransportResult } from '@elastic/elasticsearch';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';

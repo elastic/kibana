@@ -30,10 +30,15 @@ export default ({ getService }: FtrProviderContext): void => {
             actions: [{ id: string; actionRef: string }];
           };
           references: [{}];
-        }>({
-          index: '.kibana',
-          id: 'siem-detection-engine-rule-actions:fce024a0-0452-11ec-9b15-d13d79d162f3',
-        });
+        }>(
+          {
+            index: '.kibana',
+            id: 'siem-detection-engine-rule-actions:fce024a0-0452-11ec-9b15-d13d79d162f3',
+          },
+          {
+            meta: true,
+          }
+        );
         expect(response.statusCode).to.eql(200);
 
         // references exist and are expected values

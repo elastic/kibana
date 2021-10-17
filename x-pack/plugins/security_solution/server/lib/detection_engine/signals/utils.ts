@@ -11,7 +11,7 @@ import uuidv5 from 'uuid/v5';
 
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportResult } from '@elastic/transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
@@ -505,13 +505,17 @@ export const errorAggregator = (
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
     if (item.create?.error != null && !ignoreStatusCodes.includes(item.create.status)) {
+      // @ts-expect-error error is not comptible with error: ErrorCause | string
       if (accum[item.create.error.reason] == null) {
+        // @ts-expect-error error is not comptible with error: ErrorCause | string
         accum[item.create.error.reason] = {
           count: 1,
           statusCode: item.create.status,
         };
       } else {
+        // @ts-expect-error error is not comptible with error: ErrorCause | string
         accum[item.create.error.reason] = {
+          // @ts-expect-error error is not comptible with error: ErrorCause | string
           count: accum[item.create.error.reason].count + 1,
           statusCode: item.create.status,
         };
@@ -728,9 +732,11 @@ export const createSearchAfterReturnTypeFromResponse = ({
       searchResult._shards.failed === 0 ||
       searchResult._shards.failures?.every((failure) => {
         return (
+          // @ts-expect-error reason is not comptible with error: ErrorCause | string
           failure.reason?.reason?.includes(
             'No mapping found for [@timestamp] in order to sort on'
           ) ||
+          // @ts-expect-error reason is not comptible with error: ErrorCause | string
           failure.reason?.reason?.includes(
             `No mapping found for [${timestampOverride}] in order to sort on`
           )

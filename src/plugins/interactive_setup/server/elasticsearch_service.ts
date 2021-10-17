@@ -7,7 +7,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
 import { from, of, timer } from 'rxjs';

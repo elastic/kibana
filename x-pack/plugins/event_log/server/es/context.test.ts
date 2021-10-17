@@ -9,7 +9,7 @@ import { createEsContext } from './context';
 import { ElasticsearchClient, Logger } from '../../../../../src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 jest.mock('../lib/../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');
 

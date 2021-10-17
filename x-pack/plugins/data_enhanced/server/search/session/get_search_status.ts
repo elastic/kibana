@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
 import { SearchStatus } from './types';
 import { SearchSessionRequestInfo } from '../../../../../../src/plugins/data/common';

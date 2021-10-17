@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransportResult } from '@elastic/transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

@@ -2571,10 +2571,10 @@
     ts-node "^10.2.1"
     typescript "^4.3.5"
 
-"@elastic/transport@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-0.0.6.tgz#78da508529dfe789b26f85d4cb1db6a47aee0078"
-  integrity sha512-MvXT0xYuKs9+hCI1TiymvrvvhX+inKlaPcP1rO61X2N2jbViDrF1LqKWqIxfJWOImF+BsQBhh6elyiYwdCZYmw==
+"@elastic/transport@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-0.0.7.tgz#abc636b18c231dba457f188f62a4df432c543cdc"
+  integrity sha512-apSD9aY6jVBC5lLc3GWmgrcjXl2StAR/AQYW8bnZ0mGTqkkLGpx4Ojnd3yYDvD1JxMosbs6lpTA60dLF2vtSHQ==
   dependencies:
     debug "^4.3.2"
     hpagent "^0.1.2"

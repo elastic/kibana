@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/logging';
 import {
@@ -25,7 +25,7 @@ export type PersistenceAlertService = (
     fields: Record<string, unknown>;
   }>,
   refresh: boolean | 'wait_for'
-) => Promise<TransportResult<BulkResponse, unknown>>;
+) => Promise<TransportResult<BulkResponse, unknown> | undefined>;
 
 export interface PersistenceServices {
   alertWithPersistence: PersistenceAlertService;

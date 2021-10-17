@@ -7,7 +7,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { isResponseError, isUnauthorizedError } from './errors';
 
 const createApiResponseError = ({

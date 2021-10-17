@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransportResult } from '@elastic/transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IKibanaSearchRequest } from 'src/plugins/data/common';
 import { ExpressionValueFilter } from '.';

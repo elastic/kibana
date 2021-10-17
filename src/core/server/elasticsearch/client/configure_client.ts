@@ -9,14 +9,14 @@
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
 import { Client, errors } from '@elastic/elasticsearch';
-import { Transport, events } from '@elastic/transport';
 import type {
   TransportRequestParams,
   TransportRequestOptions,
   TransportResult,
   DiagnosticResult,
-} from '@elastic/transport';
+} from '@elastic/elasticsearch';
 import type { RequestBody } from '@elastic/transport/lib/types';
+import { Transport, HttpConnection } from '@elastic/transport';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import type { ElasticsearchErrorDetails } from './types';
@@ -55,7 +55,11 @@ export const configureClient = (
     }
   }
 
-  const client = new Client({ ...clientOptions, Transport: KibanaTransport });
+  const client = new Client({
+    ...clientOptions,
+    Transport: KibanaTransport,
+    Connection: HttpConnection,
+  });
   addLogging(client, logger.get('query', type));
 
   // --------------------------------------------------------------------------------- //
@@ -130,7 +134,7 @@ export function getRequestDebugMeta(event: DiagnosticResult): {
 }
 
 const addLogging = (client: Client, logger: Logger) => {
-  client.diagnostic.on(events.RESPONSE, (error, event) => {
+  client.diagnostic.on('response', (error, event) => {
     if (event) {
       const opaqueId = event.meta.request.options.opaqueId;
       const meta = opaqueId

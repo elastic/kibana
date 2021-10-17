@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 import { JobSavedObjectService } from '../../saved_objects';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';

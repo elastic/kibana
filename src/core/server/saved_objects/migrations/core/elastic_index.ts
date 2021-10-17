@@ -179,7 +179,7 @@ export async function write(client: MigrationEsClient, index: string, docs: RawD
     return;
   }
 
-  const exception: any = new Error(err.index!.error!.reason);
+  const exception: any = new Error((err.index!.error as estypes.ErrorCause)!.reason);
   exception.detail = err;
   throw exception;
 }
@@ -416,7 +416,7 @@ async function reindex(
       task_id: String(task),
     });
 
-    const e = body.error;
+    const e = body.error as estypes.ErrorCause;
     if (e) {
       throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
     }

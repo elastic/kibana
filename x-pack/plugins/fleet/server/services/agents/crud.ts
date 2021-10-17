@@ -318,7 +318,6 @@ export async function bulkUpdateAgents(
     items: res.body.items.map((item: estypes.BulkResponseItemContainer) => ({
       id: item.update!._id as string,
       success: !item.update!.error,
-      // @ts-expect-error ErrorCause is not assignable to Error
       error: item.update!.error as Error,
     })),
   };

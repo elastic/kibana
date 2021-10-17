@@ -74,6 +74,7 @@ export function registerAppRoutes({
           }
 
           const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every((privilege) =>
+            // @ts-expect-error SecurityClusterPrivilege doesn’t list all the possible privileges.
             privileges.includes(privilege)
           );
 

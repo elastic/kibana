@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ApiKeyAuth, BasicAuth } from '@elastic/transport/lib/types';
+import type { ApiKeyAuth, BasicAuth } from '@elastic/transport/lib/types';
 import {
   ESSearchResponse,
   ESSearchRequest,

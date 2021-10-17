@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
