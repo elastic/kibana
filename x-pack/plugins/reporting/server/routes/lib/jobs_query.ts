@@ -18,6 +18,7 @@ import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
 import { PromiseType } from 'utility-types';
 import { ReportingCore } from '../../';
+import { REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import { ReportApiJSON, ReportSource } from '../../../common/types';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
@@ -57,9 +58,7 @@ interface JobsQueryFactory {
 
 export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
   function getIndex() {
-    const config = reportingCore.getConfig();
-
-    return `${config.get('index')}-*`;
+    return `${REPORTING_SYSTEM_INDEX}-*`;
   }
 
   async function execQuery<

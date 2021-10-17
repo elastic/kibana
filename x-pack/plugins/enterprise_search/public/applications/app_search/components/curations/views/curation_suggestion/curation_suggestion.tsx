@@ -25,6 +25,7 @@ import { EngineLogic } from '../../../engine';
 import { AppSearchPageTemplate } from '../../../layout';
 import { Result } from '../../../result';
 import { Result as ResultType } from '../../../result/types';
+import { convertToResultFormat } from '../../curation/results';
 import { getCurationsBreadcrumbs } from '../../utils';
 
 import { CurationActionBar } from './curation_action_bar';
@@ -35,14 +36,15 @@ import { DATA } from './temp_data';
 
 export const CurationSuggestion: React.FC = () => {
   const { query } = useDecodedParams();
+  const { engine, isMetaEngine } = useValues(EngineLogic);
   const curationSuggestionLogic = CurationSuggestionLogic({ query });
   const { loadSuggestion } = useActions(curationSuggestionLogic);
-  const { engine, isMetaEngine } = useValues(EngineLogic);
-  const { suggestion, suggestedPromotedDocuments, dataLoading } =
+  const { suggestion, suggestedPromotedDocuments, curation, dataLoading } =
     useValues(curationSuggestionLogic);
   const [showOrganicResults, setShowOrganicResults] = useState(false);
   const currentOrganicResults = [...DATA].splice(5, 4);
   const proposedOrganicResults = [...DATA].splice(2, 4);
+  const existingCurationResults = curation ? curation.promoted.map(convertToResultFormat) : [];
 
   const suggestionQuery = suggestion?.query || '';
 
@@ -63,10 +65,7 @@ export const CurationSuggestion: React.FC = () => {
         pageTitle: suggestionQuery,
       }}
     >
-      <CurationActionBar
-        onAcceptClick={() => alert('Accepted')}
-        onRejectClick={() => alert('Rejected')}
-      />
+      <CurationActionBar />
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -79,7 +78,7 @@ export const CurationSuggestion: React.FC = () => {
             </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <CurationResultPanel variant="current" results={[...DATA].splice(0, 3)} />
+          <CurationResultPanel variant="current" results={existingCurationResults} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xxs">
@@ -127,12 +126,13 @@ export const CurationSuggestion: React.FC = () => {
                       gutterSize="s"
                       data-test-subj="currentOrganicResults"
                     >
-                      {currentOrganicResults.map((result: ResultType) => (
+                      {currentOrganicResults.map((result: ResultType, index) => (
                         <EuiFlexItem grow={false} key={result.id.raw}>
                           <Result
                             result={result}
                             isMetaEngine={isMetaEngine}
                             schemaForTypeHighlights={engine.schema}
+                            resultPosition={index + existingCurationResults.length + 1}
                           />
                         </EuiFlexItem>
                       ))}
@@ -146,12 +146,13 @@ export const CurationSuggestion: React.FC = () => {
                       gutterSize="s"
                       data-test-subj="proposedOrganicResults"
                     >
-                      {proposedOrganicResults.map((result: ResultType) => (
+                      {proposedOrganicResults.map((result: ResultType, index) => (
                         <EuiFlexItem grow={false} key={result.id.raw}>
                           <Result
                             result={result}
                             isMetaEngine={isMetaEngine}
                             schemaForTypeHighlights={engine.schema}
+                            resultPosition={index + suggestedPromotedDocuments.length + 1}
                           />
                         </EuiFlexItem>
                       ))}

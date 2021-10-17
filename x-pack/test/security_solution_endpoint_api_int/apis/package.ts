@@ -69,7 +69,8 @@ export default function ({ getService }: FtrProviderContext) {
     );
   };
 
-  describe('Endpoint package', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/114885
+  describe.skip('Endpoint package', () => {
     describe('network processors', () => {
       let networkIndexData: InsertedEvents;
 

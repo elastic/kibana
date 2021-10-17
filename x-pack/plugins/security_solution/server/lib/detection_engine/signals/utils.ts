@@ -99,9 +99,20 @@ export const hasReadIndexPrivileges = async (args: {
   buildRuleMessage: BuildRuleMessage;
   ruleStatusClient: IRuleExecutionLogClient;
   ruleId: string;
+  ruleName: string;
+  ruleType: string;
   spaceId: string;
 }): Promise<boolean> => {
-  const { privileges, logger, buildRuleMessage, ruleStatusClient, ruleId, spaceId } = args;
+  const {
+    privileges,
+    logger,
+    buildRuleMessage,
+    ruleStatusClient,
+    ruleId,
+    ruleName,
+    ruleType,
+    spaceId,
+  } = args;
 
   const indexNames = Object.keys(privileges.index);
   const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
@@ -119,6 +130,8 @@ export const hasReadIndexPrivileges = async (args: {
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
+      ruleName,
+      ruleType,
       spaceId,
       newStatus: RuleExecutionStatus['partial failure'],
     });
@@ -136,6 +149,8 @@ export const hasReadIndexPrivileges = async (args: {
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
+      ruleName,
+      ruleType,
       spaceId,
       newStatus: RuleExecutionStatus['partial failure'],
     });
@@ -156,6 +171,7 @@ export const hasTimestampFields = async (args: {
   ruleStatusClient: IRuleExecutionLogClient;
   ruleId: string;
   spaceId: string;
+  ruleType: string;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
 }): Promise<boolean> => {
@@ -167,6 +183,7 @@ export const hasTimestampFields = async (args: {
     inputIndices,
     ruleStatusClient,
     ruleId,
+    ruleType,
     spaceId,
     logger,
     buildRuleMessage,
@@ -184,6 +201,8 @@ export const hasTimestampFields = async (args: {
     await ruleStatusClient.logStatusChange({
       message: errorString.trimEnd(),
       ruleId,
+      ruleName,
+      ruleType,
       spaceId,
       newStatus: RuleExecutionStatus['partial failure'],
     });
@@ -210,6 +229,8 @@ export const hasTimestampFields = async (args: {
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
+      ruleName,
+      ruleType,
       spaceId,
       newStatus: RuleExecutionStatus['partial failure'],
     });
@@ -853,6 +874,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
       aggregations: newAggregations,
       hits: {
         total: calculateTotal(prev.hits.total, next.hits.total),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         max_score: Math.max(newHits.max_score!, existingHits.max_score!),
         hits: [...existingHits.hits, ...newHits.hits],
       },

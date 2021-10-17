@@ -791,6 +791,7 @@ describe('utils', () => {
         inputIndices: ['myfa*'],
         ruleStatusClient,
         ruleId: 'ruleId',
+        ruleType: 'ruleType',
         spaceId: 'default',
         logger: mockLogger,
         buildRuleMessage,
@@ -836,6 +837,7 @@ describe('utils', () => {
         inputIndices: ['myfa*'],
         ruleStatusClient,
         ruleId: 'ruleId',
+        ruleType: 'ruleType',
         spaceId: 'default',
         logger: mockLogger,
         buildRuleMessage,
@@ -867,6 +869,7 @@ describe('utils', () => {
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleStatusClient,
         ruleId: 'ruleId',
+        ruleType: 'ruleType',
         spaceId: 'default',
         logger: mockLogger,
         buildRuleMessage,
@@ -898,6 +901,7 @@ describe('utils', () => {
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleStatusClient,
         ruleId: 'ruleId',
+        ruleType: 'ruleType',
         spaceId: 'default',
         logger: mockLogger,
         buildRuleMessage,
@@ -1281,7 +1285,7 @@ describe('utils', () => {
     test('It returns timestampOverride date time if set', () => {
       const override = '2020-10-07T19:20:28.049Z';
       const searchResult = sampleDocSearchResultsNoSortId();
-      searchResult.hits.hits[0]._source!.different_timestamp = new Date(override).toISOString();
+      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
       const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });

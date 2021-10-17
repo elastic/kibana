@@ -96,6 +96,7 @@ export type {
   ConfigPath,
   ConfigService,
   ConfigDeprecation,
+  ConfigDeprecationContext,
   ConfigDeprecationProvider,
   ConfigDeprecationFactory,
   AddConfigDeprecation,
@@ -387,7 +388,10 @@ export { EventLoopDelaysMonitor } from './metrics';
 
 export type { I18nServiceSetup } from './i18n';
 export type {
+  BaseDeprecationDetails,
   DeprecationsDetails,
+  ConfigDeprecationDetails,
+  FeatureDeprecationDetails,
   RegisterDeprecationsConfig,
   GetDeprecationsContext,
   DeprecationsServiceSetup,

@@ -13,7 +13,7 @@ import { Operation } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { defaultThresholdColor } from './color_assignment';
+import { defaultReferenceLineColor } from './color_assignment';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
@@ -338,8 +338,8 @@ describe('#toExpression', () => {
             yConfig: [{ forAccessor: 'a' }],
           },
           {
-            layerId: 'threshold',
-            layerType: layerTypes.THRESHOLD,
+            layerId: 'referenceLine',
+            layerType: layerTypes.REFERENCELINE,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -348,7 +348,7 @@ describe('#toExpression', () => {
           },
         ],
       },
-      { ...frame.datasourceLayers, threshold: mockDatasource.publicAPIMock }
+      { ...frame.datasourceLayers, referenceLine: mockDatasource.publicAPIMock }
     ) as Ast;
 
     function getYConfigColorForLayer(ast: Ast, index: number) {
@@ -356,6 +356,6 @@ describe('#toExpression', () => {
         .chain[0].arguments.color;
     }
     expect(getYConfigColorForLayer(expression, 0)).toEqual([]);
-    expect(getYConfigColorForLayer(expression, 1)).toEqual([defaultThresholdColor]);
+    expect(getYConfigColorForLayer(expression, 1)).toEqual([defaultReferenceLineColor]);
   });
 });

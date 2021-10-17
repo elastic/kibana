@@ -85,7 +85,7 @@ export async function fetchAndTransformGcMetrics({
               date_histogram: getMetricsDateHistogramParams({
                 start,
                 end,
-                metricsInterval: config['xpack.apm.metricsInterval'],
+                metricsInterval: config.metricsInterval,
               }),
               aggs: {
                 // get the max value
@@ -137,9 +137,16 @@ export async function fetchAndTransformGcMetrics({
     const data = timeseriesData.buckets.map((bucket) => {
       // derivative/value will be undefined for the first hit and if the `max` value is null
       const bucketValue = bucket.value?.value;
-      const y = isFiniteNumber(bucketValue)
+
+      const unconvertedY = isFiniteNumber(bucketValue)
         ? round(bucketValue * (60 / bucketSize), 1)
         : null;
+
+      // convert to milliseconds if we're calculating time, but not for rate
+      const y =
+        unconvertedY !== null && fieldName === METRIC_JAVA_GC_TIME
+          ? unconvertedY * 1000
+          : unconvertedY;
 
       return {
         y,

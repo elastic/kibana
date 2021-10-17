@@ -9,7 +9,7 @@
 import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 import { RangeFilterParams } from '../../filters';
 
 import * as range from './range';
@@ -18,11 +18,12 @@ jest.mock('../grammar');
 
 describe('kuery functions', () => {
   describe('range', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 

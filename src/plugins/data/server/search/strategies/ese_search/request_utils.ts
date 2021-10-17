@@ -8,7 +8,7 @@
 
 import { IUiSettingsClient } from 'kibana/server';
 import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AsyncSearchSubmitRequest, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions, UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import { SearchSessionsConfigSchema } from '../../../../config';
@@ -17,8 +17,8 @@ import { SearchSessionsConfigSchema } from '../../../../config';
  * @internal
  */
 export async function getIgnoreThrottled(
-  uiSettingsClient: IUiSettingsClient
-): Promise<Pick<SearchRequest, 'ignore_throttled'>> {
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>
+): Promise<{ ignore_throttled?: boolean }> {
   const includeFrozen = await uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
   return includeFrozen ? { ignore_throttled: false } : {};
 }
@@ -27,7 +27,7 @@ export async function getIgnoreThrottled(
  @internal
  */
 export async function getDefaultAsyncSubmitParams(
-  uiSettingsClient: IUiSettingsClient,
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
 ): Promise<
