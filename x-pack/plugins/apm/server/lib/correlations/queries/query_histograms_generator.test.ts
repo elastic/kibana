@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { isLatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 
 import { fetchTransactionDurationHistograms } from './query_histograms_generator';
 
@@ -53,6 +54,7 @@ describe('query_histograms_generator', () => {
 
       let loadedHistograms = 0;
       const items = [];
+      const errors = [];
 
       for await (const item of fetchTransactionDurationHistograms(
         esClientMock,
@@ -64,8 +66,10 @@ describe('query_histograms_generator', () => {
         totalDocCount,
         fieldValuePairs
       )) {
-        if (item !== undefined) {
+        if (isLatencyCorrelation(item)) {
           items.push(item);
+        } else if (item?.error) {
+          errors.push(item);
         }
         loadedHistograms++;
       }
@@ -73,11 +77,11 @@ describe('query_histograms_generator', () => {
       expect(items.length).toEqual(0);
       expect(loadedHistograms).toEqual(3);
       expect(esClientSearchMock).toHaveBeenCalledTimes(3);
-      // expect(getLogMessages().map((d) => d.split(': ')[1])).toEqual([
-      //   "Failed to fetch correlation/kstest for 'the-field-name-1/the-field-value-1'",
-      //   "Failed to fetch correlation/kstest for 'the-field-name-2/the-field-value-2'",
-      //   "Failed to fetch correlation/kstest for 'the-field-name-2/the-field-value-3'",
-      // ]);
+      expect(errors.map((e) => e.error.toString())).toEqual([
+        'Error: fetchTransactionDurationCorrelation failed, did not return aggregations.',
+        'Error: fetchTransactionDurationCorrelation failed, did not return aggregations.',
+        'Error: fetchTransactionDurationCorrelation failed, did not return aggregations.',
+      ]);
     });
 
     it('returns items with correlation and ks-test value', async () => {
