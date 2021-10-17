@@ -30,9 +30,16 @@ import {
 } from '../../mocks';
 import { registerActionAuditLogRoutes } from './audit_log';
 import uuid from 'uuid';
-import { aMockAction, aMockResponse, MockAction, mockSearchResult, MockResponse } from './mocks';
+import { mockAuditLogSearchResult, Results } from './mocks';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
-import { ActivityLog, ActivityLogItemTypes } from '../../../../common/endpoint/types';
+import {
+  ActivityLog,
+  ActivityLogItemTypes,
+  EndpointAction,
+  EndpointActionResponse,
+} from '../../../../common/endpoint/types';
+import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 describe('Action Log API', () => {
   describe('schema', () => {
@@ -93,17 +100,31 @@ describe('Action Log API', () => {
   });
 
   describe('response', () => {
-    const mockID = 'XYZABC-000';
-    const actionID = 'some-known-actionid';
+    const mockAgentID = 'XYZABC-000';
+    const mockActionID = 'some-known-action_id';
     let endpointAppContextService: EndpointAppContextService;
+    const fleetActionGenerator = new FleetActionGenerator('seed');
+    const endpointActionGenerator = new EndpointActionGenerator('seed');
 
     // convenience for calling the route and handler for audit log
     let getActivityLog: (
       params: EndpointActionLogRequestParams,
       query?: EndpointActionLogRequestQuery
     ) => Promise<jest.Mocked<KibanaResponseFactory>>;
-    // convenience for injecting mock responses for actions index and responses
-    let havingActionsAndResponses: (actions: MockAction[], responses: MockResponse[]) => void;
+
+    // convenience for injecting mock action requests and responses
+    // for .logs-endpoint and .fleet indices
+    let mockActions: ({
+      _actions,
+      _fleetActions,
+      _responses,
+      _fleetResponses,
+    }: {
+      _actions: number;
+      _fleetActions: number;
+      _responses: number;
+      _fleetResponses: number;
+    }) => void;
 
     let havingErrors: () => void;
 
@@ -149,12 +170,105 @@ describe('Action Log API', () => {
         return mockResponse;
       };
 
-      havingActionsAndResponses = (actions: MockAction[], responses: MockResponse[]) => {
-        esClientMock.asCurrentUser.search = jest.fn().mockImplementation((req) => {
-          const items: any[] =
-            req.index === '.fleet-actions' ? actions.splice(0, 50) : responses.splice(0, 1000);
+      // create as many actions as needed
+      const getEndpointActionsData = (count: number) => {
+        const data = [...Array(count).keys()].map(() =>
+          endpointActionGenerator.generate({
+            agent: { id: mockAgentID },
+            EndpointActions: {
+              action_id: mockActionID,
+            },
+          })
+        );
+        return data;
+      };
+      // create as many responses as needed
+      const getEndpointResponseData = (count: number) => {
+        const data = [...Array(count).keys()].map(() =>
+          endpointActionGenerator.generateResponse({
+            agent: { id: mockAgentID },
+            EndpointActions: {
+              action_id: mockActionID,
+            },
+          })
+        );
+        return data;
+      };
+      // create as many fleet actions as needed
+      const getFleetResponseData = (count: number) => {
+        const data = [...Array(count).keys()].map(() =>
+          fleetActionGenerator.generateResponse({
+            agent_id: mockAgentID,
+            action_id: mockActionID,
+          })
+        );
+        return data;
+      };
+      // create as many fleet responses as needed
+      const getFleetActionData = (count: number) => {
+        const data = [...Array(count).keys()].map(() =>
+          fleetActionGenerator.generate({
+            agents: [mockAgentID],
+            action_id: mockActionID,
+            data: {
+              comment: 'some comment',
+            },
+          })
+        );
+        return data;
+      };
 
-          return Promise.resolve(mockSearchResult(items.map((x) => x.build())));
+      // mock actions and responses results in a single response
+      mockActions = ({
+        _actions,
+        _fleetActions,
+        _responses,
+        _fleetResponses,
+      }: {
+        _actions: number;
+        _fleetActions: number;
+        _responses: number;
+        _fleetResponses: number;
+      }) => {
+        esClientMock.asCurrentUser.search = jest.fn().mockImplementationOnce(() => {
+          let actions: Results[] = [];
+          let fleetActions: Results[] = [];
+          let responses: Results[] = [];
+          let fleetResponses: Results[] = [];
+
+          if (_actions) {
+            actions = getEndpointActionsData(_actions).map((e) => ({
+              _index: '.ds-.logs-endpoint.actions-default-2021.19.10-000001',
+              _source: e,
+            }));
+          }
+          if (_fleetActions) {
+            fleetActions = getFleetActionData(_fleetActions).map((e) => ({
+              _index: '.fleet-actions-7',
+              _source: e,
+            }));
+          }
+          if (_responses) {
+            responses = getEndpointResponseData(_responses).map((e) => ({
+              _index: '.ds-.logs-endpoint.action.responses-default-2021.19.10-000001',
+              _source: e,
+            }));
+          }
+          if (_fleetResponses) {
+            fleetResponses = getFleetResponseData(_fleetResponses).map((e) => ({
+              _index: '.ds-.fleet-actions-results-2021.19.10-000001',
+              _source: e,
+            }));
+          }
+
+          const results = mockAuditLogSearchResult([
+            ...actions,
+            ...fleetActions,
+            ...responses,
+            ...fleetResponses,
+          ]);
+
+          return Promise.resolve(results);
         });
       };
 
@@ -172,30 +286,45 @@ describe('Action Log API', () => {
     });
 
     it('should return an empty array when nothing in audit log', async () => {
-      havingActionsAndResponses([], []);
-      const response = await getActivityLog({ agent_id: mockID });
+      mockActions({ _actions: 0, _fleetActions: 0, _responses: 0, _fleetResponses: 0 });
+
+      const response = await getActivityLog({ agent_id: mockAgentID });
       expect(response.ok).toBeCalled();
       expect((response.ok.mock.calls[0][0]?.body as ActivityLog).data).toHaveLength(0);
     });
 
-    it.skip('should have actions and action responses', async () => {
-      havingActionsAndResponses(
-        [
-          aMockAction().withAgent(mockID).withAction('isolate').withID(actionID),
-          aMockAction().withAgent(mockID).withAction('unisolate'),
-        ],
-        [aMockResponse(actionID, mockID).forAction(actionID).forAgent(mockID)]
-      );
-      const response = await getActivityLog({ agent_id: mockID });
-      const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
+    it('should have actions and action responses', async () => {
+      mockActions({ _actions: 2, _fleetActions: 2, _responses: 2, _fleetResponses: 2 });
 
+      const response = await getActivityLog({ agent_id: mockAgentID });
+      const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
       expect(response.ok).toBeCalled();
-      expect(responseBody.data).toHaveLength(3);
+      expect(responseBody.data).toHaveLength(8);
+
+      expect(responseBody.data.filter((e) => e.type === ActivityLogItemTypes.ACTION)).toHaveLength(
+        2
+      );
       expect(
-        responseBody.data.filter((e) => e.type === ActivityLogItemTypes.FLEET_RESPONSE)
-      ).toHaveLength(1);
+        responseBody.data.filter((e) => (e.item.data as EndpointActionResponse).completed_at)
+      ).toHaveLength(2);
       expect(
-        responseBody.data.filter((e) => e.type === ActivityLogItemTypes.FLEET_ACTION)
+        responseBody.data.filter((e) => (e.item.data as EndpointAction).expiration)
+      ).toHaveLength(2);
+    });
+
+    it('should have only actions when no responses', async () => {
+      mockActions({ _actions: 2, _fleetActions: 2, _responses: 0, _fleetResponses: 0 });
+
+      const response = await getActivityLog({ agent_id: mockAgentID });
+      const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
+      expect(response.ok).toBeCalled();
+      expect(responseBody.data).toHaveLength(4);
+
+      expect(responseBody.data.filter((e) => e.type === ActivityLogItemTypes.ACTION)).toHaveLength(
+        2
+      );
+      expect(
+        responseBody.data.filter((e) => (e.item.data as EndpointAction).expiration)
       ).toHaveLength(2);
     });
 
@@ -203,18 +332,19 @@ describe('Action Log API', () => {
       havingErrors();
 
       try {
-        await getActivityLog({ agent_id: mockID });
+        await getActivityLog({ agent_id: mockAgentID });
       } catch (error) {
-        expect(error.message).toEqual(`Error fetching actions log for agent_id ${mockID}`);
+        expect(error.message).toEqual(`Error fetching actions log for agent_id ${mockAgentID}`);
       }
     });
 
     it('should return date ranges if present in the query', async () => {
-      havingActionsAndResponses([], []);
+      mockActions({ _actions: 0, _fleetActions: 0, _responses: 0, _fleetResponses: 0 });
+
       const startDate = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
       const endDate = new Date().toISOString();
       const response = await getActivityLog(
-        { agent_id: mockID },
+        { agent_id: mockAgentID },
         {
           page: 1,
           page_size: 50,
