@@ -54,11 +54,26 @@ import {
   registerManageDefaultDataViewRouteLegacy,
 } from './routes/default_index_pattern';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from './types';
-import { registerCreateRuntimeFieldRoute } from './routes/runtime_fields/create_runtime_field';
-import { registerGetRuntimeFieldRoute } from './routes/runtime_fields/get_runtime_field';
-import { registerDeleteRuntimeFieldRoute } from './routes/runtime_fields/delete_runtime_field';
-import { registerPutRuntimeFieldRoute } from './routes/runtime_fields/put_runtime_field';
-import { registerUpdateRuntimeFieldRoute } from './routes/runtime_fields/update_runtime_field';
+import {
+  registerCreateRuntimeFieldRoute,
+  registerCreateRuntimeFieldRouteLegacy,
+} from './routes/runtime_fields/create_runtime_field';
+import {
+  registerGetRuntimeFieldRoute,
+  registerGetRuntimeFieldRouteLegacy,
+} from './routes/runtime_fields/get_runtime_field';
+import {
+  registerDeleteRuntimeFieldRoute,
+  registerDeleteRuntimeFieldRouteLegacy,
+} from './routes/runtime_fields/delete_runtime_field';
+import {
+  registerPutRuntimeFieldRoute,
+  registerPutRuntimeFieldRouteLegacy,
+} from './routes/runtime_fields/put_runtime_field';
+import {
+  registerUpdateRuntimeFieldRoute,
+  registerUpdateRuntimeFieldRouteLegacy,
+} from './routes/runtime_fields/update_runtime_field';
 import {
   registerHasUserDataViewRoute,
   registerHasUserDataViewRouteLegacy,
@@ -108,7 +123,9 @@ export function registerRoutes(
   registerPutRuntimeFieldRoute(router, getStartServices);
   registerUpdateRuntimeFieldRoute(router, getStartServices);
 
+  // ###
   // Legacy Index Pattern API
+  // ###
   registerCreateDataViewRouteLegacy(router, getStartServices);
   registerGetDataViewRouteLegacy(router, getStartServices);
   registerDeleteDataViewRouteLegacy(router, getStartServices);
@@ -125,6 +142,14 @@ export function registerRoutes(
   registerGetScriptedFieldRouteLegacy(router, getStartServices);
   registerDeleteScriptedFieldRouteLegacy(router, getStartServices);
   registerUpdateScriptedFieldRouteLegacy(router, getStartServices);
+
+  // Runtime Fields API
+  registerCreateRuntimeFieldRouteLegacy(router, getStartServices);
+  registerGetRuntimeFieldRouteLegacy(router, getStartServices);
+  registerDeleteRuntimeFieldRouteLegacy(router, getStartServices);
+  registerPutRuntimeFieldRouteLegacy(router, getStartServices);
+  registerUpdateRuntimeFieldRouteLegacy(router, getStartServices);
+  // ###
 
   router.get(
     {

@@ -36,7 +36,7 @@ const indexPatternUpdateSchema = schema.object({
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSpecSchema)),
 });
 
-export const updateDataViewRouteFactory =
+const updateDataViewRouteFactory =
   (path: string) =>
   (
     router: IRouter,

@@ -18,7 +18,7 @@ import type {
 } from '../../types';
 import { SPECIFIC_SCRIPTED_FIELD_PATH, SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY } from '../../constants';
 
-export const updateScriptedFieldRouteFactory =
+const updateScriptedFieldRouteFactory =
   (path: string) =>
   (
     router: IRouter,

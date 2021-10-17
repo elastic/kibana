@@ -14,60 +14,71 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../types';
+import { SPECIFIC_RUNTIME_FIELD_PATH, SPECIFIC_RUNTIME_FIELD_PATH_LEGACY } from '../../constants';
 
-export const registerGetRuntimeFieldRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<
-    DataViewsServerPluginStartDependencies,
-    DataViewsServerPluginStart
-  >
-) => {
-  router.get(
-    {
-      path: '/api/index_patterns/index_pattern/{id}/runtime_field/{name}',
-      validate: {
-        params: schema.object({
-          id: schema.string({
-            minLength: 1,
-            maxLength: 1_000,
+const getRuntimeFieldRouteFactory =
+  (path: string) =>
+  (
+    router: IRouter,
+    getStartServices: StartServicesAccessor<
+      DataViewsServerPluginStartDependencies,
+      DataViewsServerPluginStart
+    >
+  ) => {
+    router.get(
+      {
+        path,
+        validate: {
+          params: schema.object({
+            id: schema.string({
+              minLength: 1,
+              maxLength: 1_000,
+            }),
+            name: schema.string({
+              minLength: 1,
+              maxLength: 1_000,
+            }),
           }),
-          name: schema.string({
-            minLength: 1,
-            maxLength: 1_000,
-          }),
-        }),
-      },
-    },
-
-    handleErrors(async (ctx, req, res) => {
-      const savedObjectsClient = ctx.core.savedObjects.client;
-      const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-      const [, , { indexPatternsServiceFactory }] = await getStartServices();
-      const indexPatternsService = await indexPatternsServiceFactory(
-        savedObjectsClient,
-        elasticsearchClient
-      );
-      const id = req.params.id;
-      const name = req.params.name;
-
-      const indexPattern = await indexPatternsService.get(id);
-
-      const field = indexPattern.fields.getByName(name);
-
-      if (!field) {
-        throw new ErrorIndexPatternFieldNotFound(id, name);
-      }
-
-      if (!field.runtimeField) {
-        throw new Error('Only runtime fields can be retrieved.');
-      }
-
-      return res.ok({
-        body: {
-          field: field.toSpec(),
-          runtimeField: indexPattern.getRuntimeField(name),
         },
-      });
-    })
-  );
-};
+      },
+
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const [, , { indexPatternsServiceFactory }] = await getStartServices();
+        const indexPatternsService = await indexPatternsServiceFactory(
+          savedObjectsClient,
+          elasticsearchClient
+        );
+        const id = req.params.id;
+        const name = req.params.name;
+
+        const indexPattern = await indexPatternsService.get(id);
+
+        const field = indexPattern.fields.getByName(name);
+
+        if (!field) {
+          throw new ErrorIndexPatternFieldNotFound(id, name);
+        }
+
+        if (!field.runtimeField) {
+          throw new Error('Only runtime fields can be retrieved.');
+        }
+
+        return res.ok({
+          body: {
+            field: field.toSpec(),
+            runtimeField: indexPattern.getRuntimeField(name),
+          },
+        });
+      })
+    );
+  };
+
+export const registerGetRuntimeFieldRoute = getRuntimeFieldRouteFactory(
+  SPECIFIC_RUNTIME_FIELD_PATH
+);
+
+export const registerGetRuntimeFieldRouteLegacy = getRuntimeFieldRouteFactory(
+  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY
+);

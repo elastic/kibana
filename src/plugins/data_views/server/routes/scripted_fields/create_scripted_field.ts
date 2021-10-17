@@ -16,7 +16,7 @@ import type {
 } from '../../types';
 import { SCRIPTED_FIELD_PATH, SCRIPTED_FIELD_PATH_LEGACY } from '../../constants';
 
-export const createScriptedFieldRouteFactory =
+const createScriptedFieldRouteFactory =
   (path: string) =>
   (
     router: IRouter,
