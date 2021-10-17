@@ -88,7 +88,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         const finalRawResponse: LatencyCorrelationsRawResponse & RawResponseBase = {
-          took: 0,
           ccsWarning: significantCorrelationsResponse.body?.ccsWarning,
           percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
           overallHistogram: overallDistributionResponse.body?.overallHistogram,
@@ -96,7 +95,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           log: [],
         };
 
-        expect(typeof finalRawResponse?.took).to.be('number');
         expect(finalRawResponse?.percentileThresholdValue).to.be(undefined);
         expect(finalRawResponse?.overallHistogram).to.be(undefined);
         expect(finalRawResponse?.latencyCorrelations?.length).to.be(0);
@@ -186,7 +184,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         const finalRawResponse: LatencyCorrelationsRawResponse & RawResponseBase = {
-          took: 0,
           ccsWarning: significantCorrelationsResponse.body?.ccsWarning,
           percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
           overallHistogram: overallDistributionResponse.body?.overallHistogram,
@@ -194,7 +191,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           log: [],
         };
 
-        expect(typeof finalRawResponse?.took).to.be('number');
         // Fetched 95th percentile value of 1309695.875 based on 1244 documents.
         expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
         expect(finalRawResponse?.overallHistogram?.length).to.be(101);

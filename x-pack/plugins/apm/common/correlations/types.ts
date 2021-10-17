@@ -28,7 +28,6 @@ export interface ResponseHit {
 
 export interface RawResponseBase {
   ccsWarning: boolean;
-  took: number;
 }
 
 export interface SearchStrategyClientParamsBase {

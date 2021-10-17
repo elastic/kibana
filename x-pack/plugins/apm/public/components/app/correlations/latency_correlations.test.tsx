@@ -99,7 +99,6 @@ describe('correlations', () => {
             isRunning: true,
             rawResponse: {
               ccsWarning: false,
-              took: 1234,
               latencyCorrelations: [],
               log: [],
             },
@@ -122,7 +121,6 @@ describe('correlations', () => {
             isRunning: false,
             rawResponse: {
               ccsWarning: false,
-              took: 1234,
               latencyCorrelations: [],
               log: [],
             },

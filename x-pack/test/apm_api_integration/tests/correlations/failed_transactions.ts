@@ -88,7 +88,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const finalRawResponse: FailedTransactionsCorrelationsRawResponse & RawResponseBase = {
-        took: 0,
         ccsWarning: failedTransactionsCorrelationsResponse.body?.ccsWarning,
         percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
         overallHistogram: overallDistributionResponse.body?.overallHistogram,
@@ -96,8 +95,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations,
         log: [],
       };
-
-      expect(typeof finalRawResponse?.took).to.be('number');
 
       expect(finalRawResponse?.failedTransactionsCorrelations?.length).to.eql(
         0,
@@ -177,7 +174,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const finalRawResponse: FailedTransactionsCorrelationsRawResponse & RawResponseBase = {
-        took: 0,
         ccsWarning: failedTransactionsCorrelationsResponse.body?.ccsWarning,
         percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
         overallHistogram: overallDistributionResponse.body?.overallHistogram,
@@ -187,7 +183,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         log: [],
       };
 
-      expect(typeof finalRawResponse?.took).to.be('number');
       expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
       expect(finalRawResponse?.errorHistogram?.length).to.be(101);
       expect(finalRawResponse?.overallHistogram?.length).to.be(101);

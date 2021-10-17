@@ -42,7 +42,6 @@ function getLatencyCorrelationsSortedByCorrelation(
 const getInitialRawResponse = (): Response =>
   ({
     ccsWarning: false,
-    took: 0,
   } as Response);
 
 const getInitialProgress = (): SearchStrategyProgress => ({
