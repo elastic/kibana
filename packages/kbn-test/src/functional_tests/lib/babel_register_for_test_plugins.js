@@ -69,7 +69,12 @@ const testMap = [
   Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
 ].map((path) =>
   process.env.JENKINS_HOME
-    ? Path.join(path, 'parallel', process.env.CI_PARALLEL_PROCESS_NUMBER)
+    ? Path.join(
+        Path.dirname(path),
+        'parallel',
+        process.env.CI_PARALLEL_PROCESS_NUMBER,
+        Path.basename(path)
+      )
     : path
 );
 
