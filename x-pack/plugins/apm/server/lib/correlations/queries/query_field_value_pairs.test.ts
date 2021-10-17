@@ -69,10 +69,6 @@ describe('query_field_value_pairs', () => {
         fieldCandidates
       );
 
-      // TODO PROGRESS
-      // const { progress } = state.getState();
-
-      // expect(progress.loadedFieldValuePairs).toBe(1);
       expect(resp).toEqual([
         { fieldName: 'myFieldCandidate1', fieldValue: 'myValue1' },
         { fieldName: 'myFieldCandidate1', fieldValue: 'myValue2' },
@@ -82,8 +78,6 @@ describe('query_field_value_pairs', () => {
         { fieldName: 'myFieldCandidate3', fieldValue: 'myValue2' },
       ]);
       expect(esClientSearchMock).toHaveBeenCalledTimes(3);
-      // TODO Log
-      // expect(getLogMessages()).toEqual([]);
     });
   });
 });

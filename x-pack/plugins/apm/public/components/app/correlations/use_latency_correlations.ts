@@ -11,7 +11,10 @@ import { chunk } from 'lodash';
 import { IHttpFetchError } from 'src/core/public';
 
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
-import type { RawResponseBase } from '../../../../common/correlations/types';
+import type {
+  FieldValuePair,
+  RawResponseBase,
+} from '../../../../common/correlations/types';
 import type {
   LatencyCorrelation,
   LatencyCorrelationsRawResponse,
@@ -137,16 +140,38 @@ export function useLatencyCorrelations() {
         loaded: 10,
       });
 
-      const { fieldValuePairs } = await callApmApi({
-        endpoint: 'GET /internal/apm/correlations/field_value_pairs',
-        signal: null,
-        params: {
-          query: {
-            ...query,
-            fieldCandidates,
+      const chunkSize = 10;
+      let chunkLoadCounter = 0;
+
+      const fieldValuePairs: FieldValuePair[] = [];
+      const fieldCandidateChunks = chunk(fieldCandidates, chunkSize);
+
+      for (const fieldCandidateChunk of fieldCandidateChunks) {
+        const fieldValuePairChunkResponse = await callApmApi({
+          endpoint: 'GET /internal/apm/correlations/field_value_pairs',
+          signal: null,
+          params: {
+            query: {
+              ...query,
+              fieldCandidates: fieldCandidateChunk,
+            },
           },
-        },
-      });
+        });
+
+        if (fieldValuePairChunkResponse.fieldValuePairs.length > 0) {
+          fieldValuePairs.push(...fieldValuePairChunkResponse.fieldValuePairs);
+        }
+
+        if (isCancelledRef.current) {
+          return;
+        }
+
+        chunkLoadCounter += chunkSize;
+        setFetchState({
+          loaded:
+            10 + Math.round((chunkLoadCounter / fieldValuePairs.length) * 10),
+        });
+      }
 
       if (isCancelledRef.current) {
         return;
@@ -156,11 +181,10 @@ export function useLatencyCorrelations() {
         loaded: 20,
       });
 
+      chunkLoadCounter = 0;
+
       const fieldsToSample = new Set<string>();
       const latencyCorrelations: LatencyCorrelation[] = [];
-      const chunkSize = 10;
-      let loadCounter = 0;
-
       const fieldValuePairChunks = chunk(fieldValuePairs, chunkSize);
 
       for (const fieldValuePairChunk of fieldValuePairChunks) {
@@ -188,9 +212,10 @@ export function useLatencyCorrelations() {
           return;
         }
 
-        loadCounter += chunkSize;
+        chunkLoadCounter += chunkSize;
         setFetchState({
-          loaded: 20 + Math.round((loadCounter / fieldValuePairs.length) * 80),
+          loaded:
+            20 + Math.round((chunkLoadCounter / fieldValuePairs.length) * 80),
         });
       }
 

@@ -43,70 +43,40 @@ const fetchTransactionDurationFieldTerms = async (
   params: SearchStrategyParams,
   fieldName: string
 ): Promise<FieldValuePair[]> => {
-  try {
-    const resp = await esClient.search(getTermsAggRequest(params, fieldName));
+  const resp = await esClient.search(getTermsAggRequest(params, fieldName));
 
-    if (resp.body.aggregations === undefined) {
-      // TODO LOG
-      // if (addLogMessage) {
-      //   addLogMessage(
-      //     `Failed to fetch terms for field candidate ${fieldName} fieldValuePairs, no aggregations returned.`,
-      //     JSON.stringify(resp)
-      //   );
-      // }
-      return [];
-    }
-    const buckets = (
-      resp.body.aggregations
-        .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
-        key: string;
-      }>
-    )?.buckets;
-    if (buckets?.length >= 1) {
-      return buckets.map((d) => ({
-        fieldName,
-        fieldValue: d.key,
-      }));
-    }
-  } catch (e) {
-    // TODO LOG
-    // if (addLogMessage) {
-    //   addLogMessage(
-    //     `Failed to fetch terms for field candidate ${fieldName} fieldValuePairs.`,
-    //     JSON.stringify(e)
-    //   );
-    // }
+  if (resp.body.aggregations === undefined) {
+    throw new Error(
+      'fetchTransactionDurationFieldTerms failed, did not return aggregations.'
+    );
+  }
+
+  const buckets = (
+    resp.body.aggregations
+      .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
+      key: string;
+    }>
+  )?.buckets;
+  if (buckets?.length >= 1) {
+    return buckets.map((d) => ({
+      fieldName,
+      fieldValue: d.key,
+    }));
   }
 
   return [];
 };
-
-async function fetchInSequence(
-  fieldCandidates: string[],
-  fn: (fieldCandidate: string) => Promise<FieldValuePair[]>
-) {
-  const results = [];
-
-  for (const fieldCandidate of fieldCandidates) {
-    results.push(...(await fn(fieldCandidate)));
-  }
-
-  return results;
-}
 
 export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   fieldCandidates: string[]
 ): Promise<FieldValuePair[]> => {
-  return await fetchInSequence(
-    fieldCandidates,
-    async function (fieldCandidate: string) {
-      return await fetchTransactionDurationFieldTerms(
-        esClient,
-        params,
-        fieldCandidate
-      );
-    }
+  const responses = await Promise.all(
+    fieldCandidates.map((fieldCandidate) =>
+      fetchTransactionDurationFieldTerms(esClient, params, fieldCandidate)
+    )
   );
+
+  return responses.flat();
 };
