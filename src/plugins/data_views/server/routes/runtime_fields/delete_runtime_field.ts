@@ -76,6 +76,6 @@ export const registerDeleteRuntimeFieldRoute = deleteRuntimeFieldRouteFactory(
   SPECIFIC_RUNTIME_FIELD_PATH
 );
 
-export const registerDeleteRuntimeFieldouteLegacy = deleteRuntimeFieldRouteFactory(
+export const registerDeleteRuntimeFieldRouteLegacy = deleteRuntimeFieldRouteFactory(
   SPECIFIC_RUNTIME_FIELD_PATH_LEGACY
 );
