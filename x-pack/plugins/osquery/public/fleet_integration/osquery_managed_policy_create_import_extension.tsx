@@ -65,7 +65,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
 
   const { form: configForm } = useForm({
     defaultValue: {
-      config: JSON.stringify(get(newPolicy, 'inputs[0].config?.osquery.value', {}), null, 2),
+      config: JSON.stringify(get(newPolicy, 'inputs[0].config.osquery.value', {}), null, 2),
     },
     schema: {
       config: {

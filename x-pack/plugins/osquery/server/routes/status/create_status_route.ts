@@ -121,9 +121,14 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                   produce(packagePolicy, (draft) => {
                     unset(draft, 'id');
 
-                    set(draft, 'name', `osquery_manager-1`);
+                    set(draft, 'name', 'osquery_manager-1');
 
-                    set(draft, 'inputs[0].streams', []);
+                    set(draft, 'inputs[0]', {
+                      enabled: true,
+                      policy_template: 'osquery_manager',
+                      streams: [],
+                      type: 'osquery',
+                    });
 
                     each(agentPacks, (agentPack) => {
                       // @ts-expect-error update types
