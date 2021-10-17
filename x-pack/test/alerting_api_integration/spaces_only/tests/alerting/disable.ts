@@ -179,3 +179,4 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
       });
     });
   });
+}
