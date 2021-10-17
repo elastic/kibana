@@ -12,12 +12,12 @@ import { IHttpFetchError } from 'src/core/public';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/search_strategies/constants';
-import type { RawResponseBase } from '../../../../common/search_strategies/types';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
+import type { RawResponseBase } from '../../../../common/correlations/types';
 import type {
   FailedTransactionsCorrelation,
   FailedTransactionsCorrelationsRawResponse,
-} from '../../../../common/search_strategies/failed_transactions_correlations/types';
+} from '../../../../common/correlations/failed_transactions_correlations/types';
 
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';

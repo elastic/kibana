@@ -8,7 +8,7 @@
 import type {
   FieldValuePair,
   SearchStrategyClientParams,
-} from '../../../common/search_strategies/types';
+} from '../../../common/correlations/types';
 
 import { Setup } from '../helpers/setup_request';
 

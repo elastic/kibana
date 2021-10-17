@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   FieldValuePair,
   SearchStrategyParams,
-} from '../../../../common/search_strategies/types';
+} from '../../../../common/correlations/types';
 import { getCorrelationsFilters } from './get_filters';
 
 export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {

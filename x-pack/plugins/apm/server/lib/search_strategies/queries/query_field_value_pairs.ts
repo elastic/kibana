@@ -12,7 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   FieldValuePair,
   SearchStrategyParams,
-} from '../../../../common/search_strategies/types';
+} from '../../../../common/correlations/types';
 
 import { TERMS_SIZE } from '../constants';
 

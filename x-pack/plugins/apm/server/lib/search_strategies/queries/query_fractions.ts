@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 
-import { SearchStrategyParams } from '../../../../common/search_strategies/types';
+import { SearchStrategyParams } from '../../../../common/correlations/types';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 
 import { getQueryWithParams } from './get_query_with_params';

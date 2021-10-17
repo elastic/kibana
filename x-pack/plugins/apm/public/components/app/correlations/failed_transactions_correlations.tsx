@@ -35,9 +35,9 @@ import {
 } from '../../../../../observability/public';
 
 import { asPercent } from '../../../../common/utils/formatters';
-import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/search_strategies/constants';
-import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
+import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
+import { FieldStats } from '../../../../common/correlations/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';

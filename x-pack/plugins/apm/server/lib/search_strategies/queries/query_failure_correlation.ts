@@ -6,8 +6,8 @@
  */
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
-import { SearchStrategyParams } from '../../../../common/search_strategies/types';
-import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
+import { SearchStrategyParams } from '../../../../common/correlations/types';
+import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { fetchTransactionDurationRanges } from './query_ranges';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
+import type { SearchStrategyParams } from '../../../../common/correlations/types';
 
 export const getRequestBase = ({
   index,

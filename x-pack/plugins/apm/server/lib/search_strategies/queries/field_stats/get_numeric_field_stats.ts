@@ -14,8 +14,8 @@ import {
   FieldStatsCommonRequestParams,
   TopValueBucket,
   Aggs,
-} from '../../../../../common/search_strategies/field_stats_types';
-import { FieldValuePair } from '../../../../../common/search_strategies/types';
+} from '../../../../../common/correlations/field_stats_types';
+import { FieldValuePair } from '../../../../../common/correlations/types';
 import { getQueryWithParams } from '../get_query_with_params';
 import { buildSamplerAggregation } from '../../utils/field_stats_utils';
 

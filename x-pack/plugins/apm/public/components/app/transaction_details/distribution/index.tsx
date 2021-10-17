@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useUiTracker } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/search_strategies/constants';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';

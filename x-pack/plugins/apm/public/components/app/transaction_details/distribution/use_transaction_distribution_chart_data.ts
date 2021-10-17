@@ -9,8 +9,8 @@ import { useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/search_strategies/constants';
-import { RawSearchStrategyClientParams } from '../../../../../common/search_strategies/types';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
+import { RawSearchStrategyClientParams } from '../../../../../common/correlations/types';
 import { EVENT_OUTCOME } from '../../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../../common/event_outcome';
 

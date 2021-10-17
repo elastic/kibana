@@ -15,7 +15,7 @@ import {
   PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { SearchStrategyClientParams } from '../../../../common/search_strategies/types';
+import { SearchStrategyClientParams } from '../../../../common/correlations/types';
 
 export function getCorrelationsFilters({
   environment,

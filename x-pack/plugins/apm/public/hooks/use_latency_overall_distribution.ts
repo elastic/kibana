@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../common/search_strategies/constants';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../common/correlations/constants';
 
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../context/url_params_context/use_url_params';

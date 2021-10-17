@@ -31,9 +31,9 @@ import {
 } from '../../../../../observability/public';
 
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/search_strategies/constants';
-import { LatencyCorrelation } from '../../../../common/search_strategies/latency_correlations/types';
-import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
+import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
+import { FieldStats } from '../../../../common/correlations/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';

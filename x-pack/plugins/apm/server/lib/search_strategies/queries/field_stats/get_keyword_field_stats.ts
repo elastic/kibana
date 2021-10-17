@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { estypes } from '@elastic/elasticsearch';
-import { FieldValuePair } from '../../../../../common/search_strategies/types';
+import { FieldValuePair } from '../../../../../common/correlations/types';
 import { getQueryWithParams } from '../get_query_with_params';
 import { buildSamplerAggregation } from '../../utils/field_stats_utils';
 import {
@@ -16,7 +16,7 @@ import {
   KeywordFieldStats,
   Aggs,
   TopValueBucket,
-} from '../../../../../common/search_strategies/field_stats_types';
+} from '../../../../../common/correlations/field_stats_types';
 
 export const getKeywordFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,

@@ -15,7 +15,7 @@ import type {
   HistogramItem,
   ResponseHit,
   SearchStrategyParams,
-} from '../../../../common/search_strategies/types';
+} from '../../../../common/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';

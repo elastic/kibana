@@ -11,14 +11,14 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   FieldValuePair,
   SearchStrategyParams,
-} from '../../../../../common/search_strategies/types';
+} from '../../../../../common/correlations/types';
 import { getRequestBase } from '../get_request_base';
 import { fetchKeywordFieldStats } from './get_keyword_field_stats';
 import { fetchNumericFieldStats } from './get_numeric_field_stats';
 import {
   FieldStats,
   FieldStatsCommonRequestParams,
-} from '../../../../../common/search_strategies/field_stats_types';
+} from '../../../../../common/correlations/field_stats_types';
 import { fetchBooleanFieldStats } from './get_boolean_field_stats';
 
 export const fetchFieldsStats = async (

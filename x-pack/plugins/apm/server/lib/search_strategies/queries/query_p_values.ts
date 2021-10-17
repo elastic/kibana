@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
-import type { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
+import type { SearchStrategyParams } from '../../../../common/correlations/types';
+import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
 import { ERROR_CORRELATION_THRESHOLD } from '../constants';
 

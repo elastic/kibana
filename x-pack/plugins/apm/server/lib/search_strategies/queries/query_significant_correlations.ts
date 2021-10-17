@@ -12,8 +12,8 @@ import type { ElasticsearchClient } from 'src/core/server';
 import type {
   FieldValuePair,
   SearchStrategyParams,
-} from '../../../../common/search_strategies/types';
-import type { LatencyCorrelation } from '../../../../common/search_strategies/latency_correlations/types';
+} from '../../../../common/correlations/types';
+import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 
 import {
   fetchTransactionDurationFractions,
