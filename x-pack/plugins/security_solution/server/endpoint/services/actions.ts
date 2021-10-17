@@ -6,15 +6,18 @@
  */
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { SearchResponse } from '@elastic/elasticsearch/api/types';
+import { SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
   ActivityLog,
+  ActivityLogEntry,
   EndpointAction,
+  LogsEndpointAction,
   EndpointActionResponse,
   EndpointPendingActions,
+  LogsEndpointActionResponse,
 } from '../../../common/endpoint/types';
 import {
   catchAndWrapError,
@@ -83,7 +86,7 @@ const getActivityLog = async ({
   startDate: string;
   endDate: string;
   logger: Logger;
-}) => {
+}): Promise<ActivityLogEntry[]> => {
   let actionsResult: ApiResponse<SearchResponse<unknown>, unknown>;
   let responsesResult: ApiResponse<SearchResponse<unknown>, unknown>;
 
@@ -118,12 +121,18 @@ const getActivityLog = async ({
     throw new Error(`Error fetching actions log for agent_id ${elasticAgentId}`);
   }
 
-  // label record as `action`, `response`, `fleetAction` and `fleetResponse`
+  // label record as `action`, `fleetAction`
   const responses = categorizeResponseResults({
-    results: responsesResult?.body?.hits?.hits,
+    results: responsesResult?.body?.hits?.hits as Array<
+      SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
+    >,
   });
+
+  // label record as `response`, `fleetResponse`
   const actions = categorizeActionResults({
-    results: actionsResult?.body?.hits?.hits,
+    results: actionsResult?.body?.hits?.hits as Array<
+      SearchHit<EndpointAction | LogsEndpointAction>
+    >,
   });
 
   // sort by @timestamp in desc order, newest first

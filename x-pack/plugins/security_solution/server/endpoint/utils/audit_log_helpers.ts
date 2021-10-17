@@ -17,9 +17,15 @@ import {
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
   ActivityLog,
+  ActivityLogAction,
+  EndpointActivityLogAction,
+  ActivityLogActionResponse,
+  EndpointActivityLogActionResponse,
   ActivityLogItemTypes,
   EndpointAction,
   LogsEndpointAction,
+  EndpointActionResponse,
+  LogsEndpointActionResponse,
 } from '../../../common/endpoint/types';
 import { doesLogsEndpointActionsIndexExist } from '../utils';
 
@@ -43,33 +49,55 @@ const getDateFilters = ({ startDate, endDate }: { startDate: string; endDate: st
   ];
 };
 
-export const categorizeResponseResults = ({ results }: { results: Array<SearchHit<unknown>> }) => {
+export const categorizeResponseResults = ({
+  results,
+}: {
+  results: Array<SearchHit<EndpointActionResponse | LogsEndpointActionResponse>>;
+}): Array<ActivityLogActionResponse | EndpointActivityLogActionResponse> => {
   return results?.length
     ? results?.map((e) => {
-        return {
-          type: hasNewEndpointIndex({ regexPattern: logsEndpointResponsesRegex, index: e._index })
-            ? ActivityLogItemTypes.RESPONSE
-            : ActivityLogItemTypes.FLEET_RESPONSE,
-          item: { id: e._id, data: e._source },
-        };
+        const isResponseDoc: boolean = hasNewEndpointIndex({
+          regexPattern: logsEndpointResponsesRegex,
+          index: e._index,
+        });
+        return isResponseDoc
+          ? {
+              type: ActivityLogItemTypes.RESPONSE,
+              item: { id: e._id, data: e._source as LogsEndpointActionResponse },
+            }
+          : {
+              type: ActivityLogItemTypes.FLEET_RESPONSE,
+              item: { id: e._id, data: e._source as EndpointActionResponse },
+            };
       })
     : [];
 };
 
-export const categorizeActionResults = ({ results }: { results: Array<SearchHit<unknown>> }) => {
+export const categorizeActionResults = ({
+  results,
+}: {
+  results: Array<SearchHit<EndpointAction | LogsEndpointAction>>;
+}): Array<ActivityLogAction | EndpointActivityLogAction> => {
   return results?.length
     ? results?.map((e) => {
-        return {
-          type: hasNewEndpointIndex({ regexPattern: logsEndpointActionsRegex, index: e._index })
-            ? ActivityLogItemTypes.ACTION
-            : ActivityLogItemTypes.FLEET_ACTION,
-          item: { id: e._id, data: e._source },
-        };
+        const isActionDoc: boolean = hasNewEndpointIndex({
+          regexPattern: logsEndpointActionsRegex,
+          index: e._index,
+        });
+        return isActionDoc
+          ? {
+              type: ActivityLogItemTypes.ACTION,
+              item: { id: e._id, data: e._source as LogsEndpointAction },
+            }
+          : {
+              type: ActivityLogItemTypes.FLEET_ACTION,
+              item: { id: e._id, data: e._source as EndpointAction },
+            };
       })
     : [];
 };
 
-export const getTimeSortedData = (data: ActivityLog['data']) => {
+export const getTimeSortedData = (data: ActivityLog['data']): ActivityLog['data'] => {
   return data.sort((a, b) =>
     new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
   );
@@ -197,5 +225,10 @@ export const getActionResponsesResult = async ({
   return actionResponses;
 };
 
-const hasNewEndpointIndex = ({ regexPattern, index }: { regexPattern: RegExp; index: string }) =>
-  regexPattern.test(index);
+const hasNewEndpointIndex = ({
+  regexPattern,
+  index,
+}: {
+  regexPattern: RegExp;
+  index: string;
+}): boolean => regexPattern.test(index);
