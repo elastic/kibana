@@ -24,9 +24,9 @@ import { APP_ID } from '../../../../../../../common/constants';
 import {
   EndpointPrivileges,
   useEndpointPrivileges,
-} from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
+} from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 
-jest.mock('../../../../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
 
 describe('when rendering the PolicyTrustedAppsList', () => {

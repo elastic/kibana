@@ -25,7 +25,7 @@ import {
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
 import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
