@@ -13,11 +13,7 @@ import {
   TaskManagerStartContract,
 } from '../../../task_manager/server';
 import { PreConfiguredAction } from '../types';
-import {
-  getTotalCount,
-  getInUseTotalCount,
-  getInUseByAlertingTotalCounts,
-} from './actions_telemetry';
+import { getTotalCount, getInUseByAlertingTotalCounts } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 

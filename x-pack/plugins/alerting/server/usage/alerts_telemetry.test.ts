@@ -46,6 +46,7 @@ Object {
     "document.test__": 1,
     "logs.alert.document.count": 1,
   },
+  "countNamespaces": 1,
   "countTotal": 4,
 }
 `);
