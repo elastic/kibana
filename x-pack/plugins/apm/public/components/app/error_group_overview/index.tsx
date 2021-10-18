@@ -7,6 +7,7 @@
 
 import {
   EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
@@ -15,10 +16,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
 import { ErrorDistribution } from '../error_group_details/Distribution';
 import { ErrorGroupList } from './List';
 
@@ -70,17 +73,30 @@ export function ErrorGroupOverview() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiPanel hasBorder={true}>
-          <ErrorDistribution
-            distribution={errorDistributionData}
-            title={i18n.translate(
-              'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
-              { defaultMessage: 'Error occurrences' }
-            )}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
+      <ChartPointerEventContextProvider>
+        <EuiFlexGrid columns={2} gutterSize="s">
+          <EuiFlexItem>
+            <EuiPanel hasBorder={true}>
+              <ErrorDistribution
+                distribution={errorDistributionData}
+                title={i18n.translate(
+                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
+                  { defaultMessage: 'Error occurrences' }
+                )}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TransactionErrorRateChart
+              title={i18n.translate('xpack.apm.errorRate.chart.errorRate', {
+                defaultMessage: 'Error rate',
+              })}
+              kuery={kuery}
+              environment={environment}
+            />
+          </EuiFlexItem>
+        </EuiFlexGrid>
+      </ChartPointerEventContextProvider>
 
       <EuiFlexItem>
         <EuiPanel hasBorder={true}>

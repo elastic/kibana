@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
@@ -56,6 +56,12 @@ export function TransactionCharts({
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
               <TransactionErrorRateChart
+                title={i18n.translate(
+                  'xpack.apm.errorRate.chart.transactionsErrorRate',
+                  {
+                    defaultMessage: 'Failed transaction rate',
+                  }
+                )}
                 kuery={kuery}
                 environment={environment}
               />

@@ -162,6 +162,9 @@ export const serviceDetail = {
           defaultMessage: 'Errors',
         }),
         element: <Outlet />,
+        searchBarOptions: {
+          showTimeComparison: true,
+        },
       }),
       params: t.partial({
         query: t.partial({

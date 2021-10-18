@@ -105,7 +105,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
       <EuiTitle size="xs">
         <span>{title}</span>
       </EuiTitle>
-      <div style={{ height: 180 }}>
+      <div style={{ height: 256 }}>
         <Chart>
           <Settings
             xDomain={{ min, max }}

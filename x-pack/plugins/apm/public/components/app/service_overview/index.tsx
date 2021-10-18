@@ -139,6 +139,12 @@ export function ServiceOverview() {
               {!isRumAgent && (
                 <EuiFlexItem grow={3}>
                   <TransactionErrorRateChart
+                    title={i18n.translate(
+                      'xpack.apm.errorRate.chart.transactionsErrorRate',
+                      {
+                        defaultMessage: 'Failed transaction rate',
+                      }
+                    )}
                     height={nonLatencyChartHeight}
                     showAnnotations={false}
                     kuery={kuery}
