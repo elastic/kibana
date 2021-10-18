@@ -120,7 +120,7 @@ function makeRouterEnforcingFleetSetupPrivilege<TContext extends RequestHandlerC
   };
 }
 
-type RouterWrapper = <T extends RequestHandlerContext>(route: IRouter<T>) => IRouter<T>;
+export type RouterWrapper = <T extends RequestHandlerContext>(route: IRouter<T>) => IRouter<T>;
 
 interface RouterWrappersSetup {
   require: {
