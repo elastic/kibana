@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
-import { createDataStreamPayload } from './data_streams_tab.helpers';
+import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
 
 /**
  * The below import is required to avoid a console error warn from the "brace" package
@@ -23,9 +23,14 @@ import { createMemoryHistory } from 'history';
 stubWebWorker();
 
 // unhandled promise rejection https://github.com/elastic/kibana/issues/112699
-describe.skip('<IndexManagementHome />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+describe('<IndexManagementHome />', () => {
   let testBed: IndicesTestBed;
+  let server: ReturnType<typeof setupEnvironment>['server'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+
+  beforeEach(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
 
   afterAll(() => {
     server.restore();
@@ -108,19 +113,9 @@ describe.skip('<IndexManagementHome />', () => {
 
   describe('index detail panel with % character in index name', () => {
     const indexName = 'test%';
+
     beforeEach(async () => {
-      const index = {
-        health: 'green',
-        status: 'open',
-        primary: 1,
-        replica: 1,
-        documents: 10000,
-        documents_deleted: 100,
-        size: '156kb',
-        primary_size: '156kb',
-        name: indexName,
-      };
-      httpRequestsMockHelpers.setLoadIndicesResponse([index]);
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
 
       testBed = await setup();
       const { component, find } = testBed;
@@ -165,20 +160,11 @@ describe.skip('<IndexManagementHome />', () => {
 
   describe('index actions', () => {
     const indexName = 'testIndex';
-    beforeEach(async () => {
-      const index = {
-        health: 'green',
-        status: 'open',
-        primary: 1,
-        replica: 1,
-        documents: 10000,
-        documents_deleted: 100,
-        size: '156kb',
-        primary_size: '156kb',
-        name: indexName,
-      };
 
-      httpRequestsMockHelpers.setLoadIndicesResponse([index]);
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+      httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexName] });
+
       testBed = await setup();
       const { find, component } = testBed;
       component.update();
@@ -188,11 +174,15 @@ describe.skip('<IndexManagementHome />', () => {
 
     test('should be able to flush index', async () => {
       const { actions } = testBed;
+
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('flushIndexMenuButton');
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/flush`);
+      const requestsCount = server.requests.length;
+      expect(server.requests[requestsCount - 2].url).toBe(`${API_BASE_PATH}/indices/flush`);
+      // After the indices are flushed, we imediately reload them. So we need to expect to see
+      // a reload server call also.
+      expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
     });
   });
 });
