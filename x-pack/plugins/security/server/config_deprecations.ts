@@ -35,6 +35,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     const legacyAuditLoggerEnabled = !settings?.xpack?.security?.audit?.appender;
     if (auditLoggingEnabled && legacyAuditLoggerEnabled) {
       addDeprecation({
+        configPath: 'xpack.security.audit.appender',
         title: i18n.translate('xpack.security.deprecations.auditLoggerTitle', {
           defaultMessage: 'The legacy audit logger is deprecated',
         }),
@@ -59,6 +60,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation) => {
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
       addDeprecation({
+        configPath: 'xpack.security.authc.providers',
         title: i18n.translate('xpack.security.deprecations.authcProvidersTitle', {
           defaultMessage:
             'Defining "xpack.security.authc.providers" as an array of provider types is deprecated',
@@ -92,6 +94,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     if (hasProviderType('basic') && hasProviderType('token')) {
       addDeprecation({
+        configPath: 'xpack.security.authc.providers',
         title: i18n.translate('xpack.security.deprecations.basicAndTokenProvidersTitle', {
           defaultMessage:
             'Both "basic" and "token" authentication providers are enabled in "xpack.security.authc.providers"',
@@ -119,8 +122,13 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       string,
       any
     >;
-    if (Object.values(samlProviders).find((provider) => !!provider.maxRedirectURLSize)) {
+
+    const foundProvider = Object.entries(samlProviders).find(
+      ([_, provider]) => !!provider.maxRedirectURLSize
+    );
+    if (foundProvider) {
       addDeprecation({
+        configPath: `xpack.security.authc.providers.saml.${foundProvider[0]}.maxRedirectURLSize`,
         title: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeTitle', {
           defaultMessage:
             '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is deprecated',
@@ -143,6 +151,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation, { branch }) => {
     if ('enabled' in (settings?.xpack?.security || {})) {
       addDeprecation({
+        configPath: 'xpack.security.enabled',
         title: i18n.translate('xpack.security.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.security.enabled" is deprecated',
         }),
@@ -169,6 +178,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation, { branch }) => {
     if (settings?.xpack?.security?.session?.idleTimeout === undefined) {
       addDeprecation({
+        configPath: 'xpack.security.session.idleTimeout',
         level: 'warning',
         title: i18n.translate('xpack.security.deprecations.idleTimeoutTitle', {
           defaultMessage: 'The "xpack.security.session.idleTimeout" default is changing',
@@ -192,6 +202,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     if (settings?.xpack?.security?.session?.lifespan === undefined) {
       addDeprecation({
+        configPath: 'xpack.security.session.lifespan',
         level: 'warning',
         title: i18n.translate('xpack.security.deprecations.lifespanTitle', {
           defaultMessage: 'The "xpack.security.session.lifespan" default is changing',
