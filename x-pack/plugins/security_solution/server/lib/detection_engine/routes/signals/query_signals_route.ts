@@ -51,7 +51,7 @@ export const querySignalsRoute = (router: SecuritySolutionPluginRouter, config: 
         });
       }
       const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const siemClient = context.securitySolution!.getAppClient();
+      const siemClient = context.securitySolution.getAppClient();
 
       // TODO: Once we are past experimental phase this code should be removed
       const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
