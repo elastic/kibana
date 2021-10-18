@@ -28,6 +28,7 @@ describe('getDeprecations', () => {
   describe('when running on cloud with legacy apm-server', () => {
     it('returns deprecations', async () => {
       const deprecationsCallback = getDeprecations({
+        branch: 'master',
         cloudSetup: { isCloudEnabled: true } as unknown as CloudSetup,
         fleet: {
           start: () => ({
@@ -43,6 +44,7 @@ describe('getDeprecations', () => {
   describe('when running on cloud with fleet', () => {
     it('returns no deprecations', async () => {
       const deprecationsCallback = getDeprecations({
+        branch: 'master',
         cloudSetup: { isCloudEnabled: true } as unknown as CloudSetup,
         fleet: {
           start: () => ({
@@ -58,6 +60,7 @@ describe('getDeprecations', () => {
   describe('when running on prem', () => {
     it('returns no deprecations', async () => {
       const deprecationsCallback = getDeprecations({
+        branch: 'master',
         cloudSetup: { isCloudEnabled: false } as unknown as CloudSetup,
         fleet: {
           start: () => ({ agentPolicyService: { get: () => undefined } }),
