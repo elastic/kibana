@@ -88,10 +88,10 @@ export const signalRulesAlertType = ({
   ruleExecutionLogClientOverride,
 }: {
   logger: Logger;
-  eventsTelemetry?: TelemetryEventsSender;
+  eventsTelemetry: TelemetryEventsSender | undefined;
   experimentalFeatures: ExperimentalFeatures;
   version: string;
-  ml?: SetupPlugins['ml'];
+  ml: SetupPlugins['ml'] | undefined;
   lists: SetupPlugins['lists'] | undefined;
   config: ConfigType;
   eventLogService: IEventLogService;
@@ -135,7 +135,6 @@ export const signalRulesAlertType = ({
       params,
       spaceId,
       updatedBy: updatedByUser,
-      rule,
     }) {
       const { ruleId, maxSignals, meta, outputIndex, timestampOverride, type } = params;
 
@@ -263,6 +262,7 @@ export const signalRulesAlertType = ({
         buildRuleMessage,
         startedAt,
       });
+
       if (remainingGap.asMilliseconds() > 0) {
         const gapString = remainingGap.humanize();
         const gapMessage = buildRuleMessage(

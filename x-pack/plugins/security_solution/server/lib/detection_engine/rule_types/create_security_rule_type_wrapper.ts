@@ -75,20 +75,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           underlyingClient: config.ruleExecutionLog.underlyingClient,
         });
 
-        const {
-          actions,
-          name,
-          schedule: { interval },
-          ruleTypeId,
-        } = rule;
-
-        const refresh = actions.length ? 'wait_for' : false;
-
         const completeRule = {
           ruleConfig: rule,
           ruleParams: params,
           alertId,
         };
+
+        const {
+          actions,
+          name,
+          schedule: { interval },
+          ruleTypeId,
+        } = completeRule.ruleConfig;
+
+        const refresh = actions.length ? 'wait_for' : false;
 
         const buildRuleMessage = buildRuleMessageFactory({
           id: alertId,
@@ -321,7 +321,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`)
               );
 
-              if (rule.throttle != null) {
+              if (completeRule.ruleConfig.throttle != null) {
                 await scheduleThrottledNotificationActions({
                   alertInstance: services.alertInstanceFactory(alertId),
                   throttle: completeRule.ruleConfig.throttle ?? '',
