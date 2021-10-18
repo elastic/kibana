@@ -336,7 +336,7 @@ const ValidationMessage: FC<{
       >
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.message"
-          defaultMessage="This data view produced an error when attempting preview the datafeed. This could be due to fields selected for this job not existing in {dataViewTitle}."
+          defaultMessage="This data view produced an error when attempting to preview the datafeed. This could be due to fields selected for this job not existing in {dataViewTitle}."
           values={{ dataViewTitle }}
         />
 
