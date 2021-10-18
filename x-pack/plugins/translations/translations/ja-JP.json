@@ -4514,8 +4514,6 @@
     "telemetry.optInNoticeSeenErrorToastText": "通知の消去中にエラーが発生しました",
     "telemetry.optInSuccessOff": "使用状況データ収集がオフです。",
     "telemetry.optInSuccessOn": "使用状況データ収集がオンです。",
-    "telemetry.provideUsageStatisticsAriaName": "使用統計を提供",
-    "telemetry.provideUsageStatisticsTitle": "使用統計を提供",
     "telemetry.readOurUsageDataPrivacyStatementLinkText": "プライバシーポリシー",
     "telemetry.securityData": "Endpoint Security データ",
     "telemetry.telemetryBannerDescription": "Elastic Stackの改善にご協力ください使用状況データの収集は現在無効です。使用状況データの収集を有効にすると、製品とサービスを管理して改善することができます。詳細については、{privacyStatementLink}をご覧ください。",
