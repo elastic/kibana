@@ -17,8 +17,8 @@ const BASE_REPO_ROOT = Path.resolve(
 const REPO_ROOT = process.env.JENKINS_HOME
   ? Path.join(
       Path.dirname(BASE_REPO_ROOT),
-      // 'parallel',
-      // process.env.CI_PARALLEL_PROCESS_NUMBER,
+      'parallel',
+      process.env.CI_PARALLEL_PROCESS_NUMBER,
       Path.basename(BASE_REPO_ROOT)
     )
   : BASE_REPO_ROOT;
@@ -77,19 +77,19 @@ const testMap = [
   Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
 ];
 
-// const testMap2 = [
-//   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'test')),
-//   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/test')),
-//   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'examples')),
-//   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/examples')),
-//   // TODO: should should probably remove this link back to the source
-//   Fs.realpathSync(
-//     Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/plugins/task_manager/server/config.ts')
-//   ),
-//   Fs.realpathSync(
-//     Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'src/core/utils/default_app_categories.ts')
-//   ),
-// ];
+const testMap2 = [
+  Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'test')),
+  Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/test')),
+  Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'examples')),
+  Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/examples')),
+  // TODO: should should probably remove this link back to the source
+  Fs.realpathSync(
+    Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/plugins/task_manager/server/config.ts')
+  ),
+  Fs.realpathSync(
+    Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'src/core/utils/default_app_categories.ts')
+  ),
+];
 
 // const testMap3 = [
 //   Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'test'),
@@ -104,7 +104,7 @@ const testMap = [
 // testMap2.concat(testMap3);
 // testMap.concat(testMap2);
 
-const finalTestMap = [].concat(testMap);
+const finalTestMap = testMap.concat(testMap2);
 
 console.log('TEST PATHS: ');
 console.log(finalTestMap);
