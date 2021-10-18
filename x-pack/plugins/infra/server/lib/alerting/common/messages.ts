@@ -138,7 +138,6 @@ export const buildRecoveredAlertReason: (alertResult: {
     defaultMessage:
       '{metric} is now {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
     values: {
-      group,
       metric,
       comparator: recoveredComparatorToI18n(
         comparator,
@@ -147,6 +146,7 @@ export const buildRecoveredAlertReason: (alertResult: {
       ),
       threshold: thresholdToI18n(threshold),
       currentValue,
+      group,
     },
   });
 
@@ -159,9 +159,9 @@ export const buildNoDataAlertReason: (alertResult: {
   i18n.translate('xpack.infra.metrics.alerting.threshold.noDataAlertReason', {
     defaultMessage: '{metric} has reported no data over the past {interval} for {group}',
     values: {
-      group,
       metric,
       interval: `${timeSize}${timeUnit}`,
+      group,
     },
   });
 
