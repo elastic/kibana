@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import type { ApiKeyAuth, BasicAuth } from '@elastic/transport/lib/types';
+import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import {
   ESSearchResponse,
   ESSearchRequest,
@@ -19,7 +19,7 @@ export function getEsClient({
   auth,
 }: {
   node: string;
-  auth?: BasicAuth | ApiKeyAuth;
+  auth?: ClientOptions['auth'];
   // TODO ask owners to fix
 }): any {
   const client = new Client({

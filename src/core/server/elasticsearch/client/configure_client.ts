@@ -15,7 +15,7 @@ import type {
   TransportResult,
   DiagnosticResult,
 } from '@elastic/elasticsearch';
-import type { RequestBody } from '@elastic/transport/lib/types';
+import type { RequestBody } from '@elastic/transport';
 import { Transport, HttpConnection } from '@elastic/transport';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
