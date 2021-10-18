@@ -314,4 +314,129 @@ function replaceFirstAndLastDotSymbols(strToReplace: string) {
   return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
-// TODO: Implement executions count telemetry with eventLog, when it will write to index
+export async function getExecutionsTotalCount(
+  esClient: ElasticsearchClient,
+  kibanaIndex: string
+): Promise<{
+  countTotal: number;
+  countByType: Record<string, number>;
+  countFailures: number;
+  countFailuresByType: Record<string, number>;
+}> {
+  const scriptedMetric = {
+    scripted_metric: {
+      init_script: 'state.connectorTypes = [:];  state.total = 0;',
+      map_script: `
+        if (doc['kibana.saved_objects.type'].value == 'action') { 
+          String connectorType = doc['kibana.saved_objects.type_id'].value; 
+          state.connectorTypes.put(connectorType, state.connectorTypes.containsKey(connectorType) ? state.connectorTypes.get(connectorType) + 1 : 1);
+          state.total++;
+        }
+      `,
+      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+      // Despite docs that say this is optional, this script can't be blank.
+      combine_script: 'return state',
+      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+      // This also needs to account for having no data
+      reduce_script: `
+          Map connectorTypes = [:];
+          long total = 0;
+          for (state in states) {
+            if (state !== null) {
+              total += state.total;
+              for (String k : state.connectorTypes.keySet()) {
+                connectorTypes.put(k, connectorTypes.containsKey(k) ? connectorTypes.get(k) + state.connectorTypes.get(k) : state.connectorTypes.get(k));
+              }
+            }
+          }
+          Map result = new HashMap();
+          result.total = total;
+          result.connectorTypes = connectorTypes;
+          return result;
+      `,
+    },
+  };
+
+  const { body: actionResults } = await esClient.search({
+    index: kibanaIndex,
+    body: {
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              must: [
+                {
+                  term: { 'event.action': 'execute' },
+                },
+                {
+                  nested: {
+                    path: 'kibana.saved_objects',
+                    query: {
+                      bool: {
+                        must: [
+                          {
+                            term: {
+                              'kibana.saved_objects.type': {
+                                value: 'action',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      aggs: {
+        totalExecutions: {
+          nested: {
+            path: 'kibana.saved_objects',
+          },
+          aggs: {
+            byConnectorTypeId: scriptedMetric,
+          },
+        },
+        failuresExecutions: {
+          filter: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'event.outcome': 'failure',
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            refs: {
+              nested: {
+                path: 'kibana.saved_objects',
+              },
+              aggs: {
+                byConnectorTypeId: scriptedMetric,
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // @ts-expect-error aggegation type is not specified
+  const aggsExecutions = actionResults.aggregations.totalExecutions?.byConnectorTypeId.value;
+  const aggsFailureExecutions =
+    // @ts-expect-error aggegation type is not specified
+    actionResults.aggregations.failuresExecutions?.refs?.byConnectorTypeId.value;
+
+  return {
+    countTotal: aggsExecutions.total,
+    countByType: aggsExecutions.connectorTypes,
+    countFailures: aggsFailureExecutions.total,
+    countFailuresByType: aggsFailureExecutions.connectorTypes,
+  };
+}

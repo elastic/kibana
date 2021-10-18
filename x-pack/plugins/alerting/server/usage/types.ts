@@ -11,6 +11,11 @@ export interface AlertsUsage {
   count_disabled_total: number;
   count_by_type: Record<string, number>;
   count_active_by_type: Record<string, number>;
+  count_rules_executions: number;
+  count_rules_executions_by_type: Record<string, number>;
+  count_rules_executions_failured: number;
+  count_rules_executions_failured_by_reason: Record<string, number>;
+  count_rules_executions_failured_by_reason_by_type: Record<string, Record<string, number>>;
   throttle_time: {
     min: string;
     avg: string;

@@ -50,6 +50,25 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   xpack__ml__anomaly_detection_jobs_health: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
 };
 
+const byReasonSchema: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason'] = {
+  // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+  DYNAMIC_KEY: { type: 'long' },
+  read: { type: 'long' },
+  decrypt: { type: 'long' },
+  license: { type: 'long' },
+  unknown: { type: 'long' },
+};
+
+const byReasonSchemaByType: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_by_type'] =
+  {
+    // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+    DYNAMIC_KEY: byTypeSchema,
+    read: byTypeSchema,
+    decrypt: byTypeSchema,
+    license: byTypeSchema,
+    unknown: byTypeSchema,
+  };
+
 export function createAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
@@ -91,6 +110,11 @@ export function createAlertsUsageCollector(
           },
           count_active_by_type: {},
           count_by_type: {},
+          count_rules_executions: 0,
+          count_rules_executions_by_type: {},
+          count_rules_executions_failured: 0,
+          count_rules_executions_failured_by_reason: {},
+          count_rules_executions_failured_by_reason_by_type: {},
         };
       }
     },
@@ -115,6 +139,11 @@ export function createAlertsUsageCollector(
       },
       count_active_by_type: byTypeSchema,
       count_by_type: byTypeSchema,
+      count_rules_executions: { type: 'long' },
+      count_rules_executions_by_type: byTypeSchema,
+      count_rules_executions_failured: { type: 'long' },
+      count_rules_executions_failured_by_reason: byReasonSchema,
+      count_rules_executions_failured_by_reason_by_type: byReasonSchemaByType,
     },
   });
 }

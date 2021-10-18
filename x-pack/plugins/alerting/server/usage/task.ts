@@ -13,7 +13,11 @@ import {
   TaskManagerStartContract,
 } from '../../../task_manager/server';
 
-import { getTotalCountAggregations, getTotalCountInUse } from './alerts_telemetry';
+import {
+  getTotalCountAggregations,
+  getTotalCountInUse,
+  getTotalExecutionsCount,
+} from './alerts_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
@@ -43,7 +47,7 @@ function registerAlertingTelemetryTask(
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting usage fetch task',
-      timeout: '5m',
+      timeout: '5s',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
     },
   });
@@ -80,8 +84,9 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
         return Promise.all([
           getTotalCountAggregations(esClient, kibanaIndex),
           getTotalCountInUse(esClient, kibanaIndex),
+          getTotalExecutionsCount(esClient, kibanaIndex),
         ])
-          .then(([totalCountAggregations, totalInUse]) => {
+          .then(([totalCountAggregations, totalInUse, totalExecutions]) => {
             return {
               state: {
                 runs: (state.runs || 0) + 1,
@@ -89,6 +94,12 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
                 count_active_by_type: totalInUse.countByType,
                 count_active_total: totalInUse.countTotal,
                 count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
+                count_rules_executions: totalExecutions.countByType,
+                count_rules_executions_by_type: totalExecutions.countByType,
+                count_rules_executions_failured: totalExecutions.countTotalFailures,
+                count_rules_executions_failured_by_reason: totalExecutions.countFailuresByReason,
+                count_rules_executions_failured_by_reason_by_type:
+                  totalExecutions.countFailuresByReasonByType,
               },
               runAt: getNextMidnight(),
             };
@@ -106,5 +117,5 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
+  return moment().add(1, 'm').startOf('m').toDate();
 }

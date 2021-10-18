@@ -54,6 +54,10 @@ export function createActionsUsageCollector(
       },
       count_by_type: byTypeSchema,
       count_active_by_type: byTypeSchema,
+      count_actions_executions: { type: 'long' },
+      count_actions_executions_by_type: byTypeSchema,
+      count_actions_executions_failured: { type: 'long' },
+      count_actions_executions_failured_by_type: byTypeSchema,
     },
     fetch: async () => {
       try {
@@ -73,6 +77,10 @@ export function createActionsUsageCollector(
           count_active_alert_history_connectors: 0,
           count_active_by_type: {},
           count_by_type: {},
+          count_actions_executions: 0,
+          count_actions_executions_by_type: {},
+          count_actions_executions_failured: 0,
+          count_actions_executions_failured_by_type: {},
         };
       }
     },

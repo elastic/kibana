@@ -34,6 +34,63 @@ const alertTypeMetric = {
   },
 };
 
+const ruleTypeExecutionsMetric = {
+  scripted_metric: {
+    init_script: 'state.ruleTypes = [:];',
+    map_script: `
+      String ruleType = doc['rule.category'].value; 
+      state.ruleTypes.put(ruleType, state.ruleTypes.containsKey(ruleType) ? state.ruleTypes.get(ruleType) + 1 : 1);
+    `,
+    // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+    // Despite docs that say this is optional, this script can't be blank.
+    combine_script: 'return state',
+    // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+    // This also needs to account for having no data
+    reduce_script: `
+      Map result = [:];
+      for (Map m : states.toArray()) {
+        if (m !== null) {
+          for (String k : m.keySet()) {
+            result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+          }
+        }
+      }
+      return result;
+    `,
+  },
+};
+
+const ruleTypeFailureExecutionsMetric = {
+  scripted_metric: {
+    init_script: 'state.reasons = [:]',
+    map_script: `
+      if (doc['event.outcome'].value == 'failure') { 
+        String reason = doc['event.reason'].value; 
+        String ruleType = doc['rule.category'].value; 
+        Map ruleTypes = state.reasons.containsKey(reason) ? state.reasons.get(reason) : [:]; 
+        ruleTypes.put(ruleType, ruleTypes.containsKey(ruleType) ? ruleTypes.get(ruleType) + 1 : 1); 
+        state.reasons.put(reason, ruleTypes); 
+      }
+    `,
+    // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+    // Despite docs that say this is optional, this script can't be blank.
+    combine_script: 'return state',
+    // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+    // This also needs to account for having no data
+    reduce_script: `
+      Map result = [:];
+      for (Map m : states.toArray()) {
+        if (m !== null) {
+          for (String k : m.keySet()) {
+            result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+          }
+        }
+      }
+      return result;
+    `,
+  },
+};
+
 export async function getTotalCountAggregations(
   esClient: ElasticsearchClient,
   kibanaInex: string
@@ -347,4 +404,97 @@ function replaceFirstAndLastDotSymbols(strToReplace: string) {
   return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
-// TODO: Implement executions count telemetry with eventLog, when it will write to index
+export async function getTotalExecutionsCount(esClient: ElasticsearchClient, kibanaInex: string) {
+  const { body: searchResult } = await esClient.search({
+    index: kibanaInex,
+    body: {
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              must: [
+                {
+                  term: { 'event.action': 'execute' },
+                },
+                {
+                  term: { 'event.kind': 'alert' },
+                },
+              ],
+            },
+          },
+        },
+      },
+      aggs: {
+        byRuleTypeId: ruleTypeExecutionsMetric,
+        failuresByReason: ruleTypeFailureExecutionsMetric,
+      },
+    },
+  });
+
+  const executionsAggregations = searchResult.aggregations as {
+    byRuleTypeId: { value: { ruleTypes: Record<string, string> } };
+  };
+
+  const executionFailuresAggregations = searchResult.aggregations as {
+    failuresByReason: { value: { reasons: Record<string, Record<string, string>> } };
+  };
+
+  return {
+    countTotal: Object.keys(executionsAggregations.byRuleTypeId.value.ruleTypes).reduce(
+      (total: number, key: string) =>
+        parseInt(executionsAggregations.byRuleTypeId.value.ruleTypes[key], 10) + total,
+      0
+    ),
+    countByType: Object.keys(executionsAggregations.byRuleTypeId.value.ruleTypes).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, key: string) => ({
+        ...obj,
+        [replaceFirstAndLastDotSymbols(key)]:
+          executionsAggregations.byRuleTypeId.value.ruleTypes[key],
+      }),
+      {}
+    ),
+    countTotalFailures: Object.keys(
+      executionFailuresAggregations.failuresByReason.value.reasons
+    ).reduce((total: number, reason: string) => {
+      const byRuleTypesRefs = executionFailuresAggregations.failuresByReason.value.reasons[reason];
+      const countByRuleTypes = Object.keys(byRuleTypesRefs).reduce(
+        (totalByType, ruleType) => parseInt(byRuleTypesRefs[ruleType] + totalByType, 10),
+        0
+      );
+      return countByRuleTypes + total;
+    }, 0),
+    countFailuresByReason: Object.keys(
+      executionFailuresAggregations.failuresByReason.value.reasons
+    ).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, reason: string) => {
+        const byRuleTypesRefs =
+          executionFailuresAggregations.failuresByReason.value.reasons[reason];
+        const countByRuleTypes = Object.keys(byRuleTypesRefs).reduce(
+          (totalByType, ruleType) => parseInt(byRuleTypesRefs[ruleType] + totalByType, 10),
+          0
+        );
+        return {
+          ...obj,
+          [replaceFirstAndLastDotSymbols(reason)]: countByRuleTypes,
+        };
+      },
+      {}
+    ),
+    countFailuresByReasonByType: Object.keys(
+      executionFailuresAggregations.failuresByReason.value.reasons
+    ).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, key: string) => ({
+        ...obj,
+        [replaceFirstAndLastDotSymbols(key)]:
+          executionFailuresAggregations.failuresByReason.value.reasons[key],
+      }),
+      {}
+    ),
+  };
+}

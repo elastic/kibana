@@ -13,7 +13,7 @@ import {
   TaskManagerStartContract,
 } from '../../../task_manager/server';
 import { PreConfiguredAction } from '../types';
-import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
+import { getTotalCount, getInUseTotalCount, getExecutionsTotalCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 
@@ -43,7 +43,7 @@ function registerActionsTelemetryTask(
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
-      timeout: '5m',
+      timeout: '5s',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, preconfiguredActions),
     },
   });
@@ -84,8 +84,9 @@ export function telemetryTaskRunner(
         return Promise.all([
           getTotalCount(esClient, kibanaIndex, preconfiguredActions),
           getInUseTotalCount(esClient, kibanaIndex),
+          getExecutionsTotalCount(esClient, kibanaIndex),
         ])
-          .then(([totalAggegations, totalInUse]) => {
+          .then(([totalAggegations, totalInUse, totalExecutions]) => {
             return {
               state: {
                 runs: (state.runs || 0) + 1,
@@ -94,6 +95,10 @@ export function telemetryTaskRunner(
                 count_active_total: totalInUse.countTotal,
                 count_active_by_type: totalInUse.countByType,
                 count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
+                count_actions_executions: totalExecutions.countTotal,
+                count_actions_executions_by_type: totalExecutions.countByType,
+                count_actions_executions_failured: totalExecutions.countFailures,
+                count_actions_executions_failured_by_type: totalExecutions.countFailuresByType,
               },
               runAt: getNextMidnight(),
             };
@@ -111,5 +116,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
+  return moment().add(1, 'm').startOf('m').toDate();
 }
