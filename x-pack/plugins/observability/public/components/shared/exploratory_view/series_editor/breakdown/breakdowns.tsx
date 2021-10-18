@@ -80,7 +80,11 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
         return {
           inputDisplay: label,
           value: id,
-          dropdownDisplay: label,
+          dropdownDisplay: (
+            <EuiToolTip content={BREAKDOWN_UNAVAILABLE}>
+              <>{label}</>
+            </EuiToolTip>
+          ),
           disabled: true,
         };
       } else {
@@ -135,6 +139,14 @@ export const NO_BREAK_DOWN_LABEL = i18n.translate(
 export const BREAKDOWN_WARNING = i18n.translate('xpack.observability.exp.breakDownFilter.warning', {
   defaultMessage: 'Breakdowns can be applied to only one series at a time.',
 });
+
+export const BREAKDOWN_UNAVAILABLE = i18n.translate(
+  'xpack.observability.exp.breakDownFilter.unavailable',
+  {
+    defaultMessage:
+      'Step name breakdown is not available for monitor duration metric, use step duration metric to breakdown by step name.',
+  }
+);
 
 const Wrapper = styled.span`
   .euiToolTipAnchor {
