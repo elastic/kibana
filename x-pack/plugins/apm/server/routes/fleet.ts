@@ -191,34 +191,13 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   },
 });
 
-const devRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/fleet/dev',
-  options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const { plugins, context } = resources;
-    if (!plugins.fleet || !plugins.security) {
-      throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
-    }
-    const fleetPluginStart = await plugins.fleet.start();
-    const savedObjectsClient = context.core.savedObjects.client;
-
-    const cloudAgentPolicy = await getCloudAgentPolicy({
-      savedObjectsClient,
-      fleetPluginStart,
-    });
-    const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
-    return { apmPackagePolicy };
-  },
-});
-
 export const apmFleetRouteRepository = createApmServerRouteRepository()
   .add(hasFleetDataRoute)
   .add(fleetAgentsRoute)
   .add(saveApmServerSchemaRoute)
   .add(getUnsupportedApmServerSchemaRoute)
   .add(getMigrationCheckRoute)
-  .add(createCloudApmPackagePolicyRoute)
-  .add(devRoute);
+  .add(createCloudApmPackagePolicyRoute);
 
 const FLEET_SECURITY_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.fleet.fleetSecurityRequired',
