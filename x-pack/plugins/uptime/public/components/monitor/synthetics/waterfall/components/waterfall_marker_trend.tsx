@@ -21,18 +21,18 @@ export function WaterfallMarkerTrend({ title, field }: { title: string; field: s
 
   const { basePath } = useUptimeSettingsContext();
 
-  const { stepName } = useWaterfallContext();
+  const { activeStep } = useWaterfallContext();
 
   const allSeries: AllSeries = [
     {
-      name: `${title}(${stepName})`,
+      name: `${title}(${activeStep?.synthetics.step?.name!})`,
       selectedMetricField: field,
       time: { from: 'now-1d', to: 'now' },
       seriesType: 'area',
       dataType: 'synthetics',
       reportDefinitions: {
-        'monitor.name': ['ALL_VALUES'],
-        'synthetics.step.name.keyword': [stepName],
+        'monitor.name': [activeStep.monitor.name!],
+        'synthetics.step.name.keyword': [activeStep?.synthetics.step?.name!],
       },
     },
   ];

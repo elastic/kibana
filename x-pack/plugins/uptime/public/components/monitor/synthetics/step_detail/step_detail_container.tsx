@@ -48,7 +48,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
         <WaterfallChartContainer
           checkGroup={checkGroup}
           stepIndex={stepIndex}
-          stepName={activeStep?.synthetics.step?.name!}
+          activeStep={activeStep}
         />
       )}
     </>

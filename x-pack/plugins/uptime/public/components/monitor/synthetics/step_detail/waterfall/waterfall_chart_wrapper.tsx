@@ -15,6 +15,7 @@ import { WaterfallFilter } from './waterfall_filter';
 import { WaterfallFlyout } from './waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
 import { MarkerItems } from '../../waterfall/context/waterfall_chart';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return (
@@ -26,12 +27,17 @@ export const renderLegendItem: RenderItem<LegendItem> = (item) => {
 
 interface Props {
   total: number;
-  stepName: string;
+  activeStep: JourneyStep;
   data: NetworkItems;
   markerItems?: MarkerItems;
 }
 
-export const WaterfallChartWrapper: React.FC<Props> = ({ data, total, markerItems, stepName }) => {
+export const WaterfallChartWrapper: React.FC<Props> = ({
+  data,
+  total,
+  markerItems,
+  activeStep,
+}) => {
   const [query, setQuery] = useState<string>('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [onlyHighlighted, setOnlyHighlighted] = useState(false);
@@ -110,7 +116,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total, markerItem
 
   return (
     <WaterfallProvider
-      stepName={stepName}
+      activeStep={activeStep}
       markerItems={markerItems}
       totalNetworkRequests={total}
       fetchedNetworkRequests={networkData.length}
