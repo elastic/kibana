@@ -87,7 +87,7 @@ export function buildEuiGridColumn(
   if (column.id === indexPattern.timeFieldName) {
     column.display = (
       <Fragment>
-        {indexPattern.timeFieldName}{' '}
+        {indexPatternField?.customLabel ?? indexPattern.timeFieldName}{' '}
         <EuiToolTip
           key="time-column"
           content={i18n.translate('discover.docTable.tableHeader.timeFieldIconTooltip', {
