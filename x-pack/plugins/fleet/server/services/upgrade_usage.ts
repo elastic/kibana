@@ -27,7 +27,7 @@ export function deleteUpgradeUsages(soClient: SavedObjectsClientContract, ids: s
   }
 }
 
-export function sendAlertTelemetryEvents(
+export function sendTelemetryEvents(
   logger: Logger,
   eventsTelemetry: TelemetryEventsSender | undefined,
   upgradeUsage: PackagePolicyUpgradeUsage
@@ -39,11 +39,19 @@ export function sendAlertTelemetryEvents(
   try {
     eventsTelemetry.queueTelemetryEvents([
       {
-        package_policy_upgrade: { ...upgradeUsage },
+        package_policy_upgrade: {
+          ...upgradeUsage,
+          error: capErrorSize(upgradeUsage.error),
+        },
         id: `${upgradeUsage.package_name}_${upgradeUsage.current_version}_${upgradeUsage.new_version}_${upgradeUsage.status}`,
       },
     ]);
   } catch (exc) {
     logger.error(`queing telemetry events failed ${exc}`);
   }
+}
+
+function capErrorSize(errors?: any[]) {
+  const MAX_ERROR_SIZE = 100;
+  return (errors || []).length > MAX_ERROR_SIZE ? errors?.slice(0, MAX_ERROR_SIZE) : errors;
 }

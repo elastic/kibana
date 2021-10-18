@@ -20,7 +20,7 @@ export const FLEET_CHANNEL_NAME = 'fleet-stats';
 
 export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
-  private readonly checkIntervalMs = 10 * 1000;
+  private readonly checkIntervalMs = 30 * 1000;
   private readonly logger: Logger;
   private maxQueueSize = TELEMETRY_MAX_BUFFER_SIZE;
   private telemetryStart?: TelemetryPluginStart;
@@ -67,8 +67,6 @@ export class TelemetryEventsSender {
       (event) => !this.queue.find((qItem) => qItem.id && event.id && qItem.id === event.id)
     );
 
-    this.logger.info(`Queue events ` + JSON.stringify(events));
-
     if (qlength >= this.maxQueueSize) {
       // we're full already
       return;
@@ -98,9 +96,9 @@ export class TelemetryEventsSender {
     try {
       this.isSending = true;
 
-      this.isOptedIn = true; // await this.isTelemetryOptedIn();
+      this.isOptedIn = await this.isTelemetryOptedIn();
       if (!this.isOptedIn) {
-        this.logger.info(`Telemetry is not opted-in.`);
+        this.logger.debug(`Telemetry is not opted-in.`);
         this.queue = [];
         this.isSending = false;
         return;
@@ -125,8 +123,7 @@ export class TelemetryEventsSender {
       }));
       this.queue = [];
 
-      this.logger.info('sending events to: ' + telemetryUrl);
-      this.logger.info(JSON.stringify(toSend));
+      this.logger.debug(JSON.stringify(toSend));
 
       await this.sendEvents(
         toSend,
