@@ -92,11 +92,13 @@ const config7x: PluginConfigDescriptor<ConsoleConfig7x> = {
 
       addDeprecation({
         configPath: 'console.enabled',
+        level: 'critical',
         title: i18n.translate('console.deprecations.enabledTitle', {
           defaultMessage: 'Setting "console.enabled" is deprecated',
         }),
         message: i18n.translate('console.deprecations.enabledMessage', {
-          defaultMessage: 'Use the "console.ui.enabled" setting instead of "console.enabled".',
+          defaultMessage:
+            'To disallow users from accessing the Console UI, use the "console.ui.enabled" setting instead of "console.enabled".',
         }),
         correctiveActions: {
           manualSteps: [
@@ -118,12 +120,13 @@ const config7x: PluginConfigDescriptor<ConsoleConfig7x> = {
 
       addDeprecation({
         configPath: 'console.proxyConfig',
+        level: 'critical',
         title: i18n.translate('console.deprecations.proxyConfigTitle', {
           defaultMessage: 'Setting "console.proxyConfig" is deprecated',
         }),
         message: i18n.translate('console.deprecations.proxyConfigMessage', {
           defaultMessage:
-            'Configuring "console.proxyConfig" is deprecated and will be removed in 8.0.0. To secure your connection between Kibana and Elasticsearch use the standard "server.ssl.*" settings instead.". See https://ela.st/encrypt-kibana-browser for more details',
+            'Configuring "console.proxyConfig" is deprecated and will be removed in 8.0.0. To secure your connection between Kibana and Elasticsearch use the standard "server.ssl.*" settings instead.',
         }),
         documentationUrl: 'https://ela.st/encrypt-kibana-browser',
         correctiveActions: {
@@ -136,7 +139,7 @@ const config7x: PluginConfigDescriptor<ConsoleConfig7x> = {
             }),
             i18n.translate('console.deprecations.proxyConfig.manualStepThreeMessage', {
               defaultMessage:
-                'Configure the secure connection between Kibana and Elasticsearch using the "server.ssl.*" settings',
+                'Configure the secure connection between Kibana and Elasticsearch using the "server.ssl.*" settings.',
             }),
           ],
         },
@@ -150,12 +153,13 @@ const config7x: PluginConfigDescriptor<ConsoleConfig7x> = {
 
       addDeprecation({
         configPath: 'console.proxyFilter',
+        level: 'critical',
         title: i18n.translate('console.deprecations.proxyFilterTitle', {
           defaultMessage: 'Setting "console.proxyFilter" is deprecated',
         }),
         message: i18n.translate('console.deprecations.proxyFilterMessage', {
           defaultMessage:
-            'Configuring "console.proxyFilter" is deprecated and will be removed in 8.0.0. To secure your connection between Kibana and Elasticsearch use the standard "server.ssl.*" settings instead.". See https://ela.st/encrypt-kibana-browser for more details',
+            'Configuring "console.proxyFilter" is deprecated and will be removed in 8.0.0. To secure your connection between Kibana and Elasticsearch use the standard "server.ssl.*" settings instead.',
         }),
         documentationUrl: 'https://ela.st/encrypt-kibana-browser',
         correctiveActions: {
@@ -168,7 +172,7 @@ const config7x: PluginConfigDescriptor<ConsoleConfig7x> = {
             }),
             i18n.translate('console.deprecations.proxyFilter.manualStepThreeMessage', {
               defaultMessage:
-                'Configure the secure connection between Kibana and Elasticsearch using the "server.ssl.*" settings',
+                'Configure the secure connection between Kibana and Elasticsearch using the "server.ssl.*" settings.',
             }),
           ],
         },
