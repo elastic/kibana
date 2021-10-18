@@ -49,6 +49,7 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
     config$,
     kibanaVersion: '8.0.0',
     kibanaBranch: 'master',
+    telemetryEventsSender: undefined,
   };
 };
 

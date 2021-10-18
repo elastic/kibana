@@ -27,6 +27,8 @@ export const getPackagePolicyUpgradeUsage = async (
     type: 'package-policy-upgrade-telemetry',
   });
 
+  // TODO cap if becomes too large
+
   const usages = telemetryObjects.saved_objects.map((so) => so.attributes);
   deleteUpgradeUsages(
     soClient,

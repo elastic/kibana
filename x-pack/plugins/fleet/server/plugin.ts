@@ -18,6 +18,8 @@ import type {
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
+import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
+
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
@@ -83,6 +85,8 @@ import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
+import { TelemetryReceiver } from './telemetry/receiver';
+import { TelemetryEventsSender } from './telemetry/sender';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -91,12 +95,14 @@ export interface FleetSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 export interface FleetStartDeps {
   data: DataPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
+  telemetry?: TelemetryPluginStart;
 }
 
 export interface FleetAppContext {
@@ -115,6 +121,7 @@ export interface FleetAppContext {
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
+  telemetryEventsSender: TelemetryEventsSender;
 }
 
 export type FleetSetupContract = void;
@@ -176,6 +183,8 @@ export class FleetPlugin
   private httpSetup?: HttpServiceSetup;
   private securitySetup?: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
+  private readonly telemetryReceiver: TelemetryReceiver;
+  private readonly telemetryEventsSender: TelemetryEventsSender;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -184,6 +193,8 @@ export class FleetPlugin
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.logger = this.initializerContext.logger.get();
     this.configInitialValue = this.initializerContext.config.get();
+    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
+    this.telemetryReceiver = new TelemetryReceiver(this.logger);
   }
 
   public setup(core: CoreSetup, deps: FleetSetupDeps) {
@@ -274,6 +285,8 @@ export class FleetPlugin
         registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
       }
     }
+
+    this.telemetryEventsSender.setup(deps.telemetry);
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
@@ -293,10 +306,15 @@ export class FleetPlugin
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,
+      telemetryEventsSender: this.telemetryEventsSender,
     });
     licenseService.start(this.licensing$);
 
     const fleetServerSetup = startFleetServerSetup();
+
+    this.telemetryReceiver.start(core);
+
+    this.telemetryEventsSender.start(plugins.telemetry, this.telemetryReceiver);
 
     return {
       fleetSetupCompleted: () =>
@@ -334,5 +352,6 @@ export class FleetPlugin
   public async stop() {
     appContextService.stop();
     licenseService.stop();
+    this.telemetryEventsSender.stop();
   }
 }
