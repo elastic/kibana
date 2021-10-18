@@ -33,9 +33,6 @@ const createStartContract = (): VisualizationsStart => ({
   getAliases: jest.fn(),
   getByGroup: jest.fn(),
   unRegisterAlias: jest.fn(),
-  savedVisualizationsLoader: {
-    get: jest.fn(),
-  } as any,
   getSavedVisualization: jest.fn(),
   saveVisualization: jest.fn(),
   findListItems: jest.fn(),
