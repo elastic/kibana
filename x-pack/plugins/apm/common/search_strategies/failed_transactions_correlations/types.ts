@@ -13,6 +13,7 @@ import {
 } from '../types';
 
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from './constants';
+import { FieldStats } from '../field_stats_types';
 
 export interface FailedTransactionsCorrelation extends FieldValuePair {
   doc_count: number;
@@ -42,4 +43,5 @@ export interface FailedTransactionsCorrelationsRawResponse
   percentileThresholdValue?: number;
   overallHistogram?: HistogramItem[];
   errorHistogram?: HistogramItem[];
+  fieldStats?: FieldStats[];
 }
