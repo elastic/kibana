@@ -14,6 +14,7 @@ interface PackageInfo {
   archiveChecksum: string;
   binaryChecksum: string;
   binaryRelativePath: string;
+  revision: number;
 }
 
 enum BaseUrl {
@@ -32,8 +33,6 @@ interface CommonPackageInfo extends PackageInfo {
 }
 
 export class ChromiumArchivePaths {
-  public readonly revision = '856583';
-
   public readonly packages: Array<CustomPackageInfo | CommonPackageInfo> = [
     {
       platform: 'darwin',
@@ -43,6 +42,7 @@ export class ChromiumArchivePaths {
       binaryChecksum: 'dfcd6e007214175997663c50c8d871ea',
       binaryRelativePath: 'headless_shell-darwin_x64/headless_shell',
       location: 'custom',
+      revision: 856583,
     },
     {
       platform: 'linux',
@@ -52,6 +52,7 @@ export class ChromiumArchivePaths {
       binaryChecksum: '99cfab472d516038b94ef86649e52871',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
+      revision: 856583,
     },
     {
       platform: 'linux',
@@ -61,6 +62,7 @@ export class ChromiumArchivePaths {
       binaryChecksum: '13baccf2e5c8385cb9d9588db6a9e2c2',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
+      revision: 856583,
     },
     {
       platform: 'win32',
@@ -71,6 +73,7 @@ export class ChromiumArchivePaths {
       binaryRelativePath: 'chrome-win\\chrome.exe',
       location: 'common',
       archivePath: 'Win',
+      revision: 856583,
     },
   ];
 
@@ -82,7 +85,10 @@ export class ChromiumArchivePaths {
   }
 
   public resolvePath(p: PackageInfo) {
-    return path.resolve(this.archivesPath, p.archiveFilename);
+    // We're (going to be) downloading Chromium for both Mac x64 and Mac Arm,
+    // therefore we need to distinguish the download folder by architecture,
+    // because both downloads are "chrome-mac.zip".
+    return path.resolve(this.archivesPath, p.architecture, p.archiveFilename);
   }
 
   public getAllArchiveFilenames(): string[] {
@@ -91,9 +97,9 @@ export class ChromiumArchivePaths {
 
   public getDownloadUrl(p: CustomPackageInfo | CommonPackageInfo) {
     if (p.location === 'common') {
-      return `${BaseUrl.common}/${p.archivePath}/${this.revision}/${p.archiveFilename}`;
+      return `${BaseUrl.common}/${p.archivePath}/${p.revision}/${p.archiveFilename}`;
     }
-    return BaseUrl.custom + '/' + p.archiveFilename;
+    return BaseUrl.custom + '/' + p.archiveFilename; // revision is not used for URL if package is a custom build
   }
 
   public getBinaryPath(p: PackageInfo) {

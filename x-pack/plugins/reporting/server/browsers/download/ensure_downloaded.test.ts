@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import mockFs from 'mock-fs';
 import { existsSync, readdirSync } from 'fs';
 import { chromium } from '../chromium';
@@ -27,16 +28,16 @@ describe('ensureBrowserDownloaded', () => {
     } as unknown as typeof logger;
 
     (md5 as jest.MockedFunction<typeof md5>).mockImplementation(
-      async (path) =>
+      async (packagePath) =>
         chromium.paths.packages.find(
-          (packageInfo) => chromium.paths.resolvePath(packageInfo) === path
+          (packageInfo) => chromium.paths.resolvePath(packageInfo) === packagePath
         )?.archiveChecksum ?? 'some-md5'
     );
 
     (download as jest.MockedFunction<typeof download>).mockImplementation(
-      async (_url, path) =>
+      async (_url, packagePath) =>
         chromium.paths.packages.find(
-          (packageInfo) => chromium.paths.resolvePath(packageInfo) === path
+          (packageInfo) => chromium.paths.resolvePath(packageInfo) === packagePath
         )?.archiveChecksum ?? 'some-md5'
     );
 
@@ -93,11 +94,16 @@ describe('ensureBrowserDownloaded', () => {
       await ensureBrowserDownloaded(logger);
 
       expect(download).not.toHaveBeenCalled();
-      expect(readdirSync(chromium.paths.archivesPath)).toEqual(
-        expect.arrayContaining(
-          chromium.paths.packages.map(({ archiveFilename }) => archiveFilename)
-        )
-      );
+      const paths = [
+        readdirSync(path.resolve(chromium.paths.archivesPath + '/x64')),
+        readdirSync(path.resolve(chromium.paths.archivesPath + '/arm64')),
+      ];
+      paths[0].sort();
+      paths[1].sort();
+      expect(paths).toMatchObject([
+        ['chrome-win.zip', 'chromium-d163fd7-darwin_x64.zip', 'chromium-d163fd7-linux_x64.zip'],
+        ['chromium-d163fd7-linux_arm64.zip'],
+      ]);
     });
 
     it('should download again if md5 hash different', async () => {
