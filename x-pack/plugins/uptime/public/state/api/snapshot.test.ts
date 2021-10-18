@@ -18,6 +18,7 @@ describe('snapshot API', () => {
       get: jest.fn(),
       fetch: jest.fn(),
     } as any;
+    apiService.addInspectorRequest = jest.fn();
     fetchMock = jest.spyOn(apiService.http, 'fetch');
     mockResponse = { up: 3, down: 12, total: 15 };
   });
