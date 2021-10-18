@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './setup_mode';
+export * from '../../lib/setup_mode';
