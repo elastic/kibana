@@ -119,7 +119,7 @@ export function FieldSelect({
   const isInvalid = Boolean(value && fields[fieldsSelector] && !selectedOptions.length);
 
   if (value && !selectedOptions.length) {
-    selectedOptions = [{ label: value!, id: 'INVALID_FIELD' }];
+    selectedOptions = [{ label: value, id: 'INVALID_FIELD' }];
   }
 
   return (
