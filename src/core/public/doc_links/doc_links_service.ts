@@ -473,6 +473,7 @@ export class DocLinksService {
         },
         fleet: {
           guide: `${FLEET_DOCS}index.html`,
+          customizeIntegrationDataRetention: `${FLEET_DOCS}customize-data-retention.html`, // TODO: this is a temp URL until we decide the correct one
           fleetServer: `${FLEET_DOCS}fleet-server.html`,
           fleetServerAddFleetServer: `${FLEET_DOCS}fleet-server.html#add-fleet-server`,
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
@@ -734,6 +735,7 @@ export interface DocLinksStart {
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{
+      customizeIntegrationDataRetention: string;
       guide: string;
       fleetServer: string;
       fleetServerAddFleetServer: string;
