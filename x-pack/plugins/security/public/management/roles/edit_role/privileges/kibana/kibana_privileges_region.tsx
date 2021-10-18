@@ -14,13 +14,11 @@ import type { Role } from '../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../model';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import type { RoleValidator } from '../../validate_role';
-import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
 
 interface Props {
   role: Role;
-  spacesEnabled: boolean;
   canCustomizeSubFeaturePrivileges: boolean;
   spaces?: Space[];
   uiCapabilities: Capabilities;
@@ -44,7 +42,6 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
     const {
       kibanaPrivileges,
       role,
-      spacesEnabled,
       canCustomizeSubFeaturePrivileges,
       spaces = [],
       uiCapabilities,
@@ -58,30 +55,18 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
       return <TransformErrorSection />;
     }
 
-    if (spacesEnabled) {
-      return (
-        <SpaceAwarePrivilegeSection
-          kibanaPrivileges={kibanaPrivileges}
-          role={role}
-          spaces={spaces}
-          uiCapabilities={uiCapabilities}
-          onChange={onChange}
-          editable={editable}
-          canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
-          validator={validator}
-          spacesApiUi={spacesApiUi!}
-        />
-      );
-    } else {
-      return (
-        <SimplePrivilegeSection
-          kibanaPrivileges={kibanaPrivileges}
-          role={role}
-          onChange={onChange}
-          editable={editable}
-          canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
-        />
-      );
-    }
+    return (
+      <SpaceAwarePrivilegeSection
+        kibanaPrivileges={kibanaPrivileges}
+        role={role}
+        spaces={spaces}
+        uiCapabilities={uiCapabilities}
+        onChange={onChange}
+        editable={editable}
+        canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
+        validator={validator}
+        spacesApiUi={spacesApiUi!}
+      />
+    );
   };
 }

@@ -18,12 +18,10 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../common/constants';
  * @return {Array} array of rename operations and callback function for rename logging
  */
 export const deprecations = ({
-  deprecate,
   rename,
   renameFromRoot,
 }: ConfigDeprecationFactory): ConfigDeprecation[] => {
   return [
-    deprecate('enabled', '8.0.0'),
     // This order matters. The "blanket rename" needs to happen at the end
     renameFromRoot('xpack.monitoring.max_bucket_size', 'monitoring.ui.max_bucket_size'),
     renameFromRoot('xpack.monitoring.min_interval_seconds', 'monitoring.ui.min_interval_seconds'),
@@ -50,6 +48,7 @@ export const deprecations = ({
       const emailNotificationsEnabled = get(config, 'cluster_alerts.email_notifications.enabled');
       if (emailNotificationsEnabled && !get(config, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
         addDeprecation({
+          configPath: `cluster_alerts.email_notifications.enabled`,
           message: `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 8.0."`,
           correctiveActions: {
             manualSteps: [
@@ -60,52 +59,13 @@ export const deprecations = ({
       }
       return config;
     },
-    (config, fromPath, addDeprecation) => {
-      const es: Record<string, any> = get(config, 'elasticsearch');
-      if (es) {
-        if (es.username === 'elastic') {
-          addDeprecation({
-            message: `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`,
-            correctiveActions: {
-              manualSteps: [`Replace [${fromPath}.username] from "elastic" to "kibana_system".`],
-            },
-          });
-        } else if (es.username === 'kibana') {
-          addDeprecation({
-            message: `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`,
-            correctiveActions: {
-              manualSteps: [`Replace [${fromPath}.username] from "kibana" to "kibana_system".`],
-            },
-          });
-        }
-      }
-      return config;
-    },
-    (config, fromPath, addDeprecation) => {
-      const ssl: Record<string, any> = get(config, 'elasticsearch.ssl');
-      if (ssl) {
-        if (ssl.key !== undefined && ssl.certificate === undefined) {
-          addDeprecation({
-            message: `Setting [${fromPath}.key] without [${fromPath}.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
-            correctiveActions: {
-              manualSteps: [
-                `Set [${fromPath}.ssl.certificate] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
-              ],
-            },
-          });
-        } else if (ssl.certificate !== undefined && ssl.key === undefined) {
-          addDeprecation({
-            message: `Setting [${fromPath}.certificate] without [${fromPath}.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
-            correctiveActions: {
-              manualSteps: [
-                `Set [${fromPath}.ssl.key] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
-              ],
-            },
-          });
-        }
-      }
-      return config;
-    },
     rename('xpack_api_polling_frequency_millis', 'licensing.api_polling_frequency'),
+
+    // TODO: Add deprecations for "monitoring.ui.elasticsearch.username: elastic" and "monitoring.ui.elasticsearch.username: kibana".
+    // TODO: Add deprecations for using "monitoring.ui.elasticsearch.ssl.certificate" without "monitoring.ui.elasticsearch.ssl.key", and
+    // vice versa.
+    // ^ These deprecations should only be shown if they are explicitly configured for monitoring -- we should not show Monitoring
+    // deprecations for these settings if they are inherited from the Core elasticsearch settings.
+    // See the Core implementation: src/core/server/elasticsearch/elasticsearch_config.ts
   ];
 };
