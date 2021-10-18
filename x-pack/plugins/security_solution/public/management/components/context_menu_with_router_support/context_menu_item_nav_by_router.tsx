@@ -88,12 +88,16 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
               >
                 {children}
               </div>
-              <StyledEuiFlexItem className="additional-info">{hoverInfo}</StyledEuiFlexItem>
+              {hoverInfo && (
+                <StyledEuiFlexItem className="additional-info">{hoverInfo}</StyledEuiFlexItem>
+              )}
             </>
           ) : (
             <>
               <EuiFlexItem>{children}</EuiFlexItem>
-              <StyledEuiFlexItem className="additional-info">{hoverInfo}</StyledEuiFlexItem>
+              {hoverInfo && (
+                <StyledEuiFlexItem className="additional-info">{hoverInfo}</StyledEuiFlexItem>
+              )}
             </>
           )}
         </EuiFlexGroup>
