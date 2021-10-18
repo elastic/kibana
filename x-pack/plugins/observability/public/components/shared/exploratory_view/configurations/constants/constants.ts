@@ -49,7 +49,9 @@ import {
   MONITORS_DURATION_LABEL,
   PAGE_LOAD_TIME_LABEL,
   LABELS_FIELD,
+  STEP_NAME_LABEL,
 } from './labels';
+import { SYNTHETICS_STEP_NAME } from './field_names/synthetics';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
@@ -77,6 +79,7 @@ export const FieldLabels: Record<string, string> = {
   'monitor.id': MONITOR_ID_LABEL,
   'monitor.status': MONITOR_STATUS_LABEL,
   'monitor.duration.us': MONITORS_DURATION_LABEL,
+  [SYNTHETICS_STEP_NAME]: STEP_NAME_LABEL,
 
   'agent.hostname': AGENT_HOST_LABEL,
   'host.hostname': HOST_NAME_LABEL,
