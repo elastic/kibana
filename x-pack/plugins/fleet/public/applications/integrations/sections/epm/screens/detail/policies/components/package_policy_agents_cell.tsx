@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { LinkedAgentCount, AddAgentHelpPopover } from '../../../../../../components';
 
 const AddAgentButton = ({ onAddAgent }: { onAddAgent: () => void }) => (
-  <EuiButton iconType="plusInCircle" data-test-subj="addAgentButton" onClick={onAddAgent}>
+  <EuiButton iconType="plusInCircle" data-test-subj="addAgentButton" onClick={onAddAgent} size="s">
     <FormattedMessage
       id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
       defaultMessage="Add agent"
