@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from 'kibana/server';
 import type { RequestStatistics, RequestStatus } from '../../../../../src/plugins/inspector';
-import { WrappedElasticsearchClientError } from '../index';
 import { InspectResponse } from '../../typings/common';
+import { WrappedElasticsearchClientError } from './unwrap_es_response';
 
 /**
  * Get statistics to show on inspector tab.
@@ -29,19 +29,26 @@ function getStats({
   kibanaRequest: KibanaRequest;
 }) {
   const stats: RequestStatistics = {
-    kibanaApiQueryParameters: {
-      label: i18n.translate('xpack.observability.inspector.stats.kibanaApiQueryParametersLabel', {
-        defaultMessage: 'Kibana API query parameters',
-      }),
-      description: i18n.translate(
-        'xpack.observability.inspector.stats.kibanaApiQueryParametersDescription',
-        {
-          defaultMessage:
-            'The query parameters used in the Kibana API request that initiated the Elasticsearch request.',
+    ...(kibanaRequest.query
+      ? {
+          kibanaApiQueryParameters: {
+            label: i18n.translate(
+              'xpack.observability.inspector.stats.kibanaApiQueryParametersLabel',
+              {
+                defaultMessage: 'Kibana API query parameters',
+              }
+            ),
+            description: i18n.translate(
+              'xpack.observability.inspector.stats.kibanaApiQueryParametersDescription',
+              {
+                defaultMessage:
+                  'The query parameters used in the Kibana API request that initiated the Elasticsearch request.',
+              }
+            ),
+            value: JSON.stringify(kibanaRequest.query, null, 2),
+          },
         }
-      ),
-      value: JSON.stringify(kibanaRequest.query, null, 2),
-    },
+      : {}),
     kibanaApiRoute: {
       label: i18n.translate('xpack.observability.inspector.stats.kibanaApiRouteLabel', {
         defaultMessage: 'Kibana API route',
@@ -93,11 +100,17 @@ function getStats({
   }
 
   if (esResponse?.hits?.total !== undefined) {
-    const total = esResponse.hits.total as {
-      relation: string;
-      value: number;
-    };
-    const hitsTotalValue = total.relation === 'eq' ? `${total.value}` : `> ${total.value}`;
+    let hitsTotalValue;
+
+    if (typeof esResponse.hits.total === 'number') {
+      hitsTotalValue = esResponse.hits.total;
+    } else {
+      const total = esResponse.hits.total as {
+        relation: string;
+        value: number;
+      };
+      hitsTotalValue = total.relation === 'eq' ? `${total.value}` : `> ${total.value}`;
+    }
 
     stats.hitsTotal = {
       label: i18n.translate('xpack.observability.inspector.stats.hitsTotalLabel', {

@@ -40,7 +40,7 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
     body,
   };
 
-  const response = await queryContext.search(params);
+  const response = await queryContext.search(params, 'getMonitorList-potentialMatches');
   return response;
 };
 

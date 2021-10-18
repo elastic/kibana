@@ -17,7 +17,7 @@ import {
 } from '../../../common/annotations';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { mappings } from './mappings';
-import { unwrapEsResponse } from '../../utils/unwrap_es_response';
+import { unwrapEsResponse } from '../../../common/utils/unwrap_es_response';
 
 type CreateParams = t.TypeOf<typeof createAnnotationRt>;
 type DeleteParams = t.TypeOf<typeof deleteAnnotationRt>;

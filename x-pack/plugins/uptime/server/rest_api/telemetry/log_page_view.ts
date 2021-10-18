@@ -22,7 +22,6 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
       autoRefreshEnabled: schema.boolean(),
       autorefreshInterval: schema.number(),
       refreshTelemetryHistory: schema.maybe(schema.boolean()),
-      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ savedObjectsClient, uptimeEsClient, request }): Promise<any> => {

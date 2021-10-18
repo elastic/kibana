@@ -18,6 +18,7 @@ import { useGetUrlParams } from '../../../hooks';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
 import { SETTINGS_ROUTE } from '../../../../common/constants';
 import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
+import { InspectorHeaderLink } from './inspector_header_link';
 import { monitorStatusSelector } from '../../../state/selectors';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
@@ -107,6 +108,7 @@ export function ActionMenuContent(): React.ReactElement {
       >
         {ADD_DATA_LABEL}
       </EuiHeaderLink>
+      <InspectorHeaderLink />
     </EuiHeaderLinks>
   );
 }

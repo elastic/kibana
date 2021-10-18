@@ -33,6 +33,7 @@ describe('ML Flyout component', () => {
     spy1.mockReturnValue(false);
 
     const value = {
+      isDevMode: true,
       basePath: '',
       dateRangeStart: DATE_RANGE_START,
       dateRangeEnd: DATE_RANGE_END,
@@ -48,6 +49,7 @@ describe('ML Flyout component', () => {
           onClose={onClose}
           canCreateMLJob={true}
         />
+        uptime/public/state/api/utils.ts
       </UptimeSettingsContext.Provider>
     );
 
@@ -57,6 +59,7 @@ describe('ML Flyout component', () => {
 
   it('able to create job if valid license is available', async () => {
     const value = {
+      isDevMode: true,
       basePath: '',
       dateRangeStart: DATE_RANGE_START,
       dateRangeEnd: DATE_RANGE_END,

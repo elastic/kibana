@@ -87,7 +87,8 @@ describe('useStepWaterfallMetrics', () => {
         },
         index: 'heartbeat-*',
       },
-      ['heartbeat-*', '44D-444FFF-444-FFF-3333', true]
+      ['heartbeat-*', '44D-444FFF-444-FFF-3333', true],
+      { name: 'getWaterfallStepMetrics' }
     );
     expect(result.current).toEqual({
       loading: false,

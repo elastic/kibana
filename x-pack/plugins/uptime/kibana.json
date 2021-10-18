@@ -14,6 +14,7 @@
   "requiredPlugins": [
     "alerting",
     "embeddable",
+    "inspector",
     "features",
     "licensing",
     "triggersActionsUi",
