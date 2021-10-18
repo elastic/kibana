@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { castArray } from 'lodash';
 import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -16,34 +17,53 @@ import { OsqueryIcon } from '../components/osquery_icon';
 
 interface LiveQueryProps {
   agentId?: string;
-  agentPolicyId?: string;
+  agentIds?: string[];
+  agentPolicyIds?: string[];
   onSuccess?: () => void;
   query?: string;
+  savedQueryId?: string;
+  ecs_mapping?: unknown;
+  agentsField?: boolean;
+  queryField?: boolean;
+  ecsMappingField?: boolean;
+  enabled?: boolean;
+  formType?: 'steps' | 'simple';
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   agentId,
-  agentPolicyId,
+  agentIds,
+  agentPolicyIds,
   onSuccess,
   query,
+  savedQueryId,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  ecs_mapping,
+  agentsField,
+  queryField,
+  ecsMappingField,
+  formType,
+  enabled,
 }) => {
   const { data: hasActionResultsPrivileges, isFetched } = useActionResultsPrivileges();
 
   const defaultValue = useMemo(() => {
-    if (agentId || agentPolicyId || query) {
+    if (agentId || agentPolicyIds || query) {
       return {
         agentSelection: {
           allAgentsSelected: false,
-          agents: agentId ? [agentId] : [],
+          agents: castArray(agentId ?? agentIds ?? []),
           platformsSelected: [],
-          policiesSelected: agentPolicyId ? [agentPolicyId] : [],
+          policiesSelected: agentPolicyIds ?? [],
         },
         query,
+        savedQueryId,
+        ecs_mapping,
       };
     }
 
     return undefined;
-  }, [agentId, agentPolicyId, query]);
+  }, [agentId, agentIds, agentPolicyIds, ecs_mapping, query, savedQueryId]);
 
   if (!isFetched) {
     return <EuiLoadingContent lines={10} />;
@@ -80,7 +100,15 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   }
 
   return (
-    <LiveQueryForm singleAgentMode={!!agentId} defaultValue={defaultValue} onSuccess={onSuccess} />
+    <LiveQueryForm
+      agentsField={agentId ? !agentId : agentsField}
+      queryField={queryField}
+      ecsMappingField={ecsMappingField}
+      defaultValue={defaultValue}
+      onSuccess={onSuccess}
+      formType={formType}
+      enabled={enabled}
+    />
   );
 };
 
