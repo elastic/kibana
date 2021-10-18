@@ -43,7 +43,6 @@ function sortSeries(visData, model) {
 
 function TopNVisualization(props) {
   const [accessDeniedDrilldownUrl, setAccessDeniedDrilldownUrl] = useState(null);
-  const [showExternalUrlErrorModal, setShowExternalUrlErrorModal] = useState(false);
   const coreStart = getCoreStart();
   const { backgroundColor, model, visData, fieldFormatMap, getConfig } = props;
 
@@ -89,20 +88,20 @@ function TopNVisualization(props) {
       const url = replaceVars(model.drilldown_url, {}, { key: item.label });
       const validatedUrl = coreStart.http.externalUrl.validateUrl(url);
       if (validatedUrl) {
+        setAccessDeniedDrilldownUrl(null);
         coreStart.application.navigateToUrl(url);
       } else {
         setAccessDeniedDrilldownUrl(url);
-        setShowExternalUrlErrorModal(true);
       }
     };
   }
 
-  const closeExternalUrlErrorModal = useCallback(() => setShowExternalUrlErrorModal(false), []);
+  const closeExternalUrlErrorModal = useCallback(() => setAccessDeniedDrilldownUrl(null), []);
 
   return (
     <div className="tvbVis" style={style}>
       <TopN {...params} />
-      {showExternalUrlErrorModal && (
+      {accessDeniedDrilldownUrl && (
         <ExternalUrlErrorModal
           url={accessDeniedDrilldownUrl}
           handleClose={closeExternalUrlErrorModal}

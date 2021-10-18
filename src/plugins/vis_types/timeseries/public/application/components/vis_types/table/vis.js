@@ -56,7 +56,7 @@ class TableVis extends Component {
     this.dateFormatter = new DateFormat({}, this.props.getConfig);
 
     this.state = {
-      showExternalUrlErrorModal: false,
+      accessDeniedDrilldownUrl: null,
     };
   }
 
@@ -64,11 +64,13 @@ class TableVis extends Component {
     return get(this.props, 'model.series', []).filter((series) => !series.hidden);
   }
 
-  handleDrilldownUrlClick = (event, url) => {
+  createDrilldownUrlClickHandler = (url) => (event) => {
     const validatedUrl = getCoreStart().http.externalUrl.validateUrl(url);
-    if (!validatedUrl) {
+    if (validatedUrl) {
+      this.setState({ accessDeniedDrilldownUrl: null });
+    } else {
       event.preventDefault();
-      this.setState({ accessDeniedDrilldownUrl: url, showExternalUrlErrorModal: true });
+      this.setState({ accessDeniedDrilldownUrl: url });
     }
   };
 
@@ -87,8 +89,13 @@ class TableVis extends Component {
 
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
+      const handleDrilldownUrlClick = this.createDrilldownUrlClickHandler(url);
       rowDisplay = (
-        <a href={sanitizeUrl(url)} onClick={(event) => this.handleDrilldownUrlClick(event, url)}>
+        <a
+          href={sanitizeUrl(url)}
+          onClick={handleDrilldownUrlClick}
+          onContextMenu={handleDrilldownUrlClick}
+        >
           {rowDisplay}
         </a>
       );
@@ -230,10 +237,11 @@ class TableVis extends Component {
     );
   }
 
-  closeExternalUrlErrorModal = () => this.setState({ showExternalUrlErrorModal: false });
+  closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
 
   render() {
     const { visData, model } = this.props;
+    const { accessDeniedDrilldownUrl } = this.state;
     const header = this.renderHeader();
     let rows;
 
@@ -269,9 +277,9 @@ class TableVis extends Component {
             <tbody>{rows}</tbody>
           </table>
         </RedirectAppLinks>
-        {this.state.showExternalUrlErrorModal && (
+        {accessDeniedDrilldownUrl && (
           <ExternalUrlErrorModal
-            url={this.state.accessDeniedDrilldownUrl}
+            url={accessDeniedDrilldownUrl}
             handleClose={this.closeExternalUrlErrorModal}
           />
         )}
