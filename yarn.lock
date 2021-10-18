@@ -2571,22 +2571,10 @@
     ts-node "^10.2.1"
     typescript "^4.3.5"
 
-"@elastic/transport@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-0.0.7.tgz#abc636b18c231dba457f188f62a4df432c543cdc"
-  integrity sha512-apSD9aY6jVBC5lLc3GWmgrcjXl2StAR/AQYW8bnZ0mGTqkkLGpx4Ojnd3yYDvD1JxMosbs6lpTA60dLF2vtSHQ==
-  dependencies:
-    debug "^4.3.2"
-    hpagent "^0.1.2"
-    ms "^2.1.3"
-    secure-json-parse "^2.4.0"
-    tslib "^2.3.0"
-    undici "^4.7.0"
-
-"@elastic/transport@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-0.0.7.tgz#abc636b18c231dba457f188f62a4df432c543cdc"
-  integrity sha512-apSD9aY6jVBC5lLc3GWmgrcjXl2StAR/AQYW8bnZ0mGTqkkLGpx4Ojnd3yYDvD1JxMosbs6lpTA60dLF2vtSHQ==
+"@elastic/transport@^0.0.7", "@elastic/transport@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-0.0.9.tgz#608e13fad75eb9d92d80171aeb92aea0351f70c1"
+  integrity sha512-HgW/nBtwpXpj5RIjhxg03Yd2S5fPYOtjcsXUYW1Yo85Z5pgNDq+lujU6m6CAJBGgrUghtFvkoGzP0vBSpU1weQ==
   dependencies:
     debug "^4.3.2"
     hpagent "^0.1.2"
