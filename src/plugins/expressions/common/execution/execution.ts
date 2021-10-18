@@ -212,7 +212,7 @@ export class Execution<
       abortSignal: this.abortController.signal,
       inspectorAdapters,
       logDatatable: (name: string, datatable: Datatable) => {
-        inspectorAdapters.tables.logDatatable(name, datatable);
+        inspectorAdapters.tables[name] = datatable;
       },
       isSyncColorsEnabled: () => execution.params.syncColors!,
       ...execution.params.extraContext,
