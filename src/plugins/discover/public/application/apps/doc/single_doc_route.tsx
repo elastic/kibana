@@ -60,6 +60,7 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
     return (
       <EuiEmptyPrompt
         iconType="alert"
+        iconColor="danger"
         title={
           <FormattedMessage
             id="discover.singleDocRoute.errorTitle"
