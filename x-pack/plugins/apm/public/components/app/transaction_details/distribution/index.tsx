@@ -221,7 +221,7 @@ export function TransactionDistribution({
 
       <EuiText color="subdued" size="xs">
         {i18n.translate(
-          'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartDescription',
+          'xpack.apm.transactionDetails.tabs.transactionDistributionChartDescription',
           {
             defaultMessage:
               'Log-log plot for latency (x) by transactions (y) with overlapping bands for',
@@ -229,21 +229,21 @@ export function TransactionDistribution({
         )}{' '}
         <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
           {i18n.translate(
-            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllTransactions',
+            'xpack.apm.transactionDetails.tabs.transactionDistributionChartAllTransactions',
             {
               defaultMessage: 'all transactions',
             }
           )}
         </span>{' '}
         {i18n.translate(
-          'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAnd',
+          'xpack.apm.transactionDetails.tabs.transactionDistributionChartAnd',
           {
             defaultMessage: 'and',
           }
         )}{' '}
         <span style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}>
           {i18n.translate(
-            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllFailedTransactions',
+            'xpack.apm.transactionDetails.tabs.transactionDistributionChartAllFailedTransactions',
             {
               defaultMessage: 'all failed transactions',
             }

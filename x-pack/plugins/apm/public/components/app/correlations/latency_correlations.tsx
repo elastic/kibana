@@ -296,7 +296,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       {selectedHistogram && (
         <EuiText color="subdued" size="xs">
           {i18n.translate(
-            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartDescription',
+            'xpack.apm.transactionDetails.tabs.latencyCorrelationsChartDescription',
             {
               defaultMessage:
                 'Log-log plot for latency (x) by transactions (y) with overlapping bands for',
@@ -305,14 +305,14 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           <br />
           <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
             {i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllTransactions',
+              'xpack.apm.transactionDetails.tabs.latencyCorrelationsChartAllTransactions',
               {
                 defaultMessage: 'all transactions',
               }
             )}
           </span>{' '}
           {i18n.translate(
-            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAnd',
+            'xpack.apm.transactionDetails.tabs.latencyCorrelationsChartAnd',
             {
               defaultMessage: 'and',
             }
