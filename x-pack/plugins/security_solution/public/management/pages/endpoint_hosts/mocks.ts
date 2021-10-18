@@ -122,30 +122,27 @@ export const endpointActivityLogHttpMock =
         const responseData = fleetActionGenerator.generateResponse({
           agent_id: endpointMetadata.agent.id,
         });
-
         return {
-          body: {
-            page: 1,
-            pageSize: 50,
-            startDate: 'now-1d',
-            endDate: 'now',
-            data: [
-              {
-                type: 'response',
-                item: {
-                  id: '',
-                  data: responseData,
-                },
+          page: 1,
+          pageSize: 50,
+          startDate: 'now-1d',
+          endDate: 'now',
+          data: [
+            {
+              type: 'response',
+              item: {
+                id: '',
+                data: responseData,
               },
-              {
-                type: 'action',
-                item: {
-                  id: '',
-                  data: actionData,
-                },
+            },
+            {
+              type: 'action',
+              item: {
+                id: '',
+                data: actionData,
               },
-            ],
-          },
+            },
+          ],
         };
       },
     },

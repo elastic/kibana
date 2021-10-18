@@ -236,6 +236,16 @@ const getSavedObjectTypes = (
             version: { type: 'keyword' },
           },
         },
+        elasticsearch: {
+          enabled: false,
+          properties: {
+            privileges: {
+              properties: {
+                cluster: { type: 'keyword' },
+              },
+            },
+          },
+        },
         vars: { type: 'flattened' },
         inputs: {
           type: 'nested',
