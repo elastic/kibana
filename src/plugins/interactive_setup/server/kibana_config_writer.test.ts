@@ -191,8 +191,8 @@ elasticsearch.ssl.certificateAuthorities: [/some/path/ca_1234.crt]
 
 # This section was automatically generated during setup.
 elasticsearch.hosts: [some-host]
-elasticsearch.password: password
 elasticsearch.username: username
+elasticsearch.password: password
 elasticsearch.ssl.certificateAuthorities: [/some/path/ca_1234.crt]
 
 `
@@ -215,8 +215,8 @@ elasticsearch.ssl.certificateAuthorities: [/some/path/ca_1234.crt]
 
 # This section was automatically generated during setup.
 elasticsearch.hosts: [some-host]
-elasticsearch.password: password
 elasticsearch.username: username
+elasticsearch.password: password
 
 `
         );
