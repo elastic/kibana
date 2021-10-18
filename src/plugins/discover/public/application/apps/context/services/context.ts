@@ -104,7 +104,7 @@ export async function fetchSurroundingDocs(
 }
 
 export function updateSearchSource(
-  searchSource: ISearchSource,
+  searchSource: SearchSource,
   indexPattern: IndexPattern,
   filters: Filter[],
   useNewFieldsApi: boolean
