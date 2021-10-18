@@ -4207,7 +4207,6 @@
     "inspector.requests.noRequestsLoggedTitle": "未记录任何请求",
     "inspector.requests.requestFailedTooltipTitle": "请求失败",
     "inspector.requests.requestInProgressAriaLabel": "进行中的请求",
-    "inspector.requests.requestLabel": "请求：",
     "inspector.requests.requestsDescriptionTooltip": "查看已收集数据的请求",
     "inspector.requests.requestsTitle": "请求",
     "inspector.requests.requestSucceededTooltipTitle": "请求成功",
