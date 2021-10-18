@@ -38,6 +38,14 @@ function getDeprecationTitle() {
   });
 }
 
+function getDeprecationMessage() {
+  return i18n.translate('xpack.security.deprecations.kibanaDashboardOnlyUser.deprecationMessage', {
+    defaultMessage:
+      'Users with the "{roleName}" role will not be able to access the Dashboard app. Use Kibana privileges instead.',
+    values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
+  });
+}
+
 export const registerKibanaDashboardOnlyRoleDeprecation = ({
   deprecationsService,
   logger,
@@ -92,14 +100,7 @@ async function getUsersDeprecations(
   return [
     {
       title: getDeprecationTitle(),
-      message: i18n.translate(
-        'xpack.security.deprecations.kibanaDashboardOnlyUser.usersDeprecationMessage',
-        {
-          defaultMessage:
-            'Use a custom role with Kibana privileges to restrict access to just the Dashboard feature. The "{roleName}" role will be removed in 8.0.',
-          values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
-        }
-      ),
+      message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
       documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${packageInfo.branch}/built-in-roles.html`,
@@ -109,14 +110,14 @@ async function getUsersDeprecations(
             'xpack.security.deprecations.kibanaDashboardOnlyUser.usersDeprecationCorrectiveActionOne',
             {
               defaultMessage:
-                'Create a custom role with Kibana privileges to restrict access to just the Dashboard feature.',
+                'Create a custom role with Kibana privileges to grant access to Dashboard only.',
             }
           ),
           i18n.translate(
             'xpack.security.deprecations.kibanaDashboardOnlyUser.usersDeprecationCorrectiveActionTwo',
             {
               defaultMessage:
-                'Update all users to remove the "{roleName}" role and add the custom role instead. The affected users are: {users}.',
+                'Remove the "{roleName}" role from all users and add the custom role. The affected users are: {users}.',
               values: {
                 roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,
                 users: usersWithKibanaDashboardOnlyRole.join(', '),
@@ -162,14 +163,7 @@ async function getRoleMappingsDeprecations(
   return [
     {
       title: getDeprecationTitle(),
-      message: i18n.translate(
-        'xpack.security.deprecations.kibanaDashboardOnlyUser.roleMappingsDeprecationMessage',
-        {
-          defaultMessage:
-            'Use a custom role with Kibana privileges to restrict access to just the Dashboard feature. The "{roleName}" role will be removed in 8.0.',
-          values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
-        }
-      ),
+      message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
       documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${packageInfo.branch}/built-in-roles.html`,
@@ -179,14 +173,14 @@ async function getRoleMappingsDeprecations(
             'xpack.security.deprecations.kibanaDashboardOnlyUser.roleMappingsDeprecationCorrectiveActionOne',
             {
               defaultMessage:
-                'Create a custom role with Kibana privileges to restrict access to just the Dashboard feature.',
+                'Create a custom role with Kibana privileges to grant access to Dashboard only.',
             }
           ),
           i18n.translate(
             'xpack.security.deprecations.kibanaDashboardOnlyUser.roleMappingsDeprecationCorrectiveActionTwo',
             {
               defaultMessage:
-                'Update all role mappings to remove the "{roleName}" role and add the custom role instead. The affected role mappings are: {roleMappings}.',
+                'Remove the "{roleName}" role from all role mappings and add the custom role. The affected role mappings are: {roleMappings}.',
               values: {
                 roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,
                 roleMappings: roleMappingsWithKibanaDashboardOnlyRole.join(', '),

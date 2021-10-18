@@ -39,6 +39,14 @@ function getDeprecationTitle() {
   });
 }
 
+function getDeprecationMessage() {
+  return i18n.translate('xpack.security.deprecations.kibanaUser.deprecationMessage', {
+    defaultMessage:
+      'Use the "{adminRoleName}" role to grant access to all Kibana features in all spaces.',
+    values: { adminRoleName: KIBANA_ADMIN_ROLE_NAME },
+  });
+}
+
 export const registerKibanaUserRoleDeprecation = ({
   deprecationsService,
   logger,
@@ -93,11 +101,7 @@ async function getUsersDeprecations(
   return [
     {
       title: getDeprecationTitle(),
-      message: i18n.translate('xpack.security.deprecations.kibanaUser.usersDeprecationMessage', {
-        defaultMessage:
-          'Use the "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in a future release.',
-        values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
-      }),
+      message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
       documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${packageInfo.branch}/built-in-roles.html`,
@@ -111,7 +115,7 @@ async function getUsersDeprecations(
             'xpack.security.deprecations.kibanaUser.usersDeprecationCorrectiveAction',
             {
               defaultMessage:
-                'Update all users to remove the "{userRoleName}" role and add the "{adminRoleName}" role instead. The affected users are: {users}.',
+                'Remove the "{userRoleName}" role from all users and add the "{adminRoleName}" role. The affected users are: {users}.',
               values: {
                 userRoleName: KIBANA_USER_ROLE_NAME,
                 adminRoleName: KIBANA_ADMIN_ROLE_NAME,
@@ -158,14 +162,7 @@ async function getRoleMappingsDeprecations(
   return [
     {
       title: getDeprecationTitle(),
-      message: i18n.translate(
-        'xpack.security.deprecations.kibanaUser.roleMappingsDeprecationMessage',
-        {
-          defaultMessage:
-            'Use the "{adminRoleName}" role to grant access to all Kibana features in all spaces. The "{userRoleName}" role will be removed in a future release.',
-          values: { userRoleName: KIBANA_USER_ROLE_NAME, adminRoleName: KIBANA_ADMIN_ROLE_NAME },
-        }
-      ),
+      message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
       documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${packageInfo.branch}/built-in-roles.html`,
@@ -179,7 +176,7 @@ async function getRoleMappingsDeprecations(
             'xpack.security.deprecations.kibanaUser.roleMappingsDeprecationCorrectiveAction',
             {
               defaultMessage:
-                'Update all role mappings to remove the "{userRoleName}" role and add the "{adminRoleName}" role instead. The affected role mappings are: {roleMappings}.',
+                'Remove the "{userRoleName}" role from all role mappings and add the "{adminRoleName}" role. The affected role mappings are: {roleMappings}.',
               values: {
                 userRoleName: KIBANA_USER_ROLE_NAME,
                 adminRoleName: KIBANA_ADMIN_ROLE_NAME,

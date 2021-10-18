@@ -214,13 +214,13 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                     "path": "/internal/security/deprecations/kibana_user_role/_fix_users",
                   },
                   "manualSteps": Array [
-                    "Update all users to remove the \\"kibana_user\\" role and add the \\"kibana_admin\\" role instead. The affected users are: userB, userD.",
+                    "Remove the \\"kibana_user\\" role from all users and add the \\"kibana_admin\\" role. The affected users are: userB, userD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in a future release.",
+                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces.",
                 "title": "The \\"kibana_user\\" role is deprecated",
               },
             ]
@@ -252,13 +252,13 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                     "path": "/internal/security/deprecations/kibana_user_role/_fix_role_mappings",
                   },
                   "manualSteps": Array [
-                    "Update all role mappings to remove the \\"kibana_user\\" role and add the \\"kibana_admin\\" role instead. The affected role mappings are: mappingB, mappingD.",
+                    "Remove the \\"kibana_user\\" role from all role mappings and add the \\"kibana_admin\\" role. The affected role mappings are: mappingB, mappingD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in a future release.",
+                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces.",
                 "title": "The \\"kibana_user\\" role is deprecated",
               },
             ]
@@ -297,13 +297,13 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                     "path": "/internal/security/deprecations/kibana_user_role/_fix_users",
                   },
                   "manualSteps": Array [
-                    "Update all users to remove the \\"kibana_user\\" role and add the \\"kibana_admin\\" role instead. The affected users are: userB, userD.",
+                    "Remove the \\"kibana_user\\" role from all users and add the \\"kibana_admin\\" role. The affected users are: userB, userD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in a future release.",
+                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces.",
                 "title": "The \\"kibana_user\\" role is deprecated",
               },
               Object {
@@ -313,13 +313,13 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                     "path": "/internal/security/deprecations/kibana_user_role/_fix_role_mappings",
                   },
                   "manualSteps": Array [
-                    "Update all role mappings to remove the \\"kibana_user\\" role and add the \\"kibana_admin\\" role instead. The affected role mappings are: mappingB, mappingD.",
+                    "Remove the \\"kibana_user\\" role from all role mappings and add the \\"kibana_admin\\" role. The affected role mappings are: mappingB, mappingD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces. The \\"kibana_user\\" role will be removed in a future release.",
+                "message": "Use the \\"kibana_admin\\" role to grant access to all Kibana features in all spaces.",
                 "title": "The \\"kibana_user\\" role is deprecated",
               },
             ]

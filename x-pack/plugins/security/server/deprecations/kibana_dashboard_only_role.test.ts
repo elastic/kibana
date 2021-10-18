@@ -213,14 +213,14 @@ describe('Kibana Dashboard Only User role deprecations', () => {
               Object {
                 "correctiveActions": Object {
                   "manualSteps": Array [
-                    "Create a custom role with Kibana privileges to restrict access to just the Dashboard feature.",
-                    "Update all users to remove the \\"kibana_dashboard_only_user\\" role and add the custom role instead. The affected users are: userB, userD.",
+                    "Create a custom role with Kibana privileges to grant access to Dashboard only.",
+                    "Remove the \\"kibana_dashboard_only_user\\" role from all users and add the custom role. The affected users are: userB, userD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use a custom role with Kibana privileges to restrict access to just the Dashboard feature. The \\"kibana_dashboard_only_user\\" role will be removed in 8.0.",
+                "message": "Users with the \\"kibana_dashboard_only_user\\" role will not be able to access the Dashboard app. Use Kibana privileges instead.",
                 "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
               },
             ]
@@ -248,14 +248,14 @@ describe('Kibana Dashboard Only User role deprecations', () => {
               Object {
                 "correctiveActions": Object {
                   "manualSteps": Array [
-                    "Create a custom role with Kibana privileges to restrict access to just the Dashboard feature.",
-                    "Update all role mappings to remove the \\"kibana_dashboard_only_user\\" role and add the custom role instead. The affected role mappings are: mappingB, mappingD.",
+                    "Create a custom role with Kibana privileges to grant access to Dashboard only.",
+                    "Remove the \\"kibana_dashboard_only_user\\" role from all role mappings and add the custom role. The affected role mappings are: mappingB, mappingD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use a custom role with Kibana privileges to restrict access to just the Dashboard feature. The \\"kibana_dashboard_only_user\\" role will be removed in 8.0.",
+                "message": "Users with the \\"kibana_dashboard_only_user\\" role will not be able to access the Dashboard app. Use Kibana privileges instead.",
                 "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
               },
             ]
@@ -293,27 +293,27 @@ describe('Kibana Dashboard Only User role deprecations', () => {
               Object {
                 "correctiveActions": Object {
                   "manualSteps": Array [
-                    "Create a custom role with Kibana privileges to restrict access to just the Dashboard feature.",
-                    "Update all users to remove the \\"kibana_dashboard_only_user\\" role and add the custom role instead. The affected users are: userB, userD.",
+                    "Create a custom role with Kibana privileges to grant access to Dashboard only.",
+                    "Remove the \\"kibana_dashboard_only_user\\" role from all users and add the custom role. The affected users are: userB, userD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use a custom role with Kibana privileges to restrict access to just the Dashboard feature. The \\"kibana_dashboard_only_user\\" role will be removed in 8.0.",
+                "message": "Users with the \\"kibana_dashboard_only_user\\" role will not be able to access the Dashboard app. Use Kibana privileges instead.",
                 "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
               },
               Object {
                 "correctiveActions": Object {
                   "manualSteps": Array [
-                    "Create a custom role with Kibana privileges to restrict access to just the Dashboard feature.",
-                    "Update all role mappings to remove the \\"kibana_dashboard_only_user\\" role and add the custom role instead. The affected role mappings are: mappingB, mappingD.",
+                    "Create a custom role with Kibana privileges to grant access to Dashboard only.",
+                    "Remove the \\"kibana_dashboard_only_user\\" role from all role mappings and add the custom role. The affected role mappings are: mappingB, mappingD.",
                   ],
                 },
                 "deprecationType": "feature",
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
-                "message": "Use a custom role with Kibana privileges to restrict access to just the Dashboard feature. The \\"kibana_dashboard_only_user\\" role will be removed in 8.0.",
+                "message": "Users with the \\"kibana_dashboard_only_user\\" role will not be able to access the Dashboard app. Use Kibana privileges instead.",
                 "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
               },
             ]
