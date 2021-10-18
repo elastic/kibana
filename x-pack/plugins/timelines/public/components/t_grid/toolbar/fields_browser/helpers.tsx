@@ -97,6 +97,7 @@ export const filterBrowserFieldsByFieldName = ({
         fields: filter(
           (f) => f.name != null && f.name.includes(trimmedSubstring),
           browserFields[categoryId].fields
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ).reduce((filtered, field) => ({ ...filtered, [field.name!]: field }), {}),
       },
     }),

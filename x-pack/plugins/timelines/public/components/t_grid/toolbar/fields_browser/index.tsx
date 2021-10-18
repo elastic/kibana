@@ -100,7 +100,9 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
                   (selected, category) =>
                     newFilteredBrowserFields[category].fields != null &&
                     newFilteredBrowserFields[selected].fields != null &&
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     Object.keys(newFilteredBrowserFields[category].fields!).length >
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                       Object.keys(newFilteredBrowserFields[selected].fields!).length
                       ? category
                       : selected,
