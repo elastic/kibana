@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSpacer, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 
 import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';

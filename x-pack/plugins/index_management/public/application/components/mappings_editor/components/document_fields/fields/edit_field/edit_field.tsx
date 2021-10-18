@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 
 import { documentationService } from '../../../../../../services/documentation';
 import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';

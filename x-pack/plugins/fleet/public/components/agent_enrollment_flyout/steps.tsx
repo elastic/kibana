@@ -9,7 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import semver from 'semver';
+import semverMajor from 'semver/functions/major';
+import semverMinor from 'semver/functions/minor';
+import semverPatch from 'semver/functions/patch';
 
 import type { AgentPolicy } from '../../types';
 import { useKibanaVersion } from '../../hooks';
@@ -21,9 +23,7 @@ export const DownloadStep = () => {
   const kibanaVersion = useKibanaVersion();
   const kibanaVersionURLString = useMemo(
     () =>
-      `${semver.major(kibanaVersion)}-${semver.minor(kibanaVersion)}-${semver.patch(
-        kibanaVersion
-      )}`,
+      `${semverMajor(kibanaVersion)}-${semverMinor(kibanaVersion)}-${semverPatch(kibanaVersion)}`,
     [kibanaVersion]
   );
   return {
