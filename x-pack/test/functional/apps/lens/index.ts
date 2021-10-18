@@ -18,20 +18,20 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 800);
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*', 'dateFormat:tz': 'UTC' });
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
@@ -57,7 +57,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       //       loadTestFile(require.resolve('./lens_tagging'));
       //       loadTestFile(require.resolve('./formula'));
       //       loadTestFile(require.resolve('./heatmap'));
-      //       loadTestFile(require.resolve('./thresholds'));
+      //       loadTestFile(require.resolve('./reference_lines'));
       //       loadTestFile(require.resolve('./inspector'));
 
       //       // has to be last one in the suite because it overrides saved objects
