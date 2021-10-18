@@ -121,11 +121,13 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   const layerId = props.layerId;
   const currentIndexPattern =
     props.state.indexPatterns[props.state.layers[layerId]?.indexPatternId];
+  if (!currentIndexPattern) {
+    return null;
+  }
   const operationSupportMatrix = getOperationSupportMatrix(props);
 
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
-
   return (
     <DimensionEditor
       {...props}

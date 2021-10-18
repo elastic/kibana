@@ -758,7 +758,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {TabContent}
 
       {!isFullscreen && !currentFieldIsInvalid && (
-        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
+        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded  lnsIndexPatternDimensionEditor__section--last">
           {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
             <LabelInput
               value={selectedColumn.label}

@@ -26,6 +26,10 @@
   padding: $euiSize;
 }
 
+.lnsIndexPatternDimensionEditor__section--last {
+  margin-bottom: -$euiSizeL;
+}
+
 .lnsIndexPatternDimensionEditor__section--shaded {
   background-color: $euiColorLightestShade;
   border-bottom: $euiBorderThin;
