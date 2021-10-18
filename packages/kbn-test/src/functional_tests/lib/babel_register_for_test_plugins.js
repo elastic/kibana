@@ -91,20 +91,20 @@ const testMap2 = [
   ),
 ];
 
-const testMap3 = [
-  Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'test'),
-  Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/test'),
-  Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'examples'),
-  Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/examples'),
-  // TODO: should should probably remove this link back to the source
-  Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/plugins/task_manager/server/config.ts'),
-  Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'src/core/utils/default_app_categories.ts'),
-];
+// const testMap3 = [
+//   Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'test'),
+//   Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/test'),
+//   Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'examples'),
+//   Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/examples'),
+//   // TODO: should should probably remove this link back to the source
+//   Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/plugins/task_manager/server/config.ts'),
+//   Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'src/core/utils/default_app_categories.ts'),
+// ];
 
-testMap2.concat(testMap3);
-testMap.concat(testMap2);
+// testMap2.concat(testMap3);
+// testMap.concat(testMap2);
 
-const finalTestMap = testMap.concat(testMap2, testMap3);
+const finalTestMap = testMap.concat(testMap2);
 
 console.log('TEST PATHS: ');
 console.log(finalTestMap);
