@@ -34,12 +34,12 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
   const { getPaginationTableProps, getPaginationRouteOptions, updateTotalItemCount } =
     useTable('logstash.pipelines');
 
-  const title = i18n.translate('xpack.monitoring.logstash.overview.title', {
-    defaultMessage: 'Logstash',
+  const title = i18n.translate('xpack.monitoring.logstash.pipelines.routeTitle', {
+    defaultMessage: 'Logstash Pipelines',
   });
 
-  const pageTitle = i18n.translate('xpack.monitoring.logstash.overview.pageTitle', {
-    defaultMessage: 'Logstash overview',
+  const pageTitle = i18n.translate('xpack.monitoring.logstash.pipelines.pageTitle', {
+    defaultMessage: 'Logstash pipelines',
   });
 
   const getPageData = useCallback(async () => {

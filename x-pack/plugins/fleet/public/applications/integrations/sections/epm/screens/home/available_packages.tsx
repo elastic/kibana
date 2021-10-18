@@ -181,7 +181,7 @@ export const AvailablePackages: React.FC = memo(() => {
   let controls = [
     <EuiFlexItem grow={false}>
       <EuiHorizontalRule margin="m" />
-      <IntegrationPreference initialType={preference} onChange={setPreference} />,
+      <IntegrationPreference initialType={preference} onChange={setPreference} />
     </EuiFlexItem>,
   ];
 
