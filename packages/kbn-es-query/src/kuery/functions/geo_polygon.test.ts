@@ -8,7 +8,7 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 
 import * as geoPolygon from './geo_polygon';
 
@@ -31,11 +31,12 @@ const points = [
 
 describe('kuery functions', () => {
   describe('geoPolygon', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 
