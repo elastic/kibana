@@ -13,7 +13,7 @@ const alertTypeMetric = {
     init_script: 'state.ruleTypes = [:]; state.namespaces = [:]',
     map_script: `
       String alertType = doc['alert.alertTypeId'].value;
-      String namespace = doc['namespaces'].value;
+      String namespace = doc['namespaces'].value ? doc['namespaces'].value : 'default';
       state.ruleTypes.put(alertType, state.ruleTypes.containsKey(alertType) ? state.ruleTypes.get(alertType) + 1 : 1);
       if (state.namespaces.containsKey(namespace) === false) {
         state.namespaces.put(namespace, 1);

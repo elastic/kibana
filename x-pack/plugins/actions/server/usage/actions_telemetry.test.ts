@@ -477,7 +477,28 @@ Object {
         },
       })
     );
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', undefined, [
+      {
+        id: 'test-exchange',
+        actionTypeId: '.email',
+        name: 'test',
+        isPreconfigured: true,
+        config: {
+          tenantId: 'sdsd',
+          clientId: 'sdfsdf',
+        },
+        secrets: {
+          clientSecret: 'sdfsdf',
+        },
+      },
+      {
+        id: 'anotherServerLog',
+        actionTypeId: '.server-log',
+        name: 'test',
+        isPreconfigured: true,
+        secrets: {},
+      },
+    ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
@@ -490,6 +511,7 @@ Object {
     "__slack": 1,
   },
   "countEmailByService": Object {
+    "exchange_server": 1,
     "other": 1,
   },
   "countNamespaces": 1,

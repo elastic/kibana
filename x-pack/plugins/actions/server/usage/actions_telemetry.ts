@@ -305,8 +305,8 @@ export async function getInUseTotalCount(
   );
 
   const namespacesList = actions.hits.reduce((_namespaces: Set<string>, action) => {
-    const actionSource = action._source!;
-    actionSource.namespaces.forEach((namespace) => {
+    const namespaces = action._source?.namespaces ?? ['default'];
+    namespaces.forEach((namespace) => {
       if (!_namespaces.has(namespace)) {
         _namespaces.add(namespace);
       }
