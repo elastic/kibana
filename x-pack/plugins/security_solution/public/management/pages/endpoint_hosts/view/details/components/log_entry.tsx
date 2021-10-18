@@ -82,11 +82,12 @@ const useLogEntryUIProps = (
       iconType = 'lockOpen';
       username = logEntry.item.data.user.id;
       avatarIconColor = theme.euiColorVis9_behindText;
-      failedActionEventTitle = i18.ACTIVITY_LOG.LogEntry.action.failedEndpointAction;
+      failedActionEventTitle = i18.ACTIVITY_LOG.LogEntry.action.failedEndpointReleaseAction;
       if (logEntry.item.data.EndpointActions.data) {
         const data = logEntry.item.data.EndpointActions.data;
         if (data.command === 'isolate') {
           iconType = 'lock';
+          failedActionEventTitle = i18.ACTIVITY_LOG.LogEntry.action.failedEndpointIsolateAction;
         }
         if (commentText) {
           displayComment = true;
