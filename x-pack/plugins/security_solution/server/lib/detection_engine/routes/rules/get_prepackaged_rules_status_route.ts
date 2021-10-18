@@ -20,7 +20,7 @@ import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
 import { getLatestPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset_saved_objects_client';
+import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset/rule_asset_saved_objects_client';
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';

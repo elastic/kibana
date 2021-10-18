@@ -31,7 +31,7 @@ import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset_saved_objects_client';
+import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset/rule_asset_saved_objects_client';
 
 import { buildSiemResponse } from '../utils';
 import { RulesClient } from '../../../../../../alerting/server';

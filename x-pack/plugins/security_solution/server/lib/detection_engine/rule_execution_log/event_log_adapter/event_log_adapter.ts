@@ -42,7 +42,7 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
   }
 
   public async update(args: UpdateExecutionLogArgs) {
-    const { attributes, spaceId, ruleName, ruleType } = args;
+    const { attributes, spaceId, ruleId, ruleName, ruleType } = args;
 
     await this.savedObjectsAdapter.update(args);
 
@@ -51,7 +51,7 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
       this.eventLogClient.logStatusChange({
         ruleName,
         ruleType,
-        ruleId: attributes.alertId,
+        ruleId,
         newStatus: attributes.status,
         spaceId,
       });

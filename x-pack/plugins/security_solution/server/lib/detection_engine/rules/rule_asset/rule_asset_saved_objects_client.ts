@@ -9,9 +9,9 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
-} from '../../../../../../../src/core/server';
-import { ruleAssetSavedObjectType } from '../rules/saved_object_mappings';
-import { IRuleAssetSavedObject } from '../rules/types';
+} from 'kibana/server';
+import { ruleAssetSavedObjectType } from './rule_asset_saved_object_mappings';
+import { IRuleAssetSavedObject } from '../types';
 
 const DEFAULT_PAGE_SIZE = 100;
 

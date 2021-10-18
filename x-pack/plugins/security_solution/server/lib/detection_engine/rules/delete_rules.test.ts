@@ -26,7 +26,6 @@ describe('deleteRules', () => {
       type: '',
       references: [],
       attributes: {
-        alertId: 'alertId',
         statusDate: '',
         lastFailureAt: null,
         lastFailureMessage: null,

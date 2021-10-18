@@ -86,6 +86,33 @@ export default ({ getService }: FtrProviderContext): void => {
           '7d'
         );
       });
+
+      it('migrates legacy siem-detection-engine-rule-status to use saved object references', async () => {
+        const response = await es.get<{
+          'siem-detection-engine-rule-status': {
+            alertId: string;
+          };
+          references: [{}];
+        }>({
+          index: '.kibana',
+          id: 'siem-detection-engine-rule-status:d62d2980-27c4-11ec-92b0-f7b47106bb35',
+        });
+        expect(response.statusCode).to.eql(200);
+
+        // references exist and are expected values
+        expect(response.body._source?.references).to.eql([
+          {
+            name: 'alert_0',
+            id: 'fb1046a0-0452-11ec-9b15-d13d79d162f3',
+            type: 'alert',
+          },
+        ]);
+
+        // alertId no longer exist
+        expect(response.body._source?.['siem-detection-engine-rule-status'].alertId).to.eql(
+          undefined
+        );
+      });
     });
   });
 };
