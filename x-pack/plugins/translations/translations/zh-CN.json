@@ -6417,7 +6417,6 @@
     "xpack.apm.clearFilters": "清除筛选",
     "xpack.apm.compositeSpanCallsLabel": "，{count} 个调用，平均 {duration}",
     "xpack.apm.compositeSpanDurationLabel": "平均持续时间",
-    "xpack.apm.correlations.correlationsTable.actionsLabel": "筛选",
     "xpack.apm.correlations.correlationsTable.excludeDescription": "筛除值",
     "xpack.apm.correlations.correlationsTable.excludeLabel": "排除",
     "xpack.apm.correlations.correlationsTable.filterDescription": "按值筛选",
