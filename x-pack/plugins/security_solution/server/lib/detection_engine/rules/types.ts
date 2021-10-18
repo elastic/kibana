@@ -116,7 +116,6 @@ export type RuleAlertType = SanitizedAlert<RuleParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
-  alertId: string; // created alert id.
   statusDate: StatusDate;
   lastFailureAt: LastFailureAt | null | undefined;
   lastFailureMessage: LastFailureMessage | null | undefined;
@@ -130,7 +129,6 @@ export interface IRuleStatusSOAttributes extends Record<string, any> {
 }
 
 export interface IRuleStatusResponseAttributes {
-  alert_id: string; // created alert id.
   status_date: StatusDate;
   last_failure_at: LastFailureAt | null | undefined;
   last_failure_message: LastFailureMessage | null | undefined;

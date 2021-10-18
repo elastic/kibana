@@ -8,8 +8,7 @@
 import { DefaultUuid } from './default_uuid';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-
-import { foldLeftRight, getPaths } from '../../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('default_uuid', () => {
   test('it should validate a regular string', () => {
