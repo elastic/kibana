@@ -21,7 +21,7 @@ describe('utils', () => {
 
   describe('checkForDataLayerType', () => {
     it('should return an error if the layer is of the wrong type', () => {
-      expect(checkForDataLayerType(layerTypes.THRESHOLD, 'Operation')).toEqual([
+      expect(checkForDataLayerType(layerTypes.REFERENCELINE, 'Operation')).toEqual([
         'Operation is disabled for this type of layer.',
       ]);
     });

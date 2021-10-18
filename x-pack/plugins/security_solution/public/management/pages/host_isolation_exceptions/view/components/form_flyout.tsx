@@ -52,9 +52,7 @@ import { HostIsolationExceptionsForm } from './form';
 export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
   const toasts = useToasts();
-
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
-
   const creationInProgress = useHostIsolationExceptionsSelector((state) =>
     isLoadingResourceState(state.form.status)
   );
@@ -62,11 +60,8 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
     isLoadedResourceState(state.form.status)
   );
   const creationFailure = useHostIsolationExceptionsSelector(getFormStatusFailure);
-
   const exceptionToEdit = useHostIsolationExceptionsSelector(getExceptionToEdit);
-
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
-
   const history = useHistory();
 
   const [formHasError, setFormHasError] = useState(true);
@@ -97,7 +92,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
       if (!exceptionToEdit || location.id !== exceptionToEdit.id) {
         dispatch({
           type: 'hostIsolationExceptionsMarkToEdit',
-          payload: { id: location.id! },
+          payload: { id: location.id },
         });
       } else {
         setException(exceptionToEdit);
