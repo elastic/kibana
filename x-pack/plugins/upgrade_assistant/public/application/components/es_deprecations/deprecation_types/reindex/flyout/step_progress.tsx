@@ -56,11 +56,7 @@ const Step: React.FunctionComponent<StepProgressStep & { idx: number }> = ({
 }) => {
   const titleClassName = classNames('upgStepProgress__title', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    'upgStepProgress__title--currentStep':
-      status === 'inProgress' ||
-      status === 'paused' ||
-      status === 'failed' ||
-      status === 'cancelled',
+    'upgStepProgress__title--currentStep': status === 'inProgress',
   });
 
   return (

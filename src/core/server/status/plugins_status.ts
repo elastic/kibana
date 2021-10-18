@@ -128,7 +128,7 @@ export class PluginsStatusService {
 
         return combineLatest(pluginStatuses).pipe(
           map((statuses) => Object.fromEntries(statuses)),
-          distinctUntilChanged(isDeepStrictEqual)
+          distinctUntilChanged<Record<PluginName, ServiceStatus>>(isDeepStrictEqual)
         );
       })
     );

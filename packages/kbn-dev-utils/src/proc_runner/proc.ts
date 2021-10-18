@@ -131,7 +131,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     await withTimeout(
       async () => {
         log.debug(`Sending "${signal}" to proc "${name}"`);
-        await treeKillAsync(childProcess.pid, signal);
+        await treeKillAsync(childProcess.pid!, signal);
         await outcomePromise;
       },
       STOP_TIMEOUT,
@@ -139,7 +139,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
         log.warning(
           `Proc "${name}" was sent "${signal}" didn't emit the "exit" or "error" events after ${STOP_TIMEOUT} ms, sending SIGKILL`
         );
-        await treeKillAsync(childProcess.pid, 'SIGKILL');
+        await treeKillAsync(childProcess.pid!, 'SIGKILL');
       }
     );
 

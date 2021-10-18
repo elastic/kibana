@@ -21,13 +21,12 @@ import {
   EuiTitle,
   EuiText,
   EuiCallOut,
-  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../shared';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
-import { DeprecationBadge } from '../shared';
 
 import './_deprecation_details_flyout.scss';
 
@@ -39,12 +38,6 @@ export interface DeprecationDetailsFlyoutProps {
 }
 
 const i18nTexts = {
-  learnMoreLinkLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.flyout.learnMoreLinkLabel',
-    {
-      defaultMessage: 'Learn more about this deprecation',
-    }
-  ),
   closeButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.closeButtonLabel',
     {
@@ -169,12 +162,9 @@ export const DeprecationDetailsFlyout = ({
 
         <EuiText>
           <p className="eui-textBreakWord">{message}</p>
-
           {documentationUrl && (
             <p>
-              <EuiLink target="_blank" data-test-subj="documentationLink" href={documentationUrl}>
-                {i18nTexts.learnMoreLinkLabel}
-              </EuiLink>
+              <DeprecationFlyoutLearnMoreLink documentationUrl={documentationUrl} />
             </p>
           )}
         </EuiText>

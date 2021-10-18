@@ -53,7 +53,7 @@ export const getColumnsWithTimestamp = ({
     : [];
 };
 
-export const getIconFromType = (type: string | null) => {
+export const getIconFromType = (type: string | null | undefined) => {
   switch (type) {
     case 'string': // fall through
     case 'keyword':
