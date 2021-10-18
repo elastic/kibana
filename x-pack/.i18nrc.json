@@ -65,7 +65,7 @@
     "xpack.observability": "plugins/observability",
     "xpack.banners": "plugins/banners"
   },
-  "exclude": ["examples"],
+  "exclude": ["examples", "plugins/monitoring/public/angular/angular_i18n"],
   "translations": [
     "plugins/translations/translations/zh-CN.json",
     "plugins/translations/translations/ja-JP.json"
