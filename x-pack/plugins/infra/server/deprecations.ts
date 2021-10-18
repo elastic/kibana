@@ -113,9 +113,8 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
       correctiveActions: {
         manualSteps: [
           i18n.translate('xpack.infra.deprecations.podAdjustIndexing', {
-            defaultMessage:
-              'Adjust your indexing to identify Kubernetes pods using "{field}"',
-             values: { field: 'kubernetes.pod.uid' },
+            defaultMessage: 'Adjust your indexing to identify Kubernetes pods using "{field}"',
+            values: { field: 'kubernetes.pod.uid' },
           }),
         ],
       },
@@ -135,8 +134,7 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
       correctiveActions: {
         manualSteps: [
           i18n.translate('xpack.infra.deprecations.containerAdjustIndexing', {
-            defaultMessage:
-              'Adjust your indexing to identify Docker containers using "{field}"',
+            defaultMessage: 'Adjust your indexing to identify Docker containers using "{field}"',
             values: { field: 'container.id' },
           }),
         ],
