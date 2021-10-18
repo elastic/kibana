@@ -117,7 +117,7 @@ export const HostIsolationExceptionsList = () => {
       title={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageTitle"
-          defaultMessage="Host Isolation Exceptions"
+          defaultMessage="Host isolation exceptions"
         />
       }
       actions={
@@ -130,7 +130,7 @@ export const HostIsolationExceptionsList = () => {
         >
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.list.addButton"
-            defaultMessage="Add Host Isolation Exception"
+            defaultMessage="Add Host isolation exception"
           />
         </EuiButton>
       }

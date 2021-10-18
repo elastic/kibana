@@ -240,7 +240,7 @@ describe('useSecuritySolutionNavigation', () => {
                 "href": "securitySolution/host_isolation_exceptions",
                 "id": "host_isolation_exceptions",
                 "isSelected": false,
-                "name": "Host Isolation Exceptions",
+                "name": "Host isolation exceptions",
                 "onClick": [Function],
               },
             ],
