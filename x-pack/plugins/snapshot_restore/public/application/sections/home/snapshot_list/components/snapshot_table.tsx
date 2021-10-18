@@ -7,34 +7,28 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+
 import {
-  EuiButton,
-  EuiInMemoryTable,
   EuiLink,
-  Query,
   EuiLoadingSpinner,
   EuiToolTip,
   EuiButtonIcon,
+  Criteria,
+  EuiBasicTable,
 } from '@elastic/eui';
-
 import { SnapshotDetails } from '../../../../../../common/types';
-import { UseRequestResponse } from '../../../../../shared_imports';
+import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
-import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
+import {
+  linkToRepository,
+  linkToRestoreSnapshot,
+  linkToSnapshot as openSnapshotDetailsUrl,
+} from '../../../../services/navigation';
+import { SnapshotListParams, SortDirection, SortField } from '../../../../lib';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
-
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
-
-interface Props {
-  snapshots: SnapshotDetails[];
-  repositories: string[];
-  reload: UseRequestResponse['resendRequest'];
-  openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
-  repositoryFilter?: string;
-  policyFilter?: string;
-  onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
-}
+import { SnapshotSearchBar } from './snapshot_search_bar';
 
 const getLastSuccessfulManagedSnapshot = (
   snapshots: SnapshotDetails[]
@@ -51,15 +45,28 @@ const getLastSuccessfulManagedSnapshot = (
   return successfulSnapshots[0];
 };
 
-export const SnapshotTable: React.FunctionComponent<Props> = ({
-  snapshots,
-  repositories,
-  reload,
-  openSnapshotDetailsUrl,
-  onSnapshotDeleted,
-  repositoryFilter,
-  policyFilter,
-}) => {
+interface Props {
+  snapshots: SnapshotDetails[];
+  repositories: string[];
+  reload: UseRequestResponse['resendRequest'];
+  onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
+  listParams: SnapshotListParams;
+  setListParams: (listParams: SnapshotListParams) => void;
+  totalItemCount: number;
+  isLoading: boolean;
+}
+
+export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
+  const {
+    snapshots,
+    repositories,
+    reload,
+    onSnapshotDeleted,
+    listParams,
+    setListParams,
+    totalItemCount,
+    isLoading,
+  } = props;
   const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
 
@@ -71,7 +78,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.snapshotRestore.snapshotList.table.snapshotColumnTitle', {
         defaultMessage: 'Snapshot',
       }),
-      truncateText: true,
+      truncateText: false,
       sortable: true,
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
         <EuiLink
@@ -91,7 +98,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.snapshotRestore.snapshotList.table.repositoryColumnTitle', {
         defaultMessage: 'Repository',
       }),
-      truncateText: true,
+      truncateText: false,
       sortable: true,
       render: (repositoryName: string) => (
         <EuiLink
@@ -137,7 +144,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
         defaultMessage: 'Date created',
       }),
-      truncateText: true,
+      truncateText: false,
       sortable: true,
       render: (startTimeInMillis: number) => (
         <DataPlaceholder data={startTimeInMillis}>
@@ -263,28 +270,18 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
   ];
 
-  // By default, we'll display the most recent snapshots at the top of the table.
-  const sorting = {
+  const sorting: EuiTableSortingType<SnapshotDetails> = {
     sort: {
-      field: 'startTimeInMillis',
-      direction: 'desc' as const,
+      field: listParams.sortField as keyof SnapshotDetails,
+      direction: listParams.sortDirection,
     },
   };
 
   const pagination = {
-    initialPageSize: 20,
+    pageIndex: listParams.pageIndex,
+    pageSize: listParams.pageSize,
+    totalItemCount,
     pageSizeOptions: [10, 20, 50],
-  };
-
-  const searchSchema = {
-    fields: {
-      repository: {
-        type: 'string',
-      },
-      policyName: {
-        type: 'string',
-      },
-    },
   };
 
   const selection = {
@@ -306,103 +303,44 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
   };
 
-  const search = {
-    toolsLeft: selectedItems.length ? (
-      <SnapshotDeleteProvider>
-        {(
-          deleteSnapshotPrompt: (
-            ids: Array<{ snapshot: string; repository: string }>,
-            onSuccess?: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void
-          ) => void
-        ) => {
-          return (
-            <EuiButton
-              onClick={() =>
-                deleteSnapshotPrompt(
-                  selectedItems.map(({ snapshot, repository }) => ({ snapshot, repository })),
-                  onSnapshotDeleted
-                )
-              }
-              color="danger"
-              data-test-subj="srSnapshotListBulkDeleteActionButton"
-            >
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotList.table.deleteSnapshotButton"
-                defaultMessage="Delete {count, plural, one {snapshot} other {snapshots}}"
-                values={{
-                  count: selectedItems.length,
-                }}
-              />
-            </EuiButton>
-          );
-        }}
-      </SnapshotDeleteProvider>
-    ) : undefined,
-    toolsRight: (
-      <EuiButton
-        color="secondary"
-        iconType="refresh"
-        onClick={reload}
-        data-test-subj="reloadButton"
-      >
-        <FormattedMessage
-          id="xpack.snapshotRestore.snapshotList.table.reloadSnapshotsButton"
-          defaultMessage="Reload"
-        />
-      </EuiButton>
-    ),
-    box: {
-      incremental: true,
-      schema: searchSchema,
-    },
-    filters: [
-      {
-        type: 'field_value_selection' as const,
-        field: 'repository',
-        name: i18n.translate('xpack.snapshotRestore.snapshotList.table.repositoryFilterLabel', {
-          defaultMessage: 'Repository',
-        }),
-        multiSelect: false,
-        options: repositories.map((repository) => ({
-          value: repository,
-          view: repository,
-        })),
-      },
-    ],
-    defaultQuery: policyFilter
-      ? Query.parse(`policyName="${policyFilter}"`, {
-          schema: {
-            ...searchSchema,
-            strict: true,
-          },
-        })
-      : repositoryFilter
-      ? Query.parse(`repository="${repositoryFilter}"`, {
-          schema: {
-            ...searchSchema,
-            strict: true,
-          },
-        })
-      : '',
-  };
-
   return (
-    <EuiInMemoryTable
-      items={snapshots}
-      itemId="uuid"
-      columns={columns}
-      search={search}
-      sorting={sorting}
-      isSelectable={true}
-      selection={selection}
-      pagination={pagination}
-      rowProps={() => ({
-        'data-test-subj': 'row',
-      })}
-      cellProps={() => ({
-        'data-test-subj': 'cell',
-      })}
-      data-test-subj="snapshotTable"
-    />
+    <>
+      <SnapshotSearchBar
+        listParams={listParams}
+        setListParams={setListParams}
+        reload={reload}
+        selectedItems={selectedItems}
+        onSnapshotDeleted={onSnapshotDeleted}
+        repositories={repositories}
+      />
+      <EuiBasicTable
+        items={snapshots}
+        itemId="uuid"
+        columns={columns}
+        sorting={sorting}
+        onChange={(criteria: Criteria<SnapshotDetails>) => {
+          const { page: { index, size } = {}, sort: { field, direction } = {} } = criteria;
+
+          setListParams({
+            ...listParams,
+            sortField: (field as SortField) ?? listParams.sortField,
+            sortDirection: (direction as SortDirection) ?? listParams.sortDirection,
+            pageIndex: index ?? listParams.pageIndex,
+            pageSize: size ?? listParams.pageSize,
+          });
+        }}
+        loading={isLoading}
+        isSelectable={true}
+        selection={selection}
+        pagination={pagination}
+        rowProps={() => ({
+          'data-test-subj': 'row',
+        })}
+        cellProps={() => ({
+          'data-test-subj': 'cell',
+        })}
+        data-test-subj="snapshotTable"
+      />
+    </>
   );
 };

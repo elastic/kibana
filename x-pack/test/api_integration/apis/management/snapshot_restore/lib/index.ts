@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerEsHelpers } from './elasticsearch';
+export { registerEsHelpers, SlmPolicy } from './elasticsearch';
