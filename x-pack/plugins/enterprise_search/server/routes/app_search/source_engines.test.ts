@@ -92,6 +92,7 @@ describe('source engine routes', () => {
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:name/source_engines/bulk_create',
+        hasJsonResponse: false,
       });
     });
   });
@@ -145,6 +146,7 @@ describe('source engine routes', () => {
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:name/source_engines/:source_engine_name',
+        hasJsonResponse: false,
       });
     });
   });
