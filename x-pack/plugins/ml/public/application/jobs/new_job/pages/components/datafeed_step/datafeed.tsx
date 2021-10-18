@@ -47,7 +47,7 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
               <FrequencyInput />
               <ScrollSizeInput />
               <TimeField />
-              <ChangeDataView />
+              <ChangeDataView isDisabled={false} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <ResetQueryButton />

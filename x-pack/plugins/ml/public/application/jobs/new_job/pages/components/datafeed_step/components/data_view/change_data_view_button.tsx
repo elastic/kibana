@@ -12,7 +12,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { Description } from './description';
 import { ChangeDataViewModal } from './change_data_view';
 
-export const ChangeDataView: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled }) => {
+export const ChangeDataView: FC<{ isDisabled: boolean }> = ({ isDisabled }) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   return (
@@ -27,7 +27,7 @@ export const ChangeDataView: FC<{ isDisabled: boolean; onClick(): void }> = ({ i
         >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.datafeedStep.dataView.changeDataView.button"
-            defaultMessage="Change Data View"
+            defaultMessage="Change Data view"
           />
         </EuiButtonEmpty>
       </Description>

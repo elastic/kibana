@@ -135,10 +135,13 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
         <EuiModalBody>
           {step === 0 && (
             <>
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.description"
-                defaultMessage="Really? You really want to change the Data View?"
-              />
+              <EuiCallOut color="warning">
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.description"
+                  defaultMessage="Changing the current Data view may cause problems with current job configuration as it may not contain the same fields."
+                />
+              </EuiCallOut>
+
               <EuiSpacer size="s" />
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
@@ -169,7 +172,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
             <>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.datafeedStep.dataView.step1.title"
-                defaultMessage="Select new Data View for job"
+                defaultMessage="Select new Data view for job"
               />
 
               <EuiSpacer size="s" />
@@ -217,7 +220,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                   <EuiLoadingSpinner />
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.datafeedStep.dataView.step2.validatingText"
-                    defaultMessage=" Checking compatibility of Data View with job"
+                    defaultMessage=" Checking compatibility of Data view with job"
                   />
                 </>
               ) : (
@@ -273,14 +276,14 @@ const ValidationMessage: FC<{
         title={i18n.translate(
           'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.title',
           {
-            defaultMessage: 'Data View valid',
+            defaultMessage: 'Data view valid',
           }
         )}
         color="primary"
       >
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.message"
-          defaultMessage="No detectors have been configured, so changing to this Data View should be ok."
+          defaultMessage="No detectors have been configured, so changing to this Data view should be ok."
         />
       </EuiCallOut>
     );
@@ -292,14 +295,14 @@ const ValidationMessage: FC<{
           title={i18n.translate(
             'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.valid.title',
             {
-              defaultMessage: 'Data View valid',
+              defaultMessage: 'Data view valid',
             }
           )}
           color="primary"
         >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.valid.message"
-            defaultMessage="This Data View appears to be a good match for this job."
+            defaultMessage="This Data view appears to be a good match for this job."
           />
         </EuiCallOut>
       );
@@ -309,14 +312,14 @@ const ValidationMessage: FC<{
           title={i18n.translate(
             'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.possiblyInvalid.title',
             {
-              defaultMessage: 'Data View possibly invalid',
+              defaultMessage: 'Data view possibly invalid',
             }
           )}
           color="warning"
         >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.possiblyInvalid.message"
-            defaultMessage="This Data View produced no results when previewing the datafeed. This could be due to there being no documents in {dataViewTitle}."
+            defaultMessage="This Data view produced no results when previewing the datafeed. This could be due to there being no documents in {dataViewTitle}."
             values={{ dataViewTitle }}
           />
         </EuiCallOut>
@@ -328,14 +331,14 @@ const ValidationMessage: FC<{
         title={i18n.translate(
           'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.title',
           {
-            defaultMessage: 'Data View invalid',
+            defaultMessage: 'Data view invalid',
           }
         )}
         color="danger"
       >
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.message"
-          defaultMessage="This Data View produced an error when attempting preview the datafeed. This could be due to fields selected for this job not existing in {dataViewTitle}."
+          defaultMessage="This Data view produced an error when attempting preview the datafeed. This could be due to fields selected for this job not existing in {dataViewTitle}."
           values={{ dataViewTitle }}
         />
 

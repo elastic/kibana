@@ -12,7 +12,7 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.datafeedStep.timeField.title', {
-    defaultMessage: 'Data View',
+    defaultMessage: 'Data view',
   });
   return (
     <EuiDescribedFormGroup
@@ -20,7 +20,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.dataView.description"
-          defaultMessage="The currently selected Data View being used for this job. Change this text."
+          defaultMessage="The currently selected Data view being used for this job. Change this text."
         />
       }
     >
