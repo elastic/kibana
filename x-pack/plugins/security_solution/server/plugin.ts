@@ -165,6 +165,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
+  private kibanaIndex?: string;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -184,6 +185,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.setupPlugins = plugins;
 
     const config = this.config;
+    this.kibanaIndex = core.savedObjects.getKibanaIndex();
 
     const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
     initSavedObjects(core.savedObjects);
@@ -474,10 +476,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptionListsClient: exceptionListClient,
     });
 
-    const globalConfig = this.context.config.legacy.get();
     this.telemetryReceiver.start(
       core,
-      globalConfig.kibana.index,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.kibanaIndex!,
       this.endpointAppContextService,
       exceptionListClient
     );
