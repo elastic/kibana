@@ -567,20 +567,6 @@ describe('xy_visualization', () => {
           ],
         ],
         [
-          'multiple accessors on the same layer with different axis assigned',
-          [
-            {
-              ...baseState.layers[0],
-              splitAccessor: undefined,
-              seriesType: 'bar_percentage_stacked',
-              yConfig: [
-                { forAccessor: 'a', axisMode: 'left' },
-                { forAccessor: 'b', axisMode: 'right' },
-              ],
-            },
-          ],
-        ],
-        [
           'multiple accessors spread on compatible layers',
           [
             {
@@ -708,6 +694,42 @@ describe('xy_visualization', () => {
               accessors: ['e'],
               seriesType: 'bar_percentage_stacked',
               layerType: layerTypes.REFERENCELINE,
+            },
+          ],
+        ],
+
+        [
+          'multiple accessors on the same layers with different axis assigned',
+          [
+            {
+              ...baseState.layers[0],
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [
+                { forAccessor: 'a', axisMode: 'left' },
+                { forAccessor: 'b', axisMode: 'right' },
+              ],
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on multiple layers with different axis assigned',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              xAccessor: undefined,
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [{ forAccessor: 'a', axisMode: 'left' }],
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['b'],
+              xAccessor: undefined,
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [{ forAccessor: 'b', axisMode: 'right' }],
             },
           ],
         ],

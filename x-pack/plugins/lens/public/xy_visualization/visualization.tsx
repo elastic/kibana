@@ -40,6 +40,7 @@ import {
   checkXAccessorCompatibility,
   getAxisName,
 } from './visualization_helpers';
+import { groupAxesByType } from './axes_configuration';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -378,16 +379,38 @@ export const getXyVisualization = ({
       };
     }
 
-    // Check locally first, but also multiple layers can stack for percentage charts
+    const { left, right } = groupAxesByType([layer], frame.activeData);
+    // Check locally if it has one accessor OR one accessor per axis
+    const layerHasOnlyOneAccessor = Boolean(
+      layer.accessors.length < 2 ||
+        (left.length && left.length < 2) ||
+        (right.length && right.length < 2)
+    );
+    // Check also for multiple layers that can stack for percentage charts
+    // Make sure that if multiple dimensions are defined for a single layer, they should belong to the same axis
     const hasOnlyOneAccessor =
-      layer.accessors.length < 2 &&
+      layerHasOnlyOneAccessor &&
       getLayersByType(state, layerTypes.DATA).filter(
         // check that the other layers are compatible with this one
-        (dataLayer) =>
-          dataLayer.seriesType === layer.seriesType &&
-          Boolean(dataLayer.xAccessor) === Boolean(layer.xAccessor) &&
-          Boolean(dataLayer.splitAccessor) === Boolean(layer.splitAccessor) &&
-          dataLayer.accessors.length
+        (dataLayer) => {
+          if (
+            dataLayer.seriesType === layer.seriesType &&
+            Boolean(dataLayer.xAccessor) === Boolean(layer.xAccessor) &&
+            Boolean(dataLayer.splitAccessor) === Boolean(layer.splitAccessor)
+          ) {
+            const { left: localLeft, right: localRight } = groupAxesByType(
+              [dataLayer],
+              frame.activeData
+            );
+            // return true only if matching axis are found
+            return (
+              dataLayer.accessors.length &&
+              (Boolean(localLeft.length) === Boolean(left.length) ||
+                Boolean(localRight.length) === Boolean(right.length))
+            );
+          }
+          return false;
+        }
       ).length < 2;
 
     return {
