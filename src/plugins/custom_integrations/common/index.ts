@@ -49,6 +49,7 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   project_management: 'Project Management',
   software_development: 'Software Development',
   upload_file: 'Upload a file',
+  website_search: 'Website Search',
 };
 
 /**
