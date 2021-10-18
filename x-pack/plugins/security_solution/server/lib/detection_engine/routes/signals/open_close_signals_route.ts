@@ -14,14 +14,17 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
 import { buildSiemResponse } from '../utils';
-
+import { TelemetryEventsSender } from '../../../telemetry/sender';
+import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
+import { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { InsightsService } from '../../../telemetry/insights';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
-  security: SetupPlugins['security']
+  security: SetupPlugins['security'],
+  sender: TelemetryEventsSender
 ) => {
   router.post(
     {
@@ -41,6 +44,24 @@ export const setSignalsStatusRoute = (
       const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
+
+      // Get Context for Insights Payloads
+      const clusterId = await sender.getClusterID();
+      const username = await security?.authc.getCurrentUser.name;
+      // const sessionId = await security?.getSession();
+      const sessionId = '';
+      const insightsService = new InsightsService(clusterId);
+      const isTelemetryOptedIn = await sender.isTelemetryOptedIn();
+      if (isTelemetryOptedIn && username && signalIds) {
+        const insightsPayloads = insightsService.createAlertStatusPayloads(
+          signalIds,
+          sessionId,
+          username,
+          DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          status
+        );
+        await sender.sendOnDemand(INSIGHTS_CHANNEL, insightsPayloads);
+      }
 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });

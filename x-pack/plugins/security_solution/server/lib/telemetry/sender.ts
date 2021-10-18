@@ -67,6 +67,14 @@ export class TelemetryEventsSender {
     }
   }
 
+  public async getClusterID(): Promise<string> {
+    if (!this.receiver) {
+      throw Error("Couldn't get cluster id due to receiver not being set.");
+    }
+    const clusterInfo = await this.receiver.fetchClusterInfo();
+    return clusterInfo.cluster_uuid;
+  }
+
   public start(
     telemetryStart?: TelemetryPluginStart,
     taskManager?: TaskManagerStartContract,
