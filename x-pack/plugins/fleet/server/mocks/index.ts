@@ -65,7 +65,7 @@ export const xpackMocks = {
 
 export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
   return {
-    compilePackagePolicyInputs: jest.fn(),
+    _compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),

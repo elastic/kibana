@@ -33,6 +33,7 @@ import type {
   InputsOverride,
   NewPackagePolicy,
   NewPackagePolicyInput,
+  RegistryPackage,
 } from '../../common';
 
 import { IngestManagerError } from '../errors';
@@ -43,6 +44,7 @@ import {
   _applyIndexPrivileges,
 } from './package_policy';
 import { appContextService } from './app_context';
+import { fetchInfo } from './epm/registry';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
@@ -88,6 +90,10 @@ hosts:
   ];
 }
 
+function mockedRegistryInfo(): RegistryPackage {
+  return {} as RegistryPackage;
+}
+
 jest.mock('./epm/packages/assets', () => {
   return {
     getAssetsData: mockedGetAssetsData,
@@ -100,11 +106,7 @@ jest.mock('./epm/packages', () => {
   };
 });
 
-jest.mock('./epm/registry', () => {
-  return {
-    fetchInfo: () => ({}),
-  };
-});
+jest.mock('./epm/registry');
 
 jest.mock('./agent_policy', () => {
   return {
@@ -126,12 +128,18 @@ jest.mock('./agent_policy', () => {
   };
 });
 
+const mockedFetchInfo = fetchInfo as jest.Mock<ReturnType<typeof fetchInfo>>;
+
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
 describe('Package policy service', () => {
-  describe('compilePackagePolicyInputs', () => {
+  beforeEach(() => {
+    mockedFetchInfo.mockResolvedValue({} as RegistryPackage);
+  });
+  describe('_compilePackagePolicyInputs', () => {
     it('should work with config variables from the stream', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+        mockedRegistryInfo(),
         {
           data_streams: [
             {
@@ -194,7 +202,8 @@ describe('Package policy service', () => {
     });
 
     it('should work with a two level dataset name', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+        mockedRegistryInfo(),
         {
           data_streams: [
             {
@@ -246,7 +255,8 @@ describe('Package policy service', () => {
     });
 
     it('should work with config variables at the input level', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+        mockedRegistryInfo(),
         {
           data_streams: [
             {
@@ -309,7 +319,8 @@ describe('Package policy service', () => {
     });
 
     it('should work with config variables at the package level', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+        mockedRegistryInfo(),
         {
           data_streams: [
             {
@@ -377,7 +388,8 @@ describe('Package policy service', () => {
     });
 
     it('should work with an input with a template and no streams', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+        mockedRegistryInfo(),
         {
           data_streams: [],
           policy_templates: [
@@ -419,7 +431,8 @@ describe('Package policy service', () => {
     });
 
     it('should work with an input with a template and streams', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+        mockedRegistryInfo(),
         {
           data_streams: [
             {
@@ -524,7 +537,8 @@ describe('Package policy service', () => {
     });
 
     it('should work with a package without input', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+        mockedRegistryInfo(),
         {
           policy_templates: [
             {
@@ -540,7 +554,8 @@ describe('Package policy service', () => {
     });
 
     it('should work with a package with a empty inputs array', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+        mockedRegistryInfo(),
         {
           policy_templates: [
             {
@@ -833,6 +848,59 @@ describe('Package policy service', () => {
       const [modifiedStream] = modifiedInput.streams;
       expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
       expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+
+    it('should update elasticsearch.priviles.cluster when updating', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+
+      mockedFetchInfo.mockResolvedValue({
+        elasticsearch: {
+          privileges: {
+            cluster: ['monitor'],
+          },
+        },
+      } as RegistryPackage);
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: [] }
+      );
+
+      expect(result.elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
     });
   });
 
