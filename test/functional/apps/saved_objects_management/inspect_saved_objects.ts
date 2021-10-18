@@ -74,13 +74,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaSavedObjects();
       let objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Dashboard')).to.be(true);
+
       await PageObjects.savedObjects.clickInspectByTitle('A Dashboard');
       await PageObjects.common.navigateToUrl('management', 'kibana/objects/dashboard/i-exist', {
         shouldUseHashForSubUrl: false,
-      });
+      }); // we should wait for it to load.
+      // wait for the Inspect view to load
+      await PageObjects.savedObjects.waitInspectObjectIsLoaded();
       await focusAndClickButton('savedObjectEditDelete');
       await PageObjects.common.clickConfirmOnModal();
-
       objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Dashboard')).to.be(false);
     });

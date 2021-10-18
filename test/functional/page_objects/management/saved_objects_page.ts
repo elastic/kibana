@@ -120,6 +120,17 @@ export class SavedObjectsPageObject extends FtrService {
       }
     });
   }
+  async waitInspectObjectIsLoaded() {
+    return await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
+      const isLoaded = await this.find.byClassName('kibanaCodeEditor');
+      const visibleContainerText = await isLoaded.getVisibleText();
+      if (visibleContainerText) {
+        return true;
+      } else {
+        this.log.debug(`still waiting for json view to load ${isLoaded}`);
+      }
+    });
+  }
 
   async clickRelationshipsByTitle(title: string) {
     const table = keyBy(await this.getElementsInTable(), 'title');
