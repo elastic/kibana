@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
+import {
+  POLICY_ELASTIC_AGENT_ON_CLOUD,
+  SUPPORTED_APM_PACKAGE_VERSION,
+} from '../../../common/fleet';
 import { APMPluginSetupDependencies } from '../../types';
 import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 
@@ -36,7 +39,7 @@ export function getApmPackagePolicyDefinition(
     ],
     package: {
       name: APM_PACKAGE_NAME,
-      version: '0.4.0',
+      version: SUPPORTED_APM_PACKAGE_VERSION,
       title: 'Elastic APM',
     },
   };
