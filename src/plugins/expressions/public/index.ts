@@ -112,10 +112,8 @@ export type {
 export {
   buildExpression,
   buildExpressionFunction,
-  format,
   formatExpression,
   isExpressionAstBuilder,
-  parse,
   parseExpression,
   createDefaultInspectorAdapters,
 } from '../common';
