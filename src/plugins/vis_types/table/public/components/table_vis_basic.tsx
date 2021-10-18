@@ -129,7 +129,7 @@ export const TableVisBasic = memo(
       }
       // update counter to remount grid from scratch
       setDataGridUpdateCounter((counter) => counter + 1);
-    }, [visConfig.autoFitRowToContent, table, sort]);
+    }, [visConfig.autoFitRowToContent, table, sort, pagination, columnsWidth]);
 
     return (
       <>
