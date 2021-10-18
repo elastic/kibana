@@ -205,10 +205,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.logger.debug('osquery: Setup');
     const config = createConfig(this.initializerContext);
 
-    if (!config.enabled) {
-      return {};
-    }
-
     registerFeatures(plugins.features);
 
     const router = core.http.createRouter();
