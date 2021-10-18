@@ -22,6 +22,7 @@ import {
 } from './register_transform_health_rule_type';
 import type { RulesClient } from '../../../../../alerting/server';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
+import { isContinuousTransform } from '../../../../common/types/transform';
 
 interface TestResult {
   name: string;
@@ -151,13 +152,13 @@ export function transformHealthServiceProvider(
     async populateTransformsWithAssignedRules(
       transforms: Transform[]
     ): Promise<TransformWithAlertingRules[]> {
-      const newList = [...transforms] as TransformWithAlertingRules[];
+      const newList = transforms.filter(isContinuousTransform) as TransformWithAlertingRules[];
 
       if (!rulesClient) {
         throw new Error('Rules client is missing');
       }
 
-      const transformMap = keyBy(transforms, 'id');
+      const transformMap = keyBy(newList, 'id');
 
       const transformAlertingRules = await rulesClient.find<TransformHealthRuleParams>({
         options: {
