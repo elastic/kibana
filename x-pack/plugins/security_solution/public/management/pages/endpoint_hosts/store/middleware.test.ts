@@ -49,6 +49,8 @@ import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../../common/endpoint/constants';
+import { italic } from 'chalk';
+import { iteratee } from 'lodash';
 
 jest.mock('../../policy/store/services/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
@@ -62,7 +64,7 @@ jest.mock('../../../../common/lib/kibana');
 type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-describe.skip('endpoint list middleware', () => {
+describe('endpoint list middleware', () => {
   const getKibanaServicesMock = KibanaServices.get as jest.Mock;
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
@@ -388,23 +390,27 @@ describe.skip('endpoint list middleware', () => {
       expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalled();
     });
 
-    it('should call get Activity Log API with correct paging options', async () => {
+    it.only('should call get Activity Log API with correct paging options', async () => {
+      console.log('aaaaaaa');
       dispatchUserChangedUrl();
-
+      console.log('eeeeeeee');
       const updatePagingDispatched = waitForAction('endpointDetailsActivityLogUpdatePaging');
+      console.log('iiiiiii');
       dispatchGetActivityLogPaging({ page: 3 });
+      console.log('ooooooo');
 
-      await updatePagingDispatched;
+      //   await updatePagingDispatched;
+      //   console.log('uuuuuuu');
 
-      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
-        path: expect.any(String),
-        query: {
-          page: 3,
-          page_size: 50,
-          start_date: 'now-1d',
-          end_date: 'now',
-        },
-      });
+      //   expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
+      //     path: expect.any(String),
+      //     query: {
+      //       page: 3,
+      //       page_size: 50,
+      //       start_date: 'now-1d',
+      //       end_date: 'now',
+      //     },
+      //   });
     });
   });
 

@@ -42,7 +42,6 @@ let coreStart: AppContextTestRender['coreStart'];
 let http: typeof coreStart.http;
 const generator = new EndpointDocGenerator();
 
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 describe.skip('Policy trusted apps layout', () => {
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
