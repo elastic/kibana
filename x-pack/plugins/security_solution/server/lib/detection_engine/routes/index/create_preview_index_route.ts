@@ -19,12 +19,13 @@ import type {
 } from '../../../../types';
 import { DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
+import { getSignalsTemplate, SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 import previewPolicy from './preview_policy.json';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
 import { ConfigType } from '../../../../config';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
+import { templateNeedsUpdate } from './check_template_version';
 
 export const createPreviewIndexRoute = (
   router: SecuritySolutionPluginRouter,
@@ -68,15 +69,23 @@ export const createPreviewIndex = async (
 ) => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const index = siemClient.getPreviewIndex();
+
   const indexExists = await getIndexExists(esClient, index);
   // If using the rule registry implementation, we don't want to create new .siem-signals indices
-  if (ruleRegistryEnabled && !indexExists) {
+  if (ruleRegistryEnabled) {
     return;
   }
 
   const policyExists = await getPolicyExists(esClient, index);
   if (!policyExists) {
     await setPolicy(esClient, index, previewPolicy);
+  }
+
+  if (await templateNeedsUpdate({ alias: index, esClient })) {
+    await esClient.indices.putIndexTemplate({
+      name: index,
+      body: getSignalsTemplate(index) as Record<string, unknown>,
+    });
   }
 
   if (indexExists) {

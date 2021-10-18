@@ -15,6 +15,10 @@ export const LAST_DAY = i18n.translate('xpack.securitySolution.stepDefineRule.la
   defaultMessage: 'Last day',
 });
 
+export const LAST_WEEK = i18n.translate('xpack.securitySolution.stepDefineRule.lastWeek', {
+  defaultMessage: 'Last week',
+});
+
 export const LAST_MONTH = i18n.translate('xpack.securitySolution.stepDefineRule.lastMonth', {
   defaultMessage: 'Last month',
 });

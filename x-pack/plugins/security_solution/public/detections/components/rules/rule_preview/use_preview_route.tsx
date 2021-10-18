@@ -102,8 +102,8 @@ export const usePreviewRoute = ({
 
 const getInvocationCountFromTimeFrame = (timeFrame: Unit): number => {
   switch (timeFrame) {
-    case 'M':
-      return 720;
+    case 'w':
+      return 168;
     case 'd':
       return 24;
     case 'h':

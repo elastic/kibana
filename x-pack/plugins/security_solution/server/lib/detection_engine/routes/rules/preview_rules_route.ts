@@ -44,7 +44,7 @@ import { IEventLogService } from '../../../../../../event_log/server';
 enum InvocationCount {
   HOUR = 1,
   DAY = 24,
-  MONTH = 720,
+  WEEK = 168,
 }
 
 export const previewRulesRoute = async (
@@ -83,7 +83,7 @@ export const previewRulesRoute = async (
 
         let invocationCount = request.body.invocationCount;
         if (
-          ![InvocationCount.HOUR, InvocationCount.DAY, InvocationCount.MONTH].includes(
+          ![InvocationCount.HOUR, InvocationCount.DAY, InvocationCount.WEEK].includes(
             invocationCount
           )
         ) {
@@ -173,6 +173,13 @@ export const previewRulesRoute = async (
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
             invocationCount--;
+            // eslint-disable-next-line no-console
+            console.log(
+              'preview invocation count remaining ',
+              invocationCount,
+              ' for previewId ',
+              previewId
+            );
           }
         };
 

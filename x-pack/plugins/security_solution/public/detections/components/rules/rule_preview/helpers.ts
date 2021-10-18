@@ -28,6 +28,8 @@ export const isNoisy = (hits: number, timeframe: Unit): boolean => {
     return hits > 1;
   } else if (timeframe === 'd') {
     return hits / 24 > 1;
+  } else if (timeframe === 'w') {
+    return hits / 168 > 1;
   } else if (timeframe === 'M') {
     return hits / 730 > 1;
   }
@@ -46,6 +48,12 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
     return [
       { value: 'h', text: i18n.LAST_HOUR },
       { value: 'd', text: i18n.LAST_DAY },
+    ];
+  } else if (ruleType === 'threat_match') {
+    return [
+      { value: 'h', text: i18n.LAST_HOUR },
+      { value: 'd', text: i18n.LAST_DAY },
+      { value: 'w', text: i18n.LAST_WEEK },
     ];
   } else {
     return [
