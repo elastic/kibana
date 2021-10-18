@@ -9,6 +9,7 @@ import { ElasticsearchClient, Logger } from 'kibana/server';
 import { SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
+import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
   ActivityLog,
@@ -211,6 +212,42 @@ export const getPendingActionCounts = async (
   }
 
   return pending;
+};
+
+/**
+ * Returns a boolean for search result
+ *
+ * @param esClient
+ * @param actionIds
+ * @param agentIds
+ */
+const hasIndexedDoc = async ({
+  actionId,
+  agentId,
+  esClient,
+}: {
+  actionId: string;
+  agentId: string;
+  esClient: ElasticsearchClient;
+}): Promise<boolean> => {
+  const hasActionResponse = await esClient
+    .search<EndpointActionResponse>(
+      {
+        index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        body: {
+          query: {
+            bool: {
+              filter: [{ term: { action_id: actionId } }, { term: { agent_id: agentId } }],
+            },
+          },
+        },
+      },
+      { ignore: [404] }
+    )
+    .then((result) => !!result.body?.hits?.hits?.length)
+    .catch(catchAndWrapError);
+
+  return hasActionResponse;
 };
 
 /**
