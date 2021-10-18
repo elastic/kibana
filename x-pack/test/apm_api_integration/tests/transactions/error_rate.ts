@@ -14,7 +14,8 @@ import archives_metadata from '../../common/fixtures/es_archiver/archives_metada
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
-type ErrorRate = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/error_rate'>;
+type ErrorRate =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
@@ -29,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('handles the empty state', async () => {
       const response = await supertest.get(
         format({
-          pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+          pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
           query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
         })
       );
@@ -45,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('handles the empty state with comparison data', async () => {
       const response = await supertest.get(
         format({
-          pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+          pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
           query: {
             transactionType,
             start: moment(end).subtract(15, 'minutes').toISOString(),
@@ -77,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           const response = await supertest.get(
             format({
-              pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+              pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
               query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
             })
           );
@@ -116,13 +117,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct number of buckets', () => {
           expectSnapshot(errorRateResponse.currentPeriod.transactionErrorRate.length).toMatchInline(
-            `31`
+            `61`
           );
         });
 
         it('has the correct calculation for average', () => {
           expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
-            `0.0848214285714286`
+            `0.092511013215859`
           );
         });
 
@@ -137,7 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           const response = await supertest.get(
             format({
-              pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+              pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
               query: {
                 transactionType,
                 start: moment(end).subtract(15, 'minutes').toISOString(),
@@ -159,13 +160,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(errorRateResponse.currentPeriod.transactionErrorRate.length).to.be.greaterThan(0);
           expect(errorRateResponse.previousPeriod.transactionErrorRate.length).to.be.greaterThan(0);
 
-          const currentPeriodNonNullDataPoints = errorRateResponse.currentPeriod.transactionErrorRate.filter(
-            ({ y }) => y !== null
-          );
+          const currentPeriodNonNullDataPoints =
+            errorRateResponse.currentPeriod.transactionErrorRate.filter(({ y }) => y !== null);
 
-          const previousPeriodNonNullDataPoints = errorRateResponse.previousPeriod.transactionErrorRate.filter(
-            ({ y }) => y !== null
-          );
+          const previousPeriodNonNullDataPoints =
+            errorRateResponse.previousPeriod.transactionErrorRate.filter(({ y }) => y !== null);
 
           expect(currentPeriodNonNullDataPoints.length).to.be.greaterThan(0);
           expect(previousPeriodNonNullDataPoints.length).to.be.greaterThan(0);
@@ -176,12 +175,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             new Date(
               first(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
             ).toISOString()
-          ).toMatchInline(`"2021-08-03T07:05:00.000Z"`);
+          ).toMatchInline(`"2021-08-03T07:05:10.000Z"`);
           expectSnapshot(
             new Date(
               first(errorRateResponse.previousPeriod.transactionErrorRate)?.x ?? NaN
             ).toISOString()
-          ).toMatchInline(`"2021-08-03T07:05:00.000Z"`);
+          ).toMatchInline(`"2021-08-03T07:05:10.000Z"`);
         });
 
         it('has the correct end date', () => {
@@ -189,29 +188,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             new Date(
               last(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
             ).toISOString()
-          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
+          ).toMatchInline(`"2021-08-03T07:20:10.000Z"`);
           expectSnapshot(
             new Date(
               last(errorRateResponse.previousPeriod.transactionErrorRate)?.x ?? NaN
             ).toISOString()
-          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
+          ).toMatchInline(`"2021-08-03T07:20:10.000Z"`);
         });
 
         it('has the correct number of buckets', () => {
           expectSnapshot(errorRateResponse.currentPeriod.transactionErrorRate.length).toMatchInline(
-            `16`
+            `91`
           );
           expectSnapshot(
             errorRateResponse.previousPeriod.transactionErrorRate.length
-          ).toMatchInline(`16`);
+          ).toMatchInline(`91`);
         });
 
         it('has the correct calculation for average', () => {
           expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
-            `0.0792079207920792`
+            `0.102040816326531`
           );
           expectSnapshot(errorRateResponse.previousPeriod.average).toMatchInline(
-            `0.0894308943089431`
+            `0.0852713178294574`
           );
         });
 

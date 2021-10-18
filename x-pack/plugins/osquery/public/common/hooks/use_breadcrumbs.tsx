@@ -101,54 +101,54 @@ const breadcrumbGetters: {
       text: savedQueryName,
     },
   ],
-  scheduled_query_groups: () => [
+  packs: () => [
     BASE_BREADCRUMB,
     {
-      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledQueryGroupsPageTitle', {
-        defaultMessage: 'Scheduled query groups',
+      text: i18n.translate('xpack.osquery.breadcrumbs.packsPageTitle', {
+        defaultMessage: 'Packs',
       }),
     },
   ],
-  scheduled_query_group_add: () => [
+  pack_add: () => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.scheduled_query_groups(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledQueryGroupsPageTitle', {
-        defaultMessage: 'Scheduled query groups',
+      href: pagePathGetters.packs(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.packsPageTitle', {
+        defaultMessage: 'Packs',
       }),
     },
     {
-      text: i18n.translate('xpack.osquery.breadcrumbs.addScheduledQueryGroupsPageTitle', {
+      text: i18n.translate('xpack.osquery.breadcrumbs.addpacksPageTitle', {
         defaultMessage: 'Add',
       }),
     },
   ],
-  scheduled_query_group_details: ({ scheduledQueryGroupName }) => [
+  pack_details: ({ packName }) => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.scheduled_query_groups(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledQueryGroupsPageTitle', {
-        defaultMessage: 'Scheduled query groups',
+      href: pagePathGetters.packs(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.packsPageTitle', {
+        defaultMessage: 'Packs',
       }),
     },
     {
-      text: scheduledQueryGroupName,
+      text: packName,
     },
   ],
-  scheduled_query_group_edit: ({ scheduledQueryGroupName, scheduledQueryGroupId }) => [
+  pack_edit: ({ packName, packId }) => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.scheduled_query_groups(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledQueryGroupsPageTitle', {
-        defaultMessage: 'Scheduled query groups',
+      href: pagePathGetters.packs(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.packsPageTitle', {
+        defaultMessage: 'Packs',
       }),
     },
     {
-      href: pagePathGetters.scheduled_query_group_details({ scheduledQueryGroupId }),
-      text: scheduledQueryGroupName,
+      href: pagePathGetters.pack_details({ packId }),
+      text: packName,
     },
     {
-      text: i18n.translate('xpack.osquery.breadcrumbs.editScheduledQueryGroupsPageTitle', {
+      text: i18n.translate('xpack.osquery.breadcrumbs.editpacksPageTitle', {
         defaultMessage: 'Edit',
       }),
     },

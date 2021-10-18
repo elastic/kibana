@@ -43,9 +43,9 @@ describe('getAlertState useEffect handler', () => {
 
     loadAlertInstanceSummary.mockImplementationOnce(async () => alertInstanceSummary);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
 
     await getAlertInstanceSummary(
       alert.id,
@@ -82,9 +82,9 @@ describe('getAlertState useEffect handler', () => {
       throw new Error('OMG');
     });
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getAlertInstanceSummary(
       alert.id,
       loadAlertInstanceSummary,
@@ -178,6 +178,10 @@ function mockAlertInstanceSummary(overloads: Partial<any> = {}): any {
         status: 'OK',
         muted: false,
       },
+    },
+    executionDuration: {
+      average: 0,
+      values: [],
     },
   };
   return summary;

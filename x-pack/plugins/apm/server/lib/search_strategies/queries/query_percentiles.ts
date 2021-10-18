@@ -23,10 +23,9 @@ import { SIGNIFICANT_VALUE_DIGITS } from '../constants';
 export const getTransactionDurationPercentilesRequest = (
   params: SearchStrategyParams,
   percents?: number[],
-  fieldName?: FieldValuePair['fieldName'],
-  fieldValue?: FieldValuePair['fieldValue']
+  termFilters?: FieldValuePair[]
 ): estypes.SearchRequest => {
-  const query = getQueryWithParams({ params, fieldName, fieldValue });
+  const query = getQueryWithParams({ params, termFilters });
 
   return {
     ...getRequestBase(params),
@@ -53,16 +52,10 @@ export const fetchTransactionDurationPercentiles = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   percents?: number[],
-  fieldName?: FieldValuePair['fieldName'],
-  fieldValue?: FieldValuePair['fieldValue']
+  termFilters?: FieldValuePair[]
 ): Promise<{ totalDocs: number; percentiles: Record<string, number> }> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationPercentilesRequest(
-      params,
-      percents,
-      fieldName,
-      fieldValue
-    )
+    getTransactionDurationPercentilesRequest(params, percents, termFilters)
   );
 
   // return early with no results if the search didn't return any documents
@@ -79,8 +72,9 @@ export const fetchTransactionDurationPercentiles = async (
   return {
     totalDocs: (resp.body.hits.total as estypes.SearchTotalHits).value,
     percentiles:
-      (resp.body.aggregations
-        .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate)
-        .values ?? {},
+      (
+        resp.body.aggregations
+          .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate
+      ).values ?? {},
   };
 };

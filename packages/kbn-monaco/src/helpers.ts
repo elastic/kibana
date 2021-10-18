@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { monaco } from './monaco_imports';
-import { LangModule as LangModuleType } from './types';
+import { LangModuleType } from './types';
 
 function registerLanguage(language: LangModuleType) {
   const { ID, lexerRules, languageConfiguration } = language;

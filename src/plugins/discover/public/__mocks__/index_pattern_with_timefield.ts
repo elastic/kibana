@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPatternFieldList } from '../../../data/common/index_patterns/fields';
+import { flattenHit, IIndexPatternFieldList } from '../../../data/common';
 import { IndexPattern } from '../../../data/common';
-import { indexPatterns } from '../../../data/public';
+import type { estypes } from '@elastic/elasticsearch';
 
 const fields = [
   {
@@ -60,7 +60,7 @@ fields.getAll = () => {
   return fields;
 };
 
-const indexPattern = ({
+const indexPattern = {
   id: 'index-pattern-with-timefield-id',
   title: 'index-pattern-with-timefield',
   metaFields: ['_index', '_score'],
@@ -72,12 +72,15 @@ const indexPattern = ({
   getFieldByName: (name: string) => fields.getByName(name),
   timeFieldName: 'timestamp',
   getFormatterForField: () => ({ convert: () => 'formatted' }),
-} as unknown) as IndexPattern;
+  isTimeNanosBased: () => false,
+  popularizeField: () => {},
+} as unknown as IndexPattern;
 
-indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
 indexPattern.formatField = (hit: Record<string, unknown>, fieldName: string) => {
-  return fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
+  return fieldName === '_source'
+    ? hit._source
+    : flattenHit(hit as unknown as estypes.SearchHit, indexPattern)[fieldName];
 };
 
 export const indexPatternWithTimefieldMock = indexPattern;

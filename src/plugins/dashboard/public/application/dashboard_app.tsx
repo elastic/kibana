@@ -21,6 +21,7 @@ import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+import { createDashboardEditUrl } from '../dashboard_constants';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -34,14 +35,8 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const {
-    core,
-    chrome,
-    embeddable,
-    onAppLeave,
-    uiSettings,
-    data,
-  } = useKibana<DashboardAppServices>().services;
+  const { core, chrome, embeddable, onAppLeave, uiSettings, data, spacesService } =
+    useKibana<DashboardAppServices>().services;
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -115,6 +110,18 @@ export function DashboardApp({
             embedSettings={embedSettings}
             dashboardAppState={dashboardAppState}
           />
+
+          {dashboardAppState.savedDashboard.outcome === 'conflict' &&
+          dashboardAppState.savedDashboard.id &&
+          dashboardAppState.savedDashboard.aliasId
+            ? spacesService?.ui.components.getLegacyUrlConflict({
+                currentObjectId: dashboardAppState.savedDashboard.id,
+                otherObjectId: dashboardAppState.savedDashboard.aliasId,
+                otherObjectPath: `#${createDashboardEditUrl(
+                  dashboardAppState.savedDashboard.aliasId
+                )}${history.location.search}`,
+              })
+            : null}
           <div className="dashboardViewport">
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
           </div>

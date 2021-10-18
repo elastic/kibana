@@ -9,11 +9,12 @@
 import { buildQueryFromFilters } from './from_filters';
 import { ExistsFilter, Filter, MatchAllFilter } from '../filters';
 import { fields } from '../filters/stubs';
-import { IndexPatternBase } from './types';
+import { DataViewBase } from './types';
 
 describe('build query', () => {
-  const indexPattern: IndexPatternBase = {
+  const indexPattern: DataViewBase = {
     fields,
+    title: 'dataView',
   };
 
   describe('buildQueryFromFilters', () => {
@@ -31,11 +32,11 @@ describe('build query', () => {
     test('should transform an array of kibana filters into ES queries combined in the bool clauses', () => {
       const filters = [
         {
-          match_all: {},
+          query: { match_all: {} },
           meta: { type: 'match_all' },
         } as MatchAllFilter,
         {
-          exists: { field: 'foo' },
+          query: { exists: { field: 'foo' } },
           meta: { type: 'exists' },
         } as ExistsFilter,
       ] as Filter[];
@@ -50,7 +51,7 @@ describe('build query', () => {
     test('should remove disabled filters', () => {
       const filters = [
         {
-          match_all: {},
+          query: { match_all: {} },
           meta: { type: 'match_all', negate: true, disabled: true },
         } as MatchAllFilter,
       ] as Filter[];
@@ -60,7 +61,7 @@ describe('build query', () => {
     });
 
     test('should remove falsy filters', () => {
-      const filters = ([null, undefined] as unknown) as Filter[];
+      const filters = [null, undefined] as unknown as Filter[];
       const result = buildQueryFromFilters(filters, indexPattern, false);
 
       expect(result.must_not).toEqual([]);
@@ -70,7 +71,7 @@ describe('build query', () => {
     test('should place negated filters in the must_not clause', () => {
       const filters = [
         {
-          match_all: {},
+          query: { match_all: {} },
           meta: { type: 'match_all', negate: true },
         } as MatchAllFilter,
       ] as Filter[];
@@ -104,10 +105,10 @@ describe('build query', () => {
     test('should migrate deprecated match syntax', () => {
       const filters = [
         {
-          query: { match: { extension: { query: 'foo', type: 'phrase' } } },
+          match: { extension: { query: 'foo', type: 'phrase' } },
           meta: { type: 'phrase' },
         },
-      ] as Filter[];
+      ] as unknown as Filter[];
 
       const expectedESQueries = [
         {
@@ -137,7 +138,7 @@ describe('build query', () => {
     test('should wrap filters targeting nested fields in a nested query', () => {
       const filters = [
         {
-          exists: { field: 'nestedField.child' },
+          query: { exists: { field: 'nestedField.child' } },
           meta: { type: 'exists', alias: '', disabled: false, negate: false },
         },
       ];

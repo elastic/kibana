@@ -79,9 +79,8 @@ export const ReactExpressionRenderer = ({
   const hasHandledErrorRef = useRef(false);
 
   // will call done() in LayoutEffect when done with rendering custom error state
-  const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> = useRef(
-    null
-  );
+  const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> =
+    useRef(null);
   const [debouncedExpression, setDebouncedExpression] = useState(expression);
   const [waitingForDebounceToComplete, setDebouncePending] = useState(false);
   const firstRender = useRef(true);

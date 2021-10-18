@@ -25,9 +25,9 @@ let content: string;
 let mockReporting: ReportingCore;
 let stream: jest.Mocked<Writable>;
 
-const cancellationToken = ({
+const cancellationToken = {
   on: jest.fn(),
-} as unknown) as CancellationToken;
+} as unknown as CancellationToken;
 
 const mockLoggerFactory = {
   get: jest.fn().mockImplementation(() => ({
@@ -48,7 +48,7 @@ const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPNG;
 
 beforeEach(async () => {
   content = '';
-  stream = ({ write: jest.fn((chunk) => (content += chunk)) } as unknown) as typeof stream;
+  stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
 
   const mockReportingConfig = createMockConfigSchema({
     index: '.reporting-2018.10.10',

@@ -683,14 +683,14 @@ describe('utils', () => {
   describe('#getExceptions', () => {
     test('it successfully returns array of exception list items', async () => {
       listMock.getExceptionListClient = () =>
-        (({
+        ({
           findExceptionListsItem: jest.fn().mockResolvedValue({
             data: [getExceptionListItemSchemaMock()],
             page: 1,
             per_page: 10000,
             total: 1,
           }),
-        } as unknown) as ExceptionListClient);
+        } as unknown as ExceptionListClient);
       const client = listMock.getExceptionListClient();
       const exceptions = await getExceptions({
         client,
@@ -712,9 +712,9 @@ describe('utils', () => {
     test('it throws if "getExceptionListClient" fails', async () => {
       const err = new Error('error fetching list');
       listMock.getExceptionListClient = () =>
-        (({
+        ({
           getExceptionList: jest.fn().mockRejectedValue(err),
-        } as unknown) as ExceptionListClient);
+        } as unknown as ExceptionListClient);
 
       await expect(() =>
         getExceptions({
@@ -727,9 +727,9 @@ describe('utils', () => {
     test('it throws if "findExceptionListsItem" fails', async () => {
       const err = new Error('error fetching list');
       listMock.getExceptionListClient = () =>
-        (({
+        ({
           findExceptionListsItem: jest.fn().mockRejectedValue(err),
-        } as unknown) as ExceptionListClient);
+        } as unknown as ExceptionListClient);
 
       await expect(() =>
         getExceptions({
@@ -741,9 +741,9 @@ describe('utils', () => {
 
     test('it returns empty array if "findExceptionListsItem" returns null', async () => {
       listMock.getExceptionListClient = () =>
-        (({
+        ({
           findExceptionListsItem: jest.fn().mockResolvedValue(null),
-        } as unknown) as ExceptionListClient);
+        } as unknown as ExceptionListClient);
 
       const exceptions = await getExceptions({
         client: listMock.getExceptionListClient(),
@@ -789,6 +789,7 @@ describe('utils', () => {
         inputIndices: ['myfa*'],
         ruleStatusClient,
         ruleId: 'ruleId',
+        ruleType: 'ruleType',
         spaceId: 'default',
         logger: mockLogger,
         buildRuleMessage,
@@ -832,6 +833,7 @@ describe('utils', () => {
         inputIndices: ['myfa*'],
         ruleStatusClient,
         ruleId: 'ruleId',
+        ruleType: 'ruleType',
         spaceId: 'default',
         logger: mockLogger,
         buildRuleMessage,
@@ -861,6 +863,7 @@ describe('utils', () => {
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleStatusClient,
         ruleId: 'ruleId',
+        ruleType: 'ruleType',
         spaceId: 'default',
         logger: mockLogger,
         buildRuleMessage,
@@ -890,6 +893,7 @@ describe('utils', () => {
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleStatusClient,
         ruleId: 'ruleId',
+        ruleType: 'ruleType',
         spaceId: 'default',
         logger: mockLogger,
         buildRuleMessage,
@@ -1273,7 +1277,7 @@ describe('utils', () => {
     test('It returns timestampOverride date time if set', () => {
       const override = '2020-10-07T19:20:28.049Z';
       const searchResult = sampleDocSearchResultsNoSortId();
-      searchResult.hits.hits[0]._source!.different_timestamp = new Date(override).toISOString();
+      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
       const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });

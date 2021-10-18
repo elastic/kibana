@@ -7,7 +7,7 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { forOwn, isFunction, memoize, identity } from 'lodash';
+import { memoize, identity } from 'lodash';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import {
@@ -16,9 +16,10 @@ import {
   FIELD_FORMAT_IDS,
   FieldFormatInstanceType,
   FieldFormatId,
-  IFieldFormatMetaParams,
+  FieldFormatMetaParams,
   SerializedFieldFormat,
   FormatFactory,
+  FieldFormatParams,
 } from './types';
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
@@ -28,7 +29,7 @@ import { FieldFormatNotFoundError } from './errors';
 export class FieldFormatsRegistry {
   protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType> = new Map();
   protected defaultMap: Record<string, FieldFormatConfig> = {};
-  protected metaParamsOptions: Record<string, any> = {};
+  protected metaParamsOptions: FieldFormatMetaParams = {};
   protected getConfig?: FieldFormatsGetConfigFn;
 
   public deserialize: FormatFactory = (mapping?: SerializedFieldFormat) => {
@@ -50,10 +51,13 @@ export class FieldFormatsRegistry {
 
   init(
     getConfig: FieldFormatsGetConfigFn,
-    metaParamsOptions: Record<string, any> = {},
+    metaParamsOptions: FieldFormatMetaParams = {},
     defaultFieldConverters: FieldFormatInstanceType[] = baseFormatters
   ) {
-    const defaultTypeMap = getConfig(FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP);
+    const defaultTypeMap = getConfig(FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP) as Record<
+      string,
+      FieldFormatConfig
+    >;
     this.register(defaultFieldConverters);
     this.parseDefaultTypeMap(defaultTypeMap);
     this.getConfig = getConfig;
@@ -89,10 +93,10 @@ export class FieldFormatsRegistry {
     const fieldFormat = this.fieldFormats.get(formatId);
 
     if (fieldFormat) {
-      const decoratedFieldFormat: any = this.fieldFormatMetaParamsDecorator(fieldFormat);
+      const decoratedFieldFormat = this.fieldFormatMetaParamsDecorator(fieldFormat);
 
       if (decoratedFieldFormat) {
-        return decoratedFieldFormat as FieldFormatInstanceType;
+        return decoratedFieldFormat;
       }
     }
 
@@ -159,8 +163,12 @@ export class FieldFormatsRegistry {
    * @param  {FieldFormatId} formatId
    * @return {FieldFormat}
    */
-  getInstance = memoize(
-    (formatId: FieldFormatId, params: Record<string, any> = {}): FieldFormat => {
+  getInstance = (formatId: FieldFormatId, params: FieldFormatParams = {}): FieldFormat => {
+    return this.getInstanceMemoized(formatId, params);
+  };
+
+  private getInstanceMemoized = memoize(
+    (formatId: FieldFormatId, params: FieldFormatParams = {}): FieldFormat => {
       const ConcreteFieldFormat = this.getType(formatId);
 
       if (!ConcreteFieldFormat) {
@@ -169,7 +177,7 @@ export class FieldFormatsRegistry {
 
       return new ConcreteFieldFormat(params, this.getConfig);
     },
-    (formatId: FieldFormatId, params: Record<string, any>) =>
+    (formatId: FieldFormatId, params: FieldFormatParams) =>
       JSON.stringify({
         formatId,
         ...params,
@@ -186,7 +194,7 @@ export class FieldFormatsRegistry {
   getDefaultInstancePlain = (
     fieldType: KBN_FIELD_TYPES,
     esTypes?: ES_FIELD_TYPES[],
-    params: Record<string, any> = {}
+    params: FieldFormatParams = {}
   ): FieldFormat => {
     const conf = this.getDefaultConfig(fieldType, esTypes);
     const instanceParams = {
@@ -239,19 +247,26 @@ export class FieldFormatsRegistry {
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @param  {ES_FIELD_TYPES[]} esTypes
+   * @param  {FieldFormatParams} params
    * @return {FieldFormat}
    */
-  getDefaultInstance = memoize(this.getDefaultInstancePlain, this.getDefaultInstanceCacheResolver);
+  getDefaultInstance = (
+    fieldType: KBN_FIELD_TYPES,
+    esTypes?: ES_FIELD_TYPES[],
+    params: FieldFormatParams = {}
+  ): FieldFormat => {
+    return this.getDefaultInstanceMemoized(fieldType, esTypes, params);
+  };
 
-  parseDefaultTypeMap(value: any) {
+  private getDefaultInstanceMemoized = memoize(
+    this.getDefaultInstancePlain,
+    this.getDefaultInstanceCacheResolver
+  );
+
+  parseDefaultTypeMap(value: Record<string, FieldFormatConfig>) {
     this.defaultMap = value;
-    forOwn(this, (fn) => {
-      if (isFunction(fn) && (fn as any).cache) {
-        // clear all memoize caches
-        // @ts-ignore
-        fn.cache = new memoize.Cache();
-      }
-    });
+    this.getInstanceMemoized.cache.clear?.();
+    this.getDefaultInstanceMemoized.cache.clear?.();
   }
 
   register(fieldFormats: FieldFormatInstanceType[]) {
@@ -282,14 +297,14 @@ export class FieldFormatsRegistry {
   private fieldFormatMetaParamsDecorator = (
     fieldFormat: FieldFormatInstanceType
   ): FieldFormatInstanceType | undefined => {
-    const getMetaParams = (customParams: Record<string, any>) => this.buildMetaParams(customParams);
+    const getMetaParams = (customParams: FieldFormatParams) => this.buildMetaParams(customParams);
 
     if (fieldFormat) {
       return class DecoratedFieldFormat extends fieldFormat {
         static id = fieldFormat.id;
         static fieldType = fieldFormat.fieldType;
 
-        constructor(params: Record<string, any> = {}, getConfig?: FieldFormatsGetConfigFn) {
+        constructor(params: FieldFormatParams = {}, getConfig?: FieldFormatsGetConfigFn) {
           super(getMetaParams(params), getConfig);
         }
       };
@@ -301,10 +316,12 @@ export class FieldFormatsRegistry {
   /**
    * Build Meta Params
    *
-   * @param  {Record<string, any>} custom params
-   * @return {Record<string, any>}
+   * @param  {FieldFormatParams} custom params
+   * @return {FieldFormatParams & FieldFormatMetaParams}
    */
-  private buildMetaParams = <T extends IFieldFormatMetaParams>(customParams: T): T => ({
+  private buildMetaParams = (
+    customParams: FieldFormatParams
+  ): FieldFormatParams & FieldFormatMetaParams => ({
     ...this.metaParamsOptions,
     ...customParams,
   });

@@ -8,12 +8,7 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-} from 'kibana/server';
+import { SavedObject, SavedObjectAttributes, SavedObjectsFindResult } from 'kibana/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -105,18 +100,17 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 import { RulesClient, PartialAlert } from '../../../../../alerting/server';
-import { Alert, SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 import { ruleTypeMappings } from '../signals/utils';
 
-export type RuleAlertType = Alert<RuleParams>;
+export type RuleAlertType = SanitizedAlert<RuleParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
-  alertId: string; // created alert id.
   statusDate: StatusDate;
   lastFailureAt: LastFailureAt | null | undefined;
   lastFailureMessage: LastFailureMessage | null | undefined;
@@ -130,7 +124,6 @@ export interface IRuleStatusSOAttributes extends Record<string, any> {
 }
 
 export interface IRuleStatusResponseAttributes {
-  alert_id: string; // created alert id.
   status_date: StatusDate;
   last_failure_at: LastFailureAt | null | undefined;
   last_failure_message: LastFailureMessage | null | undefined;
@@ -204,7 +197,7 @@ export const isAlertType = (
   isRuleRegistryEnabled: boolean,
   partialAlert: PartialAlert<RuleParams>
 ): partialAlert is RuleAlertType => {
-  const ruleTypeValues = (Object.values(ruleTypeMappings) as unknown) as string[];
+  const ruleTypeValues = Object.values(ruleTypeMappings) as unknown as string[];
   return isRuleRegistryEnabled
     ? ruleTypeValues.includes(partialAlert.alertTypeId as string)
     : partialAlert.alertTypeId === SIGNALS_ID;
@@ -214,12 +207,6 @@ export const isRuleStatusSavedObjectType = (
   obj: unknown
 ): obj is SavedObject<IRuleSavedAttributesSavedObjectAttributes> => {
   return get('attributes', obj) != null;
-};
-
-export const isRuleStatusFindType = (
-  obj: unknown
-): obj is SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => {
-  return get('saved_objects', obj) != null;
 };
 
 export interface CreateRulesOptions {

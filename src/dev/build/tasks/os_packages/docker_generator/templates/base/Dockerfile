@@ -24,17 +24,26 @@ RUN cd /opt && \
 {{/usePublicArtifact}}
 
 {{^usePublicArtifact}}
-COPY {{artifactTarball}} /opt/kibana.tar.gz
+COPY {{artifactTarball}} /tmp/kibana.tar.gz
 {{/usePublicArtifact}}
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
-RUN tar --strip-components=1 -zxf /opt/kibana.tar.gz
+RUN tar --strip-components=1 -zxf /tmp/kibana.tar.gz
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
+
+{{#cloud}}
+COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
+COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
+
+RUN mkdir -p /opt/filebeat /opt/metricbeat && \
+  tar xf /tmp/filebeat.tar.gz -C /opt/filebeat --strip-components=1 && \
+  tar xf /tmp/metricbeat.tar.gz -C /opt/metricbeat --strip-components=1
+{{/cloud}}
 
 ################################################################################
 # Build stage 1 (the actual Kibana image):
@@ -86,6 +95,9 @@ RUN fc-cache -v
 
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
+{{#cloud}}
+COPY --from=builder --chown=0:0 /opt /opt
+{{/cloud}}
 WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
 
@@ -98,7 +110,7 @@ COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
-COPY --chown=1000:0 bin/kibana-docker /usr/local/bin/
+COPY bin/kibana-docker /usr/local/bin/
 
 # Ensure gid 0 write permissions for OpenShift.
 RUN chmod g+ws /usr/share/kibana && \
@@ -146,8 +158,19 @@ RUN mkdir /licenses && \
     cp LICENSE.txt /licenses/LICENSE
 {{/ubi}}
 
-USER kibana
-
 ENTRYPOINT ["/bin/tini", "--"]
 
+{{#cloud}}
+CMD ["/app/kibana.sh"]
+# Generate a stub command that will be overwritten at runtime
+RUN mkdir /app && \
+    echo -e '#!/bin/sh\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
+    chmod 0555 /app/kibana.sh
+{{/cloud}}
+
+{{^cloud}}
 CMD ["/usr/local/bin/kibana-docker"]
+{{/cloud}}
+
+
+USER kibana

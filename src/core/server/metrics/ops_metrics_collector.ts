@@ -28,14 +28,21 @@ export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
   }
 
   public async collect(): Promise<OpsMetrics> {
-    const [process, os, server] = await Promise.all([
+    const [processes, os, server] = await Promise.all([
       this.processCollector.collect(),
       this.osCollector.collect(),
       this.serverCollector.collect(),
     ]);
+
     return {
       collected_at: new Date(),
-      process,
+      /**
+       * Kibana does not yet support multi-process nodes.
+       * `processes` is just an Array(1) only returning the current process's data
+       *  which is why we can just use processes[0] for `process`
+       */
+      process: processes[0],
+      processes,
       os,
       ...server,
     };

@@ -21,7 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
-import type { IndexPattern } from 'src/plugins/data/common';
+import { flattenHit, IndexPattern } from '../../../../../data/common';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -218,10 +218,10 @@ export const DiscoverGrid = ({
    */
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
   const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
-  const pageCount = useMemo(() => Math.ceil(rowCount / pagination.pageSize), [
-    rowCount,
-    pagination,
-  ]);
+  const pageCount = useMemo(
+    () => Math.ceil(rowCount / pagination.pageSize),
+    [rowCount, pagination]
+  );
   const isOnLastPage = pagination.pageIndex === pageCount - 1;
 
   const paginationObj = useMemo(() => {
@@ -271,7 +271,7 @@ export const DiscoverGrid = ({
       getRenderCellValueFn(
         indexPattern,
         displayedRows,
-        displayedRows ? displayedRows.map((hit) => indexPattern.flattenHit(hit)) : [],
+        displayedRows ? displayedRows.map((hit) => flattenHit(hit, indexPattern)) : [],
         useNewFieldsApi,
         fieldsToShow,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)

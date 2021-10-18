@@ -15,8 +15,10 @@ import {
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 
 export class NavigationPublicPlugin
-  implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart> {
-  private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry = new TopNavMenuExtensionsRegistry();
+  implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart>
+{
+  private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
+    new TopNavMenuExtensionsRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {}
 

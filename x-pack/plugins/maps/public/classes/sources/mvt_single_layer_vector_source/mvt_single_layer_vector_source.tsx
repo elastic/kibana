@@ -25,7 +25,6 @@ import {
   MapExtent,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -42,7 +41,8 @@ export const sourceTitle = i18n.translate(
 
 export class MVTSingleLayerVectorSource
   extends AbstractSource
-  implements ITiledSingleLayerVectorSource {
+  implements ITiledSingleLayerVectorSource
+{
   static createDescriptor({
     urlTemplate,
     layerName,
@@ -196,7 +196,7 @@ export class MVTSingleLayerVectorSource
     return null;
   }
 
-  getSyncMeta(): VectorSourceSyncMeta {
+  getSyncMeta(): null {
     return null;
   }
 
@@ -242,6 +242,14 @@ export class MVTSingleLayerVectorSource
 
   async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
     return {};
+  }
+
+  showJoinEditor(): boolean {
+    return false;
+  }
+
+  getJoinsDisabledReason(): string | null {
+    return null;
   }
 }
 

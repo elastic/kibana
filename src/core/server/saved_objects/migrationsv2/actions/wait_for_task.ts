@@ -23,7 +23,7 @@ export interface WaitForTaskResponse {
 }
 
 /**
- * After waiting for the specificed timeout, the task has not yet completed.
+ * After waiting for the specified timeout, the task has not yet completed.
  *
  * When querying the tasks API we use `wait_for_completion=true` to block the
  * request until the task completes. If after the `timeout`, the task still has
@@ -31,7 +31,7 @@ export interface WaitForTaskResponse {
  * has reached a timeout, Elasticsearch will continue to run the task.
  */
 export interface WaitForTaskCompletionTimeout {
-  /** After waiting for the specificed timeout, the task has not yet completed. */
+  /** After waiting for the specified timeout, the task has not yet completed. */
   readonly type: 'wait_for_task_completion_timeout';
   readonly message: string;
   readonly error?: Error;
@@ -65,30 +65,32 @@ export interface WaitForTaskParams {
  *
  * TODO: delete completed tasks
  */
-export const waitForTask = ({
-  client,
-  taskId,
-  timeout,
-}: WaitForTaskParams): TaskEither.TaskEither<
-  RetryableEsClientError | WaitForTaskCompletionTimeout,
-  WaitForTaskResponse
-> => () => {
-  return client.tasks
-    .get({
-      task_id: taskId,
-      wait_for_completion: true,
-      timeout,
-    })
-    .then((res) => {
-      const body = res.body;
-      const failures = body.response?.failures ?? [];
-      return Either.right({
-        completed: body.completed,
-        error: Option.fromNullable(body.error),
-        failures: failures.length > 0 ? Option.some(failures) : Option.none,
-        description: body.task.description,
-      });
-    })
-    .catch(catchWaitForTaskCompletionTimeout)
-    .catch(catchRetryableEsClientErrors);
-};
+export const waitForTask =
+  ({
+    client,
+    taskId,
+    timeout,
+  }: WaitForTaskParams): TaskEither.TaskEither<
+    RetryableEsClientError | WaitForTaskCompletionTimeout,
+    WaitForTaskResponse
+  > =>
+  () => {
+    return client.tasks
+      .get({
+        task_id: taskId,
+        wait_for_completion: true,
+        timeout,
+      })
+      .then((res) => {
+        const body = res.body;
+        const failures = body.response?.failures ?? [];
+        return Either.right({
+          completed: body.completed,
+          error: Option.fromNullable(body.error),
+          failures: failures.length > 0 ? Option.some(failures) : Option.none,
+          description: body.task.description,
+        });
+      })
+      .catch(catchWaitForTaskCompletionTimeout)
+      .catch(catchRetryableEsClientErrors);
+  };

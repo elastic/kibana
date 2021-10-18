@@ -32,12 +32,20 @@ export const GLOBAL_EFFECT_SCOPE = i18n.translate(
 
 export const POLICY_EFFECT_SCOPE = (policyCount = 0) => {
   return i18n.translate('xpack.securitySolution.artifactCard.policyEffectScope', {
-    defaultMessage: 'Applied to {count} policies',
+    defaultMessage: 'Applied to {count} {count, plural, one {policy} other {policies}}',
     values: {
       count: policyCount,
     },
   });
 };
+
+export const POLICY_EFFECT_SCOPE_TITLE = (policyCount = 0) =>
+  i18n.translate('xpack.securitySolution.artifactCard.policyEffectScope.title', {
+    defaultMessage: 'Applied to the following {count, plural, one {policy} other {policies}}',
+    values: {
+      count: policyCount,
+    },
+  });
 
 export const CONDITION_OPERATOR_TYPE_MATCH = i18n.translate(
   'xpack.securitySolution.artifactCard.conditions.matchOperator',
@@ -100,3 +108,29 @@ export const OS_LINUX = i18n.translate('xpack.securitySolution.artifactCard.cond
 export const OS_MAC = i18n.translate('xpack.securitySolution.artifactCard.conditions.macos', {
   defaultMessage: 'Mac',
 });
+
+export const EXPAND_ACTION = i18n.translate(
+  'xpack.securitySolution.artifactExpandableCard.expand',
+  {
+    defaultMessage: 'Expand',
+  }
+);
+
+export const COLLAPSE_ACTION = i18n.translate(
+  'xpack.securitySolution.artifactExpandableCard.collpase',
+  {
+    defaultMessage: 'Collapse',
+  }
+);
+
+export const SHOW_COMMENTS_LABEL = (count: number = 0) =>
+  i18n.translate('xpack.securitySolution.artifactCard.comments.label.show', {
+    defaultMessage: 'Show comments ({count})',
+    values: { count },
+  });
+
+export const HIDE_COMMENTS_LABEL = (count: number = 0) =>
+  i18n.translate('xpack.securitySolution.artifactCard.comments.label.hide', {
+    defaultMessage: 'Hide comments ({count})',
+    values: { count },
+  });

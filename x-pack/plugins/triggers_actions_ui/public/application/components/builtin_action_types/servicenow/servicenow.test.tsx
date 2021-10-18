@@ -43,6 +43,7 @@ describe('servicenow connector validation', () => {
         isPreconfigured: false,
         config: {
           apiUrl: 'https://dev94428.service-now.com/',
+          isLegacy: false,
         },
       } as ServiceNowActionConnector;
 
@@ -50,6 +51,7 @@ describe('servicenow connector validation', () => {
         config: {
           errors: {
             apiUrl: [],
+            isLegacy: [],
           },
         },
         secrets: {
@@ -63,7 +65,7 @@ describe('servicenow connector validation', () => {
 
     test(`${id}: connector validation fails when connector config is not valid`, async () => {
       const actionTypeModel = actionTypeRegistry.get(id);
-      const actionConnector = ({
+      const actionConnector = {
         secrets: {
           username: 'user',
         },
@@ -71,12 +73,13 @@ describe('servicenow connector validation', () => {
         actionTypeId: id,
         name: 'servicenow',
         config: {},
-      } as unknown) as ServiceNowActionConnector;
+      } as unknown as ServiceNowActionConnector;
 
       expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
         config: {
           errors: {
             apiUrl: ['URL is required.'],
+            isLegacy: [],
           },
         },
         secrets: {

@@ -10,12 +10,15 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { timePicker, visChart, visEditor, visualize } = getPageObjects([
+  const { timePicker, visChart, visEditor, visualize, timelion, common } = getPageObjects([
     'timePicker',
     'visChart',
     'visEditor',
     'visualize',
+    'timelion',
+    'common',
   ]);
+  const security = getService('security');
   const monacoEditor = getService('monacoEditor');
   const kibanaServer = getService('kibanaServer');
   const elasticChart = getService('elasticChart');
@@ -24,6 +27,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Timelion visualization', () => {
     before(async () => {
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'long_window_logstash',
+        'test_logstash_reader',
+      ]);
       await kibanaServer.uiSettings.update({
         'timelion:legacyChartsLibrary': false,
       });
@@ -227,6 +235,75 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const isLegendElementExists = await find.existsByCssSelector('.echLegend');
         expect(isLegendElementExists).to.be(false);
+      });
+    });
+
+    describe('expression typeahead', () => {
+      it('should display function suggestions', async () => {
+        await monacoEditor.setCodeEditorValue('');
+        await monacoEditor.typeCodeEditorValue('.e', 'timelionCodeEditor');
+        // wait for monaco editor model will be updated with new value
+        await common.sleep(300);
+        let value = await monacoEditor.getCodeEditorValue(0);
+        expect(value).to.eql('.e');
+        const suggestions = await timelion.getSuggestionItemsText();
+        expect(suggestions.length).to.eql(2);
+        expect(suggestions[0].includes('es')).to.eql(true);
+        expect(suggestions[1].includes('elasticsearch')).to.eql(true);
+        await timelion.clickSuggestion(0);
+        // wait for monaco editor model will be updated with new value
+        await common.sleep(300);
+        value = await monacoEditor.getCodeEditorValue(0);
+        expect(value).to.eql('.es()');
+      });
+
+      describe('dynamic suggestions for argument values', () => {
+        describe('.es()', () => {
+          it('should show index pattern suggestions for index argument', async () => {
+            await monacoEditor.setCodeEditorValue('');
+            await monacoEditor.typeCodeEditorValue('.es(index=', 'timelionCodeEditor');
+            // wait for index patterns will be loaded
+            await common.sleep(500);
+            const suggestions = await timelion.getSuggestionItemsText();
+            expect(suggestions.length).not.to.eql(0);
+            expect(suggestions[0].includes('log')).to.eql(true);
+          });
+
+          it('should show field suggestions for timefield argument when index pattern set', async () => {
+            await monacoEditor.setCodeEditorValue('');
+            await monacoEditor.typeCodeEditorValue(
+              '.es(index=logstash-*, timefield=',
+              'timelionCodeEditor'
+            );
+            const suggestions = await timelion.getSuggestionItemsText();
+            expect(suggestions.length).to.eql(4);
+            expect(suggestions[0].includes('@timestamp')).to.eql(true);
+          });
+
+          it('should show field suggestions for split argument when index pattern set', async () => {
+            await monacoEditor.setCodeEditorValue('');
+            await monacoEditor.typeCodeEditorValue(
+              '.es(index=logstash-*, timefield=@timestamp, split=',
+              'timelionCodeEditor'
+            );
+            // wait for split fields to load
+            await common.sleep(300);
+            const suggestions = await timelion.getSuggestionItemsText();
+
+            expect(suggestions.length).not.to.eql(0);
+            expect(suggestions[0].includes('@message.raw')).to.eql(true);
+          });
+
+          it('should show field suggestions for metric argument when index pattern set', async () => {
+            await monacoEditor.typeCodeEditorValue(
+              '.es(index=logstash-*, timefield=@timestamp, metric=avg:',
+              'timelionCodeEditor'
+            );
+            const suggestions = await timelion.getSuggestionItemsText();
+            expect(suggestions.length).not.to.eql(0);
+            expect(suggestions[0].includes('avg:bytes')).to.eql(true);
+          });
+        });
       });
     });
 

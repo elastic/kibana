@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { SavedObjectReferenceWithContext, ToastsStart } from 'src/core/public';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
+import { DEFAULT_OBJECT_NOUN } from '../../constants';
 import { getCopyToSpaceFlyoutComponent } from '../../copy_saved_objects_to_space';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesManager } from '../../spaces_manager';
@@ -38,7 +39,6 @@ import type {
   ShareToSpaceSavedObjectTarget,
 } from '../types';
 import { AliasTable } from './alias_table';
-import { DEFAULT_OBJECT_NOUN } from './constants';
 import { RelativesFooter } from './relatives_footer';
 import { ShareToSpaceForm } from './share_to_space_form';
 import type { InternalLegacyUrlAliasTarget } from './types';
@@ -274,12 +274,8 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       : aliasTargets.filter(({ targetSpace }) => spacesToAddSet.has(targetSpace));
     return { isSelectionChanged, spacesToAdd, spacesToRemove, aliasesToDisable };
   };
-  const {
-    isSelectionChanged,
-    spacesToAdd,
-    spacesToRemove,
-    aliasesToDisable,
-  } = getSelectionChanges();
+  const { isSelectionChanged, spacesToAdd, spacesToRemove, aliasesToDisable } =
+    getSelectionChanges();
 
   const [showAliasesToDisable, setShowAliasesToDisable] = useState(false);
   const [shareInProgress, setShareInProgress] = useState(false);

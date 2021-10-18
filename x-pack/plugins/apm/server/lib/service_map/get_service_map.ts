@@ -17,7 +17,7 @@ import { getServicesProjection } from '../../projections/services';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
   DEFAULT_ANOMALIES,
   getServiceAnomalies,
@@ -28,29 +28,32 @@ import { transformServiceMapResponses } from './transform_service_map_responses'
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 export interface IEnvOptions {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName?: string;
   environment: string;
   searchAggregatedTransactions: boolean;
   logger: Logger;
+  start: number;
+  end: number;
 }
 
 async function getConnectionData({
   setup,
   serviceName,
   environment,
+  start,
+  end,
 }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
       setup,
       serviceName,
       environment,
+      start,
+      end,
     });
 
-    const chunks = chunk(
-      traceIds,
-      setup.config['xpack.apm.serviceMapMaxTracesPerRequest']
-    );
+    const chunks = chunk(traceIds, setup.config.serviceMapMaxTracesPerRequest);
 
     const init = {
       connections: [],
@@ -69,6 +72,8 @@ async function getConnectionData({
             getServiceMapFromTraceIds({
               setup,
               traceIds: traceIdsChunk,
+              start,
+              end,
             })
           )
         )
@@ -86,12 +91,15 @@ async function getConnectionData({
 }
 
 async function getServicesData(options: IEnvOptions) {
-  const { environment, setup, searchAggregatedTransactions } = options;
+  const { environment, setup, searchAggregatedTransactions, start, end } =
+    options;
 
   const projection = getServicesProjection({
     setup,
     searchAggregatedTransactions,
     kuery: '',
+    start,
+    end,
   });
 
   let filter = [

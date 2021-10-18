@@ -23,7 +23,7 @@ jest.mock('./alerting');
 jest.mock('./cases');
 
 const create = (versionNumber: string) => {
-  const t = ({
+  const t = {
     api: new ApiActions(versionNumber),
     app: new AppActions(versionNumber),
     login: 'login:',
@@ -33,7 +33,7 @@ const create = (versionNumber: string) => {
     space: new SpaceActions(versionNumber),
     ui: new UIActions(versionNumber),
     version: `version:${versionNumber}`,
-  } as unknown) as jest.Mocked<Actions>;
+  } as unknown as jest.Mocked<Actions>;
   return t;
 };
 

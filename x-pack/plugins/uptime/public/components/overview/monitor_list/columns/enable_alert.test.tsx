@@ -77,7 +77,7 @@ describe('EnableAlertComponent', () => {
           alerts: {
             ...mockState.alerts,
             alerts: {
-              data: ({ data: alerts } as unknown) as AlertsResult,
+              data: { data: alerts } as unknown as AlertsResult,
               loading: false,
             },
           },

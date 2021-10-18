@@ -21,7 +21,7 @@ export const CtiWithEventsComponent = ({
   to: string;
   totalCount: number;
 }) => {
-  const { buttonHref, isDashboardPluginDisabled, listItems } = useCtiDashboardLinks(
+  const { buttonHref, isPluginDisabled, listItems } = useCtiDashboardLinks(
     eventCountsByDataset,
     to,
     from
@@ -30,9 +30,9 @@ export const CtiWithEventsComponent = ({
   return (
     <ThreatIntelPanelView
       buttonHref={buttonHref}
-      isDashboardPluginDisabled={isDashboardPluginDisabled}
+      isPluginDisabled={isPluginDisabled}
       listItems={listItems}
-      totalEventCount={totalCount}
+      totalCount={totalCount}
     />
   );
 };

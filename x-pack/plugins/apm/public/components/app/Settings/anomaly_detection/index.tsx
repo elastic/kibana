@@ -16,7 +16,8 @@ import { LicensePrompt } from '../../../shared/license_prompt';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection/jobs'>;
+export type AnomalyDetectionApiResponse =
+  APIReturnType<'GET /internal/apm/settings/anomaly-detection/jobs'>;
 
 const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
   jobs: [],
@@ -31,11 +32,15 @@ export function AnomalyDetection() {
 
   const [viewAddEnvironments, setViewAddEnvironments] = useState(false);
 
-  const { refetch, data = DEFAULT_VALUE, status } = useFetcher(
+  const {
+    refetch,
+    data = DEFAULT_VALUE,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (canGetJobs) {
         return callApmApi({
-          endpoint: `GET /api/apm/settings/anomaly-detection/jobs`,
+          endpoint: `GET /internal/apm/settings/anomaly-detection/jobs`,
         });
       }
     },

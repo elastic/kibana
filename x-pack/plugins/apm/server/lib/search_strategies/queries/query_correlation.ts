@@ -38,10 +38,9 @@ export const getTransactionDurationCorrelationRequest = (
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
   totalDocCount: number,
-  fieldName?: FieldValuePair['fieldName'],
-  fieldValue?: FieldValuePair['fieldValue']
+  termFilters?: FieldValuePair[]
 ): estypes.SearchRequest => {
-  const query = getQueryWithParams({ params, fieldName, fieldValue });
+  const query = getQueryWithParams({ params, termFilters });
 
   const bucketCorrelation: BucketCorrelation = {
     buckets_path: 'latency_ranges>_count',
@@ -93,8 +92,7 @@ export const fetchTransactionDurationCorrelation = async (
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
   totalDocCount: number,
-  fieldName?: FieldValuePair['fieldName'],
-  fieldValue?: FieldValuePair['fieldValue']
+  termFilters?: FieldValuePair[]
 ): Promise<{
   ranges: unknown[];
   correlation: number | null;
@@ -107,8 +105,7 @@ export const fetchTransactionDurationCorrelation = async (
       ranges,
       fractions,
       totalDocCount,
-      fieldName,
-      fieldValue
+      termFilters
     )
   );
 
@@ -119,11 +116,14 @@ export const fetchTransactionDurationCorrelation = async (
   }
 
   const result = {
-    ranges: (resp.body.aggregations
-      .latency_ranges as estypes.AggregationsMultiBucketAggregate).buckets,
-    correlation: (resp.body.aggregations
-      .transaction_duration_correlation as estypes.AggregationsValueAggregate)
-      .value,
+    ranges: (
+      resp.body.aggregations
+        .latency_ranges as estypes.AggregationsMultiBucketAggregate
+    ).buckets,
+    correlation: (
+      resp.body.aggregations
+        .transaction_duration_correlation as estypes.AggregationsValueAggregate
+    ).value,
     // @ts-ignore
     ksTest: resp.body.aggregations.ks_test.less,
   };

@@ -37,7 +37,9 @@ export const {
   setSelected,
   setTGridSelectAll,
   toggleDetailPanel,
+  updateColumnOrder,
   updateColumns,
+  updateColumnWidth,
   updateIsLoading,
   updateItemsPerPage,
   updateItemsPerPageOptions,
@@ -51,9 +53,8 @@ export const addHistory = actionCreator<{ id: string; historyId: string }>('ADD_
 
 export const addNote = actionCreator<{ id: string; noteId: string }>('ADD_NOTE');
 
-export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
-  'ADD_NOTE_TO_EVENT'
-);
+export const addNoteToEvent =
+  actionCreator<{ id: string; noteId: string; eventId: string }>('ADD_NOTE_TO_EVENT');
 
 export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
 
@@ -67,9 +68,8 @@ export const createTimeline = actionCreator<TimelinePersistInput>('CREATE_TIMELI
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
 
-export const setTimelineUpdatedAt = actionCreator<{ id: string; updated: number }>(
-  'SET_TIMELINE_UPDATED_AT'
-);
+export const setTimelineUpdatedAt =
+  actionCreator<{ id: string; updated: number }>('SET_TIMELINE_UPDATED_AT');
 
 export const removeProvider = actionCreator<{
   id: string;
@@ -146,9 +146,8 @@ export const applyKqlFilterQuery = actionCreator<{
   filterQuery: SerializedFilterQuery;
 }>('APPLY_KQL_FILTER_QUERY');
 
-export const updateIsFavorite = actionCreator<{ id: string; isFavorite: boolean }>(
-  'UPDATE_IS_FAVORITE'
-);
+export const updateIsFavorite =
+  actionCreator<{ id: string; isFavorite: boolean }>('UPDATE_IS_FAVORITE');
 
 export const updateIsLive = actionCreator<{ id: string; isLive: boolean }>('UPDATE_IS_LIVE');
 
@@ -158,17 +157,14 @@ export const updateTitleAndDescription = actionCreator<{
   title: string;
 }>('UPDATE_TITLE_AND_DESCRIPTION');
 
-export const updatePageIndex = actionCreator<{ id: string; activePage: number }>(
-  'UPDATE_PAGE_INDEX'
-);
+export const updatePageIndex =
+  actionCreator<{ id: string; activePage: number }>('UPDATE_PAGE_INDEX');
 
-export const updateProviders = actionCreator<{ id: string; providers: DataProvider[] }>(
-  'UPDATE_PROVIDERS'
-);
+export const updateProviders =
+  actionCreator<{ id: string; providers: DataProvider[] }>('UPDATE_PROVIDERS');
 
-export const updateRange = actionCreator<{ id: string; start: string; end: string }>(
-  'UPDATE_RANGE'
-);
+export const updateRange =
+  actionCreator<{ id: string; start: string; end: string }>('UPDATE_RANGE');
 
 export const updateAutoSaveMsg = actionCreator<{
   timelineId: string | null;
@@ -187,9 +183,8 @@ export const setFilters = actionCreator<{
   filters: Filter[];
 }>('SET_TIMELINE_FILTERS');
 
-export const updateEventType = actionCreator<{ id: string; eventType: TimelineEventsType }>(
-  'UPDATE_EVENT_TYPE'
-);
+export const updateEventType =
+  actionCreator<{ id: string; eventType: TimelineEventsType }>('UPDATE_EVENT_TYPE');
 
 export const setExcludedRowRendererIds = actionCreator<{
   id: string;

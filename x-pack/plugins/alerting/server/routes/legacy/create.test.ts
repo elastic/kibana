@@ -7,6 +7,7 @@
 
 import { createAlertRoute } from './create';
 import { httpServiceMock } from 'src/core/server/mocks';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
@@ -14,12 +15,16 @@ import { rulesClientMock } from '../../rules_client.mock';
 import { Alert } from '../../../common/alert';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
+}));
+
+jest.mock('../../lib/track_legacy_route_usage', () => ({
+  trackLegacyRouteUsage: jest.fn(),
 }));
 
 beforeEach(() => {
@@ -438,5 +443,24 @@ describe('createAlertRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  it('should track every call', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+    });
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
+    await handler(context, req, res);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('create', mockUsageCounter);
   });
 });

@@ -22,7 +22,7 @@ import {
   INDEX_SETTINGS_API_PATH,
   FONTS_API_PATH,
   API_ROOT_PATH,
-} from '../common';
+} from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';

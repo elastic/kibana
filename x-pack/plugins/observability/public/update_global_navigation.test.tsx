@@ -18,22 +18,22 @@ import { casesFeatureId } from '../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback
-const app = ({} as unknown) as App;
+const app = {} as unknown as App;
 
 describe('updateGlobalNavigation', () => {
   describe('when no observability apps are enabled', () => {
     it('hides the overview link', () => {
-      const capabilities = ({
+      const capabilities = {
         navLinks: { apm: false, logs: false, metrics: false, uptime: false },
-      } as unknown) as ApplicationStart['capabilities'];
+      } as unknown as ApplicationStart['capabilities'];
       const config = {
         unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
       } as ConfigSchema;
       const deepLinks: AppDeepLink[] = [];
       const callback = jest.fn();
-      const updater$ = ({
+      const updater$ = {
         next: (cb: AppUpdater) => callback(cb(app)),
-      } as unknown) as Subject<AppUpdater>;
+      } as unknown as Subject<AppUpdater>;
 
       updateGlobalNavigation({ capabilities, config, deepLinks, updater$ });
 
@@ -46,17 +46,17 @@ describe('updateGlobalNavigation', () => {
 
   describe('when one observability app is enabled', () => {
     it('shows the overview link', () => {
-      const capabilities = ({
+      const capabilities = {
         navLinks: { apm: true, logs: false, metrics: false, uptime: false },
-      } as unknown) as ApplicationStart['capabilities'];
+      } as unknown as ApplicationStart['capabilities'];
       const config = {
         unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
       } as ConfigSchema;
       const deepLinks: AppDeepLink[] = [];
       const callback = jest.fn();
-      const updater$ = ({
+      const updater$ = {
         next: (cb: AppUpdater) => callback(cb(app)),
-      } as unknown) as Subject<AppUpdater>;
+      } as unknown as Subject<AppUpdater>;
 
       updateGlobalNavigation({ capabilities, config, deepLinks, updater$ });
 
@@ -68,10 +68,10 @@ describe('updateGlobalNavigation', () => {
 
     describe('when cases are enabled', () => {
       it('shows the cases deep link', () => {
-        const capabilities = ({
+        const capabilities = {
           [casesFeatureId]: { read_cases: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
-        } as unknown) as ApplicationStart['capabilities'];
+        } as unknown as ApplicationStart['capabilities'];
         const config = {
           unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
         } as ConfigSchema;
@@ -85,9 +85,9 @@ describe('updateGlobalNavigation', () => {
           },
         ];
         const callback = jest.fn();
-        const updater$ = ({
+        const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown) as Subject<AppUpdater>;
+        } as unknown as Subject<AppUpdater>;
 
         updateGlobalNavigation({ capabilities, config, deepLinks, updater$ });
 
@@ -108,10 +108,10 @@ describe('updateGlobalNavigation', () => {
 
     describe('when cases are disabled', () => {
       it('hides the cases deep link', () => {
-        const capabilities = ({
+        const capabilities = {
           [casesFeatureId]: { read_cases: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
-        } as unknown) as ApplicationStart['capabilities'];
+        } as unknown as ApplicationStart['capabilities'];
         const config = {
           unsafe: { alertingExperience: { enabled: true }, cases: { enabled: false } },
         } as ConfigSchema;
@@ -125,9 +125,9 @@ describe('updateGlobalNavigation', () => {
           },
         ];
         const callback = jest.fn();
-        const updater$ = ({
+        const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown) as Subject<AppUpdater>;
+        } as unknown as Subject<AppUpdater>;
 
         updateGlobalNavigation({ capabilities, config, deepLinks, updater$ });
 
@@ -148,10 +148,10 @@ describe('updateGlobalNavigation', () => {
 
     describe('with no case read capabilities', () => {
       it('hides the cases deep link', () => {
-        const capabilities = ({
+        const capabilities = {
           [casesFeatureId]: { read_cases: false },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
-        } as unknown) as ApplicationStart['capabilities'];
+        } as unknown as ApplicationStart['capabilities'];
         const config = {
           unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
         } as ConfigSchema;
@@ -165,9 +165,9 @@ describe('updateGlobalNavigation', () => {
           },
         ];
         const callback = jest.fn();
-        const updater$ = ({
+        const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown) as Subject<AppUpdater>;
+        } as unknown as Subject<AppUpdater>;
 
         updateGlobalNavigation({ capabilities, config, deepLinks, updater$ });
 
@@ -188,10 +188,10 @@ describe('updateGlobalNavigation', () => {
 
     describe('when alerts are enabled', () => {
       it('shows the alerts deep link', () => {
-        const capabilities = ({
+        const capabilities = {
           [casesFeatureId]: { read_cases: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
-        } as unknown) as ApplicationStart['capabilities'];
+        } as unknown as ApplicationStart['capabilities'];
         const config = {
           unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
         } as ConfigSchema;
@@ -205,9 +205,9 @@ describe('updateGlobalNavigation', () => {
           },
         ];
         const callback = jest.fn();
-        const updater$ = ({
+        const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown) as Subject<AppUpdater>;
+        } as unknown as Subject<AppUpdater>;
 
         updateGlobalNavigation({ capabilities, config, deepLinks, updater$ });
 
@@ -228,10 +228,10 @@ describe('updateGlobalNavigation', () => {
 
     describe('when alerts are disabled', () => {
       it('hides the alerts deep link', () => {
-        const capabilities = ({
+        const capabilities = {
           [casesFeatureId]: { read_cases: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
-        } as unknown) as ApplicationStart['capabilities'];
+        } as unknown as ApplicationStart['capabilities'];
         const config = {
           unsafe: { alertingExperience: { enabled: false }, cases: { enabled: false } },
         } as ConfigSchema;
@@ -245,9 +245,9 @@ describe('updateGlobalNavigation', () => {
           },
         ];
         const callback = jest.fn();
-        const updater$ = ({
+        const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown) as Subject<AppUpdater>;
+        } as unknown as Subject<AppUpdater>;
 
         updateGlobalNavigation({ capabilities, config, deepLinks, updater$ });
 

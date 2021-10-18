@@ -13,7 +13,7 @@ import { debounce } from 'lodash';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { estypes } from '@elastic/elasticsearch';
 import { Dictionary } from '../../../../../../../common/types/common';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { DataView } from '../../../../../../../../../../src/plugins/data_views/common';
 import { Query, QueryStringInput } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
@@ -29,7 +29,7 @@ interface ErrorMessage {
 }
 
 export interface ExplorationQueryBarProps {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   setSearchQuery: (update: {
     queryString: string;
     query?: SavedSearchQuery;
@@ -57,9 +57,10 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
-  const regex = useMemo(() => new RegExp(`${filters?.columnId}\\s*:\\s*(true|false)`, 'g'), [
-    filters?.columnId,
-  ]);
+  const regex = useMemo(
+    () => new RegExp(`${filters?.columnId}\\s*:\\s*(true|false)`, 'g'),
+    [filters?.columnId]
+  );
 
   /**
    * Restoring state from the URL once on load. If a filter option is active

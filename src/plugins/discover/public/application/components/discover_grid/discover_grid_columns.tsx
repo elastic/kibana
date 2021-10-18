@@ -11,10 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiDataGridColumn, EuiScreenReaderOnly } from '@elastic/eui';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
-import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
+import type { IndexPattern } from '../../../../../data/common';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
+import { defaultTimeColumnWidth } from './constants';
 
 export function getLeadControlColumns() {
   return [
@@ -88,7 +89,7 @@ export function buildEuiGridColumn(
 
   if (column.id === indexPattern.timeFieldName) {
     column.display = `${timeString} (${indexPattern.timeFieldName})`;
-    column.initialWidth = 180;
+    column.initialWidth = defaultTimeColumnWidth;
   }
   if (columnWidth > 0) {
     column.initialWidth = Number(columnWidth);

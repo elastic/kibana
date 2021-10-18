@@ -64,7 +64,8 @@ export interface ISavedObjectsPointInTimeFinder<T, A> {
  * @internal
  */
 export class PointInTimeFinder<T = unknown, A = unknown>
-  implements ISavedObjectsPointInTimeFinder<T, A> {
+  implements ISavedObjectsPointInTimeFinder<T, A>
+{
   readonly #log: Logger;
   readonly #client: PointInTimeFinderClient;
   readonly #findOptions: SavedObjectsFindOptions;

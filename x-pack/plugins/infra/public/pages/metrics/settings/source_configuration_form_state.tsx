@@ -32,21 +32,24 @@ export const useSourceConfigurationFormState = (
     ),
   });
 
-  const errors = useMemo(() => [...indicesConfigurationFormState.errors], [
-    indicesConfigurationFormState.errors,
-  ]);
+  const errors = useMemo(
+    () => [...indicesConfigurationFormState.errors],
+    [indicesConfigurationFormState.errors]
+  );
 
   const resetForm = useCallback(() => {
     indicesConfigurationFormState.resetForm();
   }, [indicesConfigurationFormState]);
 
-  const isFormDirty = useMemo(() => indicesConfigurationFormState.isFormDirty, [
-    indicesConfigurationFormState.isFormDirty,
-  ]);
+  const isFormDirty = useMemo(
+    () => indicesConfigurationFormState.isFormDirty,
+    [indicesConfigurationFormState.isFormDirty]
+  );
 
-  const isFormValid = useMemo(() => indicesConfigurationFormState.isFormValid, [
-    indicesConfigurationFormState.isFormValid,
-  ]);
+  const isFormValid = useMemo(
+    () => indicesConfigurationFormState.isFormValid,
+    [indicesConfigurationFormState.isFormValid]
+  );
 
   const formState = useMemo(
     () => ({

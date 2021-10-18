@@ -4,8 +4,7 @@
 
 [partintro]
 --
-The APM app in {kib} is provided with the basic license.
-It allows you to monitor your software services and applications in real-time;
+The APM app in {kib} allows you to monitor your software services and applications in real-time;
 visualize detailed performance information on your services,
 identify and analyze errors,
 and monitor host-level and agent-specific metrics like JVM and Go runtime metrics.

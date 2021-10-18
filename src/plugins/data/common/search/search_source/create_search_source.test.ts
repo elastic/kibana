@@ -8,8 +8,8 @@
 
 import { createSearchSource as createSearchSourceFactory } from './create_search_source';
 import { SearchSourceDependencies } from './search_source';
-import { IIndexPattern } from '../../index_patterns';
-import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import { IIndexPattern } from '../..';
+import { IndexPatternsContract } from '../..';
 import { Filter } from '../../es_query';
 
 describe('createSearchSource', () => {
@@ -25,9 +25,9 @@ describe('createSearchSource', () => {
       onResponse: (req, res) => res,
     };
 
-    indexPatternContractMock = ({
+    indexPatternContractMock = {
       get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
-    } as unknown) as jest.Mocked<IndexPatternsContract>;
+    } as unknown as jest.Mocked<IndexPatternsContract>;
 
     createSearchSource = createSearchSourceFactory(indexPatternContractMock, dependencies);
   });

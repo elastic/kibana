@@ -56,5 +56,6 @@ export function gsuiteLogsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['security'],
   };
 }

@@ -23,8 +23,6 @@ import { HttpLogic } from '../http';
 import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
-import { appendBetaNotificationItem } from './beta';
-
 import './page_template.scss';
 
 /*
@@ -63,8 +61,6 @@ export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
 
-  appendBetaNotificationItem(solutionNav);
-
   return (
     <KibanaPageTemplate
       restrictWidth={false}
@@ -79,7 +75,6 @@ export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
       }}
       isEmptyState={isEmptyState && !isLoading}
       solutionNav={solutionNav ? { icon: 'logoEnterpriseSearch', ...solutionNav } : undefined}
-      pageSideBarProps={{ className: 'betaSidebarNotification' }}
     >
       {setPageChrome}
       {readOnlyMode && (

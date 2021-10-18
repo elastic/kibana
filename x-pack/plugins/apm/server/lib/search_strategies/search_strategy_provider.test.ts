@@ -13,6 +13,7 @@ import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common'
 
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import type { LatencyCorrelationsParams } from '../../../common/search_strategies/latency_correlations/types';
+import type { SearchStrategyClientParams } from '../../../common/search_strategies/types';
 
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
@@ -56,17 +57,6 @@ const clientSearchMock = (
       aggregations = { transaction_duration_percentiles: { values: {} } };
     }
 
-    // fetchTransactionDurationHistogramInterval
-    if (
-      aggs.transaction_duration_min !== undefined &&
-      aggs.transaction_duration_max !== undefined
-    ) {
-      aggregations = {
-        transaction_duration_min: { value: 0 },
-        transaction_duration_max: { value: 1234 },
-      };
-    }
-
     // fetchTransactionDurationCorrelation
     if (aggs.logspace_ranges !== undefined) {
       aggregations = { logspace_ranges: { buckets: [] } };
@@ -100,10 +90,7 @@ const clientSearchMock = (
 };
 
 const getApmIndicesMock = async () =>
-  ({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    'apm_oss.transactionIndices': 'apm-*',
-  } as ApmIndicesConfig);
+  ({ transaction: 'apm-*' } as ApmIndicesConfig);
 
 describe('APM Correlations search strategy', () => {
   describe('strategy interface', () => {
@@ -124,21 +111,23 @@ describe('APM Correlations search strategy', () => {
     let mockGetApmIndicesMock: jest.Mock;
     let mockDeps: SearchStrategyDependencies;
     let params: Required<
-      IKibanaSearchRequest<LatencyCorrelationsParams>
+      IKibanaSearchRequest<
+        LatencyCorrelationsParams & SearchStrategyClientParams
+      >
     >['params'];
 
     beforeEach(() => {
       mockClientFieldCaps = jest.fn(clientFieldCapsMock);
       mockClientSearch = jest.fn(clientSearchMock);
       mockGetApmIndicesMock = jest.fn(getApmIndicesMock);
-      mockDeps = ({
+      mockDeps = {
         esClient: {
           asCurrentUser: {
             fieldCaps: mockClientFieldCaps,
             search: mockClientSearch,
           },
         },
-      } as unknown) as SearchStrategyDependencies;
+      } as unknown as SearchStrategyDependencies;
       params = {
         start: '2020',
         end: '2021',

@@ -99,8 +99,10 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const nestingSwitch = component.find('[data-test-subj="indexPattern-nesting-switch"]').first();
-    (nestingSwitch.prop('onChange') as () => {})();
+    component
+      .find('[data-test-subj="indexPattern-nesting-switch"] button')
+      .first()
+      .simulate('click');
 
     expect(setColumns).toHaveBeenCalledTimes(1);
     expect(setColumns).toHaveBeenCalledWith(['a', 'b', 'c']);
@@ -117,10 +119,10 @@ describe('BucketNestingEditor', () => {
       },
     });
 
-    (component
-      .find('[data-test-subj="indexPattern-nesting-switch"]')
+    component
+      .find('[data-test-subj="indexPattern-nesting-switch"] button')
       .first()
-      .prop('onChange') as () => {})();
+      .simulate('click');
 
     expect(setColumns).toHaveBeenCalledTimes(2);
     expect(setColumns).toHaveBeenLastCalledWith(['b', 'a', 'c']);
@@ -210,8 +212,8 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const control = component.find('[data-test-subj="indexPattern-nesting-select"]').first();
-    (control.prop('onChange') as (e: unknown) => {})({
+    const control = component.find('[data-test-subj="indexPattern-nesting-select"] select').first();
+    control.simulate('change', {
       target: { value: 'b' },
     });
 
@@ -237,10 +239,8 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const control = component.find('[data-test-subj="indexPattern-nesting-select"]').first();
-    (control.prop('onChange') as (e: unknown) => {})({
-      target: { value: '' },
-    });
+    const control = component.find('[data-test-subj="indexPattern-nesting-select"] select').first();
+    control.simulate('change', { target: { value: '' } });
 
     expect(setColumns).toHaveBeenCalledWith(['a', 'c', 'b']);
   });
@@ -264,8 +264,8 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const control = component.find('[data-test-subj="indexPattern-nesting-select"]').first();
-    (control.prop('onChange') as (e: unknown) => {})({
+    const control = component.find('[data-test-subj="indexPattern-nesting-select"] select').first();
+    control.simulate('change', {
       target: { value: '' },
     });
 

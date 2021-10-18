@@ -8,7 +8,10 @@
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 import { deepFreeze } from '@kbn/std';
 
+import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 import { spacesConfigDeprecationProvider } from './config';
+
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = spacesConfigDeprecationProvider(configDeprecationFactory);
@@ -18,8 +21,11 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
     deprecations.map((deprecation) => ({
       deprecation,
       path: '',
+      context: deprecationContext,
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,

@@ -290,7 +290,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               // @ts-expect-error
               timeline_id: null,
             },
@@ -317,7 +317,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               timeline_id: [''],
             },
           },
@@ -343,7 +343,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               type: ['eql'],
               timeline_id: [''],
             },
@@ -372,8 +372,7 @@ describe('alert actions', () => {
                 and: [],
                 enabled: true,
                 excluded: false,
-                id:
-                  'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
+                id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
                 kqlQuery: '',
                 name: '1',
                 queryMatch: { field: 'signal.group.id', operator: ':', value: 'my-group-id' },
@@ -388,7 +387,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               type: ['eql'],
               timeline_id: [''],
             },

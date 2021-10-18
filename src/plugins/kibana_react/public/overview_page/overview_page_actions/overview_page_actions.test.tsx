@@ -15,9 +15,9 @@ jest.mock('../../app_links', () => ({
 
 afterAll(() => jest.clearAllMocks());
 
-const applicationStartMock = ({
+const applicationStartMock = {
   capabilities: { navLinks: { management: true, dev_tools: true } },
-} as unknown) as ApplicationStart;
+} as unknown as ApplicationStart;
 
 describe('overviewPageActions', () => {
   test('only add data button', () => {

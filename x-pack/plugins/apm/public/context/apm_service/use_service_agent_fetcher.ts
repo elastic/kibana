@@ -21,11 +21,15 @@ export function useServiceAgentFetcher({
   start: string;
   end: string;
 }) {
-  const { data = INITIAL_STATE, error, status } = useFetcher(
+  const {
+    data = INITIAL_STATE,
+    error,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (serviceName) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/agent',
+          endpoint: 'GET /internal/apm/services/{serviceName}/agent',
           params: {
             path: { serviceName },
             query: { start, end },

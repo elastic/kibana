@@ -52,6 +52,7 @@ import { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 import { Direction } from '../../../../common/search_strategy';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 jest.mock('../../../common/utils/default_date_settings', () => {
@@ -62,6 +63,8 @@ jest.mock('../../../common/utils/default_date_settings', () => {
     DEFAULT_TO_MOMENT: new Date('2020-10-28T11:37:31.655Z'),
   };
 });
+
+const mockFilterManager = {} as FilterManager;
 
 const basicDataProvider: DataProvider = {
   and: [],
@@ -97,6 +100,7 @@ const basicTimeline: TimelineModel = {
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
   expandedDetail: {},
+  filterManager: mockFilterManager,
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'foo',
@@ -193,6 +197,20 @@ describe('Timeline', () => {
           show: true,
         },
       });
+    });
+
+    test('should contain existing filterManager', () => {
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...basicTimeline,
+          status: TimelineStatus.immutable,
+          timelineType: TimelineType.template,
+        },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.filterManager).toEqual(mockFilterManager);
     });
   });
 
@@ -1108,8 +1126,8 @@ describe('Timeline', () => {
       const newAndProvider = update.foo.dataProviders[indexProvider].and.find(
         (i) => i.id === '456'
       );
-      expect(oldAndProvider!.enabled).toEqual(false);
-      expect(newAndProvider!.enabled).toEqual(true);
+      expect(oldAndProvider?.enabled).toEqual(false);
+      expect(newAndProvider?.enabled).toEqual(true);
     });
   });
 
@@ -1368,8 +1386,8 @@ describe('Timeline', () => {
       const newAndProvider = update.foo.dataProviders[indexProvider].and.find(
         (i) => i.id === '456'
       );
-      expect(oldAndProvider!.excluded).toEqual(true);
-      expect(newAndProvider!.excluded).toEqual(false);
+      expect(oldAndProvider?.excluded).toEqual(true);
+      expect(newAndProvider?.excluded).toEqual(false);
     });
   });
 

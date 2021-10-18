@@ -42,49 +42,51 @@ export interface ReindexParams {
  * this in parallel. By using `op_type: 'create', conflicts: 'proceed'` there
  * will be only one write per reindexed document.
  */
-export const reindex = ({
-  client,
-  sourceIndex,
-  targetIndex,
-  reindexScript,
-  requireAlias,
-  unusedTypesQuery,
-}: ReindexParams): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
-  return client
-    .reindex({
-      // Require targetIndex to be an alias. Prevents a new index from being
-      // created if targetIndex doesn't exist.
-      require_alias: requireAlias,
-      body: {
-        // Ignore version conflicts from existing documents
-        conflicts: 'proceed',
-        source: {
-          index: sourceIndex,
-          // Set reindex batch size
-          size: BATCH_SIZE,
-          // Exclude saved object types
-          query: unusedTypesQuery,
+export const reindex =
+  ({
+    client,
+    sourceIndex,
+    targetIndex,
+    reindexScript,
+    requireAlias,
+    unusedTypesQuery,
+  }: ReindexParams): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> =>
+  () => {
+    return client
+      .reindex({
+        // Require targetIndex to be an alias. Prevents a new index from being
+        // created if targetIndex doesn't exist.
+        require_alias: requireAlias,
+        body: {
+          // Ignore version conflicts from existing documents
+          conflicts: 'proceed',
+          source: {
+            index: sourceIndex,
+            // Set reindex batch size
+            size: BATCH_SIZE,
+            // Exclude saved object types
+            query: unusedTypesQuery,
+          },
+          dest: {
+            index: targetIndex,
+            // Don't override existing documents, only create if missing
+            op_type: 'create',
+          },
+          script: Option.fold<string, undefined | { source: string; lang: 'painless' }>(
+            () => undefined,
+            (script) => ({
+              source: script,
+              lang: 'painless',
+            })
+          )(reindexScript),
         },
-        dest: {
-          index: targetIndex,
-          // Don't override existing documents, only create if missing
-          op_type: 'create',
-        },
-        script: Option.fold<string, undefined | { source: string; lang: 'painless' }>(
-          () => undefined,
-          (script) => ({
-            source: script,
-            lang: 'painless',
-          })
-        )(reindexScript),
-      },
-      // force a refresh so that we can query the target index
-      refresh: true,
-      // Create a task and return task id instead of blocking until complete
-      wait_for_completion: false,
-    })
-    .then(({ body: { task: taskId } }) => {
-      return Either.right({ taskId: String(taskId) });
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+        // force a refresh so that we can query the target index
+        refresh: true,
+        // Create a task and return task id instead of blocking until complete
+        wait_for_completion: false,
+      })
+      .then(({ body: { task: taskId } }) => {
+        return Either.right({ taskId: String(taskId) });
+      })
+      .catch(catchRetryableEsClientErrors);
+  };

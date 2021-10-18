@@ -203,7 +203,7 @@ function getMessageFromId<K extends ErrorTypes>({
 }): ErrorWrapper {
   let message: string;
   // Use a less strict type instead of doing a typecast on each message type
-  const out = (values as unknown) as Record<string, string>;
+  const out = values as unknown as Record<string, string>;
   switch (messageId) {
     case 'wrongFirstArgument':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {

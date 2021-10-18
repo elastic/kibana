@@ -17,11 +17,11 @@ import { duration } from 'moment';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
 let esClientMock: DeeplyMockedKeys<ElasticsearchClient>;
-const configMock = ({
+const configMock = {
   autocomplete: {
     valueSuggestions: { timeout: duration(4513), terminateAfter: duration(98430) },
   },
-} as unknown) as ConfigSchema;
+} as unknown as ConfigSchema;
 
 // @ts-expect-error not full interface
 const mockResponse = {
@@ -34,7 +34,7 @@ const mockResponse = {
   },
 } as ApiResponse<estypes.SearchResponse<any>>;
 
-jest.mock('../index_patterns');
+jest.mock('../data_views');
 
 describe('terms agg suggestions', () => {
   beforeEach(() => {

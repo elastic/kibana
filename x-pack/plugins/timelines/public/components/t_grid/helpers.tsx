@@ -192,6 +192,7 @@ export const buildCombinedQuery = (combineQueriesParams: CombineQueries) => {
   const combinedQuery = combineQueries(combineQueriesParams);
   return combinedQuery
     ? {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         filterQuery: replaceStatusField(combinedQuery!.filterQuery),
       }
     : null;
@@ -228,14 +229,13 @@ export const getCombinedFilterQuery = ({
   to,
   filters,
   ...combineQueriesParams
-}: CombineQueries & { from: string; to: string }): string => {
-  return replaceStatusField(
+}: CombineQueries & { from: string; to: string }): string =>
+  replaceStatusField(
     combineQueries({
       ...combineQueriesParams,
       filters: [...filters, buildTimeRangeFilter(from, to)],
-    })!.filterQuery
+    })?.filterQuery
   );
-};
 
 /**
  * This function is a temporary patch to prevent queries using old `signal.status` field.
@@ -243,8 +243,8 @@ export const getCombinedFilterQuery = ({
  * must be replaced by `ALERT_WORKFLOW_STATUS` field name constant
  * @deprecated
  */
-const replaceStatusField = (query: string): string =>
-  query.replaceAll('signal.status', ALERT_WORKFLOW_STATUS);
+const replaceStatusField = (filterQuery?: string): string =>
+  filterQuery?.replaceAll('signal.status', ALERT_WORKFLOW_STATUS) ?? '';
 
 /**
  * The CSS class name of a "stateful event", which appears in both

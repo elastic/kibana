@@ -49,8 +49,10 @@ import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_t
 import { getDocumentTypeFilterForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { asPercent } from '../../../../observability/common/utils/formatters';
 
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 const paramsSchema = schema.object({
@@ -108,12 +110,12 @@ export function registerTransactionErrorRateAlertType({
         // to prevent (likely) unnecessary blocking request
         // in rule execution
         const searchAggregatedTransactions =
-          config['xpack.apm.searchAggregatedTransactions'] !==
+          config.searchAggregatedTransactions !==
           SearchAggregatedTransactionSetting.never;
 
         const index = searchAggregatedTransactions
-          ? indices['apm_oss.metricsIndices']
-          : indices['apm_oss.transactionIndices'];
+          ? indices.metric
+          : indices.transaction;
 
         const searchParams = {
           index,
@@ -213,12 +215,8 @@ export function registerTransactionErrorRateAlertType({
           .filter((result) => result.errorRate >= alertParams.threshold);
 
         results.forEach((result) => {
-          const {
-            serviceName,
-            environment,
-            transactionType,
-            errorRate,
-          } = result;
+          const { serviceName, environment, transactionType, errorRate } =
+            result;
 
           services
             .alertWithLifecycle({

@@ -39,7 +39,7 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
           fill
           onClick={() =>
             application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-              path: pagePathGetters.integrations_all()[1],
+              path: pagePathGetters.integrations_all({})[1],
               state: { forAgentPolicyId: policyId },
             })
           }

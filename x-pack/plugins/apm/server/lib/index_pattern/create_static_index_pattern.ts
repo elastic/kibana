@@ -34,7 +34,7 @@ export async function createStaticIndexPattern({
 }): Promise<boolean> {
   return withApmSpan('create_static_index_pattern', async () => {
     // don't autocreate APM index pattern if it's been disabled via the config
-    if (!config['xpack.apm.autocreateApmIndexPattern']) {
+    if (!config.autocreateApmIndexPattern) {
       return false;
     }
 
@@ -91,10 +91,11 @@ async function getForceOverwrite({
 }) {
   if (!overwrite) {
     try {
-      const existingIndexPattern = await savedObjectsClient.get<ApmIndexPatternAttributes>(
-        'index-pattern',
-        APM_STATIC_INDEX_PATTERN_ID
-      );
+      const existingIndexPattern =
+        await savedObjectsClient.get<ApmIndexPatternAttributes>(
+          'index-pattern',
+          APM_STATIC_INDEX_PATTERN_ID
+        );
 
       // if the existing index pattern does not matches the new one, force an update
       return existingIndexPattern.attributes.title !== apmIndexPatternTitle;

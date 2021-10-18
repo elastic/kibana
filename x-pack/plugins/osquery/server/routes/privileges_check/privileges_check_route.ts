@@ -20,9 +20,8 @@ export const privilegesCheckRoute = (router: IRouter, osqueryContext: OsqueryApp
     },
     async (context, request, response) => {
       if (osqueryContext.security.authz.mode.useRbacForRequest(request)) {
-        const checkPrivileges = osqueryContext.security.authz.checkPrivilegesDynamicallyWithRequest(
-          request
-        );
+        const checkPrivileges =
+          osqueryContext.security.authz.checkPrivilegesDynamicallyWithRequest(request);
         const { hasAllRequested } = await checkPrivileges({
           elasticsearch: {
             cluster: [],

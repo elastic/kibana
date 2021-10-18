@@ -78,17 +78,16 @@ const METRIC_FORMATTERS: MetricFormatters = {
   },
 };
 
-export const createInventoryMetricFormatter = (metric: SnapshotMetricInput) => (
-  val: string | number
-) => {
-  if (SnapshotCustomMetricInputRT.is(metric)) {
-    const formatter = createFormatterForMetric(metric);
+export const createInventoryMetricFormatter =
+  (metric: SnapshotMetricInput) => (val: string | number) => {
+    if (SnapshotCustomMetricInputRT.is(metric)) {
+      const formatter = createFormatterForMetric(metric);
+      return formatter(val);
+    }
+    const metricFormatter = get(METRIC_FORMATTERS, metric.type, METRIC_FORMATTERS.count);
+    if (val == null) {
+      return '';
+    }
+    const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
     return formatter(val);
-  }
-  const metricFormatter = get(METRIC_FORMATTERS, metric.type, METRIC_FORMATTERS.count);
-  if (val == null) {
-    return '';
-  }
-  const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
-  return formatter(val);
-};
+  };

@@ -30,7 +30,7 @@ export const getValue = <Result = any>(path: Path, source: any) => {
   for (const key of path) {
     current = (current as any)[key];
   }
-  return (current as unknown) as Result;
+  return current as unknown as Result;
 };
 
 const ARRAY_TYPE = Object.prototype.toString.call([]);
@@ -39,7 +39,7 @@ const OBJECT_TYPE = Object.prototype.toString.call({});
 const dumbCopy = <R>(value: R): R => {
   const objectType = Object.prototype.toString.call(value);
   if (objectType === ARRAY_TYPE) {
-    return ([...(value as any)] as unknown) as R;
+    return [...(value as any)] as unknown as R;
   } else if (objectType === OBJECT_TYPE) {
     return { ...(value as any) } as R;
   }

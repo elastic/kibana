@@ -19,6 +19,7 @@ import {
   ScaleType,
   AccessorFn,
   Accessor,
+  XYBrushEvent,
 } from '@elastic/charts';
 
 import { compact } from 'lodash';
@@ -131,7 +132,10 @@ const VisComponent = (props: VisComponentProps) => {
     ): BrushEndListener | undefined => {
       if (xAccessor !== null && isInterval) {
         return (brushArea) => {
-          const event = getBrushFromChartBrushEventFn(visData, xAccessor)(brushArea);
+          const event = getBrushFromChartBrushEventFn(
+            visData,
+            xAccessor
+          )(brushArea as XYBrushEvent);
           props.fireEvent(event);
         };
       }
@@ -221,9 +225,10 @@ const VisComponent = (props: VisComponentProps) => {
     config.xAxis.scale.type === ScaleType.Ordinal
       ? undefined
       : getAdjustedDomain(visData.rows, config.aspects.x, timeZone, xDomain, hasBars);
-  const legendPosition = useMemo(() => config.legend.position ?? Position.Right, [
-    config.legend.position,
-  ]);
+  const legendPosition = useMemo(
+    () => config.legend.position ?? Position.Right,
+    [config.legend.position]
+  );
   const isDarkMode = getThemeService().useDarkMode();
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
 
@@ -231,11 +236,10 @@ const VisComponent = (props: VisComponentProps) => {
     return { accessor, formatter };
   });
 
-  const allSeries = useMemo(() => getAllSeries(visData.rows, splitAccessors, config.aspects.y), [
-    config.aspects.y,
-    splitAccessors,
-    visData.rows,
-  ]);
+  const allSeries = useMemo(
+    () => getAllSeries(visData.rows, splitAccessors, config.aspects.y),
+    [config.aspects.y, splitAccessors, visData.rows]
+  );
 
   const getSeriesColor = useCallback(
     (series: XYChartSeriesIdentifier) => {

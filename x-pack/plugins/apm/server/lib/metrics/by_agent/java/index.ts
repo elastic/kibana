@@ -7,7 +7,7 @@
 
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { getHeapMemoryChart } from './heap_memory';
-import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
+import { Setup } from '../../../helpers/setup_request';
 import { getNonHeapMemoryChart } from './non_heap_memory';
 import { getThreadCountChart } from './thread_count';
 import { getCPUChartData } from '../shared/cpu';
@@ -21,12 +21,16 @@ export function getJavaMetricsCharts({
   setup,
   serviceName,
   serviceNodeName,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_java_system_metric_charts', async () => {
     const options = {
@@ -35,6 +39,8 @@ export function getJavaMetricsCharts({
       setup,
       serviceName,
       serviceNodeName,
+      start,
+      end,
     };
 
     const charts = await Promise.all([

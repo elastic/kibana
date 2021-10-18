@@ -7,13 +7,11 @@
 
 import { PluginInitializerContext } from '../../../../src/core/server';
 
-import { ConfigSchema } from './config';
 import { MetricsEntitiesPlugin } from './plugin';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext): MetricsEntitiesPlugin => {
   return new MetricsEntitiesPlugin(initializerContext);
 };

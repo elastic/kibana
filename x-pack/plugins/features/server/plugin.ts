@@ -81,31 +81,21 @@ export interface PluginStartContract {
   getKibanaFeatures(): KibanaFeature[];
 }
 
-interface TimelionSetupContract {
-  uiEnabled: boolean;
-}
-
 /**
  * Represents Features Plugin instance that will be managed by the Kibana plugin system.
  */
 export class FeaturesPlugin
-  implements
-    Plugin<RecursiveReadonly<PluginSetupContract>, RecursiveReadonly<PluginStartContract>> {
+  implements Plugin<RecursiveReadonly<PluginSetupContract>, RecursiveReadonly<PluginStartContract>>
+{
   private readonly logger: Logger;
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
-  private isTimelionEnabled: boolean = false;
   private isReportingEnabled: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(
-    core: CoreSetup,
-    { visTypeTimelion }: { visTypeTimelion?: TimelionSetupContract }
-  ): RecursiveReadonly<PluginSetupContract> {
-    this.isTimelionEnabled = visTypeTimelion !== undefined && visTypeTimelion.uiEnabled;
-
+  public setup(core: CoreSetup): RecursiveReadonly<PluginSetupContract> {
     defineRoutes({
       router: core.http.createRouter(),
       featureRegistry: this.featureRegistry,
@@ -160,14 +150,8 @@ export class FeaturesPlugin
       new Set([...savedObjectVisibleTypes, ...savedObjectImportableAndExportableHiddenTypes])
     );
 
-    this.logger.debug(
-      `Registering OSS features with SO types: ${savedObjectTypes.join(', ')}. "includeTimelion": ${
-        this.isTimelionEnabled
-      }.`
-    );
     const features = buildOSSFeatures({
       savedObjectTypes,
-      includeTimelion: this.isTimelionEnabled,
       includeReporting: this.isReportingEnabled,
     });
 

@@ -29,12 +29,12 @@ export default {
     (StoryComponent: ComponentType, { args }: StoryContext) => {
       const { agentName, canShowDashboard, environment, serviceName } = args;
 
-      const KibanaContext = createKibanaReactContext(({
+      const KibanaContext = createKibanaReactContext({
         application: {
           capabilities: { dashboard: { show: canShowDashboard } },
         },
         http: { basePath: { get: () => '' } },
-      } as unknown) as Partial<CoreStart>);
+      } as unknown as Partial<CoreStart>);
 
       return (
         <MemoryRouter

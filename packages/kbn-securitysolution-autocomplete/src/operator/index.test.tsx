@@ -210,9 +210,11 @@ describe('operator', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'is not' }]);
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith([
       { message: 'is not', operator: 'excluded', type: 'match', value: 'is_not' },

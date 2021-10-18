@@ -8,7 +8,7 @@
 
 import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
-import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../../data/common';
 import { fieldFormatsMock } from '../../../../../../../../field_formats/common/mocks';
 import { setServices } from '../../../../../../kibana_services';
 import { DiscoverServices } from '../../../../../../build_services';
@@ -63,11 +63,11 @@ describe('Row formatter', () => {
   beforeEach(() => {
     // @ts-expect-error
     indexPattern.formatHit = formatHitMock;
-    setServices(({
+    setServices({
       uiSettings: {
         get: () => 100,
       },
-    } as unknown) as DiscoverServices);
+    } as unknown as DiscoverServices);
   });
 
   it('formats document properly', () => {
@@ -110,11 +110,11 @@ describe('Row formatter', () => {
   });
 
   it('limits number of rendered items', () => {
-    setServices(({
+    setServices({
       uiSettings: {
         get: () => 1,
       },
-    } as unknown) as DiscoverServices);
+    } as unknown as DiscoverServices);
     expect(formatRow(hit, indexPattern, [])).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={

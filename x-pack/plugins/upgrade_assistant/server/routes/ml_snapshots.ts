@@ -238,13 +238,11 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
               });
             } else {
               // The task ID was not found; verify the deprecation was resolved
-              const {
-                isSuccessful: isSnapshotDeprecationResolved,
-                error: upgradeSnapshotError,
-              } = await verifySnapshotUpgrade(esClient, {
-                snapshotId,
-                jobId,
-              });
+              const { isSuccessful: isSnapshotDeprecationResolved, error: upgradeSnapshotError } =
+                await verifySnapshotUpgrade(esClient, {
+                  snapshotId,
+                  jobId,
+                });
 
               // Delete the SO; if it's complete, no need to store it anymore. If there's an error, this will give the user a chance to retry
               await deleteMlOperation(savedObjectsClient, snapshotOp.id);
@@ -269,13 +267,11 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
             }
           } else {
             // No tasks found; verify the deprecation was resolved
-            const {
-              isSuccessful: isSnapshotDeprecationResolved,
-              error: upgradeSnapshotError,
-            } = await verifySnapshotUpgrade(esClient, {
-              snapshotId,
-              jobId,
-            });
+            const { isSuccessful: isSnapshotDeprecationResolved, error: upgradeSnapshotError } =
+              await verifySnapshotUpgrade(esClient, {
+                snapshotId,
+                jobId,
+              });
 
             // Delete the SO; if it's complete, no need to store it anymore. If there's an error, this will give the user a chance to retry
             await deleteMlOperation(savedObjectsClient, snapshotOp.id);
@@ -329,12 +325,11 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
         try {
           const { snapshotId, jobId } = request.params;
 
-          const {
-            body: deleteSnapshotResponse,
-          } = await client.asCurrentUser.ml.deleteModelSnapshot({
-            job_id: jobId,
-            snapshot_id: snapshotId,
-          });
+          const { body: deleteSnapshotResponse } =
+            await client.asCurrentUser.ml.deleteModelSnapshot({
+              job_id: jobId,
+              snapshot_id: snapshotId,
+            });
 
           return response.ok({
             body: deleteSnapshotResponse,

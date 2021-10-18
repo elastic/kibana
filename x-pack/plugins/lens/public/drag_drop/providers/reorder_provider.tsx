@@ -67,9 +67,10 @@ export function ReorderProvider({
     groupId: id,
   });
 
-  const setReorderState = useMemo(() => (dispatch: SetReorderStateDispatch) => setState(dispatch), [
-    setState,
-  ]);
+  const setReorderState = useMemo(
+    () => (dispatch: SetReorderStateDispatch) => setState(dispatch),
+    [setState]
+  );
   return (
     <div
       data-test-subj="lnsDragDrop-reorderableGroup"

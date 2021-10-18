@@ -26,9 +26,9 @@ describe('RoleTemplateEditor', () => {
     };
 
     const wrapper = mountWithIntl(<RoleTemplateEditor {...props} />);
-    (wrapper
-      .find('EuiFieldText[data-test-subj="roleTemplateSourceEditor"]')
-      .props() as any).onChange({ target: { value: 'new_script' } });
+    (
+      wrapper.find('EuiFieldText[data-test-subj="roleTemplateSourceEditor"]').props() as any
+    ).onChange({ target: { value: 'new_script' } });
 
     expect(props.onChange).toHaveBeenCalledWith({
       template: {
@@ -89,9 +89,9 @@ describe('RoleTemplateEditor', () => {
     };
 
     const wrapper = mountWithIntl(<RoleTemplateEditor {...props} />);
-    (wrapper
-      .find('EuiComboBox[data-test-subj="roleMappingsFormTemplateType"]')
-      .props() as any).onChange('stored');
+    (
+      wrapper.find('EuiComboBox[data-test-subj="roleMappingsFormTemplateType"]').props() as any
+    ).onChange('stored');
 
     expect(props.onChange).toHaveBeenCalledWith({
       template: {

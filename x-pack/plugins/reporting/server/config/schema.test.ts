@@ -63,10 +63,6 @@ describe('Reporting Config Schema', () => {
             "renderComplete": "PT30S",
             "waitForElements": "PT30S",
           },
-          "viewport": Object {
-            "height": 1200,
-            "width": 1950,
-          },
           "zoom": 2,
         },
         "csv": Object {
@@ -84,7 +80,6 @@ describe('Reporting Config Schema', () => {
         },
         "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "index": ".reporting",
         "kibanaServer": Object {},
         "poll": Object {
           "jobCompletionNotifier": Object {
@@ -169,10 +164,6 @@ describe('Reporting Config Schema', () => {
             "renderComplete": "PT30S",
             "waitForElements": "PT30S",
           },
-          "viewport": Object {
-            "height": 1200,
-            "width": 1950,
-          },
           "zoom": 2,
         },
         "csv": Object {
@@ -189,7 +180,6 @@ describe('Reporting Config Schema', () => {
           "useByteOrderMarkEncoding": false,
         },
         "enabled": true,
-        "index": ".reporting",
         "kibanaServer": Object {},
         "poll": Object {
           "jobCompletionNotifier": Object {

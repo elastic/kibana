@@ -12,6 +12,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { ScreenshotModePluginStart } from 'src/plugins/screenshot_mode/public';
 import { APP_WRAPPER_CLASS } from '../../../core/public';
 import {
   App,
@@ -31,7 +32,6 @@ import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
 import { PresentationUtilPluginStart } from './services/presentation_util';
-import { KibanaLegacySetup, KibanaLegacyStart } from './services/kibana_legacy';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
@@ -98,7 +98,6 @@ export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
   home?: HomePublicPluginSetup;
-  kibanaLegacy: KibanaLegacySetup;
   urlForwarding: UrlForwardingSetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
@@ -107,7 +106,6 @@ export interface DashboardSetupDependencies {
 
 export interface DashboardStartDependencies {
   data: DataPublicPluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
@@ -118,6 +116,7 @@ export interface DashboardStartDependencies {
   savedObjects: SavedObjectsStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  screenshotMode?: ScreenshotModePluginStart;
   spaces?: SpacesPluginStart;
   visualizations: VisualizationsStart;
 }
@@ -146,7 +145,8 @@ export interface DashboardStart {
 
 export class DashboardPlugin
   implements
-    Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies> {
+    Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
+{
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -164,7 +164,8 @@ export class DashboardPlugin
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     { share, embeddable, home, urlForwarding, data, usageCollection }: DashboardSetupDependencies
   ): DashboardSetup {
-    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<DashboardFeatureFlagConfig>();
+    this.dashboardFeatureFlagConfig =
+      this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const startServices = core.getStartServices();
 
     if (share) {
@@ -418,9 +419,8 @@ export class DashboardPlugin
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
       getDashboardContainerByValueRenderer: () => {
-        const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
-          DASHBOARD_CONTAINER_TYPE
-        );
+        const dashboardContainerFactory =
+          plugins.embeddable.getEmbeddableFactory(DASHBOARD_CONTAINER_TYPE);
 
         if (!dashboardContainerFactory) {
           throw new Error(`${DASHBOARD_CONTAINER_TYPE} Embeddable Factory not found`);

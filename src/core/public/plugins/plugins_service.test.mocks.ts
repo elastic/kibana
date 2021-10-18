@@ -14,12 +14,11 @@ export type MockedPluginInitializer = jest.Mock<
   any
 >;
 
-export const mockPluginInitializerProvider: jest.Mock<
-  MockedPluginInitializer,
-  [PluginName]
-> = jest.fn().mockImplementation(() => () => {
-  throw new Error('No provider specified');
-});
+export const mockPluginInitializerProvider: jest.Mock<MockedPluginInitializer, [PluginName]> = jest
+  .fn()
+  .mockImplementation(() => () => {
+    throw new Error('No provider specified');
+  });
 
 jest.mock('./plugin_reader', () => ({
   read: mockPluginInitializerProvider,

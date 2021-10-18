@@ -9,7 +9,7 @@
 import { visualizationSavedObjectTypeMigrations } from './visualization_saved_object_migrations';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
 
-const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
+const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 
 const testMigrateMatchAllQuery = (migrate: Function) => {
   it('should migrate obsolete match_all query', () => {
@@ -922,11 +922,11 @@ describe('migration visualization', () => {
 
   describe('7.3.0', () => {
     const logMsgArr: string[] = [];
-    const logger = ({
+    const logger = {
       log: {
         warn: (msg: string) => logMsgArr.push(msg),
       },
-    } as unknown) as SavedObjectMigrationContext;
+    } as unknown as SavedObjectMigrationContext;
 
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.3.0'](
@@ -981,7 +981,7 @@ describe('migration visualization', () => {
       `);
       expect(logMsgArr).toMatchInlineSnapshot(`
         Array [
-          "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read property 'gauge' of undefined",
+          "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read properties of undefined (reading 'gauge')",
           "Exception @ migrateGaugeVerticalSplitToAlignment! Payload: {\\"type\\":\\"gauge\\"}",
         ]
       `);
@@ -1636,10 +1636,8 @@ describe('migration visualization', () => {
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON).toEqual('{}');
       const { kibanaSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
-      const {
-        kibanaSavedObjectMeta: oldKibanaSavedObjectMeta,
-        ...oldAttributes
-      } = migratedtimeSeriesDoc.attributes;
+      const { kibanaSavedObjectMeta: oldKibanaSavedObjectMeta, ...oldAttributes } =
+        migratedtimeSeriesDoc.attributes;
       expect(attributes).toEqual(oldAttributes);
     });
   });
@@ -2312,6 +2310,38 @@ describe('migration visualization', () => {
       const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
 
       expect(palette.name).toEqual('default');
+    });
+  });
+
+  describe('8.0.0 removeMarkdownLessFromTSVB', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['8.0.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const getTestDoc = () => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'metrics',
+          title: '[Flights] Delay Type',
+          params: {
+            id: 'test1',
+            type: 'markdown',
+            markdwon_less: 'test { color: red }',
+            markdown_css: '#markdown-test1 test { color: red }',
+          },
+        }),
+      },
+    });
+
+    it('should remove markdown_less and id from markdown_css', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const params = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(params.mardwon_less).toBeUndefined();
+      expect(params.markdown_css).toEqual('test { color: red }');
     });
   });
 });

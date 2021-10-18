@@ -27,9 +27,7 @@ export interface IRuleDataReader {
     ESSearchResponse<Partial<Record<TechnicalRuleDataFieldName, unknown[]>>, TSearchRequest>
   >;
 
-  getDynamicIndexPattern(
-    target?: string
-  ): Promise<{
+  getDynamicIndexPattern(target?: string): Promise<{
     title: string;
     timeFieldName: string;
     fields: FieldDescriptor[];
@@ -37,5 +35,5 @@ export interface IRuleDataReader {
 }
 
 export interface IRuleDataWriter {
-  bulk(request: BulkRequest): Promise<ApiResponse<BulkResponse>>;
+  bulk(request: BulkRequest): Promise<ApiResponse<BulkResponse> | undefined>;
 }

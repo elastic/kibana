@@ -20,8 +20,6 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 
 [cols="2*<"]
 |===
-| `xpack.fleet.enabled` {ess-icon}
-  | Set to `true` (default) to enable {fleet}. 
 | `xpack.fleet.agents.enabled` {ess-icon}
   | Set to `true` (default) to enable {fleet}. 
 |===
@@ -86,6 +84,8 @@ Optional properties are:
   be changed by updating the {kib} config.
   `is_default`:: If `true`, this policy is the default agent policy.
   `is_default_fleet_server`:: If `true`, this policy is the default {fleet-server} agent policy.
+  `data_output_id`:: ID of the output to send data (Need to be identical to `monitoring_output_id`)
+  `monitoring_output_id`:: ID of the output to send monitoring data. (Need to be identical to `data_output_id`)
   `package_policies`:: List of integration policies to add to this policy.
     `name`::: (required) Name of the integration policy.
     `package`::: (required) Integration that this policy configures
@@ -96,6 +96,20 @@ Optional properties are:
     integration. Follows the same schema as integration inputs, with the
     exception that any object in `vars` can be passed `frozen: true` in order to
     prevent that specific `var` from being edited by the user.
+
+| `xpack.fleet.outputs`
+  | List of outputs that are configured when the {fleet} app starts.
+Required properties are:
+
+  `id`:: Unique ID for this output. The ID should be a string.
+  `name`:: Output name.
+  `type`:: Type of Output. Currently we only support "elasticsearch".
+  `hosts`:: Array that contains the list of host for that output.
+  `config`:: Extra config for that output.
+
+Optional properties are:
+
+  `is_default`:: If `true`, this output is the default output.
 |===
 
 Example configuration:

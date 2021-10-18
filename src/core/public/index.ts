@@ -103,6 +103,8 @@ export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,

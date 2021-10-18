@@ -15,10 +15,10 @@ import realHits from '../../../../../__fixtures__/real_hits.js';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { IndexPatternAttributes } from '../../../../../../../data/common';
+import { flattenHit, IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
-import { DiscoverSidebar } from './discover_sidebar';
+import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
@@ -31,9 +31,9 @@ function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = (each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
+  const hits = each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
     Record<string, unknown>
-  >) as ElasticSearchHit[];
+  > as ElasticSearchHit[];
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
@@ -44,7 +44,7 @@ function getCompProps(): DiscoverSidebarProps {
   const fieldCounts: Record<string, number> = {};
 
   for (const hit of hits) {
-    for (const key of Object.keys(indexPattern.flattenHit(hit))) {
+    for (const key of Object.keys(flattenHit(hit, indexPattern))) {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }

@@ -26,9 +26,10 @@ const ActionAgentsStatusComponent: React.FC<ActionAgentsStatusProps> = ({
   agentIds,
 }) => {
   const [isLive, setIsLive] = useState(true);
-  const expired = useMemo(() => (!expirationDate ? false : new Date(expirationDate) < new Date()), [
-    expirationDate,
-  ]);
+  const expired = useMemo(
+    () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
+    [expirationDate]
+  );
   const {
     // @ts-expect-error update types
     data: { aggregations },

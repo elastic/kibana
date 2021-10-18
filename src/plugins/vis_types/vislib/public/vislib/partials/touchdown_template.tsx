@@ -8,6 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/server';
+import { EuiIcon } from '@elastic/eui';
 
 interface Props {
   wholeBucket: boolean;
@@ -16,7 +17,7 @@ interface Props {
 export const touchdownTemplate = ({ wholeBucket }: Props) => {
   return ReactDOM.renderToStaticMarkup(
     <p className="visTooltip__header">
-      <i className="fa fa-info-circle visTooltip__headerIcon" />
+      <EuiIcon type="iInCircle" className="visTooltip__headerIcon" />
       <span className="visTooltip__headerText">
         {wholeBucket ? 'Part of this bucket' : 'This area'} may contain partial data. The selected
         time range does not fully cover it.

@@ -223,9 +223,7 @@ describe('AnonymousAccessService', () => {
         );
 
         expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledTimes(1);
-        expect(
-          startParams.capabilities.resolveCapabilities
-        ).toHaveBeenCalledWith(
+        expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledWith(
           expect.objectContaining({ headers: { authorization: 'Basic dXNlcjpwYXNzd29yZA==' } }),
           { useDefaultCapabilities: false }
         );
@@ -245,9 +243,7 @@ describe('AnonymousAccessService', () => {
           resolvedCapabilities
         );
         expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledTimes(1);
-        expect(
-          startParams.capabilities.resolveCapabilities
-        ).toHaveBeenCalledWith(
+        expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledWith(
           expect.objectContaining({ headers: { authorization: 'Basic dXNlcjpwYXNzd29yZA==' } }),
           { useDefaultCapabilities: false }
         );

@@ -23,18 +23,15 @@ export class EncryptionConfig {
   ];
   #encryptionMeta = {
     'xpack.encryptedSavedObjects.encryptionKey': {
-      docs:
-        'https://www.elastic.co/guide/en/kibana/current/xpack-security-secure-saved-objects.html#xpack-security-secure-saved-objects',
+      docs: 'https://www.elastic.co/guide/en/kibana/current/xpack-security-secure-saved-objects.html#xpack-security-secure-saved-objects',
       description: 'Used to encrypt stored objects such as dashboards and visualizations',
     },
     'xpack.reporting.encryptionKey': {
-      docs:
-        'https://www.elastic.co/guide/en/kibana/current/reporting-settings-kb.html#general-reporting-settings',
+      docs: 'https://www.elastic.co/guide/en/kibana/current/reporting-settings-kb.html#general-reporting-settings',
       description: 'Used to encrypt saved reports',
     },
     'xpack.security.encryptionKey': {
-      docs:
-        'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#security-session-and-cookie-settings',
+      docs: 'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#security-session-and-cookie-settings',
       description: 'Used to encrypt session information',
     },
   };

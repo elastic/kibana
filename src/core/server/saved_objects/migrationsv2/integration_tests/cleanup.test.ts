@@ -44,6 +44,7 @@ function createRoot() {
           {
             name: 'root',
             appenders: ['file'],
+            level: 'debug', // DEBUG logs are required to retrieve the PIT _id from the action response logs
           },
         ],
       },

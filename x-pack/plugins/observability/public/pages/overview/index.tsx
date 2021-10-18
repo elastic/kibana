@@ -24,13 +24,14 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { RouteParams } from '../../routes';
 import { getNewsFeed } from '../../services/get_news_feed';
 import { getBucketSize } from '../../utils/get_bucket_size';
+import { getNoDataConfig } from '../../utils/no_data_config';
 import { DataSections } from './data_sections';
 import { LoadingObservability } from './loading_observability';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
-
+export type BucketSize = ReturnType<typeof calculateBucketSize>;
 function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
   if (start && end) {
     return getBucketSize({ start, end, minInterval: '60s' });
@@ -57,11 +58,19 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
-  const { hasDataMap, hasAnyData } = useHasData();
+  const { hasDataMap, hasAnyData, isAllRequestsComplete } = useHasData();
 
   if (hasAnyData === undefined) {
     return <LoadingObservability />;
   }
+
+  const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
+
+  const noDataConfig = getNoDataConfig({
+    hasData,
+    basePath: core.http.basePath,
+    docsLink: core.docLinks.links.observability.guide,
+  });
 
   const alerts = (hasDataMap.alert?.hasData as Alert[]) || [];
 
@@ -74,44 +83,53 @@ export function OverviewPage({ routeParams }: Props) {
 
   return (
     <ObservabilityPageTemplate
-      pageHeader={{
-        pageTitle: overviewPageTitle,
-        rightSideItems: [
-          <DatePicker
-            rangeFrom={relativeTime.start}
-            rangeTo={relativeTime.end}
-            refreshInterval={refreshInterval}
-            refreshPaused={refreshPaused}
-          />,
-        ],
-      }}
+      noDataConfig={noDataConfig}
+      pageHeader={
+        hasData
+          ? {
+              pageTitle: overviewPageTitle,
+              rightSideItems: [
+                <DatePicker
+                  rangeFrom={relativeTime.start}
+                  rangeTo={relativeTime.end}
+                  refreshInterval={refreshInterval}
+                  refreshPaused={refreshPaused}
+                />,
+              ],
+            }
+          : undefined
+      }
     >
-      <ObservabilityHeaderMenu />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={6}>
-          {/* Data sections */}
-          {hasAnyData && <DataSections bucketSize={bucketSize?.intervalString!} />}
-          <EmptySections />
-          <EuiSpacer size="l" />
+      {hasData && (
+        <>
+          <ObservabilityHeaderMenu />
           <EuiFlexGroup>
-            <EuiFlexItem>
-              {/* Resources / What's New sections */}
-              <EuiPanel hasBorder={true}>
-                <Resources />
-                <EuiSpacer size="l" />
-                {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 5)} />}
-              </EuiPanel>
+            <EuiFlexItem grow={6}>
+              {/* Data sections */}
+              {hasAnyData && <DataSections bucketSize={bucketSize} />}
+              <EmptySections />
+              <EuiSpacer size="l" />
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  {/* Resources / What's New sections */}
+                  <EuiPanel hasBorder={true}>
+                    <Resources />
+                    <EuiSpacer size="l" />
+                    {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 5)} />}
+                  </EuiPanel>
+                </EuiFlexItem>
+                {!!alerts.length && (
+                  <EuiFlexItem>
+                    <EuiPanel hasBorder={true}>
+                      <AlertsSection alerts={alerts} />
+                    </EuiPanel>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
-            {!!alerts.length && (
-              <EuiFlexItem>
-                <EuiPanel hasBorder={true}>
-                  <AlertsSection alerts={alerts} />
-                </EuiPanel>
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </>
+      )}
     </ObservabilityPageTemplate>
   );
 }

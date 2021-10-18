@@ -35,7 +35,7 @@ const addWarning = jest.fn();
 const httpGet = jest.fn();
 
 function wrapper({ children }: { children?: ReactNode }) {
-  const mockPluginContext = (merge({}, mockApmPluginContextValue, {
+  const mockPluginContext = merge({}, mockApmPluginContextValue, {
     core: {
       http: {
         get: httpGet,
@@ -46,7 +46,7 @@ function wrapper({ children }: { children?: ReactNode }) {
         },
       },
     },
-  }) as unknown) as ApmPluginContextValue;
+  }) as unknown as ApmPluginContextValue;
 
   return (
     <MemoryRouter initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}>

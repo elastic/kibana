@@ -9,49 +9,48 @@ import { i18n } from '@kbn/i18n';
 
 import { KibanaFeatureConfig, SubFeatureConfig } from '../../features/common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { APP_ID, SERVER_APP_ID } from '../common/constants';
+import { APP_ID, CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { savedObjectTypes } from './saved_objects';
 
-const CASES_SUB_FEATURE: SubFeatureConfig = {
-  name: 'Cases',
-  privilegeGroups: [
-    {
-      groupType: 'mutually_exclusive',
-      privileges: [
-        {
-          id: 'cases_all',
-          includeIn: 'all',
-          name: 'All',
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          // using variables with underscores here otherwise when we retrieve them from the kibana
-          // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
-          ui: ['crud_cases', 'read_cases'], // uiCapabilities.siem.crud_cases
-          cases: {
-            all: [APP_ID],
-          },
-        },
-        {
-          id: 'cases_read',
-          includeIn: 'read',
-          name: 'Read',
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          // using variables with underscores here otherwise when we retrieve them from the kibana
-          // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
-          ui: ['read_cases'], // uiCapabilities.siem.read_cases
-          cases: {
-            read: [APP_ID],
-          },
-        },
-      ],
+export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
+  id: CASES_FEATURE_ID,
+  name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionCaseTitle', {
+    defaultMessage: 'Cases',
+  }),
+  order: 1100,
+  category: DEFAULT_APP_CATEGORIES.security,
+  app: [CASES_FEATURE_ID, 'kibana'],
+  catalogue: [APP_ID],
+  cases: [APP_ID],
+  privileges: {
+    all: {
+      app: [CASES_FEATURE_ID, 'kibana'],
+      catalogue: [APP_ID],
+      cases: {
+        all: [APP_ID],
+      },
+      api: [],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['crud_cases', 'read_cases'], // uiCapabilities[CASES_FEATURE_ID].crud_cases or read_cases
     },
-  ],
-};
+    read: {
+      app: [CASES_FEATURE_ID, 'kibana'],
+      catalogue: [APP_ID],
+      cases: {
+        read: [APP_ID],
+      },
+      api: [],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['read_cases'], // uiCapabilities[CASES_FEATURE_ID].read_cases
+    },
+  },
+});
 
 export const getAlertsSubFeature = (ruleTypes: string[]): SubFeatureConfig => ({
   name: i18n.translate('xpack.securitySolution.featureRegistry.manageAlertsName', {
@@ -108,18 +107,17 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
   app: [APP_ID, 'kibana'],
-  catalogue: ['securitySolution'],
+  catalogue: [APP_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
   alerting: ruleTypes,
-  cases: [APP_ID],
-  subFeatures: [{ ...CASES_SUB_FEATURE } /* , { ...getAlertsSubFeature(ruleTypes) } */],
+  subFeatures: [],
   privileges: {
     all: {
       app: [APP_ID, 'kibana'],
-      catalogue: ['securitySolution'],
-      api: ['securitySolution', 'lists-all', 'lists-read', 'rac'],
+      catalogue: [APP_ID],
+      api: [APP_ID, 'lists-all', 'lists-read', 'rac'],
       savedObject: {
         all: ['alert', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
         read: [],
@@ -136,8 +134,8 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
     },
     read: {
       app: [APP_ID, 'kibana'],
-      catalogue: ['securitySolution'],
-      api: ['securitySolution', 'lists-read', 'rac'],
+      catalogue: [APP_ID],
+      api: [APP_ID, 'lists-read', 'rac'],
       savedObject: {
         all: [],
         read: ['exception-list', 'exception-list-agnostic', ...savedObjectTypes],

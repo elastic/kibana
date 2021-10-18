@@ -93,6 +93,7 @@ exports[`EditLayerPanel is rendered 1`] = `
         <LayerSettings
           layer={
             Object {
+              "canShowTooltip": [Function],
               "getDisplayName": [Function],
               "getId": [Function],
               "getImmutableSourceProperties": [Function],
@@ -101,9 +102,10 @@ exports[`EditLayerPanel is rendered 1`] = `
               "renderSourceSettingsEditor": [Function],
               "showJoinEditor": [Function],
               "supportsElasticsearchFilters": [Function],
+              "supportsFitToBounds": [Function],
             }
           }
-          supportsFitToBounds={false}
+          supportsFitToBounds={true}
         />
         <div>
           mockSourceSettings
@@ -112,6 +114,7 @@ exports[`EditLayerPanel is rendered 1`] = `
           <JoinEditor
             layer={
               Object {
+                "canShowTooltip": [Function],
                 "getDisplayName": [Function],
                 "getId": [Function],
                 "getImmutableSourceProperties": [Function],
@@ -120,6 +123,7 @@ exports[`EditLayerPanel is rendered 1`] = `
                 "renderSourceSettingsEditor": [Function],
                 "showJoinEditor": [Function],
                 "supportsElasticsearchFilters": [Function],
+                "supportsFitToBounds": [Function],
               }
             }
             layerDisplayName="layer 1"

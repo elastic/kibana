@@ -36,20 +36,21 @@ export const TEST_CASES: Record<string, UpdateTestCase> = Object.freeze({
 
 export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('update');
-  const expectResponseBody = (testCase: UpdateTestCase): ExpectResponseBody => async (
-    response: Record<string, any>
-  ) => {
-    if (testCase.failure === 403) {
-      await expectSavedObjectForbidden(testCase.type)(response);
-    } else {
-      // permitted
-      const object = response.body;
-      await expectResponses.permitted(object, testCase);
-      if (!testCase.failure) {
-        expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+  const expectResponseBody =
+    (testCase: UpdateTestCase): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      if (testCase.failure === 403) {
+        await expectSavedObjectForbidden(testCase.type)(response);
+      } else {
+        // permitted
+        const object = response.body;
+        await expectResponses.permitted(object, testCase);
+        if (!testCase.failure) {
+          expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+          // TODO: add assertions for redacted namespaces (#112455)
+        }
       }
-    }
-  };
+    };
   const createTestDefinitions = (
     testCases: UpdateTestCase | UpdateTestCase[],
     forbidden: boolean,
@@ -70,38 +71,36 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     }));
   };
 
-  const makeUpdateTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: UpdateTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeUpdateTest =
+    (describeFn: Mocha.SuiteFunction) => (description: string, definition: UpdateTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const { type, id } = test.request;
-          const requestBody = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };
-          await supertest
-            .put(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
-            .auth(user?.username, user?.password)
-            .send(requestBody)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            const { type, id } = test.request;
+            const requestBody = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };
+            await supertest
+              .put(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
+              .auth(user?.username, user?.password)
+              .send(requestBody)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeUpdateTest(describe);
   // @ts-ignore

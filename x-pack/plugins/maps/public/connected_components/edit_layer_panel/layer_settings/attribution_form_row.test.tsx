@@ -17,61 +17,61 @@ const defaultProps = {
 };
 
 test('Should render null when layer source has attribution provider', () => {
-  const sourceMock = ({
+  const sourceMock = {
     getAttributionProvider: () => {
       return async () => {
         return [{ url: 'url1', label: 'label1' }];
       };
     },
-  } as unknown) as ISource;
-  const layerMock = ({
+  } as unknown as ISource;
+  const layerMock = {
     getSource: () => {
       return sourceMock;
     },
-  } as unknown) as ILayer;
+  } as unknown as ILayer;
   const component = shallow(<AttributionFormRow {...defaultProps} layer={layerMock} />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('Should render add form row when attribution not provided', () => {
-  const sourceMock = ({
+  const sourceMock = {
     getAttributionProvider: () => {
       return null;
     },
-  } as unknown) as ISource;
-  const layerMock = ({
+  } as unknown as ISource;
+  const layerMock = {
     getSource: () => {
       return sourceMock;
     },
     getDescriptor: () => {
-      return ({} as unknown) as LayerDescriptor;
+      return {} as unknown as LayerDescriptor;
     },
-  } as unknown) as ILayer;
+  } as unknown as ILayer;
   const component = shallow(<AttributionFormRow {...defaultProps} layer={layerMock} />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('Should render edit form row when attribution not provided', () => {
-  const sourceMock = ({
+  const sourceMock = {
     getAttributionProvider: () => {
       return null;
     },
-  } as unknown) as ISource;
-  const layerMock = ({
+  } as unknown as ISource;
+  const layerMock = {
     getSource: () => {
       return sourceMock;
     },
     getDescriptor: () => {
-      return ({
+      return {
         attribution: {
           url: 'url1',
           label: 'label1',
         },
-      } as unknown) as LayerDescriptor;
+      } as unknown as LayerDescriptor;
     },
-  } as unknown) as ILayer;
+  } as unknown as ILayer;
   const component = shallow(<AttributionFormRow {...defaultProps} layer={layerMock} />);
 
   expect(component).toMatchSnapshot();

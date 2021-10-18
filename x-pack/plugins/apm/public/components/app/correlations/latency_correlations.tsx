@@ -39,7 +39,10 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSearchStrategy } from '../../../hooks/use_search_strategy';
 
-import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
+import {
+  TransactionDistributionChart,
+  TransactionDistributionChartData,
+} from '../../shared/charts/transaction_distribution_chart';
 import { push } from '../../shared/Links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
@@ -50,6 +53,9 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
+import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
+import { CorrelationsContextPopover } from './context_popover';
+import { OnAddFilter } from './context_popover/top_values';
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {
@@ -71,6 +77,13 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     progress.isRunning
   );
 
+  const fieldStats: Record<string, FieldStats> | undefined = useMemo(() => {
+    return response.fieldStats?.reduce((obj, field) => {
+      obj[field.fieldName] = field;
+      return obj;
+    }, {} as Record<string, FieldStats>);
+  }, [response?.fieldStats]);
+
   useEffect(() => {
     if (isErrorMessage(progress.error)) {
       notifications.toasts.addDanger({
@@ -85,10 +98,8 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     }
   }, [progress.error, notifications.toasts]);
 
-  const [
-    selectedSignificantTerm,
-    setSelectedSignificantTerm,
-  ] = useState<LatencyCorrelation | null>(null);
+  const [selectedSignificantTerm, setSelectedSignificantTerm] =
+    useState<LatencyCorrelation | null>(null);
 
   const selectedHistogram = useMemo(
     () =>
@@ -103,119 +114,144 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
-  const mlCorrelationColumns: Array<
-    EuiBasicTableColumn<LatencyCorrelation>
-  > = useMemo(
-    () => [
-      {
-        width: '116px',
-        field: 'correlation',
-        name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationColumnDescription',
-              {
-                defaultMessage:
-                  'The correlation score [0-1] of an attribute; the greater the score, the more an attribute increases latency.',
-              }
-            )}
-          >
-            <>
-              {i18n.translate(
-                'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationLabel',
-                {
-                  defaultMessage: 'Correlation',
-                }
-              )}
-              <EuiIcon
-                size="s"
-                color="subdued"
-                type="questionInCircle"
-                className="eui-alignTop"
-              />
-            </>
-          </EuiToolTip>
-        ),
-        render: (_, { correlation }) => {
-          return <div>{asPreciseDecimal(correlation, 2)}</div>;
-        },
-        sortable: true,
-      },
-      {
-        field: 'fieldName',
-        name: i18n.translate(
-          'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldNameLabel',
-          { defaultMessage: 'Field name' }
-        ),
-        sortable: true,
-      },
-      {
-        field: 'fieldValue',
-        name: i18n.translate(
-          'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldValueLabel',
-          { defaultMessage: 'Field value' }
-        ),
-        render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
-        sortable: true,
-      },
-      {
-        width: '100px',
-        actions: [
-          {
-            name: i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterLabel',
-              { defaultMessage: 'Filter' }
-            ),
-            description: i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
-              { defaultMessage: 'Filter by value' }
-            ),
-            icon: 'plusInCircle',
-            type: 'icon',
-            onClick: (term: LatencyCorrelation) => {
-              push(history, {
-                query: {
-                  kuery: `${term.fieldName}:"${term.fieldValue}"`,
-                },
-              });
-              onFilter();
-              trackApmEvent({ metric: 'correlations_term_include_filter' });
-            },
+  const onAddFilter = useCallback<OnAddFilter>(
+    ({ fieldName, fieldValue, include }) => {
+      if (include) {
+        push(history, {
+          query: {
+            kuery: `${fieldName}:"${fieldValue}"`,
           },
-          {
-            name: i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeLabel',
-              { defaultMessage: 'Exclude' }
-            ),
-            description: i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
-              { defaultMessage: 'Filter out value' }
-            ),
-            icon: 'minusInCircle',
-            type: 'icon',
-            onClick: (term: LatencyCorrelation) => {
-              push(history, {
-                query: {
-                  kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
-                },
-              });
-              onFilter();
-              trackApmEvent({ metric: 'correlations_term_exclude_filter' });
-            },
+        });
+        trackApmEvent({ metric: 'correlations_term_include_filter' });
+      } else {
+        push(history, {
+          query: {
+            kuery: `not ${fieldName}:"${fieldValue}"`,
           },
-        ],
-        name: i18n.translate(
-          'xpack.apm.correlations.latencyCorrelations.correlationsTable.actionsLabel',
-          { defaultMessage: 'Filter' }
-        ),
-      },
-    ],
-    [history, onFilter, trackApmEvent]
+        });
+        trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+      }
+      onFilter();
+    },
+    [onFilter, history, trackApmEvent]
   );
 
-  const [sortField, setSortField] = useState<keyof LatencyCorrelation>(
-    'correlation'
-  );
+  const mlCorrelationColumns: Array<EuiBasicTableColumn<LatencyCorrelation>> =
+    useMemo(
+      () => [
+        {
+          width: '116px',
+          field: 'correlation',
+          name: (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationColumnDescription',
+                {
+                  defaultMessage:
+                    'The correlation score [0-1] of an attribute; the greater the score, the more an attribute increases latency.',
+                }
+              )}
+            >
+              <>
+                {i18n.translate(
+                  'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationLabel',
+                  {
+                    defaultMessage: 'Correlation',
+                  }
+                )}
+                <EuiIcon
+                  size="s"
+                  color="subdued"
+                  type="questionInCircle"
+                  className="eui-alignTop"
+                />
+              </>
+            </EuiToolTip>
+          ),
+          render: (_, { correlation }) => {
+            return <div>{asPreciseDecimal(correlation, 2)}</div>;
+          },
+          sortable: true,
+        },
+        {
+          field: 'fieldName',
+          name: i18n.translate(
+            'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldNameLabel',
+            { defaultMessage: 'Field name' }
+          ),
+          render: (_, { fieldName, fieldValue }) => (
+            <>
+              {fieldName}
+              <CorrelationsContextPopover
+                fieldName={fieldName}
+                fieldValue={fieldValue}
+                topValueStats={fieldStats ? fieldStats[fieldName] : undefined}
+                onAddFilter={onAddFilter}
+              />
+            </>
+          ),
+          sortable: true,
+        },
+        {
+          field: 'fieldValue',
+          name: i18n.translate(
+            'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldValueLabel',
+            { defaultMessage: 'Field value' }
+          ),
+          render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
+          sortable: true,
+        },
+        {
+          width: '100px',
+          actions: [
+            {
+              name: i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterLabel',
+                { defaultMessage: 'Filter' }
+              ),
+              description: i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
+                { defaultMessage: 'Filter by value' }
+              ),
+              icon: 'plusInCircle',
+              type: 'icon',
+              onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
+                onAddFilter({
+                  fieldName,
+                  fieldValue,
+                  include: true,
+                }),
+            },
+            {
+              name: i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeLabel',
+                { defaultMessage: 'Exclude' }
+              ),
+              description: i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
+                { defaultMessage: 'Filter out value' }
+              ),
+              icon: 'minusInCircle',
+              type: 'icon',
+              onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
+                onAddFilter({
+                  fieldName,
+                  fieldValue,
+                  include: false,
+                }),
+            },
+          ],
+          name: i18n.translate(
+            'xpack.apm.correlations.latencyCorrelations.correlationsTable.actionsLabel',
+            { defaultMessage: 'Filter' }
+          ),
+        },
+      ],
+      [fieldStats, onAddFilter]
+    );
+
+  const [sortField, setSortField] =
+    useState<keyof LatencyCorrelation>('correlation');
   const [sortDirection, setSortDirection] = useState<Direction>('desc');
 
   const onTableChange = useCallback(({ sort }) => {
@@ -238,6 +274,26 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const showCorrelationsEmptyStatePrompt =
     histogramTerms.length < 1 &&
     (progressNormalized === 1 || !progress.isRunning);
+
+  const transactionDistributionChartData: TransactionDistributionChartData[] =
+    [];
+
+  if (Array.isArray(overallHistogram)) {
+    transactionDistributionChartData.push({
+      id: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
+        { defaultMessage: 'All transactions' }
+      ),
+      histogram: overallHistogram,
+    });
+  }
+
+  if (selectedHistogram && Array.isArray(selectedHistogram.histogram)) {
+    transactionDistributionChartData.push({
+      id: `${selectedHistogram.fieldName}:${selectedHistogram.fieldValue}`,
+      histogram: selectedHistogram.histogram,
+    });
+  }
 
   return (
     <div data-test-subj="apmLatencyCorrelationsTabContent">
@@ -264,8 +320,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       <TransactionDistributionChart
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={response.percentileThresholdValue ?? 0}
-        {...selectedHistogram}
-        overallHistogram={overallHistogram}
+        data={transactionDistributionChartData}
         hasData={hasData}
         status={status}
       />

@@ -19,28 +19,29 @@ import {
   getSearchAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
   setup,
 }: {
   alertParams: AlertParams;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
 }) {
-  const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-    ...setup,
-    kuery: '',
-  });
-
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
   const {
     aggregationType,
     environment,
     serviceName,
     transactionType,
     interval,
+    start,
+    end,
   } = alertParams;
+  const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    ...setup,
+    kuery: '',
+  });
 
   const query = {
     bool: {
@@ -58,9 +59,10 @@ export async function getTransactionDurationChartPreview({
     },
   };
 
-  const transactionDurationField = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
+  const transactionDurationField =
+    getTransactionDurationFieldForAggregatedTransactions(
+      searchAggregatedTransactions
+    );
 
   const aggs = {
     timeseries: {

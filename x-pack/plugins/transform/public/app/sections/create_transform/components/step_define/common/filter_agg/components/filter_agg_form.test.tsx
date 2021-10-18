@@ -27,7 +27,7 @@ describe('FilterAggForm', () => {
     } as RuntimeField,
   };
 
-  const indexPattern = ({
+  const indexPattern = {
     fields: {
       getByName: jest.fn((fieldName: string) => {
         if (fieldName === 'test_text_field') {
@@ -42,7 +42,7 @@ describe('FilterAggForm', () => {
         }
       }),
     },
-  } as unknown) as IndexPattern;
+  } as unknown as IndexPattern;
 
   test('should render only select dropdown on empty configuration', async () => {
     const onChange = jest.fn();

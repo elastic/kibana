@@ -70,6 +70,8 @@ import {
   last_failure_message,
   filters,
   meta,
+  outcome,
+  alias_target_id,
   note,
   building_block_type,
   license,
@@ -174,9 +176,12 @@ export const partialRulesSchema = t.partial({
   last_failure_message,
   filters,
   meta,
+  outcome,
+  alias_target_id,
   index,
   namespace,
   note,
+  uuid: id, // Move to 'required' post-migration
 });
 
 /**

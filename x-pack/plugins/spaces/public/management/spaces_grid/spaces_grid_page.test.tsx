@@ -65,7 +65,7 @@ describe('SpacesGridPage', () => {
     expect(
       shallowWithIntl(
         <SpacesGridPage
-          spacesManager={(spacesManager as unknown) as SpacesManager}
+          spacesManager={spacesManager as unknown as SpacesManager}
           getFeatures={featuresStart.getFeatures}
           notifications={notificationServiceMock.createStartContract()}
           getUrlForApp={getUrlForApp}
@@ -87,7 +87,7 @@ describe('SpacesGridPage', () => {
 
     const wrapper = mountWithIntl(
       <SpacesGridPage
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         getUrlForApp={getUrlForApp}
@@ -120,7 +120,7 @@ describe('SpacesGridPage', () => {
 
     const wrapper = mountWithIntl(
       <SpacesGridPage
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notifications}
         getUrlForApp={getUrlForApp}
@@ -154,7 +154,7 @@ describe('SpacesGridPage', () => {
 
     const wrapper = mountWithIntl(
       <SpacesGridPage
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
         getUrlForApp={getUrlForApp}

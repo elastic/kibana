@@ -21,32 +21,34 @@ export interface VerifyReindexParams {
   targetIndex: string;
 }
 
-export const verifyReindex = ({
-  client,
-  sourceIndex,
-  targetIndex,
-}: VerifyReindexParams): TaskEither.TaskEither<
-  RetryableEsClientError | { type: 'verify_reindex_failed' },
-  'verify_reindex_succeeded'
-> => () => {
-  const count = (index: string) =>
-    client
-      .count<{ count: number }>({
-        index,
-        // Return an error when targeting missing or closed indices
-        allow_no_indices: false,
-      })
-      .then((res) => {
-        return res.body.count;
-      });
+export const verifyReindex =
+  ({
+    client,
+    sourceIndex,
+    targetIndex,
+  }: VerifyReindexParams): TaskEither.TaskEither<
+    RetryableEsClientError | { type: 'verify_reindex_failed' },
+    'verify_reindex_succeeded'
+  > =>
+  () => {
+    const count = (index: string) =>
+      client
+        .count<{ count: number }>({
+          index,
+          // Return an error when targeting missing or closed indices
+          allow_no_indices: false,
+        })
+        .then((res) => {
+          return res.body.count;
+        });
 
-  return Promise.all([count(sourceIndex), count(targetIndex)])
-    .then(([sourceCount, targetCount]) => {
-      if (targetCount >= sourceCount) {
-        return Either.right('verify_reindex_succeeded' as const);
-      } else {
-        return Either.left({ type: 'verify_reindex_failed' as const });
-      }
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+    return Promise.all([count(sourceIndex), count(targetIndex)])
+      .then(([sourceCount, targetCount]) => {
+        if (targetCount >= sourceCount) {
+          return Either.right('verify_reindex_succeeded' as const);
+        } else {
+          return Either.left({ type: 'verify_reindex_failed' as const });
+        }
+      })
+      .catch(catchRetryableEsClientErrors);
+  };

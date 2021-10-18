@@ -11,6 +11,7 @@ import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eu
 import { IFieldSubType } from '../../../../../../../src/plugins/data/common';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { TimelineNonEcsData } from '../../../search_strategy/timeline';
+import { Ecs } from '../../../ecs';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
@@ -45,14 +46,18 @@ export type ColumnId = string;
 export type TGridCellAction = ({
   browserFields,
   data,
-  timelineId,
+  ecsData,
+  header,
   pageSize,
+  timelineId,
 }: {
   browserFields: BrowserFields;
   /** each row of data is represented as one TimelineNonEcsData[] */
   data: TimelineNonEcsData[][];
-  timelineId: string;
+  ecsData: Ecs[];
+  header?: ColumnHeaderOptions;
   pageSize: number;
+  timelineId: string;
 }) => (props: EuiDataGridColumnCellActionProps) => ReactNode;
 
 /** The specification of a column header */

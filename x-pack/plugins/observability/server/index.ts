@@ -9,21 +9,24 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
-import { unwrapEsResponse, WrappedElasticsearchClientError } from './utils/unwrap_es_response';
+import {
+  unwrapEsResponse,
+  WrappedElasticsearchClientError,
+} from '../common/utils/unwrap_es_response';
 export { rangeQuery, kqlQuery } from './utils/queries';
+export { getInspectResponse } from '../common/utils/get_inspect_response';
 
 export * from './types';
 
-export const config = {
+export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
-    unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
+    unsafe: true,
   },
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     annotations: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       index: schema.string({ defaultValue: 'observability-annotations' }),

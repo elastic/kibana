@@ -10,10 +10,9 @@ import type { Query } from 'src/plugins/data/common';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
   MapExtent,
-  DataFilters,
   TableSourceDescriptor,
   VectorJoinSourceRequestMeta,
-  VectorSourceSyncMeta,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { ITermJoinSource } from '../term_join_source';
@@ -55,7 +54,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return `table source ${uuid()}`;
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
+  getSyncMeta(): null {
     return null;
   }
 
@@ -186,14 +185,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   // Could be useful to implement, e.g. to preview raw csv data
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: DataFilters & {
-      applyGlobalQuery: boolean;
-      applyGlobalTime: boolean;
-      fieldNames: string[];
-      geogridPrecision?: number;
-      sourceQuery?: Query;
-      sourceMeta: VectorSourceSyncMeta;
-    },
+    searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {

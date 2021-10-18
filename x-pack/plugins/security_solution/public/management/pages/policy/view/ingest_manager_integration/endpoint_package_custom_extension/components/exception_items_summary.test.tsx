@@ -20,23 +20,22 @@ const mockTheme = getMockTheme({
 });
 
 const getStatValue = (el: reactTestingLibrary.RenderResult, stat: string) => {
-  return el.getByText(stat)!.nextSibling?.lastChild?.textContent;
+  return el.getByText(stat).nextSibling?.lastChild?.textContent;
 };
 
 describe('Fleet event filters card', () => {
-  const renderComponent: (
-    stats: GetExceptionSummaryResponse
-  ) => reactTestingLibrary.RenderResult = (stats) => {
-    const Wrapper: React.FC = ({ children }) => (
-      <I18nProvider>
-        <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
-      </I18nProvider>
-    );
-    const component = reactTestingLibrary.render(<ExceptionItemsSummary stats={stats} />, {
-      wrapper: Wrapper,
-    });
-    return component;
-  };
+  const renderComponent: (stats: GetExceptionSummaryResponse) => reactTestingLibrary.RenderResult =
+    (stats) => {
+      const Wrapper: React.FC = ({ children }) => (
+        <I18nProvider>
+          <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
+        </I18nProvider>
+      );
+      const component = reactTestingLibrary.render(<ExceptionItemsSummary stats={stats} />, {
+        wrapper: Wrapper,
+      });
+      return component;
+    };
   it('should renders correctly', () => {
     const summary: GetExceptionSummaryResponse = {
       windows: 3,

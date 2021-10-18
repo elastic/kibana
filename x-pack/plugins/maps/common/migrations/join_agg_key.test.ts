@@ -75,8 +75,7 @@ describe('migrateJoinAggKey', () => {
                 color: 'Blues',
                 colorCategory: 'palette_0',
                 field: {
-                  name:
-                    '__kbnjoin__avg_of_bytes_groupby_kibana_sample_data_logs.machine.os.keyword',
+                  name: '__kbnjoin__avg_of_bytes_groupby_kibana_sample_data_logs.machine.os.keyword',
                   origin: 'join',
                 },
                 fieldMetaOptions: {

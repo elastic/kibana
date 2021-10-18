@@ -137,7 +137,7 @@ describe('policy table', () => {
   test('filters based on content of search input', () => {
     const rendered = mountWithIntl(component);
     const searchInput = rendered.find('.euiFieldSearch').first();
-    ((searchInput.instance() as unknown) as HTMLInputElement).value = 'testy0';
+    (searchInput.instance() as unknown as HTMLInputElement).value = 'testy0';
     searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();
     snapshot(getPolicyNames(rendered));

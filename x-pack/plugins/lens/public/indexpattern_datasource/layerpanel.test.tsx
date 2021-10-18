@@ -215,12 +215,11 @@ describe('Layer Data Panel', () => {
   }
 
   function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {
-    const options: IndexPatternPickerOption[] = getIndexPatternPickerOptions(
-      instance
-    ).map((option: IndexPatternPickerOption) =>
-      option.label === selectedLabel
-        ? { ...option, checked: 'on' }
-        : { ...option, checked: undefined }
+    const options: IndexPatternPickerOption[] = getIndexPatternPickerOptions(instance).map(
+      (option: IndexPatternPickerOption) =>
+        option.label === selectedLabel
+          ? { ...option, checked: 'on' }
+          : { ...option, checked: undefined }
     );
     return getIndexPatternPickerList(instance).prop('onChange')!(options);
   }

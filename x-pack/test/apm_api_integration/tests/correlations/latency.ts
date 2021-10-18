@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { IKibanaSearchRequest } from '../../../../../src/plugins/data/common';
 
 import type { LatencyCorrelationsParams } from '../../../../plugins/apm/common/search_strategies/latency_correlations/types';
+import type { SearchStrategyClientParams } from '../../../../plugins/apm/common/search_strategies/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -21,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const getRequestBody = () => {
-    const request: IKibanaSearchRequest<LatencyCorrelationsParams> = {
+    const request: IKibanaSearchRequest<LatencyCorrelationsParams & SearchStrategyClientParams> = {
       params: {
         environment: 'ENVIRONMENT_ALL',
         start: '2020',
@@ -138,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Correlations latency_ml with data and opbeans-node args',
+    'correlations latency with data and opbeans-node args',
     { config: 'trial', archives: ['8.0.0'] },
     () => {
       // putting this into a single `it` because the responses depend on each other
@@ -235,6 +236,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(typeof finalRawResponse?.took).to.be('number');
         expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
         expect(finalRawResponse?.overallHistogram.length).to.be(101);
+        expect(finalRawResponse?.fieldStats.length).to.be(12);
 
         expect(finalRawResponse?.latencyCorrelations.length).to.eql(
           13,
@@ -249,15 +251,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           'Identified 379 fieldValuePairs.',
           'Loaded fractions and totalDocCount of 1244.',
           'Identified 13 significant correlations out of 379 field/value pairs.',
+          'Identified 12 fields to sample for field statistics.',
+          'Retrieved field statistics for 12 fields out of 12 fields.',
         ]);
 
         const correlation = finalRawResponse?.latencyCorrelations[0];
+
         expect(typeof correlation).to.be('object');
         expect(correlation?.fieldName).to.be('transaction.result');
         expect(correlation?.fieldValue).to.be('success');
         expect(correlation?.correlation).to.be(0.6275246559191225);
         expect(correlation?.ksTest).to.be(4.806503252860024e-13);
         expect(correlation?.histogram.length).to.be(101);
+
+        const fieldStats = finalRawResponse?.fieldStats[0];
+        expect(typeof fieldStats).to.be('object');
+        expect(fieldStats.topValues.length).to.greaterThan(0);
+        expect(fieldStats.topValuesSampleSize).to.greaterThan(0);
       });
     }
   );

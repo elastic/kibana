@@ -7,15 +7,167 @@
  */
 
 import { DeprecatedConfigDetails } from './types';
+import { configDeprecationsMock } from './deprecations.mock';
 import { configDeprecationFactory } from './deprecation_factory';
 
 describe('DeprecationFactory', () => {
-  const { rename, unused, renameFromRoot, unusedFromRoot } = configDeprecationFactory;
+  const { deprecate, deprecateFromRoot, rename, renameFromRoot, unused, unusedFromRoot } =
+    configDeprecationFactory;
+  const context = configDeprecationsMock.createContext();
 
   const addDeprecation = jest.fn<void, [DeprecatedConfigDetails]>();
 
   beforeEach(() => {
     addDeprecation.mockClear();
+  });
+
+  describe('deprecate', () => {
+    it('logs a warning when property is present', () => {
+      const rawConfig = {
+        myplugin: {
+          deprecated: 'deprecated',
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const commands = deprecate('deprecated', '8.0.0')(
+        rawConfig,
+        'myplugin',
+        addDeprecation,
+        context
+      );
+      expect(commands).toBeUndefined();
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "configPath": "myplugin.deprecated",
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.",
+                ],
+              },
+              "message": "Configuring \\"myplugin.deprecated\\" is deprecated and will be removed in 8.0.0.",
+              "title": "Setting \\"myplugin.deprecated\\" is deprecated",
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('handles deeply nested keys', () => {
+      const rawConfig = {
+        myplugin: {
+          section: {
+            deprecated: 'deprecated',
+          },
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const commands = deprecate('section.deprecated', '8.0.0')(
+        rawConfig,
+        'myplugin',
+        addDeprecation,
+        context
+      );
+      expect(commands).toBeUndefined();
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "configPath": "myplugin.section.deprecated",
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Remove \\"myplugin.section.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.",
+                ],
+              },
+              "message": "Configuring \\"myplugin.section.deprecated\\" is deprecated and will be removed in 8.0.0.",
+              "title": "Setting \\"myplugin.section.deprecated\\" is deprecated",
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('does not log if unused property is not present', () => {
+      const rawConfig = {
+        myplugin: {
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const commands = deprecate('deprecated', '8.0.0')(
+        rawConfig,
+        'myplugin',
+        addDeprecation,
+        context
+      );
+      expect(commands).toBeUndefined();
+      expect(addDeprecation).toBeCalledTimes(0);
+    });
+  });
+
+  describe('deprecateFromRoot', () => {
+    it('logs a warning when property is present', () => {
+      const rawConfig = {
+        myplugin: {
+          deprecated: 'deprecated',
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const commands = deprecateFromRoot('myplugin.deprecated', '8.0.0')(
+        rawConfig,
+        'does-not-matter',
+        addDeprecation,
+        context
+      );
+      expect(commands).toBeUndefined();
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "configPath": "myplugin.deprecated",
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.",
+                ],
+              },
+              "message": "Configuring \\"myplugin.deprecated\\" is deprecated and will be removed in 8.0.0.",
+              "title": "Setting \\"myplugin.deprecated\\" is deprecated",
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('does not log if unused property is not present', () => {
+      const rawConfig = {
+        myplugin: {
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const commands = deprecateFromRoot('myplugin.deprecated', '8.0.0')(
+        rawConfig,
+        'does-not-matter',
+        addDeprecation,
+        context
+      );
+      expect(commands).toBeUndefined();
+      expect(addDeprecation).toBeCalledTimes(0);
+    });
   });
 
   describe('rename', () => {
@@ -29,7 +181,12 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = rename('deprecated', 'renamed')(rawConfig, 'myplugin', addDeprecation);
+      const commands = rename('deprecated', 'renamed')(
+        rawConfig,
+        'myplugin',
+        addDeprecation,
+        context
+      );
       expect(commands).toEqual({
         set: [
           {
@@ -43,6 +200,7 @@ describe('DeprecationFactory', () => {
         Array [
           Array [
             Object {
+              "configPath": "myplugin.deprecated",
               "correctiveActions": Object {
                 "manualSteps": Array [
                   "Replace \\"myplugin.deprecated\\" with \\"myplugin.renamed\\" in the Kibana config file, CLI flag, or environment variable (in Docker only).",
@@ -65,7 +223,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = rename('deprecated', 'new')(rawConfig, 'myplugin', addDeprecation);
+      const commands = rename('deprecated', 'new')(rawConfig, 'myplugin', addDeprecation, context);
       expect(commands).toBeUndefined();
       expect(addDeprecation).toHaveBeenCalledTimes(0);
     });
@@ -84,7 +242,8 @@ describe('DeprecationFactory', () => {
       const commands = rename('oldsection.deprecated', 'newsection.renamed')(
         rawConfig,
         'myplugin',
-        addDeprecation
+        addDeprecation,
+        context
       );
       expect(commands).toEqual({
         set: [
@@ -99,6 +258,7 @@ describe('DeprecationFactory', () => {
         Array [
           Array [
             Object {
+              "configPath": "myplugin.oldsection.deprecated",
               "correctiveActions": Object {
                 "manualSteps": Array [
                   "Replace \\"myplugin.oldsection.deprecated\\" with \\"myplugin.newsection.renamed\\" in the Kibana config file, CLI flag, or environment variable (in Docker only).",
@@ -118,7 +278,12 @@ describe('DeprecationFactory', () => {
           renamed: 'renamed',
         },
       };
-      const commands = rename('deprecated', 'renamed')(rawConfig, 'myplugin', addDeprecation);
+      const commands = rename('deprecated', 'renamed')(
+        rawConfig,
+        'myplugin',
+        addDeprecation,
+        context
+      );
       expect(commands).toEqual({
         unset: [{ path: 'myplugin.deprecated' }],
       });
@@ -126,13 +291,14 @@ describe('DeprecationFactory', () => {
         Array [
           Array [
             Object {
+              "configPath": "myplugin.deprecated",
               "correctiveActions": Object {
                 "manualSteps": Array [
                   "Make sure \\"myplugin.renamed\\" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).",
                   "Remove \\"myplugin.deprecated\\" from the config.",
                 ],
               },
-              "message": "Setting \\"$myplugin.deprecated\\" has been replaced by \\"$myplugin.renamed\\". However, both keys are present. Ignoring \\"$myplugin.deprecated\\"",
+              "message": "Setting \\"myplugin.deprecated\\" has been replaced by \\"myplugin.renamed\\". However, both keys are present. Ignoring \\"myplugin.deprecated\\"",
               "title": "Setting \\"myplugin.deprecated\\" is deprecated",
             },
           ],
@@ -155,7 +321,8 @@ describe('DeprecationFactory', () => {
       const commands = renameFromRoot('myplugin.deprecated', 'myplugin.renamed')(
         rawConfig,
         'does-not-matter',
-        addDeprecation
+        addDeprecation,
+        context
       );
       expect(commands).toEqual({
         set: [
@@ -170,6 +337,7 @@ describe('DeprecationFactory', () => {
         Array [
           Array [
             Object {
+              "configPath": "myplugin.deprecated",
               "correctiveActions": Object {
                 "manualSteps": Array [
                   "Replace \\"myplugin.deprecated\\" with \\"myplugin.renamed\\" in the Kibana config file, CLI flag, or environment variable (in Docker only).",
@@ -196,7 +364,8 @@ describe('DeprecationFactory', () => {
       const commands = renameFromRoot('oldplugin.deprecated', 'newplugin.renamed')(
         rawConfig,
         'does-not-matter',
-        addDeprecation
+        addDeprecation,
+        context
       );
       expect(commands).toEqual({
         set: [
@@ -211,6 +380,7 @@ describe('DeprecationFactory', () => {
         Array [
           Array [
             Object {
+              "configPath": "oldplugin.deprecated",
               "correctiveActions": Object {
                 "manualSteps": Array [
                   "Replace \\"oldplugin.deprecated\\" with \\"newplugin.renamed\\" in the Kibana config file, CLI flag, or environment variable (in Docker only).",
@@ -237,7 +407,8 @@ describe('DeprecationFactory', () => {
       const commands = renameFromRoot('myplugin.deprecated', 'myplugin.new')(
         rawConfig,
         'does-not-matter',
-        addDeprecation
+        addDeprecation,
+        context
       );
       expect(commands).toBeUndefined();
       expect(addDeprecation).toBeCalledTimes(0);
@@ -253,7 +424,8 @@ describe('DeprecationFactory', () => {
       const commands = renameFromRoot('myplugin.deprecated', 'myplugin.renamed')(
         rawConfig,
         'does-not-matter',
-        addDeprecation
+        addDeprecation,
+        context
       );
       expect(commands).toEqual({
         unset: [{ path: 'myplugin.deprecated' }],
@@ -263,13 +435,14 @@ describe('DeprecationFactory', () => {
         Array [
           Array [
             Object {
+              "configPath": "myplugin.deprecated",
               "correctiveActions": Object {
                 "manualSteps": Array [
                   "Make sure \\"myplugin.renamed\\" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).",
                   "Remove \\"myplugin.deprecated\\" from the config.",
                 ],
               },
-              "message": "Setting \\"$myplugin.deprecated\\" has been replaced by \\"$myplugin.renamed\\". However, both keys are present. Ignoring \\"$myplugin.deprecated\\"",
+              "message": "Setting \\"myplugin.deprecated\\" has been replaced by \\"myplugin.renamed\\". However, both keys are present. Ignoring \\"myplugin.deprecated\\"",
               "title": "Setting \\"myplugin.deprecated\\" is deprecated",
             },
           ],
@@ -289,7 +462,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = unused('deprecated')(rawConfig, 'myplugin', addDeprecation);
+      const commands = unused('deprecated')(rawConfig, 'myplugin', addDeprecation, context);
       expect(commands).toEqual({
         unset: [{ path: 'myplugin.deprecated' }],
       });
@@ -297,6 +470,7 @@ describe('DeprecationFactory', () => {
         Array [
           Array [
             Object {
+              "configPath": "myplugin.deprecated",
               "correctiveActions": Object {
                 "manualSteps": Array [
                   "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only).",
@@ -322,7 +496,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = unused('section.deprecated')(rawConfig, 'myplugin', addDeprecation);
+      const commands = unused('section.deprecated')(rawConfig, 'myplugin', addDeprecation, context);
       expect(commands).toEqual({
         unset: [{ path: 'myplugin.section.deprecated' }],
       });
@@ -330,6 +504,7 @@ describe('DeprecationFactory', () => {
         Array [
           Array [
             Object {
+              "configPath": "myplugin.section.deprecated",
               "correctiveActions": Object {
                 "manualSteps": Array [
                   "Remove \\"myplugin.section.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only).",
@@ -352,7 +527,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = unused('deprecated')(rawConfig, 'myplugin', addDeprecation);
+      const commands = unused('deprecated')(rawConfig, 'myplugin', addDeprecation, context);
       expect(commands).toBeUndefined();
       expect(addDeprecation).toBeCalledTimes(0);
     });
@@ -372,7 +547,8 @@ describe('DeprecationFactory', () => {
       const commands = unusedFromRoot('myplugin.deprecated')(
         rawConfig,
         'does-not-matter',
-        addDeprecation
+        addDeprecation,
+        context
       );
       expect(commands).toEqual({
         unset: [{ path: 'myplugin.deprecated' }],
@@ -381,6 +557,7 @@ describe('DeprecationFactory', () => {
         Array [
           Array [
             Object {
+              "configPath": "myplugin.deprecated",
               "correctiveActions": Object {
                 "manualSteps": Array [
                   "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only).",
@@ -406,7 +583,8 @@ describe('DeprecationFactory', () => {
       const commands = unusedFromRoot('myplugin.deprecated')(
         rawConfig,
         'does-not-matter',
-        addDeprecation
+        addDeprecation,
+        context
       );
       expect(commands).toBeUndefined();
       expect(addDeprecation).toBeCalledTimes(0);

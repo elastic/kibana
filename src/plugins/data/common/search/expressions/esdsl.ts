@@ -14,7 +14,7 @@ import { EsRawResponse } from './es_raw_response';
 import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
 import { ISearchGeneric, KibanaContext } from '..';
 import { getEsQueryConfig } from '../../es_query';
-import { UiSettingsCommon } from '../../index_patterns';
+import { UiSettingsCommon } from '../..';
 
 const name = 'esdsl';
 

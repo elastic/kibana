@@ -9,6 +9,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { IndexPattern, IndexPatternField } from '../../../../../data/public';
+import { flattenHit } from '../../../../../data/common';
 import { SHOW_MULTIFIELDS } from '../../../../common';
 import { getServices } from '../../../kibana_services';
 import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
@@ -58,9 +59,10 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
-  const mapping = useCallback((name: string) => indexPattern?.fields.getByName(name), [
-    indexPattern?.fields,
-  ]);
+  const mapping = useCallback(
+    (name: string) => indexPattern?.fields.getByName(name),
+    [indexPattern?.fields]
+  );
 
   const formattedHit = useMemo(() => indexPattern?.formatHit(hit, 'html'), [hit, indexPattern]);
 
@@ -94,7 +96,7 @@ export const DocViewerTable = ({
     return null;
   }
 
-  const flattened = indexPattern?.flattenHit(hit);
+  const flattened = flattenHit(hit, indexPattern, { source: true });
   const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
 
   const items: FieldRecord[] = Object.keys(flattened)
@@ -145,3 +147,7 @@ export const DocViewerTable = ({
     />
   );
 };
+
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default DocViewerTable;

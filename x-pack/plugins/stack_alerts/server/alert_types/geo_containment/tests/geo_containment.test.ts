@@ -17,33 +17,29 @@ import {
   getGeoContainmentExecutor,
 } from '../geo_containment';
 import { OTHER_CATEGORY } from '../es_query_builder';
-import {
-  GeoContainmentInstanceContext,
-  GeoContainmentInstanceState,
-  GeoContainmentParams,
-} from '../alert_type';
+import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
+import type { GeoContainmentParams } from '../alert_type';
 
-const alertInstanceFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => (
-  instanceId: string
-) => {
-  const alertInstance = alertsMock.createAlertInstanceFactory<
-    GeoContainmentInstanceState,
-    GeoContainmentInstanceContext
-  >();
-  alertInstance.scheduleActions.mockImplementation(
-    (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
-      // Check subset of alert for comparison to expected results
-      // @ts-ignore
-      const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
-      testAlertActionArr.push({
-        actionGroupId,
-        instanceId,
-        context: contextSubset,
-      });
-    }
-  );
-  return alertInstance;
-};
+const alertInstanceFactory =
+  (contextKeys: unknown[], testAlertActionArr: unknown[]) => (instanceId: string) => {
+    const alertInstance = alertsMock.createAlertInstanceFactory<
+      GeoContainmentInstanceState,
+      GeoContainmentInstanceContext
+    >();
+    alertInstance.scheduleActions.mockImplementation(
+      (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
+        // Check subset of alert for comparison to expected results
+        // @ts-ignore
+        const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
+        testAlertActionArr.push({
+          actionGroupId,
+          instanceId,
+          context: contextSubset,
+        });
+      }
+    );
+    return alertInstance;
+  };
 
 describe('geo_containment', () => {
   describe('transformResults', () => {

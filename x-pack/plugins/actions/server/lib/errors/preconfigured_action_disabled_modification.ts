@@ -12,7 +12,8 @@ export type PreconfiguredActionDisabledFrom = 'update' | 'delete';
 
 export class PreconfiguredActionDisabledModificationError
   extends Error
-  implements ErrorThatHandlesItsOwnResponse {
+  implements ErrorThatHandlesItsOwnResponse
+{
   public readonly disabledFrom: PreconfiguredActionDisabledFrom;
 
   constructor(message: string, disabledFrom: PreconfiguredActionDisabledFrom) {

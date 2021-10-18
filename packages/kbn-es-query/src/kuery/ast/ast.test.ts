@@ -8,18 +8,19 @@
 
 import { fromKueryExpression, fromLiteralExpression, toElasticsearchQuery } from './ast';
 import { nodeTypes } from '../node_types';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 import { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
 
 jest.mock('../grammar');
 
 describe('kuery AST API', () => {
-  let indexPattern: IndexPatternBase;
+  let indexPattern: DataViewBase;
 
   beforeEach(() => {
     indexPattern = {
       fields,
+      title: 'dataView',
     };
   });
 
@@ -371,7 +372,7 @@ describe('kuery AST API', () => {
         indexPattern
       );
 
-      expect(toElasticsearchQuery((null as unknown) as KueryNode, undefined)).toEqual(expected);
+      expect(toElasticsearchQuery(null as unknown as KueryNode, undefined)).toEqual(expected);
 
       const noTypeNode = nodeTypes.function.buildNode('exists', 'foo');
 

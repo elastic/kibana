@@ -64,6 +64,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   esClient: ElasticsearchClient,
   params: Params,
   config: InfraSource['configuration'],
+  prevGroups: string[],
   timeframe?: { start?: number; end: number }
 ) => {
   const { criteria, groupBy, filterQuery, shouldDropPartialBuckets } = params;
@@ -91,21 +92,53 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
           : [false];
       };
 
-      return mapValues(currentValues, (points: any[] | typeof NaN | null) => {
-        if (isTooManyBucketsPreviewException(points)) throw points;
-        return {
-          ...criterion,
-          metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
-          currentValue: Array.isArray(points) ? last(points)?.value : NaN,
-          timestamp: Array.isArray(points) ? last(points)?.key : NaN,
-          shouldFire: pointsEvaluator(points, threshold, comparator),
-          shouldWarn: pointsEvaluator(points, warningThreshold, warningComparator),
-          isNoData: Array.isArray(points)
-            ? points.map((point) => point?.value === null || point === null)
-            : [points === null],
-          isError: isNaN(Array.isArray(points) ? last(points)?.value : points),
-        };
-      });
+      // If any previous groups are no longer being reported, backfill them with null values
+      const currentGroups = Object.keys(currentValues);
+
+      const missingGroups = prevGroups.filter((g) => !currentGroups.includes(g));
+      if (currentGroups.length === 0 && missingGroups.length === 0) {
+        missingGroups.push(UNGROUPED_FACTORY_KEY);
+      }
+      const backfillTimestamp =
+        last(last(Object.values(currentValues)))?.key ?? new Date().toISOString();
+      const backfilledPrevGroups: Record<
+        string,
+        Array<{ key: string; value: number }>
+      > = missingGroups.reduce(
+        (result, group) => ({
+          ...result,
+          [group]: [
+            {
+              key: backfillTimestamp,
+              value: criterion.aggType === Aggregators.COUNT ? 0 : null,
+            },
+          ],
+        }),
+        {}
+      );
+      const currentValuesWithBackfilledPrevGroups = {
+        ...currentValues,
+        ...backfilledPrevGroups,
+      };
+
+      return mapValues(
+        currentValuesWithBackfilledPrevGroups,
+        (points: any[] | typeof NaN | null) => {
+          if (isTooManyBucketsPreviewException(points)) throw points;
+          return {
+            ...criterion,
+            metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
+            currentValue: Array.isArray(points) ? last(points)?.value : NaN,
+            timestamp: Array.isArray(points) ? last(points)?.key : NaN,
+            shouldFire: pointsEvaluator(points, threshold, comparator),
+            shouldWarn: pointsEvaluator(points, warningThreshold, warningComparator),
+            isNoData: Array.isArray(points)
+              ? points.map((point) => point?.value === null || point === null)
+              : [points === null],
+            isError: isNaN(Array.isArray(points) ? last(points)?.value : points),
+          };
+        }
+      );
     })
   );
 };
@@ -119,7 +152,7 @@ const getMetric: (
   filterQuery: string | undefined,
   timeframe?: { start?: number; end: number },
   shouldDropPartialBuckets?: boolean
-) => Promise<Record<string, number[]>> = async function (
+) => Promise<Record<string, Array<{ key: string; value: number }>>> = async function (
   esClient,
   params,
   index,
@@ -195,14 +228,18 @@ const getMetric: (
 
     return {
       [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
-        (result.aggregations! as unknown) as Aggregation,
+        result.aggregations! as unknown as Aggregation,
         aggType,
         dropPartialBucketsOptions,
         calculatedTimerange,
-        isNumber(result.hits.total) ? result.hits.total : result.hits.total.value
+        result.hits
+          ? isNumber(result.hits.total)
+            ? result.hits.total
+            : result.hits.total.value
+          : 0
       ),
     };
-  } catch (e) {
+  } catch (e: any) {
     if (timeframe) {
       // This code should only ever be reached when previewing the alert, not executing it
       const causedByType = e.body?.error?.caused_by?.type;
@@ -225,16 +262,18 @@ interface DropPartialBucketOptions {
   bucketSizeInMillis: number;
 }
 
-const dropPartialBuckets = ({ from, to, bucketSizeInMillis }: DropPartialBucketOptions) => (
-  row: {
-    key: string;
-    value: number | null;
-  } | null
-) => {
-  if (row == null) return null;
-  const timestamp = new Date(row.key).valueOf();
-  return timestamp >= from && timestamp + bucketSizeInMillis <= to;
-};
+const dropPartialBuckets =
+  ({ from, to, bucketSizeInMillis }: DropPartialBucketOptions) =>
+  (
+    row: {
+      key: string;
+      value: number | null;
+    } | null
+  ) => {
+    if (row == null) return null;
+    const timestamp = new Date(row.key).valueOf();
+    return timestamp >= from && timestamp + bucketSizeInMillis <= to;
+  };
 
 const getValuesFromAggregations = (
   aggregations: Aggregation | undefined,

@@ -70,10 +70,8 @@ export function validateRoleMappingRules({ rules }: Pick<RoleMapping, 'rules'>):
 export function validateRoleMappingForSave(roleMapping: RoleMapping): ValidationResult {
   const { isInvalid: isNameInvalid, error: nameError } = validateRoleMappingName(roleMapping);
   const { isInvalid: areRolesInvalid, error: rolesError } = validateRoleMappingRoles(roleMapping);
-  const {
-    isInvalid: areRoleTemplatesInvalid,
-    error: roleTemplatesError,
-  } = validateRoleMappingRoleTemplates(roleMapping);
+  const { isInvalid: areRoleTemplatesInvalid, error: roleTemplatesError } =
+    validateRoleMappingRoleTemplates(roleMapping);
 
   const { isInvalid: areRulesInvalid, error: rulesError } = validateRoleMappingRules(roleMapping);
 

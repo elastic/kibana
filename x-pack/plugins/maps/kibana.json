@@ -29,12 +29,13 @@
     "savedObjectsTagging",
     "charts",
     "security",
+    "spaces",
     "usageCollection"
   ],
   "ui": true,
   "server": true,
   "extraPublicDirs": [
-    "common/constants"
+    "common"
   ],
   "requiredBundles": [
     "kibanaReact",

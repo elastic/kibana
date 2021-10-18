@@ -17,7 +17,7 @@ export async function validateDatafeedPreview(
 ): Promise<JobValidationMessage[]> {
   const { datafeed_config: datafeed, ...tempJob } = job;
   try {
-    const { body } = ((await mlClient.previewDatafeed(
+    const { body } = (await mlClient.previewDatafeed(
       {
         body: {
           job_config: tempJob,
@@ -26,7 +26,7 @@ export async function validateDatafeedPreview(
       },
       authHeader
       // previewDatafeed response type is incorrect
-    )) as unknown) as { body: unknown[] };
+    )) as unknown as { body: unknown[] };
 
     if (Array.isArray(body) === false || body.length === 0) {
       return [{ id: 'datafeed_preview_no_documents' }];

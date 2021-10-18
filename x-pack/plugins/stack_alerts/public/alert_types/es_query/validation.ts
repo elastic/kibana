@@ -10,15 +10,8 @@ import { EsQueryAlertParams } from './types';
 import { ValidationResult, builtInComparators } from '../../../../triggers_actions_ui/public';
 
 export const validateExpression = (alertParams: EsQueryAlertParams): ValidationResult => {
-  const {
-    index,
-    timeField,
-    esQuery,
-    size,
-    threshold,
-    timeWindowSize,
-    thresholdComparator,
-  } = alertParams;
+  const { index, timeField, esQuery, size, threshold, timeWindowSize, thresholdComparator } =
+    alertParams;
   const validationResult = { errors: {} };
   const errors = {
     index: new Array<string>(),

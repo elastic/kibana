@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -21,13 +21,17 @@ export const getServiceInfrastructure = async ({
   serviceName,
   environment,
   setup,
+  start,
+  end,
 }: {
   kuery: string;
   serviceName: string;
   environment: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) => {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },

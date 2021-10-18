@@ -71,10 +71,8 @@ const EditRulePageComponent: FC = () => {
       canUserCRUD,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const { navigateToApp } = useKibana().services.application;
 
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();

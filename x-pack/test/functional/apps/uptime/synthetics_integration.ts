@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   });
 
   describe('When on the Synthetics Integration Policy Create Page', function () {
-    this.tags(['ciGroup6']);
+    this.tags(['ciGroup10']);
     const basicConfig = {
       name: monitorName,
       apmServiceName: 'Sample APM Service',
@@ -166,7 +166,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const saveButton = await uptimePage.syntheticsIntegration.findSaveButton();
         await saveButton.click();
 
-        await testSubjects.missingOrFail('packagePolicyCreateSuccessToast');
+        await testSubjects.missingOrFail('postInstallAddAgentModal');
       });
     });
 

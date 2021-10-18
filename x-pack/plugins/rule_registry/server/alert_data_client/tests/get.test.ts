@@ -33,7 +33,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   authorization: alertingAuthMock,
   esClient: esClientMock,
   auditLogger,
-  ruleDataService: (ruleDataPluginServiceMock.create() as unknown) as RuleDataPluginService,
+  ruleDataService: ruleDataPluginServiceMock.create() as unknown as RuleDataPluginService,
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';

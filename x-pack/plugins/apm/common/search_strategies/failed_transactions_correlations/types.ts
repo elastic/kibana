@@ -7,11 +7,13 @@
 
 import {
   FieldValuePair,
+  HistogramItem,
   RawResponseBase,
   SearchStrategyClientParams,
 } from '../types';
 
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from './constants';
+import { FieldStats } from '../field_stats_types';
 
 export interface FailedTransactionsCorrelation extends FieldValuePair {
   doc_count: number;
@@ -21,14 +23,25 @@ export interface FailedTransactionsCorrelation extends FieldValuePair {
   normalizedScore: number;
   failurePercentage: number;
   successPercentage: number;
+  histogram: HistogramItem[];
 }
 
-export type FailedTransactionsCorrelationsImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
+export type FailedTransactionsCorrelationsImpactThreshold =
+  typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
 
-export type FailedTransactionsCorrelationsParams = SearchStrategyClientParams;
+export interface FailedTransactionsCorrelationsParams {
+  percentileThreshold: number;
+}
+
+export type FailedTransactionsCorrelationsRequestParams =
+  FailedTransactionsCorrelationsParams & SearchStrategyClientParams;
 
 export interface FailedTransactionsCorrelationsRawResponse
   extends RawResponseBase {
   log: string[];
-  failedTransactionsCorrelations: FailedTransactionsCorrelation[];
+  failedTransactionsCorrelations?: FailedTransactionsCorrelation[];
+  percentileThresholdValue?: number;
+  overallHistogram?: HistogramItem[];
+  errorHistogram?: HistogramItem[];
+  fieldStats?: FieldStats[];
 }

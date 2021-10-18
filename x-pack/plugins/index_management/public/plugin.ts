@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import SemVer from 'semver/classes/semver';
 
-import { CoreSetup } from '../../../../src/core/public';
+import { CoreSetup, PluginInitializerContext } from '../../../../src/core/public';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 
 import { ExtensionsService } from './services';
@@ -20,7 +21,7 @@ import { PLUGIN } from '../common/constants/plugin';
 export class IndexMgmtUIPlugin {
   private extensionsService = new ExtensionsService();
 
-  constructor() {
+  constructor(private ctx: PluginInitializerContext) {
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
     // For the selectors we should expose them through app dependencies and read them from there on each container component.
     setExtensionsService(this.extensionsService);
@@ -31,6 +32,7 @@ export class IndexMgmtUIPlugin {
     plugins: SetupDependencies
   ): IndexManagementPluginSetup {
     const { fleet, usageCollection, management } = plugins;
+    const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
 
     management.sections.section.data.registerApp({
       id: PLUGIN.id,
@@ -43,7 +45,8 @@ export class IndexMgmtUIPlugin {
           usageCollection,
           params,
           this.extensionsService,
-          Boolean(fleet)
+          Boolean(fleet),
+          kibanaVersion
         );
       },
     });

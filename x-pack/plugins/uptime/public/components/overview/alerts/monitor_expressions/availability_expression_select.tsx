@@ -16,6 +16,7 @@ interface Props {
   alertParams: { [param: string]: any };
   isOldAlert: boolean;
   setAlertParams: (key: string, value: any) => void;
+  hasFilters: boolean;
 }
 
 const TimeRangeOptions: TimeRangeOption[] = [
@@ -55,6 +56,7 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
   alertParams,
   isOldAlert,
   setAlertParams,
+  hasFilters,
 }) => {
   const [range, setRange] = useState<number>(alertParams?.availability?.range ?? DEFAULT_RANGE);
   const [rangeUnit, setRangeUnit] = useState<string>(
@@ -114,7 +116,11 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
             />
           }
           data-test-subj="xpack.uptime.alerts.monitorStatus.availability.threshold"
-          description={labels.ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION}
+          description={
+            hasFilters
+              ? labels.ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION
+              : labels.ENTER_ANY_AVAILABILITY_THRESHOLD_DESCRIPTION
+          }
           id="threshold"
           isEnabled={isEnabled}
           isInvalid={thresholdIsInvalid}

@@ -6,6 +6,8 @@
  */
 
 import { Dispatch } from 'redux';
+import semverGte from 'semver/functions/gte';
+
 import { CoreStart, HttpStart } from 'kibana/public';
 import {
   ActivityLog,
@@ -40,6 +42,7 @@ import {
   getMetadataTransformStats,
   isMetadataTransformStatsLoading,
   getActivityLogIsUninitializedOrHasSubsequentAPIError,
+  endpointPackageVersion,
 } from './selectors';
 import {
   AgentIdsPendingActions,
@@ -61,6 +64,7 @@ import {
   HOST_METADATA_LIST_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
   metadataCurrentIndexPattern,
+  METADATA_UNITED_INDEX,
 } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 import {
@@ -74,7 +78,7 @@ import { resolvePathVariables } from '../../../../common/utils/resolve_path_vari
 import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { getIsInvalidDateRange } from '../utils';
-import { TRANSFORM_STATS_URL } from '../../../../../common/constants';
+import { METADATA_TRANSFORM_STATS_URL } from '../../../../../common/constants';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -85,13 +89,26 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   coreStart,
   depsStart
 ) => {
-  async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
+  // this needs to be called after endpointPackageVersion is loaded (getEndpointPackageInfo)
+  // or else wrong pattern might be loaded
+  async function fetchIndexPatterns(
+    state: ImmutableObject<EndpointState>
+  ): Promise<IIndexPattern[]> {
+    const packageVersion = endpointPackageVersion(state) ?? '';
+    const parsedPackageVersion = packageVersion.includes('-')
+      ? packageVersion.substring(0, packageVersion.indexOf('-'))
+      : packageVersion;
+    const minUnitedIndexVersion = '1.2.0';
+    const indexPatternToFetch = semverGte(parsedPackageVersion, minUnitedIndexVersion)
+      ? METADATA_UNITED_INDEX
+      : metadataCurrentIndexPattern;
+
     const { indexPatterns } = depsStart.data;
     const fields = await indexPatterns.getFieldsForWildcard({
-      pattern: metadataCurrentIndexPattern,
+      pattern: indexPatternToFetch,
     });
     const indexPattern: IIndexPattern = {
-      title: metadataCurrentIndexPattern,
+      title: indexPatternToFetch,
       fields,
     };
     return [indexPattern];
@@ -379,7 +396,7 @@ async function endpointDetailsListMiddleware({
 }: {
   store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
   coreStart: CoreStart;
-  fetchIndexPatterns: () => Promise<IIndexPattern[]>;
+  fetchIndexPatterns: (state: ImmutableObject<EndpointState>) => Promise<IIndexPattern[]>;
 }) {
   const { getState, dispatch } = store;
 
@@ -441,7 +458,7 @@ async function endpointDetailsListMiddleware({
   // get index pattern and fields for search bar
   if (patterns(getState()).length === 0) {
     try {
-      const indexPatterns = await fetchIndexPatterns();
+      const indexPatterns = await fetchIndexPatterns(getState());
       if (indexPatterns !== undefined) {
         dispatch({
           type: 'serverReturnedMetadataPatterns',
@@ -473,15 +490,13 @@ async function endpointDetailsListMiddleware({
     });
 
     try {
-      const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackagePolicies(
-        http,
-        {
+      const policyDataResponse: GetPolicyListResponse =
+        await sendGetEndpointSpecificPackagePolicies(http, {
           query: {
             perPage: 50, // Since this is an oboarding flow, we'll cap at 50 policies.
             page: 1,
           },
-        }
-      );
+        });
 
       dispatch({
         type: 'serverReturnedPoliciesForOnboarding',
@@ -709,9 +724,9 @@ async function endpointDetailsActivityLogPagingMiddleware({
 
     const lastLoadedLogData = getLastLoadedActivityLogData(getState());
     if (lastLoadedLogData !== undefined) {
-      const updatedLogDataItems = ([
-        ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
-      ] as ActivityLog['data']).sort((a, b) =>
+      const updatedLogDataItems = (
+        [...new Set([...lastLoadedLogData.data, ...activityLog.data])] as ActivityLog['data']
+      ).sort((a, b) =>
         new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
       );
 
@@ -770,7 +785,9 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
   });
 
   try {
-    const transformStatsResponse: TransformStatsResponse = await http.get(TRANSFORM_STATS_URL);
+    const transformStatsResponse: TransformStatsResponse = await http.get(
+      METADATA_TRANSFORM_STATS_URL
+    );
 
     dispatch({
       type: 'metadataTransformStatsChanged',

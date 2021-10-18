@@ -107,6 +107,7 @@ export function DiscoverGridFlyout({
         size="m"
         data-test-subj="docTableDetailsFlyout"
         onKeyDown={onKeyDown}
+        ownFocus={false}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle
@@ -169,7 +170,7 @@ export function DiscoverGridFlyout({
               </EuiFlexItem>
             )}
             {activePage !== -1 && (
-              <EuiFlexItem>
+              <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
                 <EuiPagination
                   aria-label={i18n.translate('discover.grid.flyout.documentNavigation', {
                     defaultMessage: 'Document navigation',

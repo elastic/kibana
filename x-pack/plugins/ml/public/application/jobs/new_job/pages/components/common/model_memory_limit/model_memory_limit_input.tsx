@@ -12,13 +12,8 @@ import { JobCreatorContext } from '../../job_creator_context';
 import { Description } from './description';
 
 export const ModelMemoryLimitInput: FC = () => {
-  const {
-    jobCreator,
-    jobCreatorUpdate,
-    jobCreatorUpdated,
-    jobValidator,
-    jobValidatorUpdated,
-  } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, jobValidator, jobValidatorUpdated } =
+    useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.modelMemoryLimit);
   const [modelMemoryLimit, setModelMemoryLimit] = useState(
     jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit

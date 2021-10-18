@@ -53,13 +53,13 @@ describe('extendSearchParamsWithRuntimeFields', () => {
   });
 
   test('should use runtime mappings from spec if it is specified', async () => {
-    const requestParams = ({
+    const requestParams = {
       body: {
         runtime_mappings: {
           test: {},
         },
       },
-    } as unknown) as ReturnType<typeof getSearchParamsFromRequest>;
+    } as unknown as ReturnType<typeof getSearchParamsFromRequest>;
     const runtimeFields = { foo: {} };
 
     mockComputedFields(dataStart, 'index', runtimeFields);

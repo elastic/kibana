@@ -113,15 +113,17 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     [dataProviders, kqlQuery]
   );
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
 
   const kqlQueryExpression =
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
       ? ' '
       : kqlQueryTimeline;
-  const kqlQueryTest = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
-    kqlQueryExpression,
-  ]);
+  const kqlQueryTest = useMemo(
+    () => ({ query: kqlQueryExpression, language: 'kuery' }),
+    [kqlQueryExpression]
+  );
 
   const combinedQueries = useMemo(
     () =>
@@ -332,6 +334,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
         <FormattedRelative
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           value={new Date(updated!)}
         />
       </EuiTextColor>
@@ -371,15 +374,17 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   );
   const { dataProviders, filters, timelineType, kqlMode, activeTab } = timeline;
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
 
   const kqlQueryExpression =
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
       ? ' '
       : kqlQueryTimeline;
-  const kqlQuery = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
-    kqlQueryExpression,
-  ]);
+  const kqlQuery = useMemo(
+    () => ({ query: kqlQueryExpression, language: 'kuery' }),
+    [kqlQueryExpression]
+  );
 
   const combinedQueries = useMemo(
     () =>

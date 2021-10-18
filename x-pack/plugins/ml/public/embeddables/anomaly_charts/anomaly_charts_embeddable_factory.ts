@@ -25,7 +25,8 @@ import {
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 
 export class AnomalyChartsEmbeddableFactory
-  implements EmbeddableFactoryDefinition<AnomalyChartsEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<AnomalyChartsEmbeddableInput>
+{
   public readonly type = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
   public readonly grouping = [

@@ -10,9 +10,10 @@ import _ from 'lodash';
 import moment, { Moment } from 'moment';
 import { Optional } from '@kbn/utility-types';
 
-import { Filter, TimeRange } from '../../services/data';
+import { Filter, TimeRange, RefreshInterval } from '../../services/data';
 
 type TimeRangeCompare = Optional<TimeRange>;
+type RefreshIntervalCompare = Optional<RefreshInterval>;
 
 /**
  * Converts the time to a utc formatted string. If the time is not valid (e.g. it might be in a relative format like
@@ -31,9 +32,13 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
   }
 };
 
-export const areTimeRangesEqual = (rangeA: TimeRangeCompare, rangeB: TimeRangeCompare): boolean => {
-  return areTimesEqual(rangeA.from, rangeB.from) && areTimesEqual(rangeA.to, rangeB.to);
-};
+export const areTimeRangesEqual = (rangeA: TimeRangeCompare, rangeB: TimeRangeCompare): boolean =>
+  areTimesEqual(rangeA.from, rangeB.from) && areTimesEqual(rangeA.to, rangeB.to);
+
+export const areRefreshIntervalsEqual = (
+  refreshA?: RefreshIntervalCompare,
+  refreshB?: RefreshIntervalCompare
+): boolean => refreshA?.pause === refreshB?.pause && refreshA?.value === refreshB?.value;
 
 /**
  * Compares the two times, making sure they are in both compared in string format. Absolute times

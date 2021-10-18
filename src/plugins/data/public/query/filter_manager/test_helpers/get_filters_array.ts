@@ -11,15 +11,15 @@ import { Filter } from '../../../../common';
 export function getFiltersArray(): Filter[] {
   return [
     {
-      query: { match: { extension: { query: 'jpg', type: 'phrase' } } },
+      query: { match: { extension: { query: 'jpg' } } },
       meta: { index: 'logstash-*', negate: false, disabled: false, alias: null },
     },
     {
-      query: { match: { '@tags': { query: 'info', type: 'phrase' } } },
+      query: { match: { '@tags': { query: 'info' } } },
       meta: { index: 'logstash-*', negate: false, disabled: false, alias: null },
     },
     {
-      query: { match: { _type: { query: 'nginx', type: 'phrase' } } },
+      query: { match: { _type: { query: 'nginx' } } },
       meta: { index: 'logstash-*', negate: false, disabled: false, alias: null },
     },
   ];

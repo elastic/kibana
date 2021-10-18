@@ -39,11 +39,10 @@ export const useFormattedTime = (
   };
 
   const dateFormat = formatMap[format];
-  const formattedTime = useMemo(() => getFormattedTime(time, dateFormat, fallbackFormat), [
-    time,
-    dateFormat,
-    fallbackFormat,
-  ]);
+  const formattedTime = useMemo(
+    () => getFormattedTime(time, dateFormat, fallbackFormat),
+    [time, dateFormat, fallbackFormat]
+  );
 
   return formattedTime;
 };

@@ -16,6 +16,7 @@ import {
   User,
   UserAction,
   UserActionField,
+  ActionConnector,
 } from '../api';
 
 export interface CasesUiConfigType {
@@ -66,7 +67,9 @@ export interface CaseUserActions {
   caseId: string;
   commentId: string | null;
   newValue: string | null;
+  newValConnectorId: string | null;
   oldValue: string | null;
+  oldValConnectorId: string | null;
 }
 
 export interface CaseExternalService {
@@ -110,6 +113,12 @@ export interface Case extends BasicCase {
   settings: CaseAttributes['settings'];
   tags: string[];
   type: CaseType;
+}
+
+export interface ResolvedCase {
+  case: Case;
+  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+  aliasTargetId?: string;
 }
 
 export interface QueryParams {
@@ -251,3 +260,5 @@ export interface Ecs {
   _index?: string;
   signal?: SignalEcs;
 }
+
+export type CaseActionConnector = ActionConnector;

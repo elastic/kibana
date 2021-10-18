@@ -68,17 +68,19 @@ const mockUiSettings: Record<string, unknown> = {
   },
 };
 
-export const createUseUiSettingMock = () => (key: string, defaultValue?: unknown): unknown => {
-  const result = mockUiSettings[key];
+export const createUseUiSettingMock =
+  () =>
+  (key: string, defaultValue?: unknown): unknown => {
+    const result = mockUiSettings[key];
 
-  if (typeof result != null) return result;
+    if (typeof result != null) return result;
 
-  if (defaultValue != null) {
-    return defaultValue;
-  }
+    if (defaultValue != null) {
+      return defaultValue;
+    }
 
-  throw new TypeError(`Unexpected config key: ${key}`);
-};
+    throw new TypeError(`Unexpected config key: ${key}`);
+  };
 
 export const createUseUiSetting$Mock = () => {
   const useUiSettingMock = createUseUiSettingMock();
@@ -89,8 +91,9 @@ export const createUseUiSetting$Mock = () => {
   ];
 };
 
-export const createStartServicesMock = (): StartServices => {
-  const core = coreMock.createStart();
+export const createStartServicesMock = (
+  core: ReturnType<typeof coreMock.createStart> = coreMock.createStart()
+): StartServices => {
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
   const data = dataPluginMock.createStartContract();
@@ -99,7 +102,7 @@ export const createStartServicesMock = (): StartServices => {
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
 
-  return ({
+  return {
     ...core,
     cases: {
       getAllCases: jest.fn(),
@@ -147,7 +150,7 @@ export const createStartServicesMock = (): StartServices => {
     ml: {
       locator,
     },
-  } as unknown) as StartServices;
+  } as unknown as StartServices;
 };
 
 export const createWithKibanaMock = () => {

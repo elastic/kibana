@@ -19,6 +19,7 @@ export class ReportingPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly security = this.ctx.getService('security');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly find = this.ctx.getService('find');
   private readonly share = this.ctx.getPageObject('share');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
 
@@ -33,15 +34,21 @@ export class ReportingPageObject extends FtrService {
   async getReportURL(timeout: number) {
     this.log.debug('getReportURL');
 
-    const url = await this.testSubjects.getAttribute(
-      'downloadCompletedReportButton',
-      'href',
-      timeout
-    );
+    try {
+      const url = await this.testSubjects.getAttribute(
+        'downloadCompletedReportButton',
+        'href',
+        timeout
+      );
+      this.log.debug(`getReportURL got url: ${url}`);
 
-    this.log.debug(`getReportURL got url: ${url}`);
-
-    return url;
+      return url;
+    } catch (err) {
+      const errorTextEl = await this.find.byCssSelector('[data-test-errorText]');
+      const errorText = await errorTextEl.getAttribute('data-test-errorText');
+      const newError = new Error(`Test report failed: ${errorText}: ${err}`);
+      throw newError;
+    }
   }
 
   async removeForceSharedItemsContainerSize() {
@@ -145,14 +152,18 @@ export class ReportingPageObject extends FtrService {
     return isToastPresent;
   }
 
-  async setTimepickerInDataRange() {
+  // set the time picker to a range matching 720 documents when using the
+  // reporting/ecommerce archive
+  async setTimepickerInEcommerceDataRange() {
     this.log.debug('Reporting:setTimepickerInDataRange');
-    const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
-    const toTime = 'Aug 23, 2019 @ 16:18:51.821';
+    const fromTime = 'Jun 20, 2019 @ 00:00:00.000';
+    const toTime = 'Jun 25, 2019 @ 00:00:00.000';
     await this.timePicker.setAbsoluteRange(fromTime, toTime);
   }
 
-  async setTimepickerInNoDataRange() {
+  // set the time picker to a range matching 0 documents when using the
+  // reporting/ecommerce archive
+  async setTimepickerInEcommerceNoDataRange() {
     this.log.debug('Reporting:setTimepickerInNoDataRange');
     const fromTime = 'Sep 19, 1999 @ 06:31:44.000';
     const toTime = 'Sep 23, 1999 @ 18:31:44.000';

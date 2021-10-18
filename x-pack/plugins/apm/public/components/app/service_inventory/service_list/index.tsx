@@ -43,9 +43,10 @@ import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { HealthBadge } from './HealthBadge';
 
-type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
+type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
-type ServicesDetailedStatisticsAPIResponse = APIReturnType<'GET /api/apm/services/detailed_statistics'>;
+type ServicesDetailedStatisticsAPIResponse =
+  APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
 
 type ServiceListItem = ValuesType<Items>;
 
@@ -214,6 +215,7 @@ interface Props {
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
   isLoading: boolean;
+  isFailure?: boolean;
 }
 
 export function ServiceList({
@@ -221,6 +223,7 @@ export function ServiceList({
   noItemsMessage,
   comparisonData,
   isLoading,
+  isFailure,
 }: Props) {
   const breakpoints = useBreakpoints();
   const displayHealthStatus = items.some((item) => 'healthStatus' in item);
@@ -296,6 +299,7 @@ export function ServiceList({
       <EuiFlexItem>
         <ManagedTable
           isLoading={isLoading}
+          error={isFailure}
           columns={columns}
           items={items}
           noItemsMessage={noItemsMessage}

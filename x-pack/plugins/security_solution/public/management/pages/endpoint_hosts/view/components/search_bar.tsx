@@ -24,7 +24,7 @@ const AdminQueryBar = styled.div`
 
 export const AdminSearchBar = memo(() => {
   const history = useHistory();
-  const queryParams = useEndpointSelector(selectors.uiQueryParams);
+  const { admin_query: _, ...queryParams } = useEndpointSelector(selectors.uiQueryParams);
   const searchBarIndexPatterns = useEndpointSelector(selectors.patterns);
   const searchBarQuery = useEndpointSelector(selectors.searchBarQuery);
   const clonedIndexPatterns = useMemo(
@@ -40,7 +40,7 @@ export const AdminSearchBar = memo(() => {
           // ensure we reset the page back to the first one, so that user id not (possibly) being left on an invalid page
           page_index: '0',
           ...(params.query?.query.trim()
-            ? { admin_query: encode((params.query as unknown) as RisonValue) }
+            ? { admin_query: encode(params.query as unknown as RisonValue) }
             : {}),
         })
       );

@@ -39,6 +39,7 @@ export function defineActionTypes(
   actions.registerType(getRateLimitedActionType());
   actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
+  actions.registerType(getExcludedActionType());
 }
 
 function getIndexRecordActionType() {
@@ -212,6 +213,7 @@ function getNoAttemptsRateLimitedActionType() {
       });
       return {
         status: 'error',
+        message: 'intentional failure from action',
         retry: new Date(params.retryAt),
         actionId: '',
       };
@@ -302,6 +304,18 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
         actionId,
         status: 'ok',
       };
+    },
+  };
+  return result;
+}
+
+function getExcludedActionType() {
+  const result: ActionType<{}, {}, {}, void> = {
+    id: 'test.excluded',
+    name: 'Test: Excluded',
+    minimumLicenseRequired: 'gold',
+    async executor({ actionId }) {
+      return { status: 'ok', actionId };
     },
   };
   return result;
