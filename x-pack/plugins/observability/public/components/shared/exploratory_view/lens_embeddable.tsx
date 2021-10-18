@@ -13,12 +13,12 @@ import { useSeriesStorage } from './hooks/use_series_storage';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useExpViewTimeRange } from './hooks/use_time_range';
-import { ChartTimeRangeContext } from './exploratory_view';
 import { parseRelativeDate } from './components/date_range_picker';
+import type { ChartTimeRange } from './header/last_updated';
 
 interface Props {
   lensAttributes: TypedLensByValueInput['attributes'];
-  setChartTimeRangeContext: Dispatch<SetStateAction<ChartTimeRangeContext | undefined>>;
+  setChartTimeRangeContext: Dispatch<SetStateAction<ChartTimeRange | undefined>>;
 }
 
 export function LensEmbeddable(props: Props) {

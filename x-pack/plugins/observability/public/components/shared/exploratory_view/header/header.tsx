@@ -16,7 +16,7 @@ import { LastUpdated } from './last_updated';
 import type { ChartTimeRange } from './last_updated';
 
 interface Props {
-  chartTimeRange: ChartTimeRange;
+  chartTimeRange?: ChartTimeRange;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
