@@ -10,6 +10,8 @@ import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from 'react-
 import { SliceCaseReducers, PayloadAction, createSlice } from '@reduxjs/toolkit';
 import React, { PropsWithChildren, useEffect, useMemo, useRef } from 'react';
 import { Draft } from 'immer/dist/types/types-external';
+import { debounceTime } from 'rxjs/operators';
+import { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 
 import {
@@ -25,6 +27,21 @@ import {
 } from '../../../../embeddable/public';
 import { getManagedEmbeddablesStore } from './generic_embeddable_store';
 import { ReduxEmbeddableContext, useReduxEmbeddableContext } from './redux_embeddable_context';
+
+type InputWithFilters = Partial<EmbeddableInput> & { filters: Filter[] };
+export const stateContainsFilters = (
+  state: Partial<EmbeddableInput>
+): state is InputWithFilters => {
+  if ((state as InputWithFilters).filters) return true;
+  return false;
+};
+
+export const cleanFiltersForSerialize = (filters: Filter[]): Filter[] => {
+  return filters.map((filter) => {
+    if (filter.meta.value) delete filter.meta.value;
+    return filter;
+  });
+};
 
 const getDefaultProps = <InputType extends EmbeddableInput = EmbeddableInput>(): Required<
   Pick<ReduxEmbeddableWrapperProps<InputType>, 'diffInput'>
@@ -42,6 +59,17 @@ const getDefaultProps = <InputType extends EmbeddableInput = EmbeddableInput>():
 const embeddableIsContainer = (
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>
 ): embeddable is IContainer => embeddable.isContainer;
+
+export const getExplicitInput = <InputType extends EmbeddableInput = EmbeddableInput>(
+  embeddable: IEmbeddable<InputType, EmbeddableOutput>
+): InputType => {
+  const root = embeddable.getRoot();
+  if (!embeddableIsContainer(embeddable) && embeddableIsContainer(root)) {
+    return (root.getInput().panels[embeddable.id]?.explicitInput ??
+      embeddable.getInput()) as InputType;
+  }
+  return embeddable.getInput() as InputType;
+};
 
 /**
  * Place this wrapper around the react component when rendering an embeddable to automatically set up
@@ -81,8 +109,12 @@ export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = Embed
         return { ...state, ...action.payload };
       };
 
+      const initialState = getExplicitInput<InputType>(embeddable);
+      if (stateContainsFilters(initialState)) {
+        initialState.filters = cleanFiltersForSerialize(initialState.filters);
+      }
       const slice = createSlice<InputType, SliceCaseReducers<InputType>>({
-        initialState: embeddable.getInput(),
+        initialState,
         name: key,
         reducers: { ...reducers, updateEmbeddableReduxState },
       });
@@ -143,10 +175,13 @@ const ReduxEmbeddableSync = <InputType extends EmbeddableInput = EmbeddableInput
     // When Embeddable Input changes, push differences to redux.
     const inputSubscription = embeddable
       .getInput$()
-      // .pipe(debounceTime(0)) // debounce input changes to ensure that when many updates are made in one render the latest wins out
+      .pipe(debounceTime(0)) // debounce input changes to ensure that when many updates are made in one render the latest wins out
       .subscribe(() => {
-        const differences = diffInput(embeddable.getInput(), stateRef.current);
+        const differences = diffInput(getExplicitInput<InputType>(embeddable), stateRef.current);
         if (differences && Object.keys(differences).length > 0) {
+          if (stateContainsFilters(differences)) {
+            differences.filters = cleanFiltersForSerialize(differences.filters);
+          }
           dispatch(updateEmbeddableReduxState(differences));
         }
       });
@@ -156,7 +191,7 @@ const ReduxEmbeddableSync = <InputType extends EmbeddableInput = EmbeddableInput
   useEffect(() => {
     // When redux state changes, push differences to Embeddable Input.
     stateRef.current = currentState;
-    const differences = diffInput(currentState, embeddable.getInput());
+    const differences = diffInput(currentState, getExplicitInput<InputType>(embeddable));
     if (differences && Object.keys(differences).length > 0) {
       embeddable.updateInput(differences);
     }

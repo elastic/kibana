@@ -9,7 +9,6 @@
 import React, { useMemo, useState } from 'react';
 import {
   EuiFilterSelectItem,
-  EuiLoadingChart,
   EuiPopoverTitle,
   EuiFieldSearch,
   EuiButtonIcon,
@@ -125,17 +124,6 @@ export const OptionsListPopover = ({
                 {availableOption}
               </EuiFilterSelectItem>
             ))}
-            {loading && (
-              <div className="optionsList--loadingOverlay">
-                <div className="euiFilterSelect__note">
-                  <div className="euiFilterSelect__noteContent">
-                    <EuiLoadingChart size="m" />
-                    <EuiSpacer size="xs" />
-                    <p>{OptionsListStrings.popover.getLoadingMessage()}</p>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {!loading && (!availableOptions || availableOptions.length === 0) && (
               <div className="euiFilterSelect__note">

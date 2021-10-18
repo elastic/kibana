@@ -8,17 +8,28 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { merge, Subject, Subscription } from 'rxjs';
+import {
+  buildEsQuery,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  compareFilters,
+  Filter,
+} from '@kbn/es-query';
+import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
-import { isEqual } from 'lodash';
 import { ReduxEmbeddableWrapper } from '../../../redux_embeddables/redux_embeddable_wrapper';
-import { InputControlInput, InputControlOutput } from '../../../../services/controls';
-import { esFilters, IIndexPattern, IFieldType } from '../../../../../../data/public';
-import { Embeddable, IContainer } from '../../../../../../embeddable/public';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
+import { PresentationDataViewsService } from '../../../../services/data_views';
+import { Embeddable, IContainer } from '../../../../../../embeddable/public';
+import { PresentationDataService } from '../../../../services/data';
+import { DataView } from '../../../../../../data_views/public';
 import { optionsListReducers } from './options_list_reducers';
+import { OptionsListStrings } from './options_list_strings';
+import { pluginServices } from '../../../../services';
+import { ControlInput, ControlOutput } from '../..';
 
 const diffDataFetchProps = (
   current?: OptionsListDataFetchProps,
@@ -28,70 +39,70 @@ const diffDataFetchProps = (
   const { filters: currentFilters, ...currentWithoutFilters } = current;
   const { filters: lastFilters, ...lastWithoutFilters } = last;
   if (!deepEqual(currentWithoutFilters, lastWithoutFilters)) return false;
-  if (!esFilters.compareFilters(lastFilters ?? [], currentFilters ?? [])) return false;
+  if (!compareFilters(lastFilters ?? [], currentFilters ?? [])) return false;
   return true;
 };
 
 interface OptionsListDataFetchProps {
   search?: string;
-  field: IFieldType;
-  indexPattern: IIndexPattern;
-  query?: InputControlInput['query'];
-  filters?: InputControlInput['filters'];
-  timeRange?: InputControlInput['timeRange'];
+  fieldName: string;
+  dataViewId: string;
+  query?: ControlInput['query'];
+  filters?: ControlInput['filters'];
 }
 
-export type OptionsListIndexPatternFetcher = () => Promise<IIndexPattern[]>;
-export type OptionsListFieldFetcher = (indexPattern: IIndexPattern) => Promise<IFieldType[]>;
-
-export type OptionsListDataFetcher = (props: OptionsListDataFetchProps) => Promise<string[]>;
+const fieldMissingError = (fieldName: string) =>
+  new Error(`field ${fieldName} not found in index pattern`);
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
-export interface OptionsListEmbeddableInput extends InputControlInput {
-  field: IFieldType;
-  indexPattern: IIndexPattern;
+export interface OptionsListEmbeddableInput extends ControlInput {
+  fieldName: string;
+  dataViewId: string;
 
   selectedOptions?: string[];
   singleSelect?: boolean;
   loading?: boolean;
 }
 
-export class OptionsListEmbeddable extends Embeddable<
-  OptionsListEmbeddableInput,
-  InputControlOutput
-> {
+export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput, ControlOutput> {
   public readonly type = OPTIONS_LIST_CONTROL;
-  private node?: HTMLElement;
-
-  // internal state for this input control.
-  private typeaheadSubject: Subject<string> = new Subject<string>();
-  private searchString = '';
-
-  private componentState: OptionsListComponentState;
-  private componentStateSubject$ = new Subject<OptionsListComponentState>();
-  private updateComponentState(changes: Partial<OptionsListComponentState>) {
-    this.componentState = {
-      ...this.componentState,
-      ...changes,
-    };
-    this.componentStateSubject$.next(this.componentState);
-  }
+  public deferEmbeddableLoad = true;
 
   private subscriptions: Subscription = new Subscription();
+  private node?: HTMLElement;
 
-  constructor(
-    input: OptionsListEmbeddableInput,
-    output: InputControlOutput,
-    private fetchData: OptionsListDataFetcher,
-    parent?: IContainer
-  ) {
-    super({ ...input, loading: true }, output, parent);
-    this.fetchData = fetchData;
+  // Presentation Util services
+  private dataService: PresentationDataService;
+  private dataViewsService: PresentationDataViewsService;
 
+  // Internal data fetching state for this input control.
+  private typeaheadSubject: Subject<string> = new Subject<string>();
+  private dataView?: DataView;
+  private searchString = '';
+
+  // State to be passed down to component
+  private componentState: OptionsListComponentState;
+  private componentStateSubject$ = new BehaviorSubject<OptionsListComponentState>({
+    loading: true,
+  });
+
+  constructor(input: OptionsListEmbeddableInput, output: ControlOutput, parent?: IContainer) {
+    super(input, output, parent); // get filters for initial output...
+
+    // Destructure presentation util services
+    ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
+
+    this.componentState = { loading: true };
+    this.updateComponentState(this.componentState);
+
+    this.initialize();
+  }
+
+  private setupSubscriptions = () => {
     const dataFetchPipe = this.getInput$().pipe(
       map((newInput) => ({
-        field: newInput.field,
-        indexPattern: newInput.indexPattern,
+        fieldName: newInput.fieldName,
+        dataViewId: newInput.dataViewId,
         query: newInput.query,
         filters: newInput.filters,
         timeRange: newInput.timeRange,
@@ -102,12 +113,8 @@ export class OptionsListEmbeddable extends Embeddable<
     // push searchString changes into a debounced typeahead subject
     this.typeaheadSubject = new Subject<string>();
     const typeaheadPipe = this.typeaheadSubject.pipe(
-      tap((newSearchString) => (this.searchString = newSearchString), debounceTime(100))
-    );
-
-    // fetch available options when input changes or when search string has changed
-    this.subscriptions.add(
-      merge(dataFetchPipe, typeaheadPipe).subscribe(this.fetchAvailableOptions)
+      tap((newSearchString) => (this.searchString = newSearchString)),
+      debounceTime(100)
     );
 
     // clear all selections when field or index pattern change
@@ -115,38 +122,118 @@ export class OptionsListEmbeddable extends Embeddable<
       this.getInput$()
         .pipe(
           distinctUntilChanged(
-            (a, b) => isEqual(a.field, b.field) && isEqual(a.indexPattern, b.indexPattern)
+            (a, b) => isEqual(a.fieldName, b.fieldName) && isEqual(a.dataViewId, b.dataViewId)
           ),
-          skip(1) // skip the first change to preserve default selections after init
+          skip(1) // skip the first input update to preserve initial filters.
         )
         .subscribe(() => this.updateInput({ selectedOptions: [] }))
     );
 
-    this.componentState = { loading: true };
-    this.updateComponentState(this.componentState);
+    // fetch available options when input changes or when search string has changed
+    this.subscriptions.add(
+      merge(dataFetchPipe, typeaheadPipe).subscribe(this.fetchAvailableOptions)
+    );
+
+    // build filters when selectedOptions change
+    this.subscriptions.add(
+      this.getInput$()
+        .pipe(
+          debounceTime(400),
+          distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)),
+          skip(1) // skip the first input update because initial filters will be built by initialize.
+        )
+        .subscribe(() => this.buildFilter())
+    );
+  };
+
+  private getCurrentDataView = async (): Promise<DataView> => {
+    const { dataViewId } = this.getInput();
+    if (this.dataView && this.dataView.id === dataViewId) return this.dataView;
+    this.dataView = await this.dataViewsService.get(dataViewId);
+    if (this.dataView === undefined) {
+      this.onFatalError(new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId)));
+    }
+    this.updateOutput({ dataViews: [this.dataView] });
+    return this.dataView;
+  };
+
+  private updateComponentState(changes: Partial<OptionsListComponentState>) {
+    this.componentState = {
+      ...this.componentState,
+      ...changes,
+    };
+    this.componentStateSubject$.next(this.componentState);
   }
 
   private fetchAvailableOptions = async () => {
     this.updateComponentState({ loading: true });
-    const { indexPattern, timeRange, filters, field, query } = this.getInput();
-    const newOptions = await this.fetchData({
-      search: this.searchString,
-      indexPattern,
-      timeRange,
-      filters,
+    const { ignoreParentSettings, filters, fieldName, query } = this.getInput();
+    const dataView = await this.getCurrentDataView();
+    const field = dataView.getFieldByName(fieldName);
+
+    if (!field) throw fieldMissingError(fieldName);
+
+    const boolFilter = [
+      buildEsQuery(
+        dataView,
+        ignoreParentSettings?.ignoreQuery ? [] : query ?? [],
+        ignoreParentSettings?.ignoreFilters ? [] : filters ?? []
+      ),
+    ];
+
+    // TODO Switch between `terms_agg` and `terms_enum` method depending on the value of ignoreParentSettings
+    // const method = Object.values(ignoreParentSettings || {}).includes(false) ?
+
+    const newOptions = await this.dataService.autocomplete.getValueSuggestions({
+      query: this.searchString,
+      indexPattern: dataView,
+      useTimeRange: !ignoreParentSettings?.ignoreTimerange,
+      method: 'terms_agg', // terms_agg method is required to use timeRange
+      boolFilter,
       field,
-      query,
     });
     this.updateComponentState({ availableOptions: newOptions, loading: false });
+  };
+
+  private initialize = async () => {
+    const initialSelectedOptions = this.getInput().selectedOptions;
+    if (initialSelectedOptions) {
+      await this.getCurrentDataView();
+      await this.buildFilter();
+    }
+    this.setInitializationFinished();
+    this.setupSubscriptions();
+  };
+
+  private buildFilter = async () => {
+    const { fieldName, selectedOptions } = this.getInput();
+    if (!selectedOptions || selectedOptions.length === 0) {
+      this.updateOutput({ filters: [] });
+      return;
+    }
+    const dataView = await this.getCurrentDataView();
+    const field = dataView.getFieldByName(this.getInput().fieldName);
+
+    if (!field) throw fieldMissingError(fieldName);
+
+    let newFilter: Filter;
+    if (selectedOptions.length === 1) {
+      newFilter = buildPhraseFilter(field, selectedOptions[0], dataView);
+    } else {
+      newFilter = buildPhrasesFilter(field, selectedOptions, dataView);
+    }
+
+    newFilter.meta.key = field?.name;
+    this.updateOutput({ filters: [newFilter] });
+  };
+
+  reload = () => {
+    this.fetchAvailableOptions();
   };
 
   public destroy = () => {
     super.destroy();
     this.subscriptions.unsubscribe();
-  };
-
-  reload = () => {
-    this.fetchAvailableOptions();
   };
 
   public render = (node: HTMLElement) => {

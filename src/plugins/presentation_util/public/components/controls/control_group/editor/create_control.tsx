@@ -22,17 +22,16 @@ import { pluginServices } from '../../../../services';
 import { forwardAllContext } from './forward_all_context';
 import { OverlayRef } from '../../../../../../../core/public';
 import { ControlGroupStrings } from '../control_group_strings';
-import { InputControlInput } from '../../../../services/controls';
 import { DEFAULT_CONTROL_WIDTH } from '../control_group_constants';
-import { ControlWidth, IEditableControlFactory } from '../../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
+import { ControlWidth, IEditableControlFactory, ControlInput } from '../../types';
 import { EmbeddableFactoryNotFoundError } from '../../../../../../embeddable/public';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
 
 export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean }) => {
   // Presentation Services Context
   const { overlays, controls } = pluginServices.getHooks();
-  const { getInputControlTypes, getControlFactory } = controls.useService();
+  const { getControlTypes, getControlFactory } = controls.useService();
   const { openFlyout, openConfirm } = overlays.useService();
 
   // Redux embeddable container Context
@@ -56,8 +55,8 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
     const factory = getControlFactory(type);
     if (!factory) throw new EmbeddableFactoryNotFoundError(type);
 
-    const initialInputPromise = new Promise<Omit<InputControlInput, 'id'>>((resolve, reject) => {
-      let inputToReturn: Partial<InputControlInput> = {};
+    const initialInputPromise = new Promise<Omit<ControlInput, 'id'>>((resolve, reject) => {
+      let inputToReturn: Partial<ControlInput> = {};
 
       const onCancel = (ref: OverlayRef) => {
         if (Object.keys(inputToReturn).length === 0) {
@@ -111,7 +110,7 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
     );
   };
 
-  if (getInputControlTypes().length === 0) return null;
+  if (getControlTypes().length === 0) return null;
 
   const commonButtonProps = {
     iconType: 'plusInCircle',
@@ -121,11 +120,11 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
   };
 
   const onCreateButtonClick = () => {
-    if (getInputControlTypes().length > 1) {
+    if (getControlTypes().length > 1) {
       setIsControlTypePopoverOpen(!isControlTypePopoverOpen);
       return;
     }
-    createNewControl(getInputControlTypes()[0]);
+    createNewControl(getControlTypes()[0]);
   };
 
   const createControlButton = isIconButton ? (
@@ -141,9 +140,9 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
     </EuiButton>
   );
 
-  if (getInputControlTypes().length > 1) {
+  if (getControlTypes().length > 1) {
     const items: ReactElement[] = [];
-    getInputControlTypes().forEach((type) => {
+    getControlTypes().forEach((type) => {
       const factory = getControlFactory(type);
       items.push(
         <EuiContextMenuItem

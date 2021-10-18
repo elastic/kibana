@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { uniqBy } from 'lodash';
+import { merge, uniqBy } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { Observable, pipe } from 'rxjs';
 import { distinctUntilChanged, switchMap, filter, mapTo, map } from 'rxjs/operators';
@@ -30,6 +30,11 @@ export const syncDashboardIndexPatterns = ({
     filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
     map((container: DashboardContainer): IndexPattern[] | undefined => {
       let panelIndexPatterns: IndexPattern[] = [];
+
+      if (container.controlGroup) {
+        panelIndexPatterns.push(...(container.controlGroup.getOutput().dataViews ?? []));
+      }
+
       Object.values(container.getChildIds()).forEach((id) => {
         const embeddableInstance = container.getChild(id);
         if (isErrorEmbeddable(embeddableInstance)) return;
@@ -77,8 +82,7 @@ export const syncDashboardIndexPatterns = ({
     })
   );
 
-  return dashboardContainer
-    .getOutput$()
+  return merge(dashboardContainer.getOutput$(), dashboardContainer.controlGroup?.getOutput$())
     .pipe(mapTo(dashboardContainer), updateIndexPatternsOperator)
     .subscribe();
 };

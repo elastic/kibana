@@ -15,12 +15,9 @@ import {
 } from '../../types';
 import { OptionsListEditor } from './options_list_editor';
 import {
-  OptionsListDataFetcher,
+  OPTIONS_LIST_CONTROL,
   OptionsListEmbeddable,
   OptionsListEmbeddableInput,
-  OptionsListFieldFetcher,
-  OptionsListIndexPatternFetcher,
-  OPTIONS_LIST_CONTROL,
 } from './options_list_embeddable';
 
 export class OptionsListEmbeddableFactory
@@ -28,18 +25,10 @@ export class OptionsListEmbeddableFactory
 {
   public type = OPTIONS_LIST_CONTROL;
 
-  constructor(
-    private fetchData: OptionsListDataFetcher,
-    private fetchIndexPatterns: OptionsListIndexPatternFetcher,
-    private fetchFields: OptionsListFieldFetcher
-  ) {
-    this.fetchIndexPatterns = fetchIndexPatterns;
-    this.fetchFields = fetchFields;
-    this.fetchData = fetchData;
-  }
+  constructor() {}
 
   public create(initialInput: OptionsListEmbeddableInput, parent?: IContainer) {
-    return Promise.resolve(new OptionsListEmbeddable(initialInput, {}, this.fetchData, parent));
+    return Promise.resolve(new OptionsListEmbeddable(initialInput, {}, parent));
   }
 
   public getControlEditor = ({
@@ -48,8 +37,6 @@ export class OptionsListEmbeddableFactory
   }: GetControlEditorComponentProps<OptionsListEmbeddableInput>) => {
     return ({ setValidState }: ControlEditorProps) => (
       <OptionsListEditor
-        fetchIndexPatterns={this.fetchIndexPatterns}
-        fetchFields={this.fetchFields}
         setValidState={setValidState}
         initialInput={initialInput}
         onChange={onChange}

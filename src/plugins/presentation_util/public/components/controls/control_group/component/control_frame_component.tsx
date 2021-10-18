@@ -13,6 +13,7 @@ import {
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
+  EuiLoadingChart,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -87,13 +88,18 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
     </div>
   );
 
+  const embeddableParentClassNames = classNames('controlFrame--control', {
+    'controlFrame--twoLine': controlStyle === 'twoLine',
+    'controlFrame--oneLine': controlStyle === 'oneLine',
+  });
+
   const form = (
     <EuiFormControlLayout
       className={'controlFrame__formControlLayout'}
       fullWidth
       prepend={
         <>
-          {customPrepend ?? null}
+          {(embeddable && customPrepend) ?? null}
           {usingTwoLineLayout ? undefined : (
             <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
               {title}
@@ -102,20 +108,26 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
         </>
       }
     >
-      <div
-        className={classNames('controlFrame__control', {
-          'controlFrame--twoLine': controlStyle === 'twoLine',
-          'controlFrame--oneLine': controlStyle === 'oneLine',
-        })}
-        id={`controlFrame--${embeddableId}`}
-        ref={embeddableRoot}
-      />
+      {embeddable && (
+        <div
+          className={embeddableParentClassNames}
+          id={`controlFrame--${embeddableId}`}
+          ref={embeddableRoot}
+        />
+      )}
+      {!embeddable && (
+        <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>
+          <div className="controlFrame--controlLoading">
+            <EuiLoadingChart />
+          </div>
+        </div>
+      )}
     </EuiFormControlLayout>
   );
 
   return (
     <>
-      {enableActions && floatingActions}
+      {embeddable && enableActions && floatingActions}
       <EuiFormRow fullWidth label={usingTwoLineLayout ? title : undefined}>
         {form}
       </EuiFormRow>

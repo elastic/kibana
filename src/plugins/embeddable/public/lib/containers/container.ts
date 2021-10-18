@@ -246,7 +246,6 @@ export abstract class Container<
         [panelState.explicitInput.id]: panelState,
       },
     } as Partial<TContainerInput>);
-
     return await this.untilEmbeddableLoaded<TEmbeddable>(panelState.explicitInput.id);
   }
 

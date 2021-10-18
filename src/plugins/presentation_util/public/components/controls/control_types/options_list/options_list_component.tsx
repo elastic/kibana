@@ -9,8 +9,9 @@
 import { EuiFilterButton, EuiFilterGroup, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
+import { debounce } from 'lodash';
 import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
 import { OptionsListEmbeddableInput } from './options_list_embeddable';
 import { OptionsListPopover } from './options_list_popover_component';
@@ -31,7 +32,7 @@ export const OptionsListComponent = ({
   componentStateSubject,
 }: {
   typeaheadSubject: Subject<string>;
-  componentStateSubject: Subject<OptionsListComponentState>;
+  componentStateSubject: BehaviorSubject<OptionsListComponentState>;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [searchString, setSearchString] = useState('');
@@ -43,15 +44,21 @@ export const OptionsListComponent = ({
     actions: { replaceSelection },
   } = useReduxEmbeddableContext<OptionsListEmbeddableInput, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
-  const { twoLineLayout, selectedOptions, singleSelect } = useEmbeddableSelector((state) => state);
+  const { controlStyle, selectedOptions, singleSelect } = useEmbeddableSelector((state) => state);
 
   // useStateObservable to get component state from Embeddable
   const { availableOptions, loading } = useStateObservable<OptionsListComponentState>(
     componentStateSubject,
-    {
-      loading: true,
-    }
+    componentStateSubject.getValue()
   );
+
+  // debounce loading state so loading doesn't flash when user types
+  const [buttonLoading, setButtonLoading] = useState(true);
+  const debounceSetButtonLoading = useMemo(
+    () => debounce((latestLoading: boolean) => setButtonLoading(latestLoading), 100),
+    []
+  );
+  useEffect(() => debounceSetButtonLoading(loading), [loading, debounceSetButtonLoading]);
 
   // remove all other selections if this control is single select
   useEffect(() => {
@@ -78,8 +85,9 @@ export const OptionsListComponent = ({
   const button = (
     <EuiFilterButton
       iconType="arrowDown"
+      isLoading={buttonLoading}
       className={classNames('optionsList--filterBtn', {
-        'optionsList--filterBtnSingle': !twoLineLayout,
+        'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
         'optionsList--filterBtnPlaceholder': !selectedOptionsCount,
       })}
       onClick={() => setIsPopoverOpen((openState) => !openState)}
@@ -95,7 +103,7 @@ export const OptionsListComponent = ({
   return (
     <EuiFilterGroup
       className={classNames('optionsList--filterGroup', {
-        'optionsList--filterGroupSingle': !twoLineLayout,
+        'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
       })}
     >
       <EuiPopover

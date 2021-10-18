@@ -12,15 +12,14 @@ import React, { useEffect, useRef } from 'react';
 
 import { ControlGroupInput } from '../types';
 import { ControlEditor } from './control_editor';
-import { IEditableControlFactory } from '../../types';
 import { pluginServices } from '../../../../services';
 import { forwardAllContext } from './forward_all_context';
 import { OverlayRef } from '../../../../../../../core/public';
 import { ControlGroupStrings } from '../control_group_strings';
+import { IEditableControlFactory, ControlInput } from '../../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { EmbeddableFactoryNotFoundError } from '../../../../../../embeddable/public';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
-import { InputControlInput } from '../../../../services/controls';
 
 export const EditControlButton = ({ embeddableId }: { embeddableId: string }) => {
   // Presentation Services Context
@@ -55,7 +54,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     const factory = getControlFactory(panel.type);
     const embeddable = await untilEmbeddableLoaded(embeddableId);
 
-    let inputToReturn: Partial<InputControlInput> = {};
+    let inputToReturn: Partial<ControlInput> = {};
 
     if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
 

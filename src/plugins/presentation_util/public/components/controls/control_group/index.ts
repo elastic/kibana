@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { OptionsListEmbeddableFactory } from './options_list_embeddable_factory';
-export { OptionsListEmbeddable, OPTIONS_LIST_CONTROL } from './options_list_embeddable';
+export { CONTROL_GROUP_TYPE } from './control_group_constants';
+export { ControlGroupContainer } from './embeddable/control_group_container';
+export { ControlGroupContainerFactory } from './embeddable/control_group_container_factory';
+export { ControlGroupContainerEmbeddable, ControlGroupInput, ControlGroupOutput } from './types';

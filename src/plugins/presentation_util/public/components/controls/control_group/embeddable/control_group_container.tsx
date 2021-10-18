@@ -7,23 +7,54 @@
  */
 
 import React from 'react';
+import { uniqBy } from 'lodash';
 import ReactDOM from 'react-dom';
-
+import deepEqual from 'fast-deep-equal';
+import { Filter, uniqFilters } from '@kbn/es-query';
+import { EMPTY, merge, pipe, Subscription, concat } from 'rxjs';
 import {
-  InputControlEmbeddable,
-  InputControlInput,
-  InputControlOutput,
-} from '../../../../services/controls';
+  distinctUntilChanged,
+  debounceTime,
+  catchError,
+  switchMap,
+  map,
+  take,
+} from 'rxjs/operators';
+
 import { pluginServices } from '../../../../services';
-import { ControlGroupInput, ControlPanelState } from '../types';
+import { DataView } from '../../../../../../data_views/public';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
+import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { Container, EmbeddableFactory } from '../../../../../../embeddable/public';
+import { ControlGroupInput, ControlGroupOutput, ControlPanelState } from '../types';
 import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_WIDTH } from '../control_group_constants';
 import { ReduxEmbeddableWrapper } from '../../../redux_embeddables/redux_embeddable_wrapper';
 
-export class ControlGroupContainer extends Container<InputControlInput, ControlGroupInput> {
+export class ControlGroupContainer extends Container<
+  ControlInput,
+  ControlGroupInput,
+  ControlGroupOutput
+> {
   public readonly type = CONTROL_GROUP_TYPE;
+  private subscriptions: Subscription = new Subscription();
+
+  public untilReady = () => {
+    const panelsLoading = () =>
+      Object.values(this.getOutput().embeddableLoaded).some((loaded) => !loaded);
+    if (panelsLoading()) {
+      return new Promise<void>((resolve, reject) => {
+        const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
+          if (this.destroyed) reject();
+          if (!panelsLoading()) {
+            subscription.unsubscribe();
+            resolve();
+          }
+        });
+      });
+    }
+    return Promise.resolve();
+  };
 
   constructor(initialInput: ControlGroupInput, parent?: Container) {
     super(
@@ -32,10 +63,44 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
       pluginServices.getServices().controls.getControlFactory,
       parent
     );
+    const anyChildChangePipe = pipe(
+      map(() => this.getChildIds()),
+      distinctUntilChanged(deepEqual),
+
+      // children may change, so make sure we subscribe/unsubscribe with switchMap
+      switchMap((newChildIds: string[]) =>
+        merge(
+          ...newChildIds.map((childId) =>
+            this.getChild(childId)
+              .getOutput$()
+              // Embeddables often throw errors into their output streams.
+              .pipe(catchError(() => EMPTY))
+          )
+        )
+      )
+    );
+
+    this.subscriptions.add(
+      concat(
+        this.getOutput$().pipe(anyChildChangePipe, take(1)), // the first time filters are built, don't debounce so that initial filters are built immediately
+        this.getOutput$().pipe(anyChildChangePipe, debounceTime(10))
+      ).subscribe(this.recalculateOutput)
+    );
   }
 
-  protected createNewPanelState<TEmbeddableInput extends InputControlInput = InputControlInput>(
-    factory: EmbeddableFactory<InputControlInput, InputControlOutput, InputControlEmbeddable>,
+  private recalculateOutput = () => {
+    const allFilters: Filter[] = [];
+    const allDataViews: DataView[] = [];
+    Object.values(this.children).map((child) => {
+      const childOutput = child.getOutput() as ControlOutput;
+      allFilters.push(...(childOutput?.filters ?? []));
+      allDataViews.push(...(childOutput.dataViews ?? []));
+    });
+    this.updateOutput({ filters: uniqFilters(allFilters), dataViews: uniqBy(allDataViews, 'id') });
+  };
+
+  protected createNewPanelState<TEmbeddableInput extends ControlInput = ControlInput>(
+    factory: EmbeddableFactory<ControlInput, ControlOutput, ControlEmbeddable>,
     partial: Partial<TEmbeddableInput> = {}
   ): ControlPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
@@ -50,14 +115,19 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
     } as ControlPanelState<TEmbeddableInput>;
   }
 
-  protected getInheritedInput(id: string): InputControlInput {
-    const { filters, query, timeRange, inheritParentState } = this.getInput();
+  protected getInheritedInput(id: string): ControlInput {
+    const { filters, query, ignoreParentSettings, timeRange } = this.getInput();
     return {
-      filters: inheritParentState.useFilters ? filters : undefined,
-      query: inheritParentState.useQuery ? query : undefined,
-      timeRange: inheritParentState.useTimerange ? timeRange : undefined,
+      filters: ignoreParentSettings?.ignoreFilters ? undefined : filters,
+      query: ignoreParentSettings?.ignoreQuery ? undefined : query,
+      timeRange: ignoreParentSettings?.ignoreTimerange ? undefined : timeRange,
       id,
     };
+  }
+
+  public destroy() {
+    super.destroy();
+    this.subscriptions.unsubscribe();
   }
 
   public render(dom: HTMLElement) {
