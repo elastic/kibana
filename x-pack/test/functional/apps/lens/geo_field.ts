@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should visualize geo fields in maps', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.switchDataPanelIndexPattern('logstash-*');
       await PageObjects.timePicker.setAbsoluteRange(
         'Sep 22, 2015 @ 00:00:00.000',
         'Sep 22, 2015 @ 04:00:00.000'

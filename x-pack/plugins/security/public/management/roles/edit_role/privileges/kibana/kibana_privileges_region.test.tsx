@@ -12,11 +12,10 @@ import type { Role } from '../../../../../../common/model';
 import { KibanaPrivileges } from '../../../model';
 import { RoleValidator } from '../../validate_role';
 import { KibanaPrivilegesRegion } from './kibana_privileges_region';
-import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
 
-const buildProps = (customProps = {}) => {
+const buildProps = () => {
   return {
     role: {
       name: '',
@@ -27,7 +26,6 @@ const buildProps = (customProps = {}) => {
       },
       kibana: [],
     },
-    spacesEnabled: true,
     spaces: [
       {
         id: 'default',
@@ -64,7 +62,6 @@ const buildProps = (customProps = {}) => {
     onChange: jest.fn(),
     validator: new RoleValidator(),
     canCustomizeSubFeaturePrivileges: true,
-    ...customProps,
   };
 };
 
@@ -73,26 +70,17 @@ describe('<KibanaPrivileges>', () => {
     expect(shallow(<KibanaPrivilegesRegion {...buildProps()} />)).toMatchSnapshot();
   });
 
-  it('renders the simple privilege form when spaces is disabled', () => {
-    const props = buildProps({ spacesEnabled: false });
+  it('renders the space-aware privilege form', () => {
+    const props = buildProps();
     const wrapper = shallow(<KibanaPrivilegesRegion {...props} />);
-    expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
-    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(0);
-  });
-
-  it('renders the space-aware privilege form when spaces is enabled', () => {
-    const props = buildProps({ spacesEnabled: true });
-    const wrapper = shallow(<KibanaPrivilegesRegion {...props} />);
-    expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(0);
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
   });
 
   it('renders the transform error section when the role has a transform error', () => {
-    const props = buildProps({ spacesEnabled: true });
+    const props = buildProps();
     (props.role as Role)._transform_error = ['kibana'];
 
     const wrapper = shallow(<KibanaPrivilegesRegion {...props} />);
-    expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(0);
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(0);
     expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
   });

@@ -7,11 +7,36 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { SnapshotDetailsEs } from '../../../common/types';
-import { SNAPSHOT_LIST_MAX_SIZE } from '../../../common/constants';
 import { deserializeSnapshotDetails } from '../../../common/lib';
 import type { RouteDependencies } from '../../types';
 import { getManagedRepositoryName } from '../../lib';
 import { addBasePath } from '../helpers';
+import { snapshotListSchema } from './validate_schemas';
+import { getSnapshotSearchWildcard } from '../../lib/get_snapshot_search_wildcard';
+
+const sortFieldToESParams = {
+  snapshot: 'name',
+  repository: 'repository',
+  indices: 'index_count',
+  startTimeInMillis: 'start_time',
+  durationInMillis: 'duration',
+  'shards.total': 'shard_count',
+  'shards.failed': 'failed_shard_count',
+};
+
+const isSearchingForNonExistentRepository = (
+  repositories: string[],
+  value: string,
+  match?: string,
+  operator?: string
+): boolean => {
+  // only check if searching for an exact match (repository=test)
+  if (match === 'must' && operator === 'exact') {
+    return !(repositories || []).includes(value);
+  }
+  // otherwise we will use a wildcard, so allow the request
+  return false;
+};
 
 export function registerSnapshotsRoutes({
   router,
@@ -20,9 +45,18 @@ export function registerSnapshotsRoutes({
 }: RouteDependencies) {
   // GET all snapshots
   router.get(
-    { path: addBasePath('snapshots'), validate: false },
+    { path: addBasePath('snapshots'), validate: { query: snapshotListSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
+      const sortField =
+        sortFieldToESParams[(req.query as TypeOf<typeof snapshotListSchema>).sortField];
+      const sortDirection = (req.query as TypeOf<typeof snapshotListSchema>).sortDirection;
+      const pageIndex = (req.query as TypeOf<typeof snapshotListSchema>).pageIndex;
+      const pageSize = (req.query as TypeOf<typeof snapshotListSchema>).pageSize;
+      const searchField = (req.query as TypeOf<typeof snapshotListSchema>).searchField;
+      const searchValue = (req.query as TypeOf<typeof snapshotListSchema>).searchValue;
+      const searchMatch = (req.query as TypeOf<typeof snapshotListSchema>).searchMatch;
+      const searchOperator = (req.query as TypeOf<typeof snapshotListSchema>).searchOperator;
 
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
@@ -55,18 +89,60 @@ export function registerSnapshotsRoutes({
         return handleEsError({ error: e, response: res });
       }
 
+      // if the search is for a repository name with exact match (repository=test)
+      // and that repository doesn't exist, ES request throws an error
+      // that is why we return an empty snapshots array instead of sending an ES request
+      if (
+        searchField === 'repository' &&
+        isSearchingForNonExistentRepository(repositories, searchValue!, searchMatch, searchOperator)
+      ) {
+        return res.ok({
+          body: {
+            snapshots: [],
+            policies,
+            repositories,
+            errors: [],
+            total: 0,
+          },
+        });
+      }
       try {
         // If any of these repositories 504 they will cost the request significant time.
         const { body: fetchedSnapshots } = await clusterClient.asCurrentUser.snapshot.get({
-          repository: '_all',
-          snapshot: '_all',
+          repository:
+            searchField === 'repository'
+              ? getSnapshotSearchWildcard({
+                  field: searchField,
+                  value: searchValue!,
+                  match: searchMatch,
+                  operator: searchOperator,
+                })
+              : '_all',
           ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
-          // @ts-expect-error @elastic/elasticsearch "desc" is a new param
-          order: 'desc',
-          // TODO We are temporarily hard-coding the maximum number of snapshots returned
-          // in order to prevent an unusable UI for users with large number of snapshots
-          // In the near future, this will be resolved with server-side pagination
-          size: SNAPSHOT_LIST_MAX_SIZE,
+          snapshot:
+            searchField === 'snapshot'
+              ? getSnapshotSearchWildcard({
+                  field: searchField,
+                  value: searchValue!,
+                  match: searchMatch,
+                  operator: searchOperator,
+                })
+              : '_all',
+          // @ts-expect-error @elastic/elasticsearch new API params
+          // https://github.com/elastic/elasticsearch-specification/issues/845
+          slm_policy_filter:
+            searchField === 'policyName'
+              ? getSnapshotSearchWildcard({
+                  field: searchField,
+                  value: searchValue!,
+                  match: searchMatch,
+                  operator: searchOperator,
+                })
+              : '*,_none',
+          order: sortDirection,
+          sort: sortField,
+          size: pageSize,
+          offset: pageIndex * pageSize,
         });
 
         // Decorate each snapshot with the repository with which it's associated.
@@ -79,8 +155,10 @@ export function registerSnapshotsRoutes({
             snapshots: snapshots || [],
             policies,
             repositories,
-            // @ts-expect-error @elastic/elasticsearch "failures" is a new field in the response
+            // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/845
             errors: fetchedSnapshots?.failures,
+            // @ts-expect-error @elastic/elasticsearch "total" is a new field in the response
+            total: fetchedSnapshots?.total,
           },
         });
       } catch (e) {
@@ -170,7 +248,7 @@ export function registerSnapshotsRoutes({
       const snapshots = req.body;
 
       try {
-        // We intentially perform deletion requests sequentially (blocking) instead of in parallel (non-blocking)
+        // We intentionally perform deletion requests sequentially (blocking) instead of in parallel (non-blocking)
         // because there can only be one snapshot deletion task performed at a time (ES restriction).
         for (let i = 0; i < snapshots.length; i++) {
           const { snapshot, repository } = snapshots[i];
