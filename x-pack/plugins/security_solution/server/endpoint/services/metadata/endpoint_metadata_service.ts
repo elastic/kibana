@@ -170,52 +170,97 @@ export class EndpointMetadataService {
       );
     }
 
-    // ------------------------------------------------------------------------------
-    // Any failures in enriching the Host form this point should NOT cause an error
-    // ------------------------------------------------------------------------------
-    try {
-      let fleetAgentPolicy: AgentPolicyWithPackagePolicies | undefined;
-      let endpointPackagePolicy: PackagePolicy | undefined;
+    return this.enrichHostMetadata(esClient, endpointMetadata, fleetAgent);
+  }
 
-      // Get Agent Policy and Endpoint Package Policy
-      if (fleetAgent) {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          fleetAgentPolicy = await this.getFleetAgentPolicy(fleetAgent.policy_id!);
-          endpointPackagePolicy = fleetAgentPolicy.package_policies.find(
-            (policy) => policy.package?.name === 'endpoint'
+  /**
+   * Enriches a host metadata document with data from fleet
+   * @param esClient
+   * @param endpointMetadata
+   * @param _fleetAgent
+   * @param _fleetAgentPolicy
+   * @param _endpointPackagePolicy
+   * @private
+   */
+  private async enrichHostMetadata(
+    esClient: ElasticsearchClient,
+    endpointMetadata: HostMetadata,
+    /** If undefined, it will be retrieved from Fleet using the ID in the endpointMetadata  */
+    _fleetAgent?: Agent,
+    /** If undefined, it will be retrieved from Fleet using data from the endpointMetadata  */
+    _fleetAgentPolicy?: AgentPolicyWithPackagePolicies,
+    /** If undefined, it will be retrieved from Fleet using the ID in the endpointMetadata */
+    _endpointPackagePolicy?: PackagePolicy
+  ): Promise<HostInfo> {
+    let fleetAgentId = endpointMetadata.elastic.agent.id;
+    let fleetAgent = _fleetAgent;
+    let fleetAgentPolicy = _fleetAgentPolicy;
+    let endpointPackagePolicy = _endpointPackagePolicy;
+
+    if (!fleetAgent) {
+      try {
+        if (!fleetAgentId) {
+          fleetAgentId = endpointMetadata.agent.id;
+          this.logger?.warn(
+            new EndpointError(
+              `Missing elastic fleet agent id on Endpoint Metadata doc - using Endpoint agent.id instead: ${fleetAgentId}`
+            )
           );
-        } catch (error) {
-          this.logger?.error(error);
+        }
+
+        fleetAgent = await this.getFleetAgent(esClient, fleetAgentId);
+      } catch (error) {
+        if (error instanceof FleetAgentNotFoundError) {
+          this.logger?.warn(`agent with id ${fleetAgentId} not found`);
+        } else {
+          throw error;
         }
       }
+    }
 
-      return {
-        metadata: endpointMetadata,
-        host_status: fleetAgent
-          ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            fleetAgentStatusToEndpointHostStatus(fleetAgent.status!)
-          : DEFAULT_ENDPOINT_HOST_STATUS,
-        policy_info: {
-          agent: {
-            applied: {
-              revision: fleetAgent?.policy_revision ?? 0,
-              id: fleetAgent?.policy_id ?? '',
-            },
-            configured: {
-              revision: fleetAgentPolicy?.revision ?? 0,
-              id: fleetAgentPolicy?.id ?? '',
-            },
+    if (!fleetAgentPolicy && fleetAgent) {
+      try {
+        fleetAgentPolicy = await this.getFleetAgentPolicy(fleetAgent.policy_id ?? '');
+      } catch (error) {
+        this.logger?.error(error);
+      }
+    }
+
+    if (!endpointPackagePolicy && fleetAgentPolicy) {
+      endpointPackagePolicy = fleetAgentPolicy.package_policies.find(
+        (policy) => policy.package?.name === 'endpoint'
+      );
+
+      if (!endpointPackagePolicy) {
+        this.logger?.error(
+          new EndpointError(`Endpoint policy id not found in Fleet Agent Policy`, fleetAgentPolicy)
+        );
+      }
+    }
+
+    return {
+      metadata: endpointMetadata,
+      host_status: fleetAgent
+        ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          fleetAgentStatusToEndpointHostStatus(fleetAgent.status!)
+        : DEFAULT_ENDPOINT_HOST_STATUS,
+      policy_info: {
+        agent: {
+          applied: {
+            revision: fleetAgent?.policy_revision ?? 0,
+            id: fleetAgent?.policy_id ?? '',
           },
-          endpoint: {
-            revision: endpointPackagePolicy?.revision ?? 0,
-            id: endpointPackagePolicy?.id ?? '',
+          configured: {
+            revision: fleetAgentPolicy?.revision ?? 0,
+            id: fleetAgentPolicy?.id ?? '',
           },
         },
-      };
-    } catch (error) {
-      throw wrapErrorIfNeeded(error);
-    }
+        endpoint: {
+          revision: endpointPackagePolicy?.revision ?? 0,
+          id: endpointPackagePolicy?.id ?? '',
+        },
+      },
+    };
   }
 
   /**
@@ -338,8 +383,6 @@ export class EndpointMetadataService {
       {}
     );
 
-    // FIXME: refactor the enrichment function in this service class so that it can be reused below
-
     const hosts = docs
       .filter((doc) => {
         const { endpoint: metadata, agent } = doc?._source?.united ?? {};
@@ -352,6 +395,8 @@ export class EndpointMetadataService {
         const agentPolicy = agentPoliciesMap[agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const endpointPolicy = endpointPoliciesMap[agent.policy_id!];
+
+        // FIXME: refactor the enrichment function in this service class so that it can be reused below
         return {
           metadata,
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
