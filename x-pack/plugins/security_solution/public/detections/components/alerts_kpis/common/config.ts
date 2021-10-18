@@ -19,6 +19,9 @@ export const alertsStackByOptions: AlertsStackByOption[] = [
   { text: 'signal.rule.name', value: 'signal.rule.name' },
   { text: 'source.ip', value: 'source.ip' },
   { text: 'user.name', value: 'user.name' },
+  { text: 'process.name', value: 'process.name' },
+  { text: 'file.name', value: 'file.name' },
+  { text: 'hash.sha256', value: 'hash.sha256' },
 ];
 
 export const DEFAULT_STACK_BY_FIELD = 'signal.rule.name';
