@@ -48,12 +48,14 @@ export function setupFleetAndAgents(providerContext: FtrProviderContext) {
     await supetestWithoutAuth
       .post(`/api/fleet/setup`)
       .set('kbn-xsrf', 'xxx')
-      .set('Authentication', `Bearer ${token.value}`)
-      .send();
+      .set('Authorization', `Bearer ${token.value}`)
+      .send()
+      .expect(200);
     await supetestWithoutAuth
       .post(`/api/fleet/agents/setup`)
       .set('kbn-xsrf', 'xxx')
-      .set('Authentication', `Bearer ${token.value}`)
-      .send({ forceRecreate: true });
+      .set('Authorization', `Bearer ${token.value}`)
+      .send({ forceRecreate: true })
+      .expect(200);
   });
 }
