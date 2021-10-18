@@ -56,9 +56,8 @@ export function ActionMenuContent(): React.ReactElement {
           time: { from: dateRangeStart, to: dateRangeEnd },
           breakdown: monitorId ? 'observer.geo.name' : 'monitor.type',
           reportDefinitions: {
-            'monitor.name': selectedMonitor?.monitor?.name
-              ? [selectedMonitor?.monitor?.name]
-              : ['ALL_VALUES'],
+            'monitor.name': selectedMonitor?.monitor?.name ? [selectedMonitor?.monitor?.name] : [],
+            'url.full': ['ALL_VALUES'],
           },
           name: monitorId ? `${monitorId}-response-duration` : 'All monitors response duration',
         },
@@ -100,9 +99,11 @@ export function ActionMenuContent(): React.ReactElement {
 
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.uptime.page_header.addDataLink.label', {
-          defaultMessage: 'Navigate to a tutorial about adding Uptime data',
+          defaultMessage: 'Navigate to the Elastic Synthetics integration to add Uptime data',
         })}
-        href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
+        href={kibana.services?.application?.getUrlForApp(
+          '/integrations/detail/synthetics/overview'
+        )}
         color="primary"
         iconType="indexOpen"
       >
