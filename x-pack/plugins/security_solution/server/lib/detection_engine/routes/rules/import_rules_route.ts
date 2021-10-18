@@ -273,6 +273,7 @@ export const importRulesRoute = (
                       } else if (rule != null && request.query.overwrite) {
                         await patchRules({
                           rulesClient,
+                          savedObjectsClient,
                           author,
                           buildingBlockType,
                           spaceId: context.securitySolution.getSpaceId(),

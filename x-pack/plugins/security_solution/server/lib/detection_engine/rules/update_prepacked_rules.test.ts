@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
@@ -19,10 +20,12 @@ describe.each([
 ])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
     ruleStatusClient = ruleExecutionLogClientMock.create();
+    savedObjectsClient = savedObjectsClientMock.create();
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {
@@ -40,6 +43,7 @@ describe.each([
 
     await updatePrepackagedRules(
       rulesClient,
+      savedObjectsClient,
       'default',
       ruleStatusClient,
       [{ ...prepackagedRule, actions }],

@@ -6,6 +6,7 @@
  */
 
 import { chunk } from 'lodash/fp';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { patchRules } from './patch_rules';
@@ -51,6 +52,7 @@ export const UPDATE_CHUNK_SIZE = 50;
  */
 export const updatePrepackagedRules = async (
   rulesClient: RulesClient,
+  savedObjectsClient: SavedObjectsClientContract,
   spaceId: string,
   ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
@@ -61,6 +63,7 @@ export const updatePrepackagedRules = async (
   for (const ruleChunk of ruleChunks) {
     const rulePromises = createPromises(
       rulesClient,
+      savedObjectsClient,
       spaceId,
       ruleStatusClient,
       ruleChunk,
@@ -82,6 +85,7 @@ export const updatePrepackagedRules = async (
  */
 export const createPromises = (
   rulesClient: RulesClient,
+  savedObjectsClient: SavedObjectsClientContract,
   spaceId: string,
   ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
@@ -150,6 +154,7 @@ export const createPromises = (
     // or enable rules on the user when they were not expecting it if a rule updates
     return patchRules({
       rulesClient,
+      savedObjectsClient,
       author,
       buildingBlockType,
       description,

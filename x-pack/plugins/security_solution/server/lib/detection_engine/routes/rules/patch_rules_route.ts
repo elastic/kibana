@@ -136,6 +136,7 @@ export const patchRulesRoute = (
 
         const rule = await patchRules({
           rulesClient,
+          savedObjectsClient,
           author,
           buildingBlockType,
           description,

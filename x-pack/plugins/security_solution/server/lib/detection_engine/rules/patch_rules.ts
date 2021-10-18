@@ -13,6 +13,8 @@ import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRuleActionsSavedObjectType } from '../rule_actions/legacy_saved_object_mappings';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { addTags } from './add_tags';
 import { enableRule } from './enable_rule';
@@ -35,8 +37,10 @@ class PatchError extends Error {
   }
 }
 
+// eslint-disable-next-line complexity
 export const patchRules = async ({
   rulesClient,
+  savedObjectsClient,
   author,
   buildingBlockType,
   ruleStatusClient,
@@ -90,6 +94,39 @@ export const patchRules = async ({
 }: PatchRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   if (rule == null) {
     return null;
+  }
+
+  /**
+   * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
+   * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actualy value (1hr etc..)
+   * Then use the rules client to delete the siem.notification
+   * Then with the legacy Rule Actions saved object type, just delete it.
+   */
+
+  // find it using the references array, not params.ruleAlertId
+  let migratedRule = false;
+  const siemNotification = await rulesClient.find({
+    options: {
+      hasReference: {
+        type: 'alert',
+        id: rule.id,
+      },
+    },
+  });
+
+  const legacyRuleActionsSO = await savedObjectsClient.find({
+    type: legacyRuleActionsSavedObjectType,
+  });
+
+  if (siemNotification != null && siemNotification.data.length > 0) {
+    await rulesClient.delete({ id: siemNotification.data[0].id });
+    if (legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0) {
+      await savedObjectsClient.delete(
+        legacyRuleActionsSavedObjectType,
+        legacyRuleActionsSO.saved_objects[0].id
+      );
+    }
+    migratedRule = true;
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
@@ -191,14 +228,24 @@ export const patchRules = async ({
 
   const newRule = {
     tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
-    throttle: throttle !== undefined ? transformToAlertThrottle(throttle) : rule.throttle,
-    notifyWhen: throttle !== undefined ? transformToNotifyWhen(throttle) : rule.notifyWhen,
     name: calculateName({ updatedName: name, originalName: rule.name }),
     schedule: {
       interval: calculateInterval(interval, rule.schedule.interval),
     },
-    actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
     params: removeUndefined(nextParams),
+    actions: migratedRule
+      ? siemNotification.data[0].actions
+      : actions?.map(transformRuleToAlertAction) ?? rule.actions,
+    throttle: migratedRule
+      ? siemNotification.data[0].schedule.interval
+      : throttle !== undefined
+      ? transformToAlertThrottle(throttle)
+      : rule.throttle,
+    notifyWhen: migratedRule
+      ? transformToNotifyWhen(siemNotification.data[0].throttle)
+      : throttle !== undefined
+      ? transformToNotifyWhen(throttle)
+      : rule.notifyWhen,
   };
 
   const [validated, errors] = validate(newRule, internalRuleUpdate);

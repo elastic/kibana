@@ -283,6 +283,7 @@ export interface PatchRulesOptions {
   spaceId: string;
   ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
