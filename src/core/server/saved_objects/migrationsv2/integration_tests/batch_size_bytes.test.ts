@@ -26,6 +26,30 @@ async function removeLogFile() {
   // ignore errors if it doesn't exist
   await fs.unlink(logFilePath).catch(() => void 0);
 }
+function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {
+  return a.type.localeCompare(b.type) || a.id.localeCompare(b.id);
+}
+
+async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
+  const { body } = await esClient.search<any>({
+    index,
+    body: {
+      query: {
+        match_all: {},
+      },
+      _source: ['type', 'id'],
+    },
+  });
+
+  return body.hits.hits
+    .map((h) => ({
+      ...h._source,
+      id: h._id,
+    }))
+    .sort(sortByTypeAndId);
+}
+
+const assertMigratedDocuments = (arr: any[], target: any[]) => target.every((v) => arr.includes(v));
 
 describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
@@ -72,16 +96,11 @@ describe('migration v2', () => {
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
     const esClient: ElasticsearchClient = esServer.es.getClient();
-    const migratedIndexResponse = await esClient.count({
-      index: targetIndex,
-    });
-    const oldIndexResponse = await esClient.count({
-      index: '.kibana_7.14.0_001',
-    });
 
-    // Use a >= comparison since once Kibana has started it might create new
-    // documents like telemetry tasks
-    expect(migratedIndexResponse.body.count).toBeGreaterThanOrEqual(oldIndexResponse.body.count);
+    // assert that the docs from the original index have been migrated rather than comparing a doc count after startup
+    const originalDocs = await fetchDocuments(esClient, '.kibana_7.14.0_001');
+    const migratedDocs = await fetchDocuments(esClient, targetIndex);
+    expect(assertMigratedDocuments(migratedDocs, originalDocs));
   });
 
   it('fails with a descriptive message when a single document exceeds maxBatchSizeBytes', async () => {
