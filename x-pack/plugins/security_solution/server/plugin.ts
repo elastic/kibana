@@ -393,8 +393,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     registerPrivilegeDeprecations({
       deprecationsService: core.deprecations,
-      getKibanaRolesByFeatureId:
-        plugins.security?.privilegeDeprecationsService.getKibanaRolesByFeatureId,
+      getKibanaRoles: plugins.security?.privilegeDeprecationsService.getKibanaRoles,
       logger: this.logger.get('deprecations'),
     });
 

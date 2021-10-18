@@ -9,16 +9,19 @@ import { i18n } from '@kbn/i18n';
 import type {
   DeprecationsDetails,
   DeprecationsServiceSetup,
-  ElasticsearchClient,
+  GetDeprecationsContext,
   Logger,
   PackageInfo,
 } from 'src/core/server';
 
 import type { SecurityLicense } from '../../common';
-import type { Role } from '../../common/model';
+import type {
+  PrivilegeDeprecationsRolesResponse,
+  PrivilegeDeprecationsService,
+} from '../../common/model';
 import { isRoleReserved } from '../../common/model';
-import { transformElasticsearchRoleToRole } from '../authorization';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { getErrorStatusCode } from '../errors';
+import { getPrivilegeDeprecationsService } from './privilege_deprecations';
 
 export const KIBANA_USER_ROLE_NAME = 'kibana_user';
 export const KIBANA_ADMIN_ROLE_NAME = 'kibana_admin';
@@ -58,52 +61,30 @@ export const registerMLPrivilegesDeprecation = ({
         return [];
       }
 
-      return [
-        ...(await getRolesDeprecations(
-          context.esClient.asCurrentUser,
-          logger,
-          packageInfo,
-          applicationName
-        )),
-      ];
+      const privilegeDeprecationService = getPrivilegeDeprecationsService(
+        {
+          applicationName,
+        },
+        license,
+        logger
+      );
+
+      return [...(await getRolesDeprecations(context, privilegeDeprecationService))];
     },
   });
 };
 
 async function getRolesDeprecations(
-  client: ElasticsearchClient,
-  logger: Logger,
-  packageInfo: PackageInfo,
-  applicationName: string
+  context: GetDeprecationsContext,
+  privilegeDeprecationService: PrivilegeDeprecationsService
 ): Promise<DeprecationsDetails[]> {
-  let roles: Role[];
-  try {
-    const elasticsearchRoles = (await client.security.getRole()).body;
-
-    roles = Object.entries(elasticsearchRoles).map(([roleName, elasticsearchRole]) =>
-      transformElasticsearchRoleToRole(
-        // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
-        elasticsearchRole,
-        roleName,
-        applicationName
-      )
-    );
-  } catch (err) {
-    if (getErrorStatusCode(err) === 403) {
-      logger.warn(
-        `Failed to retrieve roles when checking for deprecations: the "manage_security" cluster privilege is required.`
-      );
-    } else {
-      logger.error(
-        `Failed to retrieve roles when checking for deprecations, unexpected error: ${getDetailedErrorMessage(
-          err
-        )}.`
-      );
-    }
-    return deprecationError(packageInfo, err);
+  const response: PrivilegeDeprecationsRolesResponse =
+    await privilegeDeprecationService.getKibanaRoles({ context });
+  if (response.errors) {
+    return response.errors;
   }
 
-  const rolesWithBasePrivileges = roles
+  const rolesWithBasePrivileges = (response.roles ?? [])
     .filter((role) => {
       const hasBasePrivileges = role.kibana.some(
         (kp) => kp.base.includes('all') || kp.base.includes('read')

@@ -10,8 +10,8 @@ import type { Logger } from 'src/core/server';
 
 import type { SecurityLicense } from '../../common/licensing';
 import type {
-  PrivilegeDeprecationsRolesByFeatureIdRequest,
-  PrivilegeDeprecationsRolesByFeatureIdResponse,
+  PrivilegeDeprecationsRolesRequest,
+  PrivilegeDeprecationsRolesResponse,
 } from '../../common/model';
 import { transformElasticsearchRoleToRole } from '../authorization';
 import type { AuthorizationServiceSetupInternal, ElasticsearchRole } from '../authorization';
@@ -22,10 +22,10 @@ export const getPrivilegeDeprecationsService = (
   license: SecurityLicense,
   logger: Logger
 ) => {
-  const getKibanaRolesByFeatureId = async ({
+  const getKibanaRoles = async ({
     context,
     featureId,
-  }: PrivilegeDeprecationsRolesByFeatureIdRequest): Promise<PrivilegeDeprecationsRolesByFeatureIdResponse> => {
+  }: PrivilegeDeprecationsRolesRequest): Promise<PrivilegeDeprecationsRolesResponse> => {
     // Nothing to do if security is disabled
     if (!license.isEnabled()) {
       return {
@@ -95,12 +95,16 @@ export const getPrivilegeDeprecationsService = (
       };
     }
     return {
-      roles: kibanaRoles.filter((role) =>
-        role.kibana.find((privilege) => Object.hasOwnProperty.call(privilege.feature, featureId))
-      ),
+      roles: featureId
+        ? kibanaRoles.filter((role) =>
+            role.kibana.find((privilege) =>
+              Object.hasOwnProperty.call(privilege.feature, featureId)
+            )
+          )
+        : kibanaRoles,
     };
   };
   return Object.freeze({
-    getKibanaRolesByFeatureId,
+    getKibanaRoles,
   });
 };

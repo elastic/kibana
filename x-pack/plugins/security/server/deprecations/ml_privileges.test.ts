@@ -125,14 +125,12 @@ describe('Machine Learning privileges deprecations', () => {
               Object {
                 "correctiveActions": Object {
                   "manualSteps": Array [
-                    "Make sure you have a \\"manage_security\\" cluster privilege assigned.",
+                    "A user with the \\"manage_security\\" cluster privilege is required to perform this check.",
                   ],
                 },
-                "deprecationType": "feature",
-                "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security.html#_required_permissions_7",
                 "level": "fetch_error",
-                "message": "You do not have enough permissions to fix this deprecation.",
-                "title": "Access to Machine Learning features will be granted in 8.0",
+                "message": "You must have the 'manage_security' cluster privilege to fix role deprecations.",
+                "title": "Error in privilege deprecations services",
               },
             ]
           `);
@@ -148,13 +146,12 @@ describe('Machine Learning privileges deprecations', () => {
               Object {
                 "correctiveActions": Object {
                   "manualSteps": Array [
-                    "Check Kibana logs for more details.",
+                    "A user with the \\"manage_security\\" cluster privilege is required to perform this check.",
                   ],
                 },
-                "deprecationType": "feature",
                 "level": "fetch_error",
-                "message": "Failed to perform deprecation check. Check Kibana logs for more details.",
-                "title": "Access to Machine Learning features will be granted in 8.0",
+                "message": "Error retrieving roles for privilege deprecations: {}",
+                "title": "Error in privilege deprecations services",
               },
             ]
           `);

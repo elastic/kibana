@@ -15,17 +15,13 @@ const kibanaIndexName = '.a-kibana-index';
 const application = `kibana-${kibanaIndexName}`;
 
 describe('#getPrivilegeDeprecationsService', () => {
-  describe('#getKibanaRolesByFeatureId', () => {
+  describe('#getKibanaRoles', () => {
     const mockAsCurrentUser = elasticsearchServiceMock.createScopedClusterClient();
     const mockLicense = licenseMock.create();
     const mockLogger = loggingSystemMock.createLogger();
     const authz = { applicationName: application };
 
-    const { getKibanaRolesByFeatureId } = getPrivilegeDeprecationsService(
-      authz,
-      mockLicense,
-      mockLogger
-    );
+    const { getKibanaRoles } = getPrivilegeDeprecationsService(authz, mockLicense, mockLogger);
 
     it('happy path to find siem roles with feature_siem privileges', async () => {
       mockAsCurrentUser.asCurrentUser.security.getRole.mockResolvedValue(
@@ -56,7 +52,7 @@ describe('#getPrivilegeDeprecationsService', () => {
         savedObjectsClient: jest.fn(),
       } as unknown as GetDeprecationsContext;
 
-      const resp = await getKibanaRolesByFeatureId({ context: mockContext, featureId: 'siem' });
+      const resp = await getKibanaRoles({ context: mockContext, featureId: 'siem' });
       expect(resp).toMatchInlineSnapshot(`
         Object {
           "roles": Array [
@@ -130,7 +126,7 @@ describe('#getPrivilegeDeprecationsService', () => {
         savedObjectsClient: jest.fn(),
       } as unknown as GetDeprecationsContext;
 
-      const resp = await getKibanaRolesByFeatureId({ context: mockContext, featureId: 'siem' });
+      const resp = await getKibanaRoles({ context: mockContext, featureId: 'siem' });
       expect(resp).toMatchInlineSnapshot(`
         Object {
           "roles": Array [
@@ -209,7 +205,7 @@ describe('#getPrivilegeDeprecationsService', () => {
         savedObjectsClient: jest.fn(),
       } as unknown as GetDeprecationsContext;
 
-      const resp = await getKibanaRolesByFeatureId({ context: mockContext, featureId: 'siem' });
+      const resp = await getKibanaRoles({ context: mockContext, featureId: 'siem' });
       expect(resp).toMatchInlineSnapshot(`
         Object {
           "roles": Array [],
@@ -230,7 +226,7 @@ describe('#getPrivilegeDeprecationsService', () => {
         savedObjectsClient: jest.fn(),
       } as unknown as GetDeprecationsContext;
 
-      const resp = await getKibanaRolesByFeatureId({ context: mockContext, featureId: 'siem' });
+      const resp = await getKibanaRoles({ context: mockContext, featureId: 'siem' });
       expect(resp).toMatchInlineSnapshot(`
         Object {
           "errors": Array [
@@ -262,7 +258,7 @@ describe('#getPrivilegeDeprecationsService', () => {
         savedObjectsClient: jest.fn(),
       } as unknown as GetDeprecationsContext;
 
-      const resp = await getKibanaRolesByFeatureId({ context: mockContext, featureId: 'siem' });
+      const resp = await getKibanaRoles({ context: mockContext, featureId: 'siem' });
       expect(resp).toMatchInlineSnapshot(`
         Object {
           "errors": Array [

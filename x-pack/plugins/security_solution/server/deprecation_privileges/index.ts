@@ -14,7 +14,7 @@ import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../common/constants';
 
 interface Deps {
   deprecationsService: DeprecationsServiceSetup;
-  getKibanaRolesByFeatureId?: PrivilegeDeprecationsService['getKibanaRolesByFeatureId'];
+  getKibanaRoles?: PrivilegeDeprecationsService['getKibanaRoles'];
   logger: Logger;
 }
 
@@ -70,16 +70,16 @@ function outdatedSiemRolePredicate(role: Role) {
 
 export const registerPrivilegeDeprecations = ({
   deprecationsService,
-  getKibanaRolesByFeatureId,
+  getKibanaRoles,
   logger,
 }: Deps) => {
   deprecationsService.registerDeprecations({
     getDeprecations: async (context) => {
       let deprecatedRoles: DeprecationsDetails[] = [];
-      if (!getKibanaRolesByFeatureId) {
+      if (!getKibanaRoles) {
         return deprecatedRoles;
       }
-      const responseRoles = await getKibanaRolesByFeatureId({
+      const responseRoles = await getKibanaRoles({
         context,
         featureId: 'siem',
       });

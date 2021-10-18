@@ -324,7 +324,7 @@ describe('deprecations', () => {
       savedObjectsClient: jest.fn(),
     } as unknown as GetDeprecationsContext;
     const getDeprecations = jest.fn();
-    const getKibanaRolesByFeatureId = jest.fn();
+    const getKibanaRoles = jest.fn();
     const mockDeprecationsService: DeprecationsServiceSetup = {
       registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => {
         getDeprecations.mockImplementation(deprecationContext.getDeprecations);
@@ -334,15 +334,15 @@ describe('deprecations', () => {
     beforeAll(() => {
       registerPrivilegeDeprecations({
         deprecationsService: mockDeprecationsService,
-        getKibanaRolesByFeatureId,
+        getKibanaRoles,
         logger: loggingSystemMock.createLogger(),
       });
     });
     beforeEach(() => {
-      getKibanaRolesByFeatureId.mockReset();
+      getKibanaRoles.mockReset();
     });
 
-    test('getDeprecations return the errors from getKibanaRolesByFeatureId', async () => {
+    test('getDeprecations return the errors from getKibanaRoles', async () => {
       const errorResponse = {
         errors: [
           {
@@ -357,13 +357,13 @@ describe('deprecations', () => {
           },
         ],
       };
-      getKibanaRolesByFeatureId.mockResolvedValue(errorResponse);
+      getKibanaRoles.mockResolvedValue(errorResponse);
       const response = await getDeprecations(mockContext);
       expect(response).toEqual(errorResponse.errors);
     });
 
     test('getDeprecations return empty array when securitySolutionCases privileges are already set up', async () => {
-      getKibanaRolesByFeatureId.mockResolvedValue({
+      getKibanaRoles.mockResolvedValue({
         roles: [
           {
             _transform_error: [],
@@ -399,7 +399,7 @@ describe('deprecations', () => {
     });
 
     test('happy path build securitySolutionCases privileges from  siem privileges', async () => {
-      getKibanaRolesByFeatureId.mockResolvedValue({
+      getKibanaRoles.mockResolvedValue({
         roles: [
           {
             _transform_error: [],
@@ -481,7 +481,7 @@ describe('deprecations', () => {
     });
 
     test('getDeprecations handles multiple roles and filters out any that have already been updated', async () => {
-      getKibanaRolesByFeatureId.mockResolvedValue({
+      getKibanaRoles.mockResolvedValue({
         roles: [
           {
             _transform_error: [],
@@ -616,7 +616,7 @@ describe('deprecations', () => {
     });
 
     test('getDeprecations handles multiple roles and filters out any that do not grant access to Cases', async () => {
-      getKibanaRolesByFeatureId.mockResolvedValue({
+      getKibanaRoles.mockResolvedValue({
         roles: [
           {
             _transform_error: [],
