@@ -55,9 +55,11 @@ export const getPreloadedState = ({
   const state = {
     ...initialState,
     isLoading: true,
-    query: data.query.queryString.getQuery(),
     // Do not use app-specific filters from previous app,
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+    query: !initialContext
+      ? data.query.queryString.getDefaultQuery()
+      : data.query.queryString.getQuery(),
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : data.query.filterManager.getFilters(),
@@ -117,7 +119,6 @@ export const navigateAway = createAction<void>('lens/navigateAway');
 export const loadInitial = createAction<{
   initialInput?: LensEmbeddableInput;
   redirectCallback: (savedObjectId?: string) => void;
-  emptyState: LensAppState;
   history: History<unknown>;
 }>('lens/loadInitial');
 export const initEmpty = createAction(
@@ -356,7 +357,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       payload: PayloadAction<{
         initialInput?: LensEmbeddableInput;
         redirectCallback: (savedObjectId?: string) => void;
-        emptyState: LensAppState;
         history: History<unknown>;
       }>
     ) => state,

@@ -58,7 +58,7 @@ export const useGetOneAgentPolicyFull = (agentPolicyId: string) => {
 
 export const sendGetOneAgentPolicyFull = (
   agentPolicyId: string,
-  query: { standalone?: boolean } = {}
+  query: { standalone?: boolean; kubernetes?: boolean } = {}
 ) => {
   return sendRequest<GetFullAgentPolicyResponse>({
     path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
