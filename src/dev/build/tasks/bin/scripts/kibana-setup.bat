@@ -27,8 +27,8 @@ IF EXIST "%CONFIG_DIR%\node.options" (
   )
 )
 
-TITLE Kibana Init
-"%NODE%" "%DIR%\src\cli_init\dist" %*
+TITLE Kibana Setup
+"%NODE%" "%DIR%\src\cli_setup\dist" %*
 
 :finally
 

@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-require('../src/cli_init/dev');
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/src/cli_setup'],
+};

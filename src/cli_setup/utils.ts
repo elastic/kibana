@@ -18,20 +18,21 @@ import { ElasticsearchService } from '../plugins/interactive_setup/server/elasti
 import { KibanaConfigWriter } from '../plugins/interactive_setup/server/kibana_config_writer';
 import type { EnrollmentToken } from '../plugins/interactive_setup/common';
 
-export const logger: Logger = {
-  debug: () => {},
-  error: () => {},
-  warn: () => {},
-  trace: () => {},
-  info: () => {},
-  fatal: () => {},
-  log: () => {},
+const noop = () => {};
+const logger: Logger = {
+  debug: noop,
+  error: noop,
+  warn: noop,
+  trace: noop,
+  info: noop,
+  fatal: noop,
+  log: noop,
   get: () => logger,
 };
 
 export const kibanaConfigWriter = new KibanaConfigWriter(getConfigPath(), logger);
 export const elasticsearch = new ElasticsearchService(logger).setup({
-  connectionCheckInterval: duration(999999),
+  connectionCheckInterval: duration(Infinity),
   elasticsearch: {
     createClient: (type, config) => {
       const defaults = configSchema.validate({});

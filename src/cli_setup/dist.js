@@ -7,4 +7,4 @@
  */
 
 require('../setup_node_env/dist');
-require('./cli_init');
+require('./cli_setup');

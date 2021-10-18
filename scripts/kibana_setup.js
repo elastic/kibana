@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-require('../setup_node_env');
-require('./cli_init');
+require('../src/cli_setup/dev');
