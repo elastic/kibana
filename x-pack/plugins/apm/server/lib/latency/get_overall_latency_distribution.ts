@@ -8,93 +8,44 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import { ProcessorEvent } from '../../../common/processor_event';
+
 import { withApmSpan } from '../../utils/with_apm_span';
-import { CorrelationsOptions } from '../search_strategies/queries/get_filters';
+
 import {
   getHistogramIntervalRequest,
   getHistogramRangeSteps,
 } from '../search_strategies/queries/query_histogram_range_steps';
-import { getTransactionDurationPercentilesRequest } from '../search_strategies/queries/query_percentiles';
 import { getTransactionDurationRangesRequest } from '../search_strategies/queries/query_ranges';
-import { Setup } from '../helpers/setup_request';
 
-interface Options extends CorrelationsOptions {
-  percentileThreshold: number;
-  setup: Setup;
-}
+import { getPercentileThresholdValue } from './get_percentile_threshold_value';
+import type {
+  OverallLatencyDistributionOptions,
+  OverallLatencyDistributionResponse,
+} from './types';
 
-export interface OverallLatencyDistributionResponse {
-  log: string[];
-  percentileThresholdValue?: number;
-  overallHistogram?: Array<{
-    key: number;
-    doc_count: number;
-  }>;
-}
-
-export async function getOverallLatencyDistribution(options: Options) {
-  const {
-    setup,
-    environment,
-    kuery,
-    serviceName,
-    start,
-    end,
-    transactionType,
-    transactionName,
-    percentileThreshold,
-  } = options;
-
+export async function getOverallLatencyDistribution(
+  options: OverallLatencyDistributionOptions
+) {
   return withApmSpan('get_overall_latency_distribution', async () => {
     const overallLatencyDistribution: OverallLatencyDistributionResponse = {
       log: [],
     };
 
+    const { setup, ...rawParams } = options;
     const { apmEventClient } = setup;
-
     const params = {
       // pass on an empty index because we're using only the body attribute
       // of the request body getters we're reusing from search strategies.
       index: '',
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      transactionType,
-      transactionName,
+      ...rawParams,
     };
 
     // #1: get 95th percentile to be displayed as a marker in the log log chart
-    const { body: transactionDurationPercentilesRequestBody } =
-      getTransactionDurationPercentilesRequest(params, [percentileThreshold]);
-
-    const transactionDurationPercentilesResponse = (await apmEventClient.search(
-      'get_transaction_duration_percentiles',
-      {
-        // TODO: add support for metrics
-        apm: { events: [ProcessorEvent.transaction] },
-        body: transactionDurationPercentilesRequestBody,
-      }
-    )) as {
-      aggregations?: {
-        transaction_duration_percentiles: estypes.AggregationsTDigestPercentilesAggregate;
-      };
-    };
-
-    if (!transactionDurationPercentilesResponse.aggregations) {
-      return overallLatencyDistribution;
-    }
-
-    const percentilesResponseThresholds =
-      transactionDurationPercentilesResponse.aggregations
-        .transaction_duration_percentiles?.values ?? {};
-
     overallLatencyDistribution.percentileThresholdValue =
-      percentilesResponseThresholds[`${percentileThreshold}.0`] ?? null;
+      await getPercentileThresholdValue(options);
 
     // finish early if we weren't able to identify the percentileThresholdValue.
-    if (overallLatencyDistribution.percentileThresholdValue === null) {
+    if (!overallLatencyDistribution.percentileThresholdValue) {
       return overallLatencyDistribution;
     }
 
