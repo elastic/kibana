@@ -159,41 +159,31 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
           );
   }
 
-  function downloadMsg() {
-    if (isK8s === 'IS_KUBERNETES') {
-      return (
-        <FormattedMessage
-          id="xpack.fleet.agentEnrollment.downloadPolicyButtonk8s"
-          defaultMessage="Download Manifest"
-        />
-      );
-    } else {
-      return (
-        <FormattedMessage
-          id="xpack.fleet.agentEnrollment.downloadPolicyButton"
-          defaultMessage="Download Policy"
-        />
-      );
-    }
-  }
+  const downloadMsg =
+    isK8s === 'IS_KUBERNETES' ? (
+      <FormattedMessage
+        id="xpack.fleet.agentEnrollment.downloadPolicyButtonk8s"
+        defaultMessage="Download Manifest"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.fleet.agentEnrollment.downloadPolicyButton"
+        defaultMessage="Download Policy"
+      />
+    );
 
-  function applyMsg() {
-    if (isK8s === 'IS_KUBERNETES') {
-      return (
-        <FormattedMessage
-          id="xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s"
-          defaultMessage="From the directory where the Kubernetes manifest is downloaded, run the apply command."
-        />
-      );
-    } else {
-      return (
-        <FormattedMessage
-          id="xpack.fleet.agentEnrollment.stepRunAgentDescription"
-          defaultMessage="From the agent directory, run this command to install, enroll and start an Elastic Agent. You can reuse this command to set up agents on more than one host. Requires administrator privileges."
-        />
-      );
-    }
-  }
+  const applyMsg =
+    isK8s === 'IS_KUBERNETES' ? (
+      <FormattedMessage
+        id="xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s"
+        defaultMessage="From the directory where the Kubernetes manifest is downloaded, run the apply command."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.fleet.agentEnrollment.stepRunAgentDescription"
+        defaultMessage="From the agent directory, run this command to install, enroll and start an Elastic Agent. You can reuse this command to set up agents on more than one host. Requires administrator privileges."
+      />
+    );
 
   const steps = [
     DownloadStep(),
@@ -224,7 +214,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton iconType="download" href={downloadLink} isDisabled={!downloadLink}>
-                  {downloadMsg()}
+                  <>{downloadMsg}</>
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -243,7 +233,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
       children: (
         <>
           <EuiText>
-            {applyMsg()}
+            <>{applyMsg}</>
             <EuiSpacer size="m" />
             <EuiCodeBlock fontSize="m">{runInstructions}</EuiCodeBlock>
             <EuiSpacer size="m" />
