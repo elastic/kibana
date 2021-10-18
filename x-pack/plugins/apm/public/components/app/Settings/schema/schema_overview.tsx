@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import SemVer from 'semver';
+import semverLt from 'semver/functions/lt';
 import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../../../common/fleet';
 import { PackagePolicy } from '../../../../../../fleet/common/types';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
@@ -54,7 +54,7 @@ export function SchemaOverview({
     !cloudApmMigrationEnabled || !hasCloudAgentPolicy || !hasRequiredRole;
   const packageVersion = cloudApmPackagePolicy?.package?.version;
   const isUpgradeAvailable =
-    packageVersion && SemVer.lt(packageVersion, SUPPORTED_APM_PACKAGE_VERSION);
+    packageVersion && semverLt(packageVersion, SUPPORTED_APM_PACKAGE_VERSION);
 
   if (isLoading) {
     return (
