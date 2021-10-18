@@ -11,7 +11,7 @@ import './field_name.scss';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon, FieldIconProps } from '../../../../../kibana_react/public';
+import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 import { getFieldTypeName } from './field_type_name';
 import { IndexPatternField } from '../../../../../data/public';
 import { getFieldSubtypeMulti } from '../../../../../data/common';

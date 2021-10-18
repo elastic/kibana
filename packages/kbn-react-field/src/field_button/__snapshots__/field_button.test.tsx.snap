@@ -1,0 +1,134 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fieldAction is rendered 1`] = `
+<div
+  className="kbnFieldButton"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
+  >
+    <span
+      className="kbnFieldButton__name"
+    >
+      name
+    </span>
+  </button>
+  <div
+    className="kbnFieldButton__fieldAction"
+  >
+    <span>
+      fieldAction
+    </span>
+  </div>
+</div>
+`;
+
+exports[`fieldIcon is rendered 1`] = `
+<div
+  className="kbnFieldButton"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
+  >
+    <span
+      className="kbnFieldButton__fieldIcon"
+    >
+      <span>
+        fieldIcon
+      </span>
+    </span>
+    <span
+      className="kbnFieldButton__name"
+    >
+      name
+    </span>
+  </button>
+</div>
+`;
+
+exports[`isActive defaults to false 1`] = `
+<div
+  className="kbnFieldButton"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
+  >
+    <span
+      className="kbnFieldButton__name"
+    >
+      name
+    </span>
+  </button>
+</div>
+`;
+
+exports[`isActive renders true 1`] = `
+<div
+  className="kbnFieldButton kbnFieldButton-isActive"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
+  >
+    <span
+      className="kbnFieldButton__name"
+    >
+      name
+    </span>
+  </button>
+</div>
+`;
+
+exports[`isDraggable is rendered 1`] = `
+<div
+  className="kbnFieldButton kbnFieldButton--isDraggable"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
+  >
+    <span
+      className="kbnFieldButton__name"
+    >
+      name
+    </span>
+  </button>
+</div>
+`;
+
+exports[`sizes m is applied 1`] = `
+<div
+  className="kbnFieldButton"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
+  >
+    <span
+      className="kbnFieldButton__name"
+    >
+      name
+    </span>
+  </button>
+</div>
+`;
+
+exports[`sizes s is applied 1`] = `
+<div
+  className="kbnFieldButton kbnFieldButton--small"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
+  >
+    <span
+      className="kbnFieldButton__name"
+    >
+      name
+    </span>
+  </button>
+</div>
+`;
