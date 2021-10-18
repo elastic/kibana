@@ -12,8 +12,8 @@ import { merge } from 'lodash';
 // @ts-ignore
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-import { MAJOR_VERSION } from '../../../common/constants';
 import { HttpSetup } from 'src/core/public';
+import { MAJOR_VERSION } from '../../../common/constants';
 
 import { AuthorizationContext, Authorization, Privileges } from '../../../public/shared_imports';
 import { AppContextProvider } from '../../../public/application/app_context';

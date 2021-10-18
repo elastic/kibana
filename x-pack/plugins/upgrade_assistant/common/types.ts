@@ -123,8 +123,6 @@ export interface ReindexWarning {
 }
 
 // Telemetry types
-export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
-export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';
 export type UIOpenOption = 'overview' | 'elasticsearch' | 'kibana';
 export type UIReindexOption = 'close' | 'open' | 'start' | 'stop';
 
@@ -141,41 +139,12 @@ export interface UIReindex {
   stop: boolean;
 }
 
-export interface UpgradeAssistantTelemetrySavedObject {
-  ui_open: {
-    overview: number;
-    elasticsearch: number;
-    kibana: number;
-  };
-  ui_reindex: {
-    close: number;
-    open: number;
-    start: number;
-    stop: number;
-  };
-}
-
 export interface UpgradeAssistantTelemetry {
-  ui_open: {
-    overview: number;
-    elasticsearch: number;
-    kibana: number;
-  };
-  ui_reindex: {
-    close: number;
-    open: number;
-    start: number;
-    stop: number;
-  };
   features: {
     deprecation_logging: {
       enabled: boolean;
     };
   };
-}
-
-export interface UpgradeAssistantTelemetrySavedObjectAttributes {
-  [key: string]: any;
 }
 
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
