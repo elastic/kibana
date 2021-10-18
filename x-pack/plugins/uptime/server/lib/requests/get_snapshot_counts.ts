@@ -43,9 +43,12 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
 };
 
 const statusCount = async (context: QueryContext): Promise<Snapshot> => {
-  const { body: res } = await context.search({
-    body: statusCountBody(await context.dateAndCustomFilters(), context),
-  });
+  const { body: res } = await context.search(
+    {
+      body: statusCountBody(await context.dateAndCustomFilters(), context),
+    },
+    'geSnapshotCount'
+  );
 
   return (
     (res.aggregations?.counts?.value as Snapshot) ?? {
