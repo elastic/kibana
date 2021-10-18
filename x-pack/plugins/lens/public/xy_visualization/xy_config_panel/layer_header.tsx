@@ -17,7 +17,7 @@ import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { StaticHeader } from '../../shared_components';
 import { ToolbarButton } from '../../../../../../src/plugins/kibana_react/public';
-import { LensIconChartBarThreshold } from '../../assets/chart_bar_threshold';
+import { LensIconChartBarReferenceLine } from '../../assets/chart_bar_reference_line';
 import { updateLayer } from '.';
 
 export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
@@ -29,13 +29,13 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   if (!layer) {
     return null;
   }
-  // if it's a threshold just draw a static text
-  if (layer.layerType === layerTypes.THRESHOLD) {
+  // if it's a reference line just draw a static text
+  if (layer.layerType === layerTypes.REFERENCELINE) {
     return (
       <StaticHeader
-        icon={LensIconChartBarThreshold}
-        label={i18n.translate('xpack.lens.xyChart.layerThresholdLabel', {
-          defaultMessage: 'Thresholds',
+        icon={LensIconChartBarReferenceLine}
+        label={i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
+          defaultMessage: 'Reference lines',
         })}
       />
     );

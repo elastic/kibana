@@ -67,7 +67,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   notifyWhen,
   muteAll,
   mutedInstanceIds,
-  executionStatus: { lastExecutionDate, ...executionStatus },
+  executionStatus: { lastExecutionDate, lastDuration, ...executionStatus },
   ...rest
 }) => ({
   ...rest,
@@ -84,6 +84,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   execution_status: {
     ...executionStatus,
     last_execution_date: lastExecutionDate,
+    last_duration: lastDuration,
   },
   actions: actions.map(({ group, id, actionTypeId, params }) => ({
     group,

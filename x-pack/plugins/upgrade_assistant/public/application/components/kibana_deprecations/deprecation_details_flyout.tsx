@@ -20,12 +20,11 @@ import {
   EuiTitle,
   EuiText,
   EuiCallOut,
-  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../shared';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
-import { DeprecationBadge } from '../shared';
 
 import './_deprecation_details_flyout.scss';
 
@@ -37,12 +36,6 @@ export interface DeprecationDetailsFlyoutProps {
 }
 
 const i18nTexts = {
-  learnMoreLinkLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.flyout.learnMoreLinkLabel',
-    {
-      defaultMessage: 'Learn more about this deprecation',
-    }
-  ),
   closeButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.closeButtonLabel',
     {
@@ -162,12 +155,9 @@ export const DeprecationDetailsFlyout = ({
 
         <EuiText>
           <p className="eui-textBreakWord">{message}</p>
-
           {documentationUrl && (
             <p>
-              <EuiLink target="_blank" href={documentationUrl}>
-                {i18nTexts.learnMoreLinkLabel}
-              </EuiLink>
+              <DeprecationFlyoutLearnMoreLink documentationUrl={documentationUrl} />
             </p>
           )}
         </EuiText>
@@ -192,31 +182,33 @@ export const DeprecationDetailsFlyout = ({
               </>
             )}
 
-            <EuiTitle size="s">
-              <h3>{i18nTexts.manualFixTitle}</h3>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            <EuiText>
-              {correctiveActions.manualSteps.length === 1 ? (
-                <p data-test-subj="manualStep" className="eui-textBreakWord">
-                  {correctiveActions.manualSteps[0]}
-                </p>
-              ) : (
-                <ol data-test-subj="manualStepsList">
-                  {correctiveActions.manualSteps.map((step, stepIndex) => (
-                    <li
-                      data-test-subj="manualStepsListItem"
-                      key={`step-${stepIndex}`}
-                      className="upgResolveStep eui-textBreakWord"
-                    >
-                      {step}
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </EuiText>
+            {correctiveActions.manualSteps.length > 0 && (
+              <>
+                <EuiTitle size="s" data-test-subj="manualStepsTitle">
+                  <h3>{i18nTexts.manualFixTitle}</h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  {correctiveActions.manualSteps.length === 1 ? (
+                    <p data-test-subj="manualStep" className="eui-textBreakWord">
+                      {correctiveActions.manualSteps[0]}
+                    </p>
+                  ) : (
+                    <ol data-test-subj="manualStepsList">
+                      {correctiveActions.manualSteps.map((step, stepIndex) => (
+                        <li
+                          data-test-subj="manualStepsListItem"
+                          key={`step-${stepIndex}`}
+                          className="upgResolveStep eui-textBreakWord"
+                        >
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </EuiText>
+              </>
+            )}
           </div>
         )}
       </EuiFlyoutBody>

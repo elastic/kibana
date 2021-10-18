@@ -81,6 +81,11 @@ export class DataViewsService {
   private onError: OnError;
   private onUnsupportedTimePattern: OnUnsupportedTimePattern;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
+
+  /**
+   * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
+   *             'no data view' case in api consumer code - no more auto redirect
+   */
   ensureDefaultDataView: EnsureDefaultDataView;
 
   constructor({
@@ -712,6 +717,33 @@ export class DataViewsService {
   async delete(indexPatternId: string) {
     this.dataViewCache.clear(indexPatternId);
     return this.savedObjectsClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, indexPatternId);
+  }
+
+  /**
+   * Returns the default data view as an object. If no default is found, or it is missing
+   * another data view is selected as default and returned.
+   * @returns default data view
+   */
+
+  async getDefaultDataView() {
+    const patterns = await this.getIds();
+    let defaultId = await this.config.get('defaultIndex');
+    let defined = !!defaultId;
+    const exists = patterns.includes(defaultId);
+
+    if (defined && !exists) {
+      await this.config.remove('defaultIndex');
+      defaultId = defined = false;
+    }
+
+    if (patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
+      defaultId = patterns[0];
+      await this.config.set('defaultIndex', defaultId);
+    }
+
+    if (defaultId) {
+      return this.get(defaultId);
+    }
   }
 }
 
