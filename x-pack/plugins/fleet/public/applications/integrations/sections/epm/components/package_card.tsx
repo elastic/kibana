@@ -31,6 +31,7 @@ export function PackageCard({
   integration,
   url,
   release,
+  id,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -47,8 +48,10 @@ export function PackageCard({
     );
   }
 
+  const testid = `integration-card:${id}`;
   return (
     <Card
+      data-test-subj={testid}
       layout="horizontal"
       title={title || ''}
       titleSize="xs"
