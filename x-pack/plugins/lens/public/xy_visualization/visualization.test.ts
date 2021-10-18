@@ -319,7 +319,7 @@ describe('xy_visualization', () => {
       });
     });
 
-    it('should add a dimension to a threshold layer', () => {
+    it('should add a dimension to a reference layer', () => {
       expect(
         xyVisualization.setDimension({
           frame,
@@ -327,20 +327,20 @@ describe('xy_visualization', () => {
             ...exampleState(),
             layers: [
               {
-                layerId: 'threshold',
-                layerType: layerTypes.THRESHOLD,
+                layerId: 'referenceLine',
+                layerType: layerTypes.REFERENCELINE,
                 seriesType: 'line',
                 accessors: [],
               },
             ],
           },
-          layerId: 'threshold',
-          groupId: 'xThreshold',
+          layerId: 'referenceLine',
+          groupId: 'xReferenceLine',
           columnId: 'newCol',
         }).layers[0]
       ).toEqual({
-        layerId: 'threshold',
-        layerType: layerTypes.THRESHOLD,
+        layerId: 'referenceLine',
+        layerType: layerTypes.REFERENCELINE,
         seriesType: 'line',
         accessors: ['newCol'],
         yConfig: [
@@ -707,7 +707,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['e'],
               seriesType: 'bar_percentage_stacked',
-              layerType: layerTypes.THRESHOLD,
+              layerType: layerTypes.REFERENCELINE,
             },
           ],
         ],
@@ -724,15 +724,15 @@ describe('xy_visualization', () => {
       );
     });
 
-    describe('thresholds', () => {
+    describe('reference lines', () => {
       beforeEach(() => {
         frame.datasourceLayers = {
           first: mockDatasource.publicAPIMock,
-          threshold: mockDatasource.publicAPIMock,
+          referenceLine: mockDatasource.publicAPIMock,
         };
       });
 
-      function getStateWithBaseThreshold(): State {
+      function getStateWithBaseReferenceLine(): State {
         return {
           ...exampleState(),
           layers: [
@@ -745,8 +745,8 @@ describe('xy_visualization', () => {
               accessors: ['a'],
             },
             {
-              layerId: 'threshold',
-              layerType: layerTypes.THRESHOLD,
+              layerId: 'referenceLine',
+              layerType: layerTypes.REFERENCELINE,
               seriesType: 'line',
               accessors: [],
               yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
@@ -756,28 +756,28 @@ describe('xy_visualization', () => {
       }
 
       it('should support static value', () => {
-        const state = getStateWithBaseThreshold();
+        const state = getStateWithBaseReferenceLine();
         state.layers[0].accessors = [];
         state.layers[1].yConfig = undefined;
 
         expect(
           xyVisualization.getConfiguration({
-            state: getStateWithBaseThreshold(),
+            state: getStateWithBaseReferenceLine(),
             frame,
-            layerId: 'threshold',
+            layerId: 'referenceLine',
           }).supportStaticValue
         ).toBeTruthy();
       });
 
-      it('should return no threshold groups for a empty data layer', () => {
-        const state = getStateWithBaseThreshold();
+      it('should return no referenceLine groups for a empty data layer', () => {
+        const state = getStateWithBaseReferenceLine();
         state.layers[0].accessors = [];
         state.layers[1].yConfig = undefined;
 
         const options = xyVisualization.getConfiguration({
           state,
           frame,
-          layerId: 'threshold',
+          layerId: 'referenceLine',
         }).groups;
 
         expect(options).toHaveLength(0);
@@ -785,37 +785,37 @@ describe('xy_visualization', () => {
 
       it('should return a group for the vertical left axis', () => {
         const options = xyVisualization.getConfiguration({
-          state: getStateWithBaseThreshold(),
+          state: getStateWithBaseReferenceLine(),
           frame,
-          layerId: 'threshold',
+          layerId: 'referenceLine',
         }).groups;
 
         expect(options).toHaveLength(1);
-        expect(options[0].groupId).toBe('yThresholdLeft');
+        expect(options[0].groupId).toBe('yReferenceLineLeft');
       });
 
       it('should return a group for the vertical right axis', () => {
-        const state = getStateWithBaseThreshold();
+        const state = getStateWithBaseReferenceLine();
         state.layers[0].yConfig = [{ axisMode: 'right', forAccessor: 'a' }];
         state.layers[1].yConfig![0].axisMode = 'right';
 
         const options = xyVisualization.getConfiguration({
           state,
           frame,
-          layerId: 'threshold',
+          layerId: 'referenceLine',
         }).groups;
 
         expect(options).toHaveLength(1);
-        expect(options[0].groupId).toBe('yThresholdRight');
+        expect(options[0].groupId).toBe('yReferenceLineRight');
       });
 
-      it('should compute no groups for thresholds when the only data accessor available is a date histogram', () => {
-        const state = getStateWithBaseThreshold();
+      it('should compute no groups for referenceLines when the only data accessor available is a date histogram', () => {
+        const state = getStateWithBaseReferenceLine();
         state.layers[0].xAccessor = 'b';
         state.layers[0].accessors = [];
         state.layers[1].yConfig = []; // empty the configuration
         // set the xAccessor as date_histogram
-        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'date',
@@ -830,19 +830,19 @@ describe('xy_visualization', () => {
         const options = xyVisualization.getConfiguration({
           state,
           frame,
-          layerId: 'threshold',
+          layerId: 'referenceLine',
         }).groups;
 
         expect(options).toHaveLength(0);
       });
 
       it('should mark horizontal group is invalid when xAccessor is changed to a date histogram', () => {
-        const state = getStateWithBaseThreshold();
+        const state = getStateWithBaseReferenceLine();
         state.layers[0].xAccessor = 'b';
         state.layers[0].accessors = [];
         state.layers[1].yConfig![0].axisMode = 'bottom';
         // set the xAccessor as date_histogram
-        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'date',
@@ -857,19 +857,19 @@ describe('xy_visualization', () => {
         const options = xyVisualization.getConfiguration({
           state,
           frame,
-          layerId: 'threshold',
+          layerId: 'referenceLine',
         }).groups;
 
         expect(options[0]).toEqual(
           expect.objectContaining({
             invalid: true,
-            groupId: 'xThreshold',
+            groupId: 'xReferenceLine',
           })
         );
       });
 
       it('should return groups in a specific order (left, right, bottom)', () => {
-        const state = getStateWithBaseThreshold();
+        const state = getStateWithBaseReferenceLine();
         state.layers[0].xAccessor = 'c';
         state.layers[0].accessors = ['a', 'b'];
         // invert them on purpose
@@ -883,7 +883,7 @@ describe('xy_visualization', () => {
           { forAccessor: 'a', axisMode: 'left' },
         ];
         // set the xAccessor as number histogram
-        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'c') {
             return {
               dataType: 'number',
@@ -898,21 +898,21 @@ describe('xy_visualization', () => {
         const [left, right, bottom] = xyVisualization.getConfiguration({
           state,
           frame,
-          layerId: 'threshold',
+          layerId: 'referenceLine',
         }).groups;
 
-        expect(left.groupId).toBe('yThresholdLeft');
-        expect(right.groupId).toBe('yThresholdRight');
-        expect(bottom.groupId).toBe('xThreshold');
+        expect(left.groupId).toBe('yReferenceLineLeft');
+        expect(right.groupId).toBe('yReferenceLineRight');
+        expect(bottom.groupId).toBe('xReferenceLine');
       });
 
       it('should ignore terms operation for xAccessor', () => {
-        const state = getStateWithBaseThreshold();
+        const state = getStateWithBaseReferenceLine();
         state.layers[0].xAccessor = 'b';
         state.layers[0].accessors = [];
         state.layers[1].yConfig = []; // empty the configuration
         // set the xAccessor as top values
-        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'string',
@@ -927,19 +927,19 @@ describe('xy_visualization', () => {
         const options = xyVisualization.getConfiguration({
           state,
           frame,
-          layerId: 'threshold',
+          layerId: 'referenceLine',
         }).groups;
 
         expect(options).toHaveLength(0);
       });
 
       it('should mark horizontal group is invalid when accessor is changed to a terms operation', () => {
-        const state = getStateWithBaseThreshold();
+        const state = getStateWithBaseReferenceLine();
         state.layers[0].xAccessor = 'b';
         state.layers[0].accessors = [];
         state.layers[1].yConfig![0].axisMode = 'bottom';
         // set the xAccessor as date_histogram
-        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'string',
@@ -954,13 +954,13 @@ describe('xy_visualization', () => {
         const options = xyVisualization.getConfiguration({
           state,
           frame,
-          layerId: 'threshold',
+          layerId: 'referenceLine',
         }).groups;
 
         expect(options[0]).toEqual(
           expect.objectContaining({
             invalid: true,
-            groupId: 'xThreshold',
+            groupId: 'xReferenceLine',
           })
         );
       });
@@ -999,20 +999,20 @@ describe('xy_visualization', () => {
           },
         };
 
-        const state = getStateWithBaseThreshold();
+        const state = getStateWithBaseReferenceLine();
         state.layers[0].accessors = ['yAccessorId', 'yAccessorId2'];
         state.layers[1].yConfig = []; // empty the configuration
 
         const options = xyVisualization.getConfiguration({
           state,
           frame: { ...frame, activeData: tables },
-          layerId: 'threshold',
+          layerId: 'referenceLine',
         }).groups;
 
         expect(options).toEqual(
           expect.arrayContaining([
-            expect.objectContaining({ groupId: 'yThresholdLeft' }),
-            expect.objectContaining({ groupId: 'yThresholdRight' }),
+            expect.objectContaining({ groupId: 'yReferenceLineLeft' }),
+            expect.objectContaining({ groupId: 'yReferenceLineRight' }),
           ])
         );
       });
