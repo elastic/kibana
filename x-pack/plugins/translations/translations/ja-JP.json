@@ -13196,7 +13196,7 @@
     "xpack.infra.metrics.alerting.threshold.errorAlertReason": "{metric}のデータのクエリを試行しているときに、Elasticsearchが失敗しました",
     "xpack.infra.metrics.alerting.threshold.errorState": "エラー",
     "xpack.infra.metrics.alerting.threshold.fired": "アラート",
-    "xpack.infra.metrics.alerting.threshold.firedAlertReason": "{metric}は{comparator} {threshold}のしきい値です（現在の値は{currentValue}）",
+    "xpack.infra.metrics.alerting.threshold.firedAlertReason": "{groupName}: {metric}は{comparator} {threshold}のしきい値です（現在の値は{currentValue}）",
     "xpack.infra.metrics.alerting.threshold.gtComparator": "より大きい",
     "xpack.infra.metrics.alerting.threshold.ltComparator": "より小さい",
     "xpack.infra.metrics.alerting.threshold.noDataAlertReason": "{metric}は過去{interval}にデータを報告していません",
