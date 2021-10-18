@@ -48,6 +48,8 @@ export const getMigrationSavedObjectsById = async ({
   );
   if (resolvedConflicts.length > 0) {
     const legacyIds = resolvedConflicts.map((object) => object.saved_object.id);
+    // alias_target_id is guaranteed if outcome is 'conflict', see #107256 for context.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const newIds = resolvedConflicts.map((object) => object.alias_target_id!);
 
     throw new MigrationResponseError(i18n.migrationConflictMessage(legacyIds, newIds), 409);
@@ -58,6 +60,8 @@ export const getMigrationSavedObjectsById = async ({
   );
   if (resolvedAliases.length > 0) {
     const legacyIds = resolvedAliases.map((object) => object.saved_object.id);
+    // alias_target_id is guaranteed if outcome is 'aliasMatch', see #107256 for context.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const newIds = resolvedAliases.map((object) => object.alias_target_id!);
 
     throw new MigrationResponseError(i18n.migrationAliasMessage(legacyIds, newIds), 422);
