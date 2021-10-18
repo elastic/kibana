@@ -105,7 +105,7 @@ describe('Discover grid cell rendering', function () {
       rowsSource,
       rowsSource.map(flatten),
       false,
-      [],
+      ['extension', 'bytes'],
       100
     );
     const component = shallow(
@@ -136,7 +136,7 @@ describe('Discover grid cell rendering', function () {
           }
         />
         <EuiDescriptionListTitle>
-          bytes
+          bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
@@ -221,7 +221,7 @@ describe('Discover grid cell rendering', function () {
       rowsFields,
       rowsFields.map(flatten),
       true,
-      [],
+      ['extension', 'bytes'],
       100
     );
     const component = shallow(
@@ -254,7 +254,7 @@ describe('Discover grid cell rendering', function () {
           }
         />
         <EuiDescriptionListTitle>
-          bytes
+          bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
@@ -298,7 +298,7 @@ describe('Discover grid cell rendering', function () {
       rowsFields,
       rowsFields.map(flatten),
       true,
-      [],
+      ['extension', 'bytes'],
       // this is the number of rendered items
       1
     );
@@ -332,7 +332,7 @@ describe('Discover grid cell rendering', function () {
           }
         />
         <EuiDescriptionListTitle>
-          bytes
+          bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
@@ -424,7 +424,7 @@ describe('Discover grid cell rendering', function () {
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map(flatten),
       true,
-      [],
+      ['object.value', 'extension', 'bytes'],
       100
     );
     const component = shallow(
@@ -465,7 +465,7 @@ describe('Discover grid cell rendering', function () {
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map(flatten),
       true,
-      [],
+      ['extension', 'bytes', 'object.value'],
       100
     );
     const component = shallow(

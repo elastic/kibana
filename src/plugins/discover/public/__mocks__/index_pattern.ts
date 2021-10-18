@@ -27,6 +27,7 @@ const fields = [
   {
     name: 'message',
     type: 'string',
+    displayName: 'message',
     scripted: false,
     filterable: false,
     aggregatable: false,
@@ -34,6 +35,7 @@ const fields = [
   {
     name: 'extension',
     type: 'string',
+    displayName: 'extension',
     scripted: false,
     filterable: true,
     aggregatable: true,
@@ -41,6 +43,7 @@ const fields = [
   {
     name: 'bytes',
     type: 'number',
+    displayName: 'bytesDisplayName',
     scripted: false,
     filterable: true,
     aggregatable: true,
@@ -48,12 +51,14 @@ const fields = [
   {
     name: 'scripted',
     type: 'number',
+    displayName: 'scripted',
     scripted: true,
     filterable: false,
   },
   {
     name: 'object.value',
     type: 'number',
+    displayName: 'object.value',
     scripted: false,
     filterable: true,
     aggregatable: true,

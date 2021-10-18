@@ -22,7 +22,7 @@ import { indexPatternMock } from '../../../../../__mocks__/index_pattern';
 
 jest.mock('../../../../../kibana_services', () => ({
   ...jest.requireActual('../../../../../kibana_services'),
-  getServices: () => discoverServiceMock,
+  getServices: () => jest.requireActual('../../../../../__mocks__/services').discoverServiceMock,
 }));
 
 setHeaderActionMenuMounter(jest.fn());
