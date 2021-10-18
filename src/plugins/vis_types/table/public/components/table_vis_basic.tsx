@@ -129,6 +129,7 @@ export const TableVisBasic = memo(
       }
       // update counter to remount grid from scratch
       setDataGridUpdateCounter(dataGridUpdateCounter + 1);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [visConfig.autoFitRowToContent, table]);
 
     return (
