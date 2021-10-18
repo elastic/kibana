@@ -6,10 +6,10 @@
  */
 
 import { MiddlewareAPI } from '@reduxjs/toolkit';
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { LensAppState, setState, initEmpty, LensStoreDeps } from '..';
+import { setState, initEmpty, LensStoreDeps } from '..';
+import { getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
@@ -83,19 +83,20 @@ export const getPersisted = async ({
 
 export function loadInitial(
   store: MiddlewareAPI,
-  { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext }: LensStoreDeps,
+  storeDeps: LensStoreDeps,
   {
     redirectCallback,
     initialInput,
-    emptyState,
     history,
   }: {
     redirectCallback: (savedObjectId?: string) => void;
     initialInput?: LensEmbeddableInput;
-    emptyState?: LensAppState;
     history?: History<unknown>;
   }
 ) {
+  const { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext } = storeDeps;
+  const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
+    getPreloadedState(storeDeps);
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
   const currentSessionId = data.search.session.getSessionId();
 
@@ -150,10 +151,6 @@ export function loadInitial(
               initialInput.savedObjectId
             );
           }
-          // Don't overwrite any pinned filters
-          data.query.filterManager.setAppFilters(
-            injectFilterReferences(doc.state.filters, doc.references)
-          );
 
           const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
             (stateMap, [datasourceId, datasourceState]) => ({
@@ -165,6 +162,10 @@ export function loadInitial(
             }),
             {}
           );
+
+          const filters = injectFilterReferences(doc.state.filters, doc.references);
+          // Don't overwrite any pinned filters
+          data.query.filterManager.setAppFilters(filters);
 
           initializeDatasources(
             datasourceMap,
@@ -178,7 +179,9 @@ export function loadInitial(
             .then((result) => {
               store.dispatch(
                 setState({
+                  isSaveable: true,
                   sharingSavedObjectProps,
+                  filters,
                   query: doc.state.query,
                   searchSessionId:
                     dashboardFeatureFlag.allowByValueEmbeddables &&
@@ -187,7 +190,7 @@ export function loadInitial(
                     currentSessionId
                       ? currentSessionId
                       : data.search.session.start(),
-                  ...(!isEqual(lens.persistedDoc, doc) ? { persistedDoc: doc } : null),
+                  persistedDoc: doc,
                   activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                   visualization: {
                     activeId: doc.visualizationType,
