@@ -11,7 +11,8 @@ import { alertsMock } from '../../alerting/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
-describe('AlertingBuiltins Plugin', () => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+describe.skip('AlertingBuiltins Plugin', () => {
   describe('setup()', () => {
     let context: ReturnType<typeof coreMock['createPluginInitializerContext']>;
     let plugin: AlertingBuiltinsPlugin;
