@@ -35,9 +35,9 @@ describe('Export timelines', () => {
     exportTimeline(this.templateId);
 
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.statusCode).should('eql', 200);
+      cy.wrap(response?.statusCode).should('eql', 200);
 
-      cy.wrap(response!.body).should(
+      cy.wrap(response?.body).should(
         'eql',
         expectedExportedTimelineTemplate(this.templateResponse)
       );

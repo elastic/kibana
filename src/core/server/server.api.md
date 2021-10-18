@@ -33,6 +33,7 @@ import { LoggerFactory } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { LogRecord } from '@kbn/logging';
+import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
@@ -156,6 +157,27 @@ export interface AuthToolkit {
 }
 
 // @public
+export interface BaseDeprecationDetails {
+    correctiveActions: {
+        api?: {
+            path: string;
+            method: 'POST' | 'PUT';
+            body?: {
+                [key: string]: any;
+            };
+            omitContextFromBody?: boolean;
+        };
+        manualSteps: string[];
+    };
+    deprecationType?: 'config' | 'feature';
+    documentationUrl?: string;
+    level: 'warning' | 'critical' | 'fetch_error';
+    message: string;
+    requireRestart?: boolean;
+    title: string;
+}
+
+// @public
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string, publicBaseUrl?: string);
@@ -248,6 +270,14 @@ export const config: {
 export { ConfigDeprecation }
 
 export { ConfigDeprecationContext }
+
+// @public (undocumented)
+export interface ConfigDeprecationDetails extends BaseDeprecationDetails {
+    // (undocumented)
+    configPath: string;
+    // (undocumented)
+    deprecationType: 'config';
+}
 
 export { ConfigDeprecationFactory }
 
@@ -754,8 +784,6 @@ export class CspConfig implements ICspConfig {
     // (undocumented)
     readonly header: string;
     // (undocumented)
-    readonly rules: string[];
-    // (undocumented)
     readonly strict: boolean;
     // (undocumented)
     readonly warnLegacyBrowsers: boolean;
@@ -804,24 +832,7 @@ export interface DeprecationsClient {
 }
 
 // @public (undocumented)
-export interface DeprecationsDetails {
-    correctiveActions: {
-        api?: {
-            path: string;
-            method: 'POST' | 'PUT';
-            body?: {
-                [key: string]: any;
-            };
-        };
-        manualSteps: string[];
-    };
-    deprecationType?: 'config' | 'feature';
-    documentationUrl?: string;
-    level: 'warning' | 'critical' | 'fetch_error';
-    message: string;
-    requireRestart?: boolean;
-    title: string;
-}
+export type DeprecationsDetails = ConfigDeprecationDetails | FeatureDeprecationDetails;
 
 // @public
 export interface DeprecationSettings {
@@ -970,6 +981,12 @@ export type ExecutionContextStart = ExecutionContextSetup;
 // @public
 export interface FakeRequest {
     headers: Headers;
+}
+
+// @public (undocumented)
+export interface FeatureDeprecationDetails extends BaseDeprecationDetails {
+    // (undocumented)
+    deprecationType?: 'feature' | undefined;
 }
 
 // @public
@@ -1134,7 +1151,6 @@ export type IContextProvider<Context extends RequestHandlerContext, ContextName 
 export interface ICspConfig {
     readonly disableEmbedding: boolean;
     readonly header: string;
-    readonly rules: string[];
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
 }
@@ -1697,8 +1713,6 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 
 // @public (undocumented)
 export interface RegisterDeprecationsConfig {
-    // Warning: (ae-forgotten-export) The symbol "MaybePromise" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     getDeprecations: (context: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
 }
