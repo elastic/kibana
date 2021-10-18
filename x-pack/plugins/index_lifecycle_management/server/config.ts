@@ -8,67 +8,60 @@ import { SemVer } from 'semver';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor, AddConfigDeprecation } from 'src/core/server';
+import { PluginConfigDescriptor } from 'src/core/server';
 
 import { MAJOR_VERSION } from '../common/constants';
 
 const kibanaVersion = new SemVer(MAJOR_VERSION);
 
-const baseConfig = {
+// -------------------------------
+// >= 8.x
+// -------------------------------
+const schemaLatest = schema.object(
+  {
+    ui: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+    // Cloud requires the ability to hide internal node attributes from users.
+    filteredNodeAttributes: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  },
+  { defaultValue: undefined }
+);
+
+const configLatest: PluginConfigDescriptor<IndexLifecycleManagementConfig> = {
   exposeToBrowser: {
     ui: true,
   },
+  schema: schemaLatest,
+  deprecations: () => [],
 };
 
-const baseSchema = {
-  ui: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
-  // Cloud requires the ability to hide internal node attributes from users.
-  filteredNodeAttributes: schema.arrayOf(schema.string(), { defaultValue: [] }),
-};
+export type IndexLifecycleManagementConfig = TypeOf<typeof schemaLatest>;
 
-// >= 8.x
-const configSchema = schema.object(
-  {
-    ...baseSchema,
-  },
-  { defaultValue: undefined }
-);
-
-// Settings that will be deprecated in the next major
-const deprecations: PluginConfigDescriptor['deprecations'] = () => [];
-
-// Config in latest major
-const configLatest: PluginConfigDescriptor<IndexLifecycleManagementConfig> = {
-  ...baseConfig,
-  schema: configSchema,
-  deprecations,
-};
-
-export type IndexLifecycleManagementConfig = TypeOf<typeof configSchema>;
-
+// -------------------------------
 // 7.x
-const settings7x = {
-  enabled: schema.boolean({ defaultValue: true }),
-};
-
-const configSchema7x = schema.object(
+// -------------------------------
+const schema7x = schema.object(
   {
-    ...baseSchema,
-    ...settings7x,
+    enabled: schema.boolean({ defaultValue: true }),
+    ui: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+    // Cloud requires the ability to hide internal node attributes from users.
+    filteredNodeAttributes: schema.arrayOf(schema.string(), { defaultValue: [] }),
   },
   { defaultValue: undefined }
 );
 
-// Settings that will be deprecated in 8.0
-const deprecations7x: PluginConfigDescriptor<IndexLifecycleManagementConfig7x>['deprecations'] =
-  () => [
-    (
-      completeConfig: Record<string, any>,
-      rootPath: string,
-      addDeprecation: AddConfigDeprecation
-    ) => {
+export type IndexLifecycleManagementConfig7x = TypeOf<typeof schema7x>;
+
+const config7x: PluginConfigDescriptor<IndexLifecycleManagementConfig7x> = {
+  exposeToBrowser: {
+    ui: true,
+  },
+  schema: schema7x,
+  deprecations: () => [
+    (completeConfig, rootPath, addDeprecation) => {
       if (get(completeConfig, 'xpack.ilm.enabled') === undefined) {
         return completeConfig;
       }
@@ -93,13 +86,7 @@ const deprecations7x: PluginConfigDescriptor<IndexLifecycleManagementConfig7x>['
       });
       return completeConfig;
     },
-  ];
-export type IndexLifecycleManagementConfig7x = TypeOf<typeof configSchema7x>;
-
-const config7x: PluginConfigDescriptor<IndexLifecycleManagementConfig7x> = {
-  ...baseConfig,
-  schema: configSchema7x,
-  deprecations: deprecations7x,
+  ],
 };
 
 export const config: PluginConfigDescriptor<

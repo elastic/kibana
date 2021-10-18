@@ -10,49 +10,40 @@ import { SemVer } from 'semver';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor, AddConfigDeprecation } from 'kibana/server';
+import { PluginConfigDescriptor } from 'kibana/server';
 
 import { MAJOR_VERSION } from '../common/constants';
 
 const kibanaVersion = new SemVer(MAJOR_VERSION);
 
-const baseConfig = {
-  exposeToBrowser: {
-    ui: true,
-  },
-};
-
-const baseSchema = {
-  ssl: schema.object({ verify: schema.boolean({ defaultValue: false }) }, {}),
-  ui: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
-};
-
+// -------------------------------
 // >= 8.x
-const configSchema = schema.object(
+// -------------------------------
+const schemaLatest = schema.object(
   {
-    ...baseSchema,
+    ssl: schema.object({ verify: schema.boolean({ defaultValue: false }) }, {}),
+    ui: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
   },
   { defaultValue: undefined }
 );
 
-// Settings that will be deprecated in the next major
-const deprecations: PluginConfigDescriptor['deprecations'] = () => [];
-
-// Config in latest major
 const configLatest: PluginConfigDescriptor<ConsoleConfig> = {
-  ...baseConfig,
-  schema: configSchema,
-  deprecations,
+  exposeToBrowser: {
+    ui: true,
+  },
+  schema: schemaLatest,
+  deprecations: () => [],
 };
 
-export type ConsoleConfig = TypeOf<typeof configSchema>;
+export type ConsoleConfig = TypeOf<typeof schemaLatest>;
 
+// -------------------------------
 // 7.x
-const configSchema7x = schema.object(
+// -------------------------------
+const schema7x = schema.object(
   {
-    ...baseSchema,
     enabled: schema.boolean({ defaultValue: true }),
     proxyFilter: schema.arrayOf(schema.string(), { defaultValue: ['.*'] }),
     proxyConfig: schema.arrayOf(
@@ -77,51 +68,51 @@ const configSchema7x = schema.object(
       }),
       { defaultValue: [] }
     ),
+    ssl: schema.object({ verify: schema.boolean({ defaultValue: false }) }, {}),
+    ui: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
   },
   { defaultValue: undefined }
 );
 
-// Settings that will be deprecated in 8.0
-const deprecations7x: PluginConfigDescriptor<ConsoleConfig7x>['deprecations'] = ({
-  deprecate,
-  unused,
-}) => [
-  deprecate('proxyFilter', '8.0.0'),
-  deprecate('proxyConfig', '8.0.0'),
-  unused('ssl'),
-  (completeConfig: Record<string, any>, rootPath: string, addDeprecation: AddConfigDeprecation) => {
-    if (get(completeConfig, 'console.enabled') === undefined) {
-      return completeConfig;
-    }
-
-    addDeprecation({
-      title: i18n.translate('console.deprecations.enabledTitle', {
-        defaultMessage: 'Setting "console.enabled" is deprecated',
-      }),
-      message: i18n.translate('console.deprecations.enabledMessage', {
-        defaultMessage: 'Use the "console.ui.enabled" setting instead of "console.enabled".',
-      }),
-      correctiveActions: {
-        manualSteps: [
-          i18n.translate('console.deprecations.enabled.manualStepOneMessage', {
-            defaultMessage: 'Open the kibana.yml config file.',
-          }),
-          i18n.translate('console.deprecations.enabled.manualStepTwoMessage', {
-            defaultMessage: 'Change the "console.enabled" setting to "console.ui.enabled".',
-          }),
-        ],
-      },
-    });
-    return completeConfig;
-  },
-];
-
-export type ConsoleConfig7x = TypeOf<typeof configSchema7x>;
+export type ConsoleConfig7x = TypeOf<typeof schema7x>;
 
 const config7x: PluginConfigDescriptor<ConsoleConfig7x> = {
-  ...baseConfig,
-  schema: configSchema7x,
-  deprecations: deprecations7x,
+  exposeToBrowser: {
+    ui: true,
+  },
+  schema: schema7x,
+  deprecations: ({ deprecate, unused }) => [
+    deprecate('proxyFilter', '8.0.0'),
+    deprecate('proxyConfig', '8.0.0'),
+    unused('ssl'),
+    (completeConfig, rootPath, addDeprecation) => {
+      if (get(completeConfig, 'console.enabled') === undefined) {
+        return completeConfig;
+      }
+
+      addDeprecation({
+        title: i18n.translate('console.deprecations.enabledTitle', {
+          defaultMessage: 'Setting "console.enabled" is deprecated',
+        }),
+        message: i18n.translate('console.deprecations.enabledMessage', {
+          defaultMessage: 'Use the "console.ui.enabled" setting instead of "console.enabled".',
+        }),
+        correctiveActions: {
+          manualSteps: [
+            i18n.translate('console.deprecations.enabled.manualStepOneMessage', {
+              defaultMessage: 'Open the kibana.yml config file.',
+            }),
+            i18n.translate('console.deprecations.enabled.manualStepTwoMessage', {
+              defaultMessage: 'Change the "console.enabled" setting to "console.ui.enabled".',
+            }),
+          ],
+        },
+      });
+      return completeConfig;
+    },
+  ],
 };
 
 export const config: PluginConfigDescriptor<ConsoleConfig | ConsoleConfig7x> =

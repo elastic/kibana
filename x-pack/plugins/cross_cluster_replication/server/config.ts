@@ -8,65 +8,56 @@ import { SemVer } from 'semver';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor, AddConfigDeprecation } from 'src/core/server';
+import { PluginConfigDescriptor } from 'src/core/server';
 
 import { MAJOR_VERSION } from '../common/constants';
 
 const kibanaVersion = new SemVer(MAJOR_VERSION);
 
-const baseConfig = {
+// -------------------------------
+// >= 8.x
+// -------------------------------
+const schemaLatest = schema.object(
+  {
+    ui: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+  },
+  { defaultValue: undefined }
+);
+
+const configLatest: PluginConfigDescriptor<CrossClusterReplicationConfig> = {
   exposeToBrowser: {
     ui: true,
   },
+  schema: schemaLatest,
+  deprecations: () => [],
 };
 
-const baseSchema = {
-  ui: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
-};
+export type CrossClusterReplicationConfig = TypeOf<typeof schemaLatest>;
 
-// >= 8.x
-const configSchema = schema.object(
-  {
-    ...baseSchema,
-  },
-  { defaultValue: undefined }
-);
-
-// Settings that will be deprecated in the next major
-const deprecations: PluginConfigDescriptor['deprecations'] = () => [];
-
-// Config in latest major
-const configLatest: PluginConfigDescriptor<CrossClusterReplicationConfig> = {
-  ...baseConfig,
-  schema: configSchema,
-  deprecations,
-};
-
-export type CrossClusterReplicationConfig = TypeOf<typeof configSchema>;
-
+// -------------------------------
 // 7.x
-const settings7x = {
-  enabled: schema.boolean({ defaultValue: true }),
-};
-
-const configSchema7x = schema.object(
+// -------------------------------
+const schema7x = schema.object(
   {
-    ...baseSchema,
-    ...settings7x,
+    enabled: schema.boolean({ defaultValue: true }),
+    ui: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
   },
   { defaultValue: undefined }
 );
 
-// Settings that will be deprecated in 8.0
-const deprecations7x: PluginConfigDescriptor<CrossClusterReplicationConfig>['deprecations'] =
-  () => [
-    (
-      completeConfig: Record<string, any>,
-      rootPath: string,
-      addDeprecation: AddConfigDeprecation
-    ) => {
+export type CrossClusterReplicationConfig7x = TypeOf<typeof schema7x>;
+
+const config7x: PluginConfigDescriptor<CrossClusterReplicationConfig7x> = {
+  exposeToBrowser: {
+    ui: true,
+  },
+  schema: schema7x,
+  deprecations: () => [
+    (completeConfig, rootPath, addDeprecation) => {
       if (get(completeConfig, 'xpack.ccr.enabled') === undefined) {
         return completeConfig;
       }
@@ -97,13 +88,7 @@ const deprecations7x: PluginConfigDescriptor<CrossClusterReplicationConfig>['dep
       });
       return completeConfig;
     },
-  ];
-export type CrossClusterReplicationConfig7x = TypeOf<typeof configSchema7x>;
-
-const config7x: PluginConfigDescriptor<CrossClusterReplicationConfig7x> = {
-  ...baseConfig,
-  schema: configSchema7x,
-  deprecations: deprecations7x,
+  ],
 };
 
 export const config: PluginConfigDescriptor<
