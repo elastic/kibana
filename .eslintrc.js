@@ -899,7 +899,12 @@ module.exports = {
     },
 
     /**
-     * Security Solution overrides
+     * Security Solution overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only
@@ -920,6 +925,22 @@ module.exports = {
             patterns: ['**/server/*'],
           },
         ],
+      },
+    },
+    {
+      // typescript only for front and back end, but excludes the test files.
+      // We use this section to add rules in which we do not want to apply to test files.
+      // This should be a very small set as most linter rules are useful for tests as well.
+      files: [
+        'x-pack/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-non-null-assertion': 'error',
       },
     },
     {
@@ -1040,7 +1061,12 @@ module.exports = {
     },
 
     /**
-     * Lists overrides
+     * Lists overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only
@@ -1215,8 +1241,14 @@ module.exports = {
         ],
       },
     },
+
     /**
-     * Metrics entities overrides
+     * Metrics entities overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only
@@ -1550,8 +1582,8 @@ module.exports = {
       plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        // 'arrow-body-style': ['error', 'as-needed'],
-        // 'prefer-arrow-callback': 'error',
+        'arrow-body-style': ['error', 'as-needed'],
+        'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
