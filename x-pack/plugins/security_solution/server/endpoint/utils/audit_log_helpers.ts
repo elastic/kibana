@@ -26,6 +26,7 @@ import {
   LogsEndpointAction,
   EndpointActionResponse,
   LogsEndpointActionResponse,
+  ActivityLogEntry,
 } from '../../../common/endpoint/types';
 import { doesLogsEndpointActionsIndexExist } from '../utils';
 
@@ -49,6 +50,32 @@ const getDateFilters = ({ startDate, endDate }: { startDate: string; endDate: st
   ];
 };
 
+export const getUniqueLogData = (activityLogEntries: ActivityLogEntry[]): ActivityLogEntry[] => {
+  // find the error responses for actions that didn't make it to fleet index
+  const onlyResponsesForFleetErrors = activityLogEntries
+    .filter((e) => e.type === ActivityLogItemTypes.RESPONSE && e.item.data.error?.code === '424')
+    .map(
+      (e: ActivityLogEntry) => (e.item.data as LogsEndpointActionResponse).EndpointActions.action_id
+    );
+
+  // all actions and responses minus endpoint actions.
+  const nonEndpointActionsDocs = activityLogEntries.filter(
+    (e) => e.type !== ActivityLogItemTypes.ACTION
+  );
+
+  // only endpoint actions that match the error responses
+  const onlyEndpointActionsDocWithoutFleetActions = activityLogEntries
+    .filter((e) => e.type === ActivityLogItemTypes.ACTION)
+    .filter((e: ActivityLogEntry) =>
+      onlyResponsesForFleetErrors.includes(
+        (e.item.data as LogsEndpointAction).EndpointActions.action_id
+      )
+    );
+
+  // join the error actions and the rest
+  return [...nonEndpointActionsDocs, ...onlyEndpointActionsDocWithoutFleetActions];
+};
+
 export const categorizeResponseResults = ({
   results,
 }: {
@@ -56,7 +83,7 @@ export const categorizeResponseResults = ({
 }): Array<ActivityLogActionResponse | EndpointActivityLogActionResponse> => {
   return results?.length
     ? results?.map((e) => {
-        const isResponseDoc: boolean = hasNewEndpointIndex({
+        const isResponseDoc: boolean = matchesIndexPattern({
           regexPattern: logsEndpointResponsesRegex,
           index: e._index,
         });
@@ -80,7 +107,7 @@ export const categorizeActionResults = ({
 }): Array<ActivityLogAction | EndpointActivityLogAction> => {
   return results?.length
     ? results?.map((e) => {
-        const isActionDoc: boolean = hasNewEndpointIndex({
+        const isActionDoc: boolean = matchesIndexPattern({
           regexPattern: logsEndpointActionsRegex,
           index: e._index,
         });
@@ -225,7 +252,7 @@ export const getActionResponsesResult = async ({
   return actionResponses;
 };
 
-const hasNewEndpointIndex = ({
+const matchesIndexPattern = ({
   regexPattern,
   index,
 }: {

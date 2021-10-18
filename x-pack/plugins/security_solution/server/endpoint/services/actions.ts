@@ -26,6 +26,7 @@ import {
   getActionRequestsResult,
   getActionResponsesResult,
   getTimeSortedData,
+  getUniqueLogData,
 } from '../utils';
 import { EndpointMetadataService } from './metadata';
 
@@ -135,8 +136,13 @@ const getActivityLog = async ({
     >,
   });
 
+  // filter out the duplicate endpoint actions that also have fleetActions
+  // include endpoint actions that have no fleet actions
+  const uniqueLogData = getUniqueLogData([...responses, ...actions]);
+
   // sort by @timestamp in desc order, newest first
-  const sortedData = getTimeSortedData([...responses, ...actions] as ActivityLog['data']);
+  const sortedData = getTimeSortedData(uniqueLogData);
+
   return sortedData;
 };
 

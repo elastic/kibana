@@ -32,6 +32,7 @@ const useLogEntryUIProps = (
   commentType: EuiCommentProps['type'];
   displayComment: boolean;
   displayResponseEvent: boolean;
+  failedActionEventTitle: string;
   iconType: IconType;
   isResponseEvent: boolean;
   isSuccessful: boolean;
@@ -46,6 +47,7 @@ const useLogEntryUIProps = (
     let avatarColor: EuiAvatarProps['color'] = theme.euiColorLightestShade;
     let avatarIconColor: EuiAvatarProps['iconColor'];
     let avatarSize: EuiAvatarProps['size'] = 's';
+    let failedActionEventTitle: string = '';
     let isIsolateAction: boolean = false;
     let isResponseEvent: boolean = false;
     let isSuccessful: boolean = false;
@@ -79,12 +81,12 @@ const useLogEntryUIProps = (
       displayResponseEvent = false;
       iconType = 'lockOpen';
       username = logEntry.item.data.user.id;
-      avatarIconColor = theme.euiColorSuccess;
+      avatarIconColor = theme.euiColorVis9_behindText;
+      failedActionEventTitle = i18.ACTIVITY_LOG.LogEntry.action.failedEndpointAction;
       if (logEntry.item.data.EndpointActions.data) {
         const data = logEntry.item.data.EndpointActions.data;
         if (data.command === 'isolate') {
           iconType = 'lock';
-          isIsolateAction = true;
         }
         if (commentText) {
           displayComment = true;
@@ -157,6 +159,7 @@ const useLogEntryUIProps = (
       commentType,
       displayComment,
       displayResponseEvent,
+      failedActionEventTitle,
       iconType,
       isResponseEvent,
       isSuccessful,
@@ -198,6 +201,7 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
     commentType,
     displayComment,
     displayResponseEvent,
+    failedActionEventTitle,
     iconType,
     isResponseEvent,
     responseEventTitle,
@@ -209,7 +213,15 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
       type={(commentType ?? 'regular') as EuiCommentProps['type']}
       username={username}
       timestamp={<FormattedRelativePreferenceDate value={logEntry.item.data['@timestamp']} />}
-      event={<b>{displayResponseEvent ? responseEventTitle : actionEventTitle}</b>}
+      event={
+        <b>
+          {displayResponseEvent
+            ? responseEventTitle
+            : failedActionEventTitle
+            ? failedActionEventTitle
+            : actionEventTitle}
+        </b>
+      }
       timelineIcon={
         <LogEntryTimelineIcon
           {...{ avatarSize, iconType, isResponseEvent, avatarColor, avatarIconColor }}
