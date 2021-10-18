@@ -39,6 +39,14 @@ export const POLICY_EFFECT_SCOPE = (policyCount = 0) => {
   });
 };
 
+export const POLICY_EFFECT_SCOPE_TITLE = (policyCount = 0) =>
+  i18n.translate('xpack.securitySolution.artifactCard.policyEffectScope.title', {
+    defaultMessage: 'Applied to the following {count, plural, one {policy} other {policies}}',
+    values: {
+      count: policyCount,
+    },
+  });
+
 export const CONDITION_OPERATOR_TYPE_MATCH = i18n.translate(
   'xpack.securitySolution.artifactCard.conditions.matchOperator',
   {

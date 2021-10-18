@@ -8,7 +8,7 @@ pageLoadAssetSize:
   console: 46091
   core: 435325
   crossClusterReplication: 65408
-  dashboard: 374194
+  dashboard: 186763
   dashboardEnhanced: 65646
   devTools: 38637
   discover: 99999
@@ -99,12 +99,12 @@ pageLoadAssetSize:
   expressionMetricVis: 23121
   visTypeMetric: 23332
   bfetch: 22837
-  kibanaUtils: 97808
+  kibanaUtils: 79713
   data: 491273
   dataViews: 41532
   expressions: 140958
   fieldFormats: 65209
-  kibanaReact: 99422
+  kibanaReact: 84422
   share: 71239
   uiActions: 35121
   dataEnhanced: 24980

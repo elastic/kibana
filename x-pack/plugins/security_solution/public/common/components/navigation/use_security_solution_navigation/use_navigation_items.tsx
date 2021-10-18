@@ -14,6 +14,7 @@ import { PrimaryNavigationItemsProps } from './types';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import { NavTab } from '../types';
+import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -62,8 +63,9 @@ export const usePrimaryNavigationItems = ({
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
-  return useMemo(
-    () => [
+  const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+  return useMemo(() => {
+    return [
       {
         id: 'main',
         name: '',
@@ -87,10 +89,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
           navTabs.endpoints,
           navTabs.trusted_apps,
           navTabs.event_filters,
-          navTabs.host_isolation_exceptions,
+          ...(canSeeHostIsolationExceptions ? [navTabs.host_isolation_exceptions] : []),
         ],
       },
-    ],
-    [navTabs, hasCasesReadPermissions]
-  );
+    ];
+  }, [navTabs, hasCasesReadPermissions, canSeeHostIsolationExceptions]);
 }
