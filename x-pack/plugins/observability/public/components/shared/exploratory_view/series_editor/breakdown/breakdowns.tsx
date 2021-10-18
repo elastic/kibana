@@ -72,6 +72,16 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
     });
   }
 
+  if (
+    !isStepLevelMetric(series.selectedMetricField) &&
+    selectedBreakdown === SYNTHETICS_STEP_NAME
+  ) {
+    setSeries(seriesId, {
+      ...series,
+      breakdown: undefined,
+    });
+  }
+
   const options = items
     .map(({ id, label }) => {
       if (id === SYNTHETICS_STEP_NAME && !isStepLevelMetric(series.selectedMetricField)) {
