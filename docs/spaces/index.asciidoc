@@ -109,11 +109,6 @@ image::images/spaces-configure-landing-page.png["Configure space-level landing p
 
 [float]
 [[spaces-delete-started]]
-=== Disable and version updates
+=== Disabling spaces
 
-Spaces are automatically enabled in {kib}. If you don't want use this feature,
-you can disable it. For more information, refer to <<spaces-settings-kb,Spaces settings in {kib}>>.
-
-When you upgrade {kib}, the default space contains all of your existing saved objects.
-
-
+Starting in {kib} 8.0, the Spaces feature cannot be disabled.
