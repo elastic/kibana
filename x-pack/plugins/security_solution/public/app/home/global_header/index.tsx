@@ -29,6 +29,15 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
   defaultMessage: 'Add data',
 });
 
+export const pagesWithSourcerer = [
+  SecurityPageName.alerts,
+  SecurityPageName.detections,
+  SecurityPageName.events,
+  SecurityPageName.hosts,
+  SecurityPageName.network,
+  SecurityPageName.overview,
+];
+
 /**
  * This component uses the reverse portal to add the Add Data and ML job settings buttons on the
  * right hand side of the Kibana global header
@@ -50,17 +59,10 @@ export const GlobalHeader = React.memo(
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
     const showSourcerer = useMemo(
-      () =>
-        [
-          SecurityPageName.alerts,
-          SecurityPageName.detections,
-          SecurityPageName.events,
-          SecurityPageName.hosts,
-          SecurityPageName.network,
-          SecurityPageName.overview,
-        ].find((page) => page === pageName) || isAlertsOrRulesDetailsPage,
+      () => pagesWithSourcerer.find((page) => page === pageName) || isAlertsOrRulesDetailsPage,
       [isAlertsOrRulesDetailsPage, pageName]
     );
+    const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
 
     useEffect(() => {
       setHeaderActionMenu((element) => {
@@ -87,12 +89,12 @@ export const GlobalHeader = React.memo(
               <EuiHeaderLink
                 color="primary"
                 data-test-subj="add-data"
-                href={prepend(ADD_DATA_PATH)}
+                href={href}
                 iconType="indexOpen"
               >
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>
-              {showSourcerer && <Sourcerer scope={sourcererScope} />}
+              {showSourcerer && <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />}
             </EuiHeaderLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
