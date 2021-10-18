@@ -33,6 +33,7 @@ export function FieldValueSuggestions({
   required,
   allowExclusions = true,
   cardinalityField,
+  inspector,
   asCombobox = true,
   keepHistory = true,
   onChange: onSelectionChange,
@@ -45,8 +46,10 @@ export function FieldValueSuggestions({
     sourceField,
     filters,
     time,
+    inspector,
     cardinalityField,
     keepHistory,
+    label,
   });
 
   const SelectionComponent = asCombobox ? FieldValueCombobox : FieldValueSelection;

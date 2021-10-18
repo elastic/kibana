@@ -97,6 +97,8 @@ export interface UrlFilter {
   field: string;
   values?: string[];
   notValues?: string[];
+  wildcards?: string[];
+  notWildcards?: string[];
 }
 
 export interface ConfigProps {
