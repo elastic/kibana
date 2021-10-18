@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Entity } from './entity';
+import { ApmError } from './apm_error';
+import { ApplicationMetricFields, Entity } from './entity';
+import { Metricset } from './metricset';
 import { Span } from './span';
 import { Transaction } from './transaction';
 
@@ -25,6 +27,22 @@ export class Instance extends Entity {
       'span.name': spanName,
       'span.type': spanType,
       'span.subtype': spanSubtype,
+    });
+  }
+
+  error(message: string, type?: string, groupingName?: string) {
+    return new ApmError({
+      ...this.fields,
+      'error.exception': [{ message, ...(type ? { type } : {}) }],
+      'error.grouping_name': groupingName || message,
+    });
+  }
+
+  appMetrics(metrics: ApplicationMetricFields) {
+    return new Metricset({
+      ...this.fields,
+      'metricset.name': 'app',
+      ...metrics,
     });
   }
 }
