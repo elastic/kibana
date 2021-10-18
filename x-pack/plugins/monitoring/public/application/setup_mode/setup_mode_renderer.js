@@ -13,7 +13,7 @@ import {
   disableElasticsearchInternalCollection,
   toggleSetupMode,
   setSetupModeMenuItem,
-} from './setup_mode';
+} from '../../lib/setup_mode';
 import { Flyout } from '../../components/metricbeat_migration/flyout';
 import {
   EuiBottomBar,
