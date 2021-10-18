@@ -13,22 +13,23 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot,
   unused,
 }) => [
-  rename('sessionTimeout', 'session.idleTimeout'),
-  rename('authProviders', 'authc.providers'),
+  rename('sessionTimeout', 'session.idleTimeout', { level: 'warning' }),
+  rename('authProviders', 'authc.providers', { level: 'warning' }),
 
-  rename('audit.appender.kind', 'audit.appender.type'),
-  rename('audit.appender.layout.kind', 'audit.appender.layout.type'),
-  rename('audit.appender.policy.kind', 'audit.appender.policy.type'),
-  rename('audit.appender.strategy.kind', 'audit.appender.strategy.type'),
-  rename('audit.appender.path', 'audit.appender.fileName'),
+  rename('audit.appender.kind', 'audit.appender.type', { level: 'warning' }),
+  rename('audit.appender.layout.kind', 'audit.appender.layout.type', { level: 'warning' }),
+  rename('audit.appender.policy.kind', 'audit.appender.policy.type', { level: 'warning' }),
+  rename('audit.appender.strategy.kind', 'audit.appender.strategy.type', { level: 'warning' }),
+  rename('audit.appender.path', 'audit.appender.fileName', { level: 'warning' }),
 
   renameFromRoot(
     'security.showInsecureClusterWarning',
-    'xpack.security.showInsecureClusterWarning'
+    'xpack.security.showInsecureClusterWarning',
+    { level: 'warning' }
   ),
 
-  unused('authorization.legacyFallback.enabled'),
-  unused('authc.saml.maxRedirectURLSize'),
+  unused('authorization.legacyFallback.enabled', { level: 'warning' }),
+  unused('authc.saml.maxRedirectURLSize', { level: 'warning' }),
   // Deprecation warning for the legacy audit logger.
   (settings, fromPath, addDeprecation, { branch }) => {
     const auditLoggingEnabled = settings?.xpack?.security?.audit?.enabled ?? false;
