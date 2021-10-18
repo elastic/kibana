@@ -8,13 +8,23 @@
 
 import { Fields } from './entity';
 import { Serializable } from './serializable';
+import { generateLongId, generateShortId } from './utils/generate_id';
 
-export class Metricset extends Serializable {
+export class ApmError extends Serializable {
   constructor(fields: Fields) {
     super({
-      'processor.event': 'metric',
-      'processor.name': 'metric',
       ...fields,
+      'processor.event': 'error',
+      'processor.name': 'error',
+      'error.id': generateShortId(),
     });
+  }
+
+  serialize() {
+    const [data] = super.serialize();
+    data['error.grouping_key'] = generateLongId(
+      this.fields['error.grouping_name'] || this.fields['error.exception']?.[0]?.message
+    );
+    return [data];
   }
 }
