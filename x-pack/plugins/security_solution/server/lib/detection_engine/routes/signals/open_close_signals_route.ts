@@ -14,11 +14,15 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
+import { SetupPlugins } from '../../../../plugin';
 import { buildSiemResponse } from '../utils';
 
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
-export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
+export const setSignalsStatusRoute = (
+  router: SecuritySolutionPluginRouter,
+  security: SetupPlugins['security']
+) => {
   router.post(
     {
       path: DETECTION_ENGINE_SIGNALS_STATUS_URL,

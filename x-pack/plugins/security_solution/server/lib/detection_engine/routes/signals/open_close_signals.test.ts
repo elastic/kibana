@@ -15,6 +15,7 @@ import {
   getSuccessfulSignalUpdateResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { SetupPlugins } from '../../../../plugin';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
@@ -32,8 +33,12 @@ describe('set signal status', () => {
         getSuccessfulSignalUpdateResponse()
       )
     );
-
-    setSignalsStatusRoute(server.router);
+    const securityMock = {
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
+      },
+    } as unknown as SetupPlugins['security'];
+    setSignalsStatusRoute(server.router, securityMock);
   });
 
   describe('status on signal', () => {
