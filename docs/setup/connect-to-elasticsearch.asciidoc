@@ -47,7 +47,7 @@ so you can quickly get insights into your data, and {fleet} mode offers several 
 image::images/addData_fleet_7.15.0.png[Add data using Fleet]
 
 To get started, refer to
-{fleet-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack].
+{observability-guide}/ingest-logs-metrics-uptime.html[Ingest logs, metrics, and uptime data with {agent}].
 
 [discrete]
 [[upload-data-kibana]]
