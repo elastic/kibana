@@ -181,12 +181,12 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
         {exception?.item_id ? (
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.flyout.editButton"
-            defaultMessage="Edit Host Isolation Exception"
+            defaultMessage="Edit Host isolation exception"
           />
         ) : (
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.flyout.createButton"
-            defaultMessage="Add Host Isolation Exception"
+            defaultMessage="Add Host isolation exception"
           />
         )}
       </EuiButton>
@@ -206,14 +206,14 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
             <h2>
               <FormattedMessage
                 id="xpack.securitySolution.hostIsolationExceptions.flyout.editTitle"
-                defaultMessage="Edit Host Isolation Exception"
+                defaultMessage="Edit Host isolation exception"
               />
             </h2>
           ) : (
             <h2>
               <FormattedMessage
                 id="xpack.securitySolution.hostIsolationExceptions.flyout.title"
-                defaultMessage="Add Host Isolation Exception"
+                defaultMessage="Add Host isolation exception"
               />
             </h2>
           )}
