@@ -16,7 +16,7 @@ import moment from 'moment';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
-import { DeepPartial } from '@reduxjs/toolkit';
+import { PreloadedState } from '@reduxjs/toolkit';
 import { LensPublicStart } from '.';
 import { visualizationTypes } from './xy_visualization/types';
 import { navigationPluginMock } from '../../../../src/plugins/navigation/public/mocks';
@@ -56,6 +56,7 @@ import {
   DatasourceMap,
   VisualizationMap,
 } from './types';
+import { getLensInspectorService } from './lens_inspector_service';
 
 export function mockDatasourceStates() {
   return {
@@ -158,6 +159,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getErrorMessages: jest.fn((_state) => undefined),
     checkIntegrity: jest.fn((_state) => []),
     isTimeBased: jest.fn(),
+    isValidColumn: jest.fn(),
   };
 }
 
@@ -417,7 +419,11 @@ export function makeDefaultServices(
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),
-    inspector: inspectorPluginMock.createStartContract(),
+    inspector: {
+      adapters: getLensInspectorService(inspectorPluginMock.createStartContract()).adapters,
+      inspect: jest.fn(),
+      close: jest.fn(),
+    },
     dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
     savedObjectsClient: core.savedObjects.client,
@@ -479,7 +485,7 @@ export function makeLensStore({
       resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
       ...preloadedState,
     },
-  } as DeepPartial<LensState>);
+  } as PreloadedState<LensState>);
 
   const origDispatch = store.dispatch;
   store.dispatch = jest.fn(dispatch || origDispatch);

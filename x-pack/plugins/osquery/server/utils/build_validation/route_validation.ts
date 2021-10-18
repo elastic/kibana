@@ -8,8 +8,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { formatErrors } from '../../../common/format_errors';
-import { exactCheck } from '../../../common/exact_check';
+import { formatErrors, exactCheck } from '@kbn/securitysolution-io-ts-utils';
 import {
   RouteValidationFunction,
   RouteValidationResultFactory,

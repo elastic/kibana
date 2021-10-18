@@ -12,7 +12,8 @@ import { visualizationSavedObjectTypeMigrations } from '../migrations/visualizat
 export const visualizationSavedObjectType: SavedObjectsType = {
   name: 'visualization',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'visualizeApp',
     defaultSearchField: 'title',

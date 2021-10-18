@@ -8,15 +8,16 @@
 import '../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../../__mocks__/react_router';
+
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiLoadingSpinner, EuiTab } from '@elastic/eui';
 
-import { getPageHeaderActions, getPageTitle } from '../../../../test_helpers';
+import { getPageHeaderActions, getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 
@@ -25,7 +26,9 @@ import { AppSearchPageTemplate } from '../../layout';
 import { AutomatedCuration } from './automated_curation';
 import { CurationLogic } from './curation_logic';
 
+import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments } from './documents';
+import { History } from './history';
 
 describe('AutomatedCuration', () => {
   const values = {
@@ -33,9 +36,12 @@ describe('AutomatedCuration', () => {
     queries: ['query A', 'query B'],
     isFlyoutOpen: false,
     curation: {
+      promoted: [],
+      hidden: [],
       suggestion: {
         status: 'applied',
       },
+      queries: ['foo'],
     },
     activeQuery: 'query A',
     isAutomated: true,
@@ -58,6 +64,46 @@ describe('AutomatedCuration', () => {
     expect(wrapper.is(AppSearchPageTemplate));
     expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
     expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
+    expect(wrapper.find(History)).toHaveLength(0);
+  });
+
+  it('includes tabs', () => {
+    const wrapper = shallow(<AutomatedCuration />);
+    let tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs).toHaveLength(3);
+
+    expect(tabs.at(0).prop('isSelected')).toBe(true);
+
+    expect(tabs.at(1).prop('onClick')).toBeUndefined();
+    expect(tabs.at(1).prop('isSelected')).toBe(false);
+    expect(tabs.at(1).prop('disabled')).toBe(true);
+
+    expect(tabs.at(2).prop('isSelected')).toBe(false);
+
+    // Clicking on the History tab shows the history view
+    tabs.at(2).simulate('click');
+
+    tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(0).prop('isSelected')).toBe(false);
+    expect(tabs.at(2).prop('isSelected')).toBe(true);
+
+    expect(wrapper.find(PromotedDocuments)).toHaveLength(0);
+    expect(wrapper.find(OrganicDocuments)).toHaveLength(0);
+    expect(wrapper.find(History)).toHaveLength(1);
+
+    // Clicking back to the Promoted tab shows promoted documents
+    tabs.at(0).simulate('click');
+
+    tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(0).prop('isSelected')).toBe(true);
+    expect(tabs.at(2).prop('isSelected')).toBe(false);
+
+    expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
+    expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
+    expect(wrapper.find(History)).toHaveLength(0);
   });
 
   it('initializes CurationLogic with a curationId prop from URL param', () => {
@@ -75,13 +121,29 @@ describe('AutomatedCuration', () => {
     expect(pageTitle.find(EuiBadge)).toHaveLength(1);
   });
 
+  it('displays a spinner in the title when loading', () => {
+    setMockValues({ ...values, dataLoading: true });
+
+    const wrapper = shallow(<AutomatedCuration />);
+    const pageTitle = shallow(<div>{getPageTitle(wrapper)}</div>);
+
+    expect(pageTitle.find(EuiLoadingSpinner)).toHaveLength(1);
+  });
+
+  it('contains a button to delete the curation', () => {
+    const wrapper = shallow(<AutomatedCuration />);
+    const pageHeaderActions = getPageHeaderActions(wrapper);
+
+    expect(pageHeaderActions.find(DeleteCurationButton)).toHaveLength(1);
+  });
+
   describe('convert to manual button', () => {
     let convertToManualButton: ShallowWrapper;
     let confirmSpy: jest.SpyInstance;
 
     beforeAll(() => {
       const wrapper = shallow(<AutomatedCuration />);
-      convertToManualButton = getPageHeaderActions(wrapper).childAt(0);
+      convertToManualButton = getPageHeaderActions(wrapper).find(EuiButton);
 
       confirmSpy = jest.spyOn(window, 'confirm');
     });
@@ -93,12 +155,14 @@ describe('AutomatedCuration', () => {
     it('converts the curation upon user confirmation', () => {
       confirmSpy.mockReturnValueOnce(true);
       convertToManualButton.simulate('click');
+
       expect(actions.convertToManual).toHaveBeenCalled();
     });
 
     it('does not convert the curation if the user cancels', () => {
       confirmSpy.mockReturnValueOnce(false);
       convertToManualButton.simulate('click');
+
       expect(actions.convertToManual).not.toHaveBeenCalled();
     });
   });

@@ -32,10 +32,13 @@ import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/ins
 import { getInstallations, installPackage } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
 import { pkgToPkgKey } from './epm/registry';
+import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 
 export interface SetupStatus {
   isInitialized: boolean;
-  nonFatalErrors: Array<PreconfigurationError | DefaultPackagesInstallationError>;
+  nonFatalErrors: Array<
+    PreconfigurationError | DefaultPackagesInstallationError | UpgradeManagedPackagePoliciesResult
+  >;
 }
 
 export async function setupFleet(

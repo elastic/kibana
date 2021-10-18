@@ -65,10 +65,7 @@ export const CurationSuggestion: React.FC = () => {
         pageTitle: suggestionQuery,
       }}
     >
-      <CurationActionBar
-        onAcceptClick={() => alert('Accepted')}
-        onRejectClick={() => alert('Rejected')}
-      />
+      <CurationActionBar />
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -129,12 +126,13 @@ export const CurationSuggestion: React.FC = () => {
                       gutterSize="s"
                       data-test-subj="currentOrganicResults"
                     >
-                      {currentOrganicResults.map((result: ResultType) => (
+                      {currentOrganicResults.map((result: ResultType, index) => (
                         <EuiFlexItem grow={false} key={result.id.raw}>
                           <Result
                             result={result}
                             isMetaEngine={isMetaEngine}
                             schemaForTypeHighlights={engine.schema}
+                            resultPosition={index + existingCurationResults.length + 1}
                           />
                         </EuiFlexItem>
                       ))}
@@ -148,12 +146,13 @@ export const CurationSuggestion: React.FC = () => {
                       gutterSize="s"
                       data-test-subj="proposedOrganicResults"
                     >
-                      {proposedOrganicResults.map((result: ResultType) => (
+                      {proposedOrganicResults.map((result: ResultType, index) => (
                         <EuiFlexItem grow={false} key={result.id.raw}>
                           <Result
                             result={result}
                             isMetaEngine={isMetaEngine}
                             schemaForTypeHighlights={engine.schema}
+                            resultPosition={index + suggestedPromotedDocuments.length + 1}
                           />
                         </EuiFlexItem>
                       ))}

@@ -8,7 +8,7 @@ import React, { useContext, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
 // @ts-ignore
@@ -34,19 +34,18 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
   const { getPaginationTableProps, getPaginationRouteOptions, updateTotalItemCount } =
     useTable('logstash.pipelines');
 
-  const title = i18n.translate('xpack.monitoring.logstash.overview.title', {
-    defaultMessage: 'Logstash',
+  const title = i18n.translate('xpack.monitoring.logstash.pipelines.routeTitle', {
+    defaultMessage: 'Logstash Pipelines',
   });
 
-  const pageTitle = i18n.translate('xpack.monitoring.logstash.overview.pageTitle', {
-    defaultMessage: 'Logstash overview',
+  const pageTitle = i18n.translate('xpack.monitoring.logstash.pipelines.pageTitle', {
+    defaultMessage: 'Logstash pipelines',
   });
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipelines`;
 
-    const options: any = getPaginationRouteOptions();
     const response = await services.http?.fetch(url, {
       method: 'POST',
       body: JSON.stringify({
@@ -55,8 +54,7 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
           min: bounds.min.toISOString(),
           max: bounds.max.toISOString(),
         },
-        pagination: options.pagination,
-        queryText: options.queryText,
+        ...getPaginationRouteOptions(),
       }),
     });
 
@@ -96,10 +94,10 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      data-test-subj="elasticsearchOverviewPage"
+      data-test-subj="logstashPipelinesListing"
       cluster={cluster}
     >
-      <div data-test-subj="elasticsearchOverviewPage">{renderOverview(data)}</div>
+      <div data-test-subj="logstashPipelinesListing">{renderOverview(data)}</div>
     </LogstashTemplate>
   );
 };

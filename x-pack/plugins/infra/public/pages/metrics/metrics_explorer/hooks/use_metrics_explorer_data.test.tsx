@@ -20,7 +20,7 @@ import {
   createSeries,
 } from '../../../../utils/fixtures/metrics_explorer';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 import { HttpHandler } from 'kibana/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 
@@ -39,7 +39,7 @@ const renderUseMetricsExplorerDataHook = () => {
     (props: {
       options: MetricsExplorerOptions;
       source: MetricsSourceConfigurationProperties | undefined;
-      derivedIndexPattern: IIndexPattern;
+      derivedIndexPattern: DataViewBase;
       timeRange: MetricsExplorerTimeOptions;
       afterKey: string | null | Record<string, string | null>;
       signal: any;

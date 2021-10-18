@@ -17,6 +17,7 @@ const deprecationContext = configDeprecationsMock.createContext();
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
+  const configPaths: string[] = [];
   const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
@@ -25,10 +26,13 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
       context: deprecationContext,
     })),
     () =>
-      ({ message }) =>
-        deprecationMessages.push(message)
+      ({ message, configPath }) => {
+        deprecationMessages.push(message);
+        configPaths.push(configPath);
+      }
   );
   return {
+    configPaths,
     messages: deprecationMessages,
     migrated,
   };
@@ -171,6 +175,22 @@ describe('Config Deprecations', () => {
     `);
   });
 
+  it('renames security.showInsecureClusterWarning to xpack.security.showInsecureClusterWarning', () => {
+    const config = {
+      security: {
+        showInsecureClusterWarning: false,
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.security.showInsecureClusterWarning).not.toBeDefined();
+    expect(migrated.xpack.security.showInsecureClusterWarning).toEqual(false);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting \\"security.showInsecureClusterWarning\\" has been replaced by \\"xpack.security.showInsecureClusterWarning\\"",
+      ]
+    `);
+  });
+
   it('warns when using the legacy audit logger', () => {
     const config = {
       xpack: {
@@ -289,12 +309,14 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages } = applyConfigDeprecations(cloneDeep(config));
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\\" is no longer used.",
+        "This setting is no longer used.",
       ]
     `);
+
+    expect(configPaths).toEqual(['xpack.security.authc.providers.saml.saml1.maxRedirectURLSize']);
   });
 
   it(`warns when 'xpack.security.authc.providers' is an array of strings`, () => {
@@ -311,7 +333,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
+        "Use the new object format instead of an array of provider types.",
       ]
     `);
   });
@@ -330,8 +352,8 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
-        "Enabling both \\"basic\\" and \\"token\\" authentication providers in \\"xpack.security.authc.providers\\" is deprecated. Login page will only use \\"token\\" provider.",
+        "Use the new object format instead of an array of provider types.",
+        "Use only one of these providers. When both providers are set, Kibana only uses the \\"token\\" provider.",
       ]
     `);
   });

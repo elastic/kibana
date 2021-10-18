@@ -22,6 +22,7 @@ import { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
+import { HostRisk } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -34,6 +35,7 @@ interface Props {
   messageHeight?: number;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
+  hostRisk: HostRisk | null;
 }
 
 interface ExpandableEventTitleProps {
@@ -90,6 +92,7 @@ export const ExpandableEvent = React.memo<Props>(
     isDraggable,
     loading,
     detailsData,
+    hostRisk,
   }) => {
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
@@ -105,11 +108,12 @@ export const ExpandableEvent = React.memo<Props>(
           <EventDetails
             browserFields={browserFields}
             data={detailsData ?? []}
-            id={event.eventId!}
+            id={event.eventId}
             isAlert={isAlert}
             isDraggable={isDraggable}
             timelineId={timelineId}
             timelineTabType={timelineTabType}
+            hostRisk={hostRisk}
           />
         </StyledEuiFlexItem>
       </StyledFlexGroup>
