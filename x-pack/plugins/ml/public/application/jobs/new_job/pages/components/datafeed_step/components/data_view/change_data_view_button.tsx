@@ -27,7 +27,7 @@ export const ChangeDataView: FC<{ isDisabled: boolean }> = ({ isDisabled }) => {
         >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.datafeedStep.dataView.changeDataView.button"
-            defaultMessage="Change Data view"
+            defaultMessage="Change data view"
           />
         </EuiButtonEmpty>
       </Description>

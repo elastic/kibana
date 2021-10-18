@@ -217,7 +217,7 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
    *
    * @api {post} /api/ml/validate/datafeed_preview Validates datafeed preview
    * @apiName ValidateDataFeedPreview
-   * @apiDescription Validates that the job preview runs successfully
+   * @apiDescription Validates that the datafeed preview runs successfully and produces results
    *
    * @apiSchema (body) validateDatafeedPreviewSchema
    */
