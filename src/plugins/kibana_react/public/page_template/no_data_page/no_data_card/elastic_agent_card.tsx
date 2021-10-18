@@ -80,7 +80,12 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       paddingSize="l"
       image={image}
       href={href ?? addBasePath(`/app/integrations/browse${hasCategory}`)}
-      title=""
+      // Bad hack to fix the need for an a11y title even though the button exists
+      title={
+        <span style={{ display: 'block', opacity: 0, height: 0, overflow: 'hidden' }}>
+          {defaultCTAtitle}
+        </span>
+      }
       description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
         defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
       })}

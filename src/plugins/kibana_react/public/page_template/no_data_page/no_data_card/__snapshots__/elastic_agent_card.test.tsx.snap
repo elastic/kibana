@@ -13,7 +13,20 @@ exports[`ElasticAgentCard props button 1`] = `
   href="/app/integrations/browse"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
-  title=""
+  title={
+    <span
+      style={
+        Object {
+          "display": "block",
+          "height": 0,
+          "opacity": 0,
+          "overflow": "hidden",
+        }
+      }
+    >
+      Add Elastic Agent
+    </span>
+  }
 />
 `;
 
@@ -30,7 +43,20 @@ exports[`ElasticAgentCard props category 1`] = `
   href="/app/integrations/browse/custom"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
-  title=""
+  title={
+    <span
+      style={
+        Object {
+          "display": "block",
+          "height": 0,
+          "opacity": 0,
+          "overflow": "hidden",
+        }
+      }
+    >
+      Add Elastic Agent
+    </span>
+  }
 />
 `;
 
@@ -47,7 +73,20 @@ exports[`ElasticAgentCard props href 1`] = `
   href="#"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
-  title=""
+  title={
+    <span
+      style={
+        Object {
+          "display": "block",
+          "height": 0,
+          "opacity": 0,
+          "overflow": "hidden",
+        }
+      }
+    >
+      Add Elastic Agent
+    </span>
+  }
 />
 `;
 
@@ -65,7 +104,20 @@ exports[`ElasticAgentCard props recommended 1`] = `
   href="/app/integrations/browse"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
-  title=""
+  title={
+    <span
+      style={
+        Object {
+          "display": "block",
+          "height": 0,
+          "opacity": 0,
+          "overflow": "hidden",
+        }
+      }
+    >
+      Add Elastic Agent
+    </span>
+  }
 />
 `;
 
@@ -82,6 +134,19 @@ exports[`ElasticAgentCard renders 1`] = `
   href="/app/integrations/browse"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
-  title=""
+  title={
+    <span
+      style={
+        Object {
+          "display": "block",
+          "height": 0,
+          "opacity": 0,
+          "overflow": "hidden",
+        }
+      }
+    >
+      Add Elastic Agent
+    </span>
+  }
 />
 `;
