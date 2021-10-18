@@ -9,9 +9,5 @@
         "description": "",
         "color": "#a80853"
     },
-    "references": [],
-    "migrationVersion": {
-        "tag": "8.0.0"
-    },
-    "coreMigrationVersion": "8.0.0"
+    "references": []
 }
