@@ -57,7 +57,7 @@ export class MonitoringPlugin
     });
     const monitoring = this.initializerContext.config.get();
 
-    if (!monitoring.ui.enabled || !monitoring.enabled) {
+    if (!monitoring.ui.enabled) {
       return false;
     }
 
