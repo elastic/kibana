@@ -23,13 +23,14 @@ export const getIndexForType = ({
   defaultIndex,
   kibanaVersion,
 }: GetIndexForTypeOptions): string => {
+  const cleanedKibanaVersion = kibanaVersion.split('-')[0]; // coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha) to a regular semver (x.y.z);
   // TODO migrationsV2: Remove once we remove migrations v1
   //   This is a hacky, but it required the least amount of changes to
   //   existing code to support a migrations v2 index. Long term we would
   //   want to always use the type registry to resolve a type's index
   //   (including the default index).
   if (migV2Enabled) {
-    return `${typeRegistry.getIndex(type) || defaultIndex}_${kibanaVersion}`;
+    return `${typeRegistry.getIndex(type) || defaultIndex}_${cleanedKibanaVersion}`;
   } else {
     return typeRegistry.getIndex(type) || defaultIndex;
   }

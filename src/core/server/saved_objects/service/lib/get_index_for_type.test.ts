@@ -11,6 +11,7 @@ import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 
 describe('getIndexForType', () => {
   const kibanaVersion = '8.0.0';
+  const kibanaSnapshotVersion = '8.0.0-SNAPSHOT';
   const defaultIndex = '.kibana';
   let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
 
@@ -32,6 +33,19 @@ describe('getIndexForType', () => {
           migV2Enabled,
         })
       ).toEqual('.foo-index_8.0.0');
+    });
+
+    it('returns the correct index for a SNAPSHOT version', () => {
+      typeRegistry.getIndex.mockImplementation((type) => undefined);
+      expect(
+        getIndexForType({
+          type: 'foo',
+          typeRegistry,
+          defaultIndex,
+          kibanaVersion: kibanaSnapshotVersion,
+          migV2Enabled,
+        })
+      ).toEqual('.kibana_8.0.0');
     });
 
     it('returns the correct index for a type not specifying a custom index', () => {
