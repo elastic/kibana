@@ -45,11 +45,13 @@ describe('ActionMenuContent', () => {
   it('renders Add Data link', () => {
     const { getByLabelText, getByText } = render(<ActionMenuContent />);
 
-    const addDataAnchor = getByLabelText('Navigate to a tutorial about adding Uptime data');
+    const addDataAnchor = getByLabelText(
+      'Navigate to the Elastic Synthetics integration to add Uptime data'
+    );
 
     // this href value is mocked, so it doesn't correspond to the real link
     // that Kibana core services will provide
-    expect(addDataAnchor.getAttribute('href')).toBe('/home#/tutorial/uptimeMonitors');
+    expect(addDataAnchor.getAttribute('href')).toBe('/integrations/detail/synthetics/overview');
     expect(getByText('Add data'));
   });
 });
