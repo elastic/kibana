@@ -71,7 +71,7 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.reindex.resolutionTooltipLabel',
     {
       defaultMessage:
-        'Resolve this deprecation by reindexing this index. This is an automated resolution.',
+        'Resolve this issue by reindexing this index. This issue can be resolved automatically.',
     }
   ),
 };

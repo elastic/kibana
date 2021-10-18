@@ -64,7 +64,7 @@ const i18nTexts = {
   viewSystemIndicesStatus: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.viewSystemIndicesStatus',
     {
-      defaultMessage: 'View migration information',
+      defaultMessage: 'View migration details',
     }
   ),
   retryButtonLabel: i18n.translate(

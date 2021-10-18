@@ -46,7 +46,7 @@ export const OnPremBackup: React.FunctionComponent = () => {
       <EuiText>
         <p>
           {i18n.translate('xpack.upgradeAssistant.overview.backupStepDescription', {
-            defaultMessage: 'Back up your data before addressing any deprecation issues.',
+            defaultMessage: 'Make sure you have a current snapshot before making any changes.',
           })}
         </p>
       </EuiText>
