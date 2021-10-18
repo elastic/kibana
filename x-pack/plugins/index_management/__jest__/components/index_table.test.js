@@ -504,7 +504,7 @@ describe('index table', () => {
       JSON.stringify(modifiedIndices),
     ]);
 
-    testAction(rendered, 'openIndexMenuButton', 1);
+    testAction(rendered, 'openIndexMenuButton', 2);
   });
 
   test('show settings button works from context menu', async () => {
