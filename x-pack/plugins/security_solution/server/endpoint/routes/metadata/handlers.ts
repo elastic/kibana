@@ -25,7 +25,11 @@ import {
 } from '../../../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
-import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
+import {
+  getESQueryHostMetadataByID,
+  getPagingProperties,
+  kibanaRequestToMetadataListESQuery,
+} from './query_builders';
 import { Agent, PackagePolicy } from '../../../../../fleet/common/types/models';
 import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
@@ -96,12 +100,6 @@ export const getMetadataListRequestHandler = function (
       throw new EndpointError('endpoint metadata service not available');
     }
 
-    const endpointPolicies = await getAllEndpointPackagePolicies(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      endpointAppContext.service.getPackagePolicyService()!,
-      context.core.savedObjects.client
-    );
-
     let doesUnitedIndexExist = false;
     let didUnitedIndexError = false;
     let body: HostResultList = {
@@ -120,6 +118,11 @@ export const getMetadataListRequestHandler = function (
     }
 
     if (!doesUnitedIndexExist || didUnitedIndexError) {
+      const endpointPolicies = await getAllEndpointPackagePolicies(
+        endpointAppContext.service.getPackagePolicyService(),
+        context.core.savedObjects.client
+      );
+
       body = await legacyListMetadataQuery(
         context,
         request,
@@ -131,13 +134,21 @@ export const getMetadataListRequestHandler = function (
     }
 
     try {
-      body = await endpointMetadataService.getHostMetadataList(
+      const pagingProperties = await getPagingProperties(request, endpointAppContext);
+      const { data, page, total, pageSize } = await endpointMetadataService.getHostMetadataList(
         context.core.elasticsearch.client.asCurrentUser,
-        context.core.savedObjects.client,
-        request,
-        endpointAppContext,
-        endpointPolicies
+        {
+          page: pagingProperties.pageIndex + 1,
+          pageSize: pagingProperties.pageSize,
+          filters: request.body?.filters || {},
+        }
       );
+      body = {
+        hosts: data,
+        request_page_index: page - 1,
+        total,
+        request_page_size: pageSize,
+      };
     } catch (error) {
       return errorHandler(logger, response, error);
     }

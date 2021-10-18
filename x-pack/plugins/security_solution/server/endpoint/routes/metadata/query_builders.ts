@@ -74,7 +74,7 @@ export async function kibanaRequestToMetadataListESQuery(
   };
 }
 
-async function getPagingProperties(
+export async function getPagingProperties(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext
