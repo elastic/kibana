@@ -171,6 +171,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(res.statusCode).equal(404);

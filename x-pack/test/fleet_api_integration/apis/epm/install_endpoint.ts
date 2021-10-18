@@ -49,18 +49,24 @@ export default function (providerContext: FtrProviderContext) {
     describe('install', () => {
       transforms.forEach((transform) => {
         it(`should have installed the [${transform.id}] transform`, async function () {
-          const res = await es.transport.request({
-            method: 'GET',
-            path: `/_transform/${transform.id}-${pkgVersion}`,
-          });
+          const res = await es.transport.request(
+            {
+              method: 'GET',
+              path: `/_transform/${transform.id}-${pkgVersion}`,
+            },
+            { meta: true }
+          );
           expect(res.statusCode).equal(200);
         });
         it(`should have created the destination index for the [${transform.id}] transform`, async function () {
           // the  index is defined in the transform file
-          const res = await es.transport.request({
-            method: 'GET',
-            path: `/${transform.dest}`,
-          });
+          const res = await es.transport.request(
+            {
+              method: 'GET',
+              path: `/${transform.dest}`,
+            },
+            { meta: true }
+          );
           expect(res.statusCode).equal(200);
         });
       });
@@ -82,9 +88,7 @@ export default function (providerContext: FtrProviderContext) {
               method: 'GET',
               path: `/_transform/${transform.id}`,
             },
-            {
-              ignore: [404],
-            }
+            { meta: true, ignore: [404] }
           );
           expect(res.statusCode).equal(404);
         });
@@ -97,6 +101,7 @@ export default function (providerContext: FtrProviderContext) {
               path: `/${transform.dest}`,
             },
             {
+              meta: true,
               ignore: [404],
             }
           );

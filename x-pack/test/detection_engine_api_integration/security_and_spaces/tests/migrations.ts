@@ -77,10 +77,15 @@ export default ({ getService }: FtrProviderContext): void => {
             ruleThrottle: string;
             alertThrottle: string;
           };
-        }>({
-          index: '.kibana',
-          id: 'siem-detection-engine-rule-actions:fce024a0-0452-11ec-9b15-d13d79d162f3',
-        });
+        }>(
+          {
+            index: '.kibana',
+            id: 'siem-detection-engine-rule-actions:fce024a0-0452-11ec-9b15-d13d79d162f3',
+          },
+          {
+            meta: true,
+          }
+        );
         expect(response.statusCode).to.eql(200);
 
         // "alertThrottle" and "ruleThrottle" should still exist

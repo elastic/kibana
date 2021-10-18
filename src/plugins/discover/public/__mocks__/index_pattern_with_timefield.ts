@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flattenHit, IIndexPatternFieldList } from '../../../data/common';
 import { IndexPattern } from '../../../data/common';
-import type { estypes } from '@elastic/elasticsearch';
 
 const fields = [
   {

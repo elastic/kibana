@@ -35,5 +35,5 @@ export interface IRuleDataReader {
 }
 
 export interface IRuleDataWriter {
-  bulk(request: BulkRequest): Promise<TransportResult<BulkResponse, unknown>>;
+  bulk(request: BulkRequest): Promise<TransportResult<BulkResponse, unknown> | undefined>;
 }
