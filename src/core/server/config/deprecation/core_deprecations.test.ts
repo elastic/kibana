@@ -483,30 +483,52 @@ describe('core deprecations', () => {
   });
 
   describe('using default pattern layout', () => {
-    it('warns when console appender is used', () => {
-      const { messages } = applyCoreDeprecations({
-        logging: {
-          root: {
-            appenders: ['default', 'console', 'test'],
-          },
-        },
-      });
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "It looks like you are using Kibana's built-in \`console\` appender, which uses the \\"pattern\\" layout by default. In 8.0, the default layout will switch to JSON, which is ECS-compliant. If you are relying on the default pattern layout for log ingestion, be sure to explicitly configure this in your Kibana configuration to prevent any disruption when upgrading to 8.0.",
-        ]
-      `);
-    });
+    ['default', 'console'].forEach((appender) => {
+      describe(appender, () => {
+        it(`warns when ${appender} appender is used in root`, () => {
+          const { messages } = applyCoreDeprecations({
+            logging: {
+              root: {
+                appenders: [appender, 'test'],
+              },
+            },
+          });
+          expect(messages).toMatchInlineSnapshot(`
+            Array [
+              "It looks like you are using Kibana's built-in \`console\` appender, which uses the \\"pattern\\" layout by default. In 8.0, the default layout will switch to JSON, which is ECS-compliant. If you are relying on the default pattern layout for log ingestion, be sure to explicitly configure this in your Kibana configuration to prevent any disruption when upgrading to 8.0.",
+            ]
+          `);
+        });
 
-    it('does not warn when console appender is not used', () => {
-      const { messages } = applyCoreDeprecations({
-        logging: {
-          root: {
-            level: 'warn',
-          },
-        },
+        it(`warns when ${appender} appender is used in loggers`, () => {
+          const { messages } = applyCoreDeprecations({
+            logging: {
+              loggers: [
+                {
+                  name: 'my-logger',
+                  appenders: [appender],
+                },
+              ],
+            },
+          });
+          expect(messages).toMatchInlineSnapshot(`
+            Array [
+              "It looks like you are using Kibana's built-in \`console\` appender, which uses the \\"pattern\\" layout by default. In 8.0, the default layout will switch to JSON, which is ECS-compliant. If you are relying on the default pattern layout for log ingestion, be sure to explicitly configure this in your Kibana configuration to prevent any disruption when upgrading to 8.0.",
+            ]
+          `);
+        });
+
+        it(`does not warn when ${appender} appender is not used in root`, () => {
+          const { messages } = applyCoreDeprecations({
+            logging: {
+              root: {
+                level: 'warn',
+              },
+            },
+          });
+          expect(messages).toMatchInlineSnapshot(`Array []`);
+        });
       });
-      expect(messages).toMatchInlineSnapshot(`Array []`);
     });
 
     it('does not warn when console appender is overwritten', () => {
@@ -522,7 +544,7 @@ describe('core deprecations', () => {
             },
           },
           root: {
-            appenders: ['default', 'console'],
+            appenders: ['console'],
           },
         },
       });

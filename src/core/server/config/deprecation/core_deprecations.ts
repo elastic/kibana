@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
+import { LoggingConfigType } from '../../logging';
 
 const kibanaPathConf: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (process.env?.KIBANA_PATH_CONF) {
@@ -598,9 +599,15 @@ const patternLayoutDefaultLoggingDeprecation: ConfigDeprecation = (
   addDeprecation,
   { branch }
 ) => {
+  const usesAppender = (name: string) =>
+    settings.logging?.root?.appenders?.includes(name) ||
+    settings.logging?.loggers?.some((logger: LoggingConfigType['loggers'][number]) =>
+      logger.appenders?.includes(name)
+    );
+
   if (
-    settings.logging?.root?.appenders?.includes('console') &&
-    settings.logging?.appenders?.console === undefined
+    (usesAppender('default') && settings.logging?.appenders?.default === undefined) ||
+    (usesAppender('console') && settings.logging?.appenders?.console === undefined)
   ) {
     addDeprecation({
       configPath: 'logging.root.appenders',
