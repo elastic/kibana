@@ -682,14 +682,12 @@ async function endpointDetailsActivityLogPagingMiddleware({
   coreStart: CoreStart;
 }) {
   const { getState, dispatch } = store;
-  console.log('this is called!');
   try {
     const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
     // don't page when paging is disabled or when date ranges are invalid
     if (disabled) {
       return;
     }
-    console.log('this is called! 22');
     if (getIsInvalidDateRange({ startDate, endDate })) {
       dispatch({
         type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
@@ -697,83 +695,71 @@ async function endpointDetailsActivityLogPagingMiddleware({
           isInvalidDateRange: true,
         },
       });
-      console.log('this is called! 3333');
       return;
     }
 
-    console.log('this is called! 44444');
     dispatch({
       type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
       payload: {
         isInvalidDateRange: false,
       },
     });
-    console.log('this is called! 55555');
     dispatch({
       type: 'endpointDetailsActivityLogChanged',
       // ts error to be fixed when AsyncResourceState is refactored (#830)
       // @ts-expect-error
       payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
     });
-    console.log('this is called! 66666');
     const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
       agent_id: selectedAgent(getState()),
     });
-    console.log('this is called! 777777');
-    // const activityLog = await coreStart.http.get<ActivityLog>(route, {
-    //   query: {
-    //     page,
-    //     page_size: pageSize,
-    //     start_date: startDate,
-    //     end_date: endDate,
-    //   },
-    // });
+    const activityLog = await coreStart.http.get<ActivityLog>(route, {
+      query: {
+        page,
+        page_size: pageSize,
+        start_date: startDate,
+        end_date: endDate,
+      },
+    });
 
-    // console.log('this is called! 88888');
-    // const lastLoadedLogData = getLastLoadedActivityLogData(getState());
-    // console.log('this is called! 99999');
-    // if (lastLoadedLogData !== undefined) {
-    //   const updatedLogDataItems = (
-    //     [...new Set([...lastLoadedLogData.data, ...activityLog.data])] as ActivityLog['data']
-    //   ).sort((a, b) =>
-    //     new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
-    //   );
-    //   console.log('this is called! 1000000');
+    const lastLoadedLogData = getLastLoadedActivityLogData(getState());
+    if (lastLoadedLogData !== undefined) {
+      const updatedLogDataItems = (
+        [...new Set([...lastLoadedLogData.data, ...activityLog.data])] as ActivityLog['data']
+      ).sort((a, b) =>
+        new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
+      );
 
-    //   const updatedLogData = {
-    //     page: activityLog.page,
-    //     pageSize: activityLog.pageSize,
-    //     startDate: activityLog.startDate,
-    //     endDate: activityLog.endDate,
-    //     data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
-    //   };
-    //   console.log('this is called! 11111111');
-    //   dispatch({
-    //     type: 'endpointDetailsActivityLogChanged',
-    //     payload: createLoadedResourceState<ActivityLog>(updatedLogData),
-    //   });
-    //   console.log('eeeee', activityLog.data);
-    //   if (!activityLog.data.length) {
-    //     dispatch({
-    //       type: 'endpointDetailsActivityLogUpdatePaging',
-    //       payload: {
-    //         disabled: true,
-    //         page: activityLog.page > 1 ? activityLog.page - 1 : 1,
-    //         pageSize: activityLog.pageSize,
-    //         startDate: activityLog.startDate,
-    //         endDate: activityLog.endDate,
-    //       },
-    //     });
-    //   }
-    // } else {
-    //   console.log('this is called! 12222222');
-    //   dispatch({
-    //     type: 'endpointDetailsActivityLogChanged',
-    //     payload: createLoadedResourceState<ActivityLog>(activityLog),
-    //   });
-    // }
+      const updatedLogData = {
+        page: activityLog.page,
+        pageSize: activityLog.pageSize,
+        startDate: activityLog.startDate,
+        endDate: activityLog.endDate,
+        data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
+      };
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        payload: createLoadedResourceState<ActivityLog>(updatedLogData),
+      });
+      if (!activityLog.data.length) {
+        dispatch({
+          type: 'endpointDetailsActivityLogUpdatePaging',
+          payload: {
+            disabled: true,
+            page: activityLog.page > 1 ? activityLog.page - 1 : 1,
+            pageSize: activityLog.pageSize,
+            startDate: activityLog.startDate,
+            endDate: activityLog.endDate,
+          },
+        });
+      }
+    } else {
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        payload: createLoadedResourceState<ActivityLog>(activityLog),
+      });
+    }
   } catch (error) {
-    console.log('this is the error', error);
     dispatch({
       type: 'endpointDetailsActivityLogChanged',
       payload: createFailedResourceState<ActivityLog>(error.body ?? error),
