@@ -75,6 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('dashboard', () => {
       beforeEach(async () => {
+        await time()
         await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
@@ -82,7 +83,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should launch sample flights data set dashboard', async () => {
-        await timeNav();
         await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
@@ -107,7 +107,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should launch sample logs data set dashboard', async () => {
-        await timeNav();
         await PageObjects.home.launchSampleDashboard('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
@@ -116,7 +115,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should launch sample ecommerce data set dashboard', async () => {
-        await timeNav();
         await PageObjects.home.launchSampleDashboard('ecommerce');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
@@ -153,12 +151,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    async function timeNav() {
+    async function time() {
       const today = moment().format('MMM D, YYYY');
       const from = `${today} @ 00:00:00.000`;
       const to = `${today} @ 23:59:59.999`;
       await PageObjects.common.setTime({ from, to });
-      await PageObjects.common.navigateToApp('discover');
+      // await PageObjects.common.navigateToApp('discover');
     }
   });
 }
