@@ -261,7 +261,10 @@ export class ManifestManager {
     return { defaultArtifacts, policySpecificArtifacts };
   }
 
-  protected async buildHostIsolationExceptionForOs(os: string, policyId?: string) {
+  protected async buildHostIsolationExceptionForOs(
+    os: string,
+    policyId?: string
+  ): Promise<InternalArtifactCompleteSchema> {
     return buildArtifact(
       await getHostIsolationExceptionsList(
         this.exceptionListClient,
