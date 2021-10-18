@@ -154,6 +154,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       return;
     }
 
+    setIsUpdateModalVisible(false);
     setIsUpgradingPackagePolicies(true);
 
     await installPackage({ name, version, title });
@@ -166,7 +167,6 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     );
 
     setIsUpgradingPackagePolicies(false);
-    setIsUpdateModalVisible(false);
 
     notifications.toasts.addSuccess({
       title: toMountPoint(
@@ -285,7 +285,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton
-            isLoading={isInstalling}
+            isLoading={isInstalling || isUpgradingPackagePolicies}
             onClick={
               upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate
             }
