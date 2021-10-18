@@ -7,9 +7,12 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
+import type { Installation, PackageInfo } from '../../common';
+import { AUTO_UPDATE_PACKAGES } from '../../common';
+
+import { shouldUpgradePolicies, upgradeManagedPackagePolicies } from './managed_package_policies';
 import { packagePolicyService } from './package_policy';
-import { getPackageInfo } from './epm/packages';
+import { getPackageInfo, getInstallation } from './epm/packages';
 
 jest.mock('./package_policy');
 jest.mock('./epm/packages');
@@ -24,11 +27,12 @@ jest.mock('./app_context', () => {
   };
 });
 
-describe('managed package policies', () => {
+describe('upgradeManagedPackagePolicies', () => {
   afterEach(() => {
     (packagePolicyService.get as jest.Mock).mockReset();
     (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockReset();
     (getPackageInfo as jest.Mock).mockReset();
+    (getInstallation as jest.Mock).mockReset();
     (packagePolicyService.upgrade as jest.Mock).mockReset();
   });
 
@@ -50,7 +54,7 @@ describe('managed package policies', () => {
           package: {
             name: 'non-managed-package',
             title: 'Non-Managed Package',
-            version: '0.0.1',
+            version: '1.0.0',
           },
         };
       }
@@ -73,6 +77,11 @@ describe('managed package policies', () => {
         keepPoliciesUpToDate: false,
       })
     );
+
+    (getInstallation as jest.Mock).mockResolvedValueOnce({
+      id: 'test-installation',
+      version: '0.0.1',
+    });
 
     await upgradeManagedPackagePolicies(soClient, esClient, ['non-managed-package-id']);
 
@@ -120,6 +129,11 @@ describe('managed package policies', () => {
         keepPoliciesUpToDate: true,
       })
     );
+
+    (getInstallation as jest.Mock).mockResolvedValueOnce({
+      id: 'test-installation',
+      version: '1.0.0',
+    });
 
     await upgradeManagedPackagePolicies(soClient, esClient, ['managed-package-id']);
 
@@ -172,6 +186,11 @@ describe('managed package policies', () => {
         })
       );
 
+      (getInstallation as jest.Mock).mockResolvedValueOnce({
+        id: 'test-installation',
+        version: '1.0.0',
+      });
+
       const result = await upgradeManagedPackagePolicies(soClient, esClient, [
         'conflicting-package-policy',
       ]);
@@ -203,6 +222,136 @@ describe('managed package policies', () => {
       ]);
 
       expect(packagePolicyService.upgrade).not.toBeCalled();
+    });
+  });
+});
+
+describe('shouldUpgradePolicies', () => {
+  describe('package is marked as AUTO_UPDATE', () => {
+    describe('keep_policies_up_to_date is true', () => {
+      it('returns false', () => {
+        const packageInfo = {
+          version: '1.0.0',
+          keepPoliciesUpToDate: true,
+          name: AUTO_UPDATE_PACKAGES[0].name,
+        };
+
+        const installedPackage = {
+          version: '1.0.0',
+        };
+
+        const result = shouldUpgradePolicies(
+          packageInfo as PackageInfo,
+          installedPackage as Installation
+        );
+
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('keep_policies_up_to_date is false', () => {
+      it('returns false', () => {
+        const packageInfo = {
+          version: '1.0.0',
+          keepPoliciesUpToDate: false,
+          name: AUTO_UPDATE_PACKAGES[0].name,
+        };
+
+        const installedPackage = {
+          version: '1.0.0',
+        };
+
+        const result = shouldUpgradePolicies(
+          packageInfo as PackageInfo,
+          installedPackage as Installation
+        );
+
+        expect(result).toBe(false);
+      });
+    });
+  });
+
+  describe('package policy is up-to-date', () => {
+    describe('keep_policies_up_to_date is true', () => {
+      it('returns false', () => {
+        const packageInfo = {
+          version: '1.0.0',
+          keepPoliciesUpToDate: true,
+        };
+
+        const installedPackage = {
+          version: '1.0.0',
+        };
+
+        const result = shouldUpgradePolicies(
+          packageInfo as PackageInfo,
+          installedPackage as Installation
+        );
+
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('keep_policies_up_to_date is false', () => {
+      it('returns false', () => {
+        const packageInfo = {
+          version: '1.0.0',
+          keepPoliciesUpToDate: false,
+        };
+
+        const installedPackage = {
+          version: '1.0.0',
+        };
+
+        const result = shouldUpgradePolicies(
+          packageInfo as PackageInfo,
+          installedPackage as Installation
+        );
+
+        expect(result).toBe(false);
+      });
+    });
+  });
+
+  describe('package policy is out-of-date', () => {
+    describe('keep_policies_up_to_date is true', () => {
+      it('returns true', () => {
+        const packageInfo = {
+          version: '1.0.0',
+          keepPoliciesUpToDate: true,
+        };
+
+        const installedPackage = {
+          version: '1.1.0',
+        };
+
+        const result = shouldUpgradePolicies(
+          packageInfo as PackageInfo,
+          installedPackage as Installation
+        );
+
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('keep_policies_up_to_date is false', () => {
+      it('returns false', () => {
+        const packageInfo = {
+          version: '1.0.0',
+          keepPoliciesUpToDate: false,
+        };
+
+        const installedPackage = {
+          version: '1.1.0',
+        };
+
+        const result = shouldUpgradePolicies(
+          packageInfo as PackageInfo,
+          installedPackage as Installation
+        );
+
+        expect(result).toBe(false);
+      });
     });
   });
 });
