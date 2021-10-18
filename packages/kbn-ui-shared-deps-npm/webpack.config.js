@@ -50,7 +50,6 @@ module.exports = (_, argv) => {
         '@elastic/eui/dist/eui_theme_amsterdam_dark.json',
         '@elastic/numeral',
         '@emotion/react',
-        'angular',
         'classnames',
         'fflate',
         'history',
