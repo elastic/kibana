@@ -48,7 +48,7 @@ const i18nTexts = {
     defaultMessage: 'Error',
   }),
   buttonLabel: i18n.translate('xpack.upgradeAssistant.overview.deprecationLogs.buttonLabel', {
-    defaultMessage: 'Enable deprecation logging and indexing',
+    defaultMessage: 'Enable deprecation log collecting',
   }),
   loadingLogsLabel: i18n.translate('xpack.upgradeAssistant.overview.loadingLogsLabel', {
     defaultMessage: 'Loading log collection state…',
