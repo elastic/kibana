@@ -8,7 +8,7 @@
 import { I18nProvider } from '@kbn/i18n/react';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 
 import { ReindexWarning } from '../../../../../../../common/types';
 import { MAJOR_VERSION } from '../../../../../../../common/constants';

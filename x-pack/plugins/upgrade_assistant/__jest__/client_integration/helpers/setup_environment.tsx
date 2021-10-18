@@ -9,7 +9,7 @@ import React from 'react';
 import axios from 'axios';
 // @ts-ignore
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 import {
   deprecationsServiceMock,
   docLinksServiceMock,
