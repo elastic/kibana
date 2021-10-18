@@ -106,6 +106,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           transform: [],
           index_template: [],
           data_stream_ilm_policy: [],
+          ml_model: [],
         },
       },
       data_streams: [
@@ -217,6 +218,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           transform: [],
           index_template: [],
           data_stream_ilm_policy: [],
+          ml_model: [],
         },
       },
       data_streams: [
@@ -431,6 +433,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           transform: [],
           index_template: [],
           data_stream_ilm_policy: [],
+          ml_model: [],
         },
       },
     });

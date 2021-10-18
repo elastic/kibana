@@ -57,7 +57,7 @@ import {
   registerPreconfigurationRoutes,
 } from './routes';
 
-import type { ExternalCallback } from './types';
+import type { ExternalCallback, FleetRequestHandlerContext } from './types';
 import type {
   ESIndexPatternService,
   AgentService,
@@ -79,7 +79,7 @@ import {
   getAgentById,
 } from './services/agents';
 import { registerFleetUsageCollector } from './collectors/register';
-import { getInstallation } from './services/epm/packages';
+import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
@@ -231,7 +231,21 @@ export class FleetPlugin
       });
     }
 
-    const router = core.http.createRouter();
+    core.http.registerRouteHandlerContext<FleetRequestHandlerContext, 'fleet'>(
+      'fleet',
+      (coreContext, request) => ({
+        epm: {
+          // Use a lazy getter to avoid constructing this client when not used by a request handler
+          get internalSoClient() {
+            return appContextService
+              .getSavedObjects()
+              .getScopedClient(request, { excludedWrappers: ['security'] });
+          },
+        },
+      })
+    );
+
+    const router = core.http.createRouter<FleetRequestHandlerContext>();
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
@@ -292,6 +306,7 @@ export class FleetPlugin
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
         getInstallation,
+        ensureInstalledPackage,
       },
       agentService: {
         getAgent: getAgentById,

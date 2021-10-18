@@ -8,7 +8,7 @@
 import angular, { IModule } from 'angular';
 import { uiRoutes } from './helpers/routes';
 import { Legacy } from '../legacy_shims';
-import { configureAppAngularModule } from '../../../../../src/plugins/kibana_legacy/public';
+import { configureAppAngularModule } from '../angular/top_nav';
 import { localAppModule, appModuleName } from './app_modules';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 
@@ -28,7 +28,6 @@ export class AngularApp {
       externalConfig,
       triggersActionsUi,
       usageCollection,
-      kibanaLegacy,
       appMountParameters,
     } = deps;
     const app: IModule = localAppModule(deps);
@@ -43,7 +42,6 @@ export class AngularApp {
           isCloud,
           pluginInitializerContext,
           externalConfig,
-          kibanaLegacy,
           triggersActionsUi,
           usageCollection,
           appMountParameters,
