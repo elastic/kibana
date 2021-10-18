@@ -146,23 +146,6 @@ You can also remove a plugin manually by deleting the plugin's subdirectory unde
 NOTE: Removing a plugin will result in an "optimize" run which will delay the next start of {kib}.
 
 [float]
-[[disable-plugin]]
-== Disable plugins
-
-deprecated:[7.16.0,"In 8.0 and later, this setting will only be supported for a subset of plugins that have opted in to the behavior."]
-
-Use the following command to disable a plugin:
-
-[source,shell]
------------
-./bin/kibana --<plugin ID>.enabled=false <1>
------------
-
-NOTE: Disabling or enabling a plugin will result in an "optimize" run which will delay the start of {kib}.
-
-<1> You can find a plugin's plugin ID as the value of the `name` property in the plugin's `kibana.json` file.
-
-[float]
 [[configure-plugin-manager]]
 == Configure the plugin manager
 
