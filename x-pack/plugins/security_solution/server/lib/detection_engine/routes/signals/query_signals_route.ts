@@ -33,7 +33,7 @@ export const querySignalsRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    async (_, request, response) => {
+    async (context, request, response) => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { query, aggs, _source, track_total_hits, size } = request.body;
       const siemResponse = buildSiemResponse(response);
@@ -51,17 +51,19 @@ export const querySignalsRoute = (
       }
 
       try {
-        const result = await ruleDataClient?.getReader().search({
-          body: {
-            query,
-            // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
-            aggs: { ...aggs },
-            _source,
-            track_total_hits,
-            size,
-          },
-          ignore_unavailable: true,
-        });
+        const result = await ruleDataClient
+          ?.getReader({ namespace: context.securitySolution.getSpaceId() })
+          .search({
+            body: {
+              query,
+              // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
+              aggs: { ...aggs },
+              _source,
+              track_total_hits,
+              size,
+            },
+            ignore_unavailable: true,
+          });
         return response.ok({ body: result });
       } catch (err) {
         // error while getting or updating signal with id: id in signal index .siem-signals

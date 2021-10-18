@@ -123,7 +123,7 @@ export const initRoutes = (
   querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);
-  finalizeSignalsMigrationRoute(router, security);
+  finalizeSignalsMigrationRoute(router, ruleDataService, security);
   deleteSignalsMigrationRoute(router, security);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index

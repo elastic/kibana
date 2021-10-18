@@ -100,8 +100,8 @@ export default ({ getService }: FtrProviderContext) => {
           .set('kbn-xsrf', 'true')
           .query({ from: '2021-08-01' })
           .expect(200);
-        expect(indices.length).to.eql(2);
-        expect(indices[1].is_outdated).to.eql(true);
+        expect(indices.length).to.eql(1);
+        expect(indices[0].is_outdated).to.eql(true);
 
         const [migration] = await startSignalsMigration({ indices: [indices[0].index], supertest });
         await waitFor(async () => {
@@ -109,7 +109,6 @@ export default ({ getService }: FtrProviderContext) => {
             migrationIds: [migration.migration_id],
             supertest,
           });
-
           return completed === true;
         }, `polling finalize_migration until complete`);
 
