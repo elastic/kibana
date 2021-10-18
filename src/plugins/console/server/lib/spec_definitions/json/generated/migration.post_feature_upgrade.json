@@ -1,0 +1,11 @@
+{
+  "migration.post_feature_upgrade": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_migration/system_features"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/migration-api-feature-upgrade.html"
+  }
+}
