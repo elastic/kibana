@@ -32,7 +32,7 @@ export function UpgradeAvailableCard({
       description={
         <FormattedMessage
           id="xpack.apm.settings.upgradeAvailable.description"
-          defaultMessage="Although your APM integration is setup, a new version of the APM integration is available for upgrade with your fleet policy. {upgradePackagePolicyLink} to get the most out your setup!"
+          defaultMessage="Even though your APM integration is setup, a new version of the APM integration is available for upgrade with your package policy. {upgradePackagePolicyLink} to get the most out of your setup."
           values={{
             upgradePackagePolicyLink: (
               <EuiLink href={upgradeApmPackagePolicyHref}>
