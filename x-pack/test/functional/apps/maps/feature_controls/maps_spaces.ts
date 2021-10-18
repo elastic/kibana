@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`allows a map to be created`, async () => {
         await PageObjects.common.navigateToActualUrl(APP_ID, '/map', {
           basePath: `/s/custom_space`,
-          ensureCurrentUrl: false,
+          ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
         await PageObjects.maps.waitForLayersToLoad();
@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`allows a map to be deleted`, async () => {
         await PageObjects.common.navigateToActualUrl(APP_ID, '/', {
           basePath: `/s/custom_space`,
-          ensureCurrentUrl: false,
+          ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
         await PageObjects.maps.deleteSavedMaps('my test map');
@@ -81,7 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`returns a 404`, async () => {
         await PageObjects.common.navigateToActualUrl(APP_ID, '/', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
+          ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
         const messageText = await PageObjects.common.getJsonBodyText();
