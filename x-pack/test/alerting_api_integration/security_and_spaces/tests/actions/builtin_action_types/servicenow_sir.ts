@@ -95,6 +95,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             connector_type_id: '.servicenow-sir',
             config: {
               apiUrl: serviceNowSimulatorURL,
+              isLegacy: false,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -129,7 +130,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should set the isLegacy to false when not provided', async () => {
+      it('should set the isLegacy to true when not provided', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
@@ -147,7 +148,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
           .get(`/api/actions/connector/${createdAction.id}`)
           .expect(200);
 
-        expect(fetchedAction.config.isLegacy).to.be(false);
+        expect(fetchedAction.config.isLegacy).to.be(true);
       });
 
       it('should respond with a 400 Bad Request when creating a servicenow action with no apiUrl', async () => {
