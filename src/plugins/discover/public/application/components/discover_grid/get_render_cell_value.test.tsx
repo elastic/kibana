@@ -26,7 +26,7 @@ jest.mock('../../../kibana_services', () => ({
       get: jest.fn(),
     },
     fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
     },
   }),
 }));
@@ -603,6 +603,6 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`"<span></span>"`);
+    expect(component.html()).toMatchInlineSnapshot(`"<span>-</span>"`);
   });
 });
