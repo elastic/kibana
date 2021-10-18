@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useTransactionDistributionFetcher } from '../../../../hooks/use_transaction_distribution_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import {
   OnHasData,
   TransactionDistributionChart,
@@ -104,40 +104,41 @@ export function TransactionDistribution({
     }
   );
 
-  const {
-    error,
-    percentileThresholdValue,
-    startFetch,
-    cancelFetch,
-    transactionDistribution,
-  } = useTransactionDistributionFetcher();
-
-  const startFetchHandler = useCallback(() => {
-    startFetch({
-      environment,
-      kuery,
+  const { data = { log: [] }, status, error } = useFetcher(
+    (callApmApi) => {
+      if (serviceName && environment && start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/latency/overall_distribution',
+          params: {
+            query: {
+              serviceName,
+              transactionName,
+              transactionType,
+              kuery,
+              environment,
+              start,
+              end,
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+            },
+          },
+        });
+      }
+    },
+    [
       serviceName,
       transactionName,
       transactionType,
+      kuery,
+      environment,
       start,
       end,
-      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-    });
-  }, [
-    startFetch,
-    environment,
-    serviceName,
-    transactionName,
-    transactionType,
-    kuery,
-    start,
-    end,
-  ]);
+    ]
+  );
 
-  useEffect(() => {
-    startFetchHandler();
-    return cancelFetch;
-  }, [cancelFetch, startFetchHandler]);
+  const overallHistogram =
+    data.overallHistogram === undefined && status !== FETCH_STATUS.LOADING
+      ? []
+      : data.overallHistogram;
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -230,11 +231,11 @@ export function TransactionDistribution({
       <TransactionDistributionChart
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-        markerValue={percentileThresholdValue ?? 0}
+        markerValue={data.percentileThresholdValue ?? 0}
         // If there's an error pass on an empty array for the data
         // so the chart finishes the loading state.
-        overallHistogram={!isErrorMessage(error) ? transactionDistribution : []}
-        onChartSelection={onTrackedChartSelection}
+        overallHistogram={!isErrorMessage(error) ? overallHistogram : []}
+        onChartSelection={onTrackedChartSelection as BrushEndListener}
         onHasData={onTransactionDistributionHasData}
         selection={selection}
       />

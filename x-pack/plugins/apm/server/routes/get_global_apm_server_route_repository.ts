@@ -18,6 +18,7 @@ import { environmentsRouteRepository } from './environments';
 import { errorsRouteRepository } from './errors';
 import { apmFleetRouteRepository } from './fleet';
 import { indexPatternRouteRepository } from './index_pattern';
+import { latencyDistributionRouteRepository } from './latency_distribution';
 import { metricsRouteRepository } from './metrics';
 import { observabilityOverviewRouteRepository } from './observability_overview';
 import { rumRouteRepository } from './rum_client';
@@ -39,6 +40,7 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(indexPatternRouteRepository)
     .merge(environmentsRouteRepository)
     .merge(errorsRouteRepository)
+    .merge(latencyDistributionRouteRepository)
     .merge(metricsRouteRepository)
     .merge(observabilityOverviewRouteRepository)
     .merge(rumRouteRepository)

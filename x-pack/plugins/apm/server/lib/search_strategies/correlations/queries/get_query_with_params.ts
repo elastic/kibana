@@ -42,13 +42,20 @@ export const getQueryWithParams = ({
     transactionName,
   } = params;
 
-  // converts string based start/end to epochmillis
-  const setup = pipe(
-    rangeRt.decode({ start, end }),
-    getOrElse<t.Errors, { start: number; end: number }>((errors) => {
-      throw new Error(failure(errors).join('\n'));
-    })
-  ) as Setup & SetupTimeRange;
+  let setup = { start: 0, end: 0 } as Setup & SetupTimeRange;
+
+  if (typeof start === 'number' && typeof end === 'number') {
+    setup.start = start;
+    setup.end = end;
+  } else if (typeof start === 'string' && typeof end === 'string') {
+    // converts string based start/end to epochmillis
+    setup = pipe(
+      rangeRt.decode({ start, end }),
+      getOrElse<t.Errors, { start: number; end: number }>((errors) => {
+        throw new Error(failure(errors).join('\n'));
+      })
+    ) as Setup & SetupTimeRange;
+  }
 
   const filters = getCorrelationsFilters({
     setup,
