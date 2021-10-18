@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiTitle,
   EuiSpacer,
@@ -17,6 +17,7 @@ import {
   EuiButtonGroup,
   EuiButtonEmpty,
   EuiFlyoutHeader,
+  EuiCheckbox,
 } from '@elastic/eui';
 
 import {
@@ -44,6 +45,11 @@ export const EditControlGroup = () => {
 
   const dispatch = useEmbeddableDispatch();
   const { panels, controlStyle, defaultControlWidth } = useEmbeddableSelector((state) => state);
+  const [checked, setChecked] = useState(false);
+
+  const onChange = (e) => {
+    setChecked(e.target.checked);
+  };
 
   return (
     <>
@@ -66,34 +72,24 @@ export const EditControlGroup = () => {
         </EuiFormRow>
         <EuiSpacer size="m" />
         <EuiFormRow label={ControlGroupStrings.management.getDefaultWidthTitle()}>
-          <EuiFlexGroup direction={'row'}>
-            <EuiFlexItem>
-              <EuiButtonGroup
-                color="primary"
-                idSelected={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
-                legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-                options={CONTROL_WIDTH_OPTIONS}
-                onChange={(newWidth: string) =>
-                  dispatch(setDefaultControlWidth(newWidth as ControlWidth))
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={() =>
-                  dispatch(setAllControlWidths(defaultControlWidth ?? DEFAULT_CONTROL_WIDTH))
-                }
-                aria-label={'delete-all'}
-                iconType="returnKey"
-                size="s"
-              >
-                {ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiButtonGroup
+            color="primary"
+            idSelected={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
+            legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+            options={CONTROL_WIDTH_OPTIONS}
+            onChange={(newWidth: string) =>
+              dispatch(setDefaultControlWidth(newWidth as ControlWidth))
+            }
+          />
         </EuiFormRow>
-
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="s" />
+        <EuiCheckbox
+          id="widthsCheckbox"
+          label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
+          checked={checked}
+          onChange={(e) => onChange(e)}
+        />
+        <EuiSpacer size="l" />
 
         <EuiButtonEmpty
           onClick={() => {

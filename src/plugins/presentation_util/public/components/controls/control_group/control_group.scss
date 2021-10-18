@@ -1,35 +1,62 @@
 $smallControl: $euiSize * 14;
 $mediumControl: $euiSize * 25;
 $largeControl: $euiSize * 50;
-$controlMinWidth: $euiSize * 14;
+$controlMinWidth: $euiSize * 16;
 
 .controlGroup {
-  margin-left: $euiSizeXS;
   overflow-x: clip; // sometimes when using auto width, removing a control can cause a horizontal scrollbar to appear.
   min-height: $euiSize * 4;
-  padding: $euiSize 0;
 }
 
-.controlFrame--cloneWrapper {
+.controlsWrapper {
+  &--empty {
+    display: flex;
+    @include euiBreakpoint('m', 'l', 'xl') {
+      background: url(opt_a.svg);
+      background-position: left top;
+      background-repeat: no-repeat;
+      .addControlButton {
+        text-align: center;
+      }
+      .emptyStateText {
+        padding-left: $euiSize * 2;
+      }
+    }
+    @include euiBreakpoint('xs', 's') {
+      .addControlButton {
+        text-align: center;
+      }
+    }
+    padding-right: $euiSizeL;
+  }
+
+  &--twoLine {
+    .groupEditActions {
+      padding-top: $euiSize;
+    }
+  }
+}
+
+.controlFrame__cloneWrapper {
   width: max-content;
 
   .euiFormLabel {
     padding-bottom: $euiSizeXS;
   }
 
-  &-small {
+  &--small {
     width: $smallControl;
   }
 
-  &-medium {
+  &--medium {
     width: $mediumControl;
   }
 
-  &-large {
+  &--large {
     width: $largeControl;
   }
 
-  &-twoLine {
+  &--twoLine {
     margin-top: -$euiSize * 1.25;
   }
 
@@ -49,7 +76,7 @@ $controlMinWidth: $euiSize * 14;
     min-width: $controlMinWidth;
   }
 
-  .controlFrame--formControlLayout, .controlFrame--draggable {
+  .controlFrame__formControlLayout, .controlFrame--draggable {
     &-clone {
       box-shadow: 0 0 0 1px $euiShadowColor,
         0 1px 6px 0 $euiShadowColor;
@@ -62,28 +89,28 @@ $controlMinWidth: $euiSize * 14;
   }
 }
 
-.controlFrame--wrapper {
+.controlFrame__wrapper {
   flex-basis: auto;
   position: relative;
   display: block;
 
-  .controlFrame--formControlLayout {
+  .controlFrame__formControlLayout {
     width: 100%;
     min-width: $controlMinWidth;
     transition:background-color .1s, color .1s;
 
-    &__label {
+    &Label {
       @include euiTextTruncate;
       max-width: 50%;
     }
 
-    &:not(.controlFrame--formControlLayout-clone) {
+    &:not(.controlFrame__formControlLayout-clone) {
       .controlFrame--dragHandle {
         cursor: grab;
       }
     }
 
-    .controlFrame--control {
+    .controlFrame__control {
       height: 100%;
       transition: opacity .1s;
 
@@ -93,21 +120,21 @@ $controlMinWidth: $euiSize * 14;
     }
   }
 
-  &-small {
+  &--small {
     width: $smallControl;
   }
 
-  &-medium {
+  &--medium {
     width: $mediumControl;
   }
 
-  &-large {
+  &--large {
     width: $largeControl;
   }
 
-  &-insertBefore,
-  &-insertAfter {
-    .controlFrame--formControlLayout:after {
+  &--insertBefore,
+  &--insertAfter {
+    .controlFrame__formControlLayout:after {
       content: '';
       position: absolute;
       background-color: transparentize($euiColorPrimary, .5);
@@ -118,14 +145,14 @@ $controlMinWidth: $euiSize * 14;
     }
   }
 
-  &-insertBefore {
-    .controlFrame--formControlLayout:after {
+  &--insertBefore {
+    .controlFrame__formControlLayout:after {
       left: -$euiSizeS;
     }
   }
 
-  &-insertAfter {
-    .controlFrame--formControlLayout:after {
+  &--insertAfter {
+    .controlFrame__formControlLayout:after {
       right: -$euiSizeS;
     }
   }
@@ -167,7 +194,7 @@ $controlMinWidth: $euiSize * 14;
     .euiFormRow__labelWrapper {
       opacity: 0;
     }
-    .controlFrame--formControlLayout {
+    .controlFrame__formControlLayout {
       background-color: $euiColorEmptyShade !important;
       color: transparent !important;
       box-shadow: none;
@@ -176,7 +203,7 @@ $controlMinWidth: $euiSize * 14;
         opacity: 0;
       }
 
-      .controlFrame--control {
+      .controlFrame__control {
         opacity: 0;
       }
     }
