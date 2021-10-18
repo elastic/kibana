@@ -33,7 +33,7 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
               defaultMessage: `One or more values in this field are too long and can't be searched or filtered.`,
             })
           : i18n.translate('discover.docView.table.ignored.singleAboveTooltip', {
-              defaultMessage: `The value in this field is too long and and can't be searched or filtered.`,
+              defaultMessage: `The value in this field is too long and can't be searched or filtered.`,
             });
       case IgnoredReason.MALFORMED:
         return multiValue
