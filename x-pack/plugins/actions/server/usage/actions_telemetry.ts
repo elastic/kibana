@@ -83,7 +83,8 @@ export async function getTotalCount(
 export async function getInUseTotalCount(
   esClient: ElasticsearchClient,
   kibanaIndex: string,
-  referenceType?: string
+  referenceType?: string,
+  preconfiguredActions?: PreConfiguredAction[]
 ): Promise<{
   countTotal: number;
   countByType: Record<string, number>;
@@ -334,6 +335,15 @@ export async function getInUseTotalCount(
     countByActionTypeId[actionTypeId]++;
     if (actionRef === `preconfigured:${AlertHistoryEsIndexConnectorId}`) {
       preconfiguredAlertHistoryConnectors++;
+    }
+    if (preconfiguredActions && actionTypeId === '.email') {
+      const preconfiguredConnectorId = actionRef.split(':')[1];
+      const service = (preconfiguredActions.find(
+        (preconfConnector) => preconfConnector.id === preconfiguredConnectorId
+      )?.config?.service ?? 'other') as string;
+      const currentCount =
+        countEmailByService[service] !== undefined ? countEmailByService[service] : 0;
+      countEmailByService[service] = currentCount + 1;
     }
   }
 
