@@ -61,7 +61,7 @@ const legacyRuleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const legacyType: SavedObjectsType = {
   name: legacyRuleActionsSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: legacyRuleActionsSavedObjectMappings,
   migrations: legacyRuleActionsSavedObjectMigration,
 };
