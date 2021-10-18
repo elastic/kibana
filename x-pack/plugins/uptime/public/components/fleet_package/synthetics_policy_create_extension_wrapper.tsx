@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
 import { SyntheticsPolicyCreateExtension } from './synthetics_policy_create_extension';
 import {
-  MonitorTypeContextProvider,
+  PolicyConfigContextProvider,
   TCPContextProvider,
   ICMPSimpleFieldsContextProvider,
   HTTPContextProvider,
@@ -24,7 +24,7 @@ import {
 export const SyntheticsPolicyCreateExtensionWrapper =
   memo<PackagePolicyCreateExtensionComponentProps>(({ newPolicy, onChange }) => {
     return (
-      <MonitorTypeContextProvider>
+      <PolicyConfigContextProvider>
         <HTTPContextProvider>
           <TCPContextProvider>
             <TLSFieldsContextProvider>
@@ -36,7 +36,7 @@ export const SyntheticsPolicyCreateExtensionWrapper =
             </TLSFieldsContextProvider>
           </TCPContextProvider>
         </HTTPContextProvider>
-      </MonitorTypeContextProvider>
+      </PolicyConfigContextProvider>
     );
   });
 SyntheticsPolicyCreateExtensionWrapper.displayName = 'SyntheticsPolicyCreateExtensionWrapper';
