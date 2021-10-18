@@ -43,8 +43,7 @@ export const config: PluginConfigDescriptor = {
     epm: true,
     agents: true,
   },
-  deprecations: ({ deprecate, renameFromRoot, unused, unusedFromRoot }) => [
-    deprecate('enabled', '8.0.0'),
+  deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Fleet plugin was named ingestManager before
     renameFromRoot('xpack.ingestManager.enabled', 'xpack.fleet.enabled'),
     renameFromRoot('xpack.ingestManager.registryUrl', 'xpack.fleet.registryUrl'),
@@ -103,7 +102,6 @@ export const config: PluginConfigDescriptor = {
     },
   ],
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     agents: schema.object({

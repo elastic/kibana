@@ -33,6 +33,7 @@ export interface CommonArtifactEntryCardProps extends CommonProps {
    * `Record<policyId: string, ContextMenuItemNavByRouterProps>`.
    */
   policies?: MenuItemPropsByPolicyId;
+  loadingPoliciesList?: boolean;
 }
 
 export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
@@ -50,6 +51,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
   ({
     item,
     policies,
+    loadingPoliciesList = false,
     actions,
     hideDescription = false,
     hideComments = false,
@@ -74,10 +76,11 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
             createdBy={artifact.created_by}
             updatedBy={artifact.updated_by}
             policies={policyNavLinks}
+            loadingPoliciesList={loadingPoliciesList}
             data-test-subj={getTestId('subHeader')}
           />
 
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
 
           {!hideDescription ? (
             <EuiText>
