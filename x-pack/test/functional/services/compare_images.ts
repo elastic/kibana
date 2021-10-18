@@ -7,7 +7,7 @@
 
 import path from 'path';
 import { promises as fs } from 'fs';
-import { pdf } from 'pdf-to-img';
+import { pdf as pdfToPng } from 'pdf-to-img';
 import { comparePngs } from '../../../../test/functional/services/lib/compare_pngs';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -111,8 +111,8 @@ export function CompareImagesProvider({ getService }: FtrProviderContext) {
       log.debug(`writeFileSync: ${actualCopyPath}`);
       await fs.writeFile(actualCopyPath, await fs.readFile(actualPdfPath));
 
-      const actualPdf = await pdf(actualCopyPath);
-      const baselinePdf = await pdf(baselineCopyPath);
+      const actualPdf = await pdfToPng(actualCopyPath);
+      const baselinePdf = await pdfToPng(baselineCopyPath);
 
       log.debug(`Checking number of pages`);
 
