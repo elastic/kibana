@@ -20,7 +20,6 @@ import type {
   PrivilegeDeprecationsService,
 } from '../../common/model';
 import { isRoleReserved } from '../../common/model';
-import { getErrorStatusCode } from '../errors';
 import { getPrivilegeDeprecationsService } from './privilege_deprecations';
 
 export const KIBANA_USER_ROLE_NAME = 'kibana_user';
@@ -111,53 +110,6 @@ async function getRolesDeprecations(
             values: {
               roles: rolesWithBasePrivileges.join(', '),
             },
-          }),
-        ],
-      },
-    },
-  ];
-}
-
-function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsDetails[] {
-  const title = getDeprecationTitle();
-
-  if (getErrorStatusCode(error) === 403) {
-    return [
-      {
-        title,
-        level: 'fetch_error',
-        deprecationType: 'feature',
-        message: i18n.translate('xpack.security.deprecations.mlPrivileges.forbiddenErrorMessage', {
-          defaultMessage: 'You do not have enough permissions to fix this deprecation.',
-        }),
-        documentationUrl: `https://www.elastic.co/guide/en/kibana/${packageInfo.branch}/xpack-security.html#_required_permissions_7`,
-        correctiveActions: {
-          manualSteps: [
-            i18n.translate(
-              'xpack.security.deprecations.mlPrivileges.forbiddenErrorCorrectiveAction',
-              {
-                defaultMessage:
-                  'Make sure you have a "manage_security" cluster privilege assigned.',
-              }
-            ),
-          ],
-        },
-      },
-    ];
-  }
-
-  return [
-    {
-      title,
-      level: 'fetch_error',
-      deprecationType: 'feature',
-      message: i18n.translate('xpack.security.deprecations.mlPrivileges.unknownErrorMessage', {
-        defaultMessage: 'Failed to perform deprecation check. Check Kibana logs for more details.',
-      }),
-      correctiveActions: {
-        manualSteps: [
-          i18n.translate('xpack.security.deprecations.mlPrivileges.unknownErrorCorrectiveAction', {
-            defaultMessage: 'Check Kibana logs for more details.',
           }),
         ],
       },
