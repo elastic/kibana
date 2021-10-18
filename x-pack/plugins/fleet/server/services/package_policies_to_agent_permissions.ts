@@ -122,14 +122,10 @@ export async function storedPackagePoliciesToAgentPermissions(
       }
 
       let clusterRoleDescriptor = {};
-      if (
-        packagePolicy.elasticsearch &&
-        packagePolicy.elasticsearch.privileges &&
-        packagePolicy.elasticsearch.privileges.cluster &&
-        packagePolicy.elasticsearch.privileges.cluster.length > 0
-      ) {
+      const cluster = packagePolicy?.elasticsearch?.privileges?.cluster ?? [];
+      if (cluster.length > 0) {
         clusterRoleDescriptor = {
-          cluster: packagePolicy.elasticsearch.privileges.cluster,
+          cluster,
         };
       }
 
