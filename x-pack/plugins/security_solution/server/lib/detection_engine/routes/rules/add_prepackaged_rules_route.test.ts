@@ -20,9 +20,8 @@ import { siemMock } from '../../../../mocks';
 import { FrameworkRequest } from '../../../framework';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { getIndexExists } from '@kbn/securitysolution-es-utils';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -72,6 +71,13 @@ jest.mock('../../../timeline/routes/prepackaged_timelines/install_prepackaged_ti
   };
 });
 
+jest.mock('@kbn/securitysolution-es-utils', () => {
+  return {
+    ...jest.requireActual('@kbn/securitysolution-es-utils'),
+    getIndexExists: jest.fn().mockResolvedValue(true),
+  };
+});
+
 describe.each([
   ['Legacy', false],
   ['RAC', true],
@@ -109,9 +115,9 @@ describe.each([
       errors: [],
     });
 
-    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
-    );
+    (getIndexExists as jest.Mock).mockReset();
+    (getIndexExists as jest.Mock).mockResolvedValue(true);
+
     addPrepackedRulesRoute(server.router, createMockConfig(), securitySetup, isRuleRegistryEnabled);
   });
 
@@ -137,9 +143,7 @@ describe.each([
 
     test('it returns a 400 if the index does not exist when rule registry not enabled', async () => {
       const request = addPrepackagedRulesRequest();
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
-      );
+      (getIndexExists as jest.Mock).mockResolvedValueOnce(false);
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);
@@ -196,9 +200,10 @@ describe.each([
     testif(
       'catches errors if signals index does not exist when rule registry not enabled',
       async () => {
-        context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
-        );
+        (getIndexExists as jest.Mock).mockRejectedValueOnce({
+          message: 'Test error',
+          statusCode: 500,
+        });
         const request = addPrepackagedRulesRequest();
         const response = await server.inject(request, context);
 

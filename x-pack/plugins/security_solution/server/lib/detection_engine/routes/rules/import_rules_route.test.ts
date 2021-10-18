@@ -23,11 +23,17 @@ import {
   ruleIdsToNdJsonString,
   rulesToNdJsonString,
 } from '../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { getIndexExists } from '@kbn/securitysolution-es-utils';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+
+jest.mock('@kbn/securitysolution-es-utils', () => {
+  return {
+    ...jest.requireActual('@kbn/securitysolution-es-utils'),
+    getIndexExists: jest.fn().mockResolvedValue(true),
+  };
+});
 
 describe.each([
   ['Legacy', false],
@@ -51,9 +57,10 @@ describe.each([
     clients.rulesClient.update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
-    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
-    );
+
+    (getIndexExists as jest.Mock).mockReset();
+    (getIndexExists as jest.Mock).mockResolvedValue(true);
+
     importRulesRoute(server.router, config, ml, isRuleRegistryEnabled);
   });
 
@@ -132,9 +139,7 @@ describe.each([
 
     test('returns an error if the index does not exist when rule registry not enabled', async () => {
       clients.appClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
-      );
+      (getIndexExists as jest.Mock).mockResolvedValueOnce(false);
       const response = await server.inject(request, context);
       expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);
       if (!isRuleRegistryEnabled) {
@@ -147,11 +152,10 @@ describe.each([
     });
 
     test('returns an error when cluster throws error', async () => {
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-        elasticsearchClientMock.createErrorTransportRequestPromise({
-          body: new Error('Test error'),
-        })
-      );
+      (getIndexExists as jest.Mock).mockRejectedValueOnce({
+        message: 'Test error',
+        statusCode: 500,
+      });
 
       const response = await server.inject(request, context);
       expect(response.status).toEqual(500);

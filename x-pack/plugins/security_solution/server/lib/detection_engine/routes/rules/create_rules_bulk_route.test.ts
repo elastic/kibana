@@ -18,11 +18,17 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { getIndexExists } from '@kbn/securitysolution-es-utils';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+
+jest.mock('@kbn/securitysolution-es-utils', () => {
+  return {
+    ...jest.requireActual('@kbn/securitysolution-es-utils'),
+    getIndexExists: jest.fn().mockResolvedValue(true),
+  };
+});
 
 describe.each([
   ['Legacy', false],
@@ -42,9 +48,9 @@ describe.each([
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     ); // successful creation
 
-    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
-    );
+    (getIndexExists as jest.Mock).mockReset();
+    (getIndexExists as jest.Mock).mockResolvedValue(true);
+
     createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
@@ -92,9 +98,7 @@ describe.each([
     });
 
     test('returns an error object if the index does not exist when rule registry not enabled', async () => {
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
-      );
+      (getIndexExists as jest.Mock).mockResolvedValueOnce(false);
       const response = await server.inject(getReadBulkRequest(), context);
 
       expect(response.status).toEqual(200);
