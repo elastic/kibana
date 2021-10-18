@@ -132,7 +132,7 @@ describe('Runtime field editor', () => {
       const defaultValue: RuntimeField = {
         name: 'myRuntimeField',
         type: 'boolean',
-        script: { source: 'emit("hello"' },
+        script: { source: 'emit("hello")' },
       };
 
       testBed = setup({
@@ -150,6 +150,29 @@ describe('Runtime field editor', () => {
 
       expect(lastOnChangeCall()[0].isValid).toBe(true);
       expect(form.getErrorsMessages()).toEqual([]);
+    });
+
+    test('should not allow field to have * in the name', async () => {
+      testBed = setup({ onChange, docLinks, ctx: { namesNotAllowed: [] } });
+
+      const { form, component } = testBed;
+
+      await act(async () => {
+        form.setInputValue('nameField.input', 'test*123', true);
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(2000); // Make sure our debounced error message is in the DOM
+      });
+
+      await act(async () => {
+        await lastOnChangeCall()[0].submit();
+      });
+
+      component.update();
+
+      expect(lastOnChangeCall()[0].isValid).toBe(false);
+      expect(form.getErrorsMessages()).toEqual(['The field cannot have * in the name.']);
     });
   });
 });

@@ -84,6 +84,21 @@ const createNameNotAllowedValidator =
     }
   };
 
+const createStarCharacterNotAllowedValidator =
+  (): ValidationFunc<{}, string, string> =>
+  ({ value }) => {
+    if (value.includes('*')) {
+      return {
+        message: i18n.translate(
+          'xpack.runtimeFields.runtimeFieldsEditor.starCharacterNotAllowedValidationErrorMessage',
+          {
+            defaultMessage: 'The field cannot have * in the name.',
+          }
+        ),
+      };
+    }
+  };
+
 /**
  * Dynamically retrieve the config for the "name" field, adding
  * a validator to avoid duplicated runtime fields to be created.
@@ -110,6 +125,9 @@ const getNameFieldConfig = (
         validator: createNameNotAllowedValidator(
           namesNotAllowed.filter((name) => name !== defaultValue?.name)
         ),
+      },
+      {
+        validator: createStarCharacterNotAllowedValidator(),
       },
     ],
   };
