@@ -179,7 +179,6 @@ export class RuleDataClient implements IRuleDataClient {
 
             return clusterClient.bulk(requestWithDefaultParameters).then((response) => {
               if (response.body.errors) {
-                // @ts-expect-error @elastic/elasticsearch Context falls back to Record mistakenly
                 const error = new errors.ResponseError(response);
                 throw error;
               }
