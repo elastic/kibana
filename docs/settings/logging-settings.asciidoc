@@ -31,7 +31,7 @@ logging:
       layout:
         type: pattern
   root:
-    appenders: [default, file]
+    appenders: [file]
 ----
 
 [[log-in-json-ECS-example]]
@@ -49,7 +49,7 @@ logging:
       layout:
         type: json
   root:
-    appenders: [default, json-layout]
+    appenders: [json-layout]
 ----
 
 [[log-with-meta-to-stdout]]
@@ -67,7 +67,7 @@ logging:
         type: pattern
         pattern: "[%date] [%level] [%logger] [%meta] %message"
   root:
-    appenders: [default, console-meta]
+    appenders: [console-meta]
 ----
 
 [[log-elasticsearch-queries]]
@@ -83,7 +83,7 @@ logging:
         type: pattern
         highlight: true
   root:
-    appenders: [default, console_appender]
+    appenders: [console_appender]
     level: warn
   loggers:
     - name: elasticsearch.query
@@ -128,7 +128,7 @@ logging:
         type: json
 
   root:
-    appenders: [default, console, file]
+    appenders: [console, file]
     level: error
 
   loggers:

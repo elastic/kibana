@@ -8,7 +8,6 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   savePolicy: schema.oneOf(
     [
       schema.literal('none'),
