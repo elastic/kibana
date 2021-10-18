@@ -145,7 +145,8 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   }, []);
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();
- // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
+
+  // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
   if (!hasAnyData && !isAllRequestsComplete) {

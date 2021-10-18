@@ -32,7 +32,7 @@ export const AllCasesPage = React.memo(() => {
     return <LoadingObservability />;
   }
 
- // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
+  // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
   const noDataConfig = getNoDataConfig({
