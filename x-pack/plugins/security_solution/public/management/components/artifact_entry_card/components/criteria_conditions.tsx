@@ -49,6 +49,10 @@ const EuiFlexItemNested = styled(EuiFlexItem)`
   margin-top: 6px !important;
 `;
 
+const StyledCondition = styled('span')`
+  margin-right: 6px;
+`;
+
 export type CriteriaConditionsProps = Pick<ArtifactInfo, 'os' | 'entries'> &
   Pick<CommonProps, 'data-test-subj'>;
 
@@ -108,7 +112,11 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
         {entries.map(({ field, type, value, entries: nestedEntries = [] }) => {
           return (
             <div data-test-subj={getTestId('condition')} key={field + type + value}>
-              <EuiExpression description={CONDITION_AND} value={field} color="subdued" />
+              <EuiExpression
+                description={<StyledCondition>{CONDITION_AND}</StyledCondition>}
+                value={field}
+                color="subdued"
+              />
               <EuiExpression
                 description={
                   OPERATOR_TYPE_LABELS[type as keyof typeof OPERATOR_TYPE_LABELS] ?? type
