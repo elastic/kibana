@@ -32,14 +32,13 @@ interface Deps {
 }
 
 function getDeprecationTitle() {
-  return i18n.translate('xpack.security.deprecations.kibanaUser.deprecationTitle', {
+  return i18n.translate('xpack.security.deprecations.mlPrivileges.deprecationTitle', {
     defaultMessage: 'Access to Machine Learning features will be granted in 8.0',
-    values: { userRoleName: KIBANA_USER_ROLE_NAME },
   });
 }
 
 function getDeprecationMessage() {
-  return i18n.translate('xpack.security.deprecations.kibanaUser.deprecationMessage', {
+  return i18n.translate('xpack.security.deprecations.mlPrivileges.deprecationMessage', {
     defaultMessage:
       'Roles that grant "all" or "read" privileges to all features will include Machine Learning.',
   });
