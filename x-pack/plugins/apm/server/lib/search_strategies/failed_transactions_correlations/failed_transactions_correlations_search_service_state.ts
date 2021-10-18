@@ -8,6 +8,7 @@
 import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 
 import type { HistogramItem } from '../../../../common/search_strategies/types';
+import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
 
 interface Progress {
   started: number;
@@ -73,6 +74,11 @@ export const failedTransactionsCorrelationsSearchServiceStateProvider = () => {
     };
   }
 
+  const fieldStats: FieldStats[] = [];
+  function addFieldStats(stats: FieldStats[]) {
+    fieldStats.push(...stats);
+  }
+
   const failedTransactionsCorrelations: FailedTransactionsCorrelation[] = [];
   function addFailedTransactionsCorrelation(d: FailedTransactionsCorrelation) {
     failedTransactionsCorrelations.push(d);
@@ -98,6 +104,7 @@ export const failedTransactionsCorrelationsSearchServiceStateProvider = () => {
       percentileThresholdValue,
       progress,
       failedTransactionsCorrelations,
+      fieldStats,
     };
   }
 
@@ -115,6 +122,7 @@ export const failedTransactionsCorrelationsSearchServiceStateProvider = () => {
     setErrorHistogram,
     setPercentileThresholdValue,
     setProgress,
+    addFieldStats,
   };
 };
 

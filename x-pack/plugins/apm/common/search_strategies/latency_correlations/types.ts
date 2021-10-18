@@ -6,6 +6,7 @@
  */
 
 import { FieldValuePair, HistogramItem } from '../types';
+import { FieldStats } from '../field_stats_types';
 
 export interface LatencyCorrelation extends FieldValuePair {
   correlation: number;
@@ -32,4 +33,5 @@ export interface LatencyCorrelationsRawResponse {
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number;
   latencyCorrelations?: LatencyCorrelation[];
+  fieldStats?: FieldStats[];
 }
