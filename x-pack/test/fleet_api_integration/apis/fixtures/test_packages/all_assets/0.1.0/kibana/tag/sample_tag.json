@@ -1,0 +1,13 @@
+{
+    "id": "sample_tag",
+    "type": "tag",
+    "namespaces": [
+        "default"
+    ],
+    "attributes": {
+        "name": "my tag",
+        "description": "",
+        "color": "#a80853"
+    },
+    "references": []
+}
