@@ -35,7 +35,7 @@ describe('Export rules', () => {
     goToManageAlertsDetectionRules();
     exportFirstRule();
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should('eql', expectedExportedRule(this.ruleResponse));
+      cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
     });
   });
 });
