@@ -7,7 +7,15 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiHealth, IconColor, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  IconColor,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import type { Job } from '../../lib/job';
 import { JOB_STATUSES } from '../../../common/constants';
@@ -54,36 +62,42 @@ const i18nTexts = {
 };
 
 export const ReportStatusIndicator: FC<Props> = ({ job, hasIssues }) => {
-  const renderStatus = (statusText: string, color: IconColor) => (
-    <EuiHealth aria-label={statusText} color={color}>
-      {job.completed_at ? (
-        <EuiToolTip content={i18nTexts.lastStatusUpdate({ date: job.getPrettyStatusTimestamp() })}>
-          <div>{statusText}</div>
-        </EuiToolTip>
-      ) : (
-        statusText
-      )}
-    </EuiHealth>
+  const renderStatus = (statusText: string, icon: JSX.Element) => (
+    <EuiToolTip content={i18nTexts.lastStatusUpdate({ date: job.getPrettyStatusTimestamp() })}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} aria-label={statusText}>
+        <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{statusText}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
   );
 
   switch (job.status) {
     case JOB_STATUSES.COMPLETED:
       if (hasIssues) {
-        return renderStatus(i18nTexts.completedWithWarnings, 'warning');
+        return renderStatus(
+          i18nTexts.completedWithWarnings,
+          <EuiIcon type="alert" color="warning" />
+        );
       }
-      return renderStatus(i18nTexts.completed, 'success');
+      return renderStatus(
+        i18nTexts.completed,
+        <EuiIcon type="checkInCircleFilled" color="success" />
+      );
     case JOB_STATUSES.WARNINGS:
-      return renderStatus(i18nTexts.completedWithWarnings, 'warning');
+      return renderStatus(
+        i18nTexts.completedWithWarnings,
+        <EuiIcon type="alert" color="warning" />
+      );
     case JOB_STATUSES.PENDING:
-      return renderStatus(i18nTexts.pending, 'primary');
+      return renderStatus(i18nTexts.pending, <EuiLoadingSpinner />);
     case JOB_STATUSES.PROCESSING:
       return renderStatus(
         i18nTexts.processing({ attempt: job.attempts, of: job.max_attempts }),
-        'primary'
+        <EuiLoadingSpinner />
       );
     case JOB_STATUSES.FAILED:
-      return renderStatus(i18nTexts.failed, 'danger');
+      return renderStatus(i18nTexts.failed, <EuiIcon type="crossInACircleFilled" color="danger" />);
     default:
-      return renderStatus(i18nTexts.unknown, 'subdued');
+      return renderStatus(i18nTexts.unknown, <EuiIcon type="cross" color="subdued" />);
   }
 };

@@ -36,11 +36,9 @@ import {
   MigrateIlmPolicyCallOut,
   ReportDeleteButton,
   ReportDiagnostic,
-  ReportDownloadLink,
-  ReportInfoButton,
   ReportStatusIndicator,
   ViewInAppLink,
-  SeeReportInfoToolTip,
+  ReportInfoFlyout,
 } from './components';
 import { guessAppIconTypeFromObjectType, jobHasIssues } from './utils';
 
@@ -55,6 +53,7 @@ interface State {
   showLinks: boolean;
   enableLinks: boolean;
   badLicenseMessage: string;
+  selectedJob: undefined | Job;
 }
 
 class ReportListingUi extends Component<Props, State> {
@@ -75,6 +74,7 @@ class ReportListingUi extends Component<Props, State> {
       showLinks: false,
       enableLinks: false,
       badLicenseMessage: '',
+      selectedJob: undefined,
     };
 
     this.isInitialJobsFetch = true;
@@ -276,11 +276,10 @@ class ReportListingUi extends Component<Props, State> {
    * per column basis.
    */
   private readonly tableColumnWidths = {
-    type: '5%',
     title: '30%',
     status: '20%',
-    contentType: '10%',
-    createdAt: '20%',
+    createdAt: '25%',
+    content: '10%',
     actions: '10%',
   };
 
@@ -289,7 +288,7 @@ class ReportListingUi extends Component<Props, State> {
     const tableColumns: TableColumn[] = [
       {
         field: 'type',
-        width: tableColumnWidths.type,
+        width: undefined, // take remainder of space
         name: i18n.translate('xpack.reporting.listing.tableColumns.typeTitle', {
           defaultMessage: 'Type',
         }),
@@ -319,20 +318,17 @@ class ReportListingUi extends Component<Props, State> {
         render: (objectTitle: string, job) => {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
-              <ReportDownloadLink
-                disabled={
-                  job.status !== JOB_STATUSES.COMPLETED && job.status !== JOB_STATUSES.WARNINGS
-                }
-                objectTitle={objectTitle}
-                job={job}
-              />
+              {objectTitle ||
+                i18n.translate('xpack.reporting.listing.table.noTitleLabel', {
+                  defaultMessage: 'Untitled',
+                })}
             </div>
           );
         },
-        mobileOptions: ({
+        mobileOptions: {
           header: false,
           width: '100%', // This is not recognized by EUI types but has an effect, leaving for now
-        } as unknown) as { header: boolean },
+        } as unknown as { header: boolean },
       },
       {
         field: 'status',
@@ -344,35 +340,10 @@ class ReportListingUi extends Component<Props, State> {
           const hasIssues = jobHasIssues(job);
           return (
             <div data-test-subj="reportJobStatus">
-              <EuiFlexGroup
-                justifyContent="center"
-                alignItems="center"
-                responsive={false}
-                gutterSize="xs"
-              >
-                <EuiFlexItem grow={false}>
-                  <ReportStatusIndicator hasIssues={hasIssues} job={job} />
-                </EuiFlexItem>
-                {hasIssues && (
-                  <EuiFlexItem grow={false}>
-                    <SeeReportInfoToolTip />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
+              <ReportStatusIndicator hasIssues={hasIssues} job={job} />
             </div>
           );
         },
-        mobileOptions: {
-          show: false,
-        },
-      },
-      {
-        field: 'contentType',
-        width: tableColumnWidths.contentType,
-        name: i18n.translate('xpack.reporting.listing.tableColumns.contentType', {
-          defaultMessage: 'Content type',
-        }),
-        render: (_status: string, job) => prettyPrintJobType(job.jobtype),
         mobileOptions: {
           show: false,
         },
@@ -391,30 +362,56 @@ class ReportListingUi extends Component<Props, State> {
         },
       },
       {
+        field: 'content',
+        width: tableColumnWidths.content,
+        name: i18n.translate('xpack.reporting.listing.tableColumns.content', {
+          defaultMessage: 'Content',
+        }),
+        render: (_status: string, job) => prettyPrintJobType(job.jobtype),
+        mobileOptions: {
+          show: false,
+        },
+      },
+      {
         name: i18n.translate('xpack.reporting.listing.tableColumns.actionsTitle', {
           defaultMessage: 'Actions',
         }),
         width: tableColumnWidths.actions,
         actions: [
           {
-            render: (job) => {
-              return (
-                <EuiFlexGroup
-                  alignItems="flexEnd"
-                  gutterSize="none"
-                  data-test-subj="reportJobActions"
-                >
-                  {[PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2].some((jobType) => jobType === job.jobtype) ? (
-                    <EuiFlexItem grow={false}>
-                      <ViewInAppLink job={job} />
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem grow={false}>
-                    <ReportInfoButton {...this.props} job={job} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              );
-            },
+            isPrimary: true,
+            name: i18n.translate('xpack.reporting.listing.table.downloadActionButtonLabel', {
+              defaultMessage: 'Download',
+            }),
+            description: i18n.translate(
+              'xpack.reporting.listing.table.downloadActionButtonDescription',
+              {
+                defaultMessage: 'Download this report',
+              }
+            ),
+            type: 'button',
+            enabled: (job) =>
+              job.status === JOB_STATUSES.COMPLETED || job.status === JOB_STATUSES.WARNINGS,
+            onClick: (job) => this.props.apiClient.downloadReport(job.id),
+          },
+          {
+            name: i18n.translate(
+              'xpack.reporting.listing.table.viewReportingInfoActionButtonLabel',
+              {
+                defaultMessage: 'View report info',
+              }
+            ),
+            description: i18n.translate(
+              'xpack.reporting.listing.table.viewReportingInfoActionButtonDescription',
+              {
+                defaultMessage: 'View additional information about this report.',
+              }
+            ),
+            type: 'button',
+            onClick: (job) => this.setState({ selectedJob: job }),
+          },
+          {
+            render: (job) => <ViewInAppLink job={job} />,
           },
         ],
       },
@@ -466,6 +463,12 @@ class ReportListingUi extends Component<Props, State> {
           data-test-subj={REPORT_TABLE_ID}
           rowProps={() => ({ 'data-test-subj': REPORT_TABLE_ROW_ID })}
         />
+        {!!this.state.selectedJob && (
+          <ReportInfoFlyout
+            onClose={() => this.setState({ selectedJob: undefined })}
+            job={this.state.selectedJob}
+          />
+        )}
       </Fragment>
     );
   }
