@@ -1176,7 +1176,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <span
                         class="euiExpression__value"
                       >
-                        macos
+                        Mac
                       </span>
                     </span>
                   </strong>
@@ -2325,7 +2325,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <span
                         class="euiExpression__value"
                       >
-                        macos
+                        Mac
                       </span>
                     </span>
                   </strong>
@@ -3474,7 +3474,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <span
                         class="euiExpression__value"
                       >
-                        macos
+                        Mac
                       </span>
                     </span>
                   </strong>
@@ -5313,7 +5313,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <span
                         class="euiExpression__value"
                       >
-                        macos
+                        Mac
                       </span>
                     </span>
                   </strong>
@@ -6462,7 +6462,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <span
                         class="euiExpression__value"
                       >
-                        macos
+                        Mac
                       </span>
                     </span>
                   </strong>
@@ -7611,7 +7611,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <span
                         class="euiExpression__value"
                       >
-                        macos
+                        Mac
                       </span>
                     </span>
                   </strong>
@@ -9407,7 +9407,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <span
                         class="euiExpression__value"
                       >
-                        macos
+                        Mac
                       </span>
                     </span>
                   </strong>
@@ -10556,7 +10556,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <span
                         class="euiExpression__value"
                       >
-                        macos
+                        Mac
                       </span>
                     </span>
                   </strong>
@@ -11705,7 +11705,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <span
                         class="euiExpression__value"
                       >
-                        macos
+                        Mac
                       </span>
                     </span>
                   </strong>
