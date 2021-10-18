@@ -25,6 +25,7 @@ import {
   EndpointPrivileges,
   useEndpointPrivileges,
 } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 
 jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
@@ -42,10 +43,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   const loadedUserEndpointPrivilegesState = (
     endpointOverrides: Partial<EndpointPrivileges> = {}
   ): EndpointPrivileges => ({
-    loading: false,
-    canAccessFleet: true,
-    canAccessEndpointManagement: true,
-    isPlatinumPlus: true,
+    ...getEndpointPrivilegesInitialStateMock(),
     ...endpointOverrides,
   });
 
