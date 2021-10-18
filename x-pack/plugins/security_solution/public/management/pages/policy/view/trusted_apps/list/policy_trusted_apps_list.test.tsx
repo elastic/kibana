@@ -21,6 +21,13 @@ import {
 } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_ID } from '../../../../../../../common/constants';
+import {
+  EndpointPrivileges,
+  useEndpointPrivileges,
+} from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
+
+jest.mock('../../../../../../common/components/user_privileges/use_endpoint_privileges');
+const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
 
 describe('when rendering the PolicyTrustedAppsList', () => {
   // The index (zero based) of the card created by the generator that is policy specific
@@ -31,6 +38,16 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   let render: (waitForLoadedState?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let mockedApis: ReturnType<typeof policyDetailsPageAllApiHttpMocks>;
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
+
+  const loadedUserEndpointPrivilegesState = (
+    endpointOverrides: Partial<EndpointPrivileges> = {}
+  ): EndpointPrivileges => ({
+    loading: false,
+    canAccessFleet: true,
+    canAccessEndpointManagement: true,
+    isPlatinumPlus: true,
+    ...endpointOverrides,
+  });
 
   const getCardByIndexPosition = (cardIndex: number = 0) => {
     const card = renderResult.getAllByTestId('policyTrustedAppsGrid-card')[cardIndex];
@@ -66,8 +83,12 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     );
   };
 
+  afterAll(() => {
+    mockUseEndpointPrivileges.mockReset();
+  });
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
+    mockUseEndpointPrivileges.mockReturnValue(loadedUserEndpointPrivilegesState());
 
     mockedApis = policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
     appTestContext.setExperimentalFlag({ trustedAppsByPolicyEnabled: true });
@@ -223,11 +244,11 @@ describe('when rendering the PolicyTrustedAppsList', () => {
       expect(
         renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-0')
           .textContent
-      ).toEqual('Endpoint Policy 0');
+      ).toEqual('Endpoint Policy 0View details');
       expect(
         renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-1')
           .textContent
-      ).toEqual('Endpoint Policy 1');
+      ).toEqual('Endpoint Policy 1View details');
     });
 
     it('should navigate to policy details when clicking policy on assignment context menu', async () => {
@@ -296,5 +317,17 @@ describe('when rendering the PolicyTrustedAppsList', () => {
         title: expect.any(String),
       })
     );
+  });
+
+  it('does not show remove option in actions menu if license is downgraded to gold or below', async () => {
+    await render();
+    mockUseEndpointPrivileges.mockReturnValue(
+      loadedUserEndpointPrivilegesState({
+        isPlatinumPlus: false,
+      })
+    );
+    await toggleCardActionMenu(POLICY_SPECIFIC_CARD_INDEX);
+
+    expect(renderResult.queryByTestId('policyTrustedAppsGrid-removeAction')).toBeNull();
   });
 });
