@@ -138,27 +138,29 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
       id={node}
       pageType="nodes"
     >
-      <SetupModeRenderer
-        productName={ELASTICSEARCH_SYSTEM_ID}
-        render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
-          <SetupModeContext.Provider value={{ setupModeSupported: true }}>
-            {flyoutComponent}
-            <NodeReact
-              alerts={alerts}
-              labels={labels.node}
-              nodeId={node}
-              clusterUuid={clusterUuid}
-              onBrush={onBrush}
-              zoomInfo={zoomInfo}
-              toggleShowSystemIndices={toggleShowSystemIndices}
-              showSystemIndices={showSystemIndices}
-              nodesByIndices={nodesByIndicesData}
-              {...data}
-            />
-            {bottomBarComponent}
-          </SetupModeContext.Provider>
-        )}
-      />
+      <div data-test-subj="elasticsearchNodeDetailPage">
+        <SetupModeRenderer
+          productName={ELASTICSEARCH_SYSTEM_ID}
+          render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
+            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+              {flyoutComponent}
+              <NodeReact
+                alerts={alerts}
+                labels={labels.node}
+                nodeId={node}
+                clusterUuid={clusterUuid}
+                onBrush={onBrush}
+                zoomInfo={zoomInfo}
+                toggleShowSystemIndices={toggleShowSystemIndices}
+                showSystemIndices={showSystemIndices}
+                nodesByIndices={nodesByIndicesData}
+                {...data}
+              />
+              {bottomBarComponent}
+            </SetupModeContext.Provider>
+          )}
+        />
+      </div>
     </ItemTemplate>
   );
 };

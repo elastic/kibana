@@ -110,20 +110,22 @@ export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = ({ cluste
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http, node]);
 
   return (
-    <ItemTemplate
-      title={title}
-      pageTitle={pageTitle}
-      getPageData={getPageData}
-      id={node}
-      pageType="nodes"
-    >
-      <AdvancedNode
-        nodeSummary={data.nodeSummary}
-        alerts={alerts}
-        metrics={data.metrics}
-        onBrush={onBrush}
-        zoomInfo={zoomInfo}
-      />
-    </ItemTemplate>
+    <div data-test-subj="elasticsearchNodeDetailPage">
+      <ItemTemplate
+        title={title}
+        pageTitle={pageTitle}
+        getPageData={getPageData}
+        id={node}
+        pageType="nodes"
+      >
+        <AdvancedNode
+          nodeSummary={data.nodeSummary}
+          alerts={alerts}
+          metrics={data.metrics}
+          onBrush={onBrush}
+          zoomInfo={zoomInfo}
+        />
+      </ItemTemplate>
+    </div>
   );
 };
