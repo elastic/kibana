@@ -8,8 +8,8 @@ import { BaseSignalHit, SimpleHit } from './types';
 import { getField } from './utils';
 
 export const buildEventTypeSignal = (doc: BaseSignalHit): object => {
-  if (doc._source?.event != null && doc._source?.event instanceof Object) {
-    return { ...doc._source!.event, kind: 'signal' };
+  if (doc._source != null && doc._source.event instanceof Object) {
+    return { ...doc._source.event, kind: 'signal' };
   } else {
     return { kind: 'signal' };
   }

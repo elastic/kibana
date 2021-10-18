@@ -185,6 +185,12 @@ export function copyToSpaceTestSuiteFactory(
 
       const indexPatternDestinationId = result[destination].successResults![0].destinationId;
       expect(indexPatternDestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
+      const vis1DestinationId = result[destination].successResults![1].destinationId;
+      expect(vis1DestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
+      const vis2DestinationId = result[destination].successResults![2].destinationId;
+      expect(vis2DestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
+      const vis3DestinationId = result[destination].successResults![3].destinationId;
+      expect(vis3DestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
 
       expect(result).to.eql({
         [destination]: {
@@ -204,16 +210,19 @@ export function copyToSpaceTestSuiteFactory(
               id: `cts_vis_1_${spaceId}`,
               type: 'visualization',
               meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
+              destinationId: vis1DestinationId,
             },
             {
               id: `cts_vis_2_${spaceId}`,
               type: 'visualization',
               meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
+              destinationId: vis2DestinationId,
             },
             {
-              id: 'cts_vis_3',
+              id: `cts_vis_3_${spaceId}`,
               type: 'visualization',
               meta: { icon: 'visualizeApp', title: `CTS vis 3 from ${spaceId} space` },
+              destinationId: vis3DestinationId,
             },
             {
               id: 'cts_dashboard',
@@ -303,6 +312,12 @@ export function copyToSpaceTestSuiteFactory(
     (spaceId?: string) => async (resp: { [key: string]: any }) => {
       const destination = getDestinationWithConflicts(spaceId);
       const result = resp.body as CopyResponse;
+
+      const vis1DestinationId = result[destination].successResults![1].destinationId;
+      expect(vis1DestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
+      const vis2DestinationId = result[destination].successResults![2].destinationId;
+      expect(vis2DestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
+
       expect(result).to.eql({
         [destination]: {
           success: true,
@@ -322,17 +337,20 @@ export function copyToSpaceTestSuiteFactory(
               id: `cts_vis_1_${spaceId}`,
               type: 'visualization',
               meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
+              destinationId: vis1DestinationId,
             },
             {
               id: `cts_vis_2_${spaceId}`,
               type: 'visualization',
               meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
+              destinationId: vis2DestinationId,
             },
             {
-              id: 'cts_vis_3',
+              id: `cts_vis_3_${spaceId}`,
               type: 'visualization',
               meta: { icon: 'visualizeApp', title: `CTS vis 3 from ${spaceId} space` },
               overwrite: true,
+              destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
             },
             {
               id: 'cts_dashboard',
@@ -364,16 +382,23 @@ export function copyToSpaceTestSuiteFactory(
       const result = resp.body as CopyResponse;
       result[destination].errors!.sort(errorSorter);
 
+      const vis1DestinationId = result[destination].successResults![0].destinationId;
+      expect(vis1DestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
+      const vis2DestinationId = result[destination].successResults![1].destinationId;
+      expect(vis2DestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
+
       const expectedSuccessResults = [
         {
           id: `cts_vis_1_${spaceId}`,
           type: 'visualization',
           meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
+          destinationId: vis1DestinationId,
         },
         {
           id: `cts_vis_2_${spaceId}`,
           type: 'visualization',
           meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
+          destinationId: vis2DestinationId,
         },
       ];
       const expectedErrors = [
@@ -401,8 +426,11 @@ export function copyToSpaceTestSuiteFactory(
           },
         },
         {
-          error: { type: 'conflict' },
-          id: 'cts_vis_3',
+          error: {
+            type: 'conflict',
+            destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
+          },
+          id: `cts_vis_3_${spaceId}`,
           title: `CTS vis 3 from ${spaceId} space`,
           type: 'visualization',
           meta: {

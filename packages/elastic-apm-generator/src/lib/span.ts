@@ -8,27 +8,15 @@
 
 import { BaseSpan } from './base_span';
 import { Fields } from './entity';
-import { generateEventId } from './utils/generate_id';
+import { generateShortId } from './utils/generate_id';
 
 export class Span extends BaseSpan {
   constructor(fields: Fields) {
     super({
       ...fields,
       'processor.event': 'span',
-      'span.id': generateEventId(),
+      'span.id': generateShortId(),
     });
-  }
-
-  children(...children: BaseSpan[]) {
-    super.children(...children);
-
-    children.forEach((child) =>
-      child.defaults({
-        'parent.id': this.fields['span.id'],
-      })
-    );
-
-    return this;
   }
 
   duration(duration: number) {
