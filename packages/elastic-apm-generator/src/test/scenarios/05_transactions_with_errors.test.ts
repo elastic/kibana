@@ -54,7 +54,7 @@ describe('transactions with errors', () => {
   });
 
   it('sets the error grouping key', () => {
-    const [_, error] = instance
+    const [, error] = instance
       .transaction('GET /api')
       .timestamp(timestamp)
       .errors(instance.error('test error').timestamp(timestamp))
