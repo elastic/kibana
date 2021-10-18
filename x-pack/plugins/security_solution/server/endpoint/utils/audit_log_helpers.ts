@@ -13,6 +13,7 @@ import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fl
 import {
   ENDPOINT_ACTIONS_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX,
+  statusCodes,
 } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
@@ -53,7 +54,11 @@ const getDateFilters = ({ startDate, endDate }: { startDate: string; endDate: st
 export const getUniqueLogData = (activityLogEntries: ActivityLogEntry[]): ActivityLogEntry[] => {
   // find the error responses for actions that didn't make it to fleet index
   const onlyResponsesForFleetErrors = activityLogEntries
-    .filter((e) => e.type === ActivityLogItemTypes.RESPONSE && e.item.data.error?.code === '424')
+    .filter(
+      (e) =>
+        e.type === ActivityLogItemTypes.RESPONSE &&
+        e.item.data.error?.code === statusCodes['424'].code
+    )
     .map(
       (e: ActivityLogEntry) => (e.item.data as LogsEndpointActionResponse).EndpointActions.action_id
     );
