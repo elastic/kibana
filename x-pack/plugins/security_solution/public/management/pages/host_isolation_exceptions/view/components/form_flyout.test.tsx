@@ -18,6 +18,7 @@ import uuid from 'uuid';
 import { createEmptyHostIsolationException } from '../../utils';
 
 jest.mock('../../service.ts');
+jest.mock('../../../../../common/hooks/use_license');
 
 describe('When on the host isolation exceptions flyout form', () => {
   let mockedContext: AppContextTestRender;
