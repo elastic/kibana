@@ -59,13 +59,14 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
   onSnapshotDeleted,
   repositories,
 }) => {
-  const [debouncedValue, setDebouncedValue] = useState<SnapshotListParams>(listParams);
+  const [cachedListParams, setCachedListParams] = useState<SnapshotListParams>(listParams);
+  // send the request after the user has stopped typing
   useDebounce(
     () => {
-      setListParams(debouncedValue);
+      setListParams(cachedListParams);
     },
     SEARCH_DEBOUNCE_VALUE_MS,
-    [debouncedValue]
+    [cachedListParams]
   );
 
   const deleteButton = selectedItems.length ? (
@@ -138,7 +139,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
       if (changedQuery.ast.clauses.length > 1) {
         setError({ name: onlyOneClauseMessage, message: onlyOneClauseMessage });
       } else {
-        setDebouncedValue(getListParams(listParams, changedQuery));
+        setCachedListParams(getListParams(listParams, changedQuery));
       }
     }
   };
