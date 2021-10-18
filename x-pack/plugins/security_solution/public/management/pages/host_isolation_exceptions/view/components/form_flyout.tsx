@@ -52,9 +52,7 @@ import { HostIsolationExceptionsForm } from './form';
 export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
   const toasts = useToasts();
-
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
-
   const creationInProgress = useHostIsolationExceptionsSelector((state) =>
     isLoadingResourceState(state.form.status)
   );
@@ -62,11 +60,8 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
     isLoadedResourceState(state.form.status)
   );
   const creationFailure = useHostIsolationExceptionsSelector(getFormStatusFailure);
-
   const exceptionToEdit = useHostIsolationExceptionsSelector(getExceptionToEdit);
-
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
-
   const history = useHistory();
 
   const [formHasError, setFormHasError] = useState(true);
@@ -186,12 +181,12 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
         {exception?.item_id ? (
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.flyout.editButton"
-            defaultMessage="Edit Host Isolation Exception"
+            defaultMessage="Edit Host isolation exception"
           />
         ) : (
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.flyout.createButton"
-            defaultMessage="Add Host Isolation Exception"
+            defaultMessage="Add Host isolation exception"
           />
         )}
       </EuiButton>
@@ -211,14 +206,14 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
             <h2>
               <FormattedMessage
                 id="xpack.securitySolution.hostIsolationExceptions.flyout.editTitle"
-                defaultMessage="Edit Host Isolation Exception"
+                defaultMessage="Edit Host isolation exception"
               />
             </h2>
           ) : (
             <h2>
               <FormattedMessage
                 id="xpack.securitySolution.hostIsolationExceptions.flyout.title"
-                defaultMessage="Add Host Isolation Exception"
+                defaultMessage="Add Host isolation exception"
               />
             </h2>
           )}

@@ -53,6 +53,7 @@ export interface LogStatusChangeArgs {
 export interface UpdateExecutionLogArgs {
   id: string;
   attributes: IRuleStatusSOAttributes;
+  ruleId: string;
   ruleName: string;
   ruleType: string;
   spaceId: string;

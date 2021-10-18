@@ -18,7 +18,13 @@
     "presentationUtil",
     "visualizations"
   ],
-  "optionalPlugins": ["home", "spaces", "savedObjectsTaggingOss", "usageCollection"],
+  "optionalPlugins": [
+    "home",
+    "spaces",
+    "savedObjectsTaggingOss",
+    "screenshotMode",
+    "usageCollection"
+  ],
   "server": true,
   "ui": true,
   "requiredBundles": ["home", "kibanaReact", "kibanaUtils", "presentationUtil"]
