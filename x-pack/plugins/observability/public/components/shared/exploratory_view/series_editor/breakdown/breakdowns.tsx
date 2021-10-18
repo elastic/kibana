@@ -17,10 +17,8 @@ import {
   PERCENTILE,
 } from '../../configurations/constants';
 import { SeriesConfig, SeriesUrl } from '../../types';
-import {
-  MONITOR_DURATION_US,
-  SYNTHETICS_STEP_NAME,
-} from '../../configurations/constants/field_names/synthetics';
+import { SYNTHETICS_STEP_NAME } from '../../configurations/constants/field_names/synthetics';
+import { isStepLevelMetric } from '../../configurations/synthetics/kpi_over_time_config';
 
 interface Props {
   seriesId: number;
@@ -76,7 +74,7 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
 
   const options = items
     .map(({ id, label }) => {
-      if (id === SYNTHETICS_STEP_NAME && series.selectedMetricField === MONITOR_DURATION_US) {
+      if (id === SYNTHETICS_STEP_NAME && !isStepLevelMetric(series.selectedMetricField)) {
         return {
           inputDisplay: label,
           value: id,
