@@ -185,15 +185,19 @@ export const getPendingActionCounts = async (
     recentActions.map((a) => a.action_id),
     agentIDs
   );
+
+
   const pending: EndpointPendingActions[] = [];
-
   for (const agentId of agentIDs) {
-    const responseIDsFromAgent = responses[agentId];
-
+    const responsesForAgentId = responses[agentId];
     pending.push({
       agent_id: agentId,
       pending_actions: recentActions
-        .filter((a) => a.agents.includes(agentId) && !responseIDsFromAgent.includes(a.action_id))
+        .filter(
+          (a) =>
+            a.agents.includes(agentId) &&
+            !responsesForAgentId.map((e) => e.action_id).includes(a.action_id)
+        )
         .map((a) => a.data.command)
         .reduce((acc, cur) => {
           if (cur in acc) {
@@ -222,11 +226,14 @@ const fetchActionResponseIds = async (
   metadataService: EndpointMetadataService,
   actionIds: string[],
   agentIds: string[]
-): Promise<Record<string, string[]>> => {
-  const actionResponsesByAgentId: Record<string, string[]> = agentIds.reduce((acc, agentId) => {
-    acc[agentId] = [];
-    return acc;
-  }, {} as Record<string, string[]>);
+): Promise<Record<string, EndpointActionResponse[]>> => {
+  const actionResponsesByAgentId: Record<string, EndpointActionResponse[]> = agentIds.reduce(
+    (acc, agentId) => {
+      acc[agentId] = [];
+      return acc;
+    },
+    {} as Record<string, EndpointActionResponse[]>
+  );
 
   const actionResponses = await esClient
     .search<EndpointActionResponse>(
@@ -288,7 +295,7 @@ const fetchActionResponseIds = async (
       enoughTimeHasLapsed ||
       lastEndpointMetadataEventTimestamp > actionCompletedAtTimestamp
     ) {
-      actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse.action_id);
+      actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse);
     }
   }
 
