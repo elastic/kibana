@@ -25,9 +25,9 @@ import {
 } from '@elastic/eui';
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { DeprecationBadge } from '../../../shared';
-import { MlSnapshotContext } from './context';
 import { useAppContext } from '../../../../app_context';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
+import { MlSnapshotContext } from './context';
 import { SnapshotState } from './use_snapshot_state';
 
 export interface FixSnapshotsFlyoutProps extends MlSnapshotContext {
@@ -91,12 +91,6 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.upgradeSnapshotErrorTitle',
     {
       defaultMessage: 'Error upgrading snapshot',
-    }
-  ),
-  learnMoreLinkLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.learnMoreLinkLabel',
-    {
-      defaultMessage: 'Learn more about this deprecation',
     }
   ),
   upgradeModeEnabledErrorTitle: i18n.translate(
@@ -229,9 +223,7 @@ export const FixSnapshotsFlyout = ({
         <EuiText>
           <p>{deprecation.details}</p>
           <p>
-            <EuiLink target="_blank" href={deprecation.url}>
-              {i18nTexts.learnMoreLinkLabel}
-            </EuiLink>
+            <DeprecationFlyoutLearnMoreLink documentationUrl={deprecation.url} />
           </p>
         </EuiText>
       </EuiFlyoutBody>
