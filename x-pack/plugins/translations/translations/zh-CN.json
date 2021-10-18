@@ -25663,7 +25663,6 @@
     "xpack.upgradeAssistant.overview.observe.observabilityDescription": "深入了解正在使用哪些已弃用 API 以及需要更新哪些应用程序。",
     "xpack.upgradeAssistant.overview.pageDescription": "准备使用下一版 Elastic Stack！",
     "xpack.upgradeAssistant.overview.pageTitle": "升级助手",
-    "xpack.upgradeAssistant.overview.toggleTitle": "记录 Elasticsearch 弃用警告",
     "xpack.upgradeAssistant.overview.upgradeGuideLink": "查看升级指南",
     "xpack.upgradeAssistant.overview.upgradeStepCloudLink": "在 Cloud 上升级",
     "xpack.upgradeAssistant.overview.upgradeStepDescription": "解决所有关键问题并确认您的应用程序就绪后，便可以升级 Elastic Stack。",
