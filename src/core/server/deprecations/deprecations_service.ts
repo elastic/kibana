@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { take } from 'rxjs/operators';
+
 import { DeprecationsFactory } from './deprecations_factory';
 import { DomainDeprecationDetails, RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
-
+import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
 import { CoreContext } from '../core_context';
+import { IConfigService } from '../config';
 import { CoreService } from '../../types';
 import { InternalHttpServiceSetup } from '../http';
 import { Logger } from '../logging';
@@ -103,6 +106,7 @@ export interface DeprecationsServiceSetup {
 export interface DeprecationsClient {
   getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
 }
+
 export interface InternalDeprecationsServiceStart {
   /**
    * Creates a {@link DeprecationsClient} with provided SO client and ES client.
@@ -129,22 +133,33 @@ export class DeprecationsService
   implements CoreService<InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart>
 {
   private readonly logger: Logger;
-  private readonly deprecationsFactory: DeprecationsFactory;
+  private readonly configService: IConfigService;
+  private deprecationsFactory?: DeprecationsFactory;
 
-  constructor(private readonly coreContext: Pick<CoreContext, 'logger' | 'configService'>) {
+  constructor(coreContext: Pick<CoreContext, 'logger' | 'configService'>) {
     this.logger = coreContext.logger.get('deprecations-service');
-    this.deprecationsFactory = new DeprecationsFactory({
-      logger: this.logger,
-    });
+    this.configService = coreContext.configService;
   }
 
-  public setup({ http }: DeprecationsSetupDeps): InternalDeprecationsServiceSetup {
+  public async setup({ http }: DeprecationsSetupDeps): Promise<InternalDeprecationsServiceSetup> {
     this.logger.debug('Setting up Deprecations service');
-    const deprecationsFactory = this.deprecationsFactory;
+
+    const config = await this.configService
+      .atPath<DeprecationConfigType>(deprecationConfig.path)
+      .pipe(take(1))
+      .toPromise();
+
+    this.deprecationsFactory = new DeprecationsFactory({
+      logger: this.logger,
+      config: {
+        ignoredConfigDeprecations: config.skip_deprecated_settings,
+      },
+    });
 
     registerRoutes({ http });
     this.registerConfigDeprecationsInfo(this.deprecationsFactory);
 
+    const deprecationsFactory = this.deprecationsFactory;
     return {
       getRegistry: (domainId: string): DeprecationsServiceSetup => {
         const registry = deprecationsFactory.getRegistry(domainId);
@@ -156,6 +171,9 @@ export class DeprecationsService
   }
 
   public start(): InternalDeprecationsServiceStart {
+    if (!this.deprecationsFactory) {
+      throw new Error('`setup` must be called before `start`');
+    }
     return {
       asScopedToClient: this.createScopedDeprecations(),
     };
@@ -169,7 +187,7 @@ export class DeprecationsService
   ) => DeprecationsClient {
     return (esClient: IScopedClusterClient, savedObjectsClient: SavedObjectsClientContract) => {
       return {
-        getAllDeprecations: this.deprecationsFactory.getAllDeprecations.bind(null, {
+        getAllDeprecations: this.deprecationsFactory!.getAllDeprecations.bind(null, {
           savedObjectsClient,
           esClient,
         }),
@@ -178,7 +196,7 @@ export class DeprecationsService
   }
 
   private registerConfigDeprecationsInfo(deprecationsFactory: DeprecationsFactory) {
-    const handledDeprecatedConfigs = this.coreContext.configService.getHandledDeprecatedConfigs();
+    const handledDeprecatedConfigs = this.configService.getHandledDeprecatedConfigs();
 
     for (const [domainId, deprecationsContexts] of handledDeprecatedConfigs) {
       const deprecationsRegistry = deprecationsFactory.getRegistry(domainId);
@@ -186,12 +204,14 @@ export class DeprecationsService
         getDeprecations: () => {
           return deprecationsContexts.map(
             ({
+              configPath,
               title = `${domainId} has a deprecated setting`,
               level = 'critical',
               message,
               correctiveActions,
               documentationUrl,
             }) => ({
+              configPath,
               title,
               level,
               message,

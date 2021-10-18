@@ -21,7 +21,6 @@ const alwaysImportedTests = [
   require.resolve('../test/functional_embedded/config.ts'),
   require.resolve('../test/functional_cors/config.ts'),
   require.resolve('../test/functional_enterprise_search/without_host_configured.config.ts'),
-  require.resolve('../test/functional_vis_wizard/config.ts'),
   require.resolve('../test/saved_object_tagging/functional/config.ts'),
   require.resolve('../test/usage_collection/config.ts'),
   require.resolve('../test/fleet_functional/config.ts'),
