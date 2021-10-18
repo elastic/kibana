@@ -67,7 +67,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   delete extraCliOptions.env;
 
   if (opts.dev) {
-    if (!has('elasticsearch.serviceAccountToken')) {
+    if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
       if (!has('elasticsearch.username')) {
         set('elasticsearch.username', 'kibana_system');
       }
@@ -191,7 +191,11 @@ export default function (program) {
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
       .option('--no-optimizer', 'Disable the kbn/optimizer completely')
       .option('--no-cache', 'Disable the kbn/optimizer cache')
-      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
+      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode')
+      .option(
+        '--no-dev-credentials',
+        'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
+      );
   }
 
   command.action(async function (opts) {

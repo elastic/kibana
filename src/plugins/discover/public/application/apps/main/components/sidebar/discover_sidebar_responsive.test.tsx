@@ -15,7 +15,7 @@ import realHits from '../../../../../__fixtures__/real_hits.js';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { IndexPatternAttributes } from '../../../../../../../data/common';
+import { flattenHit, IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import {
   DiscoverSidebarResponsive,
@@ -72,7 +72,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   const indexPattern = stubLogstashIndexPattern;
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
+  const hits = each(cloneDeep(realHits), (hit) => flattenHit(hit, indexPattern)) as Array<
     Record<string, unknown>
   > as ElasticSearchHit[];
 
@@ -83,7 +83,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   ];
 
   for (const hit of hits) {
-    for (const key of Object.keys(indexPattern.flattenHit(hit))) {
+    for (const key of Object.keys(flattenHit(hit, indexPattern))) {
       mockfieldCounts[key] = (mockfieldCounts[key] || 0) + 1;
     }
   }
