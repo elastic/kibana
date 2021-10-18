@@ -142,6 +142,7 @@ export const getTrustedAppsList = async (
     data: results?.data.map(exceptionListItemToTrustedApp) ?? [],
     total: results?.total ?? 0,
     page: results?.page ?? 1,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     per_page: results?.per_page ?? perPage!,
   };
 };
@@ -262,6 +263,7 @@ export const getTrustedAppsSummary = async (
   let page = 1;
 
   while (paging) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { data, total } = (await exceptionsListClient.findExceptionListItem({
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page,

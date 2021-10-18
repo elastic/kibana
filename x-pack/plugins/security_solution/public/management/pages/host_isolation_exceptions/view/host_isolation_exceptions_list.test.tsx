@@ -14,8 +14,12 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../../../com
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
+import { useLicense } from '../../../../common/hooks/use_license';
+
+jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
 
 jest.mock('../service');
+jest.mock('../../../../common/hooks/use_license');
 
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
 
@@ -24,9 +28,13 @@ describe('When on the host isolation exceptions page', () => {
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
+  let mockedContext: AppContextTestRender;
+
+  const isPlatinumPlusMock = useLicense().isPlatinumPlus as jest.Mock;
+
   beforeEach(() => {
     getHostIsolationExceptionItemsMock.mockReset();
-    const mockedContext = createAppRootMockRenderer();
+    mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<HostIsolationExceptionsList />));
     waitForAction = mockedContext.middlewareSpy.waitForAction;
@@ -105,17 +113,38 @@ describe('When on the host isolation exceptions page', () => {
         ).toEqual(' Server is too far away');
       });
     });
-    it('should show the create flyout when the add button is pressed', () => {
-      render();
-      act(() => {
-        userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
+    describe('is license platinum plus', () => {
+      beforeEach(() => {
+        isPlatinumPlusMock.mockReturnValue(true);
       });
-      expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
+      it('should show the create flyout when the add button is pressed', () => {
+        render();
+        act(() => {
+          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
+        });
+        expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
+      });
+      it('should show the create flyout when the show location is create', () => {
+        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
+        render();
+        expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
+        expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
+      });
     });
-    it('should show the create flyout when the show location is create', () => {
-      history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
-      render();
-      expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
+    describe('is not license platinum plus', () => {
+      beforeEach(() => {
+        isPlatinumPlusMock.mockReturnValue(false);
+      });
+      it('should not show the create flyout if the user navigates to the create url', () => {
+        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
+        render();
+        expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
+      });
+      it('should not show the create flyout if the user navigates to the edit url', () => {
+        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=edit`);
+        render();
+        expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
+      });
     });
   });
 });

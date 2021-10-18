@@ -174,6 +174,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     timestampOverride: timestampOverride ?? '',
     name,
     description,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     note: note!,
     references,
     severity: {
