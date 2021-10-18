@@ -109,7 +109,6 @@ Object {
     "another.type__": 1,
     "some.type": 1,
   },
-  "countNamespaces": 1,
   "countTotal": 4,
 }
 `);
@@ -173,6 +172,7 @@ Object {
     "__server-log": 1,
     "__slack": 1,
   },
+  "countEmailByService": Object {},
   "countNamespaces": 1,
   "countTotal": 2,
 }
@@ -251,6 +251,7 @@ Object {
     "__server-log": 1,
     "__slack": 1,
   },
+  "countEmailByService": Object {},
   "countNamespaces": 1,
   "countTotal": 4,
 }
