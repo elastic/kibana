@@ -30,6 +30,7 @@ interface StartDeps {
 
 export class ApmSystem {
   private readonly enabled: boolean;
+  private pageLoadTransaction?: Transaction;
   /**
    * `apmConfig` would be populated with relevant APM RUM agent
    * configuration if server is started with elastic.apm.* config.
@@ -41,7 +42,7 @@ export class ApmSystem {
   async setup() {
     if (!this.enabled) return;
     const { init, apm } = await import('@elastic/apm-rum');
-    const { globalLabels, ...apmConfig } = this.apmConfig!;
+    const { globalLabels, ...apmConfig } = this.apmConfig! || {};
     if (globalLabels) {
       apm.addLabels(globalLabels);
     }
@@ -49,10 +50,23 @@ export class ApmSystem {
     this.addHttpRequestNormalization(apm);
 
     init(apmConfig);
+    this.pageLoadTransaction = apm.getCurrentTransaction();
+
+    // Keep the page load transaction open until all resources finished loading
+    if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
+      // @ts-expect-error 2339
+      this.pageLoadTransaction.block(true);
+      this.pageLoadTransaction.mark('apm-setup');
+    }
   }
 
   async start(start?: StartDeps) {
     if (!this.enabled || !start) return;
+
+    if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
+      this.pageLoadTransaction.mark('apm-start');
+    }
+
     /**
      * Register listeners for navigation changes and capture them as
      * route-change transactions after Kibana app is bootstrapped
@@ -60,6 +74,12 @@ export class ApmSystem {
     start.application.currentAppId$.subscribe((appId) => {
       const apmInstance = (window as any).elasticApm;
       if (appId && apmInstance && typeof apmInstance.startTransaction === 'function') {
+        // Close the page load transaction
+        if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
+          // @ts-expect-error 2339
+          this.pageLoadTransaction.block(false);
+          this.pageLoadTransaction = undefined;
+        }
         apmInstance.startTransaction(`/app/${appId}`, 'route-change', {
           managed: true,
           canReuse: true,
