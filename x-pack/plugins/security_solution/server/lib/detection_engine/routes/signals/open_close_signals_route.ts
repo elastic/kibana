@@ -48,7 +48,8 @@ export const setSignalsStatusRoute = (
 
       // Get Context for Insights Payloads
       const clusterId = await sender.getClusterID();
-      const username = await security?.authc.getCurrentUser.name;
+      const username = await security?.authc.getCurrentUser(request)?.username;
+      // How do we get this?
       // const sessionId = await security?.getSession();
       const sessionId = '';
       const insightsService = new InsightsService(clusterId);
