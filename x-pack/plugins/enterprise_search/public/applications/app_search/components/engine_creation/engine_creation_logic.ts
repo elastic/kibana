@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { generatePath } from 'react-router-dom';
-
 import { kea, MakeLogicType } from 'kea';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
-import { ENGINE_PATH } from '../../routes';
 import { formatApiName } from '../../utils/format_api_name';
 
 import { DEFAULT_LANGUAGE, ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
+import { getRedirectToAfterEngineCreation } from './utils';
 
 interface EngineCreationActions {
   onEngineCreationSuccess(): void;
+  setIngestionMethod(method: string): { method: string };
   setLanguage(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
   submitEngine(): void;
@@ -26,6 +25,7 @@ interface EngineCreationActions {
 }
 
 interface EngineCreationValues {
+  ingestionMethod: string;
   isLoading: boolean;
   language: string;
   name: string;
@@ -36,12 +36,19 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
   path: ['enterprise_search', 'app_search', 'engine_creation_logic'],
   actions: {
     onEngineCreationSuccess: true,
+    setIngestionMethod: (method) => ({ method }),
     setLanguage: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
     submitEngine: true,
     onSubmitError: true,
   },
   reducers: {
+    ingestionMethod: [
+      '',
+      {
+        setIngestionMethod: (_, { method }) => method,
+      },
+    ],
     isLoading: [
       false,
       {
@@ -81,12 +88,12 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       }
     },
     onEngineCreationSuccess: () => {
-      const { name } = values;
+      const { ingestionMethod, name } = values;
       const { navigateToUrl } = KibanaLogic.values;
-      const enginePath = generatePath(ENGINE_PATH, { engineName: name });
+      const toUrl = getRedirectToAfterEngineCreation({ ingestionMethod, engineName: name });
 
       flashSuccessToast(ENGINE_CREATION_SUCCESS_MESSAGE(name));
-      navigateToUrl(enginePath);
+      navigateToUrl(toUrl);
     },
   }),
 });

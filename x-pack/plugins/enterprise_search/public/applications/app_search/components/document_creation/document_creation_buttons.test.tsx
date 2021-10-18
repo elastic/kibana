@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import '../../../__mocks__/react_router';
+import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
@@ -59,5 +62,21 @@ describe('DocumentCreationButtons', () => {
     const wrapper = shallow(<DocumentCreationButtons />);
 
     expect(wrapper.find(EuiCardTo).prop('to')).toEqual('/engines/some-engine/crawler');
+  });
+
+  it('calls openDocumentCreation("file") if ?method=json', () => {
+    const search = '?method=json';
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({ search }));
+
+    shallow(<DocumentCreationButtons />);
+    expect(actions.openDocumentCreation).toHaveBeenCalledWith('file');
+  });
+
+  it('calls openDocumentCreation("api") if ?method=api', () => {
+    const search = '?method=api';
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({ search }));
+
+    shallow(<DocumentCreationButtons />);
+    expect(actions.openDocumentCreation).toHaveBeenCalledWith('api');
   });
 });
