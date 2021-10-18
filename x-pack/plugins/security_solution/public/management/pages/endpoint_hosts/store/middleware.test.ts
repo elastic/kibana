@@ -389,7 +389,6 @@ describe('endpoint list middleware', () => {
 
     it('should call get Activity Log API with correct paging options', async () => {
       dispatchUserChangedUrl();
-
       const updatePagingDispatched = waitForAction('endpointDetailsActivityLogUpdatePaging');
       dispatchGetActivityLogPaging({ page: 3 });
 
