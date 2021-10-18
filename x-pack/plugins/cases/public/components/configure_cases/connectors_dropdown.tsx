@@ -14,6 +14,7 @@ import { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon, isDeprecateConnector } from '../utils';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 export interface Props {
   connectors: ActionConnector[];
@@ -57,6 +58,11 @@ const addNewConnector = {
   'data-test-subj': 'dropdown-connector-add-connector',
 };
 
+const StyledEuiIconTip = euiStyled(EuiIconTip)`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS}
+  margin-bottom: 0 !important;
+`;
+
 const ConnectorsDropdownComponent: React.FC<Props> = ({
   connectors,
   disabled,
@@ -87,16 +93,18 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <span>{connector.name}</span>
+                  <span>
+                    {connector.name}
+                    {isDeprecateConnector(connector) && ` (${i18n.DEPRECATED_TOOLTIP_TEXT})`}
+                  </span>
                 </EuiFlexItem>
                 {isDeprecateConnector(connector) && (
                   <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      aria-label={i18n.DEPRECATED_TOOLTIP_TITLE}
+                    <StyledEuiIconTip
+                      aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
                       size={ICON_SIZE}
                       type="alert"
                       color="warning"
-                      title={i18n.DEPRECATED_TOOLTIP_TITLE}
                       content={i18n.DEPRECATED_TOOLTIP_CONTENT}
                     />
                   </EuiFlexItem>

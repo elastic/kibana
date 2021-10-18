@@ -12,15 +12,14 @@ import { i18n } from '@kbn/i18n';
 const DEPRECATED_CONNECTOR_WARNING_TITLE = i18n.translate(
   'xpack.cases.connectors.serviceNow.deprecatedConnectorWarningTitle',
   {
-    defaultMessage: 'Deprecated connector type',
+    defaultMessage: 'This connector type is deprecated',
   }
 );
 
 const DEPRECATED_CONNECTOR_WARNING_DESC = i18n.translate(
   'xpack.cases.connectors.serviceNow.deprecatedConnectorWarningDesc',
   {
-    defaultMessage:
-      'This connector type is deprecated. Create a new connector or update this connector',
+    defaultMessage: 'Update this connector, or create a new one.',
   }
 );
 

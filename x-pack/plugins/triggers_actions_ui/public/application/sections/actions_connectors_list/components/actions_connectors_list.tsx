@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ClassNames } from '@emotion/react';
 import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
@@ -24,6 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { withTheme, EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -51,6 +53,33 @@ import {
   ENABLE_NEW_SN_SIR_CONNECTOR,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../actions/server/constants/connectors';
+
+const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
+  return (
+    <ClassNames>
+      {({ css }) => (
+        <EuiIconTip
+          anchorClassName={css({
+            /**
+             * Adds some spacing to the left of the warning icon for deprecated connectors
+             */
+            marginLeft: theme.eui.euiSizeS,
+            marginBottom: '0 !important',
+          })}
+          aria-label="Warning"
+          size="m"
+          type="alert"
+          color="warning"
+          content={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isDeprecatedDescription',
+            { defaultMessage: 'This connector is deprecated. Update it, or create a new one.' }
+          )}
+          position="right"
+        />
+      )}
+    </ClassNames>
+  );
+});
 
 const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
@@ -204,23 +233,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                 position="right"
               />
             ) : null}
-            {showDeprecatedTooltip && (
-              <EuiIconTip
-                aria-label="Warning"
-                size="m"
-                type="alert"
-                color="warning"
-                title={i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deprecatedConnectorTitle',
-                  { defaultMessage: 'Deprecated connector' }
-                )}
-                content={i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isDeprecatedDescription',
-                  { defaultMessage: 'Please update your connector' }
-                )}
-                position="right"
-              />
-            )}
+            {showDeprecatedTooltip && <ConnectorIconTipWithSpacing />}
           </>
         );
 
