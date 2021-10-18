@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { ExistsFilter } from '@kbn/es-query';
+import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
@@ -19,13 +19,26 @@ import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_valu
 interface Props {
   seriesId: number;
   series: SeriesUrl;
-  field: string;
+  singleSelection?: boolean;
+  keepHistory?: boolean;
+  field: string | { field: string; nested: string };
   seriesConfig: SeriesConfig;
   onChange: (field: string, value?: string[]) => void;
+  filters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
 }
 
-export function ReportDefinitionField({ series, field, seriesConfig, onChange }: Props) {
+export function ReportDefinitionField({
+  singleSelection,
+  keepHistory,
+  series,
+  field: fieldProp,
+  seriesConfig,
+  onChange,
+  filters,
+}: Props) {
   const { indexPattern } = useAppIndexPatternContext(series.dataType);
+
+  const field = typeof fieldProp === 'string' ? fieldProp : fieldProp.field;
 
   const { reportDefinitions: selectedReportDefinitions = {} } = series;
 
@@ -33,18 +46,22 @@ export function ReportDefinitionField({ series, field, seriesConfig, onChange }:
 
   const queryFilters = useMemo(() => {
     const filtersN: ESFilter[] = [];
-    (baseFilters ?? []).forEach((qFilter: PersistableFilter | ExistsFilter) => {
-      if (qFilter.query) {
-        filtersN.push(qFilter.query);
-      }
-      const existFilter = qFilter as ExistsFilter;
-      if (existFilter.query.exists) {
-        filtersN.push({ exists: existFilter.query.exists });
-      }
-    });
+    (baseFilters ?? [])
+      .concat(filters ?? [])
+      .forEach((qFilter: PersistableFilter | ExistsFilter) => {
+        if (qFilter.query) {
+          filtersN.push(qFilter.query);
+        }
+        const existFilter = qFilter as ExistsFilter;
+        if (existFilter.query.exists) {
+          filtersN.push({ exists: existFilter.query.exists });
+        }
+      });
 
     if (!isEmpty(selectedReportDefinitions)) {
-      definitionFields.forEach((fieldT) => {
+      definitionFields.forEach((fieldObj) => {
+        const fieldT = typeof fieldObj === 'string' ? fieldObj : fieldObj.field;
+
         if (indexPattern && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
           const values = selectedReportDefinitions?.[fieldT];
           if (!values.includes(ALL_VALUES_SELECTED)) {
@@ -65,7 +82,7 @@ export function ReportDefinitionField({ series, field, seriesConfig, onChange }:
 
   return (
     <FieldValueSuggestions
-      label={labels[field]}
+      label={labels[field] ?? field}
       sourceField={field}
       indexPatternTitle={indexPattern.title}
       selectedValue={selectedReportDefinitions?.[field]}
@@ -79,6 +96,8 @@ export function ReportDefinitionField({ series, field, seriesConfig, onChange }:
       usePrependLabel={false}
       compressed={false}
       required={isEmpty(selectedReportDefinitions)}
+      singleSelection={singleSelection}
+      keepHistory={keepHistory}
     />
   );
 }

@@ -42,6 +42,7 @@ export function FieldValueCombobox({
   usePrependLabel = true,
   compressed = true,
   required = true,
+  singleSelection = false,
   allowAllValuesSelection,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
@@ -68,6 +69,7 @@ export function FieldValueCombobox({
   const comboBox = (
     <EuiComboBox
       fullWidth
+      singleSelection={singleSelection ? { asPlainText: true } : false}
       compressed={compressed}
       placeholder={i18n.translate('xpack.observability.fieldValueSelection.placeholder.search', {
         defaultMessage: 'Search {label}',
