@@ -81,7 +81,7 @@ import {
   getAgentById,
 } from './services/agents';
 import { registerFleetUsageCollector } from './collectors/register';
-import { getInstallation } from './services/epm/packages';
+import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
@@ -324,6 +324,7 @@ export class FleetPlugin
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
         getInstallation,
+        ensureInstalledPackage,
       },
       agentService: {
         getAgent: getAgentById,
