@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
-
-export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-});
-
-export type ConfigType = TypeOf<typeof ConfigSchema>;
+export { installMlModel } from './install';
+export { deleteMlModel } from './remove';
