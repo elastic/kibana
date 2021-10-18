@@ -17,12 +17,10 @@ import { getServices } from '../kibana_services';
 import { KibanaPageTemplate } from '../../../../kibana_react/public';
 import { getTutorials } from '../load_tutorials';
 
-const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 
-const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('home.breadcrumbs.addDataTitle', {
-  defaultMessage: 'Add data',
+const integrationsTitle = i18n.translate('home.breadcrumbs.integrationsAppTitle', {
+  defaultMessage: 'Integrations',
 });
 
 class TutorialDirectoryUi extends React.Component {
@@ -71,10 +69,9 @@ class TutorialDirectoryUi extends React.Component {
 
     getServices().chrome.setBreadcrumbs([
       {
-        text: homeTitle,
-        href: '#/',
+        text: integrationsTitle,
+        href: this.props.addBasePath(`/app/integrations/browse`),
       },
-      { text: addDataTitle },
     ]);
 
     const tutorialConfigs = await getTutorials();
@@ -153,6 +150,17 @@ class TutorialDirectoryUi extends React.Component {
 
   renderTabContent = () => {
     const tab = this.tabs.find(({ id }) => id === this.state.selectedTabId);
+
+    getServices().chrome.setBreadcrumbs([
+      {
+        text: integrationsTitle,
+        href: this.props.addBasePath(`/app/integrations/browse`),
+      },
+      {
+        text: tab.name,
+      },
+    ]);
+
     return tab.content;
   };
 
