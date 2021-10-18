@@ -44,7 +44,6 @@ import { configDeprecations, getInfraDeprecationsFactory } from './deprecations'
 
 export const config: PluginConfigDescriptor = {
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     inventory: schema.object({
       compositeSize: schema.number({ defaultValue: 2000 }),
     }),

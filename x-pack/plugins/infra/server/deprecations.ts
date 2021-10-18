@@ -139,8 +139,7 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
     }),
   };
 
-export const configDeprecations: ConfigDeprecationProvider = ({ deprecate }) => [
-  deprecate('enabled', '8.0.0'),
+export const configDeprecations: ConfigDeprecationProvider = () => [
   ...Object.keys(FIELD_DEPRECATION_FACTORIES).map(
     (key): ConfigDeprecation =>
       (completeConfig, rootPath, addDeprecation) => {
