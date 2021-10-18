@@ -1585,8 +1585,8 @@ module.exports = {
       plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        // 'arrow-body-style': ['error', 'as-needed'],
-        // 'prefer-arrow-callback': 'error',
+        'arrow-body-style': ['error', 'as-needed'],
+        'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
