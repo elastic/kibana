@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
-  isLegacy: schema.boolean({ defaultValue: false }),
+  isLegacy: schema.boolean({ defaultValue: true }),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
