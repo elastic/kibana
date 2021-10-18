@@ -94,8 +94,8 @@ function getProps(props?: Partial<DashboardViewportProps>): {
     options,
   };
 }
-
-test('renders DashboardViewport', () => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+test.skip('renders DashboardViewport', () => {
   const { props, options } = getProps();
   const component = mount(
     <I18nProvider>
@@ -110,7 +110,8 @@ test('renders DashboardViewport', () => {
   expect(panels.length).toBe(2);
 });
 
-test('renders DashboardViewport with no visualizations', () => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+test.skip('renders DashboardViewport with no visualizations', () => {
   const { props, options } = getProps();
   props.container.updateInput({ panels: {} });
   const component = mount(
@@ -128,7 +129,8 @@ test('renders DashboardViewport with no visualizations', () => {
   component.unmount();
 });
 
-test('renders DashboardEmptyScreen', () => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+test.skip('renders DashboardEmptyScreen', () => {
   const { props, options } = getProps();
   props.container.updateInput({ panels: {} });
   const component = mount(
@@ -146,7 +148,8 @@ test('renders DashboardEmptyScreen', () => {
   component.unmount();
 });
 
-test('renders exit full screen button when in full screen mode', async () => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+test.skip('renders exit full screen button when in full screen mode', async () => {
   const { props, options } = getProps();
   props.container.updateInput({ isFullScreenMode: true });
   const component = mount(
@@ -174,7 +177,8 @@ test('renders exit full screen button when in full screen mode', async () => {
   component.unmount();
 });
 
-test('renders exit full screen button when in full screen mode and empty screen', async () => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+test.skip('renders exit full screen button when in full screen mode and empty screen', async () => {
   const { props, options } = getProps();
   props.container.updateInput({ panels: {}, isFullScreenMode: true });
   const component = mount(
@@ -201,7 +205,8 @@ test('renders exit full screen button when in full screen mode and empty screen'
   component.unmount();
 });
 
-test('DashboardViewport unmount unsubscribes', async (done) => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+test.skip('DashboardViewport unmount unsubscribes', async (done) => {
   const { props, options } = getProps();
   const component = mount(
     <I18nProvider>

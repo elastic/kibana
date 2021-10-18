@@ -335,6 +335,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       document: params.document!,
       context: `${params.type!}_field` as FieldPreviewContext,
       script: params.script!,
+      documentId: currentDocId,
     });
 
     if (currentApiCall !== previewCount.current) {

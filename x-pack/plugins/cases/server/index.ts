@@ -15,8 +15,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
     markdownPlugins: true,
   },
-  deprecations: ({ deprecate, renameFromRoot }) => [
-    deprecate('enabled', '8.0.0'),
+  deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
   ],
 };

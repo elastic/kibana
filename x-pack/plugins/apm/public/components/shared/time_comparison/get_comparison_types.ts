@@ -16,14 +16,14 @@ export function getComparisonTypes({
   start?: string;
   end?: string;
 }) {
-  const momentStart = moment(start);
-  const momentEnd = moment(end);
+  const momentStart = moment(start).startOf('second');
+  const momentEnd = moment(end).startOf('second');
 
   const dateDiff = getDateDifference({
     start: momentStart,
     end: momentEnd,
-    unitOfTime: 'days',
     precise: true,
+    unitOfTime: 'days',
   });
 
   // Less than or equals to one day

@@ -36,6 +36,7 @@ import { ScreenshotModePluginStart } from './services/screenshot_mode';
 import { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
+import { SpacesPluginStart } from './services/spaces';
 
 export { SavedDashboardPanel };
 
@@ -204,5 +205,6 @@ export interface DashboardAppServices {
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
-  screenshotMode: ScreenshotModePluginStart;
+  spacesService?: SpacesPluginStart;
+  screenshotModeService?: ScreenshotModePluginStart;
 }
