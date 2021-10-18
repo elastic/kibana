@@ -34,7 +34,6 @@ import { useExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useInvestigateInResolverContextItem } from './investigate_in_resolver';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
@@ -163,30 +162,19 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     isEndpointAlert: isAlertFromEndpointAlert({ ecsData: ecsRowData }),
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
   });
-  const investigateInResolverActionItems = useInvestigateInResolverContextItem({
-    timelineId,
-    ecsData: ecsRowData,
-    onClose: afterItemSelection,
-  });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
   });
   const items: React.ReactElement[] = useMemo(
     () =>
       !isEvent && ruleId
-        ? [
-            ...investigateInResolverActionItems,
-            ...addToCaseActionItems,
-            ...statusActionItems,
-            ...exceptionActionItems,
-          ]
-        : [...investigateInResolverActionItems, ...addToCaseActionItems, ...eventFilterActionItems],
+        ? [...addToCaseActionItems, ...statusActionItems, ...exceptionActionItems]
+        : [...addToCaseActionItems, ...eventFilterActionItems],
     [
       statusActionItems,
       addToCaseActionItems,
       eventFilterActionItems,
       exceptionActionItems,
-      investigateInResolverActionItems,
       isEvent,
       ruleId,
     ]

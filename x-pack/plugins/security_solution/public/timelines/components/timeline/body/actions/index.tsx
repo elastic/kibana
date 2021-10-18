@@ -21,9 +21,23 @@ import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import { TimelineId, ActionProps, OnPinEvent } from '../../../../../../common/types/timeline';
+import {
+  setActiveTabTimeline,
+  updateTimelineGraphEventId,
+} from '../../../../store/timeline/actions';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../../../common/containers/use_full_screen';
+import {
+  TimelineId,
+  ActionProps,
+  OnPinEvent,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
+import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -100,6 +114,25 @@ const ActionsComponent: React.FC<ActionProps> = ({
     [eventType, ecsData.event?.kind, ecsData.agent?.type]
   );
 
+  const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
+  const { setGlobalFullScreen } = useGlobalFullScreen();
+  const { setTimelineFullScreen } = useTimelineFullScreen();
+  const handleClick = useCallback(() => {
+    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
+    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
+    if (timelineId === TimelineId.active) {
+      if (dataGridIsFullScreen) {
+        setTimelineFullScreen(true);
+      }
+      dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
+    } else {
+      if (dataGridIsFullScreen) {
+        setGlobalFullScreen(true);
+      }
+    }
+    // onClose();
+  }, [dispatch, ecsData._id, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
+
   return (
     <ActionsContainer>
       {showCheckboxes && !tGridEnabled && (
@@ -171,6 +204,26 @@ const ActionsComponent: React.FC<ActionProps> = ({
           refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />
+        {isDisabled === false ? (
+          <div>
+            <EventsTdContent textAlign="center" width={36}>
+              <EuiToolTip
+                data-test-subj="expand-event-tool-tip"
+                content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.ACTION_INVESTIGATE_IN_RESOLVER_FOR_ROW({
+                    ariaRowindex,
+                    columnValues,
+                  })}
+                  data-test-subj="view-in-analyzer"
+                  iconType="analyzeEvent"
+                  onClick={handleClick}
+                />
+              </EuiToolTip>
+            </EventsTdContent>
+          </div>
+        ) : null}
       </>
     </ActionsContainer>
   );
