@@ -51,6 +51,7 @@ export function ContextAppRoute(props: ContextAppProps) {
     return (
       <EuiEmptyPrompt
         iconType="alert"
+        iconColor="danger"
         title={
           <FormattedMessage
             id="discover.singleDocRoute.errorTitle"
