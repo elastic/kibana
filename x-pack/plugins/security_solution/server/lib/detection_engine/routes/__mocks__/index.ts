@@ -11,11 +11,11 @@ import { serverMock } from './server';
 import { requestMock } from './request';
 import { responseMock } from './response_factory';
 import { ConfigType } from '../../../../config';
+import { UnderlyingLogClient } from '../../rule_execution_log/types';
 
 export { requestMock, requestContextMock, responseMock, serverMock };
 
 export const createMockConfig = (): ConfigType => ({
-  enabled: true,
   [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
   maxRuleImportExportSize: 10000,
   maxRuleImportPayloadBytes: 10485760,
@@ -29,6 +29,9 @@ export const createMockConfig = (): ConfigType => ({
   alertIgnoreFields: [],
   prebuiltRulesFromFileSystem: true,
   prebuiltRulesFromSavedObjects: false,
+  ruleExecutionLog: {
+    underlyingClient: UnderlyingLogClient.savedObjects,
+  },
 });
 
 export const mockGetCurrentUser = {

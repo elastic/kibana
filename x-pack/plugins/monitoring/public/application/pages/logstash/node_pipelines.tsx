@@ -12,7 +12,7 @@ import { useRouteMatch } from 'react-router-dom';
 // @ts-ignore
 import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pipelines';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 // @ts-ignore
 import { Listing } from '../../../components/logstash/listing';
@@ -58,7 +58,6 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const options: any = getPaginationRouteOptions();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/node/${match.params.uuid}/pipelines`;
     const response = await services.http?.fetch(url, {
       method: 'POST',
@@ -68,8 +67,7 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
           min: bounds.min.toISOString(),
           max: bounds.max.toISOString(),
         },
-        pagination: options.pagination,
-        queryText: options.queryText,
+        ...getPaginationRouteOptions(),
       }),
     });
 
