@@ -3,7 +3,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "A machine learning job found an unusual user name in the authentication logs. An unusual user name is one way of detecting credentialed access by means of a new or dormant user account. A user account that is normally inactive (because the user has left the organization) that becomes active may be due to credentialed access using a compromised account password. Threat actors will sometimes also create new users as a means of persisting in a compromised web application.",
+  "description": "A machine learning job found an unusual user name in the authentication logs. An unusual user name is one way of detecting credentialed access by means of a new or dormant user account. An inactive user account (because the user has left the organization) that becomes active may be due to credentialed access using a compromised account password. Threat actors will sometimes also create new users as a means of persisting in a compromised web application.",
   "false_positives": [
     "User accounts that are rarely active, such as a site reliability engineer (SRE) or developer logging into a production server for troubleshooting, may trigger this alert. Under some conditions, a newly created user account may briefly trigger this alert while the model is learning."
   ],
@@ -25,5 +25,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 2
+  "version": 3
 }

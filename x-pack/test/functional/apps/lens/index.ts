@@ -11,6 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('lens app', () => {
     before(async () => {
@@ -18,16 +19,23 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.setWindowSize(1280, 800);
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
+      );
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
+      );
     });
 
     describe('', function () {
       this.tags(['ciGroup3', 'skipFirefox']);
       loadTestFile(require.resolve('./smokescreen'));
+      loadTestFile(require.resolve('./persistent_context'));
     });
 
     describe('', function () {
@@ -37,7 +45,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./runtime_fields'));
       loadTestFile(require.resolve('./dashboard'));
-      loadTestFile(require.resolve('./persistent_context'));
       loadTestFile(require.resolve('./colors'));
       loadTestFile(require.resolve('./chart_data'));
       loadTestFile(require.resolve('./time_shift'));
@@ -47,7 +54,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./lens_tagging'));
       loadTestFile(require.resolve('./formula'));
       loadTestFile(require.resolve('./heatmap'));
-      loadTestFile(require.resolve('./thresholds'));
+      loadTestFile(require.resolve('./reference_lines'));
       loadTestFile(require.resolve('./inspector'));
 
       // has to be last one in the suite because it overrides saved objects

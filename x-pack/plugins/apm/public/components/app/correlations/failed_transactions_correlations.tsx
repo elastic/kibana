@@ -15,12 +15,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiIcon,
-  EuiLink,
   EuiTitle,
   EuiBetaBadge,
   EuiBadge,
   EuiToolTip,
-  RIGHT_ALIGNMENT,
+  EuiSwitch,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
@@ -43,8 +43,7 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSearchStrategy } from '../../../hooks/use_search_strategy';
 
 import { ImpactBar } from '../../shared/ImpactBar';
-import { createHref, push } from '../../shared/Links/url_helpers';
-import { Summary } from '../../shared/Summary';
+import { push } from '../../shared/Links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
@@ -59,6 +58,11 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useTheme } from '../../../hooks/use_theme';
+import { CorrelationsContextPopover } from './context_popover';
+import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
+import { OnAddFilter } from './context_popover/top_values';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -78,6 +82,14 @@ export function FailedTransactionsCorrelations({
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     }
   );
+
+  const fieldStats: Record<string, FieldStats> | undefined = useMemo(() => {
+    return response.fieldStats?.reduce((obj, field) => {
+      obj[field.fieldName] = field;
+      return obj;
+    }, {} as Record<string, FieldStats>);
+  }, [response?.fieldStats]);
+
   const progressNormalized = progress.loaded / progress.total;
   const { overallHistogram, hasData, status } = getOverallHistogram(
     response,
@@ -91,18 +103,75 @@ export function FailedTransactionsCorrelations({
     selectedSignificantTerm ?? response.failedTransactionsCorrelations?.[0];
 
   const history = useHistory();
+  const [showStats, setShowStats] = useLocalStorage(
+    'apmFailedTransactionsShowAdvancedStats',
+    false
+  );
+  const euiTheme = useTheme();
+
+  const toggleShowStats = useCallback(() => {
+    setShowStats(!showStats);
+  }, [setShowStats, showStats]);
+
+  const onAddFilter = useCallback<OnAddFilter>(
+    ({ fieldName, fieldValue, include }) => {
+      if (include) {
+        push(history, {
+          query: {
+            kuery: `${fieldName}:"${fieldValue}"`,
+          },
+        });
+        trackApmEvent({ metric: 'correlations_term_include_filter' });
+      } else {
+        push(history, {
+          query: {
+            kuery: `not ${fieldName}:"${fieldValue}"`,
+          },
+        });
+        trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+      }
+      onFilter();
+    },
+    [onFilter, history, trackApmEvent]
+  );
 
   const failedTransactionsCorrelationsColumns: Array<
     EuiBasicTableColumn<FailedTransactionsCorrelation>
   > = useMemo(() => {
     const percentageColumns: Array<
       EuiBasicTableColumn<FailedTransactionsCorrelation>
-    > = inspectEnabled
+    > = showStats
       ? [
           {
             width: '100px',
             field: 'pValue',
-            name: 'p-value',
+            name: (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.correlations.failedTransactions.correlationsTable.pValueDescription',
+                  {
+                    defaultMessage:
+                      'The chance of getting at least this amount of field name and value for failed transactions given its prevalence in successful transactions.',
+                  }
+                )}
+              >
+                <>
+                  {i18n.translate(
+                    'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
+                    {
+                      defaultMessage: 'p-value',
+                    }
+                  )}
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="questionInCircle"
+                    className="eui-alignTop"
+                  />
+                </>
+              </EuiToolTip>
+            ),
+
             render: (pValue: number) => pValue.toPrecision(3),
             sortable: true,
           },
@@ -182,14 +251,13 @@ export function FailedTransactionsCorrelations({
         name: (
           <>
             {i18n.translate(
-              'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
+              'xpack.apm.correlations.failedTransactions.correlationsTable.scoreLabel',
               {
                 defaultMessage: 'Score',
               }
             )}
           </>
         ),
-        align: RIGHT_ALIGNMENT,
         render: (_, { normalizedScore }) => {
           return (
             <>
@@ -226,6 +294,17 @@ export function FailedTransactionsCorrelations({
           'xpack.apm.correlations.failedTransactions.correlationsTable.fieldNameLabel',
           { defaultMessage: 'Field name' }
         ),
+        render: (_, { fieldName, fieldValue }) => (
+          <>
+            {fieldName}
+            <CorrelationsContextPopover
+              fieldName={fieldName}
+              fieldValue={fieldValue}
+              topValueStats={fieldStats ? fieldStats[fieldName] : undefined}
+              onAddFilter={onAddFilter}
+            />
+          </>
+        ),
         sortable: true,
       },
       {
@@ -252,15 +331,15 @@ export function FailedTransactionsCorrelations({
             ),
             icon: 'plusInCircle',
             type: 'icon',
-            onClick: (term: FailedTransactionsCorrelation) => {
-              push(history, {
-                query: {
-                  kuery: `${term.fieldName}:"${term.fieldValue}"`,
-                },
-              });
-              onFilter();
-              trackApmEvent({ metric: 'correlations_term_include_filter' });
-            },
+            onClick: ({
+              fieldName,
+              fieldValue,
+            }: FailedTransactionsCorrelation) =>
+              onAddFilter({
+                fieldName,
+                fieldValue,
+                include: true,
+              }),
           },
           {
             name: i18n.translate(
@@ -273,49 +352,20 @@ export function FailedTransactionsCorrelations({
             ),
             icon: 'minusInCircle',
             type: 'icon',
-            onClick: (term: FailedTransactionsCorrelation) => {
-              push(history, {
-                query: {
-                  kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
-                },
-              });
-              onFilter();
-              trackApmEvent({ metric: 'correlations_term_exclude_filter' });
-            },
+            onClick: ({
+              fieldName,
+              fieldValue,
+            }: FailedTransactionsCorrelation) =>
+              onAddFilter({
+                fieldName,
+                fieldValue,
+                include: false,
+              }),
           },
         ],
-        name: i18n.translate(
-          'xpack.apm.correlations.correlationsTable.actionsLabel',
-          { defaultMessage: 'Filter' }
-        ),
-        render: (_, { fieldName, fieldValue }) => {
-          return (
-            <>
-              <EuiLink
-                href={createHref(history, {
-                  query: {
-                    kuery: `${fieldName}:"${fieldValue}"`,
-                  },
-                })}
-              >
-                <EuiIcon type="magnifyWithPlus" />
-              </EuiLink>
-              &nbsp;/&nbsp;
-              <EuiLink
-                href={createHref(history, {
-                  query: {
-                    kuery: `not ${fieldName}:"${fieldValue}"`,
-                  },
-                })}
-              >
-                <EuiIcon type="magnifyWithMinus" />
-              </EuiLink>
-            </>
-          );
-        },
       },
     ] as Array<EuiBasicTableColumn<FailedTransactionsCorrelation>>;
-  }, [history, onFilter, trackApmEvent, inspectEnabled]);
+  }, [fieldStats, onAddFilter, showStats]);
 
   useEffect(() => {
     if (isErrorMessage(progress.error)) {
@@ -366,9 +416,6 @@ export function FailedTransactionsCorrelations({
   const showCorrelationsEmptyStatePrompt =
     correlationTerms.length < 1 &&
     (progressNormalized === 1 || !progress.isRunning);
-
-  const showSummaryBadge =
-    inspectEnabled && (progress.isRunning || correlationTerms.length > 0);
 
   const transactionDistributionChartData: TransactionDistributionChartData[] =
     [];
@@ -462,17 +509,51 @@ export function FailedTransactionsCorrelations({
 
       <EuiSpacer size="s" />
 
-      <EuiTitle size="xs">
-        <span data-test-subj="apmFailedTransactionsCorrelationsTablePanelTitle">
-          {i18n.translate(
-            'xpack.apm.correlations.failedTransactions.tableTitle',
-            {
-              defaultMessage: 'Correlations',
-            }
-          )}
-        </span>
-      </EuiTitle>
-
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiTitle size="xs">
+          <span data-test-subj="apmFailedTransactionsCorrelationsTablePanelTitle">
+            {i18n.translate(
+              'xpack.apm.correlations.failedTransactions.tableTitle',
+              {
+                defaultMessage: 'Correlations',
+              }
+            )}
+          </span>
+        </EuiTitle>
+        <EuiFlexItem
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            paddingLeft: euiTheme.eui.paddingSizes.s,
+          }}
+        >
+          <EuiSwitch
+            label={i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.advancedStatisticsLabel',
+              {
+                defaultMessage: 'Advanced statistics',
+              }
+            )}
+            checked={showStats}
+            onChange={toggleShowStats}
+            compressed
+          />
+          <EuiIconTip
+            size="m"
+            iconProps={{
+              style: { marginLeft: euiTheme.eui.paddingSizes.xs },
+            }}
+            content={i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.advancedStatisticsTooltipContent',
+              {
+                defaultMessage:
+                  'Enable additional statistical information for the correlation results.',
+              }
+            )}
+            type="questionInCircle"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
 
       <CorrelationsProgressControls
@@ -487,20 +568,6 @@ export function FailedTransactionsCorrelations({
           <EuiSpacer size="m" />
           {/* Failed transactions correlations uses ES aggs that are available since 7.15 */}
           <CrossClusterSearchCompatibilityWarning version="7.15" />
-        </>
-      )}
-
-      {showSummaryBadge && selectedTerm?.pValue && (
-        <>
-          <EuiSpacer size="m" />
-          <Summary
-            items={[
-              <EuiBadge color="hollow">
-                {`${selectedTerm.fieldName}: ${selectedTerm.fieldValue}`}
-              </EuiBadge>,
-              <>{`p-value: ${selectedTerm.pValue.toPrecision(3)}`}</>,
-            ]}
-          />
         </>
       )}
 

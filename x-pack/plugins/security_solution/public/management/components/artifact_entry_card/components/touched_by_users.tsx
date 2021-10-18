@@ -7,9 +7,14 @@
 
 import React, { memo } from 'react';
 import { CommonProps, EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { CREATED_BY, LAST_UPDATED_BY } from './translations';
 import { TextValueDisplay } from './text_value_display';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  margin: 6px;
+`;
 
 export interface TouchedByUsersProps extends Pick<CommonProps, 'data-test-subj'> {
   createdBy: string;
@@ -59,10 +64,10 @@ const UserName = memo<UserNameProps>(({ label, value, 'data-test-subj': dataTest
       responsive={false}
       data-test-subj={dataTestSubj}
     >
-      <EuiFlexItem grow={false}>
+      <StyledEuiFlexItem grow={false}>
         <EuiBadge data-test-subj={getTestId('label')}>{label}</EuiBadge>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      </StyledEuiFlexItem>
+      <StyledEuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center" wrap={false}>
           <EuiFlexItem grow={false}>
             <EuiAvatar name={value} size="s" data-test-subj={getTestId('avatar')} />
@@ -75,7 +80,7 @@ const UserName = memo<UserNameProps>(({ label, value, 'data-test-subj': dataTest
             <TextValueDisplay>{value}</TextValueDisplay>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
+      </StyledEuiFlexItem>
     </EuiFlexGroup>
   );
 });
