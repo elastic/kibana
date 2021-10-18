@@ -104,7 +104,6 @@ import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_lo
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
-import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
 import { registerPrivilegeDeprecations } from './deprecation_privileges';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
@@ -258,10 +257,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         componentTemplates: [
           {
             name: 'mappings',
-            mappings: mappingFromFieldMap(
-              { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
-              false
-            ),
+            mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
           },
         ],
         secondaryAlias: config.signalsIndex,
@@ -365,6 +361,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.lists = plugins.lists;
       this.manifestTask = new ManifestTask({
         endpointAppContext: endpointContext,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         taskManager: plugins.taskManager!,
       });
     }
@@ -390,6 +387,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
       endpointAppContext: endpointContext,
       core,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       taskManager: plugins.taskManager!,
     });
 
@@ -448,7 +446,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       // License related start
       licenseService.start(this.licensing$);
       this.policyWatcher = new PolicyWatcher(
-        plugins.fleet!.packagePolicyService,
+        plugins.fleet.packagePolicyService,
         core.savedObjects,
         core.elasticsearch,
         logger
@@ -456,6 +454,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.policyWatcher.start(licenseService);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
 
     this.endpointAppContextService.start({
@@ -465,14 +464,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       agentPolicyService: plugins.fleet?.agentPolicyService,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.agentService!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.agentPolicyService!,
         logger
       ),
       appClientFactory: this.appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
-      config: this.config!,
+      config: this.config,
       cases: plugins.cases,
       logger,
       manifestManager,
@@ -496,6 +497,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
 
     this.checkMetadataTransformsTask?.start({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       taskManager: plugins.taskManager!,
     });
 

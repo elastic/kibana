@@ -27,6 +27,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
         return;
       }
       addDeprecation({
+        configPath: 'kibana.defaultAppId',
         message: `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`,
         correctiveActions: {
           manualSteps: [

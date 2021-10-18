@@ -26,6 +26,7 @@ import {
   RULE_THREAD_POOL_WRITE_REJECTIONS,
   RULE_MEMORY_USAGE,
   RULE_MISSING_MONITORING_DATA,
+  ELASTICSEARCH_SYSTEM_ID,
 } from '../../../../common/constants';
 
 export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
@@ -117,6 +118,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     >
       <div data-test-subj="elasticsearchNodesListingPage">
         <SetupModeRenderer
+          productName={ELASTICSEARCH_SYSTEM_ID}
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}

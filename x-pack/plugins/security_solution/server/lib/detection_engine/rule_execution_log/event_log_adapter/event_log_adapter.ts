@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { sum } from 'lodash';
+import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
 import { IEventLogService } from '../../../../../../event_log/server';
+import { SavedObjectsAdapter } from '../saved_objects_adapter/saved_objects_adapter';
 import {
   FindBulkExecutionLogArgs,
   FindExecutionLogArgs,
@@ -18,26 +21,37 @@ import { EventLogClient } from './event_log_client';
 
 export class EventLogAdapter implements IRuleExecutionLogClient {
   private eventLogClient: EventLogClient;
+  /**
+   * @deprecated Saved objects adapter is used during the transition period while the event log doesn't support all features needed to implement the execution log.
+   * We use savedObjectsAdapter to write/read the latest rule execution status and eventLogClient to read/write historical execution data.
+   * We can remove savedObjectsAdapter as soon as the event log supports all methods that we need (find, findBulk).
+   */
+  private savedObjectsAdapter: IRuleExecutionLogClient;
 
-  constructor(eventLogService: IEventLogService) {
+  constructor(eventLogService: IEventLogService, savedObjectsClient: SavedObjectsClientContract) {
     this.eventLogClient = new EventLogClient(eventLogService);
+    this.savedObjectsAdapter = new SavedObjectsAdapter(savedObjectsClient);
   }
 
-  public async find({ ruleId, logsCount = 1, spaceId }: FindExecutionLogArgs) {
-    return []; // TODO Implement
+  public async find(args: FindExecutionLogArgs) {
+    return this.savedObjectsAdapter.find(args);
   }
 
-  public async findBulk({ ruleIds, logsCount = 1, spaceId }: FindBulkExecutionLogArgs) {
-    return {}; // TODO Implement
+  public async findBulk(args: FindBulkExecutionLogArgs) {
+    return this.savedObjectsAdapter.findBulk(args);
   }
 
-  public async update({ attributes, spaceId, ruleName, ruleType }: UpdateExecutionLogArgs) {
-    // execution events are immutable, so we just log a status change istead of updating previous
+  public async update(args: UpdateExecutionLogArgs) {
+    const { attributes, spaceId, ruleId, ruleName, ruleType } = args;
+
+    await this.savedObjectsAdapter.update(args);
+
+    // EventLog execution events are immutable, so we just log a status change istead of updating previous
     if (attributes.status) {
       this.eventLogClient.logStatusChange({
         ruleName,
         ruleType,
-        ruleId: attributes.alertId,
+        ruleId,
         newStatus: attributes.status,
         spaceId,
       });
@@ -45,16 +59,15 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
   }
 
   public async delete(id: string) {
-    // execution events are immutable, nothing to do here
+    await this.savedObjectsAdapter.delete(id);
+
+    // EventLog execution events are immutable, nothing to do here
   }
 
-  public async logExecutionMetrics({
-    ruleId,
-    spaceId,
-    ruleType,
-    ruleName,
-    metrics,
-  }: LogExecutionMetricsArgs) {
+  public async logExecutionMetrics(args: LogExecutionMetricsArgs) {
+    const { ruleId, spaceId, ruleType, ruleName, metrics } = args;
+    await this.savedObjectsAdapter.logExecutionMetrics(args);
+
     this.eventLogClient.logExecutionMetrics({
       ruleId,
       ruleName,
@@ -62,16 +75,19 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
       spaceId,
       metrics: {
         executionGapDuration: metrics.executionGap?.asSeconds(),
-        totalIndexingDuration: metrics.indexingDurations?.reduce(
-          (acc, cur) => acc + Number(cur),
-          0
-        ),
-        totalSearchDuration: metrics.searchDurations?.reduce((acc, cur) => acc + Number(cur), 0),
+        totalIndexingDuration: metrics.indexingDurations
+          ? sum(metrics.indexingDurations.map(Number))
+          : undefined,
+        totalSearchDuration: metrics.searchDurations
+          ? sum(metrics.searchDurations.map(Number))
+          : undefined,
       },
     });
   }
 
   public async logStatusChange(args: LogStatusChangeArgs) {
+    await this.savedObjectsAdapter.logStatusChange(args);
+
     if (args.metrics) {
       this.logExecutionMetrics({
         ruleId: args.ruleId,

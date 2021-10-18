@@ -18,7 +18,7 @@ import { useTable } from '../../hooks/use_table';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
+import { RULE_LARGE_SHARD_SIZE, ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters }) => {
@@ -106,6 +106,7 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
     >
       <div data-test-subj="elasticsearchIndicesListingPage">
         <SetupModeRenderer
+          productName={ELASTICSEARCH_SYSTEM_ID}
           render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
