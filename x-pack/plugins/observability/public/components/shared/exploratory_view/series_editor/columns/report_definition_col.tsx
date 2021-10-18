@@ -8,6 +8,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { undefined } from 'io-ts';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { ReportDefinitionField } from './report_definition_field';
@@ -59,6 +60,13 @@ export function ReportDefinitionCol({
         const isNonStepMetric = !isStepLevelMetric(series.selectedMetricField);
 
         const hideNestedStep = nestedField === SYNTHETICS_STEP_NAME && isNonStepMetric;
+
+        if (hideNestedStep && nestedField && selectedReportDefinitions[nestedField]?.length > 0) {
+          setSeries(seriesId, {
+            ...series,
+            reportDefinitions: { ...selectedReportDefinitions, [nestedField]: [] },
+          });
+        }
 
         let nestedFieldElement;
 
