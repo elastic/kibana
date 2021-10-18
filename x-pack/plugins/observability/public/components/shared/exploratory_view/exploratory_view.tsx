@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { EuiButtonEmpty, EuiResizableContainer, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiResizableContainer, EuiTitle, EuiPanel } from '@elastic/eui';
 import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
@@ -180,7 +180,7 @@ const LensWrapper = styled.div<{ height: string }>`
     height: 100%;
   }
 `;
-const Wrapper = styled.div`
+const Wrapper = styled(EuiPanel)`
   max-width: 1800px;
   min-width: 800px;
   margin: 0 auto;
