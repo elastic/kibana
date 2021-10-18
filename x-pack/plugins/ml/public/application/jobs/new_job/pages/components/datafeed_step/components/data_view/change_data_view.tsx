@@ -69,9 +69,18 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
     null
   );
 
-  useEffect(() => {
+  useEffect(function initialPageLoad() {
     setCurrentDataViewTitle(jobCreator.indexPatternTitle);
   }, []);
+
+  useEffect(
+    function stepChange() {
+      if (step === 1) {
+        setValidationResponse(null);
+      }
+    },
+    [step]
+  );
 
   function onDataViewSelected(dataViewId: string) {
     if (validating === false) {
@@ -79,12 +88,6 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
       validate(dataViewId);
     }
   }
-
-  useEffect(() => {
-    if (step === 1) {
-      setValidationResponse(null);
-    }
-  }, [step]);
 
   const validate = useCallback(
     async (dataViewId: string) => {
@@ -110,11 +113,6 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   );
 
   const applyDataView = useCallback(() => {
-    if (newDataViewTitle === '') {
-      console.error('data view title is empty'); // eslint-disable-line no-console
-      return;
-    }
-
     const newIndices = newDataViewTitle.split(',');
     jobCreator.indices = newIndices;
     resetAdvancedJob(jobCreator, navigateToPath);

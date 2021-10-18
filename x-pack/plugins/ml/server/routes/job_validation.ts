@@ -215,11 +215,11 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
   /**
    * @apiGroup DataFeedPreviewValidation
    *
-   * @api {post} /api/ml/validate/datafeed_preview Validates job
+   * @api {post} /api/ml/validate/datafeed_preview Validates datafeed preview
    * @apiName ValidateJob
-   * @apiDescription Validates the given job configuration
+   * @apiDescription Validates that the job preview runs successfully
    *
-   * @apiSchema (body) validateJobSchema
+   * @apiSchema (body) validateDatafeedPreviewSchema
    */
   router.post(
     {

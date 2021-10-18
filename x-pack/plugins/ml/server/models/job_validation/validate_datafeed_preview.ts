@@ -19,9 +19,8 @@ export async function validateDatafeedPreviewWithMessages(
   const { valid, documentsFound } = await validateDatafeedPreview(mlClient, authHeader, job);
   if (valid) {
     return documentsFound ? [] : [{ id: 'datafeed_preview_no_documents' }];
-  } else {
-    return [{ id: 'datafeed_preview_failed' }];
   }
+  return [{ id: 'datafeed_preview_failed' }];
 }
 
 export async function validateDatafeedPreview(
