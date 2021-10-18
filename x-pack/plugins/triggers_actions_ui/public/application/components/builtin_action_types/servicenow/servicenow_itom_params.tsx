@@ -134,6 +134,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
       >
         <EuiSelect
           fullWidth
+          hasNoInitialSelection
           data-test-subj="severitySelect"
           isLoading={isLoadingChoices}
           disabled={isLoadingChoices}

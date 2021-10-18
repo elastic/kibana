@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_ALERTS_GROUPING_KEY } from './config';
 
 export const ExternalIncidentServiceConfigurationBase = {
   apiUrl: schema.string(),
@@ -99,7 +100,7 @@ export const ExecutorSubActionAddEventParamsSchema = schema.object({
   severity: schema.nullable(schema.string()),
   description: schema.nullable(schema.string()),
   additional_info: schema.nullable(schema.string()),
-  message_key: schema.nullable(schema.string()),
+  message_key: schema.nullable(schema.string({ defaultValue: DEFAULT_ALERTS_GROUPING_KEY })),
   time_of_event: schema.nullable(schema.string()),
 });
 

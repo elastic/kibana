@@ -198,7 +198,7 @@ export function getServiceNowITOMActionType(): ActionTypeModel<
       };
       const validationResult = { errors };
 
-      if (actionParams.subActionParams.severity == null) {
+      if (actionParams?.subActionParams?.severity == null) {
         errors.severity.push(translations.SEVERITY_REQUIRED);
       }
 

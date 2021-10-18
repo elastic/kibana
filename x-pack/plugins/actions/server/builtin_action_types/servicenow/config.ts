@@ -44,3 +44,4 @@ export const snExternalServiceConfig: SNProductsConfig = {
 };
 
 export const FIELD_PREFIX = 'u_';
+export const DEFAULT_ALERTS_GROUPING_KEY = '{{rule.id}}:{{alert.id}}';

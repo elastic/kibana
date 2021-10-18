@@ -45,7 +45,7 @@ export const useChoices = ({
         values.reduce(
           (acc, value) => ({
             ...acc,
-            [value.element]: [...(acc[value.element] != null ? acc[value.element] : []), value],
+            [value.element]: [...(acc[value.element] ?? []), value],
           }),
           defaultFields
         )
