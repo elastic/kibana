@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { OptionsListEmbeddableFactory } from './options_list_embeddable_factory';
-export { OptionsListEmbeddable, OPTIONS_LIST_CONTROL } from './options_list_embeddable';
+import { DataViewsPublicPluginStart } from '../../../data_views/public';
+
+export interface PresentationDataViewsService {
+  get: DataViewsPublicPluginStart['get'];
+  getIdsWithTitle: DataViewsPublicPluginStart['getIdsWithTitle'];
+}

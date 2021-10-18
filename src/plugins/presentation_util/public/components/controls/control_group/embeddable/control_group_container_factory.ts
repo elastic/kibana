@@ -46,10 +46,10 @@ export class ControlGroupContainerFactory
   public getDefaultInput(): Partial<ControlGroupInput> {
     return {
       panels: {},
-      inheritParentState: {
-        useFilters: true,
-        useQuery: true,
-        useTimerange: true,
+      ignoreParentSettings: {
+        ignoreFilters: false,
+        ignoreQuery: false,
+        ignoreTimerange: false,
       },
     };
   }

@@ -7,8 +7,8 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import uuid from 'uuid';
 
+import uuid from 'uuid';
 import { decorators } from './decorators';
 import { pluginServices, registry } from '../../../services/storybook';
 import { populateStorybookControlFactories } from './storybook_control_factories';
@@ -25,7 +25,7 @@ export default {
   decorators,
 };
 
-const EmptyControlGroupStoryComponent = ({ panels }: { panels?: ControlsPanels }) => {
+const ControlGroupStoryComponent = ({ panels }: { panels?: ControlsPanels }) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   pluginServices.setRegistry(registry.start({}));
@@ -35,11 +35,6 @@ const EmptyControlGroupStoryComponent = ({ panels }: { panels?: ControlsPanels }
     (async () => {
       const factory = new ControlGroupContainerFactory();
       const controlGroupContainerEmbeddable = await factory.create({
-        inheritParentState: {
-          useQuery: false,
-          useFilters: false,
-          useTimerange: false,
-        },
         controlStyle: 'oneLine',
         panels: panels ?? {},
         id: uuid.v4(),
@@ -53,9 +48,9 @@ const EmptyControlGroupStoryComponent = ({ panels }: { panels?: ControlsPanels }
   return <div ref={embeddableRoot} />;
 };
 
-export const EmptyControlGroupStory = () => <EmptyControlGroupStoryComponent />;
+export const EmptyControlGroupStory = () => <ControlGroupStoryComponent />;
 export const ConfiguredControlGroupStory = () => (
-  <EmptyControlGroupStoryComponent
+  <ControlGroupStoryComponent
     panels={{
       optionsList1: {
         type: OPTIONS_LIST_CONTROL,
@@ -64,14 +59,8 @@ export const ConfiguredControlGroupStory = () => (
         explicitInput: {
           title: 'Origin City',
           id: 'optionsList1',
-          indexPattern: {
-            title: 'demo data flights',
-          },
-          field: {
-            name: 'OriginCityName',
-            type: 'string',
-            aggregatable: true,
-          },
+          dataViewId: 'demoDataFlights',
+          fieldName: 'OriginCityName',
           selectedOptions: ['Toronto'],
         } as OptionsListEmbeddableInput,
       },
@@ -82,14 +71,8 @@ export const ConfiguredControlGroupStory = () => (
         explicitInput: {
           title: 'Destination City',
           id: 'optionsList2',
-          indexPattern: {
-            title: 'demo data flights',
-          },
-          field: {
-            name: 'DestCityName',
-            type: 'string',
-            aggregatable: true,
-          },
+          dataViewId: 'demoDataFlights',
+          fieldName: 'DestCityName',
           selectedOptions: ['London'],
         } as OptionsListEmbeddableInput,
       },
@@ -100,14 +83,8 @@ export const ConfiguredControlGroupStory = () => (
         explicitInput: {
           title: 'Carrier',
           id: 'optionsList3',
-          indexPattern: {
-            title: 'demo data flights',
-          },
-          field: {
-            name: 'Carrier',
-            type: 'string',
-            aggregatable: true,
-          },
+          dataViewId: 'demoDataFlights',
+          fieldName: 'Carrier',
         } as OptionsListEmbeddableInput,
       },
     }}

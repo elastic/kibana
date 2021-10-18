@@ -11,52 +11,59 @@ import { i18n } from '@kbn/i18n';
 export const OptionsListStrings = {
   summary: {
     getSeparator: () =>
-      i18n.translate('presentationUtil.inputControls.optionsList.summary.separator', {
+      i18n.translate('presentationUtil.controls.optionsList.summary.separator', {
         defaultMessage: ', ',
       }),
     getPlaceholder: () =>
-      i18n.translate('presentationUtil.inputControls.optionsList.summary.placeholder', {
+      i18n.translate('presentationUtil.controls.optionsList.summary.placeholder', {
         defaultMessage: 'Select...',
       }),
   },
   editor: {
     getIndexPatternTitle: () =>
-      i18n.translate('presentationUtil.inputControls.optionsList.editor.indexPatternTitle', {
+      i18n.translate('presentationUtil.controls.optionsList.editor.indexPatternTitle', {
         defaultMessage: 'Index pattern',
       }),
     getFieldTitle: () =>
-      i18n.translate('presentationUtil.inputControls.optionsList.editor.fieldTitle', {
+      i18n.translate('presentationUtil.controls.optionsList.editor.fieldTitle', {
         defaultMessage: 'Field',
       }),
     getAllowMultiselectTitle: () =>
-      i18n.translate('presentationUtil.inputControls.optionsList.editor.allowMultiselectTitle', {
+      i18n.translate('presentationUtil.controls.optionsList.editor.allowMultiselectTitle', {
         defaultMessage: 'Allow multiselect',
       }),
   },
   popover: {
     getLoadingMessage: () =>
-      i18n.translate('presentationUtil.inputControls.optionsList.popover.loading', {
+      i18n.translate('presentationUtil.controls.optionsList.popover.loading', {
         defaultMessage: 'Loading filters',
       }),
     getEmptyMessage: () =>
-      i18n.translate('presentationUtil.inputControls.optionsList.popover.empty', {
+      i18n.translate('presentationUtil.controls.optionsList.popover.empty', {
         defaultMessage: 'No filters found',
       }),
     getSelectionsEmptyMessage: () =>
-      i18n.translate('presentationUtil.inputControls.optionsList.popover.selectionsEmpty', {
+      i18n.translate('presentationUtil.controls.optionsList.popover.selectionsEmpty', {
         defaultMessage: 'You have no selections',
       }),
     getAllOptionsButtonTitle: () =>
-      i18n.translate('presentationUtil.inputControls.optionsList.popover.allOptionsTitle', {
+      i18n.translate('presentationUtil.controls.optionsList.popover.allOptionsTitle', {
         defaultMessage: 'Show all options',
       }),
     getSelectedOptionsButtonTitle: () =>
-      i18n.translate('presentationUtil.inputControls.optionsList.popover.selectedOptionsTitle', {
+      i18n.translate('presentationUtil.controls.optionsList.popover.selectedOptionsTitle', {
         defaultMessage: 'Show selected options only',
       }),
     getClearAllSelectionsButtonTitle: () =>
-      i18n.translate('presentationUtil.inputControls.optionsList.popover.clearAllSelectionsTitle', {
+      i18n.translate('presentationUtil.controls.optionsList.popover.clearAllSelectionsTitle', {
         defaultMessage: 'Clear selections',
+      }),
+  },
+  errors: {
+    getDataViewNotFoundError: (dataViewId: string) =>
+      i18n.translate('presentationUtil.controls.optionsList.errors.dataViewNotFound', {
+        defaultMessage: 'Could not locate data view: {dataViewId}',
+        values: { dataViewId },
       }),
   },
 };

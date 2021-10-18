@@ -37,6 +37,7 @@ import { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
+import { DashboardControlGroupInput } from './application/lib/dashboard_control_group';
 
 export { SavedDashboardPanel };
 
@@ -65,6 +66,8 @@ export interface DashboardState {
   expandedPanelId?: string;
   options: DashboardOptions;
   panels: DashboardPanelMap;
+
+  controlGroupInput?: DashboardControlGroupInput;
 }
 
 /**
@@ -74,6 +77,7 @@ export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: Saved
 
 export interface DashboardContainerInput extends ContainerInput {
   dashboardCapabilities?: DashboardAppCapabilities;
+  controlGroupInput?: DashboardControlGroupInput;
   refreshConfig?: RefreshInterval;
   isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;

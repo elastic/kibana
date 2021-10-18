@@ -135,7 +135,7 @@ export const ControlGroup = () => {
                 aria-label={ControlGroupStrings.management.getManageButtonTitle()}
                 iconType="gear"
                 color="text"
-                data-test-subj="inputControlsSortingButton"
+                data-test-subj="controlsManagementButton"
                 onClick={() =>
                   openFlyout(forwardAllContext(<EditControlGroup />, reduxContainerContext))
                 }

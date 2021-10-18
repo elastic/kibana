@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { OptionsListEmbeddableFactory } from './options_list_embeddable_factory';
-export { OptionsListEmbeddable, OPTIONS_LIST_CONTROL } from './options_list_embeddable';
+export * from './control_group';
+export * from './control_types';
+export * from './types';

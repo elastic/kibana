@@ -6,64 +6,59 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow, EuiSuperSelect, EuiSuperSelectOption, EuiSwitch } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { IFieldType, IIndexPattern } from '../../../../../../data/public';
+import React, { useEffect, useState } from 'react';
+import { EuiFormRow, EuiSuperSelect, EuiSuperSelectOption, EuiSwitch } from '@elastic/eui';
+
 import { ControlEditorProps, GetControlEditorComponentProps } from '../../types';
-import {
-  OptionsListEmbeddableInput,
-  OptionsListFieldFetcher,
-  OptionsListIndexPatternFetcher,
-} from './options_list_embeddable';
+import { OptionsListEmbeddableInput } from './options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';
+import { pluginServices } from '../../../../services';
 
 interface OptionsListEditorProps extends ControlEditorProps {
   onChange: GetControlEditorComponentProps<OptionsListEmbeddableInput>['onChange'];
-  fetchIndexPatterns: OptionsListIndexPatternFetcher;
   initialInput?: Partial<OptionsListEmbeddableInput>;
-  fetchFields: OptionsListFieldFetcher;
 }
 
 interface OptionsListEditorState {
   singleSelect?: boolean;
 
-  indexPatternSelectOptions: Array<EuiSuperSelectOption<string>>;
-  availableIndexPatterns?: { [key: string]: IIndexPattern };
-  indexPattern?: IIndexPattern;
+  dataViewIdSelectOptions: Array<EuiSuperSelectOption<string>>;
+  dataViewId?: string;
 
-  fieldSelectOptions: Array<EuiSuperSelectOption<string>>;
-  availableFields?: { [key: string]: IFieldType };
-  field?: IFieldType;
+  fieldNameSelectOptions: Array<EuiSuperSelectOption<string>>;
+  fieldName?: string;
 }
 
 export const OptionsListEditor = ({
   onChange,
-  fetchFields,
   initialInput,
   setValidState,
-  fetchIndexPatterns,
 }: OptionsListEditorProps) => {
+  // Presentation Services Context
+  const { dataViews } = pluginServices.getHooks();
+  const { getIdsWithTitle, get } = dataViews.useService();
+
   const [state, setState] = useState<OptionsListEditorState>({
-    indexPattern: initialInput?.indexPattern,
-    field: initialInput?.field,
+    dataViewId: initialInput?.dataViewId,
+    fieldName: initialInput?.fieldName,
     singleSelect: initialInput?.singleSelect,
-    indexPatternSelectOptions: [],
-    fieldSelectOptions: [],
+    dataViewIdSelectOptions: [],
+    fieldNameSelectOptions: [],
   });
 
   const applySelection = ({
-    field,
+    fieldName,
     singleSelect,
-    indexPattern,
+    dataViewId,
   }: {
-    field?: IFieldType;
+    fieldName?: string;
     singleSelect?: boolean;
-    indexPattern?: IIndexPattern;
+    dataViewId?: string;
   }) => {
     const newState = {
-      ...(field ? { field } : {}),
-      ...(indexPattern ? { indexPattern } : {}),
+      ...(fieldName ? { fieldName } : {}),
+      ...(dataViewId ? { dataViewId } : {}),
       ...(singleSelect !== undefined ? { singleSelect } : {}),
     };
     /**
@@ -79,68 +74,56 @@ export const OptionsListEditor = ({
 
   useMount(() => {
     (async () => {
-      const newIndexPatterns = await fetchIndexPatterns();
-      const newAvailableIndexPatterns = newIndexPatterns.reduce(
-        (acc: { [key: string]: IIndexPattern }, curr) => ((acc[curr.title] = curr), acc),
-        {}
-      );
-      const newIndexPatternSelectOptions = newIndexPatterns.map((indexPattern) => ({
-        value: indexPattern.title,
-        inputDisplay: indexPattern.title,
+      const newDataViews = await getIdsWithTitle();
+      const newDataViewSelectOptions = newDataViews.map((dataView) => ({
+        value: dataView.id,
+        inputDisplay: dataView.title,
       }));
+
       setState((currentState) => ({
         ...currentState,
-        availableIndexPatterns: newAvailableIndexPatterns,
-        indexPatternSelectOptions: newIndexPatternSelectOptions,
+        dataViewIdSelectOptions: newDataViewSelectOptions,
       }));
     })();
   });
 
   useEffect(() => {
     (async () => {
-      let newFieldSelectOptions: Array<EuiSuperSelectOption<string>> = [];
-      let newAvailableFields: { [key: string]: IFieldType } = {};
-      if (state.indexPattern) {
-        const newFields = await fetchFields(state.indexPattern);
-        newAvailableFields = newFields.reduce(
-          (acc: { [key: string]: IFieldType }, curr) => ((acc[curr.name] = curr), acc),
-          {}
-        );
-        newFieldSelectOptions = newFields.map((field) => ({
+      let newFieldNameSelectOptions: Array<EuiSuperSelectOption<string>> = [];
+      if (state.dataViewId) {
+        const newFields = (await get(state.dataViewId)).fields;
+        newFieldNameSelectOptions = newFields.map((field) => ({
           value: field.name,
           inputDisplay: field.displayName ?? field.name,
         }));
       }
       setState((currentState) => ({
         ...currentState,
-        fieldSelectOptions: newFieldSelectOptions,
-        availableFields: newAvailableFields,
+        fieldNameSelectOptions: newFieldNameSelectOptions,
       }));
     })();
-  }, [state.indexPattern, fetchFields]);
+  }, [get, state.dataViewId]);
 
   useEffect(
-    () => setValidState(Boolean(state.field) && Boolean(state.indexPattern)),
-    [state.field, setValidState, state.indexPattern]
+    () => setValidState(Boolean(state.fieldName) && Boolean(state.dataViewId)),
+    [state.fieldName, setValidState, state.dataViewId]
   );
 
   return (
     <>
       <EuiFormRow label={OptionsListStrings.editor.getIndexPatternTitle()}>
         <EuiSuperSelect
-          options={state.indexPatternSelectOptions}
-          onChange={(patternTitle) =>
-            applySelection({ indexPattern: state.availableIndexPatterns?.[patternTitle] })
-          }
-          valueOfSelected={state.indexPattern?.title}
+          options={state.dataViewIdSelectOptions}
+          onChange={(dataViewId) => applySelection({ dataViewId })}
+          valueOfSelected={state.dataViewId}
         />
       </EuiFormRow>
       <EuiFormRow label={OptionsListStrings.editor.getFieldTitle()}>
         <EuiSuperSelect
-          disabled={!state.indexPattern}
-          options={state.fieldSelectOptions}
-          onChange={(fieldName) => applySelection({ field: state.availableFields?.[fieldName] })}
-          valueOfSelected={state.field?.name}
+          disabled={!state.dataViewId}
+          options={state.fieldNameSelectOptions}
+          onChange={(fieldName) => applySelection({ fieldName })}
+          valueOfSelected={state.fieldName}
         />
       </EuiFormRow>
       <EuiFormRow>

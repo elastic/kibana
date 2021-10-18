@@ -39,6 +39,11 @@ import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+import {
+  combineDashboardFiltersWithControlGroupFilters,
+  createAndSyncDashboardControlGroup,
+} from '../lib/dashboard_control_group';
+import { ControlGroupContainer } from '../../../../presentation_util/public';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
@@ -88,6 +93,9 @@ const defaultCapabilities: DashboardAppCapabilities = {
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
+  private onDestroyControlGroup?: () => void;
+
+  public controlGroup?: ControlGroupContainer;
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
   };
@@ -106,6 +114,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       services.embeddable.getEmbeddableFactory,
       parent
     );
+
+    if (
+      services.presentationUtil.labsService.isProjectEnabled('labs:dashboard:dashboardControls')
+    ) {
+      const { getEmbeddableFactory } = this.services.embeddable;
+      createAndSyncDashboardControlGroup({ dashboardContainer: this, getEmbeddableFactory }).then(
+        (result) => {
+          if (!result) return;
+          const { controlGroup, onDestroyControlGroup } = result;
+          this.controlGroup = controlGroup;
+          this.onDestroyControlGroup = onDestroyControlGroup;
+        }
+      );
+    }
   }
 
   protected createNewPanelState<
@@ -232,12 +254,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
           <this.services.presentationUtil.ContextProvider>
-            <DashboardViewport container={this} />
+            <DashboardViewport container={this} controlGroup={this.controlGroup} />
           </this.services.presentationUtil.ContextProvider>
         </KibanaContextProvider>
       </I18nProvider>,
       dom
     );
+  }
+
+  public destroy() {
+    super.destroy();
+    this.onDestroyControlGroup?.();
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
@@ -252,8 +279,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       syncColors,
       executionContext,
     } = this.input;
+    let combinedFilters = filters;
+    if (this.controlGroup) {
+      combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
+    }
     return {
-      filters,
+      filters: combinedFilters,
       hidePanelTitles,
       query,
       timeRange,

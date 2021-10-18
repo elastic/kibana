@@ -6,24 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { PanelState, EmbeddableInput } from '../../../../../embeddable/public';
-import { InputControlInput } from '../../../services/controls';
-import { ControlStyle, ControlWidth } from '../types';
+import { CommonControlOutput, ControlStyle, ControlWidth, ControlInput } from '../types';
+import {
+  Container,
+  PanelState,
+  EmbeddableInput,
+  ContainerOutput,
+} from '../../../../../embeddable/public';
 
-export interface ControlGroupInput
-  extends EmbeddableInput,
-    Omit<InputControlInput, 'twoLineLayout'> {
-  inheritParentState: {
-    useFilters: boolean;
-    useQuery: boolean;
-    useTimerange: boolean;
-  };
+export interface ControlGroupInput extends EmbeddableInput, ControlInput {
   defaultControlWidth?: ControlWidth;
   controlStyle: ControlStyle;
   panels: ControlsPanels;
 }
 
-export interface ControlPanelState<TEmbeddableInput extends InputControlInput = InputControlInput>
+export type ControlGroupOutput = ContainerOutput & CommonControlOutput;
+
+export type ControlGroupContainerEmbeddable = Container<
+  ControlInput,
+  ControlGroupInput,
+  ControlGroupOutput
+>;
+
+export interface ControlPanelState<TEmbeddableInput extends ControlInput = ControlInput>
   extends PanelState<TEmbeddableInput> {
   order: number;
   width: ControlWidth;
