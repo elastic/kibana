@@ -93,7 +93,7 @@ const isUserTryingToModifyEffectScopeWithoutPermissions = (
  * @param exceptionsListClient
  * @param id
  */
-export const findTrustedAppExceptionItemItemByIdOrItemId = async (
+export const findTrustedAppExceptionItemByIdOrItemId = async (
   exceptionsListClient: ExceptionListClient,
   id: string
 ): Promise<ExceptionListItemSchema | null> => {
@@ -118,7 +118,7 @@ export const deleteTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
   { id }: DeleteTrustedAppsRequestParams
 ): Promise<void> => {
-  const trustedAppExceptionItem = await findTrustedAppExceptionItemItemByIdOrItemId(
+  const trustedAppExceptionItem = await findTrustedAppExceptionItemByIdOrItemId(
     exceptionsListClient,
     id
   );
@@ -138,7 +138,7 @@ export const getTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
   id: string
 ): Promise<GetOneTrustedAppResponse> => {
-  const trustedAppExceptionItem = await findTrustedAppExceptionItemItemByIdOrItemId(
+  const trustedAppExceptionItem = await findTrustedAppExceptionItemByIdOrItemId(
     exceptionsListClient,
     id
   );
@@ -220,7 +220,7 @@ export const updateTrustedApp = async (
   updatedTrustedApp: PutTrustedAppUpdateRequest,
   isAtLeastPlatinum: boolean
 ): Promise<PutTrustedAppUpdateResponse> => {
-  const currentTrustedAppExceptionItem = await findTrustedAppExceptionItemItemByIdOrItemId(
+  const currentTrustedAppExceptionItem = await findTrustedAppExceptionItemByIdOrItemId(
     exceptionsListClient,
     id
   );
