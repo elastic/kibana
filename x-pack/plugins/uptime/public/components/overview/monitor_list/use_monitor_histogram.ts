@@ -37,10 +37,13 @@ export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
     monitorIds
   );
 
-  const { data, loading } = useEsSearch<Ping, typeof queryParams>(queryParams, [
-    JSON.stringify(monitorIds),
-    lastRefresh,
-  ]);
+  const { data, loading } = useEsSearch<Ping, typeof queryParams>(
+    queryParams,
+    [JSON.stringify(monitorIds), lastRefresh],
+    {
+      name: 'getMonitorDownHistory',
+    }
+  );
 
   const histogramBuckets = data?.aggregations?.histogram.buckets ?? [];
   const simplified = histogramBuckets.map((histogramBucket) => {

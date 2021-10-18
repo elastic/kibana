@@ -77,6 +77,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
         <FormattedRelative
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           value={new Date(updated!)}
         />
       </>
