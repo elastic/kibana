@@ -155,7 +155,7 @@ export const CurationSuggestion: React.FC = () => {
                             result={result}
                             isMetaEngine={isMetaEngine}
                             schemaForTypeHighlights={engine.schema}
-                            resultPosition={index + 1}
+                            resultPosition={index + existingCurationResults.length + 1}
                           />
                         </EuiFlexItem>
                       ))}
@@ -175,7 +175,7 @@ export const CurationSuggestion: React.FC = () => {
                             result={result}
                             isMetaEngine={isMetaEngine}
                             schemaForTypeHighlights={engine.schema}
-                            resultPosition={index + 1}
+                            resultPosition={index + suggestedPromotedDocuments.length + 1}
                           />
                         </EuiFlexItem>
                       ))}
