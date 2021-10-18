@@ -21,7 +21,8 @@ const kibanaDeprecations: DomainDeprecationDetails[] = [
     level: 'critical',
     title: 'Test deprecation title 1',
     message: 'Test deprecation message 1',
-    deprecationType: 'feature',
+    deprecationType: 'config',
+    configPath: 'path',
   },
   {
     correctiveActions: {
