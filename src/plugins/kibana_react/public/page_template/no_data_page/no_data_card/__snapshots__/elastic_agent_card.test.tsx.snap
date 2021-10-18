@@ -14,18 +14,11 @@ exports[`ElasticAgentCard props button 1`] = `
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
   title={
-    <span
-      style={
-        Object {
-          "display": "block",
-          "height": 0,
-          "opacity": 0,
-          "overflow": "hidden",
-        }
-      }
-    >
-      Add Elastic Agent
-    </span>
+    <EuiScreenReaderOnly>
+      <span>
+        Add Elastic Agent
+      </span>
+    </EuiScreenReaderOnly>
   }
 />
 `;
@@ -44,18 +37,11 @@ exports[`ElasticAgentCard props category 1`] = `
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
   title={
-    <span
-      style={
-        Object {
-          "display": "block",
-          "height": 0,
-          "opacity": 0,
-          "overflow": "hidden",
-        }
-      }
-    >
-      Add Elastic Agent
-    </span>
+    <EuiScreenReaderOnly>
+      <span>
+        Add Elastic Agent
+      </span>
+    </EuiScreenReaderOnly>
   }
 />
 `;
@@ -74,18 +60,11 @@ exports[`ElasticAgentCard props href 1`] = `
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
   title={
-    <span
-      style={
-        Object {
-          "display": "block",
-          "height": 0,
-          "opacity": 0,
-          "overflow": "hidden",
-        }
-      }
-    >
-      Add Elastic Agent
-    </span>
+    <EuiScreenReaderOnly>
+      <span>
+        Add Elastic Agent
+      </span>
+    </EuiScreenReaderOnly>
   }
 />
 `;
@@ -105,18 +84,11 @@ exports[`ElasticAgentCard props recommended 1`] = `
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
   title={
-    <span
-      style={
-        Object {
-          "display": "block",
-          "height": 0,
-          "opacity": 0,
-          "overflow": "hidden",
-        }
-      }
-    >
-      Add Elastic Agent
-    </span>
+    <EuiScreenReaderOnly>
+      <span>
+        Add Elastic Agent
+      </span>
+    </EuiScreenReaderOnly>
   }
 />
 `;
@@ -135,18 +107,11 @@ exports[`ElasticAgentCard renders 1`] = `
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
   title={
-    <span
-      style={
-        Object {
-          "display": "block",
-          "height": 0,
-          "opacity": 0,
-          "overflow": "hidden",
-        }
-      }
-    >
-      Add Elastic Agent
-    </span>
+    <EuiScreenReaderOnly>
+      <span>
+        Add Elastic Agent
+      </span>
+    </EuiScreenReaderOnly>
   }
 />
 `;

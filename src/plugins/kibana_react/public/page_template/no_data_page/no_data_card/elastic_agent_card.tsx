@@ -9,7 +9,7 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
-import { EuiButton, EuiCard, EuiTextColor } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly } from '@elastic/eui';
 import { useKibana } from '../../../context';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 
@@ -53,7 +53,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
         description={
           <EuiTextColor color="default">
             {i18n.translate('kibana-react.noDataPage.elasticAgentCard.noPermission.description', {
-              defaultMessage: `This integration is not yet enabled. You do not have the permissions level to turn it on.`,
+              defaultMessage: `This integration is not yet enabled. Your administrator has the required permissions to turn it on.`,
             })}
           </EuiTextColor>
         }
@@ -82,9 +82,9 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       href={href ?? addBasePath(`/app/integrations/browse${hasCategory}`)}
       // Bad hack to fix the need for an a11y title even though the button exists
       title={
-        <span style={{ display: 'block', opacity: 0, height: 0, overflow: 'hidden' }}>
-          {defaultCTAtitle}
-        </span>
+        <EuiScreenReaderOnly>
+          <span>{defaultCTAtitle}</span>
+        </EuiScreenReaderOnly>
       }
       description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
         defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
