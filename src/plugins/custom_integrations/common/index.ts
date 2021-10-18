@@ -40,8 +40,15 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   web: 'Web',
 
   // Kibana added
-  upload_file: 'Upload a file',
+  communication: 'Communication',
+  customer_support: 'Customer Support',
+  document_storage: 'Document Storage',
+  enterprise_management: 'Enterprise Management',
+  knowledge_platform: 'Knowledge Platform',
   language_client: 'Language client',
+  project_management: 'Project Management',
+  software_development: 'Software Development',
+  upload_file: 'Upload a file',
 };
 
 /**
@@ -70,6 +77,7 @@ export interface IntegrationCategoryCount {
 // TODO: consider i18n
 export const SHIPPER_DISPLAY = {
   beats: 'Beats',
+  enterprise_search: 'Enterprise Search',
   language_clients: 'Language clients',
   other: 'Other',
   sample_data: 'Sample data',
