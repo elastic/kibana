@@ -7,7 +7,6 @@
 
 import React from 'react';
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { UI_SETTINGS, useKibanaUISettings } from '../../../../hooks/use_kibana_ui_settings';
@@ -61,28 +60,3 @@ export function ChartCreationInfo(props: Partial<ChartTimeRange>) {
     </>
   );
 }
-
-export const LOADING_VIEW = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.loadingView',
-  {
-    defaultMessage: 'Loading view ...',
-  }
-);
-
-export const SELECT_REPORT_TYPE = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.selectReportType',
-  {
-    defaultMessage: 'No report type selected',
-  }
-);
-
-export const RESET_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.reset', {
-  defaultMessage: 'Reset',
-});
-
-export const REPORT_TYPE_LABEL = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.reportType',
-  {
-    defaultMessage: 'Report type',
-  }
-);
