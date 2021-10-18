@@ -267,7 +267,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   renderName() {
     const { isCreating, spec } = this.state;
-    const isInvalid = !spec.name || !spec.name.trim();
+    const starCheck = spec?.name?.includes('*');
+    const isInvalid = !spec.name || !spec.name.trim() || starCheck;
 
     return isCreating ? (
       <EuiFormRow
@@ -299,9 +300,16 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         isInvalid={isInvalid}
         error={
           isInvalid
-            ? i18n.translate('indexPatternManagement.nameErrorMessage', {
-                defaultMessage: 'Name is required',
-              })
+            ? starCheck
+              ? i18n.translate(
+                  'indexPatternManagement.starCharacterNotAllowedValidationErrorMessage',
+                  {
+                    defaultMessage: 'The field cannot have * in the name.',
+                  }
+                )
+              : i18n.translate('indexPatternManagement.nameErrorMessage', {
+                  defaultMessage: 'Name is required',
+                })
             : null
         }
       >
