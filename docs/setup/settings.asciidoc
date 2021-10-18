@@ -715,7 +715,7 @@ Set this value to false to disable the Remote Clusters UI.
 *Default: `true`*
 
 | `xpack.rollup.ui.enabled:`
-Set this value to false to disable the Rollup UI. *Default: true*
+Set this value to false to disable the Rollup Jobs UI. *Default: true*
 
 | `xpack.snapshot_restore.ui.enabled:`
 Set this value to false to disable the Snapshot and Restore UI. *Default: true*
