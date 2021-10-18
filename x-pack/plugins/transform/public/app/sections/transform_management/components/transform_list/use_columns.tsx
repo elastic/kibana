@@ -151,7 +151,7 @@ export const useColumns = (
           <p>
             <FormattedMessage
               id="xpack.transform.transformList.alertingRules.screenReaderDescription"
-              defaultMessage="This column displays icons when there are alert rules associated with a transform"
+              defaultMessage="This column displays an icon when there are alert rules associated with a transform"
             />
           </p>
         </EuiScreenReaderOnly>

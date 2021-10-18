@@ -420,7 +420,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                 <EuiText color="subdued" size="s">
                   {i18n.translate('xpack.transform.stepCreateForm.createAlertRuleDescription', {
                     defaultMessage:
-                      'Opens a wizard to create an alert rule for transform health monitoring.',
+                      'Opens a wizard to create an alert rule for monitoring transform health.',
                   })}
                 </EuiText>
               </EuiFlexItem>
@@ -442,7 +442,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.transform.stepCreateForm.createTransformDescription', {
                   defaultMessage:
-                    'Create the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
+                    'Creates the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
                 })}
               </EuiText>
             </EuiFlexItem>
