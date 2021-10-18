@@ -30,7 +30,7 @@ import { TooltipPopover } from './tooltip_popover';
 import { FeatureGeometryFilterForm } from './features_tooltip';
 // import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../classes/util/mb_filter_expressions';
 import { ILayer } from '../../../classes/layers/layer';
-import { IVectorLayer, isVectorLayer } from '../../../classes/layers/vector_layer';
+import { IVectorLayer, isVectorLayer, getFeatureId } from '../../../classes/layers/vector_layer';
 import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
 
 function justifyAnchorLocation(
@@ -127,7 +127,7 @@ export class TooltipControl extends Component<Props, {}> {
     }) as IVectorLayer;
   }
 
-  _loadPreIndexedShape = async ({ layerId, featureId }: { layerId: string; featureId: string }) => {
+  _loadPreIndexedShape = async ({ layerId, featureId }: { layerId: string; featureId: string | number }) => {
     const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer || typeof featureId === 'undefined') {
       return null;
@@ -147,7 +147,7 @@ export class TooltipControl extends Component<Props, {}> {
     tooltipId,
   }: {
     layerId: string;
-    featureId: string;
+    featureId: string | number;
     tooltipId: string;
   }): TooltipFeatureAction[] {
     const actions = [];
@@ -198,7 +198,11 @@ export class TooltipControl extends Component<Props, {}> {
       if (!layer) {
         break;
       }
-      const featureId = mbFeature.properties?.[layer.getMbFeatureIdPropertyName()];
+
+      const featureId = getFeatureId(mbFeature, layer.getSource());
+      if (!featureId) {
+        break;
+      }
       const layerId = layer.getId();
       let match = false;
       for (let j = 0; j < uniqueFeatures.length; j++) {
@@ -282,7 +286,7 @@ export class TooltipControl extends Component<Props, {}> {
     const layer = this._getLayerByMbLayerId(targetMbFeature.layer.id);
     if (layer && this.props.openTooltips[0] && this.props.openTooltips[0].features.length) {
       const firstFeature = this.props.openTooltips[0].features[0];
-      if (targetMbFeature.properties?.[layer.getMbFeatureIdPropertyName()] === firstFeature.id) {
+      if (getFeatureId(targetMbFeature, layer.getSource()) === firstFeature.id) {
         // ignore hover events when hover tooltip is all ready opened for feature
         return;
       }

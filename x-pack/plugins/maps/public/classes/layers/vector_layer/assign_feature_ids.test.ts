@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { assignFeatureIds } from './assign_feature_ids';
-import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
+import { assignFeatureIds, GEOJSON_FEATURE_ID_PROPERTY_NAME } from './assign_feature_ids';
 import { FeatureCollection, Feature, Point } from 'geojson';
 
 const featureId = 'myFeature1';

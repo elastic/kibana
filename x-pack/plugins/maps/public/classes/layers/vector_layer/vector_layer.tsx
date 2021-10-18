@@ -21,7 +21,6 @@ import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
   AGG_TYPE,
-  GEOJSON_FEATURE_ID_PROPERTY_NAME,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
@@ -36,7 +35,6 @@ import {
   DEFAULT_MAX_RESULT_WINDOW,
   MVT_HITS_TOTAL_RELATION,
   MVT_HITS_TOTAL_VALUE,
-  MVT_FEATURE_ID_PROPERTY_NAME,
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
@@ -82,6 +80,7 @@ import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './u
 import { JoinState, performInnerJoins } from './perform_inner_joins';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
+import { getFeatureId } from './assign_feature_ids';
 
 export function isVectorLayer(layer: ILayer) {
   return (layer as IVectorLayer).canShowTooltip !== undefined;
@@ -96,7 +95,6 @@ export interface VectorLayerArguments {
 
 export interface IVectorLayer extends ILayer {
   getMbTooltipLayerIds(): string[];
-  getMbFeatureIdPropertyName(): string;
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getJoins(): InnerJoin[];
@@ -220,12 +218,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       });
     }
     return clonedDescriptor;
-  }
-
-  getMbFeatureIdPropertyName(): string {
-    return this.getSource().isMvt()
-      ? MVT_FEATURE_ID_PROPERTY_NAME
-      : GEOJSON_FEATURE_ID_PROPERTY_NAME;
   }
 
   getSource(): IVectorSource {
@@ -1201,7 +1193,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const targetFeature = featureCollection.features.find((feature) => {
-      return feature.properties?.[this.getMbFeatureIdPropertyName()] === id;
+      return getFeatureId(feature, this.getSource()) === id;
     });
     return targetFeature ? targetFeature : null;
   }

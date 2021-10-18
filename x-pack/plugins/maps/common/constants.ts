@@ -126,8 +126,6 @@ export const DEFAULT_MAX_RESULT_WINDOW = 10000;
 export const DEFAULT_MAX_INNER_RESULT_WINDOW = 100;
 export const DEFAULT_MAX_BUCKETS_LIMIT = 65535;
 
-export const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
-export const MVT_FEATURE_ID_PROPERTY_NAME = '_id';
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
 
 export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';

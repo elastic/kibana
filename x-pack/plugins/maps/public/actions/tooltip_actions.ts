@@ -12,7 +12,7 @@ import { getLayerById, getOpenTooltips } from '../selectors/map_selectors';
 import { SET_OPEN_TOOLTIPS } from './map_action_constants';
 import { TooltipState } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
-import { IVectorLayer } from '../classes/layers/vector_layer';
+import { IVectorLayer, getFeatureId } from '../classes/layers/vector_layer';
 
 export function closeOnClickTooltip(tooltipId: string) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
@@ -65,7 +65,7 @@ export function openOnHoverTooltip(tooltipState: TooltipState) {
 export function cleanTooltipStateForLayer(layerId: string, layerFeatures: Feature[] = []) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
     let featuresRemoved = false;
-    const layer: IVectorLayer = getLayerById(layerId, getState()) as IVectorLayer;
+    const layer = getLayerById(layerId, getState()) as IVectorLayer | undefined;
     const openTooltips = getOpenTooltips(getState())
       .map((tooltipState) => {
         const nextFeatures = tooltipState.features.filter((tooltipFeature) => {
@@ -74,11 +74,13 @@ export function cleanTooltipStateForLayer(layerId: string, layerFeatures: Featur
             return true;
           }
 
+          if (!layer) {
+            return false;
+          }
+
           // Keep feature if it is still in layer
           return layerFeatures.some((layerFeature) => {
-            return (
-              layerFeature.properties![layer.getMbFeatureIdPropertyName()] === tooltipFeature.id
-            );
+            return getFeatureId(layerFeature, layer.getSource()) === tooltipFeature.id;
           });
         });
 

@@ -39,8 +39,11 @@ const mockLayer = {
   getMbTooltipLayerIds: () => {
     return ['foo', 'bar'];
   },
-  getMbFeatureIdPropertyName: () => {
-    return 'id';
+  getSource: () => {
+    return {
+      isMvt: () => { return false; },
+      isESSource: () => { return false; },
+    };
   },
   getFeatureById: () => {
     return {
