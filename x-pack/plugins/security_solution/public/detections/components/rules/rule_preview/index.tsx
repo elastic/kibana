@@ -106,7 +106,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         </EuiFlexGroup>
       </EuiFormRow>
       <EuiSpacer size="s" />
-      {(isPreviewRequestInProgress || previewId) && (
+      {previewId && (
         <PreviewHistogram
           isPreviewRequestInProgress={isPreviewRequestInProgress}
           timeFrame={timeFrame}

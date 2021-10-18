@@ -37,6 +37,13 @@ export const usePreviewRule = (invocationCount: number): ReturnPreviewRule => {
   const { addError } = useAppToasts();
 
   useEffect(() => {
+    if (!rule) {
+      setResponse(emptyPreviewRule);
+      setIsLoading(false);
+    }
+  }, [rule]);
+
+  useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
     setResponse(emptyPreviewRule);
