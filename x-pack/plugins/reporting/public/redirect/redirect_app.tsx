@@ -52,10 +52,10 @@ export const RedirectApp: FunctionComponent<Props> = ({ share, apiClient }) => {
 
         if (jobId) {
           const jobPayload = await apiClient.getPayload(jobId as string);
-          locatorParams = ((jobPayload as unknown) as { locatorParams: LocatorParams[] })
+          locatorParams = (jobPayload as unknown as { locatorParams: LocatorParams[] })
             .locatorParams[0];
         } else {
-          locatorParams = ((window as unknown) as Record<string, LocatorParams>)[
+          locatorParams = (window as unknown as Record<string, LocatorParams>)[
             REPORTING_REDIRECT_LOCATOR_STORE_KEY
           ];
         }
