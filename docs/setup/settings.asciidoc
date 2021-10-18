@@ -291,7 +291,7 @@ that the {kib} server uses to perform maintenance on the {kib} index at startup.
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
 | `enterpriseSearch.host`
-  | The URL of your Enterprise Search instance
+  | The http(s) URL of your Enterprise Search instance. For example, in a local self-managed setup, set this to `http://localhost:3002`. Authentication between Kibana and the Enterprise Search host URL, such as via OAuth, is not supported. You can also {enterprise-search-ref}/configure-ssl-tls.html#configure-ssl-tls-in-kibana[configure Kibana to trust your Enterprise Search TLS certificate authority].
 
 | `interpreter.enableInVisualize`
   | Enables use of interpreter in Visualize. *Default: `true`*
