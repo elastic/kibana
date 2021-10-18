@@ -11,9 +11,15 @@ import { SavedQuery } from './types';
 import { SavedQueryAttributes } from '../../../common';
 
 export const createSavedQueryService = (http: HttpStart) => {
-  const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
-    // TODO: Handle `overwrite`
+  const createQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
     const savedQuery = await http.post('/api/saved_query/_create', {
+      body: JSON.stringify(attributes),
+    });
+    return savedQuery;
+  };
+
+  const updateQuery = async (id: string, attributes: SavedQueryAttributes) => {
+    const savedQuery = await http.put(`/api/saved_query/${id}`, {
       body: JSON.stringify(attributes),
     });
     return savedQuery;
@@ -53,7 +59,8 @@ export const createSavedQueryService = (http: HttpStart) => {
   };
 
   return {
-    saveQuery,
+    createQuery,
+    updateQuery,
     getAllSavedQueries,
     findSavedQueries,
     getSavedQuery,

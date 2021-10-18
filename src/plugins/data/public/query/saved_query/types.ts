@@ -26,10 +26,8 @@ export interface SavedQueryAttributes {
 }
 
 export interface SavedQueryService {
-  saveQuery: (
-    attributes: SavedQueryAttributes,
-    config?: { overwrite: boolean }
-  ) => Promise<SavedQuery>;
+  createQuery: (attributes: SavedQueryAttributes) => Promise<SavedQuery>;
+  updateQuery: (id: string, attributes: SavedQueryAttributes) => Promise<SavedQuery>;
   getAllSavedQueries: () => Promise<SavedQuery[]>;
   findSavedQueries: (
     searchText?: string,

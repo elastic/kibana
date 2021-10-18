@@ -244,27 +244,19 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
                     (f) => f.meta.controlledBy === TIMELINE_FILTER_DROP_AREA
                   )
                 : -1;
-            savedQueryServices.saveQuery(
-              {
-                ...newSavedQuery.attributes,
-                filters:
-                  newSavedQuery.attributes.filters != null
-                    ? dataProviderFilterExists > -1
-                      ? [
-                          ...newSavedQuery.attributes.filters.slice(0, dataProviderFilterExists),
-                          getDataProviderFilter(dataProvidersDsl),
-                          ...newSavedQuery.attributes.filters.slice(dataProviderFilterExists + 1),
-                        ]
-                      : [
-                          ...newSavedQuery.attributes.filters,
-                          getDataProviderFilter(dataProvidersDsl),
-                        ]
-                    : [],
-              },
-              {
-                overwrite: true,
-              }
-            );
+            savedQueryServices.updateQuery(newSavedQuery.id, {
+              ...newSavedQuery.attributes,
+              filters:
+                newSavedQuery.attributes.filters != null
+                  ? dataProviderFilterExists > -1
+                    ? [
+                        ...newSavedQuery.attributes.filters.slice(0, dataProviderFilterExists),
+                        getDataProviderFilter(dataProvidersDsl),
+                        ...newSavedQuery.attributes.filters.slice(dataProviderFilterExists + 1),
+                      ]
+                    : [...newSavedQuery.attributes.filters, getDataProviderFilter(dataProvidersDsl)]
+                  : [],
+            });
           }
         } else {
           setSavedQueryId(null);

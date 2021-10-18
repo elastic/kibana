@@ -7,10 +7,15 @@
  */
 
 import { RequestHandlerContext, SavedObject } from 'kibana/server';
-import { SavedQueryAttributes } from '../../common';
+import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/persistable_state';
+import { isFilters } from '../../../../../../../../../private/var/tmp/_bazel_lukas/0e089c5e2da9a36b2c2982c0e50789cb/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-es-query';
 
-function toSavedObject({ id, attributes, references }: SavedObject<SavedQueryAttributes>) {
+function injectReferences({
+  id,
+  attributes,
+  references,
+}: Pick<SavedObject<SavedQueryAttributes>, 'id' | 'attributes' | 'references'>) {
   const { query } = attributes;
   if (typeof query.query === 'string') {
     try {
@@ -24,26 +29,47 @@ function toSavedObject({ id, attributes, references }: SavedObject<SavedQueryAtt
   return { id, attributes: { ...attributes, filters } };
 }
 
-export function registerSavedQueryRouteHandlerContext(context: RequestHandlerContext) {
-  const createSavedQuery = async ({
-    title,
-    description,
-    query,
-    filters = [],
-    timefilter,
-  }: SavedQueryAttributes) => {
-    const { state: extractedFilters, references } = extract(filters);
+function extractReferences({
+  title,
+  description,
+  query,
+  filters = [],
+  timefilter,
+}: SavedQueryAttributes) {
+  const { state: extractedFilters, references } = extract(filters);
 
-    const attributes: SavedQueryAttributes = {
-      title: title.trim(),
-      description: description.trim(),
-      query: {
-        ...query,
-        query: typeof query.query === 'string' ? query.query : JSON.stringify(query.query),
-      },
-      filters: extractedFilters,
-      ...(timefilter && { timefilter }),
-    };
+  const attributes: SavedQueryAttributes = {
+    title: title.trim(),
+    description: description.trim(),
+    query: {
+      ...query,
+      query: typeof query.query === 'string' ? query.query : JSON.stringify(query.query),
+    },
+    filters: extractedFilters,
+    ...(timefilter && { timefilter }),
+  };
+
+  return { attributes, references };
+}
+
+function verifySavedQuery({ title, query, filters = [] }: SavedQueryAttributes) {
+  if (!isQuery(query)) {
+    throw new Error(`Invalid query: ${query}`);
+  }
+
+  if (!isFilters(filters)) {
+    throw new Error(`Invalid filters: ${filters}`);
+  }
+
+  if (!title.trim().length) {
+    throw new Error('Cannot create saved query without a title');
+  }
+}
+
+export function registerSavedQueryRouteHandlerContext(context: RequestHandlerContext) {
+  const createSavedQuery = async (attrs: SavedQueryAttributes) => {
+    verifySavedQuery(attrs);
+    const { attributes, references } = extractReferences(attrs);
 
     const savedObject = await context.core.savedObjects.client.create<SavedQueryAttributes>(
       'query',
@@ -56,7 +82,26 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
     // TODO: Handle properly
     if (savedObject.error) throw new Error(savedObject.error.message);
 
-    return toSavedObject(savedObject);
+    return injectReferences(savedObject);
+  };
+
+  const updateSavedQuery = async (id: string, attrs: SavedQueryAttributes) => {
+    verifySavedQuery(attrs);
+    const { attributes, references } = extractReferences(attrs);
+
+    const savedObject = await context.core.savedObjects.client.update<SavedQueryAttributes>(
+      'query',
+      id,
+      attributes,
+      {
+        references,
+      }
+    );
+
+    // TODO: Handle properly
+    if (savedObject.error) throw new Error(savedObject.error.message);
+
+    return injectReferences({ id, attributes, references });
   };
 
   const getSavedQuery = async (id: string) => {
@@ -67,7 +112,7 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
     } else if (savedObject.error) {
       throw new Error(savedObject.error.message);
     }
-    return toSavedObject(savedObject);
+    return injectReferences(savedObject);
   };
 
   const getSavedQueriesCount = async () => {
@@ -86,7 +131,7 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
         search,
       });
 
-    const savedQueries = savedObjects.map(toSavedObject);
+    const savedQueries = savedObjects.map(injectReferences);
 
     return { total, savedQueries };
   };
@@ -97,6 +142,7 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
 
   return {
     create: createSavedQuery,
+    update: updateSavedQuery,
     get: getSavedQuery,
     count: getSavedQueriesCount,
     find: findSavedQueries,

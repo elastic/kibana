@@ -16,7 +16,8 @@ const {
   deleteSavedQuery,
   getSavedQuery,
   findSavedQueries,
-  saveQuery,
+  createQuery,
+  updateQuery,
   getAllSavedQueries,
   getSavedQueryCount,
 } = createSavedQueryService(http);
@@ -38,11 +39,21 @@ describe('saved query service', () => {
     http.delete.mockReset();
   });
 
-  describe('saveQuery', function () {
+  describe('createQuery', function () {
     it('should post the stringified given attributes', async () => {
-      await saveQuery(savedQueryAttributes);
+      await createQuery(savedQueryAttributes);
       expect(http.post).toBeCalled();
       expect(http.post).toHaveBeenCalledWith('/api/saved_query/_create', {
+        body: '{"title":"foo","description":"bar","query":{"language":"kuery","query":"response:200"},"filters":[]}',
+      });
+    });
+  });
+
+  describe('updateQuery', function () {
+    it('should put the ID & stringified given attributes', async () => {
+      await updateQuery('foo', savedQueryAttributes);
+      expect(http.put).toBeCalled();
+      expect(http.put).toHaveBeenCalledWith('/api/saved_query/foo', {
         body: '{"title":"foo","description":"bar","query":{"language":"kuery","query":"response:200"},"filters":[]}',
       });
     });

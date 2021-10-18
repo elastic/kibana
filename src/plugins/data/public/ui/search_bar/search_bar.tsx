@@ -245,11 +245,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     try {
       let response;
       if (this.props.savedQuery && !saveAsNew) {
-        response = await this.savedQueryService.saveQuery(savedQueryAttributes, {
-          overwrite: true,
-        });
+        response = await this.savedQueryService.updateQuery(
+          savedQueryMeta.id!,
+          savedQueryAttributes
+        );
       } else {
-        response = await this.savedQueryService.saveQuery(savedQueryAttributes);
+        response = await this.savedQueryService.createQuery(savedQueryAttributes);
       }
 
       this.services.notifications.toasts.addSuccess(
@@ -423,7 +424,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
-            savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
+            savedQuery={this.props.savedQuery ? this.props.savedQuery : undefined}
             savedQueryService={this.savedQueryService}
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}

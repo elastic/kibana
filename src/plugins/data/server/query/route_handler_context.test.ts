@@ -14,7 +14,7 @@ import {
   SavedQueryAttributes,
 } from '../../common';
 import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 
 const mockContext = {
   core: coreMock.createRequestHandlerContext(),
@@ -105,22 +105,6 @@ describe('saved query route handler context', () => {
       });
     });
 
-    // it('should allow overwriting an existing saved query', async () => {
-    //   mockSavedObjectsClient.create.mockReturnValue({
-    //     id: 'foo',
-    //     attributes: savedQueryAttributes,
-    //   });
-    //
-    //   const response = await context.create(savedQueryAttributes, { overwrite: true });
-    //
-    //   expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('query', savedQueryAttributes, {
-    //     id: 'foo',
-    //     references: [],
-    //     overwrite: true,
-    //   });
-    //   expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributes });
-    // });
-
     it('should optionally accept query in object format', async () => {
       const savedQueryAttributesWithQueryObject: SavedQueryAttributes = {
         ...savedQueryAttributes,
@@ -174,6 +158,51 @@ describe('saved query route handler context', () => {
       } as SavedObject);
 
       const response = context.create(savedQueryAttributes);
+
+      expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
+    });
+
+    it('should throw an error if the saved query does not have a title', async () => {
+      const response = context.create({ ...savedQueryAttributes, title: '' });
+      expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
+    });
+  });
+
+  describe('update', function () {
+    it('should update a saved object for the given attributes', async () => {
+      const mockResponse: SavedObject<SavedQueryAttributes> = {
+        id: 'foo',
+        type: 'query',
+        attributes: savedQueryAttributes,
+        references: [],
+      };
+      mockSavedObjectsClient.update.mockResolvedValue(mockResponse);
+
+      const response = await context.update('foo', savedQueryAttributes);
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        'query',
+        'foo',
+        savedQueryAttributes,
+        {
+          references: [],
+        }
+      );
+      expect(response).toEqual({
+        id: 'foo',
+        attributes: savedQueryAttributes,
+      });
+    });
+
+    it('should throw an error when saved objects client returns error', async () => {
+      mockSavedObjectsClient.update.mockResolvedValue({
+        error: {
+          error: '123',
+          message: 'An Error',
+        },
+      } as SavedObjectsUpdateResponse);
+
+      const response = context.update('foo', savedQueryAttributes);
 
       expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
     });

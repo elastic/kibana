@@ -130,7 +130,7 @@ export class DataPublicPlugin
     core: CoreStart,
     { uiActions, fieldFormats, dataViews }: DataStartDependencies
   ): DataPublicPluginStart {
-    const { uiSettings, notifications, savedObjects, overlays } = core;
+    const { uiSettings, notifications, overlays } = core;
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);

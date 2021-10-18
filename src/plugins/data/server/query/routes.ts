@@ -7,12 +7,23 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isFilters } from '@kbn/es-query';
 import { CoreSetup } from 'kibana/server';
-import { isQuery } from '../../common';
 import { SavedQueryRouteHandlerContext } from './route_handler_context';
 
 const SAVED_QUERY_PATH = '/api/saved_query';
+const SAVED_QUERY_ID_CONFIG = schema.object({
+  id: schema.string(),
+});
+const SAVED_QUERY_ATTRS_CONFIG = schema.object({
+  title: schema.string(),
+  description: schema.string(),
+  query: schema.object({
+    query: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
+    language: schema.string(),
+  }),
+  filters: schema.maybe(schema.arrayOf(schema.any())),
+  timefilter: schema.maybe(schema.any()),
+});
 
 export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   const router = http.createRouter<SavedQueryRouteHandlerContext>();
@@ -21,40 +32,37 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     {
       path: `${SAVED_QUERY_PATH}/_create`,
       validate: {
-        body: schema.object({
-          title: schema.string(),
-          description: schema.string(),
-          query: schema.object({
-            query: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
-            language: schema.string(),
-          }),
-          filters: schema.maybe(schema.arrayOf(schema.any())),
-          timefilter: schema.maybe(schema.any()),
-        }),
+        body: SAVED_QUERY_ATTRS_CONFIG,
       },
     },
     async (context, request, response) => {
-      const { title, query, filters = [] } = request.body;
-
-      // TODO: isTimefilter(timefilter)
-
-      if (!isQuery(query)) {
+      try {
+        const body = await context.savedQuery.create(request.body);
+        return response.ok({ body });
+      } catch (e) {
         // TODO: Handle properly
-        throw new Error(`Invalid query: ${query}`);
+        return response.customError(e);
       }
+    }
+  );
 
-      if (!isFilters(filters)) {
+  router.put(
+    {
+      path: `${SAVED_QUERY_PATH}/{id}`,
+      validate: {
+        params: SAVED_QUERY_ID_CONFIG,
+        body: SAVED_QUERY_ATTRS_CONFIG,
+      },
+    },
+    async (context, request, response) => {
+      const { id } = request.params;
+      try {
+        const body = await context.savedQuery.update(id, request.body);
+        return response.ok({ body });
+      } catch (e) {
         // TODO: Handle properly
-        throw new Error(`Invalid filters: ${filters}`);
+        return response.customError(e);
       }
-
-      if (!title.trim().length) {
-        // TODO: Handle properly
-        throw new Error('Cannot create saved query without a title');
-      }
-
-      const body = await context.savedQuery.create(request.body);
-      return response.ok({ body });
     }
   );
 
@@ -62,9 +70,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     {
       path: `${SAVED_QUERY_PATH}/{id}`,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
+        params: SAVED_QUERY_ID_CONFIG,
       },
     },
     async (context, request, response) => {
@@ -121,9 +127,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     {
       path: `${SAVED_QUERY_PATH}/{id}`,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
+        params: SAVED_QUERY_ID_CONFIG,
       },
     },
     async (context, request, response) => {
