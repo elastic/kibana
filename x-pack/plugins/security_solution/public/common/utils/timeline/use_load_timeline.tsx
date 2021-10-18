@@ -14,7 +14,9 @@ import {
 import { TimelineErrorCallback } from '../../../timelines/components/open_timeline/types';
 import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
 
-export const useTimelineLoad = () => {
+// This is a duplicate of use_timeline_click.tsx that defaults to openTimeline being false
+// It is being used for the resolve api to redirect users without forcing open the timleine
+export const useLoadTimeline = () => {
   const dispatch = useDispatch();
 
   const loadTimeline = useCallback(

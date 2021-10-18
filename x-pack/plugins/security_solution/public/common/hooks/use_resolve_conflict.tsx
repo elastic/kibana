@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
 import { useDeepEqualSelector } from './use_selector';
@@ -15,7 +15,7 @@ import { TimelineUrl } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { decodeRisonUrlState, encodeRisonUrlState } from '../components/url_state/helpers';
 import { useKibana } from '../lib/kibana';
-import { CONSTANTS } from '../../common/components/url_state/constants';
+import { CONSTANTS } from '../components/url_state/constants';
 
 export const useResolveConflict = () => {
   const { search, pathname } = useLocation();
@@ -24,7 +24,7 @@ export const useResolveConflict = () => {
   const { resolveTimelineConfig, savedObjectId, show, graphEventId, activeTab } =
     useDeepEqualSelector((state) => getTimeline(state, TimelineId.active) ?? timelineDefaults);
 
-  const getLegacyUrlConflictCallout = () => {
+  const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
     if (
       spaces &&
@@ -76,7 +76,18 @@ export const useResolveConflict = () => {
       );
     }
     return null;
-  };
+  }, [
+    activeTab,
+    graphEventId,
+    http.basePath,
+    pathname,
+    resolveTimelineConfig?.alias_target_id,
+    resolveTimelineConfig?.outcome,
+    savedObjectId,
+    search,
+    show,
+    spaces,
+  ]);
 
-  return getLegacyUrlConflictCallout();
+  return useMemo(() => getLegacyUrlConflictCallout(), [getLegacyUrlConflictCallout]);
 };

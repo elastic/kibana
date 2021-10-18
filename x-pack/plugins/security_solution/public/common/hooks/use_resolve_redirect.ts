@@ -8,18 +8,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineSelectors } from '../../timelines/store/timeline/';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import {
-  decodeRisonUrlState,
-  encodeRisonUrlState,
-} from '../../common/components/url_state/helpers';
-import { useKibana } from '../../common/lib/kibana';
+import { decodeRisonUrlState, encodeRisonUrlState } from '../components/url_state/helpers';
+import { useKibana } from '../lib/kibana';
 import { TimelineUrl } from '../../timelines/store/timeline/model';
-import { CONSTANTS } from '../../common/components/url_state/constants';
-import { useTimelineLoad } from '../utils/timeline/use_timeline_load';
+import { CONSTANTS } from '../components/url_state/constants';
+import { useLoadTimeline } from '../utils/timeline/use_load_timeline';
 import { useAppToasts } from './use_app_toasts';
 
 /**
@@ -27,7 +24,7 @@ import { useAppToasts } from './use_app_toasts';
  * If a deep link id has been migrated to a new id, this hook will cause a redirect to a url with
  * the new ID. Unfortunately the url change initiated by the `spaces` plugin doesn't seem to be
  * respected by the useSetInitialStateFromUrl here: x-pack/plugins/security_solution/public/common/components/url_state/initialize_redux_by_url.tsx
- * so after creating the redirect, we manually call queryTimelineById (via useTimelineLoad) to load
+ * so after creating the redirect, we manually call queryTimelineById (via useLoadTimeline) to load
  * the new timeline. It's not ideal, but is the simplest path foward without changing our url handling.
  *
  * FYI: It looks like the rerouting causes replaceStateInLocation to be called instead:
@@ -51,7 +48,7 @@ export const useResolveRedirect = () => {
   const { search, pathname } = useLocation();
   const [hasRedirected, updateHasRedirected] = useState(false);
   const { spaces, http } = useKibana().services;
-  const loadTimeline = useTimelineLoad();
+  const loadTimeline = useLoadTimeline();
   const { addError } = useAppToasts();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -99,7 +96,7 @@ export const useResolveRedirect = () => {
       spaces.ui.redirectLegacyUrl(newPath, CONSTANTS.timeline);
       // Manually load timeline since the redirect doesn't cause it to load
       loadTimeline(newObjectId, onError);
-      // Prevent the effect from being recalled
+      // Prevent the effect from being called again as the url change takes place in location rather than a true redirect
       updateHasRedirected(true);
     }
   }, [
