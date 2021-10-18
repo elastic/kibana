@@ -80,7 +80,7 @@ const createFailedActionResponseEntry = async ({
       body: {
         ...doc,
         error: {
-          failedFleetActionErrorCode,
+          code: failedFleetActionErrorCode,
           message: 'Failed to deliver action request to fleet',
         },
       },
