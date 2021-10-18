@@ -6366,7 +6366,6 @@
     "xpack.apm.clearFilters": "フィルターを消去",
     "xpack.apm.compositeSpanCallsLabel": "、{count}件の呼び出し、平均{duration}",
     "xpack.apm.compositeSpanDurationLabel": "平均時間",
-    "xpack.apm.correlations.correlationsTable.actionsLabel": "フィルター",
     "xpack.apm.correlations.correlationsTable.excludeDescription": "値を除外",
     "xpack.apm.correlations.correlationsTable.excludeLabel": "除外",
     "xpack.apm.correlations.correlationsTable.filterDescription": "値でフィルタリング",
