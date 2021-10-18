@@ -16,7 +16,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -48,6 +47,13 @@ const buttonLabel = (status?: ReindexStatus) => {
           defaultMessage="Resume"
         />
       );
+    case ReindexStatus.cancelled:
+      return (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.restartLabel"
+          defaultMessage="Restart reindex"
+        />
+      );
     default:
       return (
         <FormattedMessage
@@ -62,12 +68,11 @@ const buttonLabel = (status?: ReindexStatus) => {
  * Displays a flyout that shows the current reindexing status for a given index.
  */
 export const ChecklistFlyoutStep: React.FunctionComponent<{
-  renderGlobalCallouts: () => React.ReactNode;
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, renderGlobalCallouts }) => {
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
   const isCompleted = status === ReindexStatus.completed;
@@ -117,7 +122,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             </EuiCallOut>
           </>
         )}
-        {renderGlobalCallouts()}
         <EuiCallOut
           title={
             <FormattedMessage
@@ -144,14 +148,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           </p>
         </EuiCallOut>
         <EuiSpacer />
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
-              defaultMessage="Reindexing process"
-            />
-          </h3>
-        </EuiTitle>
         <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

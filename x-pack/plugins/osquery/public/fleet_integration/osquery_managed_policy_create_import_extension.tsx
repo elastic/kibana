@@ -5,29 +5,45 @@
  * 2.0.
  */
 
-import { filter } from 'lodash/fp';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
+import { get, isEmpty, unset, set } from 'lodash';
+import satisfies from 'semver/functions/satisfies';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiCallOut,
+  EuiLink,
+  EuiAccordion,
+} from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
 import { produce } from 'immer';
+import { i18n } from '@kbn/i18n';
+import useDebounce from 'react-use/lib/useDebounce';
+import styled from 'styled-components';
 
 import {
   agentRouteService,
   agentPolicyRouteService,
   AgentPolicy,
   PLUGIN_ID,
-  NewPackagePolicy,
 } from '../../../fleet/common';
 import {
   pagePathGetters,
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
 } from '../../../fleet/public';
-import { ScheduledQueryGroupQueriesTable } from '../scheduled_query_groups/scheduled_query_group_queries_table';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
-import { OsqueryManagerPackagePolicy } from '../../common/types';
+import { Form, useForm, Field, getUseField, FIELD_TYPES, fieldValidators } from '../shared_imports';
+
+const CommonUseField = getUseField({ component: Field });
+
+const StyledEuiAccordion = styled(EuiAccordion)`
+  .euiAccordion__button {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+`;
 
 /**
  * Exports Osquery-specific package policy instructions
@@ -46,8 +62,32 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     application: { getUrlForApp },
     http,
   } = useKibana().services;
-  const { state: locationState } = useLocation();
-  const { go } = useHistory();
+
+  const { form: configForm } = useForm({
+    defaultValue: {
+      config: JSON.stringify(get(newPolicy, 'inputs[0].config.osquery.value', {}), null, 2),
+    },
+    schema: {
+      config: {
+        label: i18n.translate('xpack.osquery.fleetIntegration.osqueryConfig.configFieldLabel', {
+          defaultMessage: 'Osquery config',
+        }),
+        type: FIELD_TYPES.JSON,
+        validations: [
+          {
+            validator: fieldValidators.isJsonField(
+              i18n.translate('xpack.osquery.fleetIntegration.osqueryConfig.configFieldError', {
+                defaultMessage: 'Invalid JSON',
+              }),
+              { allowEmptyString: true }
+            ),
+          },
+        ],
+      },
+    },
+  });
+
+  const { isValid, getFormData } = configForm;
 
   const agentsLinkHref = useMemo(() => {
     if (!policy?.policy_id) return '#';
@@ -59,6 +99,27 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         '?openEnrollmentFlyout=true',
     });
   }, [getUrlForApp, policy?.policy_id]);
+
+  useDebounce(
+    () => {
+      // if undefined it means that config was not modified
+      if (isValid === undefined) return;
+      const configData = getFormData().config;
+
+      const updatedPolicy = produce(newPolicy, (draft) => {
+        if (isEmpty(configData)) {
+          unset(draft, 'inputs[0].config');
+        } else {
+          set(draft, 'inputs[0].config.osquery.value', configData);
+        }
+        return draft;
+      });
+
+      onChange({ isValid: !!isValid, updatedPolicy: isValid ? updatedPolicy : newPolicy });
+    },
+    500,
+    [isValid]
+  );
 
   useEffect(() => {
     if (editMode && policyAgentsCount === null) {
@@ -97,68 +158,41 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
 
   useEffect(() => {
     /*
-      in order to enable Osquery side nav we need to refresh the whole Kibana
-      TODO: Find a better solution
-    */
-    if (editMode && locationState?.forceRefresh) {
-      go(0);
-    }
-  }, [editMode, go, locationState]);
-
-  useEffect(() => {
-    /*
       by default Fleet set up streams with an empty scheduled query,
       this code removes that, so the user can schedule queries
       in the next step
     */
-    if (!editMode) {
-      const updatedPolicy = produce(newPolicy, (draft) => {
-        draft.inputs[0].streams = [];
-        return draft;
-      });
-      onChange({
-        isValid: true,
-        updatedPolicy,
-      });
+    if (newPolicy?.package?.version) {
+      if (!editMode && satisfies(newPolicy?.package?.version, '<0.6.0')) {
+        const updatedPolicy = produce(newPolicy, (draft) => {
+          set(draft, 'inputs[0].streams', []);
+        });
+        onChange({
+          isValid: true,
+          updatedPolicy,
+        });
+      }
+
+      /* From 0.6.0 we don't provide an input template, so we have to set it here */
+      if (satisfies(newPolicy?.package?.version, '>=0.6.0')) {
+        const updatedPolicy = produce(newPolicy, (draft) => {
+          if (!draft.inputs.length) {
+            set(draft, 'inputs[0]', {
+              type: 'osquery',
+              enabled: true,
+              streams: [],
+              policy_template: 'osquery_manager',
+            });
+          }
+        });
+        onChange({
+          isValid: true,
+          updatedPolicy,
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // TODO: Find a better solution
-  // useEffect(() => {
-  //   if (!editMode) {
-  //     replace({
-  //       state: {
-  //         onSaveNavigateTo: (newPackagePolicy) => [
-  //           INTEGRATIONS_PLUGIN_ID,
-  //           {
-  //             path:
-  //               '#' +
-  //               pagePathGetters.integration_policy_edit({
-  //                 packagePolicyId: newPackagePolicy.id,
-  //               })[1],
-  //             state: {
-  //               forceRefresh: true,
-  //             },
-  //           },
-  //         ],
-  //       } as CreatePackagePolicyRouteState,
-  //     });
-  //   }
-  // }, [editMode, replace]);
-
-  const scheduledQueryGroupTableData = useMemo(() => {
-    const policyWithoutEmptyQueries = produce<
-      NewPackagePolicy,
-      OsqueryManagerPackagePolicy,
-      OsqueryManagerPackagePolicy
-    >(newPolicy, (draft) => {
-      draft.inputs[0].streams = filter(['compiled_stream.id', null], draft.inputs[0].streams);
-      return draft;
-    });
-
-    return policyWithoutEmptyQueries;
-  }, [newPolicy]);
 
   return (
     <>
@@ -192,17 +226,20 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         agentPolicyId={policy?.policy_id}
       />
       <EuiSpacer size="xxl" />
-      <EuiSpacer size="xxl" />
-
-      {editMode && scheduledQueryGroupTableData.inputs[0].streams.length ? (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <ScheduledQueryGroupQueriesTable
-              data={scheduledQueryGroupTableData.inputs[0].streams}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
+      <StyledEuiAccordion
+        id="advanced"
+        buttonContent={i18n.translate(
+          'xpack.osquery.fleetIntegration.osqueryConfig.accordionFieldLabel',
+          {
+            defaultMessage: 'Advanced',
+          }
+        )}
+      >
+        <EuiSpacer size="xs" />
+        <Form form={configForm}>
+          <CommonUseField path="config" />
+        </Form>
+      </StyledEuiAccordion>
     </>
   );
 });

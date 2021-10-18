@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandler } from 'src/core/server';
+import type { IRouter, RequestHandler, RequestHandlerContext } from 'src/core/server';
 
 import { appContextService } from '../services';
 
-export function enforceSuperUser<T1, T2, T3>(
-  handler: RequestHandler<T1, T2, T3>
-): RequestHandler<T1, T2, T3> {
+export function enforceSuperUser<T1, T2, T3, TContext extends RequestHandlerContext>(
+  handler: RequestHandler<T1, T2, T3, TContext>
+): RequestHandler<T1, T2, T3, TContext> {
   return function enforceSuperHandler(context, req, res) {
+    if (!appContextService.hasSecurity() || !appContextService.getSecurityLicense().isEnabled()) {
+      return res.forbidden({
+        body: {
+          message: `Access to this API requires that security is enabled`,
+        },
+      });
+    }
+
     const security = appContextService.getSecurity();
     const user = security.authc.getCurrentUser(req);
     if (!user) {
@@ -36,7 +44,9 @@ export function enforceSuperUser<T1, T2, T3>(
   };
 }
 
-export function makeRouterEnforcingSuperuser(router: IRouter): IRouter {
+export function makeRouterEnforcingSuperuser<TContext extends RequestHandlerContext>(
+  router: IRouter<TContext>
+): IRouter<TContext> {
   return {
     get: (options, handler) => router.get(options, enforceSuperUser(handler)),
     delete: (options, handler) => router.delete(options, enforceSuperUser(handler)),

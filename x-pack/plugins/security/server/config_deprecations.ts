@@ -33,21 +33,62 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation, { branch }) => {
     const auditLoggingEnabled = settings?.xpack?.security?.audit?.enabled ?? false;
     const legacyAuditLoggerEnabled = !settings?.xpack?.security?.audit?.appender;
-    if (auditLoggingEnabled && legacyAuditLoggerEnabled) {
+
+    // Gross, but the cloud plugin depends on the security plugin already,
+    // so we can't add a dependency in the other direction to check this in a more conventional manner.
+    const isCloudInstance = typeof settings?.xpack?.cloud?.id === 'string';
+
+    const isUsingLegacyAuditLogger = auditLoggingEnabled && legacyAuditLoggerEnabled;
+
+    if (!isUsingLegacyAuditLogger) {
+      return;
+    }
+
+    const title = i18n.translate('xpack.security.deprecations.auditLoggerTitle', {
+      defaultMessage: 'The legacy audit logger is deprecated',
+    });
+
+    const message = i18n.translate('xpack.security.deprecations.auditLoggerMessage', {
+      defaultMessage: 'Use the new ECS-compliant audit logger.',
+    });
+
+    const documentationUrl = `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#audit-logging-settings`;
+
+    const configPath = 'xpack.security.audit.appender';
+    if (isCloudInstance) {
       addDeprecation({
-        title: i18n.translate('xpack.security.deprecations.auditLoggerTitle', {
-          defaultMessage: 'The legacy audit logger is deprecated',
-        }),
-        message: i18n.translate('xpack.security.deprecations.auditLoggerMessage', {
-          defaultMessage:
-            'The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.',
-        }),
-        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#audit-logging-settings`,
+        title,
+        message,
+        configPath,
+        level: 'warning',
+        documentationUrl,
+        correctiveActions: {
+          manualSteps: [
+            i18n.translate('xpack.security.deprecations.auditLogger.manualStepOneMessageCloud', {
+              defaultMessage:
+                'To enable the ECS audit logger now, add the "xpack.security.audit.appender.type: rolling-file" setting.',
+            }),
+            i18n.translate('xpack.security.deprecations.auditLogger.manualStepTwoMessageCloud', {
+              defaultMessage: `If you don't make any changes, the ECS audit logger will be enabled when you upgrade to 8.0.`,
+            }),
+          ],
+        },
+      });
+    } else {
+      addDeprecation({
+        title,
+        message,
+        configPath,
+        level: 'warning',
+        documentationUrl,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.auditLogger.manualStepOneMessage', {
               defaultMessage:
-                'Declare an audit logger "appender" via "xpack.security.audit.appender" to enable the ECS audit logger.',
+                'To enable the ECS audit logger now, configure an appender with "xpack.security.audit.appender".',
+            }),
+            i18n.translate('xpack.security.deprecations.auditLogger.manualStepTwoMessage', {
+              defaultMessage: `If you don't make any changes, the ECS audit logger will be enabled when you upgrade to 8.0.`,
             }),
           ],
         },
@@ -59,6 +100,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation) => {
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
       addDeprecation({
+        configPath: 'xpack.security.authc.providers',
         title: i18n.translate('xpack.security.deprecations.authcProvidersTitle', {
           defaultMessage:
             'Defining "xpack.security.authc.providers" as an array of provider types is deprecated',
@@ -92,6 +134,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     if (hasProviderType('basic') && hasProviderType('token')) {
       addDeprecation({
+        configPath: 'xpack.security.authc.providers',
         title: i18n.translate('xpack.security.deprecations.basicAndTokenProvidersTitle', {
           defaultMessage:
             'Both "basic" and "token" authentication providers are enabled in "xpack.security.authc.providers"',
@@ -119,8 +162,13 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       string,
       any
     >;
-    if (Object.values(samlProviders).find((provider) => !!provider.maxRedirectURLSize)) {
+
+    const foundProvider = Object.entries(samlProviders).find(
+      ([_, provider]) => !!provider.maxRedirectURLSize
+    );
+    if (foundProvider) {
       addDeprecation({
+        configPath: `xpack.security.authc.providers.saml.${foundProvider[0]}.maxRedirectURLSize`,
         title: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeTitle', {
           defaultMessage:
             '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is deprecated',
@@ -143,6 +191,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation, { branch }) => {
     if ('enabled' in (settings?.xpack?.security || {})) {
       addDeprecation({
+        configPath: 'xpack.security.enabled',
         title: i18n.translate('xpack.security.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.security.enabled" is deprecated',
         }),
@@ -169,6 +218,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation, { branch }) => {
     if (settings?.xpack?.security?.session?.idleTimeout === undefined) {
       addDeprecation({
+        configPath: 'xpack.security.session.idleTimeout',
         level: 'warning',
         title: i18n.translate('xpack.security.deprecations.idleTimeoutTitle', {
           defaultMessage: 'The "xpack.security.session.idleTimeout" default is changing',
@@ -192,6 +242,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     if (settings?.xpack?.security?.session?.lifespan === undefined) {
       addDeprecation({
+        configPath: 'xpack.security.session.lifespan',
         level: 'warning',
         title: i18n.translate('xpack.security.deprecations.lifespanTitle', {
           defaultMessage: 'The "xpack.security.session.lifespan" default is changing',

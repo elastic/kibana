@@ -13,6 +13,16 @@ import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 export type DeprecationSource = 'Kibana' | 'Elasticsearch';
 
+export type ClusterUpgradeState = 'isPreparingForUpgrade' | 'isUpgrading' | 'isUpgradeComplete';
+
+export interface ResponseError {
+  statusCode: number;
+  message: string | Error;
+  attributes?: {
+    allNodesUpgraded: boolean;
+  };
+}
+
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.
   created = 0,
@@ -254,8 +264,8 @@ export interface DeprecationLoggingStatus {
   isDeprecationLoggingEnabled: boolean;
 }
 
-export type UPGRADE_STATUS = 'UPGRADE_NEEDED' | 'NO_UPGRADE_NEEDED' | 'IN_PROGRESS';
-export interface SystemIndicesUpgradeFeature {
+export type UPGRADE_STATUS = 'UPGRADE_NEEDED' | 'NO_UPGRADE_NEEDED' | 'IN_PROGRESS' | 'ERROR';
+export interface SystemIndicesMigrationFeature {
   id?: string;
   feature_name: string;
   minimum_index_version: string;
@@ -265,7 +275,11 @@ export interface SystemIndicesUpgradeFeature {
     version: string;
   }>;
 }
-export interface SystemIndicesUpgradeStatus {
-  features: SystemIndicesUpgradeFeature[];
+export interface SystemIndicesMigrationStatus {
+  features: SystemIndicesMigrationFeature[];
   upgrade_status: UPGRADE_STATUS;
+}
+export interface SystemIndicesMigrationStarted {
+  features: SystemIndicesMigrationFeature[];
+  accepted: boolean;
 }

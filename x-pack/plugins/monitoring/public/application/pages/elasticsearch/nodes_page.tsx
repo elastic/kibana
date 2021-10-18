@@ -13,7 +13,7 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { ElasticsearchNodes } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
@@ -26,18 +26,14 @@ import {
   RULE_THREAD_POOL_WRITE_REJECTIONS,
   RULE_MEMORY_USAGE,
   RULE_MISSING_MONITORING_DATA,
+  ELASTICSEARCH_SYSTEM_ID,
 } from '../../../../common/constants';
-
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
 
 export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { showCgroupMetricsElasticsearch } = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();
+  const [isLoading, setIsLoading] = React.useState(false);
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const { getPaginationRouteOptions, updateTotalItemCount, getPaginationTableProps } =
     useTable('elasticsearch.nodes');
@@ -69,6 +65,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`;
     if (services.http?.fetch && clusterUuid) {
+      setIsLoading(true);
       const response = await services.http?.fetch(url, {
         method: 'POST',
         body: JSON.stringify({
@@ -81,6 +78,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
         }),
       });
 
+      setIsLoading(false);
       setData(response);
       updateTotalItemCount(response.totalNodeCount);
       const alertsResponse = await fetchAlerts({
@@ -120,6 +118,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     >
       <div data-test-subj="elasticsearchNodesListingPage">
         <SetupModeRenderer
+          productName={ELASTICSEARCH_SYSTEM_ID}
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
@@ -129,6 +128,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
                 setupMode={setupMode}
                 nodes={data.nodes}
                 alerts={alerts}
+                isLoading={isLoading}
                 showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
                 {...getPaginationTableProps()}
               />
