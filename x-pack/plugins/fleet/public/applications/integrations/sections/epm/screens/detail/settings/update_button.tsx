@@ -285,7 +285,6 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType={'refresh'}
             isLoading={isInstalling}
             onClick={
               upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate
@@ -293,7 +292,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           >
             <FormattedMessage
               id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"
-              defaultMessage="Update to latest version"
+              defaultMessage="Upgrade to latest version"
             />
           </EuiButton>
         </EuiFlexItem>
