@@ -193,7 +193,7 @@ export const INSTALLATION_CALLOUT_TITLE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutTitle',
   {
     defaultMessage:
-      'To use this connector, you must first install the Elastic App from the ServiceNow App Store',
+      'To use this connector, first install the Elastic app from the ServiceNow app store.',
   }
 );
 
@@ -211,7 +211,7 @@ export const UPDATE_SUCCESS_TOAST_TITLE = (connectorName: string) =>
 export const UPDATE_SUCCESS_TOAST_TEXT = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateCalloutText',
   {
-    defaultMessage: 'Connector has been successfully updated.',
+    defaultMessage: 'Connector has been updated.',
   }
 );
 

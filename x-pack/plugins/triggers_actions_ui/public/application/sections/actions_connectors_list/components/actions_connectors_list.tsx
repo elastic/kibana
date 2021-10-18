@@ -72,7 +72,7 @@ const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) =
           color="warning"
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isDeprecatedDescription',
-            { defaultMessage: 'This connector is deprecated. Update it or create a new one.' }
+            { defaultMessage: 'This connector is deprecated. Update it, or create a new one.' }
           )}
           position="right"
         />

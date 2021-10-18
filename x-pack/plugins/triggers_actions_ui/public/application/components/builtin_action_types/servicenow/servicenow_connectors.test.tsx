@@ -357,7 +357,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        text: 'Connector has been successfully updated.',
+        text: 'Connector has been updated.',
         title: 'SN connector updated',
       });
 

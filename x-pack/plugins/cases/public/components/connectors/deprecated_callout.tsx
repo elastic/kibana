@@ -19,7 +19,7 @@ const LEGACY_CONNECTOR_WARNING_TITLE = i18n.translate(
 const LEGACY_CONNECTOR_WARNING_DESC = i18n.translate(
   'xpack.cases.connectors.serviceNow.legacyConnectorWarningDesc',
   {
-    defaultMessage: 'Update this connector  or create a new one.',
+    defaultMessage: 'Update this connector, or create a new one.',
   }
 );
 

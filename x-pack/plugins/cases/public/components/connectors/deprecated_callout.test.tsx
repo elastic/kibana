@@ -13,7 +13,7 @@ describe('DeprecatedCallout', () => {
   test('it renders correctly', () => {
     render(<DeprecatedCallout />);
     expect(screen.getByText('This connector type is deprecated')).toBeInTheDocument();
-    expect(screen.getByText('Update this connector or create a new one.')).toBeInTheDocument();
+    expect(screen.getByText('Update this connector, or create a new one.')).toBeInTheDocument();
     expect(screen.getByTestId('legacy-connector-warning-callout')).toHaveClass(
       'euiCallOut euiCallOut--warning'
     );

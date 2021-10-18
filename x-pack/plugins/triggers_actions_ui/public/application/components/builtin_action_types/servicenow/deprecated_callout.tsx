@@ -39,7 +39,7 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
                 {i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutMigrate',
                   {
-                    defaultMessage: 'Update this connector',
+                    defaultMessage: 'Update this connector,',
                   }
                 )}
               </EuiLink>

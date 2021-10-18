@@ -173,6 +173,6 @@ export const DEPRECATED_TOOLTIP_TEXT = i18n.translate(
 export const DEPRECATED_TOOLTIP_CONTENT = i18n.translate(
   'xpack.cases.configureCases.deprecatedTooltipContent',
   {
-    defaultMessage: 'This connector is deprecated. Update it or create a new one.',
+    defaultMessage: 'This connector is deprecated. Update it, or create a new one.',
   }
 );

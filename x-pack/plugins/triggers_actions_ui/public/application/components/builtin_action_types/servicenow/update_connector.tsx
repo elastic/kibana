@@ -138,7 +138,7 @@ const UpdateConnectorComponent: React.FC<Props> = ({
                 children: (
                   <FormattedMessage
                     id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.serviceNowAppRunning"
-                    defaultMessage="The Elastic App from the ServiceNow App Store must be installed prior to running the update. {visitLink} to install the app"
+                    defaultMessage="The Elastic App from the ServiceNow app store must be installed prior to running the update. {visitLink} to install the app"
                     values={{
                       visitLink: <SNStoreLink />,
                     }}
