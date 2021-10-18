@@ -9,9 +9,7 @@ import { useLocation } from 'react-router-dom';
 import { renderHook } from '@testing-library/react-hooks';
 import { useDeepEqualSelector } from './use_selector';
 import { useKibana } from '../lib/kibana';
-import { useLoadTimeline } from '../utils/timeline/use_load_timeline';
 import { useResolveRedirect } from './use_resolve_redirect';
-import { useAppToasts } from './use_app_toasts';
 import * as urlHelpers from '../components/url_state/helpers';
 
 jest.mock('react-router-dom', () => {
@@ -22,10 +20,8 @@ jest.mock('react-router-dom', () => {
     useLocation: jest.fn(),
   };
 });
-jest.mock('./use_app_toasts');
 jest.mock('../lib/kibana');
 jest.mock('./use_selector');
-jest.mock('../utils/timeline/use_load_timeline');
 jest.mock('../../timelines/store/timeline/', () => ({
   timelineSelectors: {
     getTimelineByIdSelector: () => jest.fn(),
@@ -34,15 +30,11 @@ jest.mock('../../timelines/store/timeline/', () => ({
 
 describe('useResolveRedirect', () => {
   const mockRedirectLegacyUrl = jest.fn();
-  const mockLoadTimeline = jest.fn();
   beforeEach(() => {
     jest.resetAllMocks();
-    (useAppToasts as jest.Mock).mockReturnValue({
-      addError: jest.fn(),
-    });
     // Mock rison format in actual url
     (useLocation as jest.Mock).mockReturnValue({
-      pathname: 'app/security/timelines/default',
+      pathname: 'my/cool/path',
       search:
         'timeline=(activeTab:query,graphEventId:%27%27,id:%2704e8ffb0-2c2a-11ec-949c-39005af91f70%27,isOpen:!t)',
     });
@@ -53,16 +45,8 @@ describe('useResolveRedirect', () => {
             redirectLegacyUrl: mockRedirectLegacyUrl,
           },
         },
-        http: {
-          basePath: {
-            prepend: jest.fn().mockImplementation((newPath) => {
-              return `base-path.com/${newPath}`;
-            }),
-          },
-        },
       },
     });
-    (useLoadTimeline as jest.Mock).mockReturnValue(mockLoadTimeline);
   });
 
   afterEach(() => {
@@ -79,7 +63,6 @@ describe('useResolveRedirect', () => {
       }));
       renderHook(() => useResolveRedirect());
       expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
-      expect(mockLoadTimeline).not.toHaveBeenCalled();
     });
   });
 
@@ -96,7 +79,6 @@ describe('useResolveRedirect', () => {
       }));
       renderHook(() => useResolveRedirect());
       expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
-      expect(mockLoadTimeline).not.toHaveBeenCalled();
     });
   });
 
@@ -110,10 +92,9 @@ describe('useResolveRedirect', () => {
       }));
       renderHook(() => useResolveRedirect());
       expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(
-        'base-path.com/app/security/timelines/default?timeline=%28activeTab%3Aquery%2CgraphEventId%3A%27%27%2Cid%3Anew-id%2CisOpen%3A%21t%29',
+        'my/cool/path?timeline=%28activeTab%3Aquery%2CgraphEventId%3A%27%27%2Cid%3Anew-id%2CisOpen%3A%21t%29',
         'timeline'
       );
-      expect(mockLoadTimeline).toHaveBeenCalledWith('new-id', expect.any(Function));
     });
 
     describe('rison is unable to be decoded', () => {
@@ -122,7 +103,7 @@ describe('useResolveRedirect', () => {
           throw new Error('Unable to decode');
         });
         (useLocation as jest.Mock).mockReturnValue({
-          pathname: 'app/security/timelines/default',
+          pathname: 'my/cool/path',
           search: '?foo=bar',
         });
         (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
@@ -137,10 +118,9 @@ describe('useResolveRedirect', () => {
         }));
         renderHook(() => useResolveRedirect());
         expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(
-          'base-path.com/app/security/timelines/default?foo=bar&timeline=%28activeTab%3Asome-tab%2CgraphEventId%3Acurrent-graph-event-id%2Cid%3Anew-id%2CisOpen%3A%21f%29',
+          'my/cool/path?foo=bar&timeline=%28activeTab%3Asome-tab%2CgraphEventId%3Acurrent-graph-event-id%2Cid%3Anew-id%2CisOpen%3A%21f%29',
           'timeline'
         );
-        expect(mockLoadTimeline).toHaveBeenCalledWith('new-id', expect.any(Function));
       });
     });
   });
@@ -155,7 +135,6 @@ describe('useResolveRedirect', () => {
       }));
       renderHook(() => useResolveRedirect());
       expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
-      expect(mockLoadTimeline).not.toHaveBeenCalled();
     });
   });
 });

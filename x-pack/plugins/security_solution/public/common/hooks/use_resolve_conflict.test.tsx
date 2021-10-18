@@ -33,7 +33,7 @@ describe('useResolveConflict', () => {
     jest.resetAllMocks();
     // Mock rison format in actual url
     (useLocation as jest.Mock).mockReturnValue({
-      pathname: 'app/security/timelines/default',
+      pathname: 'my/cool/path',
       search:
         'timeline=(activeTab:query,graphEventId:%27%27,id:%2704e8ffb0-2c2a-11ec-949c-39005af91f70%27,isOpen:!t)',
     });
@@ -44,13 +44,6 @@ describe('useResolveConflict', () => {
             components: {
               getLegacyUrlConflict: mockGetLegacyUrlConflict,
             },
-          },
-        },
-        http: {
-          basePath: {
-            prepend: jest.fn().mockImplementation((newPath) => {
-              return `base-path.com/${newPath}`;
-            }),
           },
         },
       },
@@ -122,7 +115,7 @@ describe('useResolveConflict', () => {
         currentObjectId: '04e8ffb0-2c2a-11ec-949c-39005af91f70',
         otherObjectId: 'new-id',
         otherObjectPath:
-          'base-path.com/app/security/timelines/default?timeline=%28activeTab%3Aquery%2CgraphEventId%3A%27%27%2Cid%3Anew-id%2CisOpen%3A%21t%29',
+          'my/cool/path?timeline=%28activeTab%3Aquery%2CgraphEventId%3A%27%27%2Cid%3Anew-id%2CisOpen%3A%21t%29',
       });
       expect(result.current).toMatchInlineSnapshot(`
         <React.Fragment>
@@ -138,7 +131,7 @@ describe('useResolveConflict', () => {
           throw new Error('Unable to decode');
         });
         (useLocation as jest.Mock).mockReturnValue({
-          pathname: 'app/security/timelines/default',
+          pathname: 'my/cool/path',
           search: '?foo=bar',
         });
         (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
@@ -159,7 +152,7 @@ describe('useResolveConflict', () => {
           currentObjectId: 'current-saved-object-id',
           otherObjectId: 'new-id',
           otherObjectPath:
-            'base-path.com/app/security/timelines/default?foo=bar&timeline=%28activeTab%3Asome-tab%2CgraphEventId%3Acurrent-graph-event-id%2Cid%3Anew-id%2CisOpen%3A%21f%29',
+            'my/cool/path?foo=bar&timeline=%28activeTab%3Asome-tab%2CgraphEventId%3Acurrent-graph-event-id%2Cid%3Anew-id%2CisOpen%3A%21f%29',
         });
         expect(result.current).toMatchInlineSnapshot(`
           <React.Fragment>
