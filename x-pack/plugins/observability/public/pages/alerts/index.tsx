@@ -162,6 +162,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
+      data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       pageHeader={{
         pageTitle: (
           <>
