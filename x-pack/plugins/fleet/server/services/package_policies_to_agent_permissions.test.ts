@@ -290,7 +290,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       description: '',
       icons: [],
       owner: { github: '' },
-      status: 'not_installed',
+      status: 'installed',
       assets: {
         kibana: {
           dashboard: [],
@@ -310,6 +310,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           transform: [],
           index_template: [],
           data_stream_ilm_policy: [],
+          ml_model: [],
         },
       },
       data_streams: [
