@@ -104,8 +104,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   });
 
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
+  const [expandAdvancedOptions, setExpandAdvancedOptions] = useState(false);
 
-  const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
+  const setPopoverIsOpenCb = useCallback(() => {
+    setPopoverIsOpen((prevState) => !prevState);
+    setExpandAdvancedOptions(false); // we always want setExpandAdvancedOptions collapsed by default when popover opened
+  }, []);
   const onChangeDataView = useCallback(
     (newSelectedDataView: string, newSelectedPatterns: string[]) => {
       dispatch(
@@ -142,6 +146,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const handleClosePopOver = useCallback(() => {
     setPopoverIsOpen(false);
+    setExpandAdvancedOptions(false);
   }, []);
   const trigger = useMemo(
     () => (
@@ -197,8 +202,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       }),
     [isPopoverOpen, isOnlyDetectionAlerts, signalIndexName, selectedPatterns]
   );
-
-  const [expandAdvancedOptions, setExpandAdvancedOptions] = useState(false);
 
   const onExpandAdvancedOptionsClicked = useCallback(() => {
     setExpandAdvancedOptions((prevState) => !prevState);
