@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -22,6 +23,8 @@ import type {
 } from 'src/plugins/custom_integrations/public';
 
 import type { SharePluginStart } from 'src/plugins/share/public';
+
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
 
@@ -77,6 +80,7 @@ export interface FleetSetupDeps {
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
   customIntegrations: CustomIntegrationsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface FleetStartDeps {
@@ -141,7 +145,17 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           cloud: deps.cloud,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
-        const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
+
+        const Tracker =
+          deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+        const unmount = renderApp(
+          startServices,
+          params,
+          config,
+          kibanaVersion,
+          extensions,
+          Tracker
+        );
 
         return () => {
           unmount();

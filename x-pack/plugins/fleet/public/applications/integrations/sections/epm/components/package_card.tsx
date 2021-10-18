@@ -9,6 +9,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiCard, EuiFlexItem, EuiBadge, EuiToolTip, EuiSpacer } from '@elastic/eui';
 
+import { TrackApplicationView } from 'src/plugins/usage_collection/public';
+
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
 
@@ -50,26 +52,28 @@ export function PackageCard({
 
   const testid = `integration-card:${id}`;
   return (
-    <Card
-      data-test-subj={testid}
-      layout="horizontal"
-      title={title || ''}
-      titleSize="xs"
-      description={description}
-      hasBorder
-      icon={
-        <CardIcon
-          icons={icons}
-          packageName={name}
-          integrationName={integration}
-          version={version}
-          size="xl"
-        />
-      }
-      href={url}
-      target={url.startsWith('http') || url.startsWith('https') ? '_blank' : undefined}
-    >
-      {releaseBadge}
-    </Card>
+    <TrackApplicationView viewId={testid}>
+      <Card
+        data-test-subj={testid}
+        layout="horizontal"
+        title={title || ''}
+        titleSize="xs"
+        description={description}
+        hasBorder
+        icon={
+          <CardIcon
+            icons={icons}
+            packageName={name}
+            integrationName={integration}
+            version={version}
+            size="xl"
+          />
+        }
+        href={url}
+        target={url.startsWith('http') || url.startsWith('https') ? '_blank' : undefined}
+      >
+        {releaseBadge}
+      </Card>
+    </TrackApplicationView>
   );
 }
