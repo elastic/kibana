@@ -6,19 +6,41 @@
  */
 
 import React, { useMemo } from 'react';
-import { ERROR_METADATA_SECTIONS } from './sections';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { getSectionsWithRows } from '../helper';
+import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { ProcessorEvent } from '../../../../../common/processor_event';
 
 interface Props {
   error: APMError;
 }
 
 export function ErrorMetadata({ error }: Props) {
-  const sectionsWithRows = useMemo(
-    () => getSectionsWithRows(ERROR_METADATA_SECTIONS, error),
-    [error]
+  const { data: errorEvent, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi({
+        endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
+        params: {
+          path: {
+            processorEvent: ProcessorEvent.error,
+            id: error.error.id,
+          },
+        },
+      });
+    },
+    [error.error.id]
   );
-  return <MetadataTable sections={sectionsWithRows} />;
+
+  const sections = useMemo(
+    () => getSectionsFromFields(errorEvent?.metadata || {}),
+    [errorEvent?.metadata]
+  );
+
+  return (
+    <MetadataTable
+      sections={sections}
+      isLoading={status === FETCH_STATUS.LOADING}
+    />
+  );
 }

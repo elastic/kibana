@@ -22,6 +22,14 @@ export const JOB_CREATED_SUCCESS_MESSAGE = i18n.translate(
   }
 );
 
+export const JOB_CREATED_LAZY_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.jobCreatedLazyNotificationText',
+  {
+    defaultMessage:
+      'The analysis is waiting for an ML node to become available. It might take a while before results are added to the response times graph.',
+  }
+);
+
 export const JOB_CREATION_FAILED = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
   {

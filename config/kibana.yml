@@ -84,24 +84,33 @@
 # Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.
 #elasticsearch.shardTimeout: 30000
 
-# Logs queries sent to Elasticsearch. Requires logging.verbose set to true.
-#elasticsearch.logQueries: false
-
 # Specifies the path where Kibana creates the process ID file.
 #pid.file: /run/kibana/kibana.pid
 
+# Set the value of this setting to off to suppress all logging output, or to debug to log everything.
+#logging.root.level: debug
+
 # Enables you to specify a file where Kibana stores log output.
-#logging.dest: stdout
+#logging.appenders.default:
+#  type: file
+#  fileName: /var/logs/kibana.log
+#  layout:
+#    type: json
 
-# Set the value of this setting to true to suppress all logging output.
-#logging.silent: false
+# Logs queries sent to Elasticsearch.
+#logging.loggers:
+#  - name: elasticsearch.queries
+#    level: debug
 
-# Set the value of this setting to true to suppress all logging output other than error messages.
-#logging.quiet: false
+# Logs http responses.
+#logging.loggers:
+#  - name: http.server.response
+#    level: debug
 
-# Set the value of this setting to true to log all events, including system usage information
-# and all requests.
-#logging.verbose: false
+# Logs system usage information.
+#logging.loggers:
+#  - name: metrics.ops
+#    level: debug
 
 # Set the interval in milliseconds to sample system and process performance
 # metrics. Minimum is 100ms. Defaults to 5000.

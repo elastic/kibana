@@ -21,7 +21,7 @@ export async function getErrorGroupIds({
   count?: number;
 }) {
   const { body } = await apmApiSupertest({
-    endpoint: `GET /api/apm/services/{serviceName}/error_groups/main_statistics`,
+    endpoint: `GET /internal/apm/services/{serviceName}/error_groups/main_statistics`,
     params: {
       path: { serviceName },
       query: {

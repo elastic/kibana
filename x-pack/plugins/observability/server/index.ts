@@ -15,6 +15,7 @@ import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
 import { unwrapEsResponse, WrappedElasticsearchClientError } from './utils/unwrap_es_response';
 export { rangeQuery, kqlQuery } from './utils/queries';
+export { getInspectResponse } from './utils/get_inspect_response';
 
 export * from './types';
 
@@ -23,7 +24,6 @@ export const config: PluginConfigDescriptor = {
     unsafe: true,
   },
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     annotations: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       index: schema.string({ defaultValue: 'observability-annotations' }),
@@ -33,7 +33,6 @@ export const config: PluginConfigDescriptor = {
       cases: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     }),
   }),
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };
 
 export type ObservabilityConfig = TypeOf<typeof config.schema>;

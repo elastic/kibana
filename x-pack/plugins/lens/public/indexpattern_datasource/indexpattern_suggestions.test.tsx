@@ -1206,11 +1206,11 @@ describe('IndexPattern Data Source suggestions', () => {
         const modifiedState: IndexPatternPrivateState = {
           ...initialState,
           layers: {
-            thresholdLayer: {
+            referenceLineLayer: {
               indexPatternId: '1',
-              columnOrder: ['threshold'],
+              columnOrder: ['referenceLine'],
               columns: {
-                threshold: {
+                referenceLine: {
                   dataType: 'number',
                   isBucketed: false,
                   label: 'Static Value: 0',
@@ -1251,10 +1251,10 @@ describe('IndexPattern Data Source suggestions', () => {
             modifiedState,
             '1',
             documentField,
-            (layerId) => layerId !== 'thresholdLayer'
+            (layerId) => layerId !== 'referenceLineLayer'
           )
         );
-        // should ignore the threshold layer
+        // should ignore the referenceLine layer
         expect(suggestions).toContainEqual(
           expect.objectContaining({
             table: expect.objectContaining({
@@ -1664,6 +1664,103 @@ describe('IndexPattern Data Source suggestions', () => {
       };
 
       expect(getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state))).toContainEqual(
+        expect.objectContaining({
+          table: {
+            isMultiRow: true,
+            changeType: 'extended',
+            label: 'Over time',
+            columns: [
+              {
+                columnId: 'cola',
+                operation: {
+                  label: 'My Terms',
+                  dataType: 'string',
+                  isBucketed: true,
+                  scale: 'ordinal',
+                },
+              },
+              {
+                columnId: 'id1',
+                operation: {
+                  label: 'timestampLabel',
+                  dataType: 'date',
+                  isBucketed: true,
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'colb',
+                operation: {
+                  label: 'My Op',
+                  dataType: 'number',
+                  isBucketed: false,
+                  scale: 'ratio',
+                },
+              },
+            ],
+            layerId: 'first',
+          },
+        })
+      );
+    });
+
+    it('adds date histogram over default time field for tables without time dimension and a referenceLine', async () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        ...initialState,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['cola', 'colb'],
+            columns: {
+              cola: {
+                label: 'My Terms',
+                customLabel: true,
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'terms',
+                sourceField: 'source',
+                scale: 'ordinal',
+                params: {
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  size: 5,
+                },
+              },
+              colb: {
+                label: 'My Op',
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'average',
+                sourceField: 'bytes',
+                scale: 'ratio',
+              },
+            },
+          },
+          referenceLine: {
+            indexPatternId: '2',
+            columnOrder: ['referenceLineA'],
+            columns: {
+              referenceLineA: {
+                label: 'My Op',
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'average',
+                sourceField: 'bytes',
+                scale: 'ratio',
+              },
+            },
+          },
+        },
+      };
+
+      expect(
+        getSuggestionSubset(
+          getDatasourceSuggestionsFromCurrentState(state, (layerId) => layerId !== 'referenceLine')
+        )
+      ).toContainEqual(
         expect.objectContaining({
           table: {
             isMultiRow: true,

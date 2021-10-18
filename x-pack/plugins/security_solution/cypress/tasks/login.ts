@@ -56,13 +56,15 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param route string route to visit
  */
 export const getUrlWithRoute = (role: ROLES, route: string) => {
+  const url = Cypress.config().baseUrl;
+  const kibana = new URL(String(url));
   const theUrl = `${Url.format({
     auth: `${role}:changeme`,
     username: role,
     password: 'changeme',
-    protocol: Cypress.env('protocol'),
-    hostname: Cypress.env('hostname'),
-    port: Cypress.env('configport'),
+    protocol: kibana.protocol.replace(':', ''),
+    hostname: kibana.hostname,
+    port: kibana.port,
   } as UrlObject)}${route.startsWith('/') ? '' : '/'}${route}`;
   cy.log(`origin: ${theUrl}`);
   return theUrl;
@@ -80,11 +82,13 @@ interface User {
  * @param route string route to visit
  */
 export const constructUrlWithUser = (user: User, route: string) => {
-  const hostname = Cypress.env('hostname');
+  const url = Cypress.config().baseUrl;
+  const kibana = new URL(String(url));
+  const hostname = kibana.hostname;
   const username = user.username;
   const password = user.password;
-  const protocol = Cypress.env('protocol');
-  const port = Cypress.env('configport');
+  const protocol = kibana.protocol.replace(':', '');
+  const port = kibana.port;
 
   const path = `${route.startsWith('/') ? '' : '/'}${route}`;
   const strUrl = `${protocol}://${username}:${password}@${hostname}:${port}${path}`;
@@ -98,7 +102,7 @@ export const getCurlScriptEnvVars = () => ({
   ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
   ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
   ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
-  KIBANA_URL: Cypress.env('KIBANA_URL'),
+  KIBANA_URL: Cypress.config().baseUrl,
 });
 
 export const postRoleAndUser = (role: ROLES) => {

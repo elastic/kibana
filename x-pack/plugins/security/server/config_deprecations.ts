@@ -10,6 +10,7 @@ import type { ConfigDeprecationProvider } from 'src/core/server';
 
 export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   rename,
+  renameFromRoot,
   unused,
 }) => [
   rename('sessionTimeout', 'session.idleTimeout'),
@@ -21,14 +22,20 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   rename('audit.appender.strategy.kind', 'audit.appender.strategy.type'),
   rename('audit.appender.path', 'audit.appender.fileName'),
 
+  renameFromRoot(
+    'security.showInsecureClusterWarning',
+    'xpack.security.showInsecureClusterWarning'
+  ),
+
   unused('authorization.legacyFallback.enabled'),
   unused('authc.saml.maxRedirectURLSize'),
   // Deprecation warning for the legacy audit logger.
-  (settings, fromPath, addDeprecation) => {
+  (settings, fromPath, addDeprecation, { branch }) => {
     const auditLoggingEnabled = settings?.xpack?.security?.audit?.enabled ?? false;
     const legacyAuditLoggerEnabled = !settings?.xpack?.security?.audit?.appender;
     if (auditLoggingEnabled && legacyAuditLoggerEnabled) {
       addDeprecation({
+        configPath: 'xpack.security.audit.appender',
         title: i18n.translate('xpack.security.deprecations.auditLoggerTitle', {
           defaultMessage: 'The legacy audit logger is deprecated',
         }),
@@ -36,8 +43,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage:
             'The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.',
         }),
-        documentationUrl:
-          'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#audit-logging-settings',
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#audit-logging-settings`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.auditLogger.manualStepOneMessage', {
@@ -54,6 +60,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation) => {
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
       addDeprecation({
+        configPath: 'xpack.security.authc.providers',
         title: i18n.translate('xpack.security.deprecations.authcProvidersTitle', {
           defaultMessage:
             'Defining "xpack.security.authc.providers" as an array of provider types is deprecated',
@@ -87,6 +94,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     if (hasProviderType('basic') && hasProviderType('token')) {
       addDeprecation({
+        configPath: 'xpack.security.authc.providers',
         title: i18n.translate('xpack.security.deprecations.basicAndTokenProvidersTitle', {
           defaultMessage:
             'Both "basic" and "token" authentication providers are enabled in "xpack.security.authc.providers"',
@@ -114,8 +122,13 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       string,
       any
     >;
-    if (Object.values(samlProviders).find((provider) => !!provider.maxRedirectURLSize)) {
+
+    const foundProvider = Object.entries(samlProviders).find(
+      ([_, provider]) => !!provider.maxRedirectURLSize
+    );
+    if (foundProvider) {
       addDeprecation({
+        configPath: `xpack.security.authc.providers.saml.${foundProvider[0]}.maxRedirectURLSize`,
         title: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeTitle', {
           defaultMessage:
             '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is deprecated',
@@ -138,6 +151,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation) => {
     if (settings?.xpack?.security?.enabled === false) {
       addDeprecation({
+        configPath: 'xpack.security.enabled',
         title: i18n.translate('xpack.security.deprecations.enabledTitle', {
           defaultMessage: 'Disabling the security plugin "xpack.security.enabled" is deprecated',
         }),
