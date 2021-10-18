@@ -46,7 +46,4 @@ export const applicationPath = `/app/home#/tutorial_directory/${FILE_DATA_VIS_TA
 export const featureTitle = i18n.translate('xpack.dataVisualizer.title', {
   defaultMessage: 'Upload a file',
 });
-export const featureDescription = i18n.translate('xpack.dataVisualizer.description', {
-  defaultMessage: 'Import your own CSV, NDJSON, or log file.',
-});
 export const featureId = `file_data_visualizer`;
