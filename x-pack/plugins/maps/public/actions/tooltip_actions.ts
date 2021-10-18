@@ -8,11 +8,12 @@
 import _ from 'lodash';
 import { Dispatch } from 'redux';
 import { Feature } from 'geojson';
-import { getLayerById, getOpenTooltips } from '../selectors/map_selectors';
+import { getOpenTooltips } from '../selectors/map_selectors';
 import { SET_OPEN_TOOLTIPS } from './map_action_constants';
 import { TooltipState } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
-import { IVectorLayer, getFeatureId } from '../classes/layers/vector_layer';
+import { ILayer } from '../classes/layers/layer';
+import { IVectorLayer, getFeatureId, isVectorLayer } from '../classes/layers/vector_layer';
 
 export function closeOnClickTooltip(tooltipId: string) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
@@ -62,25 +63,24 @@ export function openOnHoverTooltip(tooltipState: TooltipState) {
   };
 }
 
-export function cleanTooltipStateForLayer(layerId: string, layerFeatures: Feature[] = []) {
+export function cleanTooltipStateForLayer(layer: ILayer, layerFeatures: Feature[] = []) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
+    if (!isVectorLayer(layer)) {
+      return;
+    }
+
     let featuresRemoved = false;
-    const layer = getLayerById(layerId, getState()) as IVectorLayer | undefined;
     const openTooltips = getOpenTooltips(getState())
       .map((tooltipState) => {
         const nextFeatures = tooltipState.features.filter((tooltipFeature) => {
-          if (tooltipFeature.layerId !== layerId) {
+          if (tooltipFeature.layerId !== layer.getId()) {
             // feature from another layer, keep it
             return true;
           }
 
-          if (!layer) {
-            return false;
-          }
-
           // Keep feature if it is still in layer
           return layerFeatures.some((layerFeature) => {
-            return getFeatureId(layerFeature, layer.getSource()) === tooltipFeature.id;
+            return getFeatureId(layerFeature, (layer as IVectorLayer).getSource()) === tooltipFeature.id;
           });
         });
 

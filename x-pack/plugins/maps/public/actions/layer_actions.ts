@@ -218,7 +218,7 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     }
 
     if (!makeVisible) {
-      dispatch(cleanTooltipStateForLayer(layerId));
+      dispatch(cleanTooltipStateForLayer(layer));
     }
 
     dispatch({
@@ -526,7 +526,7 @@ function removeLayerFromLayerList(layerId: string) {
     layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
-    dispatch(cleanTooltipStateForLayer(layerId));
+    dispatch(cleanTooltipStateForLayer(layerGettingRemoved));
     layerGettingRemoved.destroy();
     dispatch({
       type: REMOVE_LAYER,

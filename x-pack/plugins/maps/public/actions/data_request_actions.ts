@@ -281,10 +281,10 @@ function endDataLoad(
     }
 
     const features = data && 'features' in data ? (data as FeatureCollection).features : [];
+    const layer = getLayerById(layerId, getState());
 
     const eventHandlers = getEventHandlers(getState());
     if (eventHandlers && eventHandlers.onDataLoadEnd) {
-      const layer = getLayerById(layerId, getState());
       const resultMeta: ResultMeta = {};
       if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
         const featuresWithoutCentroids = features.filter((feature) => {
@@ -300,7 +300,9 @@ function endDataLoad(
       });
     }
 
-    dispatch(cleanTooltipStateForLayer(layerId, features));
+    if (layer) {
+      dispatch(cleanTooltipStateForLayer(layer, features));
+    }
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
       layerId,
@@ -340,7 +342,10 @@ function onDataLoadError(
       });
     }
 
-    dispatch(cleanTooltipStateForLayer(layerId));
+    const layer = getLayerById(layerId, getState());
+    if (layer) {
+      dispatch(cleanTooltipStateForLayer(layer));
+    }
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
       layerId,

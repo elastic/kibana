@@ -171,7 +171,7 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
     if (prevZoom !== nextZoom) {
       getLayerList(getState()).map((layer) => {
         if (!layer.showAtZoomLevel(nextZoom)) {
-          dispatch(cleanTooltipStateForLayer(layer.getId()));
+          dispatch(cleanTooltipStateForLayer(layer));
         }
       });
     }
