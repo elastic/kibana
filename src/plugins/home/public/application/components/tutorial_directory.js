@@ -45,7 +45,7 @@ class TutorialDirectoryUi extends React.Component {
       })),
     ];
 
-    let openTab = ALL_TAB_ID;
+    let openTab = SAMPLE_DATA_TAB_ID;
     if (
       props.openTab &&
       this.tabs.some((tab) => {
