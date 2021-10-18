@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -53,6 +53,18 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
     }
   };
 
+  useEffect(() => {
+    if (
+      !isStepLevelMetric(series.selectedMetricField) &&
+      selectedBreakdown === SYNTHETICS_STEP_NAME
+    ) {
+      setSeries(seriesId, {
+        ...series,
+        breakdown: undefined,
+      });
+    }
+  });
+
   if (!seriesConfig) {
     return null;
   }
@@ -69,16 +81,6 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
     items.push({
       id: NO_BREAKDOWN,
       label: NO_BREAK_DOWN_LABEL,
-    });
-  }
-
-  if (
-    !isStepLevelMetric(series.selectedMetricField) &&
-    selectedBreakdown === SYNTHETICS_STEP_NAME
-  ) {
-    setSeries(seriesId, {
-      ...series,
-      breakdown: undefined,
     });
   }
 
