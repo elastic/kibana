@@ -68,11 +68,11 @@ describe('ManifestManager', () => {
   const ARTIFACT_NAME_EVENT_FILTERS_WINDOWS = 'endpoint-eventfilterlist-windows-v1';
   const ARTIFACT_NAME_EVENT_FILTERS_LINUX = 'endpoint-eventfilterlist-linux-v1';
   const ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS =
-    'endpoint-hostisolationexceptionslist-macos-v1';
+    'endpoint-hostisolationexceptionlist-macos-v1';
   const ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS =
-    'endpoint-hostisolationexceptionslist-windows-v1';
+    'endpoint-hostisolationexceptionlist-windows-v1';
   const ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX =
-    'endpoint-hostisolationexceptionslist-linux-v1';
+    'endpoint-hostisolationexceptionlist-linux-v1';
 
   let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
   let ARTIFACTS_BY_ID: { [K: string]: InternalArtifactCompleteSchema } = {};
