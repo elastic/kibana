@@ -86,7 +86,9 @@ const addResultToValidation = (
     };
   }
   const errorMarkup: React.ReactNode = type === 'warnings' ? <div>{resultValue}</div> : resultValue;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   validation.result[field]![type].push(errorMarkup);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   validation.result[field]!.isInvalid = true;
 };
 

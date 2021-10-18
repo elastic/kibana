@@ -106,7 +106,7 @@ describe('policy details: ', () => {
 
       it('windows process events is enabled', () => {
         const config = policyConfig(getState());
-        expect(config!.windows.events.process).toEqual(true);
+        expect(config.windows.events.process).toEqual(true);
       });
     });
 
@@ -128,7 +128,7 @@ describe('policy details: ', () => {
 
       it('mac file events is enabled', () => {
         const config = policyConfig(getState());
-        expect(config!.mac.events.file).toEqual(true);
+        expect(config.mac.events.file).toEqual(true);
       });
     });
 
@@ -150,7 +150,7 @@ describe('policy details: ', () => {
 
       it('linux file events is enabled', () => {
         const config = policyConfig(getState());
-        expect(config!.linux.events.file).toEqual(true);
+        expect(config.linux.events.file).toEqual(true);
       });
     });
 
@@ -314,12 +314,17 @@ describe('policy details: ', () => {
                     events: { process: true, file: true, network: true },
                     malware: { mode: 'prevent' },
                     behavior_protection: { mode: 'off', supported: false },
+                    memory_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
                         message: '',
                       },
                       behavior_protection: {
+                        enabled: false,
+                        message: '',
+                      },
+                      memory_protection: {
                         enabled: false,
                         message: '',
                       },
@@ -331,12 +336,17 @@ describe('policy details: ', () => {
                     logging: { file: 'info' },
                     malware: { mode: 'prevent' },
                     behavior_protection: { mode: 'off', supported: false },
+                    memory_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
                         message: '',
                       },
                       behavior_protection: {
+                        enabled: false,
+                        message: '',
+                      },
+                      memory_protection: {
                         enabled: false,
                         message: '',
                       },
