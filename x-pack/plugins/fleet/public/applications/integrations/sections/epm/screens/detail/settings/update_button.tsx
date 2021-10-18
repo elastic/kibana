@@ -114,18 +114,20 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
   }
 
-  const agentCount = useMemo(
-    () =>
-      agentPolicyData?.items.reduce((acc, item) => {
-        const existingPolicies = isStringArray(item?.package_policies)
-          ? (item?.package_policies as string[]).filter((p) => packagePolicyIds.includes(p))
-          : (item?.package_policies as PackagePolicy[]).filter((p) =>
+  const agentCount = useMemo(() => {
+    if (!agentPolicyData?.items) return 0;
+
+    return agentPolicyData.items.reduce((acc, item) => {
+      const existingPolicies = item?.package_policies
+        ? isStringArray(item.package_policies)
+          ? (item.package_policies as string[]).filter((p) => packagePolicyIds.includes(p))
+          : (item.package_policies as PackagePolicy[]).filter((p) =>
               packagePolicyIds.includes(p.id)
-            );
-        return (acc += existingPolicies.length > 0 && item?.agents ? item?.agents : 0);
-      }, 0),
-    [agentPolicyData, packagePolicyIds]
-  );
+            )
+        : [];
+      return (acc += existingPolicies.length > 0 && item?.agents ? item?.agents : 0);
+    }, 0);
+  }, [agentPolicyData, packagePolicyIds]);
 
   const conflictCount = useMemo(
     () => dryRunData?.filter((item) => item.hasErrors).length,
