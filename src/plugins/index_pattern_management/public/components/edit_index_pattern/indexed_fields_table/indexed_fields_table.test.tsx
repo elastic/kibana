@@ -78,10 +78,16 @@ const fields = [
     displayName: 'Elastic',
     searchable: true,
     esTypes: ['keyword'],
+    isUserEditable: true,
   },
-  { name: 'timestamp', displayName: 'timestamp', esTypes: ['date'] },
-  { name: 'conflictingField', displayName: 'conflictingField', esTypes: ['keyword', 'long'] },
-  { name: 'amount', displayName: 'amount', esTypes: ['long'] },
+  { name: 'timestamp', displayName: 'timestamp', esTypes: ['date'], isUserEditable: true },
+  {
+    name: 'conflictingField',
+    displayName: 'conflictingField',
+    esTypes: ['keyword', 'long'],
+    isUserEditable: true,
+  },
+  { name: 'amount', displayName: 'amount', esTypes: ['long'], isUserEditable: true },
 ].map(mockFieldToIndexPatternField);
 
 describe('IndexedFieldsTable', () => {
@@ -97,7 +103,7 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter=""
         fieldFilter=""
       />
-    );
+    ).dive();
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
@@ -117,7 +123,7 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter=""
         fieldFilter=""
       />
-    );
+    ).dive();
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ fieldFilter: 'Elast' });
@@ -138,7 +144,7 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter=""
         fieldFilter=""
       />
-    );
+    ).dive();
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ indexedFieldTypeFilter: 'date' });
@@ -160,7 +166,7 @@ describe('IndexedFieldsTable', () => {
           indexedFieldTypeFilter=""
           fieldFilter=""
         />
-      );
+      ).dive();
 
       await new Promise((resolve) => process.nextTick(resolve));
       component.update();

@@ -48,8 +48,13 @@ describe('ScriptedFieldsTable', () => {
   beforeEach(() => {
     indexPattern = getIndexPatternMock({
       getScriptedFields: () => [
-        { name: 'ScriptedField', lang: 'painless', script: 'x++' },
-        { name: 'JustATest', lang: 'painless', script: 'z++' },
+        { isUserEditable: true, name: 'ScriptedField', lang: 'painless', script: 'x++' },
+        {
+          isUserEditable: false,
+          name: 'JustATest',
+          lang: 'painless',
+          script: 'z++',
+        },
       ],
     }) as IndexPattern;
   });
@@ -62,7 +67,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -80,7 +85,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -99,9 +104,9 @@ describe('ScriptedFieldsTable', () => {
         indexPattern={
           getIndexPatternMock({
             getScriptedFields: () => [
-              { name: 'ScriptedField', lang: 'painless', script: 'x++' },
-              { name: 'JustATest', lang: 'painless', script: 'z++' },
-              { name: 'Bad', lang: 'somethingElse', script: 'z++' },
+              { isUserEditable: true, name: 'ScriptedField', lang: 'painless', script: 'x++' },
+              { isUserEditable: true, name: 'JustATest', lang: 'painless', script: 'z++' },
+              { isUserEditable: true, name: 'Bad', lang: 'somethingElse', script: 'z++' },
             ],
           }) as IndexPattern
         }
@@ -109,7 +114,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -134,7 +139,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -152,7 +157,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     await component.update(); // Fire `componentWillMount()`
     // @ts-expect-error lang is not valid
@@ -177,7 +182,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     await component.update(); // Fire `componentWillMount()`
     // @ts-expect-error lang is not valid

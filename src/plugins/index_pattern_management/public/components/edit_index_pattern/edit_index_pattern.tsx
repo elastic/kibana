@@ -56,7 +56,7 @@ const confirmModalOptionsDelete = {
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { uiSettings, overlays, chrome, data } =
+    const { application, uiSettings, overlays, chrome, data } =
       useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
@@ -134,12 +134,14 @@ export const EditIndexPattern = withRouter(
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
     const kibana = useKibana();
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
+    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         <IndexHeader
           indexPattern={indexPattern}
           setDefault={setDefaultPattern}
-          deleteIndexPatternClick={removePattern}
+          {...(userEditPermission ? { deleteIndexPatternClick: removePattern } : {})}
           defaultIndex={defaultIndex}
         >
           {showTagsSection && (
