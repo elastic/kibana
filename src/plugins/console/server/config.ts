@@ -93,6 +93,7 @@ const config7x: PluginConfigDescriptor<ConsoleConfig7x> = {
       }
 
       addDeprecation({
+        configPath: 'console.enabled',
         title: i18n.translate('console.deprecations.enabledTitle', {
           defaultMessage: 'Setting "console.enabled" is deprecated',
         }),

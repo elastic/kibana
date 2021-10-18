@@ -63,6 +63,7 @@ const config7x: PluginConfigDescriptor<IndexManagementConfig7x> = {
       }
 
       addDeprecation({
+        configPath: 'xpack.index_management.enabled',
         title: i18n.translate('xpack.idxMgmt.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.index_management.enabled" is deprecated',
         }),

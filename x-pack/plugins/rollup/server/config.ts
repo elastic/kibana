@@ -63,6 +63,7 @@ const config7x: PluginConfigDescriptor<RollupConfig7x> = {
       }
 
       addDeprecation({
+        configPath: 'xpack.rollup.enabled',
         title: i18n.translate('xpack.rollupJobs.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.rollup.enabled" is deprecated',
         }),

@@ -63,6 +63,7 @@ const config7x: PluginConfigDescriptor<RemoteClustersConfig7x> = {
       }
 
       addDeprecation({
+        configPath: 'xpack.remote_clusters.enabled',
         title: i18n.translate('xpack.remoteClusters.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.remote_clusters.enabled" is deprecated',
         }),

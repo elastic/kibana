@@ -63,6 +63,7 @@ const config7x: PluginConfigDescriptor<CrossClusterReplicationConfig7x> = {
       }
 
       addDeprecation({
+        configPath: 'xpack.ccr.enabled',
         title: i18n.translate('xpack.crossClusterReplication.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.ccr.enabled" is deprecated',
         }),

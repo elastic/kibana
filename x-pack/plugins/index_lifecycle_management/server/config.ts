@@ -67,6 +67,7 @@ const config7x: PluginConfigDescriptor<IndexLifecycleManagementConfig7x> = {
       }
 
       addDeprecation({
+        configPath: 'xpack.ilm.enabled',
         title: i18n.translate('xpack.indexLifecycleMgmt.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.ilm.enabled" is deprecated',
         }),

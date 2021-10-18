@@ -77,6 +77,7 @@ const config7x: PluginConfigDescriptor<UpgradeAssistantConfig7x> = {
       }
 
       addDeprecation({
+        configPath: 'xpack.upgrade_assistant.enabled',
         title: i18n.translate('xpack.upgradeAssistant.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.upgrade_assistant.enabled" is deprecated',
         }),

@@ -71,6 +71,7 @@ const config7x: PluginConfigDescriptor<SnapshotRestoreConfig7x> = {
       }
 
       addDeprecation({
+        configPath: 'xpack.snapshot_restore.enabled',
         title: i18n.translate('xpack.snapshotRestore.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.snapshot_restore.enabled" is deprecated',
         }),

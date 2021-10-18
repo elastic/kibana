@@ -63,6 +63,7 @@ const config7x: PluginConfigDescriptor<LicenseManagementConfig7x> = {
       }
 
       addDeprecation({
+        configPath: 'xpack.license_management.enabled',
         title: i18n.translate('xpack.licenseMgmt.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.license_management.enabled" is deprecated',
         }),
