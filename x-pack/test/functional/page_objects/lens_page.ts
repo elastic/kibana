@@ -887,14 +887,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async toggleColumnVisibility(dimension: string) {
+    async toggleColumnVisibility(dimension: string, no = 1) {
       await this.openDimensionEditor(dimension);
       const id = 'lns-table-column-hidden';
       const isChecked = await testSubjects.isEuiSwitchChecked(id);
       await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
-      screenshot.take('toggleColumnVisibility3:Changedswitch');
+      screenshot.take(`toggleColumnVisibility${no}:Changedswitch`);
       await this.closeDimensionEditor();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      screenshot.take(`toggleColumnVisibility${no + 1}:closedDimensionEditor`);
     },
 
     async clickTableCellAction(rowIndex = 0, colIndex = 0, actionTestSub: string) {
