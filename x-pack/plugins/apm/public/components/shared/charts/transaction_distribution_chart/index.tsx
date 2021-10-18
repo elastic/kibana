@@ -78,13 +78,10 @@ const CHART_PLACEHOLDER_VALUE = 0.0001;
 // Elastic charts will show any lone bin (i.e. a populated bin followed by empty bin)
 // as a circular marker instead of a bar
 // This provides a workaround by making the next bin not empty
+// TODO Find a way to get rid of this workaround since it alters original values of the data.
 export const replaceHistogramDotsWithBars = (histogramItems: HistogramItem[]) =>
   histogramItems.reduce((histogramItem, _, i) => {
-    if (
-      // histogramItem[i - 1]?.doc_count > 0 &&
-      // histogramItem[i - 1]?.doc_count !== CHART_PLACEHOLDER_VALUE &&
-      histogramItem[i].doc_count === 0
-    ) {
+    if (histogramItem[i].doc_count === 0) {
       histogramItem[i].doc_count = CHART_PLACEHOLDER_VALUE;
     }
     return histogramItem;

@@ -105,7 +105,6 @@ export function TransactionDistribution({
     APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS,
     {
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-      // analyzeCorrelations: false,
     }
   );
   const { overallHistogram, hasData, status } = getOverallHistogram(
