@@ -25,7 +25,7 @@ describe.each([
   ) => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
-    item = generateItem();
+    item = generateItem() as AnyArtifact;
     appTestContext = createAppRootMockRenderer();
     render = (props = {}) => {
       renderResult = appTestContext.render(
@@ -63,7 +63,8 @@ describe.each([
     );
   });
 
-  it('should display dates in expected format', () => {
+  // FLAKY https://github.com/elastic/kibana/issues/113892
+  it.skip('should display dates in expected format', () => {
     render();
 
     expect(renderResult.getByTestId('testCard-header-updated').textContent).toEqual(
@@ -77,11 +78,29 @@ describe.each([
     expect(renderResult.getByTestId('testCard-description').textContent).toEqual(item.description);
   });
 
+  it("shouldn't display description", async () => {
+    render({ hideDescription: true });
+    expect(renderResult.queryByTestId('testCard-description')).toBeNull();
+  });
+
   it('should display default empty value if description does not exist', async () => {
     item.description = undefined;
     render();
-
     expect(renderResult.getByTestId('testCard-description').textContent).toEqual('—');
+  });
+
+  it('should display comments if one exists', async () => {
+    render();
+    if (isTrustedApp(item)) {
+      expect(renderResult.queryByTestId('testCard-comments')).toBeNull();
+    } else {
+      expect(renderResult.queryByTestId('testCard-comments')).not.toBeNull();
+    }
+  });
+
+  it("shouldn't display comments", async () => {
+    render({ hideComments: true });
+    expect(renderResult.queryByTestId('testCard-comments')).toBeNull();
   });
 
   it('should display OS and criteria conditions', () => {
