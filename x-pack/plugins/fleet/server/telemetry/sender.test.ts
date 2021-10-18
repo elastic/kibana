@@ -10,16 +10,10 @@ import { URL } from 'url';
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
-
 import { TelemetryEventsSender } from './sender';
 
 describe('TelemetryEventsSender', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
-  const telemetryUsageCounter = usageCountersServiceSetup.createUsageCounter(
-    'testTelemetryUsageCounter'
-  );
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -50,14 +44,7 @@ describe('TelemetryEventsSender', () => {
       sender['telemetrySetup'] = {
         getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
       };
-      sender['telemetryUsageCounter'] = telemetryUsageCounter;
-      sender['sendEvents'] = jest.fn(async () => {
-        sender['telemetryUsageCounter']?.incrementCounter({
-          counterName: 'test_counter',
-          counterType: 'invoked',
-          incrementBy: 1,
-        });
-      });
+      sender['sendEvents'] = jest.fn();
 
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
       expect(sender['queue'].length).toBe(2);
@@ -70,7 +57,6 @@ describe('TelemetryEventsSender', () => {
       await sender['sendIfDue']();
       expect(sender['queue'].length).toBe(0);
       expect(sender['sendEvents']).toBeCalledTimes(2);
-      expect(sender['telemetryUsageCounter'].incrementCounter).toBeCalledTimes(2);
     });
 
     it("shouldn't send when telemetry is disabled", async () => {

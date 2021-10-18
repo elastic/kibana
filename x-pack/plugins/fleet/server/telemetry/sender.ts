@@ -63,7 +63,9 @@ export class TelemetryEventsSender {
       return;
     }
 
-    events = events.filter((event) => !this.queue.find((qItem) => qItem.id === event.id));
+    events = events.filter(
+      (event) => !this.queue.find((qItem) => qItem.id && event.id && qItem.id === event.id)
+    );
 
     this.logger.info(`Queue events ` + JSON.stringify(events));
 
