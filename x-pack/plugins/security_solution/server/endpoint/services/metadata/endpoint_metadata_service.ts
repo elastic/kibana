@@ -14,7 +14,13 @@ import {
   SavedObjectsServiceStart,
 } from 'kibana/server';
 
-import { HostInfo, HostMetadata, UnitedAgentMetadata } from '../../../../common/endpoint/types';
+import {
+  HostInfo,
+  HostMetadata,
+  MaybeImmutable,
+  PolicyData,
+  UnitedAgentMetadata,
+} from '../../../../common/endpoint/types';
 import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common';
 import {
   AgentNotFoundError,
@@ -27,6 +33,7 @@ import {
   EndpointHostUnEnrolledError,
   FleetAgentNotFoundError,
   FleetAgentPolicyNotFoundError,
+  FleetEndpointPackagePolicyNotFoundError,
 } from './errors';
 import {
   getESQueryHostMetadataByFleetAgentIds,
@@ -51,6 +58,19 @@ import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/end
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
+};
+
+const isAgentPolicyWithPackagePolicies = (
+  agentPolicy: AgentPolicy | AgentPolicyWithPackagePolicies
+): agentPolicy is AgentPolicyWithPackagePolicies => {
+  if (
+    agentPolicy.package_policies.length === 0 ||
+    typeof agentPolicy.package_policies[0] !== 'string'
+  ) {
+    return true;
+  }
+
+  return false;
 };
 
 export class EndpointMetadataService {
@@ -182,20 +202,27 @@ export class EndpointMetadataService {
    * @param _endpointPackagePolicy
    * @private
    */
+  // eslint-disable-next-line complexity
   private async enrichHostMetadata(
     esClient: ElasticsearchClient,
     endpointMetadata: HostMetadata,
     /** If undefined, it will be retrieved from Fleet using the ID in the endpointMetadata  */
-    _fleetAgent?: Agent,
+    _fleetAgent?: MaybeImmutable<Agent>,
     /** If undefined, it will be retrieved from Fleet using data from the endpointMetadata  */
-    _fleetAgentPolicy?: AgentPolicyWithPackagePolicies,
+    _fleetAgentPolicy?:
+      | MaybeImmutable<AgentPolicy>
+      | MaybeImmutable<AgentPolicyWithPackagePolicies>,
     /** If undefined, it will be retrieved from Fleet using the ID in the endpointMetadata */
-    _endpointPackagePolicy?: PackagePolicy
+    _endpointPackagePolicy?: MaybeImmutable<PackagePolicy>
   ): Promise<HostInfo> {
     let fleetAgentId = endpointMetadata.elastic.agent.id;
-    let fleetAgent = _fleetAgent;
-    let fleetAgentPolicy = _fleetAgentPolicy;
-    let endpointPackagePolicy = _endpointPackagePolicy;
+    // casting below is done only to remove `immutable<>` from the object if they are defined as such
+    let fleetAgent = _fleetAgent as Agent | undefined;
+    let fleetAgentPolicy = _fleetAgentPolicy as
+      | AgentPolicy
+      | AgentPolicyWithPackagePolicies
+      | undefined;
+    let endpointPackagePolicy = _endpointPackagePolicy as PackagePolicy | undefined;
 
     if (!fleetAgent) {
       try {
@@ -226,15 +253,25 @@ export class EndpointMetadataService {
       }
     }
 
-    if (!endpointPackagePolicy && fleetAgentPolicy) {
+    // The fleetAgentPolicy might have the endpoint policy in the `package_policies`, lets check that first
+    if (
+      !endpointPackagePolicy &&
+      fleetAgentPolicy &&
+      isAgentPolicyWithPackagePolicies(fleetAgentPolicy)
+    ) {
       endpointPackagePolicy = fleetAgentPolicy.package_policies.find(
         (policy) => policy.package?.name === 'endpoint'
       );
+    }
 
-      if (!endpointPackagePolicy) {
-        this.logger?.error(
-          new EndpointError(`Endpoint policy id not found in Fleet Agent Policy`, fleetAgentPolicy)
+    // if we still don't have an endpoint package policy, try retrieving it from fleet
+    if (!endpointPackagePolicy) {
+      try {
+        endpointPackagePolicy = await this.getFleetEndpointPackagePolicy(
+          endpointMetadata.Endpoint.policy.applied.id
         );
+      } catch (error) {
+        this.logger?.error(error);
       }
     }
 
@@ -300,6 +337,25 @@ export class EndpointMetadataService {
     throw new FleetAgentPolicyNotFoundError(
       `Fleet agent policy with id ${agentPolicyId} not found`
     );
+  }
+
+  /**
+   * Retrieve an endpoint policy from fleet
+   * @param endpointPolicyId
+   * @throws
+   */
+  async getFleetEndpointPackagePolicy(endpointPolicyId: string): Promise<PolicyData> {
+    const endpointPackagePolicy = await this.packagePolicyService
+      .get(this.DANGEROUS_INTERNAL_SO_CLIENT, endpointPolicyId)
+      .catch(catchAndWrapError);
+
+    if (!endpointPackagePolicy) {
+      throw new FleetEndpointPackagePolicyNotFoundError(
+        `Fleet endpoint package policy with id ${endpointPolicyId} not found`
+      );
+    }
+
+    return endpointPackagePolicy as PolicyData;
   }
 
   /**
@@ -383,42 +439,22 @@ export class EndpointMetadataService {
       {}
     );
 
-    const hosts = docs
-      .filter((doc) => {
-        const { endpoint: metadata, agent } = doc?._source?.united ?? {};
-        return metadata && agent;
-      })
-      .map((doc) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const { endpoint: metadata, agent } = doc!._source!.united;
+    const hosts: HostInfo[] = [];
+
+    for (const doc of docs) {
+      const { endpoint: metadata, agent } = doc?._source?.united ?? {};
+
+      if (metadata && agent) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const agentPolicy = agentPoliciesMap[agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const endpointPolicy = endpointPoliciesMap[agent.policy_id!];
 
-        // FIXME: refactor the enrichment function in this service class so that it can be reused below
-        return {
-          metadata,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          host_status: fleetAgentStatusToEndpointHostStatus(agent.last_checkin_status!),
-          policy_info: {
-            agent: {
-              applied: {
-                id: agent.policy_id || '',
-                revision: agent.policy_revision || 0,
-              },
-              configured: {
-                id: agentPolicy?.id || '',
-                revision: agentPolicy?.revision || 0,
-              },
-            },
-            endpoint: {
-              id: endpointPolicy?.id || '',
-              revision: endpointPolicy?.revision || 0,
-            },
-          },
-        };
-      });
+        hosts.push(
+          await this.enrichHostMetadata(esClient, metadata, agent, agentPolicy, endpointPolicy)
+        );
+      }
+    }
 
     return {
       data: hosts,
