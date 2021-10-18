@@ -66,12 +66,12 @@ const uploadPipeline = (pipelineContent) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
     }
 
-    // if (
-    //   (await doAnyChangesMatch([/^x-pack\/plugins\/apm/])) ||
-    //   process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    // ) {
-    //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
-    // }
+    if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/apm/])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
+    }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
