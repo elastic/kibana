@@ -31,7 +31,8 @@
     "lib": [
       "esnext",
       // includes support for browser APIs
-      "dom"
+      "dom",
+      "DOM.Iterable"
     ],
     // Node 8 should support everything output by esnext, we override this
     // in webpack with loader-level compiler options
