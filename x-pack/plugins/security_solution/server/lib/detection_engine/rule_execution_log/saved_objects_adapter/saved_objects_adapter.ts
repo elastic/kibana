@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/server';
+import { SavedObject, SavedObjectReference } from 'src/core/server';
 import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetRuleReference } from '../../rules/legacy_rule_status/legacy_utils';
+
 import { IRuleStatusSOAttributes } from '../../rules/types';
 import {
   RuleStatusSavedObjectsClient,
@@ -51,7 +54,7 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
       sortField: 'statusDate',
       sortOrder: 'desc',
       search: ruleId,
-      searchFields: ['alertId'],
+      searchFields: ['references.id'],
     });
   }
 
@@ -59,8 +62,9 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
     return this.ruleStatusClient.findBulk(ruleIds, logsCount);
   }
 
-  public async update({ id, attributes }: UpdateExecutionLogArgs) {
-    await this.ruleStatusClient.update(id, attributes);
+  public async update({ id, attributes, ruleId }: UpdateExecutionLogArgs) {
+    const references: SavedObjectReference[] = [legacyGetRuleReference(ruleId)];
+    await this.ruleStatusClient.update(id, attributes, { references });
   }
 
   public async delete(id: string) {
@@ -68,31 +72,39 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
   }
 
   public async logExecutionMetrics({ ruleId, metrics }: LogExecutionMetricsArgs) {
+    const references: SavedObjectReference[] = [legacyGetRuleReference(ruleId)];
     const [currentStatus] = await this.getOrCreateRuleStatuses(ruleId);
 
-    await this.ruleStatusClient.update(currentStatus.id, {
-      ...currentStatus.attributes,
-      ...convertMetricFields(metrics),
-    });
+    await this.ruleStatusClient.update(
+      currentStatus.id,
+      {
+        ...currentStatus.attributes,
+        ...convertMetricFields(metrics),
+      },
+      { references }
+    );
   }
 
   private createNewRuleStatus = async (
     ruleId: string
   ): Promise<SavedObject<IRuleStatusSOAttributes>> => {
+    const references: SavedObjectReference[] = [legacyGetRuleReference(ruleId)];
     const now = new Date().toISOString();
-    return this.ruleStatusClient.create({
-      alertId: ruleId,
-      statusDate: now,
-      status: RuleExecutionStatus['going to run'],
-      lastFailureAt: null,
-      lastSuccessAt: null,
-      lastFailureMessage: null,
-      lastSuccessMessage: null,
-      gap: null,
-      bulkCreateTimeDurations: [],
-      searchAfterTimeDurations: [],
-      lastLookBackDate: null,
-    });
+    return this.ruleStatusClient.create(
+      {
+        statusDate: now,
+        status: RuleExecutionStatus['going to run'],
+        lastFailureAt: null,
+        lastSuccessAt: null,
+        lastFailureMessage: null,
+        lastSuccessMessage: null,
+        gap: null,
+        bulkCreateTimeDurations: [],
+        searchAfterTimeDurations: [],
+        lastLookBackDate: null,
+      },
+      { references }
+    );
   };
 
   private getOrCreateRuleStatuses = async (
@@ -112,6 +124,8 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
   };
 
   public async logStatusChange({ newStatus, ruleId, message, metrics }: LogStatusChangeArgs) {
+    const references: SavedObjectReference[] = [legacyGetRuleReference(ruleId)];
+
     switch (newStatus) {
       case RuleExecutionStatus['going to run']:
       case RuleExecutionStatus.succeeded:
@@ -119,10 +133,14 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
       case RuleExecutionStatus['partial failure']: {
         const [currentStatus] = await this.getOrCreateRuleStatuses(ruleId);
 
-        await this.ruleStatusClient.update(currentStatus.id, {
-          ...currentStatus.attributes,
-          ...buildRuleStatusAttributes(newStatus, message, metrics),
-        });
+        await this.ruleStatusClient.update(
+          currentStatus.id,
+          {
+            ...currentStatus.attributes,
+            ...buildRuleStatusAttributes(newStatus, message, metrics),
+          },
+          { references }
+        );
 
         return;
       }
@@ -137,8 +155,8 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
         };
 
         // We always update the newest status, so to 'persist' a failure we push a copy to the head of the list
-        await this.ruleStatusClient.update(currentStatus.id, failureAttributes);
-        const lastStatus = await this.ruleStatusClient.create(failureAttributes);
+        await this.ruleStatusClient.update(currentStatus.id, failureAttributes, { references });
+        const lastStatus = await this.ruleStatusClient.create(failureAttributes, { references });
 
         // drop oldest failures
         const oldStatuses = [lastStatus, ...ruleStatuses].slice(MAX_RULE_STATUSES);
