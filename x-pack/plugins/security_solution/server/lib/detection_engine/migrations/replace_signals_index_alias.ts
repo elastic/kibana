@@ -35,9 +35,7 @@ export const replaceSignalsIndexAlias = async ({
   await esClient.indices.updateAliases({
     body: {
       actions: [
-        // @ts-expect-error IndicesUpdateAliasesIndicesUpdateAliasBulk is not valid
         { remove: { index: oldIndex, alias } },
-        // @ts-expect-error IndicesUpdateAliasesIndicesUpdateAliasBulk is not valid
         { add: { index: newIndex, alias, is_write_index: false } },
       ],
     },

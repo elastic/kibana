@@ -456,11 +456,8 @@ export const reindexServiceFactory = (
     const { body: aliasResponse } = await esClient.indices.updateAliases({
       body: {
         actions: [
-          // @ts-expect-error @elastic/elasticseach IndicesUpdateAliasesIndicesUpdateAliasBulk is not valid
           { add: { index: newIndexName, alias: indexName } },
-          // @ts-expect-error @elastic/elasticseach IndicesUpdateAliasesIndicesUpdateAliasBulk is not valid
           { remove_index: { index: indexName } },
-          // @ts-expect-error @elastic/elasticseach IndicesUpdateAliasesIndicesUpdateAliasBulk is not valid
           ...extraAliases,
         ],
       },
