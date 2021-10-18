@@ -7,6 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const LAST_HOUR = i18n.translate('xpack.securitySolution.stepDefineRule.lastHour', {
+  defaultMessage: 'Last hour',
+});
+
+export const LAST_DAY = i18n.translate('xpack.securitySolution.stepDefineRule.lastDay', {
+  defaultMessage: 'Last day',
+});
+
+export const LAST_MONTH = i18n.translate('xpack.securitySolution.stepDefineRule.lastMonth', {
+  defaultMessage: 'Last month',
+});
+
 export const QUERY_PREVIEW_BUTTON = i18n.translate(
   'xpack.securitySolution.stepDefineRule.previewQueryButton',
   {

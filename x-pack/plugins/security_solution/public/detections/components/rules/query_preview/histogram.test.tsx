@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
 import { PreviewHistogram } from './histogram';
-import { getHistogramConfig } from './helpers';
+import { getHistogramConfig } from '../rule_preview/helpers';
 
 describe('PreviewHistogram', () => {
   test('it renders loading icon if "isLoading" is true', () => {

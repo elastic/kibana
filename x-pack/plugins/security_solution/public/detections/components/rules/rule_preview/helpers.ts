@@ -7,9 +7,8 @@
 
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiSelectOption } from '@elastic/eui';
+import { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { Unit } from '@elastic/datemath';
-
-import { Type, Language } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { ChartSeriesConfigs } from '../../../../common/components/charts/common';
@@ -45,14 +44,14 @@ export const isNoisy = (hits: number, timeframe: Unit): boolean => {
 export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
   if (ruleType === 'eql') {
     return [
-      { value: 'h', text: 'Last hour' },
-      { value: 'd', text: 'Last day' },
+      { value: 'h', text: i18n.LAST_HOUR },
+      { value: 'd', text: i18n.LAST_DAY },
     ];
   } else {
     return [
-      { value: 'h', text: 'Last hour' },
-      { value: 'd', text: 'Last day' },
-      { value: 'M', text: 'Last month' },
+      { value: 'h', text: i18n.LAST_HOUR },
+      { value: 'd', text: i18n.LAST_DAY },
+      { value: 'M', text: i18n.LAST_MONTH },
     ];
   }
 };
@@ -191,4 +190,33 @@ export const getThresholdHistogramConfig = (): ChartSeriesConfigs => {
     },
     customHeight: 200,
   };
+};
+
+export const getIsRulePreviewDisabled = ({
+  ruleType,
+  isQueryBarValid,
+  isThreatQueryBarValid,
+  index,
+  threatIndex,
+  threatMapping,
+}: {
+  ruleType: Type;
+  isQueryBarValid: boolean;
+  isThreatQueryBarValid: boolean;
+  index: string[];
+  threatIndex: string[];
+  threatMapping: ThreatMapping;
+}) => {
+  if (!isQueryBarValid || index.length === 0) return true;
+  if (ruleType === 'threat_match') {
+    if (!isThreatQueryBarValid || !threatIndex.length) return true;
+    if (
+      !threatMapping.length ||
+      !threatMapping[0].entries.length ||
+      !threatMapping[0].entries[0].field ||
+      !threatMapping[0].entries[0].value
+    )
+      return true;
+  }
+  return false;
 };
