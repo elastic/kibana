@@ -167,13 +167,6 @@ export async function mountApp(
       ? historyLocationState.payload
       : undefined;
 
-  // Clear app-specific filters when navigating to Lens. Necessary because Lens
-  // can be loaded without a full page refresh. If the user navigates to Lens from Discover
-  // we keep the filters
-  if (!initialContext) {
-    data.query.filterManager.setAppFilters([]);
-  }
-
   if (embeddableEditorIncomingState?.searchSessionId) {
     data.search.session.continue(embeddableEditorIncomingState.searchSessionId);
   }
@@ -202,7 +195,13 @@ export async function mountApp(
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
 
-      lensStore.dispatch(loadInitial({ redirectCallback, initialInput, emptyState }));
+      // Clear app-specific filters when navigating to Lens. Necessary because Lens
+      // can be loaded without a full page refresh. If the user navigates to Lens from Discover
+      // we keep the filters
+      if (!initialContext) {
+        data.query.filterManager.setAppFilters([]);
+      }
+      lensStore.dispatch(loadInitial({ redirectCallback, initialInput }));
 
       return (
         <Provider store={lensStore}>

@@ -15,8 +15,6 @@ import {
 import { act } from 'react-dom/test-utils';
 import { loadInitial } from './load_initial';
 import { LensEmbeddableInput } from '../../embeddable';
-import { getPreloadedState } from '../lens_slice';
-import { LensAppState } from '..';
 
 const defaultSavedObjectId = '1234';
 const preloadedState = {
@@ -167,10 +165,9 @@ describe('Mounter', () => {
         }),
       });
 
-      const emptyState = getPreloadedState(storeDeps) as LensAppState;
       services.attributeService.unwrapAttributes = jest.fn();
       await act(async () => {
-        await loadInitial(lensStore, storeDeps, jest.fn(), undefined, emptyState);
+        await loadInitial(lensStore, storeDeps, jest.fn(), undefined);
       });
 
       expect(lensStore.getState()).toEqual({
