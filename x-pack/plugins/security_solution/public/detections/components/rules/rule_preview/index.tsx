@@ -95,7 +95,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           <EuiFlexItem grow={false}>
             <PreviewButton
               fill
-              isDisabled={isDisabled || isPreviewRequestInProgress}
+              isLoading={isPreviewRequestInProgress}
+              isDisabled={isDisabled}
               onClick={createPreview}
               data-test-subj="preview-button"
             >
@@ -105,8 +106,9 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         </EuiFlexGroup>
       </EuiFormRow>
       <EuiSpacer size="s" />
-      {previewId && (
+      {(isPreviewRequestInProgress || previewId) && (
         <PreviewHistogram
+          isPreviewRequestInProgress={isPreviewRequestInProgress}
           timeFrame={timeFrame}
           previewId={previewId}
           addNoiseWarning={addNoiseWarning}

@@ -7,10 +7,11 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Unit } from '@elastic/datemath';
-import usePrevious from 'react-use/lib/usePrevious';
 import { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FieldValueQueryBar } from '../query_bar';
 import { QUERY_PREVIEW_NOISE_WARNING } from './translations';
+import { usePreviewRule } from '../../../containers/detection_engine/rules/use_preview_rule';
+import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
 
 interface PreviewRouteParams {
   isDisabled: boolean;
@@ -33,21 +34,26 @@ export const usePreviewRoute = ({
   ruleType,
   threatMapping,
 }: PreviewRouteParams) => {
-  const [isPreviewRequestInProgress, setIsPreviewRequestInProgress] = useState<boolean>(false);
-  const [previewId, setPreviewId] = useState<string | undefined>();
-  const [errors, setErrors] = useState<string[]>([]);
-  const [warnings, setWarnings] = useState<string[]>([]);
+  const [isRequestTriggered, setIsRequestTriggered] = useState(false);
+
+  const [{ isLoading, response }, setRule] = usePreviewRule(
+    getInvocationCountFromTimeFrame(timeFrame)
+  );
+  const [warnings, setWarnings] = useState<string[]>(response.warnings ?? []);
+
+  useEffect(() => {
+    setWarnings(response.warnings ?? []);
+  }, [response]);
 
   const addNoiseWarning = useCallback(
     () => setWarnings([QUERY_PREVIEW_NOISE_WARNING, ...warnings]),
     [warnings]
   );
-  const createPreview = useCallback(() => setIsPreviewRequestInProgress(true), []);
+
   const clearPreview = useCallback(() => {
-    setPreviewId(undefined);
-    setErrors([]);
+    setRule(null);
     setWarnings([]);
-  }, []);
+  }, [setRule]);
 
   useEffect(() => {
     clearPreview();
@@ -63,32 +69,18 @@ export const usePreviewRoute = ({
     threatMapping,
   ]);
 
-  const prevIsPreviewRequestInProgress = usePrevious(isPreviewRequestInProgress);
-
-  // TODO: Make POST request to /preview here
   useEffect(() => {
-    if (isPreviewRequestInProgress && !prevIsPreviewRequestInProgress) {
-      clearPreview();
-      setTimeout(() => {
-        // eslint-disable-next-line no-console
-        console.log(index, query, threatIndex, threatQuery, timeFrame, ruleType, threatMapping);
-        setPreviewId(
-          timeFrame === 'M'
-            ? 'PLACEHOLDER_PREVIEW_ID_MONTH'
-            : timeFrame === 'd'
-            ? 'PLACEHOLDER_PREVIEW_ID_DAY'
-            : 'PLACEHOLDER_PREVIEW_ID_HOUR'
-        );
-        // setWarnings(['This is the warning copy']);
-        // setErrors(['This is the error copy']);
-        setIsPreviewRequestInProgress(false);
-      }, 1000);
+    if (isRequestTriggered) {
+      setRule(
+        formatPreviewRule({ index, query, threatIndex, threatQuery, threatMapping, ruleType })
+      );
+      setIsRequestTriggered(false);
     }
   }, [
+    setRule,
     clearPreview,
     index,
-    isPreviewRequestInProgress,
-    prevIsPreviewRequestInProgress,
+    isRequestTriggered,
     query,
     ruleType,
     threatIndex,
@@ -99,11 +91,23 @@ export const usePreviewRoute = ({
 
   return {
     addNoiseWarning,
-    createPreview,
+    createPreview: () => setIsRequestTriggered(true),
     clearPreview,
-    errors,
-    isPreviewRequestInProgress,
-    previewId,
+    errors: response.errors ?? [],
+    isPreviewRequestInProgress: isLoading,
+    previewId: response.previewId ?? '',
     warnings,
   };
+};
+
+const getInvocationCountFromTimeFrame = (timeFrame: Unit): number => {
+  switch (timeFrame) {
+    case 'M':
+      return 720;
+    case 'd':
+      return 24;
+    case 'h':
+    default:
+      return 1;
+  }
 };

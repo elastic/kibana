@@ -2152,7 +2152,7 @@ export const formattedPreviewStrategyResponse = {
                       filter: [
                         {
                           bool: {
-                            should: [{ match: { 'signal.rule.created_by': 'preview-created-by' } }],
+                            should: [{ match: { 'signal.rule.producer': 'preview-producer' } }],
                             minimum_should_match: 1,
                           },
                         },

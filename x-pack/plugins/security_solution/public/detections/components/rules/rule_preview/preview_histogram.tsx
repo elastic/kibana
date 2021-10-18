@@ -30,6 +30,7 @@ interface PreviewHistogramProps {
   timeFrame: Unit;
   previewId: string;
   addNoiseWarning: () => void;
+  isPreviewRequestInProgress: boolean;
 }
 
 const DEFAULT_HISTOGRAM_HEIGHT = 300;
@@ -38,6 +39,7 @@ export const PreviewHistogram = ({
   timeFrame,
   previewId,
   addNoiseWarning,
+  isPreviewRequestInProgress,
 }: PreviewHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
 
@@ -89,7 +91,7 @@ export const PreviewHistogram = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          {isLoading ? (
+          {isLoading || isPreviewRequestInProgress ? (
             <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
           ) : (
             <BarChart

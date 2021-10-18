@@ -41,6 +41,12 @@ import { AlertInstance } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { IEventLogService } from '../../../../../../event_log/server';
 
+enum InvocationCount {
+  HOUR = 1,
+  DAY = 24,
+  MONTH = 720,
+}
+
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
@@ -71,6 +77,19 @@ export const previewRulesRoute = async (
           return siemResponse.error({ statusCode: 404 });
         }
 
+        if (request.body.type !== 'threat_match') {
+          return response.ok({ body: { errors: ['Not an indicator match rule'] } });
+        }
+
+        let invocationCount = request.body.invocationCount;
+        if (
+          ![InvocationCount.HOUR, InvocationCount.DAY, InvocationCount.MONTH].includes(
+            invocationCount
+          )
+        ) {
+          return response.ok({ body: { errors: ['Invalid invocation count'] } });
+        }
+
         const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient, false);
         const previewRuleParams = internalRule.params;
 
@@ -87,7 +106,6 @@ export const previewRulesRoute = async (
         const previewId = uuid.v4();
         const username = security?.authc.getCurrentUser(request)?.username;
         const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
-        let invocationCount = request.body.invocationCount;
         const runState: Record<string, unknown> = {};
 
         const runExecutors = async <
@@ -178,15 +196,17 @@ export const previewRulesRoute = async (
           previewAlertInstanceFactory
         );
 
-        const errors = warningsAndErrorsStore.filter(
-          (item) => item.newStatus === RuleExecutionStatus.failed
-        );
+        const errors = warningsAndErrorsStore
+          .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+          .map((item) => item.message);
 
-        const warnings = warningsAndErrorsStore.filter(
-          (item) =>
-            item.newStatus === RuleExecutionStatus['partial failure'] ||
-            item.newStatus === RuleExecutionStatus.warning
-        );
+        const warnings = warningsAndErrorsStore
+          .filter(
+            (item) =>
+              item.newStatus === RuleExecutionStatus['partial failure'] ||
+              item.newStatus === RuleExecutionStatus.warning
+          )
+          .map((item) => item.message);
 
         return response.ok({
           body: {
@@ -198,7 +218,9 @@ export const previewRulesRoute = async (
       } catch (err) {
         const error = transformError(err as Error);
         return siemResponse.error({
-          body: error.message,
+          body: {
+            errors: [error.message],
+          },
           statusCode: error.statusCode,
         });
       }

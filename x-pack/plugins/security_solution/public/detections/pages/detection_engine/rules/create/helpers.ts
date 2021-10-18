@@ -15,6 +15,7 @@ import type {
   List,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  ThreatMapping,
   Threats,
   ThreatSubtechnique,
   ThreatTechnique,
@@ -37,6 +38,11 @@ import {
   RuleStepsFormData,
   RuleStep,
 } from '../types';
+import { FieldValueQueryBar } from '../../../../components/rules/query_bar';
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import { stepDefineDefaultValue } from '../../../../components/rules/step_define_rule';
+import { stepAboutDefaultValue } from '../../../../components/rules/step_about_rule/default_value';
+import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_actions';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
@@ -386,3 +392,44 @@ export const formatRule = <T>(
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
   ]) as unknown as T;
+
+export const formatPreviewRule = ({
+  index,
+  query,
+  threatIndex,
+  threatQuery,
+  ruleType,
+  threatMapping,
+}: {
+  index: string[];
+  threatIndex: string[];
+  query: FieldValueQueryBar;
+  threatQuery: FieldValueQueryBar;
+  ruleType: Type;
+  threatMapping: ThreatMapping;
+}): CreateRulesSchema => {
+  const defineStepData = {
+    ...stepDefineDefaultValue,
+    index,
+    queryBar: query,
+    ruleType,
+    threatIndex,
+    threatQueryBar: threatQuery,
+    threatMapping,
+  };
+  const aboutStepData = {
+    ...stepAboutDefaultValue,
+    name: 'Preview Rule',
+    description: 'Preview Rule',
+  };
+  const scheduleStepData = {
+    interval: '60m',
+    from: '1m',
+  };
+  return formatRule<CreateRulesSchema>(
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    stepActionsDefaultValue
+  );
+};
