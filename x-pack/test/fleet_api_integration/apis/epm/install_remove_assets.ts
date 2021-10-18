@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { AssetReference } from '../../../../plugins/fleet/common';
@@ -18,7 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
   const server = dockerServers.get('registry');
-  const es = getService('es');
+  const es: Client = getService('es');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const pkgKey = `${pkgName}-${pkgVersion}`;
@@ -346,68 +346,98 @@ const expectAssetsInstalled = ({
   metricsTemplateName: string;
   pkgVersion: string;
   pkgName: string;
-  es: any;
+  es: Client;
   kibanaServer: any;
 }) => {
   it('should have installed the ILM policy', async function () {
-    const resPolicy = await es.transport.request({
-      method: 'GET',
-      path: `/_ilm/policy/all_assets`,
-    });
+    const resPolicy = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_ilm/policy/all_assets`,
+      },
+      { meta: true }
+    );
     expect(resPolicy.statusCode).equal(200);
   });
   it('should have installed the index templates', async function () {
-    const resLogsTemplate = await es.transport.request({
-      method: 'GET',
-      path: `/_index_template/${logsTemplateName}`,
-    });
+    const resLogsTemplate = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_index_template/${logsTemplateName}`,
+      },
+      { meta: true }
+    );
     expect(resLogsTemplate.statusCode).equal(200);
 
-    const resMetricsTemplate = await es.transport.request({
-      method: 'GET',
-      path: `/_index_template/${metricsTemplateName}`,
-    });
+    const resMetricsTemplate = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_index_template/${metricsTemplateName}`,
+      },
+      { meta: true }
+    );
     expect(resMetricsTemplate.statusCode).equal(200);
   });
   it('should have installed the pipelines', async function () {
-    const res = await es.transport.request({
-      method: 'GET',
-      path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
-    });
+    const res = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
+      },
+      { meta: true }
+    );
     expect(res.statusCode).equal(200);
-    const resPipeline1 = await es.transport.request({
-      method: 'GET',
-      path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
-    });
+    const resPipeline1 = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+      },
+      { meta: true }
+    );
     expect(resPipeline1.statusCode).equal(200);
-    const resPipeline2 = await es.transport.request({
-      method: 'GET',
-      path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
-    });
+    const resPipeline2 = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+      },
+      { meta: true }
+    );
     expect(resPipeline2.statusCode).equal(200);
   });
   it('should have installed the ml model', async function () {
-    const res = await es.transport.request({
-      method: 'GET',
-      path: `_ml/trained_models/default`,
-    });
+    const res = await es.transport.request(
+      {
+        method: 'GET',
+        path: `_ml/trained_models/default`,
+      },
+      { meta: true }
+    );
     expect(res.statusCode).equal(200);
   });
   it('should have installed the component templates', async function () {
-    const resMappings = await es.transport.request({
-      method: 'GET',
-      path: `/_component_template/${logsTemplateName}@mappings`,
-    });
+    const resMappings = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_component_template/${logsTemplateName}@mappings`,
+      },
+      { meta: true }
+    );
     expect(resMappings.statusCode).equal(200);
-    const resSettings = await es.transport.request({
-      method: 'GET',
-      path: `/_component_template/${logsTemplateName}@settings`,
-    });
+    const resSettings = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_component_template/${logsTemplateName}@settings`,
+      },
+      { meta: true }
+    );
     expect(resSettings.statusCode).equal(200);
-    const resUserSettings = await es.transport.request({
-      method: 'GET',
-      path: `/_component_template/${logsTemplateName}@custom`,
-    });
+    const resUserSettings = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_component_template/${logsTemplateName}@custom`,
+      },
+      { meta: true }
+    );
     expect(resUserSettings.statusCode).equal(200);
   });
   it('should have installed the kibana assets', async function () {
