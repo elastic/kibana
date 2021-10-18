@@ -198,7 +198,9 @@ describe.each([
         renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
       ).not.toBeNull();
 
-      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one');
+      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
+        'Policy oneView details'
+      );
     });
 
     it('should display policy ID if no policy menu item found in `policies` prop', async () => {

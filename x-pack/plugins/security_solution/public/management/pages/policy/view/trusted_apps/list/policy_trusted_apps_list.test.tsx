@@ -244,11 +244,11 @@ describe('when rendering the PolicyTrustedAppsList', () => {
       expect(
         renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-0')
           .textContent
-      ).toEqual('Endpoint Policy 0');
+      ).toEqual('Endpoint Policy 0View details');
       expect(
         renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-1')
           .textContent
-      ).toEqual('Endpoint Policy 1');
+      ).toEqual('Endpoint Policy 1View details');
     });
 
     it('should navigate to policy details when clicking policy on assignment context menu', async () => {
