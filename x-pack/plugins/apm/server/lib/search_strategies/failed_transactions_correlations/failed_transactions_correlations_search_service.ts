@@ -9,17 +9,15 @@ import { chunk } from 'lodash';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../../../src/plugins/data/common';
-
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
-import type { SearchStrategyServerParams } from '../../../../common/search_strategies/types';
 import type {
-  FailedTransactionsCorrelationsRequestParams,
+  SearchStrategyClientParams,
+  SearchStrategyServerParams,
+  RawResponseBase,
+} from '../../../../common/search_strategies/types';
+import type {
+  FailedTransactionsCorrelationsParams,
   FailedTransactionsCorrelationsRawResponse,
 } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
@@ -38,22 +36,18 @@ import { failedTransactionsCorrelationsSearchServiceStateProvider } from './fail
 import { ERROR_CORRELATION_THRESHOLD } from '../constants';
 import { fetchFieldsStats } from '../queries/field_stats/get_fields_stats';
 
-export type FailedTransactionsCorrelationsSearchServiceProvider =
+type FailedTransactionsCorrelationsSearchServiceProvider =
   SearchServiceProvider<
-    FailedTransactionsCorrelationsRequestParams,
-    FailedTransactionsCorrelationsRawResponse
+    FailedTransactionsCorrelationsParams & SearchStrategyClientParams,
+    FailedTransactionsCorrelationsRawResponse & RawResponseBase
   >;
-
-export type FailedTransactionsCorrelationsSearchStrategy = ISearchStrategy<
-  IKibanaSearchRequest<FailedTransactionsCorrelationsRequestParams>,
-  IKibanaSearchResponse<FailedTransactionsCorrelationsRawResponse>
->;
 
 export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransactionsCorrelationsSearchServiceProvider =
   (
     esClient: ElasticsearchClient,
     getApmIndices: () => Promise<ApmIndicesConfig>,
-    searchServiceParams: FailedTransactionsCorrelationsRequestParams,
+    searchServiceParams: FailedTransactionsCorrelationsParams &
+      SearchStrategyClientParams,
     includeFrozen: boolean
   ) => {
     const { addLogMessage, getLogMessages } = searchServiceLogProvider();
@@ -63,7 +57,8 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
     async function fetchErrorCorrelations() {
       try {
         const indices = await getApmIndices();
-        const params: FailedTransactionsCorrelationsRequestParams &
+        const params: FailedTransactionsCorrelationsParams &
+          SearchStrategyClientParams &
           SearchStrategyServerParams = {
           ...searchServiceParams,
           index: indices.transaction,
