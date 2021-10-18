@@ -109,6 +109,6 @@ image::images/spaces-configure-landing-page.png["Configure space-level landing p
 
 [float]
 [[spaces-delete-started]]
-=== Disable and version updates
+=== Disabling spaces
 
 Starting in {kib} 8.0, the Spaces feature cannot be disabled.
