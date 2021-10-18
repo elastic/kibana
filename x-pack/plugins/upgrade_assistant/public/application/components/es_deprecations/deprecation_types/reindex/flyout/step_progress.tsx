@@ -63,7 +63,7 @@ const Step: React.FunctionComponent<StepProgressStep & { idx: number }> = ({
     <Fragment>
       <div className="upgStepProgress__step">
         <StepStatus status={status} idx={idx} />
-        <p className={titleClassName}>{title}</p>
+        <div className={titleClassName}>{title}</div>
       </div>
       {children && <div className="upgStepProgress__content">{children}</div>}
     </Fragment>
