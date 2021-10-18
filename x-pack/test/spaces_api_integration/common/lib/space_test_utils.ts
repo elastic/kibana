@@ -50,6 +50,8 @@ export function getAggregatedSpaceData(es: KibanaClient, objectTypes: string[]) 
             emit(doc["namespaces"].value);
           } else if (doc["namespace"].size() > 0) {
             emit(doc["namespace"].value);
+          } else if (doc["legacy-url-alias.targetNamespace"].size() > 0) {
+            emit(doc["legacy-url-alias.targetNamespace"].value);
           }
         `,
         },

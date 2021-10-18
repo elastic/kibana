@@ -26,6 +26,7 @@ import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -2714,7 +2715,11 @@ describe('SavedObjectsRepository', () => {
         const allTypes = registry.getAllTypes().map((type) => type.name);
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           namespaces: [namespace],
-          type: allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
+          type: [
+            ...allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
+            LEGACY_URL_ALIAS_TYPE,
+          ],
+          kueryNode: expect.anything(),
         });
       });
     });

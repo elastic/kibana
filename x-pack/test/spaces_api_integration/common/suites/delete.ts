@@ -48,6 +48,7 @@ export function deleteTestSuiteFactory(
       'dashboard',
       'space',
       'index-pattern',
+      'legacy-url-alias',
       // TODO: add assertions for config objects -- these assertions were removed because of flaky behavior in #92358, but we should
       // consider adding them again at some point, especially if we convert config objects to `namespaceType: 'multiple-isolated'` in
       // the future.
@@ -65,45 +66,35 @@ export function deleteTestSuiteFactory(
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            {
-              key: 'visualization',
-              doc_count: 3,
-            },
-            {
-              key: 'dashboard',
-              doc_count: 2,
-            },
-            {
-              key: 'space',
-              doc_count: 2,
-            },
-            {
-              key: 'index-pattern',
-              doc_count: 1,
-            },
+            { key: 'visualization', doc_count: 3 },
+            { key: 'dashboard', doc_count: 2 },
+            { key: 'space', doc_count: 2 }, // since space objects are namespace-agnostic, they appear in the "default" agg bucket
+            { key: 'index-pattern', doc_count: 1 },
+            // legacy-url-alias objects cannot exist for the default space
           ],
         },
       },
       {
-        doc_count: 6,
+        doc_count: 7,
         key: 'space_1',
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            {
-              key: 'visualization',
-              doc_count: 3,
-            },
-            {
-              key: 'dashboard',
-              doc_count: 2,
-            },
-            {
-              key: 'index-pattern',
-              doc_count: 1,
-            },
+            { key: 'visualization', doc_count: 3 },
+            { key: 'dashboard', doc_count: 2 },
+            { key: 'index-pattern', doc_count: 1 },
+            { key: 'legacy-url-alias', doc_count: 1 },
           ],
+        },
+      },
+      {
+        doc_count: 1,
+        key: 'other_space',
+        countByType: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [{ key: 'legacy-url-alias', doc_count: 1 }], // this alias is in a non-existent space (for other test suites)
         },
       },
     ];

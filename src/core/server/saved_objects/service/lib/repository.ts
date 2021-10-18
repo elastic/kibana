@@ -8,6 +8,7 @@
 
 import { omit, isObject } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
+import * as esKuery from '@kbn/es-query';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
 import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import type { Logger } from '../../../logging';
@@ -55,6 +56,7 @@ import {
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkResolveResponse,
 } from '../saved_objects_client';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import {
   SavedObject,
   SavedObjectsBaseOptions,
@@ -780,7 +782,17 @@ export class SavedObjectsRepository {
     }
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
-    const typesToUpdate = allTypes.filter((type) => !this._registry.isNamespaceAgnostic(type));
+    const typesToUpdate = [
+      ...allTypes.filter((type) => !this._registry.isNamespaceAgnostic(type)),
+      LEGACY_URL_ALIAS_TYPE,
+    ];
+
+    // Construct kueryNode to filter legacy URL aliases (these space-agnostic objects do not use root-level "namespace/s" fields)
+    const { buildNode } = esKuery.nodeTypes.function;
+    const targetNamespaceField = `${LEGACY_URL_ALIAS_TYPE}.targetNamespace`;
+    const match1 = buildNode('is', targetNamespaceField, namespace);
+    const match2 = buildNode('not', buildNode('exists', targetNamespaceField));
+    const kueryNode = buildNode('or', [match1, match2]);
 
     const { body, statusCode, headers } = await this.client.updateByQuery(
       {
@@ -803,8 +815,9 @@ export class SavedObjectsRepository {
           },
           conflicts: 'proceed',
           ...getSearchDsl(this._mappings, this._registry, {
-            namespaces: namespace ? [namespace] : undefined,
+            namespaces: [namespace],
             type: typesToUpdate,
+            kueryNode,
           }),
         },
       },
