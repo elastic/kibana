@@ -166,6 +166,8 @@ export const previewRulesRoute = async (
           ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
           // unused as we override the ruleExecutionLogClient
           eventLogService: {} as unknown as IEventLogService,
+          eventsTelemetry: undefined,
+          ml: undefined,
         });
 
         await runExecutors(
