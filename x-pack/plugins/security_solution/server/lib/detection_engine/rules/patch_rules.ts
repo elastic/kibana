@@ -13,8 +13,6 @@ import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
-// eslint-disable-next-line no-restricted-imports
-import { legacyRuleActionsSavedObjectType } from '../rule_actions/legacy_saved_object_mappings';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { addTags } from './add_tags';
 import { enableRule } from './enable_rule';
@@ -23,6 +21,7 @@ import {
   calculateInterval,
   calculateName,
   calculateVersion,
+  legacyMigrate,
   maybeMute,
   removeUndefined,
   transformToAlertThrottle,
@@ -37,7 +36,6 @@ class PatchError extends Error {
   }
 }
 
-// eslint-disable-next-line complexity
 export const patchRules = async ({
   rulesClient,
   savedObjectsClient,
@@ -96,38 +94,11 @@ export const patchRules = async ({
     return null;
   }
 
-  /**
-   * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
-   * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actualy value (1hr etc..)
-   * Then use the rules client to delete the siem.notification
-   * Then with the legacy Rule Actions saved object type, just delete it.
-   */
-
-  // find it using the references array, not params.ruleAlertId
-  let migratedRule = false;
-  const siemNotification = await rulesClient.find({
-    options: {
-      hasReference: {
-        type: 'alert',
-        id: rule.id,
-      },
-    },
+  const { migratedActions, migratedThrottle, migratedNotifyWhen } = await legacyMigrate({
+    rulesClient,
+    savedObjectsClient,
+    id: rule.id,
   });
-
-  const legacyRuleActionsSO = await savedObjectsClient.find({
-    type: legacyRuleActionsSavedObjectType,
-  });
-
-  if (siemNotification != null && siemNotification.data.length > 0) {
-    await rulesClient.delete({ id: siemNotification.data[0].id });
-    if (legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0) {
-      await savedObjectsClient.delete(
-        legacyRuleActionsSavedObjectType,
-        legacyRuleActionsSO.saved_objects[0].id
-      );
-    }
-    migratedRule = true;
-  }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
     author,
@@ -233,19 +204,15 @@ export const patchRules = async ({
       interval: calculateInterval(interval, rule.schedule.interval),
     },
     params: removeUndefined(nextParams),
-    actions: migratedRule
-      ? siemNotification.data[0].actions
-      : actions?.map(transformRuleToAlertAction) ?? rule.actions,
-    throttle: migratedRule
-      ? siemNotification.data[0].schedule.interval
-      : throttle !== undefined
-      ? transformToAlertThrottle(throttle)
-      : rule.throttle,
-    notifyWhen: migratedRule
-      ? transformToNotifyWhen(siemNotification.data[0].throttle)
-      : throttle !== undefined
-      ? transformToNotifyWhen(throttle)
-      : rule.notifyWhen,
+    actions: actions?.map(transformRuleToAlertAction) ?? migratedActions ?? rule.actions,
+    throttle:
+      throttle !== undefined
+        ? transformToAlertThrottle(throttle)
+        : migratedThrottle ?? rule.throttle,
+    notifyWhen:
+      throttle !== undefined
+        ? transformToNotifyWhen(throttle)
+        : migratedNotifyWhen ?? rule.notifyWhen,
   };
 
   const [validated, errors] = validate(newRule, internalRuleUpdate);

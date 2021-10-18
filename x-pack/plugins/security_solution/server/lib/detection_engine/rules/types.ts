@@ -358,3 +358,9 @@ export interface FindRuleOptions {
   fields: FieldsOrUndefined;
   sortOrder: SortOrderOrUndefined;
 }
+
+export interface LegacyMigrateParams {
+  rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  id: string;
+}

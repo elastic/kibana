@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable complexity */
-
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../alerting/server';
@@ -14,11 +14,17 @@ import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
-import { RuleParams } from '../schemas/rule_schemas';
+import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
-import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
-// eslint-disable-next-line no-restricted-imports
-import { legacyRuleActionsSavedObjectType } from '../rule_actions/legacy_saved_object_mappings';
+import { legacyMigrate, maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
+
+class UpdateError extends Error {
+  public readonly statusCode: number;
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
 
 export const updateRules = async ({
   isRuleRegistryEnabled,
@@ -39,43 +45,11 @@ export const updateRules = async ({
     return null;
   }
 
-  /**
-   * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
-   * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actualy value (1hr etc..)
-   * Then use the rules client to delete the siem.notification
-   * Then with the legacy Rule Actions saved object type, just delete it.
-   */
-
-  // find it using the references array, not params.ruleAlertId
-  let migratedRule = false;
-  if (existingRule != null) {
-    const siemNotification = await rulesClient.find({
-      options: {
-        hasReference: {
-          type: 'alert',
-          id: existingRule.id,
-        },
-      },
-    });
-
-    const legacyRuleActionsSO = await savedObjectsClient.find({
-      type: legacyRuleActionsSavedObjectType,
-    });
-
-    if (siemNotification != null && siemNotification.data.length > 0) {
-      existingRule.actions = siemNotification.data[0].actions;
-      existingRule.throttle = siemNotification.data[0].schedule.interval;
-      existingRule.notifyWhen = transformToNotifyWhen(siemNotification.data[0].throttle);
-      await rulesClient.delete({ id: siemNotification.data[0].id });
-      if (legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0) {
-        await savedObjectsClient.delete(
-          legacyRuleActionsSavedObjectType,
-          legacyRuleActionsSO.saved_objects[0].id
-        );
-      }
-      migratedRule = true;
-    }
-  }
+  const { migratedActions, migratedThrottle, migratedNotifyWhen } = await legacyMigrate({
+    rulesClient,
+    savedObjectsClient,
+    id: existingRule.id,
+  });
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
@@ -118,18 +92,28 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions: migratedRule
-      ? existingRule.actions
-      : ruleUpdate.actions != null
-      ? ruleUpdate.actions.map(transformRuleToAlertAction)
-      : [],
-    throttle: migratedRule ? existingRule.throttle : transformToAlertThrottle(ruleUpdate.throttle),
-    notifyWhen: migratedRule ? existingRule.notifyWhen : transformToNotifyWhen(ruleUpdate.throttle),
+    actions:
+      ruleUpdate.actions != null
+        ? ruleUpdate.actions.map(transformRuleToAlertAction)
+        : migratedActions ?? [],
+    throttle:
+      ruleUpdate.throttle !== existingRule.throttle
+        ? transformToAlertThrottle(ruleUpdate.throttle)
+        : migratedThrottle ?? transformToAlertThrottle(ruleUpdate.throttle),
+    notifyWhen:
+      transformToNotifyWhen(ruleUpdate.throttle) !== transformToNotifyWhen(existingRule.throttle)
+        ? transformToNotifyWhen(ruleUpdate.throttle)
+        : migratedNotifyWhen ?? transformToNotifyWhen(ruleUpdate.throttle),
   };
+
+  const [validated, errors] = validate(newInternalRule, internalRuleUpdate);
+  if (errors != null || validated === null) {
+    throw new UpdateError(`Applying update would create invalid rule: ${errors}`, 400);
+  }
 
   const update = await rulesClient.update({
     id: existingRule.id,
-    data: newInternalRule,
+    data: validated,
   });
 
   await maybeMute({
