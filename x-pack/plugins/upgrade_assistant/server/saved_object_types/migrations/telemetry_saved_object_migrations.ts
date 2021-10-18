@@ -26,16 +26,10 @@ const v716RemoveUnusedTelemetry: SavedObjectMigrationFn<any, any> = (doc) => {
   });
 
   if (isDocEligible) {
-    try {
-      return {
-        ...doc,
-        attributes: {
-          ...omit(doc.attributes, attributesBlocklist),
-        },
-      };
-    } catch (e) {
-      // Let it go, the data is invalid and we'll leave it as is
-    }
+    return {
+      ...doc,
+      attributes: omit(doc.attributes, attributesBlocklist),
+    };
   }
 
   return doc;
