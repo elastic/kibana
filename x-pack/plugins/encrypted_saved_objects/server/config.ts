@@ -12,7 +12,6 @@ export type ConfigType = TypeOf<typeof ConfigSchema>;
 
 export const ConfigSchema = schema.object(
   {
-    enabled: schema.boolean({ defaultValue: true }),
     encryptionKey: schema.conditional(
       schema.contextRef('dist'),
       true,

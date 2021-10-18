@@ -9,11 +9,12 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { CoreStart, HttpSetup, HttpStart } from 'kibana/public';
 import { matchPath } from 'react-router-dom';
-import { transformNewItemOutput } from '@kbn/securitysolution-list-hooks';
-import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
+import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
+import { AppLocation, Immutable, ImmutableObject } from '../../../../../common/endpoint/types';
 import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
@@ -21,11 +22,14 @@ import { parseQueryFilterToKQL } from '../../../common/utils';
 import {
   createFailedResourceState,
   createLoadedResourceState,
+  createLoadingResourceState,
 } from '../../../state/async_resource_builders';
 import {
   deleteHostIsolationExceptionItems,
   getHostIsolationExceptionItems,
   createHostIsolationExceptionItem,
+  getOneHostIsolationExceptionItem,
+  updateOneHostIsolationExceptionItem,
 } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 import { getCurrentListPageDataState, getCurrentLocation, getItemToDelete } from './selector';
@@ -53,6 +57,14 @@ export const createHostIsolationExceptionsPageMiddleware = (
     if (action.type === 'hostIsolationExceptionsSubmitDelete') {
       deleteHostIsolationExceptionsItem(store, coreStart.http);
     }
+
+    if (action.type === 'hostIsolationExceptionsMarkToEdit') {
+      loadHostIsolationExceptionsItem(store, coreStart.http, action.payload.id);
+    }
+
+    if (action.type === 'hostIsolationExceptionsSubmitEdit') {
+      updateHostIsolationExceptionsItem(store, coreStart.http, action.payload);
+    }
   };
 };
 
@@ -67,8 +79,8 @@ async function createHostIsolationException(
   dispatch({
     type: 'hostIsolationExceptionsFormStateChanged',
     payload: {
-      type: 'LoadingResourceState',
       // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
+      type: 'LoadingResourceState',
       previousState: entry,
     },
   });
@@ -110,8 +122,8 @@ async function loadHostIsolationExceptionsList(
     dispatch({
       type: 'hostIsolationExceptionsPageDataChanged',
       payload: {
-        type: 'LoadingResourceState',
         // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
+        type: 'LoadingResourceState',
         previousState: getCurrentListPageDataState(store.getState()),
       },
     });
@@ -152,8 +164,8 @@ async function deleteHostIsolationExceptionsItem(
     dispatch({
       type: 'hostIsolationExceptionsDeleteStatusChanged',
       payload: {
-        type: 'LoadingResourceState',
         // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
+        type: 'LoadingResourceState',
         previousState: store.getState().deletion.status,
       },
     });
@@ -168,6 +180,72 @@ async function deleteHostIsolationExceptionsItem(
   } catch (error) {
     dispatch({
       type: 'hostIsolationExceptionsDeleteStatusChanged',
+      payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
+    });
+  }
+}
+
+async function loadHostIsolationExceptionsItem(
+  store: ImmutableMiddlewareAPI<HostIsolationExceptionsPageState, AppAction>,
+  http: HttpSetup,
+  id: string
+) {
+  const { dispatch } = store;
+  try {
+    const exception: UpdateExceptionListItemSchema = await getOneHostIsolationExceptionItem(
+      http,
+      id
+    );
+    dispatch({
+      type: 'hostIsolationExceptionsFormEntryChanged',
+      payload: exception,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'hostIsolationExceptionsFormStateChanged',
+      payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
+    });
+  }
+}
+async function updateHostIsolationExceptionsItem(
+  store: ImmutableMiddlewareAPI<HostIsolationExceptionsPageState, AppAction>,
+  http: HttpSetup,
+  exception: ImmutableObject<UpdateExceptionListItemSchema>
+) {
+  const { dispatch } = store;
+  dispatch({
+    type: 'hostIsolationExceptionsFormStateChanged',
+    payload: createLoadingResourceState(createLoadedResourceState(exception)),
+  });
+
+  try {
+    const entry = transformOutput(exception as UpdateExceptionListItemSchema);
+    // Clean unnecessary fields for update action
+    const fieldsToRemove: Array<keyof ExceptionListItemSchema> = [
+      'created_at',
+      'created_by',
+      'created_at',
+      'created_by',
+      'list_id',
+      'tie_breaker_id',
+      'updated_at',
+      'updated_by',
+    ];
+
+    fieldsToRemove.forEach((field) => {
+      delete entry[field as keyof UpdateExceptionListItemSchema];
+    });
+    const response: ExceptionListItemSchema = await updateOneHostIsolationExceptionItem(
+      http,
+      entry
+    );
+    dispatch({
+      type: 'hostIsolationExceptionsFormStateChanged',
+      payload: createLoadedResourceState(response),
+    });
+  } catch (error) {
+    dispatch({
+      type: 'hostIsolationExceptionsFormStateChanged',
       payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
     });
   }
