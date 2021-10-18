@@ -220,12 +220,10 @@ async function executeCheck(checker: SettingsChecker, http: { fetch: any }): Pro
 
     return { found, reason };
   } catch (err: any) {
-    const { data } = err;
-
     return {
       error: true,
       found: false,
-      errorReason: data,
+      errorReason: err.body,
     };
   }
 }
