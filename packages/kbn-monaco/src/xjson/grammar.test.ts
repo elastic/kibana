@@ -25,6 +25,7 @@ describe('createParser', () => {
         {"menu": {
           "id": "file",
           "value": "File",
+          "quotes": "'\\"",
           "popup": {
             "actions": [
               "new",
@@ -86,6 +87,23 @@ describe('createParser', () => {
     `);
   });
 
+  test('an escaped quote can be appended to the end of triple quotes', () => {
+    expect(
+      parser(`
+        {"menu": {
+          "id": """
+          file
+          \\"""",
+          "value": "File"
+        }}
+      `)
+    ).toMatchInlineSnapshot(`
+      Object {
+        "annotations": Array [],
+      }
+    `);
+  });
+
   test('text values should be wrapper into quotes', () => {
     expect(
       parser(`
@@ -106,6 +124,7 @@ describe('createParser', () => {
       }
     `);
   });
+
   test('check for close quotes', () => {
     expect(
       parser(`
@@ -146,6 +165,7 @@ describe('createParser', () => {
       }
     `);
   });
+
   test('all curly quotes should be closed', () => {
     expect(
       parser(`

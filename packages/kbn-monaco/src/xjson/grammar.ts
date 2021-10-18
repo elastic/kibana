@@ -83,14 +83,22 @@ export const createParser = () => {
           (string += ch), next();
       return (number = +string), isNaN(number) ? (error('Bad number'), void 0) : number;
     },
-    stringLiteral = function(quotes: string) {
-      const end = text.indexOf(quotes, at + quotes.length);
+    stringLiteral = function () {
+      let quotes = '"""';
+      let end = text.indexOf('\\"' + quotes, at + quotes.length);
+
+      if (end >= 0) {
+        quotes = '\\"' + quotes;
+      } else {
+        end = text.indexOf(quotes, at + quotes.length);
+      }
 
       if (end >= 0) {
         for (let l = end - at + quotes.length; l > 0; l--) {
           next();
         }
       }
+
       return next();
     },
     string = function () {
@@ -171,9 +179,8 @@ export const createParser = () => {
     };
   return (
     (value = function () {
-      const tripleQuotes = '"""';
-      if (peek(tripleQuotes)) {
-        return stringLiteral(tripleQuotes);
+      if (peek('"""')) {
+        return stringLiteral();
       }
       switch ((white(), ch)) {
         case '{':
