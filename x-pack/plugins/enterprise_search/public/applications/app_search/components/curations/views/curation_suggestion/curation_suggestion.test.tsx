@@ -14,6 +14,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiEmptyPrompt } from '@elastic/eui';
+
 import { AppSearchPageTemplate } from '../../../layout';
 
 import { Result } from '../../../result';
@@ -167,5 +169,32 @@ describe('CurationSuggestion', () => {
     expect(resultWrapper.find(Result).at(0).prop('schemaForTypeHighlights')).toEqual(
       values.engine.schema
     );
+  });
+
+  it('shows an empty prompt when there are no organic results', () => {
+    setMockValues({
+      ...values,
+      suggestion: {
+        ...values.suggestion,
+        organic: [],
+        curation: {
+          ...values.suggestion.curation,
+          organic: [],
+        },
+      },
+    });
+    const wrapper = shallow(<CurationSuggestion />);
+    wrapper.find('[data-test-subj="showOrganicResults"]').simulate('click');
+    expect(wrapper.find('[data-test-subj="currentOrganicResults"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="proposedOrganicResults"]').exists()).toBe(false);
+    expect(wrapper.find(EuiEmptyPrompt).exists()).toBe(true);
+  });
+
+  it('renders even if no data is set yet', () => {
+    setMockValues({
+      suggestion: null,
+    });
+    const wrapper = shallow(<CurationSuggestion />);
+    expect(wrapper.find(AppSearchPageTemplate).exists()).toBe(true);
   });
 });

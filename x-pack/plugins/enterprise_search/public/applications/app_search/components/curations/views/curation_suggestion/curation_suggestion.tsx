@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButtonEmpty,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -20,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { LeafIcon } from '../../../../../shared/icons';
 import { useDecodedParams } from '../../../../utils/encode_path_params';
 import { EngineLogic } from '../../../engine';
 import { AppSearchPageTemplate } from '../../../layout';
@@ -42,6 +44,7 @@ export const CurationSuggestion: React.FC = () => {
   const [showOrganicResults, setShowOrganicResults] = useState(false);
   const currentOrganicResults = suggestion?.curation?.organic || [];
   const proposedOrganicResults = suggestion?.organic || [];
+  const totalNumberOfOrganicResults = currentOrganicResults.length + proposedOrganicResults.length;
   const existingCurationResults = suggestion?.curation
     ? suggestion.curation.promoted.map(convertToResultFormat)
     : [];
@@ -117,7 +120,24 @@ export const CurationSuggestion: React.FC = () => {
                 { defaultMessage: 'Expand organic search results' }
               )}
         </EuiButtonEmpty>
-        {showOrganicResults && (
+        {showOrganicResults && totalNumberOfOrganicResults === 0 && (
+          <EuiEmptyPrompt
+            iconType={LeafIcon}
+            title={
+              <h4>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.noOrganicResultsTitle',
+                  { defaultMessage: 'No results' }
+                )}
+              </h4>
+            }
+            body={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.noOrganicResultsDescription',
+              { defaultMessage: 'No organic search results were returned for this query' }
+            )}
+          />
+        )}
+        {showOrganicResults && totalNumberOfOrganicResults > 0 && (
           <>
             <EuiHorizontalRule margin="none" />
             <EuiPanel hasShadow={false} data-test-subj="organicResults">
