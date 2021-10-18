@@ -7,17 +7,18 @@
 
 import React, { FC } from 'react';
 
-import { EuiTabbedContent } from '@elastic/eui';
+import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
 import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
 import moment from 'moment-timezone';
 import { TransformListRow } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
-import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
+import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 import { ExpandedRowPreviewPane } from './expanded_row_preview_pane';
+import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {
@@ -44,18 +45,16 @@ export function stringHash(str: string): number {
   return hash < 0 ? hash * -2 : hash;
 }
 
-interface Item {
-  title: string;
-  description: any;
-}
+type Item = SectionItem;
 
 interface Props {
   item: TransformListRow;
+  onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
 }
 
 type StateValues = Optional<TransformListRow['stats'], 'stats' | 'checkpointing'>;
 
-export const ExpandedRow: FC<Props> = ({ item }) => {
+export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   const {
     ml: { formatHumanReadableDateTimeSeconds },
   } = useAppDependencies();
@@ -168,7 +167,20 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
 
   const alertRuleItems: Item[] | undefined = item.alerting_rules?.map((rule) => {
     return {
-      title: rule.name,
+      title: (
+        <EuiButtonEmpty
+          iconType={'documentEdit'}
+          iconSide={'left'}
+          onClick={() => {
+            onAlertEdit(rule);
+          }}
+          flush="left"
+          size={'xs'}
+          iconSize={'s'}
+        >
+          {rule.name}
+        </EuiButtonEmpty>
+      ),
       description: rule.executionStatus.status,
     };
   });

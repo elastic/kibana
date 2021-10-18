@@ -12,7 +12,7 @@ import { TRANSFORM_RULE_TYPE } from '../../common';
 
 interface TransformAlertFlyoutProps {
   initialAlert?: TransformHealthAlertRule;
-  ruleParams: TransformHealthRuleParams;
+  ruleParams?: TransformHealthRuleParams;
   onSave?: () => void;
   onCloseFlyout: () => void;
 }
