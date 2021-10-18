@@ -4168,7 +4168,6 @@
     "inspector.requests.noRequestsLoggedTitle": "リクエストが記録されていません",
     "inspector.requests.requestFailedTooltipTitle": "リクエストに失敗しました",
     "inspector.requests.requestInProgressAriaLabel": "リクエストが進行中",
-    "inspector.requests.requestLabel": "リクエスト：",
     "inspector.requests.requestsDescriptionTooltip": "データを収集したリクエストを表示します",
     "inspector.requests.requestsTitle": "リクエスト",
     "inspector.requests.requestSucceededTooltipTitle": "リクエスト成功",
