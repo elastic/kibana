@@ -534,7 +534,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "critical",
           "message": "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
         },
       ]
@@ -555,7 +555,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "critical",
           "message": "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
         },
       ]
