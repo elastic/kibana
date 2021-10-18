@@ -9,7 +9,7 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable @typescript-eslint/no-useless-constructor */
 
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import moment from 'moment';
 import uuid from 'uuid';
 import {

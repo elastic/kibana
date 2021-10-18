@@ -6,7 +6,7 @@
  */
 import { URL } from 'url';
 
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';

@@ -6,6 +6,7 @@
  */
 
 import {
+  getBreakdownMetrics,
   getSpanDestinationMetrics,
   getTransactionMetrics,
   toElasticsearchOutput,
@@ -20,7 +21,12 @@ export async function traceData(context: InheritedFtrProviderContext) {
   return {
     index: (events: any[]) => {
       const esEvents = toElasticsearchOutput(
-        events.concat(getTransactionMetrics(events)).concat(getSpanDestinationMetrics(events)),
+        [
+          ...events,
+          ...getTransactionMetrics(events),
+          ...getSpanDestinationMetrics(events),
+          ...getBreakdownMetrics(events),
+        ],
         '7.14.0'
       );
 

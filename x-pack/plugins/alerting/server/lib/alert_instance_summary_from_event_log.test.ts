@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { random, mean } from 'lodash';
 import { SanitizedAlert, AlertInstanceSummary } from '../types';
 import { IValidatedEvent } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
@@ -31,6 +32,10 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "consumer": "alert-consumer",
         "enabled": false,
         "errorMessages": Array [],
+        "executionDuration": Object {
+          "average": 0,
+          "values": Array [],
+        },
         "id": "alert-123",
         "instances": Object {},
         "lastRun": undefined,
@@ -71,6 +76,10 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "consumer": "alert-consumer-2",
         "enabled": true,
         "errorMessages": Array [],
+        "executionDuration": Object {
+          "average": 0,
+          "values": Array [],
+        },
         "id": "alert-456",
         "instances": Object {},
         "lastRun": undefined,
@@ -137,7 +146,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       dateEnd,
     });
 
-    const { lastRun, status, instances } = summary;
+    const { lastRun, status, instances, executionDuration } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {},
@@ -145,6 +154,8 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "status": "OK",
       }
     `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('active alert with no instances but has errors', async () => {
@@ -163,7 +174,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       dateEnd,
     });
 
-    const { lastRun, status, errorMessages, instances } = summary;
+    const { lastRun, status, errorMessages, instances, executionDuration } = summary;
     expect({ lastRun, status, errorMessages, instances }).toMatchInlineSnapshot(`
       Object {
         "errorMessages": Array [
@@ -181,6 +192,8 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "status": "Error",
       }
     `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently inactive instance', async () => {
@@ -202,7 +215,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       dateEnd,
     });
 
-    const { lastRun, status, instances } = summary;
+    const { lastRun, status, instances, executionDuration } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -218,6 +231,8 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "status": "OK",
       }
     `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('legacy alert with currently inactive instance', async () => {
@@ -239,7 +254,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       dateEnd,
     });
 
-    const { lastRun, status, instances } = summary;
+    const { lastRun, status, instances, executionDuration } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -255,6 +270,8 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "status": "OK",
       }
     `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently inactive instance, no new-instance', async () => {
@@ -275,7 +292,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       dateEnd,
     });
 
-    const { lastRun, status, instances } = summary;
+    const { lastRun, status, instances, executionDuration } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -291,6 +308,8 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "status": "OK",
       }
     `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently active instance', async () => {
@@ -312,7 +331,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       dateEnd,
     });
 
-    const { lastRun, status, instances } = summary;
+    const { lastRun, status, instances, executionDuration } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -328,6 +347,8 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "status": "Active",
       }
     `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently active instance with no action group in event log', async () => {
@@ -349,7 +370,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       dateEnd,
     });
 
-    const { lastRun, status, instances } = summary;
+    const { lastRun, status, instances, executionDuration } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -365,6 +386,8 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "status": "Active",
       }
     `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently active instance that switched action groups', async () => {
@@ -386,7 +409,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       dateEnd,
     });
 
-    const { lastRun, status, instances } = summary;
+    const { lastRun, status, instances, executionDuration } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -402,6 +425,8 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "status": "Active",
       }
     `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with currently active instance, no new-instance', async () => {
@@ -422,7 +447,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       dateEnd,
     });
 
-    const { lastRun, status, instances } = summary;
+    const { lastRun, status, instances, executionDuration } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -438,6 +463,8 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "status": "Active",
       }
     `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with active and inactive muted alerts', async () => {
@@ -462,7 +489,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       dateEnd,
     });
 
-    const { lastRun, status, instances } = summary;
+    const { lastRun, status, instances, executionDuration } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -485,6 +512,8 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "status": "Active",
       }
     `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
   test('alert with active and inactive alerts over many executes', async () => {
@@ -515,7 +544,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       dateEnd,
     });
 
-    const { lastRun, status, instances } = summary;
+    const { lastRun, status, instances, executionDuration } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -538,7 +567,19 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "status": "Active",
       }
     `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
+
+  const testExecutionDurations = (
+    actualDurations: number[],
+    executionDuration?: { average?: number; values?: number[] }
+  ) => {
+    expect(executionDuration).toEqual({
+      average: Math.round(mean(actualDurations)),
+      values: actualDurations,
+    });
+  };
 });
 
 function dateString(isoBaseDate: string, offsetMillis = 0): string {
@@ -573,6 +614,7 @@ export class EventsFactory {
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.execute,
+        duration: random(2000, 180000) * 1000 * 1000,
       },
     };
 
@@ -633,6 +675,12 @@ export class EventsFactory {
       kibana: { alerting: { instance_id: instanceId } },
     });
     return this;
+  }
+
+  getExecutionDurations(): number[] {
+    return this.events
+      .filter((ev) => ev?.event?.action === 'execute' && ev?.event?.duration !== undefined)
+      .map((ev) => ev?.event?.duration! / (1000 * 1000));
   }
 }
 

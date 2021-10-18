@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 function createApiResponseMock<TResponse, TContext>(
   apiResponse: Pick<TransportResult<TResponse, TContext>, 'body'> &

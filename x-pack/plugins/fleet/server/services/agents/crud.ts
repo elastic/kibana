@@ -315,7 +315,7 @@ export async function bulkUpdateAgents(
   });
 
   return {
-    items: res.body.items.map((item: estypes.BulkResponseItemContainer) => ({
+    items: res.body.items.map((item) => ({
       id: item.update!._id as string,
       success: !item.update!.error,
       error: item.update!.error as Error,

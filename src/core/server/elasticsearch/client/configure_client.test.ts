@@ -15,8 +15,8 @@ import type {
   TransportRequestOptions,
   TransportRequestParams,
   DiagnosticResult,
+  RequestBody,
 } from '@elastic/elasticsearch';
-import type { RequestBody } from '@elastic/transport/lib/types';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
@@ -74,7 +74,7 @@ const createApiResponse = <T>({
 function getProductCheckValue(client: Client) {
   const tSymbol = Object.getOwnPropertySymbols(client.transport || client).filter(
     (symbol) => symbol.description === 'product check'
-  )[0];
+  )[1];
   // @ts-expect-error `tSymbol` is missing in the index signature of Transport
   return (client.transport || client)[tSymbol];
 }
@@ -130,9 +130,9 @@ describe('configureClient', () => {
   });
 
   describe('Product check', () => {
-    it('should not skip the product check for the unscoped client', () => {
+    it('performs the product check for the unscoped client', () => {
       const client = configureClient(config, { logger, type: 'test', scoped: false });
-      expect(getProductCheckValue(client)).toBe(0);
+      expect(getProductCheckValue(client)).toBeFalsy();
     });
 
     it('should skip the product check for the scoped client', () => {

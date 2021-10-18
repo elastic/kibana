@@ -6,9 +6,10 @@
  */
 
 import DateMath from '@elastic/datemath';
-import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
+import { isEqual } from 'lodash';
+
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerResponse,

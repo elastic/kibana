@@ -163,6 +163,19 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(resPipeline2.statusCode).equal(404);
       });
+      it('should have uninstalled the ml model', async function () {
+        const res = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_ml/trained_models/default`,
+          },
+          {
+            ignore: [404],
+            meta: true,
+          }
+        );
+        expect(res.statusCode).equal(404);
+      });
       it('should have uninstalled the transforms', async function () {
         const res = await es.transport.request(
           {
@@ -373,6 +386,13 @@ const expectAssetsInstalled = ({
     });
     expect(resPipeline2.statusCode).equal(200);
   });
+  it('should have installed the ml model', async function () {
+    const res = await es.transport.request({
+      method: 'GET',
+      path: `_ml/trained_models/default`,
+    });
+    expect(res.statusCode).equal(200);
+  });
   it('should have installed the component templates', async function () {
     const resMappings = await es.transport.request({
       method: 'GET',
@@ -389,21 +409,6 @@ const expectAssetsInstalled = ({
       path: `/_component_template/${logsTemplateName}@custom`,
     });
     expect(resUserSettings.statusCode).equal(200);
-  });
-  it('should have installed the transform components', async function () {
-    const res = await es.transport.request({
-      method: 'GET',
-      path: `/_transform/${pkgName}.test-default-${pkgVersion}`,
-    });
-    expect(res.statusCode).equal(200);
-  });
-  it('should have created the index for the transform', async function () {
-    // the  index is defined in the transform file
-    const res = await es.transport.request({
-      method: 'GET',
-      path: `/logs-all_assets.test_log_current_default`,
-    });
-    expect(res.statusCode).equal(200);
   });
   it('should have installed the kibana assets', async function () {
     // These are installed from Fleet along with every package
@@ -596,8 +601,8 @@ const expectAssetsInstalled = ({
           type: 'ingest_pipeline',
         },
         {
-          id: 'all_assets.test-default-0.1.0',
-          type: 'transform',
+          id: 'default',
+          type: 'ml_model',
         },
       ],
       es_index_patterns: {
@@ -617,7 +622,7 @@ const expectAssetsInstalled = ({
         { id: 'f839c76e-d194-555a-90a1-3265a45789e4', type: 'epm-packages-assets' },
         { id: '9af7bbb3-7d8a-50fa-acc9-9dde6f5efca2', type: 'epm-packages-assets' },
         { id: '1e97a20f-9d1c-529b-8ff2-da4e8ba8bb71', type: 'epm-packages-assets' },
-        { id: '8cfe0a2b-7016-5522-87e4-6d352360d1fc', type: 'epm-packages-assets' },
+        { id: 'ed5d54d5-2516-5d49-9e61-9508b0152d2b', type: 'epm-packages-assets' },
         { id: 'bd5ff3c5-655e-5385-9918-b60ff3040aad', type: 'epm-packages-assets' },
         { id: '0954ce3b-3165-5c1f-a4c0-56eb5f2fa487', type: 'epm-packages-assets' },
         { id: '60d6d054-57e4-590f-a580-52bf3f5e7cca', type: 'epm-packages-assets' },

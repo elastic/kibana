@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 import { licenseMock } from '../common/licensing/index.mock';
 import type { MockAuthenticatedUserProps } from '../common/model/authenticated_user.mock';

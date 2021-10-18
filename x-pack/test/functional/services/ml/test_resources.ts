@@ -225,7 +225,6 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
       // Points the read/write aliases for annotations to the broken annotations index
       // so we can run tests against a state where annotation endpoints return errors.
-      // @ts-expect-error IndicesUpdateAliasesIndicesUpdateAliasBulk is not valid
       await es.indices.updateAliases({
         body: {
           actions: [
@@ -253,7 +252,6 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     async restoreAnnotationsIndexState() {
       // restore the original working state of pointing read/write aliases
       // to the right annotations index.
-      // @ts-expect-error IndicesUpdateAliasesIndicesUpdateAliasBulk is not valid
       await es.indices.updateAliases({
         body: {
           actions: [

@@ -7,31 +7,29 @@
  */
 
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { PublicKeys } from '@kbn/utility-types';
 import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
 import { PRODUCT_RESPONSE_HEADER } from '../supported_server_response_check';
+
+const omittedProps = [
+  'diagnostic',
+  'name',
+  'connectionPool',
+  'transport',
+  'serializer',
+  'helpers',
+] as Array<PublicKeys<KibanaClient>>;
 
 // use jest.requireActual() to prevent weird errors when people mock @elastic/elasticsearch
 const { Client: UnmockedClient } = jest.requireActual('@elastic/elasticsearch');
 const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<KibanaClient> => {
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
   const client = new UnmockedClient({
-    node: 'http://localhost',
+    node: 'http://127.0.0.1',
   });
-
-  const omittedProps = [
-    '_events',
-    '_eventsCount',
-    '_maxListeners',
-    'constructor',
-    'name',
-    'serializer',
-    'connectionPool',
-    'transport',
-    'helpers',
-  ];
 
   const getAllPropertyDescriptors = (obj: Record<string, any>) => {
     const descriptors = Object.entries(Object.getOwnPropertyDescriptors(obj));

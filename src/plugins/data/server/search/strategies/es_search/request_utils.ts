@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IUiSettingsClient, SharedGlobalConfig } from 'kibana/server';
 import { UI_SETTINGS } from '../../../../common';
 
-export function getShardTimeout(config: SharedGlobalConfig): Pick<SearchRequest, 'timeout'> {
+export function getShardTimeout(
+  config: SharedGlobalConfig
+): Pick<estypes.SearchRequest, 'timeout'> {
   const timeout = config.elasticsearch.shardTimeout.asMilliseconds();
   return timeout ? { timeout: `${timeout}ms` } : {};
 }

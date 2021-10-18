@@ -85,11 +85,13 @@ export const initLogSourceConfigurationRoutes = ({ framework, sources }: InfraBa
           ? sources.updateSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
+              // @ts-expect-error incompat interface
               patchedSourceConfigurationProperties
             )
           : sources.createSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
+              // @ts-expect-error incompat interface
               patchedSourceConfigurationProperties
             ));
 

@@ -38,7 +38,6 @@ export const createGetLogEntriesQuery = (
 
   return {
     index: logEntriesIndex,
-    // @ts-expect-error AsyncSearchSubmitRequest expects allow_no_indices in body
     allow_no_indices: true,
     track_scores: false,
     track_total_hits: false,
