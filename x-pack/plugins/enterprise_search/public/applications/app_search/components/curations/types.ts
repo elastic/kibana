@@ -15,7 +15,7 @@ export interface CurationSuggestion {
   status: 'pending' | 'applied' | 'automated' | 'rejected' | 'disabled';
   curation_id?: string;
   operation: 'create' | 'update' | 'delete';
-  override_curation_id?: string;
+  override_manual_curation?: boolean;
 }
 
 export interface Curation {
