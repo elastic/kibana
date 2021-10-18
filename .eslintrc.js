@@ -156,6 +156,78 @@ const DEV_PATTERNS = [
   'x-pack/plugins/*/server/scripts/**/*',
 ];
 
+/** Restricted imports with suggested alternatives */
+const RESTRICTED_IMPORTS = [
+  {
+    name: 'lodash',
+    importNames: ['set', 'setWith'],
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash.set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash.setwith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/setWith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp',
+    importNames: ['set', 'setWith', 'assoc', 'assocPath'],
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/setWith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/assoc',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/assocPath',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash',
+    importNames: ['template'],
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash.template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/fp',
+    importNames: ['template'],
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/fp/template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'react-use',
+    message: 'Please use react-use/lib/{method} instead.',
+  },
+];
+
 module.exports = {
   root: true,
 
@@ -671,81 +743,7 @@ module.exports = {
         'no-restricted-imports': [
           2,
           {
-            paths: [
-              {
-                name: 'lodash',
-                importNames: ['set', 'setWith'],
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.setwith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp',
-                importNames: ['set', 'setWith', 'assoc', 'assocPath'],
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/assoc',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/assocPath',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash',
-                importNames: ['template'],
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash.template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/fp',
-                importNames: ['template'],
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/fp/template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'react-use',
-                message: 'Please use react-use/lib/{method} instead.',
-              },
-            ],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
         'no-restricted-modules': [
@@ -834,6 +832,23 @@ module.exports = {
             object: '_',
             property: 'assocPath',
             message: 'Please use @elastic/safer-lodash-set instead',
+          },
+        ],
+      },
+    },
+    {
+      files: ['**/common/**/*.{js,mjs,ts,tsx}', '**/public/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          2,
+          {
+            paths: [
+              ...RESTRICTED_IMPORTS,
+              {
+                name: 'semver',
+                message: 'Please use "semver/*/{function}" instead',
+              },
+            ],
           },
         ],
       },
