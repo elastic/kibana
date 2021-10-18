@@ -69,21 +69,6 @@ export const updateRulesRoute = (
           spaceId: context.securitySolution.getSpaceId(),
         });
 
-        /**
-         * ,
-            {
-              term: {
-                'alert.params.ruleAlertId': rule?.id,
-              },
-            },
-         */
-
-        // const thing = await savedObjectsClient.find({
-        //   type: 'action',
-        // });
-
-        // use alert.references[] in find filter ^^^
-
         if (rule != null) {
           const ruleStatuses = await ruleStatusClient.find({
             logsCount: 1,

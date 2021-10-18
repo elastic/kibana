@@ -78,7 +78,6 @@ export const updateRulesBulkRoute = (
               ruleUpdate: payloadRule,
               isRuleRegistryEnabled,
             });
-
             if (rule != null) {
               const ruleStatuses = await ruleStatusClient.find({
                 logsCount: 1,

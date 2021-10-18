@@ -42,14 +42,9 @@ export const injectReferences = ({
     exceptionsList: params.exceptionsList,
     savedObjectReferences,
   });
-  // const actionsReferences = injectActionsReferences({
-  //   logger,
-  //   savedObjectReferences
-  // });
   const ruleParamsWithSavedObjectReferences: RuleParams = {
     ...params,
     exceptionsList,
-    // references: savedObjectReferences,
   };
   return ruleParamsWithSavedObjectReferences;
 };
