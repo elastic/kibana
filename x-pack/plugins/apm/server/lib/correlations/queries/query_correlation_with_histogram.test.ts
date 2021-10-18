@@ -9,9 +9,10 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { isLatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 
-import { fetchTransactionDurationHistograms } from './query_histograms_generator';
+import { splitAllSettledPromises } from '../utils';
+
+import { fetchTransactionDurationCorrelationWithHistogram } from './query_correlation_with_histogram';
 
 const params = {
   index: 'apm-*',
@@ -33,8 +34,8 @@ const fieldValuePairs = [
   { fieldName: 'the-field-name-2', fieldValue: 'the-field-value-3' },
 ];
 
-describe('query_histograms_generator', () => {
-  describe('fetchTransactionDurationHistograms', () => {
+describe('query_correlation_with_histogram', () => {
+  describe('fetchTransactionDurationCorrelationWithHistogram', () => {
     it(`doesn't break on failing ES queries and adds messages to the log`, async () => {
       const esClientSearchMock = jest.fn(
         (
@@ -52,32 +53,26 @@ describe('query_histograms_generator', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      let loadedHistograms = 0;
-      const items = [];
-      const errors = [];
-
-      for await (const item of fetchTransactionDurationHistograms(
-        esClientMock,
-        params,
-        expectations,
-        ranges,
-        fractions,
-        histogramRangeSteps,
-        totalDocCount,
-        fieldValuePairs
-      )) {
-        if (isLatencyCorrelation(item)) {
-          items.push(item);
-        } else if (item?.error) {
-          errors.push(item);
-        }
-        loadedHistograms++;
-      }
+      const { fulfilled: items, rejected: errors } = splitAllSettledPromises(
+        await Promise.allSettled(
+          fieldValuePairs.map((fieldValuePair) =>
+            fetchTransactionDurationCorrelationWithHistogram(
+              esClientMock,
+              params,
+              expectations,
+              ranges,
+              fractions,
+              histogramRangeSteps,
+              totalDocCount,
+              fieldValuePair
+            )
+          )
+        )
+      );
 
       expect(items.length).toEqual(0);
-      expect(loadedHistograms).toEqual(3);
       expect(esClientSearchMock).toHaveBeenCalledTimes(3);
-      expect(errors.map((e) => e.error.toString())).toEqual([
+      expect(errors.map((e) => (e as Error).toString())).toEqual([
         'Error: fetchTransactionDurationCorrelation failed, did not return aggregations.',
         'Error: fetchTransactionDurationCorrelation failed, did not return aggregations.',
         'Error: fetchTransactionDurationCorrelation failed, did not return aggregations.',
@@ -108,29 +103,26 @@ describe('query_histograms_generator', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      let loadedHistograms = 0;
-      const items = [];
-
-      for await (const item of fetchTransactionDurationHistograms(
-        esClientMock,
-        params,
-        expectations,
-        ranges,
-        fractions,
-        histogramRangeSteps,
-        totalDocCount,
-        fieldValuePairs
-      )) {
-        if (item !== undefined) {
-          items.push(item);
-        }
-        loadedHistograms++;
-      }
+      const { fulfilled: items, rejected: errors } = splitAllSettledPromises(
+        await Promise.allSettled(
+          fieldValuePairs.map((fieldValuePair) =>
+            fetchTransactionDurationCorrelationWithHistogram(
+              esClientMock,
+              params,
+              expectations,
+              ranges,
+              fractions,
+              histogramRangeSteps,
+              totalDocCount,
+              fieldValuePair
+            )
+          )
+        )
+      );
 
       expect(items.length).toEqual(3);
-      expect(loadedHistograms).toEqual(3);
       expect(esClientSearchMock).toHaveBeenCalledTimes(6);
-      // expect(getLogMessages().length).toEqual(0);
+      expect(errors.length).toEqual(0);
     });
   });
 });

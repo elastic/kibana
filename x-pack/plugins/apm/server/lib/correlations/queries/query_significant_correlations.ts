@@ -19,12 +19,16 @@ import {
 } from '../../../../common/correlations/latency_correlations/types';
 
 import {
+  computeExpectationsAndRanges,
+  splitAllSettledPromises,
+} from '../utils';
+
+import {
+  fetchTransactionDurationCorrelationWithHistogram,
   fetchTransactionDurationFractions,
   fetchTransactionDurationHistogramRangeSteps,
-  fetchTransactionDurationHistograms,
   fetchTransactionDurationPercentiles,
 } from './index';
-import { computeExpectationsAndRanges } from '../utils';
 
 export const fetchSignificantCorrelations = async (
   esClient: ElasticsearchClient,
@@ -54,30 +58,28 @@ export const fetchSignificantCorrelations = async (
     paramsWithIndex
   );
 
-  const latencyCorrelations: LatencyCorrelation[] = [];
-  let ccsWarning = false;
+  const { fulfilled, rejected } = splitAllSettledPromises(
+    await Promise.allSettled(
+      fieldValuePairs.map((fieldValuePair) =>
+        fetchTransactionDurationCorrelationWithHistogram(
+          esClient,
+          paramsWithIndex,
+          expectations,
+          ranges,
+          fractions,
+          histogramRangeSteps,
+          totalDocCount,
+          fieldValuePair
+        )
+      )
+    )
+  );
 
-  for await (const item of fetchTransactionDurationHistograms(
-    esClient,
-    paramsWithIndex,
-    expectations,
-    ranges,
-    fractions,
-    histogramRangeSteps,
-    totalDocCount,
-    fieldValuePairs
-  )) {
-    if (isLatencyCorrelation(item)) {
-      latencyCorrelations.push(item);
-    } else if (
-      typeof item === 'object' &&
-      item !== null &&
-      {}.hasOwnProperty.call(item, 'error') &&
-      paramsWithIndex?.index.includes(':')
-    ) {
-      ccsWarning = true;
-    }
-  }
+  const latencyCorrelations: LatencyCorrelation[] =
+    fulfilled.filter(isLatencyCorrelation);
+
+  const ccsWarning =
+    rejected.length > 0 && paramsWithIndex?.index.includes(':');
 
   return { latencyCorrelations, ccsWarning, totalDocCount };
 };

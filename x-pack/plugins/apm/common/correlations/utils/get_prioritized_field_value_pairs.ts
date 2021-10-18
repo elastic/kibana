@@ -6,9 +6,9 @@
  */
 
 import { FIELDS_TO_ADD_AS_CANDIDATE } from '../constants';
-import { hasPrefixToInclude } from '../utils';
+import { hasPrefixToInclude } from './has_prefix_to_include';
 
-import type { FieldValuePair } from '../../../../common/correlations/types';
+import type { FieldValuePair } from '../types';
 
 export const getPrioritizedFieldValuePairs = (
   fieldValuePairs: FieldValuePair[]

@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
-import { hasPrefixToInclude } from '../utils';
+import { hasPrefixToInclude } from '../../../../common/correlations/utils';
 
 import {
   fetchTransactionDurationFieldCandidates,

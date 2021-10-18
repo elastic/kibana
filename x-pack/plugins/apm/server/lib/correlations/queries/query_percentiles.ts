@@ -10,6 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import { SIGNIFICANT_VALUE_DIGITS } from '../../../../common/correlations/constants';
 import type {
   FieldValuePair,
   ResponseHit,
@@ -18,7 +19,6 @@ import type {
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
-import { SIGNIFICANT_VALUE_DIGITS } from '../constants';
 
 export const getTransactionDurationPercentilesRequest = (
   params: SearchStrategyParams,

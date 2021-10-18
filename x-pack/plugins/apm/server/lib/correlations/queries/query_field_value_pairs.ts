@@ -13,8 +13,7 @@ import type {
   FieldValuePair,
   SearchStrategyParams,
 } from '../../../../common/correlations/types';
-
-import { TERMS_SIZE } from '../constants';
+import { TERMS_SIZE } from '../../../../common/correlations/constants';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';

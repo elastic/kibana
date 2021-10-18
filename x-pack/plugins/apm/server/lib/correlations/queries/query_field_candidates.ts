@@ -10,14 +10,13 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import type { SearchStrategyParams } from '../../../../common/correlations/types';
-
 import {
   FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
   FIELDS_TO_ADD_AS_CANDIDATE,
   FIELDS_TO_EXCLUDE_AS_CANDIDATE,
   POPULATED_DOC_COUNT_SAMPLE_SIZE,
-} from '../constants';
-import { hasPrefixToInclude } from '../utils';
+} from '../../../../common/correlations/constants';
+import { hasPrefixToInclude } from '../../../../common/correlations/utils';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';

@@ -15,6 +15,7 @@ import type {
   FieldValuePair,
   RawResponseBase,
 } from '../../../../common/correlations/types';
+import { getPrioritizedFieldValuePairs } from '../../../../common/correlations/utils';
 import type {
   LatencyCorrelation,
   LatencyCorrelationsRawResponse,
@@ -185,7 +186,10 @@ export function useLatencyCorrelations() {
 
       const fieldsToSample = new Set<string>();
       const latencyCorrelations: LatencyCorrelation[] = [];
-      const fieldValuePairChunks = chunk(fieldValuePairs, chunkSize);
+      const fieldValuePairChunks = chunk(
+        getPrioritizedFieldValuePairs(fieldValuePairs),
+        chunkSize
+      );
 
       for (const fieldValuePairChunk of fieldValuePairChunks) {
         const significantCorrelations = await callApmApi({

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { computeExpectationsAndRanges } from './compute_expectations_and_ranges';
-export { splitAllSettledPromises } from './split_all_settled_promises';
+export { getPrioritizedFieldValuePairs } from './get_prioritized_field_value_pairs';
+export { hasPrefixToInclude } from './has_prefix_to_include';

@@ -13,6 +13,6 @@ export { fetchTransactionDurationFieldValuePairs } from './query_field_value_pai
 export { fetchTransactionDurationFractions } from './query_fractions';
 export { fetchTransactionDurationPercentiles } from './query_percentiles';
 export { fetchTransactionDurationCorrelation } from './query_correlation';
-export { fetchTransactionDurationHistograms } from './query_histograms_generator';
+export { fetchTransactionDurationCorrelationWithHistogram } from './query_correlation_with_histogram';
 export { fetchTransactionDurationHistogramRangeSteps } from './query_histogram_range_steps';
 export { fetchTransactionDurationRanges } from './query_ranges';

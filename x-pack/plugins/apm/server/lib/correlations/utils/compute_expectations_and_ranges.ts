@@ -6,7 +6,8 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { PERCENTILES_STEP } from '../constants';
+
+import { PERCENTILES_STEP } from '../../../../common/correlations/constants';
 
 export const computeExpectationsAndRanges = (
   percentiles: number[],
