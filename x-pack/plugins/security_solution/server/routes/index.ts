@@ -136,7 +136,7 @@ export const initRoutes = (
   deleteIndexRoute(router);
 
   // Detection Engine Preview Index  /api/detection_engine/preview/index
-  createPreviewIndexRoute(router, config);
+  createPreviewIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
   readTagsRoute(router, isRuleRegistryEnabled);

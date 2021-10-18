@@ -13,7 +13,6 @@ import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters'
 import { PreviewRuleOptions } from '../../rule_types/types';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { signalRulesAlertType } from '../../signals/signal_rule_alert_type';
-import { previewAlertInstanceFactory } from '../../signals/preview/preview_alert_instance_factory';
 import { createWarningsAndErrors } from '../../signals/preview/preview_rule_execution_log_client';
 import { parseInterval } from '../../signals/utils';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -22,10 +21,7 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
-import {
-  DEFAULT_PREVIEW_INDEX,
-  DETECTION_ENGINE_RULES_PREVIEW,
-} from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
 import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
@@ -40,6 +36,13 @@ import { ExecutorType } from '../../../../../../alerting/server/types';
 import { AlertInstance } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { IEventLogService } from '../../../../../../event_log/server';
+import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
+
+enum InvocationCount {
+  HOUR = 1,
+  DAY = 24,
+  WEEK = 168,
+}
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -71,6 +74,19 @@ export const previewRulesRoute = async (
           return siemResponse.error({ statusCode: 404 });
         }
 
+        if (request.body.type !== 'threat_match') {
+          return response.ok({ body: { errors: ['Not an indicator match rule'] } });
+        }
+
+        let invocationCount = request.body.invocationCount;
+        if (
+          ![InvocationCount.HOUR, InvocationCount.DAY, InvocationCount.WEEK].includes(
+            invocationCount
+          )
+        ) {
+          return response.ok({ body: { errors: ['Invalid invocation count'] } });
+        }
+
         const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient, false);
         const previewRuleParams = internalRule.params;
 
@@ -84,10 +100,10 @@ export const previewRulesRoute = async (
         await context.lists?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
+        const previewIndex = siemClient.getPreviewIndex();
         const previewId = uuid.v4();
         const username = security?.authc.getCurrentUser(request)?.username;
         const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
-        let invocationCount = request.body.invocationCount;
         const runState: Record<string, unknown> = {};
 
         const runExecutors = async <
@@ -155,6 +171,13 @@ export const previewRulesRoute = async (
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
             invocationCount--;
+            // eslint-disable-next-line no-console
+            console.log(
+              'preview invocation count remaining ',
+              invocationCount,
+              ' for previewId ',
+              previewId
+            );
           }
         };
 
@@ -162,7 +185,7 @@ export const previewRulesRoute = async (
           ...previewRuleOptions,
           lists: context.lists,
           config,
-          indexNameOverride: `${DEFAULT_PREVIEW_INDEX}-${spaceId}`,
+          indexNameOverride: `${previewIndex}-${spaceId}`,
           ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
           // unused as we override the ruleExecutionLogClient
           eventLogService: {} as unknown as IEventLogService,
@@ -175,18 +198,20 @@ export const previewRulesRoute = async (
           signalRuleAlertType.id,
           signalRuleAlertType.name,
           previewRuleParams,
-          previewAlertInstanceFactory
+          alertInstanceFactoryStub
         );
 
-        const errors = warningsAndErrorsStore.filter(
-          (item) => item.newStatus === RuleExecutionStatus.failed
-        );
+        const errors = warningsAndErrorsStore
+          .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+          .map((item) => item.message);
 
-        const warnings = warningsAndErrorsStore.filter(
-          (item) =>
-            item.newStatus === RuleExecutionStatus['partial failure'] ||
-            item.newStatus === RuleExecutionStatus.warning
-        );
+        const warnings = warningsAndErrorsStore
+          .filter(
+            (item) =>
+              item.newStatus === RuleExecutionStatus['partial failure'] ||
+              item.newStatus === RuleExecutionStatus.warning
+          )
+          .map((item) => item.message);
 
         return response.ok({
           body: {
@@ -198,7 +223,9 @@ export const previewRulesRoute = async (
       } catch (err) {
         const error = transformError(err as Error);
         return siemResponse.error({
-          body: error.message,
+          body: {
+            errors: [error.message],
+          },
           statusCode: error.statusCode,
         });
       }

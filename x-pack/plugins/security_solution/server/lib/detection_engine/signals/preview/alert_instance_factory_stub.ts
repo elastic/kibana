@@ -14,7 +14,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertInstance } from '../../../../../../alerting/server/alert_instance';
 
-export const previewAlertInstanceFactory = <
+export const alertInstanceFactoryStub = <
   TParams extends RuleParams,
   TState extends AlertTypeState,
   TInstanceState extends AlertInstanceState,

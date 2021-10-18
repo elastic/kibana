@@ -70,7 +70,11 @@ import { wrapSequencesFactory } from './wrap_sequences_factory';
 import { ConfigType } from '../../../config';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { injectReferences, extractReferences } from './saved_object_references';
-import { RuleExecutionLogClient, truncateMessageList } from '../rule_execution_log';
+import {
+  IRuleExecutionLogClient,
+  RuleExecutionLogClient,
+  truncateMessageList,
+} from '../rule_execution_log';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 import { IEventLogService } from '../../../../../event_log/server';
@@ -96,7 +100,7 @@ export const signalRulesAlertType = ({
   config: ConfigType;
   eventLogService: IEventLogService;
   indexNameOverride?: string;
-  ruleExecutionLogClientOverride?: RuleExecutionLogClient;
+  ruleExecutionLogClientOverride?: IRuleExecutionLogClient;
 }): SignalRuleAlertTypeDefinition => {
   const { alertMergeStrategy: mergeStrategy, alertIgnoreFields: ignoreFields } = config;
   return {
