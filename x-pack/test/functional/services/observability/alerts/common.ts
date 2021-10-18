@@ -204,5 +204,6 @@ export function ObservabilityAlertsCommonProvider({
     setWorkflowStatusFilter,
     submitQuery,
     typeInQueryBar,
+    openActionsMenuForRow,
   };
 }

@@ -16,7 +16,6 @@ import { UnderlyingLogClient } from '../../rule_execution_log/types';
 export { requestMock, requestContextMock, responseMock, serverMock };
 
 export const createMockConfig = (): ConfigType => ({
-  enabled: true,
   [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
   maxRuleImportExportSize: 10000,
   maxRuleImportPayloadBytes: 10485760,

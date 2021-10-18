@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import styled from 'styled-components';
 import { EuiPanel, EuiPanelProps } from '@elastic/eui';
 
 export type CardSectionPanelProps = Exclude<
@@ -13,7 +14,11 @@ export type CardSectionPanelProps = Exclude<
   'hasBorder' | 'hasShadow' | 'paddingSize'
 >;
 
+const StyledEuiPanel = styled(EuiPanel)`
+  padding: 32px;
+`;
+
 export const CardSectionPanel = memo<CardSectionPanelProps>((props) => {
-  return <EuiPanel {...props} hasBorder={false} hasShadow={false} paddingSize="l" />;
+  return <StyledEuiPanel {...props} hasBorder={false} hasShadow={false} paddingSize="l" />;
 });
 CardSectionPanel.displayName = 'CardSectionPanel';
