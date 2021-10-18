@@ -57,13 +57,13 @@ export const ACTIVITY_LOG = {
         }
       ),
       failedEndpointReleaseAction: i18n.translate(
-        'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.failedEndpointAction',
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.failedEndpointReleaseAction',
         {
           defaultMessage: 'failed to submit request: Release host',
         }
       ),
       failedEndpointIsolateAction: i18n.translate(
-        'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.failedEndpointAction',
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.failedEndpointIsolateAction',
         {
           defaultMessage: 'failed to submit request: Isolate host',
         }
