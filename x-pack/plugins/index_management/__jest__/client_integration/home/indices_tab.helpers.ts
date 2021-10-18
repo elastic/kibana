@@ -47,9 +47,12 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
    */
 
   const clickContextMenuOption = async (optionDataTestSubject: string) => {
-    const { find } = testBed;
-    const contextMenu = find('indexContextMenu');
-    contextMenu.find(`button[data-test-subj="${optionDataTestSubject}"]`).simulate('click');
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find(`indexContextMenu.${optionDataTestSubject}`).simulate('click');
+    });
+    component.update();
   };
 
   const clickIncludeHiddenIndicesToggle = () => {
@@ -57,9 +60,13 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
     find('indexTableIncludeHiddenIndicesToggle').simulate('click');
   };
 
-  const clickManageContextMenuButton = () => {
-    const { find } = testBed;
-    find('indexActionsContextMenuButton').simulate('click');
+  const clickManageContextMenuButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('indexActionsContextMenuButton').simulate('click');
+    });
+    component.update();
   };
 
   const getIncludeHiddenIndicesToggleStatus = () => {
