@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import { EuiButtonIcon, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useWaterfallContext } from '..';
 import { useTheme } from '../../../../../../../observability/public';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { WaterfallMarkerTrend } from './waterfall_marker_trend';
+import { WaterfallMarkerIcon } from './waterfall_marker_icon';
 
 export const FCP_LABEL = i18n.translate('xpack.uptime.synthetics.waterfall.fcpLabel', {
   defaultMessage: 'First contentful paint',
@@ -100,7 +99,9 @@ export function WaterfallChartMarkers() {
               }),
             },
           ]}
-          marker={<MarkerIcon field={markersInfo[id]?.field} label={markersInfo[id]?.label} />}
+          marker={
+            <WaterfallMarkerIcon field={markersInfo[id]?.field} label={markersInfo[id]?.label} />
+          }
           style={{
             line: {
               strokeWidth: 2,
@@ -111,34 +112,6 @@ export function WaterfallChartMarkers() {
         />
       ))}
     </Wrapper>
-  );
-}
-
-function MarkerIcon({ field, label }: { field: string; label: string }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  if (!field) {
-    return <EuiIcon type="dot" size="l" />;
-  }
-
-  return (
-    <EuiPopover
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      anchorPosition="downLeft"
-      panelStyle={{ paddingBottom: 0, paddingLeft: 4 }}
-      zIndex={100}
-      button={
-        <EuiButtonIcon
-          iconType="dot"
-          iconSize="l"
-          color="text"
-          onClick={() => setIsOpen((prevState) => !prevState)}
-        />
-      }
-    >
-      <WaterfallMarkerTrend title={label} field={field} />
-    </EuiPopover>
   );
 }
 
