@@ -136,7 +136,7 @@ describe('Connectors', () => {
     );
 
     expect(screen.getByText('This connector type is deprecated')).toBeInTheDocument();
-    expect(screen.getByText('Update this connector or create a new one.')).toBeInTheDocument();
+    expect(screen.getByText('Update this connector, or create a new one.')).toBeInTheDocument();
   });
 
   test('it does not shows the deprecated callout when the connector is none', async () => {
