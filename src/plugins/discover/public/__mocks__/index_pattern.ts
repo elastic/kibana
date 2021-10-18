@@ -78,7 +78,7 @@ const indexPattern = {
   getFieldByName: jest.fn(() => ({})),
   timeFieldName: '',
   docvalueFields: [],
-  getFormatterForField: () => ({ convert: (value: unknown) => value }),
+  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
 } as unknown as IndexPattern;
 
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;

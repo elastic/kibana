@@ -22,15 +22,7 @@ import { indexPatternMock } from '../../../../../__mocks__/index_pattern';
 
 jest.mock('../../../../../kibana_services', () => ({
   ...jest.requireActual('../../../../../kibana_services'),
-  getServices: () => ({
-    fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
-      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-    },
-    uiSettings: {
-      get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
-    },
-  }),
+  getServices: () => discoverServiceMock,
 }));
 
 setHeaderActionMenuMounter(jest.fn());

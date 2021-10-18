@@ -10,8 +10,6 @@ import { estypes } from '@elastic/elasticsearch';
 import { DataView, DataViewField, KBN_FIELD_TYPES } from '../../../../data/common';
 import { getServices } from '../../kibana_services';
 
-// TODO: need more test coverage
-
 /**
  * Formats the value of a specific field using the appropriate field formatter if available
  * or the default string field formatter otherwise.

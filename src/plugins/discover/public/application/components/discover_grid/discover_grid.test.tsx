@@ -18,18 +18,11 @@ import { uiSettingsMock } from '../../../__mocks__/ui_settings';
 import { DiscoverServices } from '../../../build_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getDocId } from './discover_grid_document_selection';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
 jest.mock('../../../kibana_services', () => ({
   ...jest.requireActual('../../../kibana_services'),
-  getServices: () => ({
-    fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
-      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-    },
-    uiSettings: {
-      get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
-    },
-  }),
+  getServices: () => discoverServiceMock,
 }));
 
 function getProps() {
