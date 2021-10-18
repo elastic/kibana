@@ -63,7 +63,8 @@ describe.each([
     );
   });
 
-  it('should display dates in expected format', () => {
+  // FLAKY https://github.com/elastic/kibana/issues/113892
+  it.skip('should display dates in expected format', () => {
     render();
 
     expect(renderResult.getByTestId('testCard-header-updated').textContent).toEqual(
@@ -197,7 +198,9 @@ describe.each([
         renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
       ).not.toBeNull();
 
-      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one');
+      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
+        'Policy oneView details'
+      );
     });
 
     it('should display policy ID if no policy menu item found in `policies` prop', async () => {

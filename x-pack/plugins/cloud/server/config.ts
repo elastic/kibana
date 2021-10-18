@@ -29,7 +29,6 @@ const fullStoryConfigSchema = schema.object({
 });
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   id: schema.maybe(schema.string()),
   apm: schema.maybe(apmConfigSchema),
   cname: schema.maybe(schema.string()),
@@ -52,6 +51,5 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     organization_url: true,
     full_story: true,
   },
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: configSchema,
 };
