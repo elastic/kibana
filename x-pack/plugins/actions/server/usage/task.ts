@@ -7,6 +7,7 @@
 
 import { Logger, CoreSetup } from 'kibana/server';
 import moment from 'moment';
+import { IEventLogService } from '../../../event_log/server';
 import {
   RunContext,
   TaskManagerSetupContract,
@@ -24,9 +25,17 @@ export function initializeActionsTelemetry(
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
   kibanaIndex: string,
-  preconfiguredActions: PreConfiguredAction[]
+  preconfiguredActions: PreConfiguredAction[],
+  eventLog: IEventLogService
 ) {
-  registerActionsTelemetryTask(logger, taskManager, core, kibanaIndex, preconfiguredActions);
+  registerActionsTelemetryTask(
+    logger,
+    taskManager,
+    core,
+    kibanaIndex,
+    preconfiguredActions,
+    eventLog
+  );
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -38,13 +47,20 @@ function registerActionsTelemetryTask(
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
   kibanaIndex: string,
-  preconfiguredActions: PreConfiguredAction[]
+  preconfiguredActions: PreConfiguredAction[],
+  eventLog: IEventLogService
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
       timeout: '5s',
-      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, preconfiguredActions),
+      createTaskRunner: telemetryTaskRunner(
+        logger,
+        core,
+        kibanaIndex,
+        preconfiguredActions,
+        eventLog
+      ),
     },
   });
 }
@@ -66,10 +82,12 @@ export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
   kibanaIndex: string,
-  preconfiguredActions: PreConfiguredAction[]
+  preconfiguredActions: PreConfiguredAction[],
+  eventLog: IEventLogService
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
+    const eventLogIndex = eventLog.getIndexPatterns();
     const getEsClient = () =>
       core.getStartServices().then(
         ([
@@ -84,7 +102,7 @@ export function telemetryTaskRunner(
         return Promise.all([
           getTotalCount(esClient, kibanaIndex, preconfiguredActions),
           getInUseTotalCount(esClient, kibanaIndex),
-          getExecutionsTotalCount(esClient, kibanaIndex),
+          getExecutionsTotalCount(esClient, eventLogIndex),
         ])
           .then(([totalAggegations, totalInUse, totalExecutions]) => {
             return {

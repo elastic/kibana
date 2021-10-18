@@ -7,6 +7,7 @@
 
 import { Logger, CoreSetup } from 'kibana/server';
 import moment from 'moment';
+import { IEventLogService } from '../../../event_log/server';
 import {
   RunContext,
   TaskManagerSetupContract,
@@ -27,9 +28,10 @@ export function initializeAlertingTelemetry(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  kibanaIndex: string
+  kibanaIndex: string,
+  eventLog: IEventLogService
 ) {
-  registerAlertingTelemetryTask(logger, core, taskManager, kibanaIndex);
+  registerAlertingTelemetryTask(logger, core, taskManager, kibanaIndex, eventLog);
 }
 
 export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
@@ -42,13 +44,14 @@ function registerAlertingTelemetryTask(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  kibanaIndex: string
+  kibanaIndex: string,
+  eventLog: IEventLogService
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting usage fetch task',
       timeout: '5s',
-      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
+      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, eventLog),
     },
   });
 }
@@ -66,9 +69,15 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
+export function telemetryTaskRunner(
+  logger: Logger,
+  core: CoreSetup,
+  kibanaIndex: string,
+  eventLog: IEventLogService
+) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
+    const eventLogIndex = eventLog.getIndexPatterns();
     const getEsClient = () =>
       core.getStartServices().then(
         ([
@@ -84,7 +93,7 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
         return Promise.all([
           getTotalCountAggregations(esClient, kibanaIndex),
           getTotalCountInUse(esClient, kibanaIndex),
-          getTotalExecutionsCount(esClient, kibanaIndex),
+          getTotalExecutionsCount(esClient, eventLogIndex),
         ])
           .then(([totalCountAggregations, totalInUse, totalExecutions]) => {
             return {

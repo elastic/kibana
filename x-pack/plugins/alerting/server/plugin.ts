@@ -216,7 +216,8 @@ export class AlertingPlugin {
           this.telemetryLogger,
           core,
           plugins.taskManager,
-          config.kibana.index
+          config.kibana.index,
+          plugins.eventLog
         );
       });
     }

@@ -404,9 +404,12 @@ function replaceFirstAndLastDotSymbols(strToReplace: string) {
   return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
-export async function getTotalExecutionsCount(esClient: ElasticsearchClient, kibanaInex: string) {
+export async function getTotalExecutionsCount(
+  esClient: ElasticsearchClient,
+  eventLogIndex: string
+) {
   const { body: searchResult } = await esClient.search({
-    index: kibanaInex,
+    index: eventLogIndex,
     body: {
       query: {
         bool: {

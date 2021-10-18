@@ -316,7 +316,7 @@ function replaceFirstAndLastDotSymbols(strToReplace: string) {
 
 export async function getExecutionsTotalCount(
   esClient: ElasticsearchClient,
-  kibanaIndex: string
+  eventLogIndex: string
 ): Promise<{
   countTotal: number;
   countByType: Record<string, number>;
@@ -358,7 +358,7 @@ export async function getExecutionsTotalCount(
   };
 
   const { body: actionResults } = await esClient.search({
-    index: kibanaIndex,
+    index: eventLogIndex,
     body: {
       query: {
         bool: {
