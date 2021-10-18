@@ -290,7 +290,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       description: '',
       icons: [],
       owner: { github: '' },
-      status: 'installed',
+      status: 'not_installed',
       assets: {
         kibana: {
           dashboard: [],
