@@ -17,8 +17,8 @@ const BASE_REPO_ROOT = Path.resolve(
 const REPO_ROOT = process.env.JENKINS_HOME
   ? Path.join(
       Path.dirname(BASE_REPO_ROOT),
-      'parallel',
-      process.env.CI_PARALLEL_PROCESS_NUMBER,
+      // 'parallel',
+      // process.env.CI_PARALLEL_PROCESS_NUMBER,
       Path.basename(BASE_REPO_ROOT)
     )
   : BASE_REPO_ROOT;
