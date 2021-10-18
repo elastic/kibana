@@ -67,7 +67,7 @@ export const ruleStatusSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const legacyRuleStatusType: SavedObjectsType = {
   name: legacyRuleStatusSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: ruleStatusSavedObjectMappings,
   migrations: legacyRuleStatusSavedObjectMigration,
 };

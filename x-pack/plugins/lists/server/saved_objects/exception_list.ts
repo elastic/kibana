@@ -181,7 +181,7 @@ export const exceptionListType: SavedObjectsType = {
   mappings: combinedMappings,
   migrations,
   name: exceptionListSavedObjectType,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
 };
 
 export const exceptionListAgnosticType: SavedObjectsType = {
