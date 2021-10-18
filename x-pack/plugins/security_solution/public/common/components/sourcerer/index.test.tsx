@@ -173,7 +173,7 @@ describe('Sourcerer component', () => {
     const disabledOption = options.find((o) => o.disabled);
     expect(disabledOption?.value).toEqual('fakebeat-*');
   });
-  it('Mounts with multiple options selected', () => {
+  it('Mounts with multiple options selected - default', () => {
     const state2 = {
       ...mockGlobalState,
       sourcerer: {
@@ -205,6 +205,44 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
     expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 2))).toEqual({
+      // should hide signal index
+      availableOptionCount: title.split(',').length - 3,
+      optionsSelected: true,
+    });
+  });
+  it('Mounts with multiple options selected - timeline', () => {
+    const state2 = {
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        kibanaDataViews: [
+          state.sourcerer.defaultDataView,
+          { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
+          { id: '12347', title: 'packetbeat-*', patternList: ['packetbeat-*'] },
+        ],
+        sourcererScopes: {
+          ...mockGlobalState.sourcerer.sourcererScopes,
+          [SourcererScopeName.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            loading: false,
+            patternList,
+            selectedDataViewId: id,
+            selectedPatterns: patternList.slice(0, 2),
+          },
+        },
+      },
+    };
+
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
+    expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 2))).toEqual({
+      // should show every option except fakebeat-*
       availableOptionCount: title.split(',').length - 2,
       optionsSelected: true,
     });
@@ -242,13 +280,13 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
     expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 2))).toEqual({
-      availableOptionCount: title.split(',').length - 2,
+      availableOptionCount: title.split(',').length - 3,
       optionsSelected: true,
     });
 
     wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).first().simulate('click');
     expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 3))).toEqual({
-      availableOptionCount: title.split(',').length - 3,
+      availableOptionCount: title.split(',').length - 4,
       optionsSelected: true,
     });
     wrapper.find(`[data-test-subj="sourcerer-save"]`).first().simulate('click');
@@ -272,7 +310,7 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
 
     expect(checkOptionsAndSelections(wrapper, patternListNoSignals)).toEqual({
-      availableOptionCount: title.split(',').length - patternListNoSignals.length, // 1,
+      availableOptionCount: 1,
       optionsSelected: true,
     });
 
@@ -285,13 +323,13 @@ describe('Sourcerer component', () => {
     expect(
       checkOptionsAndSelections(wrapper, patternListNoSignals.slice(1, patternListNoSignals.length))
     ).toEqual({
-      availableOptionCount: title.split(',').length - (patternListNoSignals.length - 1), // 2,
+      availableOptionCount: 2,
       optionsSelected: true,
     });
 
     wrapper.find(`[data-test-subj="sourcerer-reset"]`).first().simulate('click');
     expect(checkOptionsAndSelections(wrapper, patternListNoSignals)).toEqual({
-      availableOptionCount: title.split(',').length - patternListNoSignals.length, // 1,
+      availableOptionCount: 1,
       optionsSelected: true,
     });
   });
@@ -365,5 +403,80 @@ describe('Sourcerer component', () => {
         selectedPatterns: ['fakebeat-*'],
       })
     );
+  });
+  it('Does display signals index on timeline sourcerer', () => {
+    const state2 = {
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        kibanaDataViews: [
+          state.sourcerer.defaultDataView,
+          { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
+          { id: '12347', title: 'packetbeat-*', patternList: ['packetbeat-*'] },
+        ],
+        sourcererScopes: {
+          ...mockGlobalState.sourcerer.sourcererScopes,
+          [SourcererScopeName.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            loading: false,
+            patternList,
+            selectedDataViewId: id,
+            selectedPatterns: patternList.slice(0, 2),
+          },
+        },
+      },
+    };
+
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="comboBoxToggleListButton"]`).first().simulate('click');
+    expect(wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).at(6).text()).toEqual(
+      mockGlobalState.sourcerer.signalIndexName
+    );
+  });
+  it('Does not display signals index on default sourcerer', () => {
+    const state2 = {
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        kibanaDataViews: [
+          state.sourcerer.defaultDataView,
+          { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
+          { id: '12347', title: 'packetbeat-*', patternList: ['packetbeat-*'] },
+        ],
+        sourcererScopes: {
+          ...mockGlobalState.sourcerer.sourcererScopes,
+          [SourcererScopeName.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            loading: false,
+            patternList,
+            selectedDataViewId: id,
+            selectedPatterns: patternList.slice(0, 2),
+          },
+        },
+      },
+    };
+
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
+    expect(
+      wrapper
+        .find(
+          `[data-test-subj="sourcerer-combo-box"] span[title="${mockGlobalState.sourcerer.signalIndexName}"]`
+        )
+        .first()
+        .exists()
+    ).toBeFalsy();
   });
 });
