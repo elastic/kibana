@@ -39,6 +39,13 @@ describe('<LogRetentionConfirmationModal />', () => {
           minAgeDays: 7,
         },
       },
+      crawler: {
+        enabled: true,
+        retentionPolicy: {
+          isDefault: true,
+          minAgeDays: 7,
+        },
+      },
     },
   };
 
@@ -120,6 +127,44 @@ describe('<LogRetentionConfirmationModal />', () => {
       setMockValues({
         ...values,
         openedModal: LogRetentionOptions.API,
+      });
+
+      const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
+      const genericConfirmationModal = logRetentionPanel.find(GenericConfirmationModal);
+      genericConfirmationModal.prop('onClose')();
+      expect(actions.closeModals).toHaveBeenCalled();
+    });
+  });
+
+  describe('crawler', () => {
+    it('renders the Crawler panel when openedModal is set to Crawler', () => {
+      setMockValues({
+        ...values,
+        openedModal: LogRetentionOptions.Crawler,
+      });
+
+      const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
+      expect(
+        logRetentionPanel.find('[data-test-subj="CrawlerLogRetentionConfirmationModal"]').length
+      ).toBe(1);
+    });
+
+    it('calls saveLogRetention on save when showing crawler', () => {
+      setMockValues({
+        ...values,
+        openedModal: LogRetentionOptions.Crawler,
+      });
+
+      const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
+      const genericConfirmationModal = logRetentionPanel.find(GenericConfirmationModal);
+      genericConfirmationModal.prop('onSave')();
+      expect(actions.saveLogRetention).toHaveBeenCalledWith(LogRetentionOptions.Crawler, false);
+    });
+
+    it('calls closeModals on close', () => {
+      setMockValues({
+        ...values,
+        openedModal: LogRetentionOptions.Crawler,
       });
 
       const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
