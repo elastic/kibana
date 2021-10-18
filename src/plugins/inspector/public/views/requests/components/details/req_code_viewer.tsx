@@ -40,15 +40,16 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
 
   const navigateToUrl = services.application?.navigateToUrl;
   const devToolsDataUri = compressToEncodedURIComponent(`GET ${indexPattern}/_search\n${json}`);
-  const devToolsHref = services.share.url.locators
+  const consoleHref = services.share.url.locators
     .get('CONSOLE_APP_LOCATOR')
     ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
+  // Check if both the Dev Tools UI and the Console UI are enabled.
   const canShowDevTools =
-    services.application?.capabilities?.dev_tools.show && devToolsHref !== undefined;
+    services.application?.capabilities?.dev_tools.show && consoleHref !== undefined;
   const shouldShowDevToolsLink = !!(indexPattern && canShowDevTools);
   const handleDevToolsLinkClick = useCallback(
-    () => devToolsHref && navigateToUrl && navigateToUrl(devToolsHref),
-    [devToolsHref, navigateToUrl]
+    () => consoleHref && navigateToUrl && navigateToUrl(consoleHref),
+    [consoleHref, navigateToUrl]
   );
 
   return (
@@ -80,7 +81,7 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
               size="xs"
               flush="right"
               iconType="wrench"
-              href={devToolsHref}
+              href={consoleHref}
               onClick={handleDevToolsLinkClick}
               data-test-subj="inspectorRequestOpenInConsoleButton"
             >
