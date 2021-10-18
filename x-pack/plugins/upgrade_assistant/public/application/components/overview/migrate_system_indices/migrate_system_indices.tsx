@@ -39,7 +39,7 @@ const i18nTexts = {
   bodyDescription: (nextMajor: number) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.systemIndices.body"
-      defaultMessage="Migrate the indices that store system information before you upgrade to {nextMajor}.0."
+      defaultMessage="Migrate the indices that store system information before you upgrade."
       values={{ nextMajor }}
     />
   ),

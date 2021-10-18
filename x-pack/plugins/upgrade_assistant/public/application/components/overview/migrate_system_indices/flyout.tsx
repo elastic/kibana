@@ -49,8 +49,7 @@ const i18nTexts = {
   flyoutDescription: (nextMajor: number) =>
     i18n.translate('xpack.upgradeAssistant.overview.systemIndices.flyoutDescription', {
       defaultMessage:
-        'Migrate the indices that store information for the following features before you upgrade to {nextMajor}.0.',
-      values: { nextMajor },
+        'Migrate the indices that store information for the following features before you upgrade.',
     }),
   migrationCompleteLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.migrationCompleteLabel',

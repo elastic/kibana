@@ -22,7 +22,7 @@ import { useAppContext } from '../../../app_context';
 const i18nTexts = {
   upgradeStepTitle: (nextMajor: number) =>
     i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
-      defaultMessage: 'Install {nextMajor}.0',
+      defaultMessage: 'Upgrade to Elastic Stack 8',
       values: { nextMajor },
     }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
@@ -33,7 +33,7 @@ const i18nTexts = {
     'xpack.upgradeAssistant.overview.upgradeStepDescriptionForCloud',
     {
       defaultMessage:
-        "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade to 8.0. Be sure to back up your data again before upgrading. Upgrade your deployment on Elastic Cloud.",
+        "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic Stack 8. Be sure to back up your data again before upgrading. Upgrade your deployment on Elastic Cloud.",
     }
   ),
   upgradeStepLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepLink', {

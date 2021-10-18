@@ -93,7 +93,7 @@ export const Overview: FunctionComponent = () => {
             <EuiLink href={docLinks.links.elasticsearch.releaseHighlights} target="_blank">
               <FormattedMessage
                 id="xpack.upgradeAssistant.overview.whatsNewLink"
-                defaultMessage="What's new in version {nextMajor}.0?"
+                defaultMessage="What's new in version {nextMajor}?"
                 values={{ nextMajor }}
               />
             </EuiLink>
