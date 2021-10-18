@@ -17,23 +17,6 @@
 
 {
   "attributes": {
-    "fieldAttrs": "{}",
-    "fields": "[]",
-    "title": "foo"
-  },
-  "coreMigrationVersion": "7.16.0",
-  "id": "f8a1e9a0-2dc5-11eb-8af3-cb3aa84dbabd",
-  "migrationVersion": {
-    "index-pattern": "7.11.0"
-  },
-  "references": [],
-  "type": "index-pattern",
-  "updated_at": "2020-11-23T19:56:26.810Z",
-  "version": "WzM4LDJd"
-}
-
-{
-  "attributes": {
     "description": "",
     "state": {
       "datasourceStates": {
