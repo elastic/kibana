@@ -23,16 +23,20 @@ export function WaterfallMarkerTrend({ title, field }: { title: string; field: s
 
   const { activeStep } = useWaterfallContext();
 
+  if (!activeStep) {
+    return null;
+  }
+
   const allSeries: AllSeries = [
     {
-      name: `${title}(${activeStep?.synthetics.step?.name!})`,
+      name: `${title}(${activeStep.synthetics.step?.name!})`,
       selectedMetricField: field,
       time: { from: 'now-1d', to: 'now' },
       seriesType: 'area',
       dataType: 'synthetics',
       reportDefinitions: {
         'monitor.name': [activeStep.monitor.name!],
-        'synthetics.step.name.keyword': [activeStep?.synthetics.step?.name!],
+        'synthetics.step.name.keyword': [activeStep.synthetics.step?.name!],
       },
     },
   ];

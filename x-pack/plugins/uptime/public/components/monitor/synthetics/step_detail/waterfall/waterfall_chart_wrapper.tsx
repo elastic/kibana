@@ -27,7 +27,7 @@ export const renderLegendItem: RenderItem<LegendItem> = (item) => {
 
 interface Props {
   total: number;
-  activeStep: JourneyStep;
+  activeStep?: JourneyStep;
   data: NetworkItems;
   markerItems?: MarkerItems;
 }

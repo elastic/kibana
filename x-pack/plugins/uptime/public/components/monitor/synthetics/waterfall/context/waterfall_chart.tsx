@@ -39,7 +39,7 @@ export interface IWaterfallContext {
     index?: number
   ) => JSX.Element;
   markerItems?: MarkerItems;
-  activeStep: JourneyStep;
+  activeStep?: JourneyStep;
 }
 
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
@@ -58,7 +58,7 @@ interface ProviderProps {
   metadata: IWaterfallContext['metadata'];
   renderTooltipItem: IWaterfallContext['renderTooltipItem'];
   markerItems?: MarkerItems;
-  activeStep: JourneyStep;
+  activeStep?: JourneyStep;
 }
 
 export const WaterfallProvider: React.FC<ProviderProps> = ({

@@ -23,7 +23,7 @@ export const NO_DATA_TEXT = i18n.translate('xpack.uptime.synthetics.stepDetail.w
 
 interface Props {
   checkGroup: string;
-  activeStep: JourneyStep;
+  activeStep?: JourneyStep;
   stepIndex: number;
 }
 
