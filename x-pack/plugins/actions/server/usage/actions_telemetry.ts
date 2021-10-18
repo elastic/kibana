@@ -336,7 +336,7 @@ export async function getInUseTotalCount(
     if (actionRef === `preconfigured:${AlertHistoryEsIndexConnectorId}`) {
       preconfiguredAlertHistoryConnectors++;
     }
-    if (preconfiguredActions && actionTypeId === '.email') {
+    if (preconfiguredActions && actionTypeId === '__email') {
       const preconfiguredConnectorId = actionRef.split(':')[1];
       const service = (preconfiguredActions.find(
         (preconfConnector) => preconfConnector.id === preconfiguredConnectorId
@@ -358,7 +358,8 @@ export async function getInUseTotalCount(
 
 export async function getInUseByAlertingTotalCounts(
   esClient: ElasticsearchClient,
-  kibanaIndex: string
+  kibanaIndex: string,
+  preconfiguredActions?: PreConfiguredAction[]
 ): Promise<{
   countTotal: number;
   countByType: Record<string, number>;
@@ -366,7 +367,7 @@ export async function getInUseByAlertingTotalCounts(
   countEmailByService: Record<string, number>;
   countNamespaces: number;
 }> {
-  return await getInUseTotalCount(esClient, kibanaIndex, 'alert');
+  return await getInUseTotalCount(esClient, kibanaIndex, 'alert', preconfiguredActions);
 }
 
 function replaceFirstAndLastDotSymbols(strToReplace: string) {
