@@ -143,9 +143,10 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
         reason = alertResults
           .map((result) =>
-            buildFiredAlertReason(
-              formatAlertResult(result[group], nextState === AlertStates.WARNING)
-            )
+            buildFiredAlertReason({
+              ...formatAlertResult(result[group], nextState === AlertStates.WARNING),
+              group,
+            })
           )
           .join('\n');
         /*
@@ -181,7 +182,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         if (nextState === AlertStates.NO_DATA) {
           reason = alertResults
             .filter((result) => result[group].isNoData)
-            .map((result) => buildNoDataAlertReason(result[group]))
+            .map((result) => buildNoDataAlertReason({ ...result[group], group }))
             .join('\n');
         } else if (nextState === AlertStates.ERROR) {
           reason = alertResults

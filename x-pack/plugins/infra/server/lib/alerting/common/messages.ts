@@ -109,17 +109,17 @@ const thresholdToI18n = ([a, b]: Array<number | string>) => {
 };
 
 export const buildFiredAlertReason: (alertResult: {
-  groupName: string;
+  group: string;
   metric: string;
   comparator: Comparator;
   threshold: Array<number | string>;
   currentValue: number | string;
-}) => string = ({ groupName, metric, comparator, threshold, currentValue }) =>
+}) => string = ({ group, metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.firedAlertReason', {
     defaultMessage:
-      '{groupName}: {metric} is {comparator} a threshold of {threshold} (current value is {currentValue})',
+      '{metric} is {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
     values: {
-      groupName,
+      group,
       metric,
       comparator: comparatorToI18n(comparator, threshold.map(toNumber), toNumber(currentValue)),
       threshold: thresholdToI18n(threshold),
@@ -128,17 +128,17 @@ export const buildFiredAlertReason: (alertResult: {
   });
 
 export const buildRecoveredAlertReason: (alertResult: {
-  groupName: string;
+  group: string;
   metric: string;
   comparator: Comparator;
   threshold: Array<number | string>;
   currentValue: number | string;
-}) => string = ({ groupName, metric, comparator, threshold, currentValue }) =>
+}) => string = ({ group, metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.recoveredAlertReason', {
     defaultMessage:
-      '{groupName}: {metric} is now {comparator} a threshold of {threshold} (current value is {currentValue})',
+      '{metric} is now {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
     values: {
-      groupName,
+      group,
       metric,
       comparator: recoveredComparatorToI18n(
         comparator,
@@ -151,15 +151,14 @@ export const buildRecoveredAlertReason: (alertResult: {
   });
 
 export const buildNoDataAlertReason: (alertResult: {
-  groupName: string;
+  group: string;
   metric: string;
   timeSize: number;
   timeUnit: string;
-}) => string = ({ groupName, metric, timeSize, timeUnit }) =>
+}) => string = ({ group, metric, timeSize, timeUnit }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.noDataAlertReason', {
-    defaultMessage: '{groupName}: {metric} has reported no data over the past {interval}',
+    defaultMessage: '{metric} has reported no data over the past {interval} for {group}',
     values: {
-      groupName,
       metric,
       interval: `${timeSize}${timeUnit}`,
     },
