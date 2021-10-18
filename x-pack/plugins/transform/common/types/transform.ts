@@ -45,12 +45,21 @@ export type TransformLatestConfig = Omit<TransformBaseConfig, 'pivot'> & {
 
 export type TransformConfigUnion = TransformPivotConfig | TransformLatestConfig;
 
+export type ContinuousTransform = Omit<TransformConfigUnion, 'sync'> &
+  Required<{
+    sync: TransformConfigUnion['sync'];
+  }>;
+
 export function isPivotTransform(transform: unknown): transform is TransformPivotConfig {
   return isPopulatedObject(transform, ['pivot']);
 }
 
 export function isLatestTransform(transform: unknown): transform is TransformLatestConfig {
   return isPopulatedObject(transform, ['latest']);
+}
+
+export function isContinuousTransform(transform: unknown): transform is ContinuousTransform {
+  return isPopulatedObject(transform, ['sync']);
 }
 
 export interface LatestFunctionConfigUI {
