@@ -130,7 +130,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
         setGlobalFullScreen(true);
       }
     }
-    // onClose();
   }, [dispatch, ecsData._id, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
 
   return (
