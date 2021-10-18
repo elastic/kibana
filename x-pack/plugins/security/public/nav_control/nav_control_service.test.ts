@@ -19,7 +19,7 @@ import { SecurityNavControlService } from './nav_control_service';
 const validLicense = {
   isAvailable: true,
   getFeature: (feature) => {
-    expect(feature).toEqual('security');
+    expect(['security', 'ml']).toContain(feature);
 
     return {
       isAvailable: true,

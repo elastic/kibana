@@ -15,3 +15,4 @@ export {
   KIBANA_ADMIN_ROLE_NAME,
   KIBANA_USER_ROLE_NAME,
 } from './kibana_user_role';
+export { registerMLPrivilegesDeprecation } from './ml_privileges';

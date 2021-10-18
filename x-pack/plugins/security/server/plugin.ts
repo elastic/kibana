@@ -46,6 +46,7 @@ import {
   getPrivilegeDeprecationsService,
   registerKibanaDashboardOnlyRoleDeprecation,
   registerKibanaUserRoleDeprecation,
+  registerMLPrivilegesDeprecation,
 } from './deprecations';
 import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
@@ -433,6 +434,13 @@ export class SecurityPlugin
       license,
       logger,
       packageInfo: this.initializerContext.env.packageInfo,
+    });
+    registerMLPrivilegesDeprecation({
+      deprecationsService: core.deprecations,
+      license,
+      logger,
+      packageInfo: this.initializerContext.env.packageInfo,
+      applicationName: this.authorizationSetup?.applicationName!,
     });
   }
 }
