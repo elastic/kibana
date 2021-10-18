@@ -20,7 +20,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.dataView.description"
-          defaultMessage="The currently selected index pattern being used for this job."
+          defaultMessage="The index pattern that is currently used for this job."
         />
       }
     >

@@ -136,7 +136,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
               <EuiCallOut color="warning">
                 <FormattedMessage
                   id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.description"
-                  defaultMessage="Changing the current index pattern may cause problems with the current job configuration as it may not contain the same fields."
+                  defaultMessage="Changing the current index pattern may cause problems with the corresponding job configuration as the newly selected index pattern may not contain the same fields."
                 />
               </EuiCallOut>
 
@@ -170,7 +170,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
             <>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.datafeedStep.dataView.step1.title"
-                defaultMessage="Select new index pattern for job"
+                defaultMessage="Select new index pattern for the job"
               />
 
               <EuiSpacer size="s" />
@@ -218,7 +218,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                   <EuiLoadingSpinner />
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.datafeedStep.dataView.step2.validatingText"
-                    defaultMessage=" Checking compatibility of index pattern with job"
+                    defaultMessage="Checking index pattern and job compatibility"
                   />
                 </>
               ) : (
@@ -281,7 +281,7 @@ const ValidationMessage: FC<{
       >
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.message"
-          defaultMessage="No detectors have been configured, so changing to this index pattern should be ok."
+          defaultMessage="NNo detectors have been configured; this index pattern can be applied to the job."
         />
       </EuiCallOut>
     );
@@ -300,7 +300,7 @@ const ValidationMessage: FC<{
         >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.valid.message"
-            defaultMessage="This index pattern appears to be a good match for this job."
+            defaultMessage="This index pattern can be applied to this job."
           />
         </EuiCallOut>
       );
@@ -317,7 +317,7 @@ const ValidationMessage: FC<{
         >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.possiblyInvalid.message"
-            defaultMessage="This index pattern produced no results when previewing the datafeed. This could be due to there being no documents in {dataViewTitle}."
+            defaultMessage="This index pattern produced no results when previewing the datafeed. There may be no documents in {dataViewTitle}."
             values={{ dataViewTitle }}
           />
         </EuiCallOut>
@@ -336,7 +336,7 @@ const ValidationMessage: FC<{
       >
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.message"
-          defaultMessage="This index pattern produced an error when attempting to preview the datafeed. This could be due to fields selected for this job not existing in {dataViewTitle}."
+          defaultMessage="This index pattern produced an error when attempting to preview the datafeed. The fields selected for this job might not exist in {dataViewTitle}."
           values={{ dataViewTitle }}
         />
 
