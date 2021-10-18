@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { CurationChangesPanel } from './curation_changes_panel';
 export { IgnoredQueriesPanel } from './ignored_queries_panel';
-export { RejectedCurationsPanel } from './rejected_curations_panel';
