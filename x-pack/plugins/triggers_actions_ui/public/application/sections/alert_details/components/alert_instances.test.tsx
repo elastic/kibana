@@ -8,9 +8,13 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { act } from 'react-dom/test-utils';
 import { AlertInstances, AlertInstanceListItem, alertInstanceToListItem } from './alert_instances';
 import { Alert, AlertInstanceSummary, AlertInstanceStatus, AlertType } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
+import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
+
 jest.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
@@ -271,6 +275,118 @@ describe('alertInstanceToListItem', () => {
   });
 });
 
+describe('execution duration overview', () => {
+  it('render last execution status', async () => {
+    const rule = mockAlert({
+      executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
+    });
+    const ruleType = mockAlertType();
+    const alertSummary = mockAlertInstanceSummary();
+
+    const wrapper = mountWithIntl(
+      <AlertInstances
+        {...mockAPIs}
+        alert={rule}
+        alertType={ruleType}
+        readOnly={false}
+        alertInstanceSummary={alertSummary}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const ruleExecutionStatusStat = wrapper.find('[data-test-subj="ruleStatus-ok"]');
+    expect(ruleExecutionStatusStat.exists()).toBeTruthy();
+    expect(ruleExecutionStatusStat.first().prop('description')).toEqual('Last response');
+    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').text()).toEqual('Ok');
+  });
+
+  it('renders average execution duration', async () => {
+    const rule = mockAlert();
+    const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
+    const alertSummary = mockAlertInstanceSummary({
+      executionDuration: { average: 60284, values: [] },
+    });
+
+    const wrapper = mountWithIntl(
+      <AlertInstances
+        {...mockAPIs}
+        alert={rule}
+        alertType={ruleType}
+        readOnly={false}
+        alertInstanceSummary={alertSummary}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
+    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
+    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
+    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+      'Average duration00:01:00.284'
+    );
+    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
+  });
+
+  it('renders warning when average execution duration exceeds rule timeout', async () => {
+    const rule = mockAlert();
+    const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
+    const alertSummary = mockAlertInstanceSummary({
+      executionDuration: { average: 60284345, values: [] },
+    });
+
+    const wrapper = mountWithIntl(
+      <AlertInstances
+        {...mockAPIs}
+        alert={rule}
+        alertType={ruleType}
+        readOnly={false}
+        alertInstanceSummary={alertSummary}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
+    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
+    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('warning');
+    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+      'Average duration16:44:44.345'
+    );
+    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeTruthy();
+  });
+
+  it('renders execution duration chart', () => {
+    const rule = mockAlert();
+    const ruleType = mockAlertType();
+    const alertSummary = mockAlertInstanceSummary();
+
+    expect(
+      shallow(
+        <AlertInstances
+          {...mockAPIs}
+          alert={rule}
+          alertType={ruleType}
+          alertInstanceSummary={alertSummary}
+          readOnly={false}
+        />
+      )
+        .find(ExecutionDurationChart)
+        .exists()
+    ).toBeTruthy();
+  });
+});
+
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
     id: uuid.v4(),
@@ -341,6 +457,10 @@ function mockAlertInstanceSummary(
         muted: false,
         actionGroupId: 'testActionGroup',
       },
+    },
+    executionDuration: {
+      average: 0,
+      values: [],
     },
   };
   return { ...summary, ...overloads };

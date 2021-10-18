@@ -138,15 +138,6 @@ export class MapsPlugin implements Plugin {
     const { usageCollection, home, licensing, features, mapsEms } = plugins;
     const mapsEmsConfig = mapsEms.config;
     const config$ = this._initializerContext.config.create();
-    const currentConfig = this._initializerContext.config.get();
-
-    // @ts-ignore
-    const mapsEnabled = currentConfig.enabled;
-    // TODO: Consider dynamic way to disable maps app on config change
-    if (!mapsEnabled) {
-      this._logger.warn('Maps app disabled by configuration');
-      return;
-    }
 
     let isEnterprisePlus = false;
     let lastLicenseId: string | undefined;
