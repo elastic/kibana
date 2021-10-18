@@ -42,7 +42,7 @@ export class ApmSystem {
   async setup() {
     if (!this.enabled) return;
     const { init, apm } = await import('@elastic/apm-rum');
-    const { globalLabels, ...apmConfig } = this.apmConfig! || {};
+    const { globalLabels, ...apmConfig } = this.apmConfig!;
     if (globalLabels) {
       apm.addLabels(globalLabels);
     }
