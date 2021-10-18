@@ -147,6 +147,59 @@ const getActivityLog = async ({
   return sortedData;
 };
 
+const hasAckInResponse = (response: EndpointActionResponse): boolean => {
+  return typeof response.action_data.ack !== 'undefined';
+};
+
+const logsEndpointFilterCallback = ({
+  action,
+  agentId,
+  agentResponses,
+  esClient,
+}: {
+  action: EndpointAction;
+  agentId: string;
+  agentResponses: EndpointActionResponse[];
+  esClient: ElasticsearchClient;
+}): boolean => {
+  // get response actionIds for responses with ACKs
+  const ackResponseActionIdList: string[] = agentResponses
+    .map((response) => (hasAckInResponse(response) ? response.action_id : ''))
+    .filter((e) => {
+      return e.length;
+    });
+
+  // list of actionIds and if they are indexed in new responses index
+  const hasIndexedDocList = ackResponseActionIdList
+    .map((actionId) => (hasIndexedDoc({ agentId, actionId, esClient }) ? actionId : ''))
+    .filter((e) => {
+      return e.length;
+    });
+
+  // if action_id not in the ACK list then use the legacy filter to find pending actions
+  // else see if the action doesn't have a response in the new response index
+  if (!ackResponseActionIdList.includes(action.action_id)) {
+    return legacyFilterCallback({ action, agentId, agentResponses });
+  } else {
+    return action.agents.includes(agentId) && !hasIndexedDocList.includes(action.action_id);
+  }
+};
+
+const legacyFilterCallback = ({
+  action,
+  agentId,
+  agentResponses,
+}: {
+  action: EndpointAction;
+  agentId: string;
+  agentResponses: EndpointActionResponse[];
+}): boolean => {
+  return (
+    action.agents.includes(agentId) &&
+    !agentResponses.map((e) => e.action_id).includes(action.action_id)
+  );
+};
+
 export const getPendingActionCounts = async (
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
@@ -180,25 +233,22 @@ export const getPendingActionCounts = async (
     .catch(catchAndWrapError);
 
   // retrieve any responses to those action IDs from these agents
-  const responses = await fetchActionResponseIds(
+  const responses = await fetchActionResponses(
     esClient,
     metadataService,
     recentActions.map((a) => a.action_id),
     agentIDs
   );
 
-
   const pending: EndpointPendingActions[] = [];
   for (const agentId of agentIDs) {
-    const responsesForAgentId = responses[agentId];
+    const agentResponses = responses[agentId];
+    const pendingActions = recentActions.filter((action) => {
+      return logsEndpointFilterCallback({ action, agentId, agentResponses, esClient });
+    });
     pending.push({
       agent_id: agentId,
-      pending_actions: recentActions
-        .filter(
-          (a) =>
-            a.agents.includes(agentId) &&
-            !responsesForAgentId.map((e) => e.action_id).includes(a.action_id)
-        )
+      pending_actions: pendingActions
         .map((a) => a.data.command)
         .reduce((acc, cur) => {
           if (cur in acc) {
@@ -258,7 +308,7 @@ const hasIndexedDoc = async ({
  * @param actionIds
  * @param agentIds
  */
-const fetchActionResponseIds = async (
+const fetchActionResponses = async (
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
   actionIds: string[],
@@ -299,7 +349,7 @@ const fetchActionResponseIds = async (
     return actionResponsesByAgentId;
   }
 
-  // Get the latest docs from the metadata datastream for the Elastic Agent IDs in the action responses
+  // Get the latest docs from the metadata data-stream for the Elastic Agent IDs in the action responses
   // This will be used determine if we should withhold the action id from the returned list in cases where
   // the Endpoint might not yet have sent an updated metadata document (which would be representative of
   // the state of the endpoint post-action)
