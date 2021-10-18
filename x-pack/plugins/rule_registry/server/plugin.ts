@@ -85,7 +85,6 @@ export class RuleRegistryPlugin
       logger,
       kibanaVersion,
       isWriteEnabled: this.config.write.enabled,
-      isIndexUpgradeEnabled: this.config.unsafe.indexUpgrade.enabled,
       getClusterClient: async () => {
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;

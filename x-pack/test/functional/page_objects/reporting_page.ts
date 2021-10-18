@@ -19,6 +19,7 @@ export class ReportingPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly security = this.ctx.getService('security');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly find = this.ctx.getService('find');
   private readonly share = this.ctx.getPageObject('share');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
 
@@ -33,15 +34,21 @@ export class ReportingPageObject extends FtrService {
   async getReportURL(timeout: number) {
     this.log.debug('getReportURL');
 
-    const url = await this.testSubjects.getAttribute(
-      'downloadCompletedReportButton',
-      'href',
-      timeout
-    );
+    try {
+      const url = await this.testSubjects.getAttribute(
+        'downloadCompletedReportButton',
+        'href',
+        timeout
+      );
+      this.log.debug(`getReportURL got url: ${url}`);
 
-    this.log.debug(`getReportURL got url: ${url}`);
-
-    return url;
+      return url;
+    } catch (err) {
+      const errorTextEl = await this.find.byCssSelector('[data-test-errorText]');
+      const errorText = await errorTextEl.getAttribute('data-test-errorText');
+      const newError = new Error(`Test report failed: ${errorText}: ${err}`);
+      throw newError;
+    }
   }
 
   async removeForceSharedItemsContainerSize() {

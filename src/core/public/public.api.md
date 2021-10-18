@@ -477,6 +477,7 @@ export interface DocLinksStart {
     // (undocumented)
     readonly links: {
         readonly settings: string;
+        readonly elasticStackGetStarted: string;
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
@@ -613,6 +614,9 @@ export interface DocLinksStart {
             readonly networkMap: string;
             readonly troubleshootGaps: string;
         };
+        readonly securitySolution: {
+            readonly trustedApps: string;
+        };
         readonly query: {
             readonly eql: string;
             readonly kueryQuerySyntax: string;
@@ -704,6 +708,7 @@ export interface DocLinksStart {
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
+            apiKeysLearnMore: string;
         }>;
         readonly ecs: {
             readonly guide: string;
@@ -726,10 +731,9 @@ export interface DocLinksStart {
 // Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
 //
 // @internal (undocumented)
-export interface DomainDeprecationDetails extends DeprecationsDetails {
-    // (undocumented)
+export type DomainDeprecationDetails = DeprecationsDetails & {
     domainId: string;
-}
+};
 
 export { EnvironmentMode }
 

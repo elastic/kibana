@@ -104,16 +104,19 @@ import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_lo
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
-import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
 // eslint-disable-next-line no-restricted-imports
 import { legacyIsNotificationAlertExecutor } from './lib/detection_engine/notifications/legacy_types';
+import { createSecurityRuleTypeWrapper } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
+import { IEventLogClientService, IEventLogService } from '../../event_log/server';
+import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
+  eventLog: IEventLogService;
   features: FeaturesSetup;
   lists?: ListPluginSetup;
   ml?: MlSetup;
@@ -121,20 +124,21 @@ export interface SetupPlugins {
   security?: SecuritySetup;
   spaces?: SpacesSetup;
   taskManager?: TaskManagerSetupContract;
-  usageCollection?: UsageCollectionSetup;
   telemetry?: TelemetryPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface StartPlugins {
   alerting: AlertPluginStartContract;
+  cases?: CasesPluginStartContract;
   data: DataPluginStart;
+  eventLog: IEventLogClientService;
   fleet?: FleetStartContract;
   licensing: LicensingPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
+  security: SecurityPluginStart;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
-  security: SecurityPluginStart;
-  cases?: CasesPluginStartContract;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -201,6 +205,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
+    const eventLogService = plugins.eventLog;
+    registerEventLogProvider(eventLogService);
+
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
@@ -209,8 +216,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         getSpaceId: () => plugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
         getExecutionLogClient: () =>
           new RuleExecutionLogClient({
-            ruleDataService: plugins.ruleRegistry.ruleDataService,
             savedObjectsClient: context.core.savedObjects.client,
+            eventLogService,
+            underlyingClient: config.ruleExecutionLog.underlyingClient,
           }),
       })
     );
@@ -247,10 +255,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         componentTemplates: [
           {
             name: 'mappings',
-            mappings: mappingFromFieldMap(
-              { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
-              false
-            ),
+            mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
           },
         ],
         secondaryAlias: config.signalsIndex,
@@ -259,21 +264,34 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       // Register rule types via rule-registry
       const createRuleOptions: CreateRuleOptions = {
         experimentalFeatures,
-        lists: plugins.lists,
         logger: this.logger,
-        mergeStrategy: this.config.alertMergeStrategy,
-        ignoreFields: this.config.alertIgnoreFields,
         ml: plugins.ml,
-        ruleDataClient,
-        ruleDataService,
         version: this.context.env.packageInfo.version,
       };
 
-      this.setupPlugins.alerting.registerType(createEqlAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createMlAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createThresholdAlertType(createRuleOptions));
+      const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+        lists: plugins.lists,
+        logger: this.logger,
+        config: this.config,
+        ruleDataClient,
+        eventLogService,
+      });
+
+      this.setupPlugins.alerting.registerType(
+        securityRuleTypeWrapper(createEqlAlertType(createRuleOptions))
+      );
+      this.setupPlugins.alerting.registerType(
+        securityRuleTypeWrapper(createIndicatorMatchAlertType(createRuleOptions))
+      );
+      this.setupPlugins.alerting.registerType(
+        securityRuleTypeWrapper(createMlAlertType(createRuleOptions))
+      );
+      this.setupPlugins.alerting.registerType(
+        securityRuleTypeWrapper(createQueryAlertType(createRuleOptions))
+      );
+      this.setupPlugins.alerting.registerType(
+        securityRuleTypeWrapper(createThresholdAlertType(createRuleOptions))
+      );
     }
 
     // TODO We need to get the endpoint routes inside of initRoutes
@@ -317,10 +335,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
-        mergeStrategy: this.config.alertMergeStrategy,
-        ignoreFields: this.config.alertIgnoreFields,
+        config: this.config,
         experimentalFeatures,
-        ruleDataService: plugins.ruleRegistry.ruleDataService,
+        eventLogService,
       });
       const ruleNotificationType = legacyRulesNotificationAlertType({
         logger: this.logger,
@@ -343,6 +360,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.lists = plugins.lists;
       this.manifestTask = new ManifestTask({
         endpointAppContext: endpointContext,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         taskManager: plugins.taskManager!,
       });
     }
@@ -368,6 +386,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
       endpointAppContext: endpointContext,
       core,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       taskManager: plugins.taskManager!,
     });
 
@@ -419,7 +438,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       // License related start
       licenseService.start(this.licensing$);
       this.policyWatcher = new PolicyWatcher(
-        plugins.fleet!.packagePolicyService,
+        plugins.fleet.packagePolicyService,
         core.savedObjects,
         core.elasticsearch,
         logger
@@ -427,6 +446,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.policyWatcher.start(licenseService);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
 
     this.endpointAppContextService.start({
@@ -436,14 +456,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       agentPolicyService: plugins.fleet?.agentPolicyService,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.agentService!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.agentPolicyService!,
         logger
       ),
       appClientFactory: this.appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
-      config: this.config!,
+      config: this.config,
       cases: plugins.cases,
       logger,
       manifestManager,
@@ -452,7 +474,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptionListsClient: exceptionListClient,
     });
 
-    this.telemetryReceiver.start(core, this.endpointAppContextService, exceptionListClient);
+    const globalConfig = this.context.config.legacy.get();
+    this.telemetryReceiver.start(
+      core,
+      globalConfig.kibana.index,
+      this.endpointAppContextService,
+      exceptionListClient
+    );
 
     this.telemetryEventsSender.start(
       plugins.telemetry,
@@ -461,6 +489,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
 
     this.checkMetadataTransformsTask?.start({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       taskManager: plugins.taskManager!,
     });
 

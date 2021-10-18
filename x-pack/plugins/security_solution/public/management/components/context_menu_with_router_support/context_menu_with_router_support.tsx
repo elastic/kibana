@@ -13,6 +13,7 @@ import {
   EuiPopover,
   EuiPopoverProps,
 } from '@elastic/eui';
+import uuid from 'uuid';
 import {
   ContextMenuItemNavByRouter,
   ContextMenuItemNavByRouterProps,
@@ -49,10 +50,12 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
     }, [getTestId]);
 
     const menuItems: EuiContextMenuPanelProps['items'] = useMemo(() => {
-      return items.map((itemProps) => {
+      return items.map((itemProps, index) => {
         return (
           <ContextMenuItemNavByRouter
             {...itemProps}
+            key={uuid.v4()}
+            data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-${index}`)}
             textTruncate={Boolean(maxWidth) || itemProps.textTruncate}
             onClick={(ev) => {
               handleCloseMenu();
@@ -63,7 +66,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           />
         );
       });
-    }, [handleCloseMenu, items, maxWidth]);
+    }, [getTestId, handleCloseMenu, items, maxWidth]);
 
     type AdditionalPanelProps = Partial<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>>;
     const additionalContextMenuPanelProps = useMemo<AdditionalPanelProps>(() => {
@@ -72,6 +75,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
       };
 
       if (maxWidth) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         newAdditionalProps.style!.maxWidth = maxWidth;
       }
 
@@ -86,7 +90,11 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         panelProps={panelProps}
         button={
           // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-          <div className="eui-displayInlineBlock" onClick={handleToggleMenu}>
+          <div
+            className="eui-displayInlineBlock"
+            data-test-subj={getTestId('triggerButtonWrapper')}
+            onClick={handleToggleMenu}
+          >
             {button}
           </div>
         }

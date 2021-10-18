@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export const ClusterStatus: FunctionComponent<Props>;
+import { FunctionComponent } from 'react';
+
+export const ClusterStatus: FunctionComponent<ClusterStatusProps>;
+
+export interface ClusterStatusProps {
+  stats: unknown;
+  alerts?: unknown;
+}
