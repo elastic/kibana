@@ -6,38 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { flow, identity, mapValues } from 'lodash';
-import { SavedObjectMigrationFn } from 'kibana/server';
+import { mapValues } from 'lodash';
+import { SavedObject } from 'kibana/server';
 import { SavedQueryAttributes } from '../../../common';
 import { extract, getAllMigrations } from '../../../common/query/persistable_state';
+import { mergeMigrationFunctionMaps } from '../../../../kibana_utils/common';
 
-const extractFilterReferences: SavedObjectMigrationFn<SavedQueryAttributes, SavedQueryAttributes> =
-  (doc) => {
-    const { state: filters, references } = extract(doc.attributes.filters ?? []);
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        filters,
-      },
-      references,
-    };
+const extractFilterReferences = (doc: SavedObject<SavedQueryAttributes>) => {
+  const { state: filters, references } = extract(doc.attributes.filters ?? []);
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      filters,
+    },
+    references,
   };
-
-const filterMigrations = mapValues(
-  getAllMigrations(),
-  (migrate): SavedObjectMigrationFn<SavedQueryAttributes> => {
-    return (doc) => ({
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        filters: migrate(doc.attributes.filters),
-      },
-    });
-  }
-);
-
-export const savedQueryMigrations = {
-  ...filterMigrations,
-  '7.16.0': flow(filterMigrations['7.16.0'] ?? identity, extractFilterReferences),
 };
+
+const filterMigrations = mapValues(getAllMigrations(), (migrate) => {
+  return (doc: SavedObject<SavedQueryAttributes>) => ({
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      filters: migrate(doc.attributes.filters),
+    },
+  });
+});
+
+export const savedQueryMigrations = mergeMigrationFunctionMaps(
+  {
+    '7.16.0': extractFilterReferences,
+  },
+  filterMigrations
+);
