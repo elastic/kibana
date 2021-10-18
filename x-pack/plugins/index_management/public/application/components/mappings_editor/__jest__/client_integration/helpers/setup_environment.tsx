@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 
 /* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
 import '../../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
