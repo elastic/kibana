@@ -21,7 +21,10 @@ export const INPUT_FILE = 'input[type=file]';
 
 export const NOTE = '[data-test-subj^="note-preview-"]';
 
-export const TIMELINE = (id: string) => {
+export const TIMELINE = (id: string | undefined) => {
+  if (id == null) {
+    throw new TypeError('id should never be null or undefined');
+  }
   return `[data-test-subj="title-${id}"]`;
 };
 

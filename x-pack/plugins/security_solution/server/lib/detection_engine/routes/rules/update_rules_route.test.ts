@@ -66,7 +66,7 @@ describe.each([
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getUpdateRequest(), context);
 
       expect(response.status).toEqual(404);

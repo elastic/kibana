@@ -12,6 +12,7 @@ import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../co
 import { setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
+import type { FleetRequestHandler } from '../../types';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   try {
@@ -42,10 +43,10 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
   }
 };
 
-export const fleetSetupHandler: RequestHandler = async (context, request, response) => {
+export const fleetSetupHandler: FleetRequestHandler = async (context, request, response) => {
   try {
-    const soClient = context.core.savedObjects.client;
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const soClient = context.fleet.epm.internalSoClient;
+    const esClient = context.core.elasticsearch.client.asInternalUser;
     const setupStatus = await setupFleet(soClient, esClient);
     const body: PostFleetSetupResponse = {
       ...setupStatus,

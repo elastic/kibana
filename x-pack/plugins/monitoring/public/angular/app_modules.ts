@@ -12,13 +12,10 @@ import 'angular-sanitize';
 import 'angular-route';
 import '../index.scss';
 import { upperFirst } from 'lodash';
-import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart } from 'kibana/public';
+import { i18nDirective, i18nFilter, I18nProvider } from './angular_i18n';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import {
-  createTopNavDirective,
-  createTopNavHelper,
-} from '../../../../../src/plugins/kibana_legacy/public';
+import { createTopNavDirective, createTopNavHelper } from './top_nav';
 import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalState } from '../url_state';
 import { getSafeForExternalLink } from '../lib/get_safe_for_external_link';
