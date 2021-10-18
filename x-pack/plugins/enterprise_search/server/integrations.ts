@@ -322,7 +322,7 @@ export const registerEnterpriseSearchIntegrations = (
       },
     ],
     shipper: 'enterprise_search',
-    isBeta: true, // TODO: replace with false when Crawler goes GA
+    isBeta: false,
   });
 
   customIntegrations.registerCustomIntegration({
