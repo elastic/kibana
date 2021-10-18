@@ -602,9 +602,13 @@ exports[`Source Viewer component renders json code editor 1`] = `
                     fallback={<Fallback />}
                   >
                     <Fallback>
-                      <EuiDelayRender
-                        delay={500}
-                      />
+                      <div
+                        style={Object {}}
+                      >
+                        <EuiDelayRender
+                          delay={500}
+                        />
+                      </div>
                     </Fallback>
                   </Suspense>
                 </EuiErrorBoundary>
