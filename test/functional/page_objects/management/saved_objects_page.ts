@@ -122,6 +122,7 @@ export class SavedObjectsPageObject extends FtrService {
   }
   async waitInspectObjectIsLoaded() {
     return await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
+      this.log.debug(`wait for inspect view to load`);
       const isLoaded = await this.find.byClassName('kibanaCodeEditor');
       const visibleContainerText = await isLoaded.getVisibleText();
       if (visibleContainerText) {
