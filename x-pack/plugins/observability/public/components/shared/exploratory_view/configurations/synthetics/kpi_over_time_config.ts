@@ -38,6 +38,19 @@ import { buildExistsFilter } from '../utils';
 const SUMMARY_UP = 'summary.up';
 const SUMMARY_DOWN = 'summary.down';
 
+export const isStepLevelMetric = (metric?: string) => {
+  if (!metric) {
+    return false;
+  }
+  return [
+    SYNTHETICS_LCP,
+    SYNTHETICS_FCP,
+    SYNTHETICS_CLS,
+    SYNTHETICS_DCL,
+    SYNTHETICS_STEP_DURATION,
+    SYNTHETICS_DOCUMENT_ONLOAD,
+  ].includes(metric);
+};
 export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
     reportType: ReportTypes.KPI,
@@ -64,7 +77,7 @@ export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesCon
     baseFilters: [],
     palette: { type: 'palette', name: 'status' },
     definitionFields: [
-      { field: 'monitor.name', nested: 'synthetics.step.name.keyword', singleSelection: true },
+      { field: 'monitor.name', nested: SYNTHETICS_STEP_NAME, singleSelection: true },
       { field: 'url.full', filters: buildExistsFilter('summary.up', indexPattern) },
     ],
     metricOptions: [

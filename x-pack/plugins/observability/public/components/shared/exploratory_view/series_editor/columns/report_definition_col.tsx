@@ -11,6 +11,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { ReportDefinitionField } from './report_definition_field';
+import { isStepLevelMetric } from '../../configurations/synthetics/kpi_over_time_config';
+import { SYNTHETICS_STEP_NAME } from '../../configurations/constants/field_names/synthetics';
 
 export function ReportDefinitionCol({
   seriesId,
@@ -51,18 +53,23 @@ export function ReportDefinitionCol({
       {definitionFields.map((field) => {
         const fieldStr = typeof field === 'string' ? field : field.field;
         const singleSelection = typeof field !== 'string' && field.singleSelection;
+        const nestedField = typeof field !== 'string' && field.nested;
         const filters = typeof field !== 'string' ? field.filters : undefined;
+
+        const isNonStepMetric = !isStepLevelMetric(series.selectedMetricField);
+
+        const hideNestedStep = nestedField === SYNTHETICS_STEP_NAME && isNonStepMetric;
 
         let nestedFieldElement;
 
-        if (typeof field !== 'string' && field.nested && hasFieldDataSelected(field.field)) {
+        if (nestedField && hasFieldDataSelected(fieldStr) && !hideNestedStep) {
           nestedFieldElement = (
-            <EuiFlexItem key={field.nested} grow={1}>
+            <EuiFlexItem key={nestedField} grow={1}>
               <ReportDefinitionField
                 seriesId={seriesId}
                 series={series}
                 seriesConfig={seriesConfig}
-                field={field.nested}
+                field={nestedField}
                 onChange={onChange}
                 keepHistory={false}
                 singleSelection={singleSelection}
