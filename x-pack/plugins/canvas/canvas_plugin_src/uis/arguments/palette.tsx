@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { getType } from '@kbn/interpreter/common';
 import { ExpressionAstFunction, ExpressionAstExpression } from 'src/plugins/expressions';
-import { PalettePicker } from '../../../public/components/palette_picker';
+import { CustomColorPalette, PalettePicker } from '../../../public/components/palette_picker';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
 import { identifyPalette, ColorPalette } from '../../../common/lib';
@@ -60,7 +60,7 @@ export const PaletteArgInput: FC<Props> = ({ onValueChange, argId, argValue, ren
     return null;
   };
 
-  const handleChange = (palette: ColorPalette): void => {
+  const handleChange = (palette: ColorPalette | CustomColorPalette): void => {
     const astObj: ExpressionAstExpression = {
       type: 'expression',
       chain: [

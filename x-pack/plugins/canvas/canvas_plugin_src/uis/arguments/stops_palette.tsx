@@ -81,7 +81,7 @@ const StopsPaletteArgInput: React.FC<StopPaletteArgInputProps> = ({
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
       <EuiFlexItem>
-        <PalettePicker id={argId} additionalPalettes={[]} clearable={false} />
+        <PalettePicker id={argId} clearable={false} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

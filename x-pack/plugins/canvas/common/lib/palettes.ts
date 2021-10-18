@@ -19,11 +19,12 @@ export type PaletteID = typeof palettes[number]['id'];
  * An interface representing a color palette in Canvas, with a textual label and a set of
  * hex values.
  */
-export interface ColorPalette {
-  id: PaletteID;
+export interface ColorPalette<AdditionalPaletteID extends string = PaletteID> {
+  id: PaletteID | AdditionalPaletteID;
   label: string;
   colors: string[];
   gradient: boolean;
+  stops?: number[];
 }
 
 // This function allows one to create a strongly-typed palette for inclusion in
