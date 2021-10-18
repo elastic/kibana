@@ -166,9 +166,24 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     }
   }
 
+  const alertRuleItems: Item[] | undefined = item.alerting_rules?.map((rule) => {
+    return {
+      title: rule.name,
+      description: rule.executionStatus.status,
+    };
+  });
+
   const checkpointing: SectionConfig = {
     title: 'Checkpointing',
     items: checkpointingItems,
+    position: 'right',
+  };
+
+  const alertingRules: SectionConfig = {
+    title: i18n.translate('xpack.transform.transformList.transformDetails.alertRulesTitle', {
+      defaultMessage: 'Alert rules',
+    }),
+    items: alertRuleItems!,
     position: 'right',
   };
 
@@ -192,7 +207,16 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           defaultMessage: 'Details',
         }
       ),
-      content: <ExpandedRowDetailsPane sections={[general, state, checkpointing]} />,
+      content: (
+        <ExpandedRowDetailsPane
+          sections={[
+            general,
+            state,
+            checkpointing,
+            ...(alertingRules.items ? [alertingRules] : []),
+          ]}
+        />
+      ),
     },
     {
       id: `transform-stats-tab-${tabId}`,
