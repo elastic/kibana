@@ -161,8 +161,8 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         id: 0,
         items: [
           {
-            icon: <EuiIcon type="eyeClosed" size="s" />,
-            name: i18n.HIDE_COLUMN,
+            icon: <EuiIcon type="cross" size="s" />,
+            name: i18n.REMOVE_COLUMN,
             onClick: () => {
               dispatch(tGridActions.removeColumn({ id: timelineId, columnId: header.id }));
               handleClosePopOverTrigger();

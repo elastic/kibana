@@ -17,7 +17,7 @@ import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import { IEventLogClientService } from '../../../plugins/event_log/server';
+import { IEventLogClientService, IEventLogger } from '../../../plugins/event_log/server';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 export interface RulesClientFactoryOpts {
   logger: Logger;
@@ -32,6 +32,7 @@ export interface RulesClientFactoryOpts {
   eventLog: IEventLogClientService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   authorization: AlertingAuthorizationClientFactory;
+  eventLogger?: IEventLogger;
 }
 
 export class RulesClientFactory {
@@ -48,6 +49,7 @@ export class RulesClientFactory {
   private eventLog!: IEventLogClientService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private authorization!: AlertingAuthorizationClientFactory;
+  private eventLogger?: IEventLogger;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -66,6 +68,7 @@ export class RulesClientFactory {
     this.eventLog = options.eventLog;
     this.kibanaVersion = options.kibanaVersion;
     this.authorization = options.authorization;
+    this.eventLogger = options.eventLogger;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -123,6 +126,7 @@ export class RulesClientFactory {
       async getEventLogClient() {
         return eventLog.getClient(request);
       },
+      eventLogger: this.eventLogger,
     });
   }
 }
