@@ -142,7 +142,7 @@ export const BREAKDOWN_UNAVAILABLE = i18n.translate(
   'xpack.observability.exp.breakDownFilter.unavailable',
   {
     defaultMessage:
-      'Step name breakdown is not available for monitor duration metric, use step duration metric to breakdown by step name.',
+      'Step name breakdown is not available for monitor duration metric. Use step duration metric to breakdown by step name.',
   }
 );
 
