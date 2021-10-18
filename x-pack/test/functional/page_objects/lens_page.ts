@@ -19,6 +19,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const comboBox = getService('comboBox');
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const screenshot = getService('screenshots');
 
   const PageObjects = getPageObjects([
     'common',
@@ -875,12 +876,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async toggleColumnVisibility(dimension: string) {
+      screenshot.take('toggleColumnVisibility1:before');
       await this.openDimensionEditor(dimension);
+      screenshot.take('toggleColumnVisibility2:opensDimensionEditor');
       const id = 'lns-table-column-hidden';
       const isChecked = await testSubjects.isEuiSwitchChecked(id);
       await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
+      screenshot.take('toggleColumnVisibility3:Changedswitch');
       await this.closeDimensionEditor();
+      screenshot.take('toggleColumnVisibility4:closeDimensionEditor');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      screenshot.take('toggleColumnVisibility5:loadingfinished');
     },
 
     async clickTableCellAction(rowIndex = 0, colIndex = 0, actionTestSub: string) {

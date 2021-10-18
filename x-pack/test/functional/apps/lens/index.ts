@@ -18,26 +18,27 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 800);
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*', 'dateFormat:tz': 'UTC' });
     });
 
     after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     describe('', function () {
       this.tags(['ciGroup3', 'skipFirefox']);
       loadTestFile(require.resolve('./smokescreen'));
+      loadTestFile(require.resolve('./persistent_context'));
     });
 
     describe('', function () {
@@ -47,7 +48,6 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./runtime_fields'));
       loadTestFile(require.resolve('./dashboard'));
-      loadTestFile(require.resolve('./persistent_context'));
       loadTestFile(require.resolve('./colors'));
       loadTestFile(require.resolve('./chart_data'));
       loadTestFile(require.resolve('./time_shift'));

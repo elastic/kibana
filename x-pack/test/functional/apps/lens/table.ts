@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const screenshot = getService('screenshots');
 
   describe('lens datatable', () => {
     it('should able to sort a table by a column', async () => {
@@ -56,12 +57,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow to configure column visibility', async () => {
+      screenshot.take('toggleColumnVisibility0: before');
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('Top values of ip');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal('Average of bytes');
 
       await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger');
 
+      screenshot.take('toggleColumnVisibility9: after');
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('Average of bytes');
 
