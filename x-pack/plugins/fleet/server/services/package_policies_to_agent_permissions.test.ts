@@ -297,7 +297,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           lens: [],
           security_rule: [],
           ml_module: [],
-          tag: [],
         },
         elasticsearch: {
           component_template: [],
@@ -306,7 +305,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           transform: [],
           index_template: [],
           data_stream_ilm_policy: [],
-          ml_model: [],
         },
       },
       data_streams: [
