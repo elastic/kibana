@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['apm_jsbase', 'apm_nodejs'],
+        moduleIds: ['apm_jsbase', 'apm_transaction', 'apm_nodejs'],
       },
     },
     {
