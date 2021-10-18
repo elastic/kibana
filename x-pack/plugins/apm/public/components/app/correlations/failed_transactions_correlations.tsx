@@ -15,13 +15,11 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiIcon,
-  EuiLink,
   EuiTitle,
   EuiBetaBadge,
   EuiBadge,
   EuiText,
   EuiToolTip,
-  RIGHT_ALIGNMENT,
   EuiSwitch,
   EuiIconTip,
 } from '@elastic/eui';
@@ -40,6 +38,7 @@ import {
   APM_SEARCH_STRATEGIES,
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../common/search_strategies/constants';
+import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
@@ -48,7 +47,7 @@ import { useSearchStrategy } from '../../../hooks/use_search_strategy';
 import { useTheme } from '../../../hooks/use_theme';
 
 import { ImpactBar } from '../../shared/ImpactBar';
-import { createHref, push } from '../../shared/Links/url_helpers';
+import { push } from '../../shared/Links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
@@ -64,6 +63,8 @@ import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
 import { useTransactionColors } from './use_transaction_colors';
+import { CorrelationsContextPopover } from './context_popover';
+import { OnAddFilter } from './context_popover/top_values';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -86,6 +87,14 @@ export function FailedTransactionsCorrelations({
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     }
   );
+
+  const fieldStats: Record<string, FieldStats> | undefined = useMemo(() => {
+    return response.fieldStats?.reduce((obj, field) => {
+      obj[field.fieldName] = field;
+      return obj;
+    }, {} as Record<string, FieldStats>);
+  }, [response?.fieldStats]);
+
   const progressNormalized = progress.loaded / progress.total;
   const { overallHistogram, hasData, status } = getOverallHistogram(
     response,
@@ -101,6 +110,28 @@ export function FailedTransactionsCorrelations({
   const toggleShowStats = useCallback(() => {
     setShowStats(!showStats);
   }, [setShowStats, showStats]);
+
+  const onAddFilter = useCallback<OnAddFilter>(
+    ({ fieldName, fieldValue, include }) => {
+      if (include) {
+        push(history, {
+          query: {
+            kuery: `${fieldName}:"${fieldValue}"`,
+          },
+        });
+        trackApmEvent({ metric: 'correlations_term_include_filter' });
+      } else {
+        push(history, {
+          query: {
+            kuery: `not ${fieldName}:"${fieldValue}"`,
+          },
+        });
+        trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+      }
+      onFilter();
+    },
+    [onFilter, history, trackApmEvent]
+  );
 
   const failedTransactionsCorrelationsColumns: Array<
     EuiBasicTableColumn<FailedTransactionsCorrelation>
@@ -225,7 +256,6 @@ export function FailedTransactionsCorrelations({
             )}
           </>
         ),
-        align: RIGHT_ALIGNMENT,
         render: (_, { normalizedScore }) => {
           return (
             <>
@@ -262,6 +292,17 @@ export function FailedTransactionsCorrelations({
           'xpack.apm.correlations.failedTransactions.correlationsTable.fieldNameLabel',
           { defaultMessage: 'Field name' }
         ),
+        render: (_, { fieldName, fieldValue }) => (
+          <>
+            {fieldName}
+            <CorrelationsContextPopover
+              fieldName={fieldName}
+              fieldValue={fieldValue}
+              topValueStats={fieldStats ? fieldStats[fieldName] : undefined}
+              onAddFilter={onAddFilter}
+            />
+          </>
+        ),
         sortable: true,
       },
       {
@@ -288,15 +329,15 @@ export function FailedTransactionsCorrelations({
             ),
             icon: 'plusInCircle',
             type: 'icon',
-            onClick: (term: FailedTransactionsCorrelation) => {
-              push(history, {
-                query: {
-                  kuery: `${term.fieldName}:"${term.fieldValue}"`,
-                },
-              });
-              onFilter();
-              trackApmEvent({ metric: 'correlations_term_include_filter' });
-            },
+            onClick: ({
+              fieldName,
+              fieldValue,
+            }: FailedTransactionsCorrelation) =>
+              onAddFilter({
+                fieldName,
+                fieldValue,
+                include: true,
+              }),
           },
           {
             name: i18n.translate(
@@ -309,49 +350,20 @@ export function FailedTransactionsCorrelations({
             ),
             icon: 'minusInCircle',
             type: 'icon',
-            onClick: (term: FailedTransactionsCorrelation) => {
-              push(history, {
-                query: {
-                  kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
-                },
-              });
-              onFilter();
-              trackApmEvent({ metric: 'correlations_term_exclude_filter' });
-            },
+            onClick: ({
+              fieldName,
+              fieldValue,
+            }: FailedTransactionsCorrelation) =>
+              onAddFilter({
+                fieldName,
+                fieldValue,
+                include: false,
+              }),
           },
         ],
-        name: i18n.translate(
-          'xpack.apm.correlations.correlationsTable.actionsLabel',
-          { defaultMessage: 'Filter' }
-        ),
-        render: (_, { fieldName, fieldValue }) => {
-          return (
-            <>
-              <EuiLink
-                href={createHref(history, {
-                  query: {
-                    kuery: `${fieldName}:"${fieldValue}"`,
-                  },
-                })}
-              >
-                <EuiIcon type="magnifyWithPlus" />
-              </EuiLink>
-              &nbsp;/&nbsp;
-              <EuiLink
-                href={createHref(history, {
-                  query: {
-                    kuery: `not ${fieldName}:"${fieldValue}"`,
-                  },
-                })}
-              >
-                <EuiIcon type="magnifyWithMinus" />
-              </EuiLink>
-            </>
-          );
-        },
       },
     ] as Array<EuiBasicTableColumn<FailedTransactionsCorrelation>>;
-  }, [history, onFilter, trackApmEvent, showStats]);
+  }, [fieldStats, onAddFilter, showStats]);
 
   useEffect(() => {
     if (isErrorMessage(progress.error)) {

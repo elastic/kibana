@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const UPDATE_INCIDENT_VARIABLE = '{{rule.id}}';
-export const NOT_UPDATE_INCIDENT_VARIABLE = '{{rule.id}}:{{alert.id}}';
+export { appendOnSaveQueryParamsToPath } from './append_on_save_query_params';
