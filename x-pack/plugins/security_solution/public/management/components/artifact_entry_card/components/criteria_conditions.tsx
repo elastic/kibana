@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { CommonProps, EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -28,6 +28,7 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 const OS_LABELS = Object.freeze({
   linux: OS_LINUX,
   mac: OS_MAC,
+  macos: OS_MAC,
   windows: OS_WINDOWS,
 });
 
@@ -55,6 +56,12 @@ export type CriteriaConditionsProps = Pick<ArtifactInfo, 'os' | 'entries'> &
 export const CriteriaConditions = memo<CriteriaConditionsProps>(
   ({ os, entries, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const osLabel = useMemo(() => {
+      return os
+        .map((osValue) => OS_LABELS[osValue as keyof typeof OS_LABELS] ?? osValue)
+        .join(', ');
+    }, [os]);
 
     const getNestedEntriesContent = useCallback(
       (type: string, nestedEntries: ArtifactInfoEntry[]) => {
@@ -99,10 +106,7 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
         <div data-test-subj={getTestId('os')}>
           <strong>
             <EuiExpression description={''} value={CONDITION_OS} />
-            <EuiExpression
-              description={CONDITION_OPERATOR_TYPE_MATCH}
-              value={OS_LABELS[os as keyof typeof OS_LABELS] ?? os}
-            />
+            <EuiExpression description={CONDITION_OPERATOR_TYPE_MATCH} value={osLabel} />
           </strong>
         </div>
         {entries.map(({ field, type, value, entries: nestedEntries = [] }) => {
