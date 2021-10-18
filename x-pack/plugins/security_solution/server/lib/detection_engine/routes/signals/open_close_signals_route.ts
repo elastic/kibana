@@ -24,6 +24,7 @@ import { InsightsService } from '../../../telemetry/insights';
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
   security: SetupPlugins['security'],
+  cloud: SetupPlugins['cloud'],
   sender: TelemetryEventsSender
 ) => {
   router.post(
@@ -52,7 +53,8 @@ export const setSignalsStatusRoute = (
       const sessionId = '';
       const insightsService = new InsightsService(clusterId);
       const isTelemetryOptedIn = await sender.isTelemetryOptedIn();
-      if (isTelemetryOptedIn && username && signalIds) {
+      const isCloudEnabled = cloud.isCloudEnabled;
+      if (isTelemetryOptedIn && isCloudEnabled && username && signalIds) {
         const insightsPayloads = insightsService.createAlertStatusPayloads(
           signalIds,
           sessionId,
