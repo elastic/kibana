@@ -48,9 +48,11 @@ export const getPreloadedState = ({
   const state = {
     ...initialState,
     isLoading: true,
-    query: data.query.queryString.getQuery(),
     // Do not use app-specific filters from previous app,
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+    query: !initialContext
+      ? data.query.queryString.getDefaultQuery()
+      : data.query.queryString.getQuery(),
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : data.query.filterManager.getFilters(),
@@ -300,7 +302,6 @@ export const lensSlice = createSlice({
       payload: PayloadAction<{
         initialInput?: LensEmbeddableInput;
         redirectCallback: (savedObjectId?: string) => void;
-        emptyState: LensAppState;
       }>
     ) => state,
   },
