@@ -55,7 +55,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--config=${tempKibanaYamlFile}`,
         '--xpack.security.enabled=false',
         '--interactiveSetup.enabled=true',
-        '--no-dev-credentials',
       ],
       runOptions: {
         ...functionalConfig.get('kbnTestServer.runOptions'),
