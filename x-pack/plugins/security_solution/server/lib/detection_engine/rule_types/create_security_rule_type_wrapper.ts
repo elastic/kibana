@@ -382,9 +382,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
             await scheduleThrottledNotificationActions({
               alertInstance: services.alertInstanceFactory(alertId),
-              throttle: ruleSO.attributes.throttle,
+              throttle: completeRule.ruleConfig.throttle ?? '',
               startedAt,
-              id: ruleSO.id,
+              id: completeRule.alertId,
               kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
                 ?.kibana_siem_app_url,
               outputIndex: ruleDataClient.indexName,
@@ -414,9 +414,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
           await scheduleThrottledNotificationActions({
             alertInstance: services.alertInstanceFactory(alertId),
-            throttle: ruleSO.attributes.throttle,
+            throttle: completeRule.ruleConfig.throttle ?? '',
             startedAt,
-            id: ruleSO.id,
+            id: completeRule.alertId,
             kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
               ?.kibana_siem_app_url,
             outputIndex: ruleDataClient.indexName,

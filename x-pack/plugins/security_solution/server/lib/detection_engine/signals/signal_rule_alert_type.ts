@@ -135,6 +135,7 @@ export const signalRulesAlertType = ({
       params,
       spaceId,
       updatedBy: updatedByUser,
+      rule,
     }) {
       const { ruleId, maxSignals, meta, outputIndex, timestampOverride, type } = params;
 
@@ -500,9 +501,9 @@ export const signalRulesAlertType = ({
           // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
           await scheduleThrottledNotificationActions({
             alertInstance: services.alertInstanceFactory(alertId),
-            throttle: savedObject.attributes.throttle,
+            throttle: completeRule.ruleConfig.throttle ?? '',
             startedAt,
-            id: savedObject.id,
+            id: completeRule.alertId,
             kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
               ?.kibana_siem_app_url,
             outputIndex,
@@ -533,9 +534,9 @@ export const signalRulesAlertType = ({
         // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
         await scheduleThrottledNotificationActions({
           alertInstance: services.alertInstanceFactory(alertId),
-          throttle: savedObject.attributes.throttle,
+          throttle: completeRule.ruleConfig.throttle ?? '',
           startedAt,
-          id: savedObject.id,
+          id: completeRule.alertId,
           kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
             ?.kibana_siem_app_url,
           outputIndex,
