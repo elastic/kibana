@@ -392,7 +392,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"exists" operator', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/115315
+    describe.skip('"exists" operator', () => {
       it('will return 1 empty result if matching against ip', async () => {
         const rule = getRuleForSignalTesting(['ip_as_array']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [

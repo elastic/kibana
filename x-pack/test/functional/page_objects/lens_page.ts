@@ -248,6 +248,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async waitForEmptyWorkspace() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`empty-workspace`);
+      });
+    },
+
+    async waitForWorkspaceWithVisualization() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`lnsVisualizationContainer`);
+      });
+    },
+
     async waitForFieldMissing(field: string) {
       await retry.try(async () => {
         await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
@@ -1097,6 +1109,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async toggleFullscreen() {
       await testSubjects.click('lnsFormula-fullscreen');
+    },
+
+    async goToListingPageViaBreadcrumbs() {
+      await retry.try(async () => {
+        await testSubjects.click('breadcrumb first');
+        if (await testSubjects.exists('appLeaveConfirmModal')) {
+          await testSubjects.exists('confirmModalConfirmButton');
+          await testSubjects.click('confirmModalConfirmButton');
+        }
+        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 3000 });
+      });
     },
 
     async typeFormula(formula: string) {
