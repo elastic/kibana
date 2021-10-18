@@ -10,10 +10,18 @@ const Fs = require('fs');
 const Path = require('path');
 
 const { REPO_ROOT: REPO_ROOT_FOLLOWING_SYMLINKS } = require('@kbn/dev-utils');
-const REPO_ROOT = Path.resolve(
+const BASE_REPO_ROOT = Path.resolve(
   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'package.json')),
   '..'
 );
+const REPO_ROOT = process.env.JENKINS_HOME
+  ? Path.join(
+      Path.dirname(BASE_REPO_ROOT),
+      'parallel',
+      process.env.CI_PARALLEL_PROCESS_NUMBER,
+      Path.basename(BASE_REPO_ROOT)
+    )
+  : BASE_REPO_ROOT;
 
 // // process.env.CI_PARALLEL_PROCESS_NUMBER
 // const KIBANA_ROOT = Path.resolve(__dirname, '../../../../../');
@@ -67,16 +75,7 @@ const testMap = [
   // TODO: should should probably remove this link back to the source
   Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
   Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
-].map((path) =>
-  process.env.JENKINS_HOME
-    ? Path.join(
-        Path.dirname(path),
-        'parallel',
-        process.env.CI_PARALLEL_PROCESS_NUMBER,
-        Path.basename(path)
-      )
-    : path
-);
+];
 
 console.log('TEST PATHS: ');
 console.log(testMap);
