@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { IKibanaSearchRequest } from '../../../../../src/plugins/data/common';
 
 import type { FailedTransactionsCorrelationsParams } from '../../../../plugins/apm/common/search_strategies/failed_transactions_correlations/types';
-import type { SearchStrategyClientParams } from '../../../../plugins/apm/common/search_strategies/types';
+import type { RawSearchStrategyClientParams } from '../../../../plugins/apm/common/search_strategies/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -23,7 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const getRequestBody = () => {
     const request: IKibanaSearchRequest<
-      FailedTransactionsCorrelationsParams & SearchStrategyClientParams
+      FailedTransactionsCorrelationsParams & RawSearchStrategyClientParams
     > = {
       params: {
         environment: 'ENVIRONMENT_ALL',

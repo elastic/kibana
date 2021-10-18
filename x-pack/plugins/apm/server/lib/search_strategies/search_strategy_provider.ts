@@ -7,6 +7,10 @@
 
 import uuid from 'uuid';
 import { of } from 'rxjs';
+import { getOrElse } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
+import { failure } from 'io-ts/lib/PathReporter';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
@@ -16,18 +20,21 @@ import {
   IKibanaSearchResponse,
 } from '../../../../../../src/plugins/data/common';
 
-import type { SearchStrategyClientParams } from '../../../common/search_strategies/types';
-import type { RawResponseBase } from '../../../common/search_strategies/types';
+import type {
+  RawResponseBase,
+  RawSearchStrategyClientParams,
+  SearchStrategyClientParams,
+} from '../../../common/search_strategies/types';
+import type {
+  LatencyCorrelationsParams,
+  LatencyCorrelationsRawResponse,
+} from '../../../common/search_strategies/latency_correlations/types';
+import type {
+  FailedTransactionsCorrelationsParams,
+  FailedTransactionsCorrelationsRawResponse,
+} from '../../../common/search_strategies/failed_transactions_correlations/types';
+import { rangeRt } from '../../routes/default_api_types';
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
-
-import type {
-  LatencyCorrelationsSearchServiceProvider,
-  LatencyCorrelationsSearchStrategy,
-} from './latency_correlations';
-import type {
-  FailedTransactionsCorrelationsSearchServiceProvider,
-  FailedTransactionsCorrelationsSearchStrategy,
-} from './failed_transactions_correlations';
 
 interface SearchServiceState<TRawResponse extends RawResponseBase> {
   cancel: () => void;
@@ -56,35 +63,50 @@ export type SearchServiceProvider<
 
 // Failed Transactions Correlations function overload
 export function searchStrategyProvider(
-  searchServiceProvider: FailedTransactionsCorrelationsSearchServiceProvider,
-  getApmIndices: () => Promise<ApmIndicesConfig>,
-  includeFrozen: boolean
-): FailedTransactionsCorrelationsSearchStrategy;
-
-// Latency Correlations function overload
-export function searchStrategyProvider(
-  searchServiceProvider: LatencyCorrelationsSearchServiceProvider,
-  getApmIndices: () => Promise<ApmIndicesConfig>,
-  includeFrozen: boolean
-): LatencyCorrelationsSearchStrategy;
-
-export function searchStrategyProvider<
-  TSearchStrategyClientParams extends SearchStrategyClientParams,
-  TRawResponse extends RawResponseBase
->(
   searchServiceProvider: SearchServiceProvider<
-    TSearchStrategyClientParams,
-    TRawResponse
+    FailedTransactionsCorrelationsParams & SearchStrategyClientParams,
+    FailedTransactionsCorrelationsRawResponse & RawResponseBase
   >,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   includeFrozen: boolean
 ): ISearchStrategy<
-  IKibanaSearchRequest<TSearchStrategyClientParams>,
-  IKibanaSearchResponse<TRawResponse>
+  IKibanaSearchRequest<
+    FailedTransactionsCorrelationsParams & RawSearchStrategyClientParams
+  >,
+  IKibanaSearchResponse<
+    FailedTransactionsCorrelationsRawResponse & RawResponseBase
+  >
+>;
+
+// Latency Correlations function overload
+export function searchStrategyProvider(
+  searchServiceProvider: SearchServiceProvider<
+    LatencyCorrelationsParams & SearchStrategyClientParams,
+    LatencyCorrelationsRawResponse & RawResponseBase
+  >,
+  getApmIndices: () => Promise<ApmIndicesConfig>,
+  includeFrozen: boolean
+): ISearchStrategy<
+  IKibanaSearchRequest<
+    LatencyCorrelationsParams & RawSearchStrategyClientParams
+  >,
+  IKibanaSearchResponse<LatencyCorrelationsRawResponse & RawResponseBase>
+>;
+
+export function searchStrategyProvider<TRequestParams, TResponseParams>(
+  searchServiceProvider: SearchServiceProvider<
+    TRequestParams & SearchStrategyClientParams,
+    TResponseParams & RawResponseBase
+  >,
+  getApmIndices: () => Promise<ApmIndicesConfig>,
+  includeFrozen: boolean
+): ISearchStrategy<
+  IKibanaSearchRequest<TRequestParams & RawSearchStrategyClientParams>,
+  IKibanaSearchResponse<TResponseParams & RawResponseBase>
 > {
   const searchServiceMap = new Map<
     string,
-    GetSearchServiceState<TRawResponse>
+    GetSearchServiceState<TResponseParams & RawResponseBase>
   >();
 
   return {
@@ -93,9 +115,21 @@ export function searchStrategyProvider<
         throw new Error('Invalid request parameters.');
       }
 
+      const { start: startString, end: endString } = request.params;
+
+      // converts string based start/end to epochmillis
+      const decodedRange = pipe(
+        rangeRt.decode({ start: startString, end: endString }),
+        getOrElse<t.Errors, { start: number; end: number }>((errors) => {
+          throw new Error(failure(errors).join('\n'));
+        })
+      );
+
       // The function to fetch the current state of the search service.
       // This will be either an existing service for a follow up fetch or a new one for new requests.
-      let getSearchServiceState: GetSearchServiceState<TRawResponse>;
+      let getSearchServiceState: GetSearchServiceState<
+        TResponseParams & RawResponseBase
+      >;
 
       // If the request includes an ID, we require that the search service already exists
       // otherwise we throw an error. The client should never poll a service that's been cancelled or finished.
@@ -111,10 +145,30 @@ export function searchStrategyProvider<
 
         getSearchServiceState = existingGetSearchServiceState;
       } else {
+        const {
+          start,
+          end,
+          environment,
+          kuery,
+          serviceName,
+          transactionName,
+          transactionType,
+          ...requestParams
+        } = request.params;
+
         getSearchServiceState = searchServiceProvider(
           deps.esClient.asCurrentUser,
           getApmIndices,
-          request.params as TSearchStrategyClientParams,
+          {
+            environment,
+            kuery,
+            serviceName,
+            transactionName,
+            transactionType,
+            start: decodedRange.start,
+            end: decodedRange.end,
+            ...(requestParams as unknown as TRequestParams),
+          },
           includeFrozen
         );
       }

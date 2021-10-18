@@ -31,14 +31,24 @@ export interface RawResponseBase {
   took: number;
 }
 
-export interface SearchStrategyClientParams {
+export interface SearchStrategyClientParamsBase {
   environment: string;
   kuery: string;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
+}
+
+export interface RawSearchStrategyClientParams
+  extends SearchStrategyClientParamsBase {
   start?: string;
   end?: string;
+}
+
+export interface SearchStrategyClientParams
+  extends SearchStrategyClientParamsBase {
+  start: number;
+  end: number;
 }
 
 export interface SearchStrategyServerParams {

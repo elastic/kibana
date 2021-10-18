@@ -8,15 +8,13 @@
 import { range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../../../src/plugins/data/common';
-
-import type { SearchStrategyServerParams } from '../../../../common/search_strategies/types';
 import type {
-  LatencyCorrelationsRequestParams,
+  RawResponseBase,
+  SearchStrategyClientParams,
+  SearchStrategyServerParams,
+} from '../../../../common/search_strategies/types';
+import type {
+  LatencyCorrelationsParams,
   LatencyCorrelationsRawResponse,
 } from '../../../../common/search_strategies/latency_correlations/types';
 
@@ -38,21 +36,16 @@ import type { SearchServiceProvider } from '../search_strategy_provider';
 import { latencyCorrelationsSearchServiceStateProvider } from './latency_correlations_search_service_state';
 import { fetchFieldsStats } from '../queries/field_stats/get_fields_stats';
 
-export type LatencyCorrelationsSearchServiceProvider = SearchServiceProvider<
-  LatencyCorrelationsRequestParams,
-  LatencyCorrelationsRawResponse
->;
-
-export type LatencyCorrelationsSearchStrategy = ISearchStrategy<
-  IKibanaSearchRequest<LatencyCorrelationsRequestParams>,
-  IKibanaSearchResponse<LatencyCorrelationsRawResponse>
+type LatencyCorrelationsSearchServiceProvider = SearchServiceProvider<
+  LatencyCorrelationsParams & SearchStrategyClientParams,
+  LatencyCorrelationsRawResponse & RawResponseBase
 >;
 
 export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearchServiceProvider =
   (
     esClient: ElasticsearchClient,
     getApmIndices: () => Promise<ApmIndicesConfig>,
-    searchServiceParams: LatencyCorrelationsRequestParams,
+    searchServiceParams: LatencyCorrelationsParams & SearchStrategyClientParams,
     includeFrozen: boolean
   ) => {
     const { addLogMessage, getLogMessages } = searchServiceLogProvider();
@@ -61,7 +54,9 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
 
     async function fetchCorrelations() {
       let params:
-        | (LatencyCorrelationsRequestParams & SearchStrategyServerParams)
+        | (LatencyCorrelationsParams &
+            SearchStrategyClientParams &
+            SearchStrategyServerParams)
         | undefined;
 
       try {
