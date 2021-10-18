@@ -276,17 +276,3 @@ export const observabilityOnlyReadSpacesAll: Role = {
     ],
   },
 };
-
-/**
- * These roles are specifically for the security_only tests where the spaces plugin is disabled. Most of the roles (except
- * for noKibanaPrivileges) have spaces: ['*'] effectively giving it access to the default space since no other spaces
- * will exist when the spaces plugin is disabled.
- */
-export const rolesDefaultSpace = [
-  noKibanaPrivileges,
-  globalRead,
-  securitySolutionOnlyAllSpacesAll,
-  securitySolutionOnlyReadSpacesAll,
-  observabilityOnlyAllSpacesAll,
-  observabilityOnlyReadSpacesAll,
-];
