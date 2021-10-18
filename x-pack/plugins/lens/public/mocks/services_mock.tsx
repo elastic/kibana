@@ -30,6 +30,7 @@ import type { EmbeddableStateTransfer } from '../../../../../src/plugins/embedda
 
 import { presentationUtilPluginMock } from '../../../../../src/plugins/presentation_util/public/mocks';
 import { mockDataPlugin } from './data_plugin_mock';
+import { getLensInspectorService } from '../lens_inspector_service';
 
 export const defaultDoc = {
   savedObjectId: '1234',
@@ -110,7 +111,11 @@ export function makeDefaultServices(
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),
-    inspector: inspectorPluginMock.createStartContract(),
+    inspector: {
+      adapters: getLensInspectorService(inspectorPluginMock.createStartContract()).adapters,
+      inspect: jest.fn(),
+      close: jest.fn(),
+    },
     dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
     savedObjectsClient: core.savedObjects.client,

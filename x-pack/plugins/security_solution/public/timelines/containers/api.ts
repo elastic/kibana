@@ -156,6 +156,7 @@ export const persistTimeline = async ({
   try {
     if (isEmpty(timelineId) && timeline.status === TimelineStatus.draft && timeline) {
       const temp: TimelineResponse | TimelineErrorResponse = await cleanDraftTimeline({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineType: timeline.timelineType!,
         templateTimelineId: timeline.templateTimelineId ?? undefined,
         templateTimelineVersion: timeline.templateTimelineVersion ?? undefined,
@@ -163,7 +164,7 @@ export const persistTimeline = async ({
 
       const draftTimeline = decodeTimelineResponse(temp);
       const templateTimelineInfo =
-        timeline.timelineType! === TimelineType.template
+        timeline.timelineType === TimelineType.template
           ? {
               templateTimelineId:
                 draftTimeline.data.persistTimeline.timeline.templateTimelineId ??
