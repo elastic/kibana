@@ -159,6 +159,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getErrorMessages: jest.fn((_state) => undefined),
     checkIntegrity: jest.fn((_state) => []),
     isTimeBased: jest.fn(),
+    isValidColumn: jest.fn(),
   };
 }
 
