@@ -17,11 +17,8 @@ import {
   getGeoContainmentExecutor,
 } from '../geo_containment';
 import { OTHER_CATEGORY } from '../es_query_builder';
-import {
-  GeoContainmentInstanceContext,
-  GeoContainmentInstanceState,
-  GeoContainmentParams,
-} from '../alert_type';
+import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
+import type { GeoContainmentParams } from '../alert_type';
 
 const alertInstanceFactory =
   (contextKeys: unknown[], testAlertActionArr: unknown[]) => (instanceId: string) => {

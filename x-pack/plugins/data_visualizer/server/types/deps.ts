@@ -7,10 +7,14 @@
 
 import type { SecurityPluginStart } from '../../../security/server';
 import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import { CustomIntegrationsPluginSetup } from '../../../../../src/plugins/custom_integrations/server';
+import { HomeServerPluginSetup } from '../../../../../src/plugins/home/server';
 
 export interface StartDeps {
   security?: SecurityPluginStart;
 }
 export interface SetupDeps {
   usageCollection: UsageCollectionSetup;
+  customIntegrations?: CustomIntegrationsPluginSetup;
+  home?: HomeServerPluginSetup;
 }

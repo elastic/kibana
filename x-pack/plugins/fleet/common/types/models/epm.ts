@@ -94,6 +94,7 @@ export enum ElasticsearchAssetType {
   ilmPolicy = 'ilm_policy',
   transform = 'transform',
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
+  mlModel = 'ml_model',
 }
 
 export type DataType = typeof dataTypes;
@@ -227,6 +228,7 @@ export type RegistrySearchResult = Pick<
   | 'internal'
   | 'data_streams'
   | 'policy_templates'
+  | 'categories'
 >;
 
 export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
@@ -376,6 +378,7 @@ export interface IntegrationCardItem {
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   integration: string;
   id: string;
+  categories: string[];
 }
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;

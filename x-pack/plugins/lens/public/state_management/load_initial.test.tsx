@@ -16,8 +16,7 @@ import {
 import { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
 import { LensEmbeddableInput } from '../embeddable';
-import { getPreloadedState, initialState, loadInitial } from './lens_slice';
-import { LensAppState } from '.';
+import { loadInitial } from './lens_slice';
 
 const history = {
   location: {
@@ -38,7 +37,6 @@ const defaultProps = {
   redirectCallback: jest.fn(),
   initialInput: { savedObjectId: defaultSavedObjectId } as unknown as LensEmbeddableInput,
   history,
-  emptyState: initialState,
 };
 
 describe('Initializing the store', () => {
@@ -52,9 +50,8 @@ describe('Initializing the store', () => {
 
   it('should have initialized the initial datasource and visualization', async () => {
     const { store, deps } = await makeLensStore({ preloadedState });
-    const emptyState = getPreloadedState(deps) as LensAppState;
     await act(async () => {
-      await store.dispatch(loadInitial({ ...defaultProps, initialInput: undefined, emptyState }));
+      await store.dispatch(loadInitial({ ...defaultProps, initialInput: undefined }));
     });
     expect(deps.datasourceMap.testDatasource.initialize).toHaveBeenCalled();
     expect(deps.datasourceMap.testDatasource2.initialize).not.toHaveBeenCalled();
@@ -187,13 +184,10 @@ describe('Initializing the store', () => {
         }),
       });
 
-      const emptyState = getPreloadedState(deps) as LensAppState;
-
       await act(async () => {
         await store.dispatch(
           loadInitial({
             ...defaultProps,
-            emptyState,
             initialInput: undefined,
           })
         );
