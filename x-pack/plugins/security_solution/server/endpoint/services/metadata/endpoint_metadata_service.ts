@@ -12,20 +12,15 @@ import {
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-  KibanaRequest,
 } from 'kibana/server';
 
-import {
-  HostInfo,
-  HostMetadata,
-  HostResultList,
-  UnitedAgentMetadata,
-} from '../../../../common/endpoint/types';
+import { HostInfo, HostMetadata, UnitedAgentMetadata } from '../../../../common/endpoint/types';
 import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common';
 import {
   AgentNotFoundError,
   AgentPolicyServiceInterface,
   AgentService,
+  PackagePolicyServiceInterface,
 } from '../../../../../fleet/server';
 import {
   EndpointHostNotFoundError,
@@ -50,8 +45,9 @@ import {
 } from '../../utils';
 import { EndpointError } from '../../errors';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
-import { EndpointAppContext } from '../../types';
+import { GetHostMetadataListQuery } from '../../types';
 import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
+import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -68,6 +64,7 @@ export class EndpointMetadataService {
     private savedObjectsStart: SavedObjectsServiceStart,
     private readonly agentService: AgentService,
     private readonly agentPolicyService: AgentPolicyServiceInterface,
+    private readonly packagePolicyService: PackagePolicyServiceInterface,
     private readonly logger?: Logger
   ) {}
 
@@ -291,26 +288,20 @@ export class EndpointMetadataService {
    * Retrieve list of host metadata. Only supports new united index.
    *
    * @param esClient
-   * @param soClient
-   * @param request
-   * @param endpointAppContext
-   * @param endpointPolicies
+   * @param queryOptions
    *
    * @throws
    */
   async getHostMetadataList(
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract,
-    request: KibanaRequest,
-    endpointAppContext: EndpointAppContext,
-    endpointPolicies: PackagePolicy[]
-  ): Promise<HostResultList> {
-    const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
-    const unitedIndexQuery = await buildUnitedIndexQuery(
-      request,
-      endpointAppContext,
-      endpointPolicyIds
+    queryOptions: GetHostMetadataListQuery = {}
+  ): Promise<{ data: HostInfo[]; total: number; page: number; pageSize: number }> {
+    const endpointPolicies = await getAllEndpointPackagePolicies(
+      this.packagePolicyService,
+      this.DANGEROUS_INTERNAL_SO_CLIENT
     );
+    const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
+    const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, endpointPolicyIds);
 
     let unitedMetadataQueryResponse: ApiResponse<SearchResponse<UnitedAgentMetadata>>;
     try {
@@ -325,8 +316,9 @@ export class EndpointMetadataService {
     const agentPolicyIds: string[] = docs.map((doc) => doc._source?.united?.agent?.policy_id ?? '');
 
     const agentPolicies =
-      (await this.agentPolicyService.getByIds(soClient, agentPolicyIds).catch(catchAndWrapError)) ??
-      [];
+      (await this.agentPolicyService
+        .getByIds(this.DANGEROUS_INTERNAL_SO_CLIENT, agentPolicyIds)
+        .catch(catchAndWrapError)) ?? [];
 
     const agentPoliciesMap: Record<string, AgentPolicy> = agentPolicies.reduce(
       (acc, agentPolicy) => ({
@@ -345,6 +337,8 @@ export class EndpointMetadataService {
       }),
       {}
     );
+
+    // FIXME: refactor the enrichment function in this service class so that it can be reused below
 
     const hosts = docs
       .filter((doc) => {
@@ -382,10 +376,10 @@ export class EndpointMetadataService {
       });
 
     return {
-      request_page_size: unitedIndexQuery.size,
-      request_page_index: unitedIndexQuery.from,
+      data: hosts,
+      pageSize: unitedIndexQuery.size,
+      page: unitedIndexQuery.from + 1,
       total: (docsCount as SearchTotalHits).value,
-      hosts,
     };
   }
 }

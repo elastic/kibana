@@ -461,6 +461,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         plugins.fleet?.agentService!,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.agentPolicyService!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        plugins.fleet?.packagePolicyService!,
         logger
       ),
       appClientFactory: this.appClientFactory,
