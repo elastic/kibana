@@ -392,7 +392,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"exists" operator', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/115315
+    describe.skip('"exists" operator', () => {
       it('will return 1 empty result if matching against ip', async () => {
         const rule = getRuleForSignalTesting(['ip_as_array']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
@@ -486,7 +487,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ips).to.eql([[], ['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
       });
 
-      it('will return 1 result if we have a list that includes all ips', async () => {
+      // FLAKY https://github.com/elastic/kibana/issues/89052
+      it.skip('will return 1 result if we have a list that includes all ips', async () => {
         await importFile(
           supertest,
           'ip',

@@ -6,15 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { durationToNumber } from '../../../common/schema_utils';
-import { HeadlessChromiumDriver } from '../../browsers';
-import { CaptureConfig } from '../../types';
 import { LevelLogger, startTrace } from '../';
+import { HeadlessChromiumDriver } from '../../browsers';
 import { LayoutInstance } from '../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
 
 export const waitForRenderComplete = async (
-  captureConfig: CaptureConfig,
+  loadDelay: number,
   browser: HeadlessChromiumDriver,
   layout: LayoutInstance,
   logger: LevelLogger
@@ -69,7 +67,7 @@ export const waitForRenderComplete = async (
 
           return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
         },
-        args: [layout.selectors.renderComplete, durationToNumber(captureConfig.loadDelay)],
+        args: [layout.selectors.renderComplete, loadDelay],
       },
       { context: CONTEXT_WAITFORRENDER },
       logger

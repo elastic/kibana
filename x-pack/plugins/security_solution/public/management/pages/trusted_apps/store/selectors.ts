@@ -228,6 +228,11 @@ export const listOfPolicies: (
   return isLoadedResourceState(policies) ? policies.data.items : [];
 });
 
+export const isLoadingListOfPolicies: (state: Immutable<TrustedAppsListPageState>) => boolean =
+  createSelector(policiesState, (policies) => {
+    return isLoadingResourceState(policies);
+  });
+
 export const getMapOfPoliciesById: (
   state: Immutable<TrustedAppsListPageState>
 ) => Immutable<Record<string, Immutable<PolicyData>>> = createSelector(
