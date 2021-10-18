@@ -7,7 +7,7 @@
  */
 
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { PublicKeys } from '@kbn/utility-types';
 import { ElasticsearchClient } from './types';

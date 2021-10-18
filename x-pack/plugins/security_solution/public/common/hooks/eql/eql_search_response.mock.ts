@@ -8,7 +8,7 @@
 import { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
 import { Source } from './types';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
-import { Connection } from '@elastic/transport/lib/connection';
+import type { Connection } from '@elastic/elasticsearch';
 
 export const getMockEqlResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>> => ({
   id: 'some-id',

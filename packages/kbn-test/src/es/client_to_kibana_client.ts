@@ -12,7 +12,7 @@ import type {
   TransportRequestOptions,
   TransportResult,
 } from '@elastic/elasticsearch';
-import { Transport } from '@elastic/transport';
+import { Transport } from '@elastic/elasticsearch';
 
 class KibanaTransport extends Transport {
   request(params: TransportRequestParams, options?: TransportRequestOptions) {

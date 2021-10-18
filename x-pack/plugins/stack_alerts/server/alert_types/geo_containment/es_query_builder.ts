@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { Logger } from 'src/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 import {
   fromKueryExpression,
   toElasticsearchQuery,
