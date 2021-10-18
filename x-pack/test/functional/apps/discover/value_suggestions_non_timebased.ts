@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'settings', 'context']);
 
-  describe('value suggestions non time based', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/114745
+  describe.skip('value suggestions non time based', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
