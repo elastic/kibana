@@ -17,7 +17,7 @@ import {
   ENDPOINT_ACTION_RESPONSES_DS,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
-  statusCodes,
+  failedFleetActionErrorCode,
 } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import {
@@ -80,7 +80,7 @@ const createFailedActionResponseEntry = async ({
       body: {
         ...doc,
         error: {
-          code: statusCodes['424'].code,
+          failedFleetActionErrorCode,
           message: 'Failed to deliver action request to fleet',
         },
       },

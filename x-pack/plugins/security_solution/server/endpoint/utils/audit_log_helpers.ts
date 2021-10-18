@@ -13,7 +13,7 @@ import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fl
 import {
   ENDPOINT_ACTIONS_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX,
-  statusCodes,
+  failedFleetActionErrorCode,
 } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
@@ -57,7 +57,7 @@ export const getUniqueLogData = (activityLogEntries: ActivityLogEntry[]): Activi
     .filter(
       (e) =>
         e.type === ActivityLogItemTypes.RESPONSE &&
-        e.item.data.error?.code === statusCodes['424'].code
+        e.item.data.error?.code === failedFleetActionErrorCode
     )
     .map(
       (e: ActivityLogEntry) => (e.item.data as LogsEndpointActionResponse).EndpointActions.action_id

@@ -61,11 +61,4 @@ export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
 export const ENDPOINT_ACTION_LOG_ROUTE = `/api/endpoint/action_log/{agent_id}`;
 export const ACTION_STATUS_ROUTE = `/api/endpoint/action_status`;
 
-// From https://github.com/for-GET/know-your-http-well/blob/master/json/status-codes.json
-// similar to x-pack/plugins/apm/public/components/shared/Summary/HttpStatusBadge/statusCodes.ts
-export const statusCodes: { [key: string]: { code: string; meaning: string } } = {
-  '424': {
-    code: '424',
-    meaning: 'Failed Dependency',
-  },
-};
+export const failedFleetActionErrorCode = '424';
