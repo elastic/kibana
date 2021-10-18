@@ -63,7 +63,8 @@ describe.each([
     );
   });
 
-  it('should display dates in expected format', () => {
+  // FLAKY https://github.com/elastic/kibana/issues/113892
+  it.skip('should display dates in expected format', () => {
     render();
 
     expect(renderResult.getByTestId('testCard-header-updated').textContent).toEqual(
