@@ -21,7 +21,6 @@ export const getConfigMock = (): Partial<ConfigType> => ({
 });
 
 export const getConfigMockDecoded = (): ConfigType => ({
-  enabled: true,
   importBufferSize: IMPORT_BUFFER_SIZE,
   importTimeout: IMPORT_TIMEOUT,
   listIndex: LIST_INDEX,
