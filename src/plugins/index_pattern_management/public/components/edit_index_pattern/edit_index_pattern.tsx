@@ -152,7 +152,7 @@ export const EditIndexPattern = withRouter(
           defaultIndex={defaultIndex}
         >
           {showTagsSection && (
-            <EuiFlexGroup wrap>
+            <EuiFlexGroup wrap gutterSize="s">
               {Boolean(indexPattern.timeFieldName) && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
