@@ -166,7 +166,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const saveButton = await uptimePage.syntheticsIntegration.findSaveButton();
         await saveButton.click();
 
-        await testSubjects.missingOrFail('packagePolicyCreateSuccessToast');
+        await testSubjects.missingOrFail('postInstallAddAgentModal');
       });
     });
 
