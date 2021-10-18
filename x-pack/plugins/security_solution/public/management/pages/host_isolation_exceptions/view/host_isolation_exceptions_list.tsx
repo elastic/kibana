@@ -137,18 +137,23 @@ export const HostIsolationExceptionsList = () => {
     >
       {showFlyout && <HostIsolationExceptionsFormFlyout />}
 
-      <SearchExceptions
-        defaultValue={location.filter}
-        onSearch={handleOnSearch}
-        placeholder={i18n.translate(
-          'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
-          {
-            defaultMessage: 'Search on the fields below: name, description, ip',
-          }
-        )}
-      />
-      <EuiSpacer size="l" />
       {itemToDelete ? <HostIsolationExceptionDeleteModal /> : null}
+
+      {listItems.length ? (
+        <SearchExceptions
+          defaultValue={location.filter}
+          onSearch={handleOnSearch}
+          placeholder={i18n.translate(
+            'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
+            {
+              defaultMessage: 'Search on the fields below: name, description, ip',
+            }
+          )}
+        />
+      ) : null}
+
+      <EuiSpacer size="l" />
+
       <PaginatedContent<ExceptionListItemSchema, typeof ArtifactEntryCard>
         items={listItems}
         ItemComponent={ArtifactEntryCard}

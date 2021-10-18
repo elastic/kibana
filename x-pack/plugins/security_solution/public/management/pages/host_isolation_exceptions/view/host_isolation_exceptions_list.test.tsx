@@ -60,11 +60,18 @@ describe('When on the host isolation exceptions page', () => {
         await dataReceived();
         expect(renderResult.getByTestId('hostIsolationExceptionsEmpty')).toBeTruthy();
       });
+
+      it('should not display the search bar', async () => {
+        render();
+        await dataReceived();
+        expect(renderResult.queryByTestId('searchExceptions')).toBeFalsy();
+      });
     });
     describe('And data exists', () => {
       beforeEach(async () => {
         getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
       });
+
       it('should show loading indicator while retrieving data', async () => {
         let releaseApiResponse: (value?: unknown) => void;
 
@@ -79,6 +86,12 @@ describe('When on the host isolation exceptions page', () => {
         releaseApiResponse!();
         await wasReceived;
         expect(renderResult.container.querySelector('.euiProgress')).toBeNull();
+      });
+
+      it('should display the search bar', async () => {
+        render();
+        await dataReceived();
+        expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
       });
 
       it('should show items on the list', async () => {
@@ -106,6 +119,7 @@ describe('When on the host isolation exceptions page', () => {
         ).toEqual(' Server is too far away');
       });
     });
+
     it('should show the create flyout when the add button is pressed', () => {
       render();
       act(() => {
@@ -113,6 +127,7 @@ describe('When on the host isolation exceptions page', () => {
       });
       expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
     });
+
     it('should show the create flyout when the show location is create', () => {
       history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
       render();
