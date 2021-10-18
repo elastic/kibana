@@ -425,6 +425,70 @@ describe('policy preconfiguration', () => {
     expect(policies[0].id).toBe('test-id');
     expect(nonFatalErrorsB.length).toBe(0);
   });
+
+  it('should update policy that is becoming managed if a top level field has changed', async () => {
+    const soClient = getPutPreconfiguredPackagesMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const policy: PreconfiguredAgentPolicy = {
+      name: 'Test policy',
+      namespace: 'default',
+      id: 'test-id',
+      package_policies: [],
+      is_managed: false,
+    };
+    mockConfiguredPolicies.set('test-id', policy);
+
+    const { policies, nonFatalErrors: nonFatalErrorsB } =
+      await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [{ ...policy, name: 'I became managed', is_managed: true }],
+        [],
+        mockDefaultOutput
+      );
+    expect(spyAgentPolicyServiceUpdate).toBeCalled();
+    expect(policies.length).toEqual(1);
+    expect(policies[0].id).toBe('test-id');
+    expect(nonFatalErrorsB.length).toBe(0);
+  });
+
+  it('should update policy that is becoming managed if a package policy is added', async () => {
+    const soClient = getPutPreconfiguredPackagesMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const policy: PreconfiguredAgentPolicy = {
+      name: 'Test policy',
+      namespace: 'default',
+      id: 'test-id',
+      package_policies: [],
+      is_managed: false,
+    };
+    mockConfiguredPolicies.set('test-id', policy);
+
+    const { policies, nonFatalErrors: nonFatalErrorsB } =
+      await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [
+          {
+            ...policy,
+            name: 'I became managed',
+            is_managed: true,
+            package_policies: [
+              {
+                package: { name: 'test_package' },
+                name: 'Test package',
+              },
+            ],
+          },
+        ],
+        [{ name: 'test_package', version: '3.0.0' }],
+        mockDefaultOutput
+      );
+    expect(spyAgentPolicyServiceUpdate).toBeCalled();
+    expect(policies.length).toEqual(1);
+    expect(policies[0].id).toBe('test-id');
+    expect(nonFatalErrorsB.length).toBe(0);
+  });
 });
 
 describe('comparePreconfiguredPolicyToCurrent', () => {

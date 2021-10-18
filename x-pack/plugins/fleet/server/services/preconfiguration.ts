@@ -238,7 +238,12 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       );
 
       if (!created) {
-        if (!policy?.is_managed) return { created, policy };
+        if (!policy) {
+          return { created, policy };
+        }
+        if (!policy.is_managed && !preconfiguredAgentPolicy.is_managed) {
+          return { created, policy };
+        }
         const { hasChanged, fields } = comparePreconfiguredPolicyToCurrent(
           preconfiguredAgentPolicy,
           policy
