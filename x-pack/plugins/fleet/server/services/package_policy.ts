@@ -578,12 +578,12 @@ class PackagePolicyService {
           success: true,
         });
         if (packagePolicy.package.version !== packageInfo.version) {
-          // createUpgradeUsage(soClient, {
-          //   package_name: packageInfo.name,
-          //   current_version: packagePolicy.package.version,
-          //   new_version: packageInfo.version,
-          //   status: 'success',
-          // });
+          createUpgradeUsage(soClient, {
+            package_name: packageInfo.name,
+            current_version: packagePolicy.package.version,
+            new_version: packageInfo.version,
+            status: 'success',
+          });
           sendTelemetryEvents(
             appContextService.getLogger(),
             appContextService.getTelemetryEventsSender(),
@@ -649,13 +649,13 @@ class PackagePolicyService {
 
       if (packagePolicy.package.version !== packageInfo.version) {
         if (hasErrors) {
-          // createUpgradeUsage(soClient, {
-          //   package_name: packageInfo.name,
-          //   current_version: packagePolicy.package.version,
-          //   new_version: packageInfo.version,
-          //   status: hasErrors ? 'failure' : 'success',
-          //   error: updatedPackagePolicy.errors,
-          // });
+          createUpgradeUsage(soClient, {
+            package_name: packageInfo.name,
+            current_version: packagePolicy.package.version,
+            new_version: packageInfo.version,
+            status: hasErrors ? 'failure' : 'success',
+            error: updatedPackagePolicy.errors,
+          });
 
           sendTelemetryEvents(
             appContextService.getLogger(),
