@@ -14,6 +14,9 @@ import {
   EuiSpacer,
   EuiBasicTableColumn,
   EuiIconTip,
+  EuiButtonPopover,
+  EuiButtonIcon,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -39,6 +42,7 @@ import {
   ReportStatusIndicator,
   ViewInAppLink,
   ReportInfoFlyout,
+  ReportDownloadButton,
 } from './components';
 import { guessAppIconTypeFromObjectType, jobHasIssues } from './utils';
 
@@ -379,22 +383,17 @@ class ReportListingUi extends Component<Props, State> {
         width: tableColumnWidths.actions,
         actions: [
           {
-            isPrimary: true,
-            name: i18n.translate('xpack.reporting.listing.table.downloadActionButtonLabel', {
-              defaultMessage: 'Download',
-            }),
-            description: i18n.translate(
-              'xpack.reporting.listing.table.downloadActionButtonDescription',
-              {
-                defaultMessage: 'Download this report',
-              }
+            render: (job) => (
+              <ReportDownloadButton
+                disabled={
+                  job.status !== JOB_STATUSES.COMPLETED && job.status !== JOB_STATUSES.WARNINGS
+                }
+                job={job}
+              />
             ),
-            type: 'button',
-            enabled: (job) =>
-              job.status === JOB_STATUSES.COMPLETED || job.status === JOB_STATUSES.WARNINGS,
-            onClick: (job) => this.props.apiClient.downloadReport(job.id),
           },
           {
+            render: () => <div />,
             name: i18n.translate(
               'xpack.reporting.listing.table.viewReportingInfoActionButtonLabel',
               {
