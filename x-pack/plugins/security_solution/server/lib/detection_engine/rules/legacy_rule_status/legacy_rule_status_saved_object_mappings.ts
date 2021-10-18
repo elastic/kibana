@@ -65,6 +65,7 @@ export const ruleStatusSavedObjectMappings: SavedObjectsType['mappings'] = {
  * @deprecated Remove this once we've fully migrated to event-log and no longer require addition status SO (8.x)
  */
 export const legacyRuleStatusType: SavedObjectsType = {
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   name: legacyRuleStatusSavedObjectType,
   hidden: false,
   namespaceType: 'multiple-isolated',
