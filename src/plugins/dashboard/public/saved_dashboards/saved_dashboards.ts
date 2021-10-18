@@ -27,6 +27,10 @@ export function createSavedDashboardLoader({
   savedObjectsClient,
   embeddableStart,
 }: Services) {
-  const SavedDashboard = createSavedDashboardClass(savedObjects, embeddableStart);
+  const SavedDashboard = createSavedDashboardClass(
+    savedObjects,
+    embeddableStart,
+    savedObjectsClient
+  );
   return new SavedObjectLoader(SavedDashboard, savedObjectsClient);
 }
