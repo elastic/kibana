@@ -64,6 +64,7 @@ export const toExpressionAst: VisToExpressionAst<TableVisParams> = (vis, params)
     showMetricsAtAllLevels: vis.params.showMetricsAtAllLevels,
     showToolbar: vis.params.showToolbar,
     showTotal: vis.params.showTotal,
+    autoFitRowToContent: vis.params.autoFitRowToContent,
     totalFunc: vis.params.totalFunc,
     title: vis.title,
     metrics: metrics.map(prepareDimension),

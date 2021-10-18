@@ -118,6 +118,11 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
         defaultMessage: 'Specifies calculating function for the total row. Possible options are: ',
       }),
     },
+    autoFitRowToContent: {
+      types: ['boolean'],
+      help: '',
+      default: false,
+    },
   },
   fn(input, args, handlers) {
     const convertedData = tableVisResponseHandler(input, args);

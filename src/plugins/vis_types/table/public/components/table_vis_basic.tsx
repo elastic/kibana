@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useEffect, useState, useRef } from 'react';
 import { EuiDataGrid, EuiDataGridProps, EuiDataGridSorting, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
@@ -47,8 +47,16 @@ export const TableVisBasic = memo(
 
     // renderCellValue is a component which renders a cell based on column and row indexes
     const renderCellValue = useMemo(
-      () => createTableVisCell(sortedRows, formattedColumns),
-      [formattedColumns, sortedRows]
+      () => createTableVisCell(sortedRows, formattedColumns, visConfig.autoFitRowToContent),
+      [formattedColumns, sortedRows, visConfig.autoFitRowToContent]
+    );
+
+    const rowHeightsOptions = useMemo(
+      () =>
+        visConfig.autoFitRowToContent
+          ? ({ defaultHeight: 'auto' } as unknown as EuiDataGridProps['rowHeightsOptions'])
+          : undefined,
+      [visConfig.autoFitRowToContent]
     );
 
     // Columns config
@@ -103,6 +111,26 @@ export const TableVisBasic = memo(
       [columns, setColumnsWidth]
     );
 
+    const firstRender = useRef(true);
+    const [dataGridUpdateCounter, setDataGridUpdateCounter] = useState(0);
+
+    // key was added as temporary solution to force re-render if we change autoFitRowToContent or we get new data
+    // cause we have problem with correct updating height cache in EUI datagrid when we use auto-height
+    // will be removed as soon as fix problem on EUI side
+    useEffect(() => {
+      // skip first render
+      if (firstRender.current) {
+        firstRender.current = false;
+        return;
+      }
+      // skip if auto height was turned off
+      if (!visConfig.autoFitRowToContent) {
+        return;
+      }
+      // update counter to remount grid from scratch
+      setDataGridUpdateCounter((counter) => counter + 1);
+    }, [visConfig.autoFitRowToContent, table, sort, pagination, columnsWidth]);
+
     return (
       <>
         {title && (
@@ -111,12 +139,14 @@ export const TableVisBasic = memo(
           </EuiTitle>
         )}
         <EuiDataGrid
+          key={String(dataGridUpdateCounter)}
           aria-label={dataGridAriaLabel}
           columns={gridColumns}
           gridStyle={{
             border: 'horizontal',
             header: 'underline',
           }}
+          rowHeightsOptions={rowHeightsOptions}
           rowCount={rows.length}
           columnVisibility={{
             visibleColumns: columns.map(({ id }) => id),
