@@ -34,7 +34,6 @@ import { mockAuditLogSearchResult, Results } from './mocks';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import {
   ActivityLog,
-  ActivityLogItemTypes,
   EndpointAction,
   EndpointActionResponse,
 } from '../../../../common/endpoint/types';
@@ -101,7 +100,6 @@ describe('Action Log API', () => {
 
   describe('response', () => {
     const mockAgentID = 'XYZABC-000';
-    const mockActionID = 'some-known-action_id';
     let endpointAppContextService: EndpointAppContextService;
     const fleetActionGenerator = new FleetActionGenerator('seed');
     const endpointActionGenerator = new EndpointActionGenerator('seed');
@@ -115,15 +113,15 @@ describe('Action Log API', () => {
     // convenience for injecting mock action requests and responses
     // for .logs-endpoint and .fleet indices
     let mockActions: ({
-      _actions,
-      _fleetActions,
-      _responses,
-      _fleetResponses,
+      numActions,
+      hasFleetActions,
+      hasFleetResponses,
+      hasResponses,
     }: {
-      _actions: number;
-      _fleetActions: number;
-      _responses: number;
-      _fleetResponses: number;
+      numActions: number;
+      hasFleetActions?: boolean;
+      hasFleetResponses?: boolean;
+      hasResponses?: boolean;
     }) => void;
 
     let havingErrors: () => void;
@@ -170,46 +168,51 @@ describe('Action Log API', () => {
         return mockResponse;
       };
 
+      // some arbitrary ids for needed actions
+      const getMockActionIds = (numAction: number): string[] => {
+        return [...Array(numAction).keys()].map(() => Math.random().toString(36).split('.')[1]);
+      };
+
       // create as many actions as needed
-      const getEndpointActionsData = (count: number) => {
-        const data = [...Array(count).keys()].map(() =>
+      const getEndpointActionsData = (actionIds: string[]) => {
+        const data = actionIds.map((actionId) =>
           endpointActionGenerator.generate({
             agent: { id: mockAgentID },
             EndpointActions: {
-              action_id: mockActionID,
+              action_id: actionId,
             },
           })
         );
         return data;
       };
       // create as many responses as needed
-      const getEndpointResponseData = (count: number) => {
-        const data = [...Array(count).keys()].map(() =>
+      const getEndpointResponseData = (actionIds: string[]) => {
+        const data = actionIds.map((actionId) =>
           endpointActionGenerator.generateResponse({
             agent: { id: mockAgentID },
             EndpointActions: {
-              action_id: mockActionID,
+              action_id: actionId,
             },
           })
         );
         return data;
       };
       // create as many fleet actions as needed
-      const getFleetResponseData = (count: number) => {
-        const data = [...Array(count).keys()].map(() =>
+      const getFleetResponseData = (actionIds: string[]) => {
+        const data = actionIds.map((actionId) =>
           fleetActionGenerator.generateResponse({
             agent_id: mockAgentID,
-            action_id: mockActionID,
+            action_id: actionId,
           })
         );
         return data;
       };
       // create as many fleet responses as needed
-      const getFleetActionData = (count: number) => {
-        const data = [...Array(count).keys()].map(() =>
+      const getFleetActionData = (actionIds: string[]) => {
+        const data = actionIds.map((actionId) =>
           fleetActionGenerator.generate({
             agents: [mockAgentID],
-            action_id: mockActionID,
+            action_id: actionId,
             data: {
               comment: 'some comment',
             },
@@ -220,15 +223,15 @@ describe('Action Log API', () => {
 
       // mock actions and responses results in a single response
       mockActions = ({
-        _actions,
-        _fleetActions,
-        _responses,
-        _fleetResponses,
+        numActions,
+        hasFleetActions = false,
+        hasFleetResponses = false,
+        hasResponses = false,
       }: {
-        _actions: number;
-        _fleetActions: number;
-        _responses: number;
-        _fleetResponses: number;
+        numActions: number;
+        hasFleetActions?: boolean;
+        hasFleetResponses?: boolean;
+        hasResponses?: boolean;
       }) => {
         esClientMock.asCurrentUser.search = jest.fn().mockImplementationOnce(() => {
           let actions: Results[] = [];
@@ -236,27 +239,30 @@ describe('Action Log API', () => {
           let responses: Results[] = [];
           let fleetResponses: Results[] = [];
 
-          if (_actions) {
-            actions = getEndpointActionsData(_actions).map((e) => ({
-              _index: '.ds-.logs-endpoint.actions-default-2021.19.10-000001',
-              _source: e,
-            }));
-          }
-          if (_fleetActions) {
-            fleetActions = getFleetActionData(_fleetActions).map((e) => ({
+          const actionIds = getMockActionIds(numActions);
+
+          actions = getEndpointActionsData(actionIds).map((e) => ({
+            _index: '.ds-.logs-endpoint.actions-default-2021.19.10-000001',
+            _source: e,
+          }));
+
+          if (hasFleetActions) {
+            fleetActions = getFleetActionData(actionIds).map((e) => ({
               _index: '.fleet-actions-7',
               _source: e,
             }));
           }
-          if (_responses) {
-            responses = getEndpointResponseData(_responses).map((e) => ({
-              _index: '.ds-.logs-endpoint.action.responses-default-2021.19.10-000001',
+
+          if (hasFleetResponses) {
+            fleetResponses = getFleetResponseData(actionIds).map((e) => ({
+              _index: '.ds-.fleet-actions-results-2021.19.10-000001',
               _source: e,
             }));
           }
-          if (_fleetResponses) {
-            fleetResponses = getFleetResponseData(_fleetResponses).map((e) => ({
-              _index: '.ds-.fleet-actions-results-2021.19.10-000001',
+
+          if (hasResponses) {
+            responses = getEndpointResponseData(actionIds).map((e) => ({
+              _index: '.ds-.logs-endpoint.action.responses-default-2021.19.10-000001',
               _source: e,
             }));
           }
@@ -286,24 +292,26 @@ describe('Action Log API', () => {
     });
 
     it('should return an empty array when nothing in audit log', async () => {
-      mockActions({ _actions: 0, _fleetActions: 0, _responses: 0, _fleetResponses: 0 });
+      mockActions({ numActions: 0 });
 
       const response = await getActivityLog({ agent_id: mockAgentID });
       expect(response.ok).toBeCalled();
       expect((response.ok.mock.calls[0][0]?.body as ActivityLog).data).toHaveLength(0);
     });
 
-    it('should have actions and action responses', async () => {
-      mockActions({ _actions: 2, _fleetActions: 2, _responses: 2, _fleetResponses: 2 });
+    it('should return fleet actions, fleet responses and endpoint responses', async () => {
+      mockActions({
+        numActions: 2,
+        hasFleetActions: true,
+        hasFleetResponses: true,
+        hasResponses: true,
+      });
 
       const response = await getActivityLog({ agent_id: mockAgentID });
       const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
       expect(response.ok).toBeCalled();
-      expect(responseBody.data).toHaveLength(8);
+      expect(responseBody.data).toHaveLength(6);
 
-      expect(responseBody.data.filter((e) => e.type === ActivityLogItemTypes.ACTION)).toHaveLength(
-        2
-      );
       expect(
         responseBody.data.filter((e) => (e.item.data as EndpointActionResponse).completed_at)
       ).toHaveLength(2);
@@ -312,19 +320,32 @@ describe('Action Log API', () => {
       ).toHaveLength(2);
     });
 
-    it('should have only actions when no responses', async () => {
-      mockActions({ _actions: 2, _fleetActions: 2, _responses: 0, _fleetResponses: 0 });
+    it('should return only fleet actions and no responses', async () => {
+      mockActions({ numActions: 2, hasFleetActions: true });
+
+      const response = await getActivityLog({ agent_id: mockAgentID });
+      const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
+      expect(response.ok).toBeCalled();
+      expect(responseBody.data).toHaveLength(2);
+
+      expect(
+        responseBody.data.filter((e) => (e.item.data as EndpointAction).expiration)
+      ).toHaveLength(2);
+    });
+
+    it('should only have fleet data', async () => {
+      mockActions({ numActions: 2, hasFleetActions: true, hasFleetResponses: true });
 
       const response = await getActivityLog({ agent_id: mockAgentID });
       const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
       expect(response.ok).toBeCalled();
       expect(responseBody.data).toHaveLength(4);
 
-      expect(responseBody.data.filter((e) => e.type === ActivityLogItemTypes.ACTION)).toHaveLength(
-        2
-      );
       expect(
         responseBody.data.filter((e) => (e.item.data as EndpointAction).expiration)
+      ).toHaveLength(2);
+      expect(
+        responseBody.data.filter((e) => (e.item.data as EndpointActionResponse).completed_at)
       ).toHaveLength(2);
     });
 
@@ -339,7 +360,7 @@ describe('Action Log API', () => {
     });
 
     it('should return date ranges if present in the query', async () => {
-      mockActions({ _actions: 0, _fleetActions: 0, _responses: 0, _fleetResponses: 0 });
+      mockActions({ numActions: 0 });
 
       const startDate = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
       const endDate = new Date().toISOString();
