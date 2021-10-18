@@ -30,9 +30,10 @@ import { useHasData } from '../../../../hooks/use_has_data';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
+import { BucketSize } from '../../../../pages/overview';
 
 interface Props {
-  bucketSize?: string;
+  bucketSize: BucketSize;
 }
 
 function formatTpm(value?: number) {
@@ -65,7 +66,7 @@ export function APMSection({ bucketSize }: Props) {
         return getDataHandler('apm')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
-          bucketSize,
+          ...bucketSize,
         });
       }
     },

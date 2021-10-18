@@ -57,7 +57,7 @@ export class MonitoringPlugin
     });
     const monitoring = this.initializerContext.config.get();
 
-    if (!monitoring.ui.enabled || !monitoring.enabled) {
+    if (!monitoring.ui.enabled) {
       return false;
     }
 
@@ -92,7 +92,6 @@ export class MonitoringPlugin
         const externalConfig = this.getExternalConfig();
         const deps: MonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
-          kibanaLegacy: pluginsStart.kibanaLegacy,
           element: params.element,
           core: coreStart,
           data: pluginsStart.data,
@@ -112,7 +111,6 @@ export class MonitoringPlugin
           isCloud: deps.isCloud,
           pluginInitializerContext: deps.pluginInitializerContext,
           externalConfig: deps.externalConfig,
-          kibanaLegacy: deps.kibanaLegacy,
           triggersActionsUi: deps.triggersActionsUi,
           usageCollection: deps.usageCollection,
           appMountParameters: deps.appMountParameters,
