@@ -75,10 +75,10 @@ export interface DeprecationResolutionState {
   resolveDeprecationError?: string;
 }
 
-export interface KibanaDeprecationDetails extends DomainDeprecationDetails {
+export type KibanaDeprecationDetails = DomainDeprecationDetails & {
   id: string;
   filterType: DomainDeprecationDetails['deprecationType'] | 'uncategorized';
-}
+};
 
 const getDeprecationCountByLevel = (deprecations: KibanaDeprecationDetails[]) => {
   const criticalDeprecations: KibanaDeprecationDetails[] = [];

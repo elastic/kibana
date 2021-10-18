@@ -25,6 +25,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
       const reporting = get(settings, fromPath);
       if (reporting?.index) {
         addDeprecation({
+          configPath: `${fromPath}.index`,
           title: i18n.translate('xpack.reporting.deprecations.reportingIndex.title', {
             defaultMessage: 'Setting "{fromPath}.index" is deprecated',
             values: { fromPath },
@@ -51,6 +52,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
 
       if (reporting?.roles?.enabled !== false) {
         addDeprecation({
+          configPath: `${fromPath}.roles.enabled`,
           level: 'warning',
           title: i18n.translate('xpack.reporting.deprecations.reportingRoles.title', {
             defaultMessage: 'Setting "{fromPath}.roles" is deprecated',
