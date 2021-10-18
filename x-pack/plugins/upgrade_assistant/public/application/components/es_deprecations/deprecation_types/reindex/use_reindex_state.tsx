@@ -13,14 +13,14 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../../../../common/types';
-import { LoadingState } from '../../../types';
+import { CancelLoadingState, LoadingState } from '../../../types';
 import { ApiService } from '../../../../lib/api';
 
 const POLL_INTERVAL = 1000;
 
 export interface ReindexState {
   loadingState: LoadingState;
-  cancelLoadingState?: LoadingState;
+  cancelLoadingState?: CancelLoadingState;
   lastCompletedStep?: ReindexStep;
   status?: ReindexStatus;
   reindexTaskPercComplete: number | null;
@@ -59,8 +59,21 @@ const getReindexState = (
     newReindexState.reindexTaskPercComplete = reindexOp.reindexTaskPercComplete;
     newReindexState.errorMessage = reindexOp.errorMessage;
 
-    if (reindexOp.status === ReindexStatus.cancelled) {
-      newReindexState.cancelLoadingState = LoadingState.Success;
+    // if reindex cancellation was "requested" or "loading" and the reindex task is now cancelled,
+    // then reindex cancellation has completed, set it to "success"
+    if (
+      (reindexState.cancelLoadingState === CancelLoadingState.Requested ||
+        reindexState.cancelLoadingState === CancelLoadingState.Loading) &&
+      reindexOp.status === ReindexStatus.cancelled
+    ) {
+      newReindexState.cancelLoadingState = CancelLoadingState.Success;
+    } else if (
+      // if reindex cancellation has been requested and the reindex task is still in progress,
+      // then reindex cancellation has not completed yet, set it to "loading"
+      reindexState.cancelLoadingState === CancelLoadingState.Requested &&
+      reindexOp.status === ReindexStatus.inProgress
+    ) {
+      newReindexState.cancelLoadingState = CancelLoadingState.Loading;
     }
   }
 
@@ -90,39 +103,39 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
     const { data, error } = await api.getReindexStatus(indexName);
 
     if (error) {
-      setReindexState({
-        ...reindexState,
-        loadingState: LoadingState.Error,
-        errorMessage: error.message.toString(),
-        status: ReindexStatus.fetchFailed,
+      setReindexState((prevValue: ReindexState) => {
+        return {
+          ...prevValue,
+          loadingState: LoadingState.Error,
+          errorMessage: error.message.toString(),
+          status: ReindexStatus.fetchFailed,
+        };
       });
       return;
     }
 
-    setReindexState(getReindexState(reindexState, data));
+    setReindexState((prevValue: ReindexState) => {
+      return getReindexState(prevValue, data);
+    });
 
     // Only keep polling if it exists and is in progress.
     if (data.reindexOp && data.reindexOp.status === ReindexStatus.inProgress) {
       pollIntervalIdRef.current = setTimeout(updateStatus, POLL_INTERVAL);
     }
-  }, [clearPollInterval, api, indexName, reindexState]);
+  }, [clearPollInterval, api, indexName]);
 
   const startReindex = useCallback(async () => {
-    const currentReindexState = {
-      ...reindexState,
-    };
-
-    setReindexState({
-      ...currentReindexState,
-      // Only reset last completed step if we aren't currently paused
-      lastCompletedStep:
-        currentReindexState.status === ReindexStatus.paused
-          ? currentReindexState.lastCompletedStep
-          : undefined,
-      status: ReindexStatus.inProgress,
-      reindexTaskPercComplete: null,
-      errorMessage: null,
-      cancelLoadingState: undefined,
+    setReindexState((prevValue: ReindexState) => {
+      return {
+        ...prevValue,
+        // Only reset last completed step if we aren't currently paused
+        lastCompletedStep:
+          prevValue.status === ReindexStatus.paused ? prevValue.lastCompletedStep : undefined,
+        status: ReindexStatus.inProgress,
+        reindexTaskPercComplete: null,
+        errorMessage: null,
+        cancelLoadingState: undefined,
+      };
     });
 
     api.sendReindexTelemetryData({ start: true });
@@ -130,37 +143,45 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
     const { data: reindexOp, error } = await api.startReindexTask(indexName);
 
     if (error) {
-      setReindexState({
-        ...reindexState,
-        loadingState: LoadingState.Error,
-        errorMessage: error.message.toString(),
-        status: ReindexStatus.failed,
+      setReindexState((prevValue: ReindexState) => {
+        return {
+          ...prevValue,
+          loadingState: LoadingState.Error,
+          errorMessage: error.message.toString(),
+          status: ReindexStatus.failed,
+        };
       });
       return;
     }
 
-    setReindexState(getReindexState(reindexState, { reindexOp }));
+    setReindexState((prevValue: ReindexState) => {
+      return getReindexState(prevValue, { reindexOp });
+    });
     updateStatus();
-  }, [api, indexName, reindexState, updateStatus]);
+  }, [api, indexName, updateStatus]);
 
   const cancelReindex = useCallback(async () => {
     api.sendReindexTelemetryData({ stop: true });
 
-    const { error } = await api.cancelReindexTask(indexName);
-
-    setReindexState({
-      ...reindexState,
-      cancelLoadingState: LoadingState.Loading,
+    setReindexState((prevValue: ReindexState) => {
+      return {
+        ...prevValue,
+        cancelLoadingState: CancelLoadingState.Requested,
+      };
     });
 
+    const { error } = await api.cancelReindexTask(indexName);
+
     if (error) {
-      setReindexState({
-        ...reindexState,
-        cancelLoadingState: LoadingState.Error,
+      setReindexState((prevValue: ReindexState) => {
+        return {
+          ...prevValue,
+          cancelLoadingState: CancelLoadingState.Error,
+        };
       });
       return;
     }
-  }, [api, indexName, reindexState]);
+  }, [api, indexName]);
 
   useEffect(() => {
     isMounted.current = true;
