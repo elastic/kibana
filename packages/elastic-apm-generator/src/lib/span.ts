@@ -8,14 +8,14 @@
 
 import { BaseSpan } from './base_span';
 import { Fields } from './entity';
-import { generateEventId } from './utils/generate_id';
+import { generateShortId } from './utils/generate_id';
 
 export class Span extends BaseSpan {
   constructor(fields: Fields) {
     super({
       ...fields,
       'processor.event': 'span',
-      'span.id': generateEventId(),
+      'span.id': generateShortId(),
     });
   }
 

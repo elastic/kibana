@@ -12,14 +12,14 @@ let seq = 0;
 
 const namespace = 'f38d5b83-8eee-4f5b-9aa6-2107e15a71e3';
 
-function generateId() {
-  return uuidv5(String(seq++), namespace).replace(/-/g, '');
+function generateId(seed?: string) {
+  return uuidv5(seed ?? String(seq++), namespace).replace(/-/g, '');
 }
 
-export function generateEventId() {
-  return generateId().substr(0, 16);
+export function generateShortId(seed?: string) {
+  return generateId(seed).substr(0, 16);
 }
 
-export function generateTraceId() {
-  return generateId().substr(0, 32);
+export function generateLongId(seed?: string) {
+  return generateId(seed).substr(0, 32);
 }

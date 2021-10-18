@@ -10,7 +10,7 @@ import { Fields } from './entity';
 import { Serializable } from './serializable';
 import { Span } from './span';
 import { Transaction } from './transaction';
-import { generateTraceId } from './utils/generate_id';
+import { generateLongId } from './utils/generate_id';
 
 export class BaseSpan extends Serializable {
   private readonly _children: BaseSpan[] = [];
@@ -19,7 +19,7 @@ export class BaseSpan extends Serializable {
     super({
       ...fields,
       'event.outcome': 'unknown',
-      'trace.id': generateTraceId(),
+      'trace.id': generateLongId(),
       'processor.name': 'transaction',
     });
   }

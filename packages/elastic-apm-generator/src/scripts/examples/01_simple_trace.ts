@@ -14,11 +14,11 @@ export function simpleTrace(from: number, to: number) {
 
   const range = timerange(from, to);
 
-  const transactionName = '100rpm (80% success) failed 1000ms';
+  const transactionName = '240rpm/60% 1000ms';
 
   const successfulTraceEvents = range
-    .interval('30s')
-    .rate(40)
+    .interval('1s')
+    .rate(3)
     .flatMap((timestamp) =>
       instance
         .transaction(transactionName)
@@ -38,21 +38,39 @@ export function simpleTrace(from: number, to: number) {
     );
 
   const failedTraceEvents = range
-    .interval('30s')
-    .rate(10)
+    .interval('1s')
+    .rate(1)
     .flatMap((timestamp) =>
       instance
         .transaction(transactionName)
         .timestamp(timestamp)
         .duration(1000)
         .failure()
+        .errors(
+          instance.error('[ResponseError] index_not_found_exception').timestamp(timestamp + 50)
+        )
         .serialize()
     );
 
+  const metricsets = range
+    .interval('30s')
+    .rate(1)
+    .flatMap((timestamp) =>
+      instance
+        .appMetrics({
+          'system.memory.actual.free': 800,
+          'system.memory.total': 1000,
+          'system.cpu.total.norm.pct': 0.6,
+          'system.process.cpu.total.norm.pct': 0.7,
+        })
+        .timestamp(timestamp)
+        .serialize()
+    );
   const events = successfulTraceEvents.concat(failedTraceEvents);
 
   return [
     ...events,
+    ...metricsets,
     ...getTransactionMetrics(events),
     ...getSpanDestinationMetrics(events),
     ...getBreakdownMetrics(events),
