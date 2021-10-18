@@ -108,6 +108,7 @@ const dataTypes = [
 (ace as unknown as AceInterface).define(
   'ace/mode/osquery_highlight_rules',
   ['require', 'exports', 'ace/mode/sql_highlight_rules'],
+  // eslint-disable-next-line prefer-arrow-callback
   function (acequire, exports) {
     'use strict';
 

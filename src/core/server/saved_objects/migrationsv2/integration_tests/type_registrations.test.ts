@@ -70,6 +70,7 @@ const previouslyRegisteredTypes = [
   'ml-module',
   'ml-telemetry',
   'monitoring-telemetry',
+  'osquery-pack',
   'osquery-saved-query',
   'osquery-usage-metric',
   'osquery-manager-usage-metric',

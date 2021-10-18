@@ -51,20 +51,16 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     [agentPolicyId, navigateToApp]
   );
 
-  const scheduleQueryGroupsHref = getUrlForApp(PLUGIN_ID, {
-    path: integrationPolicyId
-      ? `/scheduled_query_groups/${integrationPolicyId}/edit`
-      : `/scheduled_query_groups`,
+  const packsHref = getUrlForApp(PLUGIN_ID, {
+    path: integrationPolicyId ? `/packs/${integrationPolicyId}/edit` : `/packs`,
   });
 
-  const scheduleQueryGroupsClick = useCallback(
+  const packsClick = useCallback(
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
         navigateToApp(PLUGIN_ID, {
-          path: integrationPolicyId
-            ? `/scheduled_query_groups/${integrationPolicyId}/edit`
-            : `/scheduled_query_groups`,
+          path: integrationPolicyId ? `/packs/${integrationPolicyId}/edit` : `/packs`,
         });
       }
     },
@@ -88,13 +84,13 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
       <EuiFlexItem>
         <EuiCard
           icon={<EuiIcon size="xl" type="clock" />}
-          title={i18n.translate('xpack.osquery.fleetIntegration.scheduleQueryGroupsButtonText', {
-            defaultMessage: 'Schedule query groups',
+          title={i18n.translate('xpack.osquery.fleetIntegration.packsButtonText', {
+            defaultMessage: 'Packs',
           })}
           description={''}
           isDisabled={isDisabled}
-          href={scheduleQueryGroupsHref}
-          onClick={scheduleQueryGroupsClick}
+          href={packsHref}
+          onClick={packsClick}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

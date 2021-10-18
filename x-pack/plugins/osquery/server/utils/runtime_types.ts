@@ -62,9 +62,10 @@ const getProps = (
       return codec.props;
     case 'IntersectionType': {
       const iTypes = codec.types as rt.HasProps[];
-      return iTypes.reduce<rt.Props>((props, type) => {
-        return Object.assign(props, getProps(type) as rt.Props);
-      }, {} as rt.Props) as rt.Props;
+      return iTypes.reduce<rt.Props>(
+        (props, type) => Object.assign(props, getProps(type) as rt.Props),
+        {} as rt.Props
+      ) as rt.Props;
     }
     default:
       return null;
@@ -76,8 +77,8 @@ const getExcessProps = (
   props: rt.Props | rt.RecordC<rt.StringC, any>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   r: any
-): string[] => {
-  return Object.keys(r).reduce<string[]>((acc, k) => {
+): string[] =>
+  Object.keys(r).reduce<string[]>((acc, k) => {
     const codecChildren = get(props, [k]);
     const childrenProps = getProps(codecChildren);
     const childrenObject = r[k] as Record<string, unknown>;
@@ -98,7 +99,6 @@ const getExcessProps = (
     }
     return acc;
   }, []);
-};
 
 export const excess = <
   C extends rt.InterfaceType<rt.Props> | GenericIntersectionC | rt.PartialType<rt.Props>

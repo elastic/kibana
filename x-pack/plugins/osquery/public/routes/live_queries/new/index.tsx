@@ -22,20 +22,20 @@ const NewLiveQueryPageComponent = () => {
   const { replace } = useHistory();
   const location = useLocation();
   const liveQueryListProps = useRouterNavigate('live_queries');
-  const [initialQuery, setInitialQuery] = useState<string | undefined>(undefined);
+  const [initialFormData, setInitialFormData] = useState<Record<string, unknown> | undefined>({});
 
-  const agentPolicyId = useMemo(() => {
+  const agentPolicyIds = useMemo(() => {
     const queryParams = qs.parse(location.search);
 
-    return queryParams?.agentPolicyId as string | undefined;
+    return queryParams?.agentPolicyId ? ([queryParams?.agentPolicyId] as string[]) : undefined;
   }, [location.search]);
 
   useEffect(() => {
-    if (location.state?.form.query) {
+    if (location.state?.form) {
+      setInitialFormData(location.state?.form);
       replace({ state: null });
-      setInitialQuery(location.state?.form.query);
     }
-  }, [location.state?.form.query, replace]);
+  }, [location.state?.form, replace]);
 
   const LeftColumn = useMemo(
     () => (
@@ -66,7 +66,7 @@ const NewLiveQueryPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      <LiveQuery agentPolicyId={agentPolicyId} query={initialQuery} />
+      <LiveQuery agentPolicyIds={agentPolicyIds} {...initialFormData} />
     </WithHeaderLayout>
   );
 };

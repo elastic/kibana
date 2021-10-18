@@ -9,6 +9,5 @@ import { PluginInitializerContext } from 'kibana/server';
 
 import { ConfigType } from './config';
 
-export const createConfig = (context: PluginInitializerContext): Readonly<ConfigType> => {
-  return context.config.get<ConfigType>();
-};
+export const createConfig = (context: PluginInitializerContext): Readonly<ConfigType> =>
+  context.config.get<ConfigType>();
