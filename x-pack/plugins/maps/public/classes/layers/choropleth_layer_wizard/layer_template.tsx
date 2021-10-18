@@ -40,7 +40,7 @@ const BOUNDARIES_OPTIONS = [
   {
     id: BOUNDARIES_SOURCE.EMS,
     label: i18n.translate('xpack.maps.choropleth.boundaries.ems', {
-      defaultMessage: 'Administrative boundaries from Elastic Maps Service',
+      defaultMessage: 'Administrative boundaries from the Elastic Maps Service',
     }),
   },
   {
