@@ -8,6 +8,7 @@
 import '../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../../__mocks__/react_router';
+
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -27,6 +28,7 @@ import { CurationLogic } from './curation_logic';
 
 import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments } from './documents';
+import { History } from './history';
 
 describe('AutomatedCuration', () => {
   const values = {
@@ -39,6 +41,7 @@ describe('AutomatedCuration', () => {
       suggestion: {
         status: 'applied',
       },
+      queries: ['foo'],
     },
     activeQuery: 'query A',
     isAutomated: true,
@@ -61,20 +64,46 @@ describe('AutomatedCuration', () => {
     expect(wrapper.is(AppSearchPageTemplate));
     expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
     expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
+    expect(wrapper.find(History)).toHaveLength(0);
   });
 
-  it('includes a static tab group', () => {
+  it('includes tabs', () => {
     const wrapper = shallow(<AutomatedCuration />);
-    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+    let tabs = getPageHeaderTabs(wrapper).find(EuiTab);
 
-    expect(tabs).toHaveLength(2);
+    expect(tabs).toHaveLength(3);
 
-    expect(tabs.at(0).prop('onClick')).toBeUndefined();
     expect(tabs.at(0).prop('isSelected')).toBe(true);
 
     expect(tabs.at(1).prop('onClick')).toBeUndefined();
     expect(tabs.at(1).prop('isSelected')).toBe(false);
     expect(tabs.at(1).prop('disabled')).toBe(true);
+
+    expect(tabs.at(2).prop('isSelected')).toBe(false);
+
+    // Clicking on the History tab shows the history view
+    tabs.at(2).simulate('click');
+
+    tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(0).prop('isSelected')).toBe(false);
+    expect(tabs.at(2).prop('isSelected')).toBe(true);
+
+    expect(wrapper.find(PromotedDocuments)).toHaveLength(0);
+    expect(wrapper.find(OrganicDocuments)).toHaveLength(0);
+    expect(wrapper.find(History)).toHaveLength(1);
+
+    // Clicking back to the Promoted tab shows promoted documents
+    tabs.at(0).simulate('click');
+
+    tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(0).prop('isSelected')).toBe(true);
+    expect(tabs.at(2).prop('isSelected')).toBe(false);
+
+    expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
+    expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
+    expect(wrapper.find(History)).toHaveLength(0);
   });
 
   it('initializes CurationLogic with a curationId prop from URL param', () => {
