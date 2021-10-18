@@ -104,8 +104,10 @@ const testMap3 = [
 testMap2.concat(testMap3);
 testMap.concat(testMap2);
 
+const finalTestMap = testMap.concat(testMap2, testMap3);
+
 console.log('TEST PATHS: ');
-console.log(testMap);
+console.log(finalTestMap);
 
 // modifies all future calls to require() to automatically
 // compile the required source with babel
@@ -124,7 +126,7 @@ require('@babel/register')({
   //     ? Path.join(path, 'parallel', process.env.CI_PARALLEL_PROCESS_NUMBER)
   //     : path
   // ),
-  only: testMap,
+  only: finalTestMap,
   babelrc: false,
   presets: [require.resolve('@kbn/babel-preset/node_preset')],
   extensions: ['.js', '.ts', '.tsx'],
