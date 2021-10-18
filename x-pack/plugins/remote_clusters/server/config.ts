@@ -64,12 +64,13 @@ const config7x: PluginConfigDescriptor<RemoteClustersConfig7x> = {
 
       addDeprecation({
         configPath: 'xpack.remote_clusters.enabled',
+        level: 'critical',
         title: i18n.translate('xpack.remoteClusters.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.remote_clusters.enabled" is deprecated',
         }),
         message: i18n.translate('xpack.remoteClusters.deprecations.enabledMessage', {
           defaultMessage:
-            'Use the "xpack.remote_clusters.ui.enabled" setting instead of "xpack.remote_clusters.enabled".',
+            'To disallow users from accessing the Remote Clusters UI, use the "xpack.remote_clusters.ui.enabled" setting instead of "xpack.remote_clusters.enabled".',
         }),
         correctiveActions: {
           manualSteps: [

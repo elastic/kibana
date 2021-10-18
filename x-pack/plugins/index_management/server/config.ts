@@ -64,12 +64,13 @@ const config7x: PluginConfigDescriptor<IndexManagementConfig7x> = {
 
       addDeprecation({
         configPath: 'xpack.index_management.enabled',
+        level: 'critical',
         title: i18n.translate('xpack.idxMgmt.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.index_management.enabled" is deprecated',
         }),
         message: i18n.translate('xpack.idxMgmt.deprecations.enabledMessage', {
           defaultMessage:
-            'Use the "xpack.index_management.ui.enabled" setting instead of "xpack.index_management.enabled".',
+            'To disallow users from accessing the Index Management UI, use the "xpack.index_management.ui.enabled" setting instead of "xpack.index_management.enabled".',
         }),
         correctiveActions: {
           manualSteps: [

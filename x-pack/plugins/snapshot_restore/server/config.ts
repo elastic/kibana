@@ -72,12 +72,13 @@ const config7x: PluginConfigDescriptor<SnapshotRestoreConfig7x> = {
 
       addDeprecation({
         configPath: 'xpack.snapshot_restore.enabled',
+        level: 'critical',
         title: i18n.translate('xpack.snapshotRestore.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.snapshot_restore.enabled" is deprecated',
         }),
         message: i18n.translate('xpack.snapshotRestore.deprecations.enabledMessage', {
           defaultMessage:
-            'Use the "xpack.snapshot_restore.ui.enabled" setting instead of "xpack.snapshot_restore.enabled".',
+            'To disallow users from accessing the Snapshot and Restore UI, use the "xpack.snapshot_restore.ui.enabled" setting instead of "xpack.snapshot_restore.enabled".',
         }),
         correctiveActions: {
           manualSteps: [

@@ -68,11 +68,13 @@ const config7x: PluginConfigDescriptor<IndexLifecycleManagementConfig7x> = {
 
       addDeprecation({
         configPath: 'xpack.ilm.enabled',
+        level: 'critical',
         title: i18n.translate('xpack.indexLifecycleMgmt.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.ilm.enabled" is deprecated',
         }),
         message: i18n.translate('xpack.indexLifecycleMgmt.deprecations.enabledMessage', {
-          defaultMessage: 'Use the "xpack.ilm.ui.enabled" setting instead of "xpack.ilm.enabled".',
+          defaultMessage:
+            'To disallow users from accessing the Index Lifecycle Policies UI, use the "xpack.ilm.ui.enabled" setting instead of "xpack.ilm.enabled".',
         }),
         correctiveActions: {
           manualSteps: [

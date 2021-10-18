@@ -64,12 +64,13 @@ const config7x: PluginConfigDescriptor<RollupConfig7x> = {
 
       addDeprecation({
         configPath: 'xpack.rollup.enabled',
+        level: 'critical',
         title: i18n.translate('xpack.rollupJobs.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.rollup.enabled" is deprecated',
         }),
         message: i18n.translate('xpack.rollupJobs.deprecations.enabledMessage', {
           defaultMessage:
-            'Use the "xpack.rollup.ui.enabled" setting instead of "xpack.rollup.enabled".',
+            'To disallow users from accessing the Rollup Jobs UI, use the "xpack.rollup.ui.enabled" setting instead of "xpack.rollup.enabled".',
         }),
         correctiveActions: {
           manualSteps: [

@@ -64,12 +64,13 @@ const config7x: PluginConfigDescriptor<LicenseManagementConfig7x> = {
 
       addDeprecation({
         configPath: 'xpack.license_management.enabled',
+        level: 'critical',
         title: i18n.translate('xpack.licenseMgmt.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.license_management.enabled" is deprecated',
         }),
         message: i18n.translate('xpack.licenseMgmt.deprecations.enabledMessage', {
           defaultMessage:
-            'Use the "xpack.license_management.ui.enabled" setting instead of "xpack.license_management.enabled".',
+            'To disallow users from accessing the License Management UI, use the "xpack.license_management.ui.enabled" setting instead of "xpack.license_management.enabled".',
         }),
         correctiveActions: {
           manualSteps: [

@@ -78,12 +78,13 @@ const config7x: PluginConfigDescriptor<UpgradeAssistantConfig7x> = {
 
       addDeprecation({
         configPath: 'xpack.upgrade_assistant.enabled',
+        level: 'critical',
         title: i18n.translate('xpack.upgradeAssistant.deprecations.enabledTitle', {
           defaultMessage: 'Setting "xpack.upgrade_assistant.enabled" is deprecated',
         }),
         message: i18n.translate('xpack.upgradeAssistant.deprecations.enabledMessage', {
           defaultMessage:
-            'Use the "xpack.upgrade_assistant.ui.enabled" setting instead of "xpack.upgrade_assistant.enabled".',
+            'To disallow users from accessing the Upgrade Assistant UI, use the "xpack.upgrade_assistant.ui.enabled" setting instead of "xpack.upgrade_assistant.enabled".',
         }),
         correctiveActions: {
           manualSteps: [
