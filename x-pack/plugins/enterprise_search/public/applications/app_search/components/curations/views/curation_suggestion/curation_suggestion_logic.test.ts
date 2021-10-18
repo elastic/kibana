@@ -149,7 +149,7 @@ const MOCK_RESPONSE = {
 
 describe('CurationSuggestionLogic', () => {
   const { mount } = new LogicMounter(CurationSuggestionLogic);
-  const { flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashAPIErrors, setQueuedErrorMessage } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
 
   const mountLogic = (props: object = {}) => {
@@ -233,14 +233,14 @@ describe('CurationSuggestionLogic', () => {
       });
 
       it('should make API calls to fetch data and trigger onSuggestionLoaded', async () => {
-        http.post.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
+        http.get.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
         mountLogic();
         jest.spyOn(CurationSuggestionLogic.actions, 'onSuggestionLoaded');
 
         CurationSuggestionLogic.actions.loadSuggestion();
         await nextTick();
 
-        expect(http.post).toHaveBeenCalledWith(
+        expect(http.get).toHaveBeenCalledWith(
           '/internal/app_search/engines/some-engine/search_relevance_suggestions/foo-query',
           {
             query: {
@@ -254,21 +254,24 @@ describe('CurationSuggestionLogic', () => {
         });
       });
 
-      it.todo('will redirect if the suggestion is not found');
-      // TODO
       // This could happen if a user applies a suggestion and then navigates back to a detail page via
       // the back button, etc. The suggestion still exists, it's just not in a "pending" state
       // so we can show it.ga
-      // it('will redirect if the suggestion is not found', async () => {
-      //   http.post.mockReturnValueOnce(Promise.resolve(set('results', [], MOCK_RESPONSE)));
-      //   mountLogic();
-      //   CurationSuggestionLogic.actions.loadSuggestion();
-      //   await nextTick();
-      //   expect(setQueuedErrorMessage).toHaveBeenCalled();
-      //   expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
-      // });
+      it('will redirect if the suggestion is not found', async () => {
+        http.get.mockReturnValueOnce(
+          Promise.reject({
+            response: { status: 404 },
+          })
+        );
 
-      itHandlesErrors(http.post, () => {
+        mountLogic();
+        CurationSuggestionLogic.actions.loadSuggestion();
+        await nextTick();
+        expect(setQueuedErrorMessage).toHaveBeenCalled();
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
+      });
+
+      itHandlesErrors(http.get, () => {
         CurationSuggestionLogic.actions.loadSuggestion();
       });
     });

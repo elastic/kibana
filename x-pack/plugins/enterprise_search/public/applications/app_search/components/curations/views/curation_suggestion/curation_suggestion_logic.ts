@@ -10,7 +10,11 @@ import { HttpSetup } from 'kibana/public';
 
 import { i18n } from '@kbn/i18n';
 
-import { flashAPIErrors, setQueuedSuccessMessage } from '../../../../../shared/flash_messages';
+import {
+  flashAPIErrors,
+  setQueuedErrorMessage,
+  setQueuedSuccessMessage,
+} from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { ENGINE_CURATIONS_PATH, ENGINE_CURATION_PATH } from '../../../../routes';
@@ -75,7 +79,7 @@ export const CurationSuggestionLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        const suggestionResponse = await http.post(
+        const suggestionResponse = await http.get(
           `/internal/app_search/engines/${engineName}/search_relevance_suggestions/${props.query}`,
           {
             query: {
@@ -97,7 +101,19 @@ export const CurationSuggestionLogic = kea<
           suggestion: suggestionData,
         });
       } catch (e) {
-        flashAPIErrors(e);
+        if (e.response?.status === 404) {
+          const message = i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.notFoundError',
+            {
+              defaultMessage:
+                'Could not find suggestion, it may have already been applied or rejected.',
+            }
+          );
+          setQueuedErrorMessage(message);
+          KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
+        } else {
+          flashAPIErrors(e);
+        }
       }
     },
     acceptSuggestion: async () => {

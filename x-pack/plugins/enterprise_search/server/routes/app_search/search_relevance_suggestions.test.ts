@@ -116,9 +116,9 @@ describe('search relevance insights routes', () => {
     });
   });
 
-  describe('POST /internal/app_search/engines/{name}/search_relevance_suggestions/{query}', () => {
+  describe('GET /internal/app_search/engines/{engineName}/search_relevance_suggestions/{query}', () => {
     const mockRouter = new MockRouter({
-      method: 'post',
+      method: 'get',
       path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/{query}',
     });
 
@@ -129,16 +129,15 @@ describe('search relevance insights routes', () => {
       });
     });
 
-    it.todo('creates a request to enterprise search');
-    // it('creates a request to enterprise search', () => {
-    //   mockRouter.callRoute({
-    //     params: { engineName: 'some-engine', query: 'foo' },
-    //     query: { type: 'curation' },
-    //   });
+    it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({
+        params: { engineName: 'some-engine', query: 'foo' },
+        query: { type: 'curation' },
+      });
 
-    //   expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-    //     path: '/as/engines/:engineName/search_relevance_suggestions/:query',
-    //   });
-    // });
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/:engineName/search_relevance_suggestions/:query',
+      });
+    });
   });
 });
