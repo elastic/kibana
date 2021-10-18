@@ -28,6 +28,7 @@ export const useWorkpad = (
   getRedirectPath: (workpadId: string) => string
 ): [CanvasWorkpad | undefined, string | Error | undefined] => {
   const workpadService = useWorkpadService();
+  const workpadResolve = workpadService.resolve;
   const platformService = usePlatformService();
   const dispatch = useDispatch();
   const storedWorkpad = useSelector(getWorkpad);
@@ -44,7 +45,7 @@ export const useWorkpad = (
           outcome,
           aliasId,
           workpad: { assets, ...workpad },
-        } = await workpadService.resolve(workpadId);
+        } = await workpadResolve(workpadId);
 
         setResolveInfo({ aliasId, outcome });
 
@@ -59,7 +60,7 @@ export const useWorkpad = (
         setError(e as Error | string);
       }
     })();
-  }, [workpadId, dispatch, setError, loadPages, workpadService]);
+  }, [workpadId, dispatch, setError, loadPages, workpadResolve]);
 
   useEffect(() => {
     (async () => {
