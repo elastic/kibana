@@ -98,7 +98,6 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
-          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -173,7 +172,6 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
-          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -225,7 +223,6 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
-          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -314,8 +311,7 @@ describe('Screenshot Observable Pipeline', () => {
                       },
                     },
                   ],
-                  "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
-                  "renderErrors": undefined,
+                  "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
                   "screenshots": Array [
                     Object {
                       "data": Object {
@@ -357,8 +353,7 @@ describe('Screenshot Observable Pipeline', () => {
                       },
                     },
                   ],
-                  "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
-                  "renderErrors": undefined,
+                  "error": [Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
                   "screenshots": Array [
                     Object {
                       "data": Object {
@@ -465,7 +460,6 @@ describe('Screenshot Observable Pipeline', () => {
               },
             ],
             "error": undefined,
-            "renderErrors": undefined,
             "screenshots": Array [
               Object {
                 "data": Object {
