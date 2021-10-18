@@ -19,7 +19,7 @@ const deprecationContext = {
 describe('getDeprecations', () => {
   describe('when fleet is disabled', () => {
     it('returns no deprecations', async () => {
-      const deprecationsCallback = getDeprecations({});
+      const deprecationsCallback = getDeprecations({ branch: 'master' });
       const deprecations = await deprecationsCallback(deprecationContext);
       expect(deprecations).toEqual([]);
     });
