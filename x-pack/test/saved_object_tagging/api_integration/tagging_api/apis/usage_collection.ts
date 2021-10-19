@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
      *   - vis-3: ref to tag-3
      */
     it('collects the expected data', async () => {
-      const telemetryStats = (await usageAPI.getTelemetryStats({
+      const [{ stats: telemetryStats }] = (await usageAPI.getTelemetryStats({
         unencrypted: true,
       })) as any;
 

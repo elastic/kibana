@@ -99,8 +99,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(body.length).to.be.greaterThan(1);
-        localXPack = body.shift();
-        monitoring = body;
+        localXPack = body.shift().stats;
+        monitoring = body.stats;
       });
       after(() => esArchiver.unload(archive));
 
@@ -150,8 +150,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).length(2);
         const [localXPack, ...monitoring] = body;
-        expect(localXPack.collectionSource).to.eql('local_xpack');
-        expect(monitoring).to.eql(basicClusterFixture.map((item) => ({ ...item, timestamp })));
+        expect(localXPack.stats.collectionSource).to.eql('local_xpack');
+        expect(monitoring.stats).to.eql(
+          basicClusterFixture.map((item) => ({ ...item, timestamp }))
+        );
       });
     });
   });
