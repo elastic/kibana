@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues, first, last, isNaN, isNumber, isObject, has } from 'lodash';
+import { mapValues, first, last, isNaN, isObject, has } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
 import {
