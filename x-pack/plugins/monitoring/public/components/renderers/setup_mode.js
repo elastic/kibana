@@ -31,7 +31,7 @@ import { GlobalStateContext } from '../../application/contexts/global_state_cont
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useRequestErrorHandler } from '../../application/hooks/use_request_error_handler';
 
-class WrappedSetupModeRenderer extends React.Component {
+export class WrappedSetupModeRenderer extends React.Component {
   globalState;
   state = {
     renderState: false,
