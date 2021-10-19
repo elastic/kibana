@@ -2449,7 +2449,6 @@
     "discover.docViews.table.toggleFieldDetails": "切换字段详细信息",
     "discover.docViews.table.unableToFilterForPresenceOfMetaFieldsTooltip": "无法筛选元数据字段是否存在",
     "discover.docViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip": "无法筛选脚本字段是否存在",
-    "discover.docViews.table.unindexedFieldsCanNotBeSearchedTooltip": "无法搜索未索引字段",
     "discover.embeddable.inspectorRequestDataTitle": "数据",
     "discover.embeddable.inspectorRequestDescription": "此请求将查询 Elasticsearch 以获取搜索的数据。",
     "discover.embeddable.search.displayName": "搜索",

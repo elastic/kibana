@@ -62,6 +62,10 @@ describe('ContextApp test', () => {
       navigation: mockNavigationPlugin,
       core: { notifications: { toasts: [] } },
       history: () => {},
+      fieldFormats: {
+        getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+        getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+      },
       filterManager: mockFilterManager,
       uiSettings: uiSettingsMock,
     } as unknown as DiscoverServices);
