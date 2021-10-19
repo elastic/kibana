@@ -86,14 +86,7 @@ export async function getTransactionBreakdown({
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
-    {
-      bool: {
-        should: [
-          { exists: { field: SPAN_SELF_TIME_SUM } },
-        ],
-        minimum_should_match: 1,
-      },
-    },
+    { exists: { field: SPAN_SELF_TIME_SUM } },
   ];
 
   if (transactionName) {
