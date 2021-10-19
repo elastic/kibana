@@ -102,6 +102,12 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
+import {
+  SCHEDULE_INTERVAL_AMOUNT_INPUT,
+  SCHEDULE_INTERVAL_UNITS_INPUT,
+  SCHEDULE_LOOKBACK_AMOUNT_INPUT,
+  SCHEDULE_LOOKBACK_UNITS_INPUT,
+} from '../../screens/create_new_rule';
 import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -381,6 +387,19 @@ describe('indicator match', () => {
           );
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
+        });
+      });
+
+      describe('Schedule', () => {
+        it('IM rule has 1h time interval and lookback by default', () => {
+          selectIndicatorMatchType();
+          fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
+          fillAboutRuleAndContinue(getNewThreatIndicatorRule());
+
+          cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', '1');
+          cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', 'h');
+          cy.get(SCHEDULE_LOOKBACK_AMOUNT_INPUT).invoke('val').should('eql', '5');
+          cy.get(SCHEDULE_LOOKBACK_UNITS_INPUT).invoke('val').should('eql', 'm');
         });
       });
     });
