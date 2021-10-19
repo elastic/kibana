@@ -19,7 +19,7 @@ export const PLUGIN = {
   minimumLicenseType: platinumLicense,
 };
 
-export const MAJOR_VERSION = '8.0.0';
+export const MAJOR_VERSION = '7.16.0';
 
 export const APPS = {
   CCR_APP: 'ccr',
