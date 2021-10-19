@@ -42,6 +42,7 @@ import {
 import { getCurrentIsolationRequestState } from '../store/selectors';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
+import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   APP_PATH,
   MANAGEMENT_PATH,
@@ -807,7 +808,7 @@ describe('when on the endpoint list page', () => {
       let renderResult: ReturnType<typeof render>;
       const agentId = 'some_agent_id';
 
-      let getMockData: () => ActivityLog;
+      let getMockData: (option?: { hasLogsEndpointActionResponses?: boolean }) => ActivityLog;
       beforeEach(async () => {
         window.IntersectionObserver = jest.fn(() => ({
           root: null,
@@ -828,10 +829,15 @@ describe('when on the endpoint list page', () => {
         });
 
         const fleetActionGenerator = new FleetActionGenerator('seed');
-        const responseData = fleetActionGenerator.generateResponse({
+        const endpointActionGenerator = new EndpointActionGenerator('seed');
+        const endpointResponseData = endpointActionGenerator.generateResponse({
+          agent: { id: agentId },
+        });
+        const fleetResponseData = fleetActionGenerator.generateResponse({
           agent_id: agentId,
         });
-        const actionData = fleetActionGenerator.generate({
+
+        const fleetActionData = fleetActionGenerator.generate({
           agents: [agentId],
           data: {
             comment: 'some comment',
@@ -844,35 +850,49 @@ describe('when on the endpoint list page', () => {
           },
         });
 
-        getMockData = () => ({
-          page: 1,
-          pageSize: 50,
-          startDate: 'now-1d',
-          endDate: 'now',
-          data: [
-            {
+        getMockData = (hasLogsEndpointActionResponses?: {
+          hasLogsEndpointActionResponses?: boolean;
+        }) => {
+          const response: ActivityLog = {
+            page: 1,
+            pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
+            data: [
+              {
+                type: 'fleetResponse',
+                item: {
+                  id: 'some_id_1',
+                  data: fleetResponseData,
+                },
+              },
+              {
+                type: 'fleetAction',
+                item: {
+                  id: 'some_id_2',
+                  data: fleetActionData,
+                },
+              },
+              {
+                type: 'fleetAction',
+                item: {
+                  id: 'some_id_3',
+                  data: isolatedActionData,
+                },
+              },
+            ],
+          };
+          if (hasLogsEndpointActionResponses) {
+            response.data.unshift({
               type: 'response',
               item: {
                 id: 'some_id_0',
-                data: responseData,
+                data: endpointResponseData,
               },
-            },
-            {
-              type: 'action',
-              item: {
-                id: 'some_id_1',
-                data: actionData,
-              },
-            },
-            {
-              type: 'action',
-              item: {
-                id: 'some_id_3',
-                data: isolatedActionData,
-              },
-            },
-          ],
-        });
+            });
+          }
+          return response;
+        };
 
         renderResult = render();
         await reactTestingLibrary.act(async () => {
@@ -910,6 +930,25 @@ describe('when on the endpoint list page', () => {
         expect(logEntries.length).toEqual(3);
         expect(`${logEntries[0]} .euiCommentTimeline__icon--update`).not.toBe(null);
         expect(`${logEntries[1]} .euiCommentTimeline__icon--regular`).not.toBe(null);
+      });
+
+      it('should display log accurately with endpoint responses', async () => {
+        const activityLogTab = await renderResult.findByTestId('activity_log');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(activityLogTab);
+        });
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged(
+            'success',
+            getMockData({ hasLogsEndpointActionResponses: true })
+          );
+        });
+        const logEntries = await renderResult.queryAllByTestId('timelineEntry');
+        expect(logEntries.length).toEqual(4);
+        expect(`${logEntries[0]} .euiCommentTimeline__icon--update`).not.toBe(null);
+        expect(`${logEntries[1]} .euiCommentTimeline__icon--update`).not.toBe(null);
+        expect(`${logEntries[2]} .euiCommentTimeline__icon--regular`).not.toBe(null);
       });
 
       it('should display empty state when API call has failed', async () => {
