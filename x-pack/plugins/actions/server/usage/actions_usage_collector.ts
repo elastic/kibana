@@ -8,7 +8,7 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { get } from 'lodash';
 import { TaskManagerStartContract } from '../../../task_manager/server';
-import { ActionsUsage, alertingActionsTypeSchema, byTypeSchema } from './types';
+import { ActionsUsage, byServiceProviderTypeSchema, byTypeSchema } from './types';
 import { ActionsConfig } from '../config';
 
 export function createActionsUsageCollector(
@@ -29,7 +29,16 @@ export function createActionsUsageCollector(
       },
       count_total: { type: 'long' },
       count_by_type: byTypeSchema,
-      alerting_actions: alertingActionsTypeSchema,
+      count_active_total: { type: 'long' },
+      count_active_alert_history_connectors: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of preconfigured alert history connectors used by rules.',
+        },
+      },
+      count_active_by_type: byTypeSchema,
+      count_active_email_connectors_by_service_type: byServiceProviderTypeSchema,
+      count_actions_namespaces: { type: 'long' },
     },
     fetch: async () => {
       try {
@@ -46,13 +55,11 @@ export function createActionsUsageCollector(
           alert_history_connector_enabled: false,
           count_total: 0,
           count_by_type: {},
-          alerting_actions: {
-            count_active_total: 0,
-            count_active_alert_history_connectors: 0,
-            count_active_by_type: {},
-            count_active_email_connectors_by_service_type: {},
-            count_actions_namespaces: 0,
-          },
+          count_active_total: 0,
+          count_active_alert_history_connectors: 0,
+          count_active_by_type: {},
+          count_active_email_connectors_by_service_type: {},
+          count_actions_namespaces: 0,
         };
       }
     },

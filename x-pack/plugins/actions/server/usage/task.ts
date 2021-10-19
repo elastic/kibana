@@ -13,7 +13,7 @@ import {
   TaskManagerStartContract,
 } from '../../../task_manager/server';
 import { PreConfiguredAction } from '../types';
-import { getTotalCount, getInUseByAlertingTotalCounts } from './actions_telemetry';
+import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 
@@ -83,7 +83,7 @@ export function telemetryTaskRunner(
         const esClient = await getEsClient();
         return Promise.all([
           getTotalCount(esClient, kibanaIndex, preconfiguredActions),
-          getInUseByAlertingTotalCounts(esClient, kibanaIndex, preconfiguredActions),
+          getInUseTotalCount(esClient, kibanaIndex, undefined, preconfiguredActions),
         ])
           .then(([totalAggegations, totalInUse]) => {
             return {
@@ -91,14 +91,11 @@ export function telemetryTaskRunner(
                 runs: (state.runs || 0) + 1,
                 count_total: totalAggegations.countTotal,
                 count_by_type: totalAggegations.countByType,
-                alerting_actions: {
-                  count_active_total: totalInUse.countTotal,
-                  count_active_by_type: totalInUse.countByType,
-                  count_active_alert_history_connectors:
-                    totalInUse.countByAlertHistoryConnectorType,
-                  count_active_email_connectors_by_service_type: totalInUse.countEmailByService,
-                  count_actions_namespaces: totalInUse.countNamespaces,
-                },
+                count_active_total: totalInUse.countTotal,
+                count_active_by_type: totalInUse.countByType,
+                count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
+                count_active_email_connectors_by_service_type: totalInUse.countEmailByService,
+                count_actions_namespaces: totalInUse.countNamespaces,
               },
               runAt: getNextMidnight(),
             };

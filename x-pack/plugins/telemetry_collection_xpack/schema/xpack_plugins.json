@@ -51,86 +51,82 @@
             }
           }
         },
-        "alerting_actions": {
+        "count_active_total": {
+          "type": "long"
+        },
+        "count_active_alert_history_connectors": {
+          "type": "long",
+          "_meta": {
+            "description": "The total number of preconfigured alert history connectors used by rules."
+          }
+        },
+        "count_active_by_type": {
           "properties": {
-            "count_active_total": {
+            "DYNAMIC_KEY": {
               "type": "long"
             },
-            "count_active_alert_history_connectors": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of preconfigured alert history connectors used by rules."
-              }
+            "__email": {
+              "type": "long"
             },
-            "count_active_by_type": {
-              "properties": {
-                "DYNAMIC_KEY": {
-                  "type": "long"
-                },
-                "__email": {
-                  "type": "long"
-                },
-                "__index": {
-                  "type": "long"
-                },
-                "__pagerduty": {
-                  "type": "long"
-                },
-                "__swimlane": {
-                  "type": "long"
-                },
-                "__server-log": {
-                  "type": "long"
-                },
-                "__slack": {
-                  "type": "long"
-                },
-                "__webhook": {
-                  "type": "long"
-                },
-                "__servicenow": {
-                  "type": "long"
-                },
-                "__jira": {
-                  "type": "long"
-                },
-                "__resilient": {
-                  "type": "long"
-                },
-                "__teams": {
-                  "type": "long"
-                }
-              }
+            "__index": {
+              "type": "long"
             },
-            "count_active_email_connectors_by_service_type": {
-              "properties": {
-                "DYNAMIC_KEY": {
-                  "type": "long"
-                },
-                "exchange_server": {
-                  "type": "long"
-                },
-                "gmail": {
-                  "type": "long"
-                },
-                "outlook365": {
-                  "type": "long"
-                },
-                "elastic_cloud": {
-                  "type": "long"
-                },
-                "other": {
-                  "type": "long"
-                },
-                "ses": {
-                  "type": "long"
-                }
-              }
+            "__pagerduty": {
+              "type": "long"
             },
-            "count_actions_namespaces": {
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
               "type": "long"
             }
           }
+        },
+        "count_active_email_connectors_by_service_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "exchange_server": {
+              "type": "long"
+            },
+            "gmail": {
+              "type": "long"
+            },
+            "outlook365": {
+              "type": "long"
+            },
+            "elastic_cloud": {
+              "type": "long"
+            },
+            "other": {
+              "type": "long"
+            },
+            "ses": {
+              "type": "long"
+            }
+          }
+        },
+        "count_actions_namespaces": {
+          "type": "long"
         }
       }
     },
