@@ -9,7 +9,6 @@ import type { HttpStart } from 'src/core/public';
 
 import type { Role, RoleIndexPrivilege } from '../../../common/model';
 import { copyRole } from '../../../common/model';
-import { isGlobalPrivilegeDefinition } from './edit_role/privilege_utils';
 
 export class RolesAPIClient {
   constructor(private readonly http: HttpStart) {}
@@ -26,13 +25,13 @@ export class RolesAPIClient {
     await this.http.delete(`/api/security/role/${encodeURIComponent(roleName)}`);
   }
 
-  public async saveRole({ role, spacesEnabled }: { role: Role; spacesEnabled: boolean }) {
+  public async saveRole({ role }: { role: Role }) {
     await this.http.put(`/api/security/role/${encodeURIComponent(role.name)}`, {
-      body: JSON.stringify(this.transformRoleForSave(copyRole(role), spacesEnabled)),
+      body: JSON.stringify(this.transformRoleForSave(copyRole(role))),
     });
   }
 
-  private transformRoleForSave(role: Role, spacesEnabled: boolean) {
+  private transformRoleForSave(role: Role) {
     // Remove any placeholder index privileges
     const isPlaceholderPrivilege = (indexPrivilege: RoleIndexPrivilege) =>
       indexPrivilege.names.length === 0;
@@ -42,11 +41,6 @@ export class RolesAPIClient {
 
     // Remove any placeholder query entries
     role.elasticsearch.indices.forEach((index) => index.query || delete index.query);
-
-    // If spaces are disabled, then do not persist any space privileges
-    if (!spacesEnabled) {
-      role.kibana = role.kibana.filter(isGlobalPrivilegeDefinition);
-    }
 
     role.kibana.forEach((kibanaPrivilege) => {
       // If a base privilege is defined, then do not persist feature privileges
