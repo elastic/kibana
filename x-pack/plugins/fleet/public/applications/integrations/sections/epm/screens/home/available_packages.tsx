@@ -232,10 +232,10 @@ export const AvailablePackages: React.FC = memo(() => {
           <EuiCard
             icon={<EuiIcon type="logoSecurity" size="xxl" />}
             href={addBasePath('/app/integrations/detail/endpoint/')}
-            title={i18n.translate('xpack.observability.home.featuredSecurityTitle', {
+            title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
               defaultMessage: 'Endpoint Security',
             })}
-            description={i18n.translate('xpack.observability.home.featuredSecurityDesc', {
+            description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
               defaultMessage:
                 'Protect your hosts with threat prevention, detection, and deep security data visibility.',
             })}
@@ -243,10 +243,10 @@ export const AvailablePackages: React.FC = memo(() => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
-            title={i18n.translate('xpack.observability.home.featuredObsTitle', {
+            title={i18n.translate('xpack.fleet.featuredObsTitle', {
               defaultMessage: 'Elastic APM',
             })}
-            description={i18n.translate('xpack.observability.home.featuredObsDesc', {
+            description={i18n.translate('xpack.fleet.featuredObsDesc', {
               defaultMessage:
                 'Monitor, detect and diagnose complex performance issues from your application.',
             })}
@@ -258,10 +258,10 @@ export const AvailablePackages: React.FC = memo(() => {
           <EuiCard
             icon={<EuiIcon type="logoAppSearch" size="xxl" />}
             href={addBasePath('/app/enterprise_search/app_search')}
-            title={i18n.translate('xpack.observability.home.featuredObsTitle', {
+            title={i18n.translate('xpack.fleet.featuredSearchTitle', {
               defaultMessage: 'Web site crawler',
             })}
-            description={i18n.translate('xpack.observability.home.featuredObsDesc', {
+            description={i18n.translate('xpack.fleet.featuredSearchDesc', {
               defaultMessage: 'Add search to your website with the App Search web crawler.',
             })}
           />

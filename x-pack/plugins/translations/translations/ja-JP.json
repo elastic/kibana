@@ -11010,7 +11010,6 @@
     "xpack.fleet.epm.usedByLabel": "エージェントポリシー",
     "xpack.fleet.epm.versionLabel": "バージョン",
     "xpack.fleet.epmList.allPackagesFilterLinkText": "すべて",
-    "xpack.fleet.epmList.installedTitle": "インストールされている統合",
     "xpack.fleet.epmList.missingIntegrationPlaceholder": "検索用語と一致する統合が見つかりませんでした。別のキーワードを試すか、左側のカテゴリを使用して参照してください。",
     "xpack.fleet.epmList.noPackagesFoundPlaceholder": "パッケージが見つかりません",
     "xpack.fleet.epmList.searchPackagesPlaceholder": "統合を検索",
