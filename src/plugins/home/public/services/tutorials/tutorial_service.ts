@@ -12,9 +12,6 @@ import React from 'react';
 export type TutorialVariables = Partial<Record<string, unknown>>;
 
 /** @public */
-export type TutorialDirectoryNoticeComponent = React.FC;
-
-/** @public */
 export type TutorialDirectoryHeaderLinkComponent = React.FC;
 
 /** @public */
@@ -27,7 +24,6 @@ type CustomComponent = () => Promise<React.ReactNode>;
 
 export class TutorialService {
   private tutorialVariables: TutorialVariables = {};
-  private tutorialDirectoryNotices: { [key: string]: TutorialDirectoryNoticeComponent } = {};
   private tutorialDirectoryHeaderLinks: {
     [key: string]: TutorialDirectoryHeaderLinkComponent;
   } = {};
@@ -45,16 +41,6 @@ export class TutorialService {
           throw new Error('variable already set');
         }
         this.tutorialVariables[key] = value;
-      },
-
-      /**
-       * Registers a component that will be rendered at the top of tutorial directory page.
-       */
-      registerDirectoryNotice: (id: string, component: TutorialDirectoryNoticeComponent) => {
-        if (this.tutorialDirectoryNotices[id]) {
-          throw new Error(`directory notice ${id} already set`);
-        }
-        this.tutorialDirectoryNotices[id] = component;
       },
 
       /**
@@ -92,10 +78,6 @@ export class TutorialService {
 
   public getVariables() {
     return this.tutorialVariables;
-  }
-
-  public getDirectoryNotices() {
-    return Object.values(this.tutorialDirectoryNotices);
   }
 
   public getDirectoryHeaderLinks() {
