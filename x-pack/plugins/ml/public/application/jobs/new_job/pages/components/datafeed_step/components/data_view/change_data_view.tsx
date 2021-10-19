@@ -104,13 +104,13 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
       const indices = title.split(',');
       if (jobCreator.detectors.length) {
         const datafeed: Datafeed = { ...jobCreator.datafeedConfig, indices };
-        const gg = await validateDatafeedPreview({
+        const resp = await validateDatafeedPreview({
           job: {
             ...jobCreator.jobConfig,
             datafeed_config: datafeed,
           } as CombinedJob,
         });
-        setValidationResponse(gg);
+        setValidationResponse(resp);
       }
       setValidating(false);
     },
