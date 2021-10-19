@@ -296,14 +296,15 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
               label={i18n.translate(
                 'xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalLabel',
                 {
-                  defaultMessage: 'Experimental',
+                  defaultMessage: 'Tech preview',
                 }
               )}
               iconType="beaker"
               tooltipContent={i18n.translate(
                 'xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalTooltip',
                 {
-                  defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                  defaultMessage:
+                    'Preview the quickest way to create Elastic Synthetics monitoring scripts with our Elastic Synthetics Recorder',
                 }
               )}
             />
