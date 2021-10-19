@@ -35,6 +35,7 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
       showToolbar: false,
       totalFunc: 'sum',
       percentageCol: '',
+      autoFitRowToContent: false,
     },
   },
   editorConfig: {
