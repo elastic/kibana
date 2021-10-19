@@ -71,7 +71,7 @@ export function DiscoverGridFlyout({
   setExpandedDoc,
 }: Props) {
   // Get actual hit with updated highlighted searches
-  const actualHit = hits?.find(({ _id }) => _id === hit?._id) || hit;
+  const actualHit = useMemo(() => hits?.find(({ _id }) => _id === hit?._id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
   const activePage = useMemo<number>(() => {
     const id = getDocFingerprintId(hit);
