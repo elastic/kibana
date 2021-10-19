@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { FieldIcon } from '@kbn/react-field';
+import { FieldIcon } from '@kbn/react-field/field_icon';
 import * as i18n from '../translations';
 import { IndexPatternField } from '../../../../../../../../src/plugins/data/public';
 import { getExampleText } from '../helpers';

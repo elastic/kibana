@@ -28,7 +28,9 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md"
+  "README.md",
+  "field_button/package.json",
+  "field_icon/package.json",
 ]
 
 RUNTIME_DEPS = [
