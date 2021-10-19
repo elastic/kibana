@@ -73,8 +73,8 @@ export const PreviewHistogram = ({
   }, [setQuery, inspect, isLoading, isInitializing, refetch, previewId]);
 
   const barConfig = useMemo(
-    (): ChartSeriesConfigs => getHistogramConfig(to, from, true),
-    [from, to]
+    (): ChartSeriesConfigs => getHistogramConfig(endDate, startDate, true),
+    [endDate, startDate]
   );
 
   const subtitle = useMemo(
