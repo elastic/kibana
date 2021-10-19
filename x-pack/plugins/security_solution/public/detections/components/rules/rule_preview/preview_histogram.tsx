@@ -19,6 +19,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { BarChart } from '../../../../common/components/charts/barchart';
 import { usePreviewHistogram } from './use_preview_histogram';
 import { formatDate } from '../../../../common/components/super_date_picker';
+import { QUERY_PREVIEW_DISCLAIMER_MAX_SIGNALS } from './translations';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -111,7 +112,7 @@ export const PreviewHistogram = ({
           <>
             <EuiSpacer />
             <EuiText size="s" color="subdued">
-              <p>{i18n.QUERY_PREVIEW_DISCLAIMER}</p>
+              <p>{i18n.QUERY_PREVIEW_DISCLAIMER_MAX_SIGNALS}</p>
             </EuiText>
           </>
         </EuiFlexItem>

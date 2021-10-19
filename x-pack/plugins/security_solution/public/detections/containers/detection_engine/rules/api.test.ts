@@ -98,7 +98,7 @@ describe('Detections Rules API', () => {
 
     test('POSTs rule', async () => {
       const payload = getCreateRulesSchemaMock();
-      await previewRule({ rule: { ...payload }, signal: abortCtrl.signal });
+      await previewRule({ rule: { ...payload, invocationCount: 1 }, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/preview', {
         body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1"}',
         method: 'POST',
