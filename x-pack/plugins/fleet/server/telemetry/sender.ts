@@ -153,11 +153,7 @@ export class TelemetryEventsSender {
   // https://telemetry-staging.elastic.co/v3/send/my-channel-name
   public getV3UrlFromV2(v2url: string, channel: string): string {
     const url = new URL(v2url);
-    if (!url.hostname.includes('staging')) {
-      url.pathname = `/v3/send/${channel}`;
-    } else {
-      url.pathname = `/v3/send/${channel}`;
-    }
+    url.pathname = `/v3/send/${channel}`;
     return url.toString();
   }
 
