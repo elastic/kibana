@@ -7,7 +7,7 @@
  */
 
 import { keyBy } from 'lodash';
-import { delay, map as mapAsync } from 'bluebird';
+import { map as mapAsync } from 'bluebird';
 import { FtrService } from '../../ftr_provider_context';
 
 export class SavedObjectsPageObject extends FtrService {
@@ -18,8 +18,6 @@ export class SavedObjectsPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
-  private readonly config = this.ctx.getService('config');
-  private readonly defaultTryTimeout = this.config.get('timeouts.try');
 
   async searchForObject(objectName: string) {
     const searchBox = await this.testSubjects.find('savedObjectSearchBar');
@@ -100,15 +98,8 @@ export class SavedObjectsPageObject extends FtrService {
     await this.testSubjects.click('importSavedObjectsConfirmBtn');
   }
 
-  async sleep(sleepMilliseconds: number) {
-    this.log.debug(`... sleep(${sleepMilliseconds}) start`);
-    await delay(sleepMilliseconds);
-    this.log.debug(`... sleep(${sleepMilliseconds}) end`);
-  }
-
   async waitTableIsLoaded() {
-    await this.sleep(501);
-    return await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
+    return await this.retry.try(async () => {
       const isLoaded = await this.find.existsByDisplayedByCssSelector(
         '*[data-test-subj="savedObjectsTable"] :not(.euiBasicTable-loading)'
       );
@@ -121,7 +112,7 @@ export class SavedObjectsPageObject extends FtrService {
     });
   }
   async waitInspectObjectIsLoaded() {
-    return await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
+    return await this.retry.try(async () => {
       this.log.debug(`wait for inspect view to load`);
       const isLoaded = await this.find.byClassName('kibanaCodeEditor');
       const visibleContainerText = await isLoaded.getVisibleText();
