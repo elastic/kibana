@@ -40,6 +40,7 @@ import {
   PatchRuleProps,
   BulkActionProps,
   BulkActionResponse,
+  PreviewRulesProps,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
@@ -103,7 +104,7 @@ export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Pro
  *
  * @throws An error if response is not OK
  */
-export const previewRule = async ({ rule, signal }: CreateRulesProps): Promise<PreviewResponse> =>
+export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<PreviewResponse> =>
   KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
     method: 'POST',
     body: JSON.stringify(rule),

@@ -52,7 +52,7 @@ export const usePreviewRule = (): ReturnPreviewRule => {
         try {
           setIsLoading(true);
           const previewRuleResponse = await previewRule({
-            rule: transformOutput(rule),
+            rule: { ...transformOutput(rule), invocationCount: 1 },
             signal: abortCtrl.signal,
           });
           if (isSubscribed) {
