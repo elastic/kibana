@@ -77,6 +77,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('return the correct data', () => {
+          console.log('### caue ~ response.body', JSON.stringify(response.body, null, 2));
+          expect(true).to.be.equal(false);
           expectSnapshot(response.body).toMatch();
         });
       });
