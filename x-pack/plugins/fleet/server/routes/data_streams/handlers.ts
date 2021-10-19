@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
-import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler, SavedObjectsBulkGetObject } from 'src/core/server';
+import { keyBy, merge } from 'lodash';
+import type { RequestHandler } from 'src/core/server';
 
 import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common';
@@ -72,7 +71,6 @@ export const getListHandler: RequestHandler = async (context, request, response)
 
     // Combine data stream info
     const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
-    const dataStreamNames = keys(dataStreams);
 
     // Map package SOs
     const packageSavedObjectsByName = keyBy(packageSavedObjects.saved_objects, 'id');
@@ -91,20 +89,16 @@ export const getListHandler: RequestHandler = async (context, request, response)
       allDashboards[pkgSavedObject.id] = dashboards;
       return allDashboards;
     }, {});
+
     const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
       title?: string;
     }>(
-      Object.values(dashboardIdsByPackageName).reduce<SavedObjectsBulkGetObject[]>(
-        (allDashboards, dashboardIds) => {
-          return allDashboards.concat(
-            dashboardIds.map((id) => ({
-              id,
-              type: KibanaSavedObjectType.dashboard,
-              fields: ['title'],
-            }))
-          );
-        },
-        []
+      Object.values(dashboardIdsByPackageName).flatMap((dashboardIds) =>
+        dashboardIds.map((id) => ({
+          id,
+          type: KibanaSavedObjectType.dashboard,
+          fields: ['title'],
+        }))
       )
     );
     // Ignore dashboards not found
@@ -118,15 +112,11 @@ export const getListHandler: RequestHandler = async (context, request, response)
       return true;
     });
 
-    const allDashboardSavedObjectsById = keyBy(
-      allDashboardSavedObjects,
-      (dashboardSavedObject) => dashboardSavedObject.id
-    );
+    const allDashboardSavedObjectsById = keyBy(allDashboardSavedObjects, 'id');
 
     // Query additional information for each data stream
-    const dataStreamPromises = dataStreamNames.map(async (dataStreamName) => {
+    const formattedDataStreams = Object.entries(dataStreams).map(([dataStreamName, dataStream]) => {
       const [type, dataset, namespace] = dataStreamName.split('-');
-      const dataStream = dataStreams[dataStreamName];
       const dataStreamResponse: DataStream = {
         index: dataStreamName,
         dataset,
@@ -179,9 +169,9 @@ export const getListHandler: RequestHandler = async (context, request, response)
       return dataStreamResponse;
     });
 
-    // Return final data streams objects sorted by last activity, decending
+    // Return final data streams objects sorted by last activity, descending
     // After filtering out data streams that are missing dataset/namespace/type fields
-    body.data_streams = (await Promise.all(dataStreamPromises))
+    body.data_streams = formattedDataStreams
       .filter(({ dataset, namespace, type }) => dataset && namespace && type)
       .sort((a, b) => b.last_activity_ms - a.last_activity_ms);
     return response.ok({
