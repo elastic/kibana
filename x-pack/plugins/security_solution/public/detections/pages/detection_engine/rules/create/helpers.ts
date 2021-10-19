@@ -426,8 +426,8 @@ export const formatPreviewRule = ({
     description: 'Preview Rule',
   };
   const scheduleStepData = {
-    from: `${timeFrame === 'w' ? '7d' : `1${timeFrame}`}`,
-    interval: `now-30s`,
+    from: `now-${timeFrame === 'w' ? '604830' : timeFrame === 'd' ? '86420' : '3610'}s`,
+    interval: `30s`,
   };
   return {
     ...formatRule<CreateRulesSchema>(
