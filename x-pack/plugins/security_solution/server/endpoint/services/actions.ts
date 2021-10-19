@@ -151,7 +151,9 @@ const hasAckInResponse = (response: EndpointActionResponse): boolean => {
   return typeof response.action_data.ack !== 'undefined';
 };
 
-const isLogsEndpointFilter = ({
+// return TRUE if for given action_id/agent_id
+// there is no doc in .logs-endpoint.action.response-default
+const hasNoEndpointResponse = ({
   action,
   agentId,
   indexedActionIds,
@@ -163,7 +165,9 @@ const isLogsEndpointFilter = ({
   return action.agents.includes(agentId) && !indexedActionIds.includes(action.action_id);
 };
 
-const legacyFilterCallback = ({
+// return TRUE if for given action_id/agent_id
+// there is no doc in .fleet-actions-results
+const hasNoFleetResponse = ({
   action,
   agentId,
   agentResponses,
@@ -230,7 +234,7 @@ export const getPendingActionCounts = async (
       .map((response) => response.action_id);
 
     // actions Ids that are indexed in new response index
-    const indexedActionIds = await hasIndexedDoc({
+    const indexedActionIds = await hasEndpointResponseDoc({
       agentId,
       actionIds: ackResponseActionIdList,
       esClient,
@@ -238,8 +242,8 @@ export const getPendingActionCounts = async (
 
     const pendingActions: EndpointAction[] = recentActions.filter((action) => {
       return ackResponseActionIdList.includes(action.action_id) // if has ack
-        ? isLogsEndpointFilter({ action, agentId, indexedActionIds }) // then find responses in new index
-        : legacyFilterCallback({
+        ? hasNoEndpointResponse({ action, agentId, indexedActionIds }) // then find responses in new index
+        : hasNoFleetResponse({
             // else use the legacy way
             action,
             agentId,
@@ -272,7 +276,7 @@ export const getPendingActionCounts = async (
  * @param actionIds
  * @param agentIds
  */
-const hasIndexedDoc = async ({
+const hasEndpointResponseDoc = async ({
   actionIds,
   agentId,
   esClient,
