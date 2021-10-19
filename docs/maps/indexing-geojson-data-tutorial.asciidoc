@@ -58,8 +58,8 @@ auto-populate *Index type* with either {ref}/geo-point.html[geo_point] or
 . Click *Import file*.
 +
 You'll see activity as the GeoJSON Upload utility creates a new index
-and index pattern for the data set. When the process is complete, you should
-receive messages that the creation of the new index and index pattern
+and data view for the data set. When the process is complete, you should
+receive messages that the creation of the new index and data view
 were successful.
 
 . Click *Add layer*.
@@ -88,11 +88,6 @@ lightning strikes is that you can perform aggregations on the data.
 
 . Click *Add layer*.
 . From the list of layer types, click *Heat map*.
-+
-Because you indexed `lightning_detected.geojson` using the index name and
-pattern `lightning_detected`, that data is available as a {ref}/geo-point.html[geo_point]
-aggregation.
-
 . Select `lightning_detected`.
 . Click *Add layer* to add the heat map layer
 "Lightning intensity".
