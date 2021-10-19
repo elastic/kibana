@@ -14,7 +14,7 @@ interface LoggerOptions {
 export declare class Logger {
   constructor(settings?: LoggerOptions);
 
-  log(data: string, sameLine?: boolean);
+  log(data: string, sameLine?: boolean): void;
 
-  error(data: string);
+  error(data: string): void;
 }
