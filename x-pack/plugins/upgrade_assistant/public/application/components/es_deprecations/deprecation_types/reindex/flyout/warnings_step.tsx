@@ -41,9 +41,9 @@ const warningToComponentMap: {
 
 export const idForWarning = (id: number) => `reindexWarning-${id}`;
 interface WarningsConfirmationFlyoutProps {
-  closeFlyout: () => void;
+  hideWarningsStep: () => void;
+  continueReindex: () => void;
   warnings: ReindexWarning[];
-  advanceNextStep: () => void;
 }
 
 /**
@@ -52,8 +52,8 @@ interface WarningsConfirmationFlyoutProps {
  */
 export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFlyoutProps> = ({
   warnings,
-  closeFlyout,
-  advanceNextStep,
+  hideWarningsStep,
+  continueReindex,
 }) => {
   const {
     services: {
@@ -86,64 +86,66 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
   return (
     <>
       <EuiFlyoutBody>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle"
-              defaultMessage="This index requires destructive changes that cannot be reversed"
-            />
-          }
-          color="danger"
-          iconType="alert"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail"
-              defaultMessage="Back up the index before continuing. To proceed with the reindex, accept each change."
-            />
-          </p>
-        </EuiCallOut>
-
-        <EuiSpacer />
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
-              defaultMessage="Accept changes"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer />
-
-        {warnings.map((warning, index) => {
-          const WarningCheckbox = warningToComponentMap[warning.warningType];
-          return (
-            <WarningCheckbox
-              key={idForWarning(index)}
-              isChecked={checkedIds[idForWarning(index)]}
-              onChange={onChange}
-              docLinks={links}
-              id={idForWarning(index)}
-              meta={warning.meta}
-            />
-          );
-        })}
+        {warnings.length > 0 && (
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle"
+                  defaultMessage="This index requires destructive changes that cannot be reversed"
+                />
+              }
+              color="warning"
+              iconType="alert"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail"
+                  defaultMessage="Back up the index before continuing. To proceed with the reindex, accept each change."
+                />
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
+                  defaultMessage="Accept changes"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer />
+            {warnings.map((warning, index) => {
+              const WarningCheckbox = warningToComponentMap[warning.warningType];
+              return (
+                <WarningCheckbox
+                  key={idForWarning(index)}
+                  isChecked={checkedIds[idForWarning(index)]}
+                  onChange={onChange}
+                  docLinks={links}
+                  id={idForWarning(index)}
+                  meta={warning.meta}
+                />
+              );
+            })}
+          </>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty iconType="arrowLeft" onClick={hideWarningsStep} flush="left">
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelButtonLabel"
-                defaultMessage="Cancel"
+                defaultMessage="Back"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill color="danger" onClick={advanceNextStep} disabled={blockAdvance}>
+            <EuiButton fill color="primary" onClick={continueReindex} disabled={blockAdvance}>
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.continueButtonLabel"
-                defaultMessage="Continue with reindex"
+                defaultMessage="Continue reindexing"
               />
             </EuiButton>
           </EuiFlexItem>

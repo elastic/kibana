@@ -6,3 +6,7 @@
  */
 
 export { SnapshotTable } from './snapshot_table';
+export { RepositoryError } from './repository_error';
+export { RepositoryEmptyPrompt } from './repository_empty_prompt';
+export { SnapshotEmptyPrompt } from './snapshot_empty_prompt';
+export { SnapshotSearchBar } from './snapshot_search_bar';

@@ -113,7 +113,7 @@ export const configSchema = schema.object({
         schema.literal(UnderlyingLogClient.eventLog),
         schema.literal(UnderlyingLogClient.savedObjects),
       ],
-      { defaultValue: UnderlyingLogClient.savedObjects }
+      { defaultValue: UnderlyingLogClient.eventLog }
     ),
   }),
 

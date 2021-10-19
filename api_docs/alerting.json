@@ -3403,6 +3403,19 @@
             ],
             "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertInstanceSummary.executionDuration",
+            "type": "Object",
+            "tags": [],
+            "label": "executionDuration",
+            "description": [],
+            "signature": [
+              "{ average: number; values: number[]; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
