@@ -185,7 +185,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(false);
     });
-    test('it shows the analyze event button when the event is from an enpoint', () => {
+    test('it shows the analyze event button when the event is from an endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },

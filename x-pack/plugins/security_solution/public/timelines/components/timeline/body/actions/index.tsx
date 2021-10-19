@@ -207,7 +207,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           <div>
             <EventsTdContent textAlign="center" width={36}>
               <EuiToolTip
-                data-test-subj="expand-event-tool-tip"
+                data-test-subj="view-in-analyzer-tool-tip"
                 content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
               >
                 <EuiButtonIcon
