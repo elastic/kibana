@@ -77,19 +77,19 @@ const testMap = [
   Path.resolve(REPO_ROOT, 'src/core/utils/default_app_categories.ts'),
 ];
 
-const testMap2 = [
-  Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'test')),
-  Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/test')),
-  Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'examples')),
-  Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/examples')),
-  // TODO: should should probably remove this link back to the source
-  Fs.realpathSync(
-    Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/plugins/task_manager/server/config.ts')
-  ),
-  Fs.realpathSync(
-    Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'src/core/utils/default_app_categories.ts')
-  ),
-];
+// const testMap2 = [
+//   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'test')),
+//   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/test')),
+//   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'examples')),
+//   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/examples')),
+//   // TODO: should should probably remove this link back to the source
+//   Fs.realpathSync(
+//     Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'x-pack/plugins/task_manager/server/config.ts')
+//   ),
+//   Fs.realpathSync(
+//     Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'src/core/utils/default_app_categories.ts')
+//   ),
+// ];
 
 // const testMap3 = [
 //   Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'test'),
@@ -104,11 +104,11 @@ const testMap2 = [
 // testMap2.concat(testMap3);
 // testMap.concat(testMap2);
 
-const finalTestMap = testMap.concat(testMap2);
+// const finalTestMap = testMap.concat(testMap2);
+const finalTestMap = testMap;
 
 console.log('TEST PATHS: ');
 console.log(finalTestMap);
-throw new Error('FAIL CI');
 
 // modifies all future calls to require() to automatically
 // compile the required source with babel
