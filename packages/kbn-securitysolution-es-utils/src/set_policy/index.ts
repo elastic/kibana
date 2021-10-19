@@ -13,9 +13,12 @@ export const setPolicy = async (
   body: Record<string, unknown>
 ): Promise<unknown> => {
   return (
-    await esClient.ilm.putLifecycle({
-      policy,
-      body,
-    })
+    await esClient.ilm.putLifecycle(
+      {
+        policy,
+        body,
+      },
+      { meta: true }
+    )
   ).body;
 };

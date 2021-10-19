@@ -12,5 +12,5 @@ export const deletePolicy = async (
   esClient: ElasticsearchClient,
   policy: string
 ): Promise<unknown> => {
-  return (await esClient.ilm.deleteLifecycle({ policy })).body;
+  return (await esClient.ilm.deleteLifecycle({ policy }, { meta: true })).body;
 };
