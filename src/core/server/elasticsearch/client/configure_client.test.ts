@@ -11,7 +11,6 @@ import { Readable } from 'stream';
 
 import { errors } from '@elastic/elasticsearch';
 import type {
-  Client,
   TransportRequestOptions,
   TransportRequestParams,
   DiagnosticResult,
@@ -71,14 +70,6 @@ const createApiResponse = <T>({
   };
 };
 
-function getProductCheckValue(client: Client) {
-  const tSymbol = Object.getOwnPropertySymbols(client.transport || client).filter(
-    (symbol) => symbol.description === 'product check'
-  )[1];
-  // @ts-expect-error `tSymbol` is missing in the index signature of Transport
-  return (client.transport || client)[tSymbol];
-}
-
 describe('configureClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let config: ElasticsearchClientConfig;
@@ -127,24 +118,6 @@ describe('configureClient', () => {
 
     expect(client.diagnostic.on).toHaveBeenCalledTimes(1);
     expect(client.diagnostic.on).toHaveBeenCalledWith('response', expect.any(Function));
-  });
-
-  describe('Product check', () => {
-    it('performs the product check for the unscoped client', () => {
-      const client = configureClient(config, { logger, type: 'test', scoped: false });
-      expect(getProductCheckValue(client)).toBeFalsy();
-    });
-
-    it('should skip the product check for the scoped client', () => {
-      const client = configureClient(config, { logger, type: 'test', scoped: true });
-      expect(getProductCheckValue(client)).toBe(2);
-    });
-
-    it('should skip the product check for the children of the scoped client', () => {
-      const client = configureClient(config, { logger, type: 'test', scoped: true });
-      const asScoped = client.child({ headers: { 'x-custom-header': 'Custom value' } });
-      expect(getProductCheckValue(asScoped)).toBe(2);
-    });
   });
 
   describe('Client logging', () => {
