@@ -17,7 +17,7 @@ interface Props {
 
 export function Uploader({ onUpload }: Props) {
   const fileReader = useRef<null | FileReader>(null);
-  const [error, setError] = useState<string | null>('');
+  const [error, setError] = useState<string | null>(null);
   const filePickerRef = useRef<EuiFilePicker>(null);
 
   const handleFileRead = (fileName: string) => {
