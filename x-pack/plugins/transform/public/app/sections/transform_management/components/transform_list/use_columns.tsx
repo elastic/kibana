@@ -146,6 +146,7 @@ export const useColumns = (
       scope: 'row',
     },
     {
+      id: 'alertRule',
       name: (
         <EuiScreenReaderOnly>
           <p>
