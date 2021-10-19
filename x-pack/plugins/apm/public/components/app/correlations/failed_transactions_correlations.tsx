@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiBetaBadge,
   EuiBadge,
+  EuiText,
   EuiToolTip,
   EuiSwitch,
   EuiIconTip,
@@ -26,6 +27,8 @@ import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_tabl
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   enableInspectEsQueries,
   useUiTracker,
@@ -37,10 +40,13 @@ import {
   APM_SEARCH_STRATEGIES,
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../common/search_strategies/constants';
+import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSearchStrategy } from '../../../hooks/use_search_strategy';
+import { useTheme } from '../../../hooks/use_theme';
 
 import { ImpactBar } from '../../shared/ImpactBar';
 import { push } from '../../shared/Links/url_helpers';
@@ -58,10 +64,8 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
-import { useTheme } from '../../../hooks/use_theme';
+import { useTransactionColors } from './use_transaction_colors';
 import { CorrelationsContextPopover } from './context_popover';
-import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
 import { OnAddFilter } from './context_popover/top_values';
 
 export function FailedTransactionsCorrelations({
@@ -69,6 +73,9 @@ export function FailedTransactionsCorrelations({
 }: {
   onFilter: () => void;
 }) {
+  const euiTheme = useTheme();
+  const transactionColors = useTransactionColors();
+
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -96,18 +103,11 @@ export function FailedTransactionsCorrelations({
     progress.isRunning
   );
 
-  const [selectedSignificantTerm, setSelectedSignificantTerm] =
-    useState<FailedTransactionsCorrelation | null>(null);
-
-  const selectedTerm =
-    selectedSignificantTerm ?? response.failedTransactionsCorrelations?.[0];
-
   const history = useHistory();
   const [showStats, setShowStats] = useLocalStorage(
     'apmFailedTransactionsShowAdvancedStats',
     false
   );
-  const euiTheme = useTheme();
 
   const toggleShowStats = useCallback(() => {
     setShowStats(!showStats);
@@ -410,6 +410,30 @@ export function FailedTransactionsCorrelations({
     [response.failedTransactionsCorrelations, sortField, sortDirection]
   );
 
+  const [pinnedSignificantTerm, setPinnedSignificantTerm] =
+    useState<FailedTransactionsCorrelation | null>(null);
+  const [selectedSignificantTerm, setSelectedSignificantTerm] =
+    useState<FailedTransactionsCorrelation | null>(null);
+
+  const selectedTerm = useMemo(() => {
+    if (!correlationTerms) {
+      return;
+    } else if (selectedSignificantTerm) {
+      return correlationTerms?.find(
+        (h) =>
+          h.fieldName === selectedSignificantTerm.fieldName &&
+          h.fieldValue === selectedSignificantTerm.fieldValue
+      );
+    } else if (pinnedSignificantTerm) {
+      return correlationTerms.find(
+        (h) =>
+          h.fieldName === pinnedSignificantTerm.fieldName &&
+          h.fieldValue === pinnedSignificantTerm.fieldValue
+      );
+    }
+    return correlationTerms[0];
+  }, [correlationTerms, pinnedSignificantTerm, selectedSignificantTerm]);
+
   const showCorrelationsTable =
     progress.isRunning || correlationTerms.length > 0;
 
@@ -497,6 +521,41 @@ export function FailedTransactionsCorrelations({
         </EuiFlexItem>
       </EuiFlexItem>
 
+      {selectedTerm && (
+        <EuiText color="subdued" size="xs">
+          <FormattedMessage
+            id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartDescription"
+            defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {br}{allTransactions}, {allFailedTransactions} and {focusTransaction}."
+            values={{
+              br: <br />,
+              allTransactions: (
+                <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
+                  <FormattedMessage
+                    id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllTransactions"
+                    defaultMessage="all transactions"
+                  />
+                </span>
+              ),
+              allFailedTransactions: (
+                <span
+                  style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}
+                >
+                  <FormattedMessage
+                    id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllFailedTransactions"
+                    defaultMessage="all failed transactions"
+                  />
+                </span>
+              ),
+              focusTransaction: (
+                <span style={{ color: transactionColors.FOCUS_TRANSACTION }}>
+                  {selectedTerm?.fieldName}:{selectedTerm?.fieldValue}
+                </span>
+              ),
+            }}
+          />
+        </EuiText>
+      )}
+
       <EuiSpacer size="s" />
 
       <TransactionDistributionChart
@@ -504,6 +563,11 @@ export function FailedTransactionsCorrelations({
         markerValue={response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}
+        palette={[
+          transactionColors.ALL_TRANSACTIONS,
+          transactionColors.ALL_FAILED_TRANSACTIONS,
+          transactionColors.FOCUS_TRANSACTION,
+        ]}
         status={status}
       />
 
@@ -581,6 +645,7 @@ export function FailedTransactionsCorrelations({
             status={
               progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS
             }
+            setPinnedSignificantTerm={setPinnedSignificantTerm}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             selectedTerm={selectedTerm}
             onTableChange={onTableChange}

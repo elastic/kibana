@@ -6844,7 +6844,6 @@
     "xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel": "查看样例文档",
     "xpack.apm.transactionBreakdown.chartTitle": "跨度类型花费的时间",
     "xpack.apm.transactionDetails.clearSelectionAriaLabel": "清除所选内容",
-    "xpack.apm.transactionDetails.distribution.errorTitle": "获取分布时出错",
     "xpack.apm.transactionDetails.distribution.panelTitle": "延迟分布",
     "xpack.apm.transactionDetails.emptySelectionText": "单击并拖动以选择范围",
     "xpack.apm.transactionDetails.errorCount": "{errorCount, number} 个 {errorCount, plural, other {错误}}",

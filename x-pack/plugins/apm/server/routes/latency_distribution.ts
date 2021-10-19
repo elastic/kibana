@@ -14,13 +14,19 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
 const latencyOverallDistributionRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/latency/overall_distribution',
+  endpoint: 'POST /internal/apm/latency/overall_distribution',
   params: t.type({
-    query: t.intersection([
+    body: t.intersection([
       t.partial({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
+        termFilters: t.array(
+          t.type({
+            fieldName: t.string,
+            fieldValue: t.union([t.string, toNumberRt]),
+          })
+        ),
       }),
       environmentRt,
       kueryRt,
@@ -43,7 +49,8 @@ const latencyOverallDistributionRoute = createApmServerRoute({
       start,
       end,
       percentileThreshold,
-    } = resources.params.query;
+      termFilters,
+    } = resources.params.body;
 
     return getOverallLatencyDistribution({
       environment,
@@ -54,6 +61,7 @@ const latencyOverallDistributionRoute = createApmServerRoute({
       start,
       end,
       percentileThreshold,
+      termFilters,
       setup,
     });
   },

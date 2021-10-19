@@ -12,17 +12,17 @@ import { registry } from '../../common/registry';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
 
-  const endpoint = 'GET /internal/apm/latency/overall_distribution';
+  const endpoint = 'POST /internal/apm/latency/overall_distribution';
 
   // This matches the parameters used for the other tab's search strategy approach in `../correlations/*`.
   const getOptions = () => ({
     params: {
-      query: {
+      body: {
         environment: 'ENVIRONMENT_ALL',
         start: '2020',
         end: '2021',
         kuery: '',
-        percentileThreshold: '95',
+        percentileThreshold: 95,
       },
     },
   });

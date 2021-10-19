@@ -101,10 +101,7 @@ export const fetchFailedTransactionsCorrelationPValues = async (
       esClient,
       params,
       histogramRangeSteps,
-      [
-        { fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure },
-        { fieldName, fieldValue: bucket.key },
-      ]
+      [{ fieldName, fieldValue: bucket.key }]
     );
 
     result.push({
