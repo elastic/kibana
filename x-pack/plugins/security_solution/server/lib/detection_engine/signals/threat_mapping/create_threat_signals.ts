@@ -11,7 +11,7 @@ import { getThreatList, getThreatListCount } from './get_threat_list';
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
-import { combineConcurrentResults } from './utils';
+import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
@@ -46,6 +46,9 @@ export const createThreatSignals = async ({
   const params = ruleSO.attributes.params;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
   const perPage = concurrentSearches * itemsPerSearch;
+  const verifyExecutionCanProceed = buildExecutionIntervalValidator(
+    ruleSO.attributes.schedule.interval
+  );
 
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
@@ -99,6 +102,7 @@ export const createThreatSignals = async ({
   });
 
   while (threatList.hits.hits.length !== 0) {
+    verifyExecutionCanProceed();
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
     logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
