@@ -69,6 +69,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
         )
       ) {
         addDeprecation({
+          configPath: 'xpack.actions.customHostSettings.ssl.rejectUnauthorized',
           message:
             `"xpack.actions.customHostSettings[<index>].ssl.rejectUnauthorized" is deprecated.` +
             `Use "xpack.actions.customHostSettings[<index>].ssl.verificationMode" instead, ` +
@@ -96,6 +97,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       const actions = get(settings, fromPath);
       if (actions?.hasOwnProperty('rejectUnauthorized')) {
         addDeprecation({
+          configPath: `${fromPath}.rejectUnauthorized`,
           message:
             `"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.verificationMode" instead, ` +
             `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
@@ -122,6 +124,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       const actions = get(settings, fromPath);
       if (actions?.hasOwnProperty('proxyRejectUnauthorizedCertificates')) {
         addDeprecation({
+          configPath: `${fromPath}.proxyRejectUnauthorizedCertificates`,
           message:
             `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.proxyVerificationMode" instead, ` +
             `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
@@ -148,6 +151,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       const actions = get(settings, fromPath);
       if (actions?.enabled === false || actions?.enabled === true) {
         addDeprecation({
+          configPath: 'xpack.actions.enabled',
           message: `"xpack.actions.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
             manualSteps: [`Remove "xpack.actions.enabled" from your kibana configs.`],

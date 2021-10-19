@@ -28,6 +28,7 @@ export function createConfig$(context: PluginInitializerContext) {
 const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation) => {
   if ('enabled' in (config?.xpack?.spaces || {})) {
     addDeprecation({
+      configPath: 'xpack.spaces.enabled',
       title: i18n.translate('xpack.spaces.deprecations.enabledTitle', {
         defaultMessage: 'Setting "xpack.spaces.enabled" is deprecated',
       }),
@@ -35,6 +36,7 @@ const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation
         defaultMessage:
           'This setting will be removed in 8.0 and the Spaces plugin will always be enabled.',
       }),
+      level: 'critical',
       correctiveActions: {
         manualSteps: [
           i18n.translate('xpack.spaces.deprecations.enabled.manualStepOneMessage', {

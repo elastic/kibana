@@ -24,7 +24,6 @@ describe('Test Discover Context State', () => {
     history.push('/');
     state = getState({
       defaultSize: 4,
-      timeFieldName: 'time',
       history,
       uiSettings: {
         get: <T>(key: string) =>
@@ -44,12 +43,6 @@ describe('Test Discover Context State', () => {
         ],
         "filters": Array [],
         "predecessorCount": 4,
-        "sort": Array [
-          Array [
-            "time",
-            "desc",
-          ],
-        ],
         "successorCount": 4,
       }
     `);
@@ -62,41 +55,29 @@ describe('Test Discover Context State', () => {
     state.setAppState({ predecessorCount: 10 });
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(_source),filters:!(),predecessorCount:10,sort:!(!(time,desc)),successorCount:4)"`
+      `"/#?_a=(columns:!(_source),filters:!(),predecessorCount:10,successorCount:4)"`
     );
   });
   test('getState -> url to appState syncing', async () => {
-    history.push(
-      '/#?_a=(columns:!(_source),predecessorCount:1,sort:!(time,desc),successorCount:1)'
-    );
+    history.push('/#?_a=(columns:!(_source),predecessorCount:1,successorCount:1)');
     expect(state.appState.getState()).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           "_source",
         ],
         "predecessorCount": 1,
-        "sort": Array [
-          "time",
-          "desc",
-        ],
         "successorCount": 1,
       }
     `);
   });
   test('getState -> url to appState syncing with return to a url without state', async () => {
-    history.push(
-      '/#?_a=(columns:!(_source),predecessorCount:1,sort:!(time,desc),successorCount:1)'
-    );
+    history.push('/#?_a=(columns:!(_source),predecessorCount:1,successorCount:1)');
     expect(state.appState.getState()).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           "_source",
         ],
         "predecessorCount": 1,
-        "sort": Array [
-          "time",
-          "desc",
-        ],
         "successorCount": 1,
       }
     `);
@@ -107,10 +88,6 @@ describe('Test Discover Context State', () => {
           "_source",
         ],
         "predecessorCount": 1,
-        "sort": Array [
-          "time",
-          "desc",
-        ],
         "successorCount": 1,
       }
     `);
@@ -148,10 +125,9 @@ describe('Test Discover Context State', () => {
             "value": [Function],
           },
           "query": Object {
-            "match": Object {
+            "match_phrase": Object {
               "extension": Object {
                 "query": "jpg",
-                "type": "phrase",
               },
             },
           },
@@ -173,10 +149,9 @@ describe('Test Discover Context State', () => {
             "value": [Function],
           },
           "query": Object {
-            "match": Object {
+            "match_phrase": Object {
               "extension": Object {
                 "query": "png",
-                "type": "phrase",
               },
             },
           },
@@ -185,7 +160,7 @@ describe('Test Discover Context State', () => {
     `);
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!f,params:(query:jpg),type:phrase),query:(match:(extension:(query:jpg,type:phrase))))))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!t,params:(query:png),type:phrase),query:(match:(extension:(query:png,type:phrase))))),predecessorCount:4,sort:!(!(time,desc)),successorCount:4)"`
+      `"/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!f,params:(query:jpg),type:phrase),query:(match_phrase:(extension:(query:jpg))))))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!t,params:(query:png),type:phrase),query:(match_phrase:(extension:(query:png))))),predecessorCount:4,successorCount:4)"`
     );
   });
 });

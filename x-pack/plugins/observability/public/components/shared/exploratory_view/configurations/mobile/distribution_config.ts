@@ -6,7 +6,13 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
+import {
+  FieldLabels,
+  LABEL_FIELDS_FILTER,
+  RECORDS_FIELD,
+  REPORT_METRIC_FIELD,
+  ReportTypes,
+} from '../constants';
 import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
@@ -33,7 +39,7 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
       },
     ],
     hasOperationType: false,
-    filterFields: Object.keys(MobileFields),
+    filterFields: [...Object.keys(MobileFields), LABEL_FIELDS_FILTER],
     breakdownFields: Object.keys(MobileFields),
     baseFilters: [
       ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),

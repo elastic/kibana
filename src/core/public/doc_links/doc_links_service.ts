@@ -25,12 +25,15 @@ export class DocLinksService {
     const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
     const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
     const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
+    const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
+    const STACK_GETTING_STARTED = `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-get-started/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
         settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
+        elasticStackGetStarted: `${STACK_GETTING_STARTED}get-started-elastic-stack.html`,
         apm: {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
@@ -156,6 +159,7 @@ export class DocLinksService {
         upgradeAssistant: {
           overview: `${KIBANA_DOCS}upgrade-assistant.html`,
           batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
+          remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
         },
         rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
         elasticsearch: {
@@ -228,13 +232,17 @@ export class DocLinksService {
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
         },
         siem: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
-          gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
-          privileges: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/sec-requirements.html`,
-          ml: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/machine-learning.html`,
-          ruleChangeLog: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/prebuilt-rules-changelog.html`,
-          detectionsReq: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/detections-permissions-section.html`,
-          networkMap: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/conf-map-ui.html`,
+          guide: `${SECURITY_SOLUTION_DOCS}index.html`,
+          gettingStarted: `${SECURITY_SOLUTION_DOCS}index.html`,
+          privileges: `${SECURITY_SOLUTION_DOCS}sec-requirements.html`,
+          ml: `${SECURITY_SOLUTION_DOCS}machine-learning.html`,
+          ruleChangeLog: `${SECURITY_SOLUTION_DOCS}prebuilt-rules-changelog.html`,
+          detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
+          networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
+          troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
+        },
+        securitySolution: {
+          trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
         },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -326,6 +334,7 @@ export class DocLinksService {
           preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
           preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}index-action-type.html#preconfigured-connector-alert-history`,
           serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
+          serviceNowSIRAction: `${KIBANA_DOCS}servicenow-sir-action-type.html`,
           setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
           slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
           teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
@@ -475,12 +484,14 @@ export class DocLinksService {
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
-          elasticAgent: `${FLEET_DOCS}elastic-agent-installation-configuration.html`,
+          elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
           datastreams: `${FLEET_DOCS}data-streams.html`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
+          installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
+          apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -509,6 +520,7 @@ export interface DocLinksStart {
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
     readonly settings: string;
+    readonly elasticStackGetStarted: string;
     readonly apm: {
       readonly kibanaSettings: string;
       readonly supportedServiceMaps: string;
@@ -635,6 +647,7 @@ export interface DocLinksStart {
     readonly upgradeAssistant: {
       readonly overview: string;
       readonly batchReindex: string;
+      readonly remoteReindex: string;
     };
     readonly rollupJobs: string;
     readonly elasticsearch: Record<string, string>;
@@ -646,6 +659,10 @@ export interface DocLinksStart {
       readonly ruleChangeLog: string;
       readonly detectionsReq: string;
       readonly networkMap: string;
+      readonly troubleshootGaps: string;
+    };
+    readonly securitySolution: {
+      readonly trustedApps: string;
     };
     readonly query: {
       readonly eql: string;
@@ -735,9 +752,11 @@ export interface DocLinksStart {
       elasticAgent: string;
       datastreams: string;
       datastreamsNamingScheme: string;
+      installElasticAgent: string;
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
       learnMoreBlog: string;
+      apiKeysLearnMore: string;
     }>;
     readonly ecs: {
       readonly guide: string;

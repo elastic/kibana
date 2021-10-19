@@ -6,13 +6,32 @@
  * Side Public License, v 1.
  */
 
+export type ApplicationMetricFields = Partial<{
+  'system.process.memory.size': number;
+  'system.memory.actual.free': number;
+  'system.memory.total': number;
+  'system.cpu.total.norm.pct': number;
+  'system.process.memory.rss.bytes': number;
+  'system.process.cpu.total.norm.pct': number;
+}>;
+
+export interface Exception {
+  message: string;
+}
+
 export type Fields = Partial<{
   '@timestamp': number;
   'agent.name': string;
   'agent.version': string;
+  'container.id': string;
   'ecs.version': string;
   'event.outcome': string;
   'event.ingested': number;
+  'error.id': string;
+  'error.exception': Exception[];
+  'error.grouping_name': string;
+  'error.grouping_key': string;
+  'host.name': string;
   'metricset.name': string;
   'observer.version': string;
   'observer.version_major': number;
@@ -42,7 +61,10 @@ export type Fields = Partial<{
   'span.destination.service.type': string;
   'span.destination.service.response_time.sum.us': number;
   'span.destination.service.response_time.count': number;
-}>;
+  'span.self_time.count': number;
+  'span.self_time.sum.us': number;
+}> &
+  ApplicationMetricFields;
 
 export class Entity {
   constructor(public readonly fields: Fields) {

@@ -382,11 +382,13 @@ export class VegaBaseView {
         timeFieldName: '*',
         filters: [
           {
-            range: {
-              '*': {
-                mode,
-                gte: from,
-                lte: to,
+            query: {
+              range: {
+                '*': {
+                  mode,
+                  gte: from,
+                  lte: to,
+                },
               },
             },
           },

@@ -156,6 +156,78 @@ const DEV_PATTERNS = [
   'x-pack/plugins/*/server/scripts/**/*',
 ];
 
+/** Restricted imports with suggested alternatives */
+const RESTRICTED_IMPORTS = [
+  {
+    name: 'lodash',
+    importNames: ['set', 'setWith'],
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash.set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash.setwith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/setWith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp',
+    importNames: ['set', 'setWith', 'assoc', 'assocPath'],
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/setWith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/assoc',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/assocPath',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash',
+    importNames: ['template'],
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash.template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/fp',
+    importNames: ['template'],
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/fp/template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'react-use',
+    message: 'Please use react-use/lib/{method} instead.',
+  },
+];
+
 module.exports = {
   root: true,
 
@@ -671,81 +743,7 @@ module.exports = {
         'no-restricted-imports': [
           2,
           {
-            paths: [
-              {
-                name: 'lodash',
-                importNames: ['set', 'setWith'],
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.setwith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp',
-                importNames: ['set', 'setWith', 'assoc', 'assocPath'],
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/assoc',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/assocPath',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash',
-                importNames: ['template'],
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash.template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/fp',
-                importNames: ['template'],
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/fp/template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'react-use',
-                message: 'Please use react-use/lib/{method} instead.',
-              },
-            ],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
         'no-restricted-modules': [
@@ -838,6 +836,23 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ['**/common/**/*.{js,mjs,ts,tsx}', '**/public/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          2,
+          {
+            paths: [
+              ...RESTRICTED_IMPORTS,
+              {
+                name: 'semver',
+                message: 'Please use "semver/*/{function}" instead',
+              },
+            ],
+          },
+        ],
+      },
+    },
 
     /**
      * APM and Observability overrides
@@ -902,7 +917,12 @@ module.exports = {
     },
 
     /**
-     * Security Solution overrides
+     * Security Solution overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only
@@ -923,6 +943,22 @@ module.exports = {
             patterns: ['**/server/*'],
           },
         ],
+      },
+    },
+    {
+      // typescript only for front and back end, but excludes the test files.
+      // We use this section to add rules in which we do not want to apply to test files.
+      // This should be a very small set as most linter rules are useful for tests as well.
+      files: [
+        'x-pack/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-non-null-assertion': 'error',
       },
     },
     {
@@ -1043,7 +1079,12 @@ module.exports = {
     },
 
     /**
-     * Lists overrides
+     * Lists overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only
@@ -1218,8 +1259,14 @@ module.exports = {
         ],
       },
     },
+
     /**
-     * Metrics entities overrides
+     * Metrics entities overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only
@@ -1553,8 +1600,8 @@ module.exports = {
       plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        // 'arrow-body-style': ['error', 'as-needed'],
-        // 'prefer-arrow-callback': 'error',
+        'arrow-body-style': ['error', 'as-needed'],
+        'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',

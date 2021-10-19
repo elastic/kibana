@@ -2494,7 +2494,7 @@
             "label": "types",
             "description": [],
             "signature": [
-              "(string[] & (\"date\" | \"filter\" | ",
+              "(string[] & (\"filter\" | \"date\" | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -2502,7 +2502,7 @@
                 "section": "def-common.KnownTypeToString",
                 "text": "KnownTypeToString"
               },
-              "<T>)[]) | (string[] & (\"date\" | \"filter\" | ArrayTypeToArgumentString<T>)[]) | (string[] & (\"date\" | \"filter\" | UnresolvedTypeToArgumentString<T>)[]) | (string[] & (\"date\" | \"filter\" | UnresolvedArrayTypeToArgumentString<T>)[]) | undefined"
+              "<T>)[]) | (string[] & (\"filter\" | \"date\" | ArrayTypeToArgumentString<T>)[]) | (string[] & (\"filter\" | \"date\" | UnresolvedTypeToArgumentString<T>)[]) | (string[] & (\"filter\" | \"date\" | UnresolvedArrayTypeToArgumentString<T>)[]) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
             "deprecated": false
@@ -7683,7 +7683,7 @@
               "\nName of type of value this function outputs."
             ],
             "signature": [
-              "\"date\" | \"filter\" | ",
+              "\"filter\" | \"date\" | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -10485,57 +10485,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressions",
-        "id": "def-public.SerializedFieldFormat",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedFieldFormat",
-        "description": [
-          "\nJSON representation of a field formatter configuration.\nIs used to carry information about how to format data in\na data table as part of the column definition."
-        ],
-        "signature": [
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.SerializedFieldFormat",
-            "text": "SerializedFieldFormat"
-          },
-          "<TParams>"
-        ],
-        "path": "src/plugins/expressions/common/types/common.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.SerializedFieldFormat.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/expressions/common/types/common.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.SerializedFieldFormat.params",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "TParams | undefined"
-            ],
-            "path": "src/plugins/expressions/common/types/common.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -10700,7 +10649,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -11566,7 +11515,7 @@
           "\nThis can convert a type into a known Expression string representation of\nthat type. For example, `TypeToString<Datatable>` will resolve to `'datatable'`.\nThis allows Expression Functions to continue to specify their type in a\nsimple string format."
         ],
         "signature": [
-          "\"date\" | \"filter\" | ",
+          "\"filter\" | \"date\" | ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -11590,7 +11539,7 @@
           "\nTypes used in Expressions that don't map to a primitive cleanly:\n\n`date` is typed as a number or string, and represents a date"
         ],
         "signature": [
-          "\"date\" | \"filter\""
+          "\"filter\" | \"date\""
         ],
         "path": "src/plugins/expressions/common/types/common.ts",
         "deprecated": false,
@@ -14178,7 +14127,7 @@
             "label": "types",
             "description": [],
             "signature": [
-              "(string[] & (\"date\" | \"filter\" | ",
+              "(string[] & (\"filter\" | \"date\" | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -14186,7 +14135,7 @@
                 "section": "def-common.KnownTypeToString",
                 "text": "KnownTypeToString"
               },
-              "<T>)[]) | (string[] & (\"date\" | \"filter\" | ArrayTypeToArgumentString<T>)[]) | (string[] & (\"date\" | \"filter\" | UnresolvedTypeToArgumentString<T>)[]) | (string[] & (\"date\" | \"filter\" | UnresolvedArrayTypeToArgumentString<T>)[]) | undefined"
+              "<T>)[]) | (string[] & (\"filter\" | \"date\" | ArrayTypeToArgumentString<T>)[]) | (string[] & (\"filter\" | \"date\" | UnresolvedTypeToArgumentString<T>)[]) | (string[] & (\"filter\" | \"date\" | UnresolvedArrayTypeToArgumentString<T>)[]) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
             "deprecated": false
@@ -17738,7 +17687,7 @@
               "\nName of type of value this function outputs."
             ],
             "signature": [
-              "\"date\" | \"filter\" | ",
+              "\"filter\" | \"date\" | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -19505,57 +19454,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressions",
-        "id": "def-server.SerializedFieldFormat",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedFieldFormat",
-        "description": [
-          "\nJSON representation of a field formatter configuration.\nIs used to carry information about how to format data in\na data table as part of the column definition."
-        ],
-        "signature": [
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.SerializedFieldFormat",
-            "text": "SerializedFieldFormat"
-          },
-          "<TParams>"
-        ],
-        "path": "src/plugins/expressions/common/types/common.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressions",
-            "id": "def-server.SerializedFieldFormat.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/expressions/common/types/common.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-server.SerializedFieldFormat.params",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "TParams | undefined"
-            ],
-            "path": "src/plugins/expressions/common/types/common.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -19720,7 +19618,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -20484,7 +20382,7 @@
           "\nThis can convert a type into a known Expression string representation of\nthat type. For example, `TypeToString<Datatable>` will resolve to `'datatable'`.\nThis allows Expression Functions to continue to specify their type in a\nsimple string format."
         ],
         "signature": [
-          "\"date\" | \"filter\" | ",
+          "\"filter\" | \"date\" | ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -20508,7 +20406,7 @@
           "\nTypes used in Expressions that don't map to a primitive cleanly:\n\n`date` is typed as a number or string, and represents a date"
         ],
         "signature": [
-          "\"date\" | \"filter\""
+          "\"filter\" | \"date\""
         ],
         "path": "src/plugins/expressions/common/types/common.ts",
         "deprecated": false,
@@ -23053,7 +22951,7 @@
             "label": "types",
             "description": [],
             "signature": [
-              "(string[] & (\"date\" | \"filter\" | ",
+              "(string[] & (\"filter\" | \"date\" | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -23061,7 +22959,7 @@
                 "section": "def-common.KnownTypeToString",
                 "text": "KnownTypeToString"
               },
-              "<T>)[]) | (string[] & (\"date\" | \"filter\" | ArrayTypeToArgumentString<T>)[]) | (string[] & (\"date\" | \"filter\" | UnresolvedTypeToArgumentString<T>)[]) | (string[] & (\"date\" | \"filter\" | UnresolvedArrayTypeToArgumentString<T>)[]) | undefined"
+              "<T>)[]) | (string[] & (\"filter\" | \"date\" | ArrayTypeToArgumentString<T>)[]) | (string[] & (\"filter\" | \"date\" | UnresolvedTypeToArgumentString<T>)[]) | (string[] & (\"filter\" | \"date\" | UnresolvedArrayTypeToArgumentString<T>)[]) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
             "deprecated": false
@@ -27545,7 +27443,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false
@@ -27606,13 +27504,21 @@
             ],
             "signature": [
               {
-                "pluginId": "expressions",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<Record<string, any>> | undefined"
+              "<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "> | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false
@@ -29673,7 +29579,7 @@
               "\nName of type of value this function outputs."
             ],
             "signature": [
-              "\"date\" | \"filter\" | ",
+              "\"filter\" | \"date\" | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -32777,57 +32683,6 @@
       },
       {
         "parentPluginId": "expressions",
-        "id": "def-common.SerializedFieldFormat",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedFieldFormat",
-        "description": [
-          "\nJSON representation of a field formatter configuration.\nIs used to carry information about how to format data in\na data table as part of the column definition."
-        ],
-        "signature": [
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.SerializedFieldFormat",
-            "text": "SerializedFieldFormat"
-          },
-          "<TParams>"
-        ],
-        "path": "src/plugins/expressions/common/types/common.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.SerializedFieldFormat.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/expressions/common/types/common.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.SerializedFieldFormat.params",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "TParams | undefined"
-            ],
-            "path": "src/plugins/expressions/common/types/common.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressions",
         "id": "def-common.UiSettingArguments",
         "type": "Interface",
         "tags": [],
@@ -33072,7 +32927,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -34708,7 +34563,7 @@
           "\nThis can convert a type into a known Expression string representation of\nthat type. For example, `TypeToString<Datatable>` will resolve to `'datatable'`.\nThis allows Expression Functions to continue to specify their type in a\nsimple string format."
         ],
         "signature": [
-          "\"date\" | \"filter\" | ",
+          "\"filter\" | \"date\" | ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -34746,7 +34601,7 @@
           "\nTypes used in Expressions that don't map to a primitive cleanly:\n\n`date` is typed as a number or string, and represents a date"
         ],
         "signature": [
-          "\"date\" | \"filter\""
+          "\"filter\" | \"date\""
         ],
         "path": "src/plugins/expressions/common/types/common.ts",
         "deprecated": false,

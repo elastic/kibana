@@ -34,6 +34,8 @@ const enabledActionTypes = [
   '.swimlane',
   '.server-log',
   '.servicenow',
+  '.servicenow-sir',
+  '.servicenow-itom',
   '.jira',
   '.resilient',
   '.slack',

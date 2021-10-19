@@ -184,6 +184,7 @@ export class ConfigService {
     if (validatedConfig?.enabled === undefined && isEnabled !== undefined) {
       const deprecationPath = pathToString(enabledPath);
       const deprecatedConfigDetails: DeprecatedConfigDetails = {
+        configPath: deprecationPath,
         title: `Setting "${deprecationPath}" is deprecated`,
         message: `Configuring "${deprecationPath}" is deprecated and will be removed in 8.0.0.`,
         correctiveActions: {

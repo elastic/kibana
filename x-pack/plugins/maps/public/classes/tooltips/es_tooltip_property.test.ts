@@ -125,8 +125,10 @@ describe('getESFilters', () => {
           index: 'indexPatternId',
           negate: true,
         },
-        exists: {
-          field: 'machine.os',
+        query: {
+          exists: {
+            field: 'machine.os',
+          },
         },
       },
     ]);
