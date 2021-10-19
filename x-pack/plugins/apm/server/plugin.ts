@@ -215,10 +215,12 @@ export class APMPlugin
         );
       })();
     });
+
     core.deprecations.registerDeprecations({
       getDeprecations: getDeprecations({
         cloudSetup: plugins.cloud,
         fleet: resourcePlugins.fleet,
+        branch: this.initContext.env.packageInfo.branch,
       }),
     });
 
