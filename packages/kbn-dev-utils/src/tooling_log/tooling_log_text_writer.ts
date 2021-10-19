@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { format } from 'util';
 
 import chalk from 'chalk';
 
+// TODO use the actual ansiEscapes module
+import { ansiEscapes } from './ansi';
+
 import { LogLevel, parseLogLevel, ParsedLogLevel } from './log_levels';
 import { Writer } from './writer';
 import { Message, MessageTypes } from './message';
-
 const { magentaBright, yellow, red, blue, green, dim } = chalk;
 const PREFIX_INDENT = ' '.repeat(6);
 const MSG_PREFIXES = {
@@ -84,6 +85,23 @@ export class ToolingLogTextWriter implements Writer {
         'ToolingLogTextWriter requires the `writeTo` option be set to a stream (like process.stdout)'
       );
     }
+    // this.patchStdout();
+  }
+
+  patchStdout() {
+    const origWrite = process.stdout.write;
+    Object.defineProperty(
+      process.stdout,
+      'write',
+      function (...args: [Uint8Array | string, BufferEncoding, (err?: Error) => void]): boolean {
+        // @ts-ignore
+        origWrite.call(process.stdout, ansiEscapes.eraseLine);
+        // @ts-ignore
+        origWrite.call(process.stdout, ansiEscapes.cursorLeft);
+        origWrite.apply(process.stdout, args);
+        return origWrite.call(process.stdout, 'status ' + Math.random());
+      }
+    );
   }
 
   write(msg: Message) {
