@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export const SEARCHABLE_FIELDS: Readonly<string[]> = [
-  `name`,
-  `description`,
-  'item_id',
-  `entries.value`,
-  `entries.entries.value`,
-];
+export * from './use_endpoint_privileges';
+export { getEndpointPrivilegesInitialState } from './utils';

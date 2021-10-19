@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export const SEARCHABLE_FIELDS: Readonly<string[]> = [
-  `name`,
-  `description`,
-  'item_id',
-  `entries.value`,
-  `entries.entries.value`,
-];
+import { getEndpointPrivilegesInitialStateMock } from '../mocks';
+
+export { getEndpointPrivilegesInitialState } from '../utils';
+
+export const useEndpointPrivileges = jest.fn(getEndpointPrivilegesInitialStateMock);
