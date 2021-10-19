@@ -322,10 +322,6 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
-              expect(resp.body.retry).to.eql(false);
-              expect(resp.body.message).to.be(
-                `error validating action params: undefined is not iterable (cannot read property Symbol(Symbol.iterator))`
-              );
             });
         });
 

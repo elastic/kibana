@@ -9,6 +9,7 @@ import { UserConfiguredActionConnector } from '../../../../types';
 import {
   ExecutorSubActionPushParamsITSM,
   ExecutorSubActionPushParamsSIR,
+  ExecutorSubActionAddEventParams,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../actions/server/builtin_action_types/servicenow/types';
 
@@ -25,6 +26,11 @@ export interface ServiceNowITSMActionParams {
 export interface ServiceNowSIRActionParams {
   subAction: string;
   subActionParams: ExecutorSubActionPushParamsSIR;
+}
+
+export interface ServiceNowITOMActionParams {
+  subAction: string;
+  subActionParams: ExecutorSubActionAddEventParams;
 }
 
 export interface ServiceNowConfig {

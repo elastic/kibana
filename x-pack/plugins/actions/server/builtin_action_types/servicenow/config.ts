@@ -6,6 +6,7 @@
  */
 
 import {
+  ENABLE_ITOM,
   ENABLE_NEW_SN_ITSM_CONNECTOR,
   ENABLE_NEW_SN_SIR_CONNECTOR,
 } from '../../constants/connectors';
@@ -16,6 +17,7 @@ export const serviceNowSIRTable = 'sn_si_incident';
 
 export const ServiceNowITSMActionTypeId = '.servicenow';
 export const ServiceNowSIRActionTypeId = '.servicenow-sir';
+export const ServiceNowITOMActionTypeId = '.servicenow-itom';
 
 export const snExternalServiceConfig: SNProductsConfig = {
   '.servicenow': {
@@ -32,6 +34,14 @@ export const snExternalServiceConfig: SNProductsConfig = {
     useImportAPI: ENABLE_NEW_SN_SIR_CONNECTOR,
     commentFieldKey: 'work_notes',
   },
+  '.servicenow-itom': {
+    importSetTable: 'x_elas2_inc_int_elastic_incident',
+    appScope: 'x_elas2_inc_int',
+    table: 'em_event',
+    useImportAPI: ENABLE_ITOM,
+    commentFieldKey: 'work_notes',
+  },
 };
 
 export const FIELD_PREFIX = 'u_';
+export const DEFAULT_ALERTS_GROUPING_KEY = '{{rule.id}}:{{alert.id}}';
