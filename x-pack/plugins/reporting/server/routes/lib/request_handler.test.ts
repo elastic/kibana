@@ -197,7 +197,6 @@ describe('Handle request to generate', () => {
         "output": Object {},
         "payload": Object {
           "browserTimezone": "UTC",
-          "indexPatternSavedObject": Object {},
           "isDeprecated": true,
           "layout": Object {
             "id": "preserve_layout",

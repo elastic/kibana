@@ -10,13 +10,6 @@ import { BaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
-export interface IndexPatternSavedObjectDeprecatedCSV {
-  title?: string;
-  timeFieldName?: string;
-  fields?: FieldSpec[];
-  fieldFormatMap?: Record<string, any>;
-}
-
 interface BaseParamsDeprecatedCSV {
   searchRequest: SearchRequestDeprecatedCSV;
   fields: string[];
@@ -29,10 +22,9 @@ export type JobParamsDeprecatedCSV = BaseParamsDeprecatedCSV &
     indexPatternId: string;
   };
 
-// CSV create job method converts indexPatternID to indexPatternSavedObject
 export type TaskPayloadDeprecatedCSV = BaseParamsDeprecatedCSV &
   BasePayload & {
-    indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV;
+    indexPatternId: string;
   };
 
 export interface SearchRequestDeprecatedCSV {

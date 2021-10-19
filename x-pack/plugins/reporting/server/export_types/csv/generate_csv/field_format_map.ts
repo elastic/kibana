@@ -6,22 +6,21 @@
  */
 
 import _ from 'lodash';
+import type { DataView, KBN_FIELD_TYPES } from 'src/plugins/data/common';
 import {
   FieldFormat,
   IFieldFormatsRegistry,
   FieldFormatConfig,
 } from 'src/plugins/field_formats/common';
-import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
-
 /**
  *  Create a map of FieldFormat instances for index pattern fields
  *
- *  @param {Object} indexPatternSavedObject
+ *  @param {DataView} dataView
  *  @param {FieldFormatsService} fieldFormats
  *  @return {Map} key: field name, value: FieldFormat instance
  */
 export function fieldFormatMapFactory(
-  indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV,
+  dataView: DataView | undefined,
   fieldFormatsRegistry: IFieldFormatsRegistry,
   timezone: string | undefined
 ) {
@@ -32,9 +31,9 @@ export function fieldFormatMapFactory(
   const serverDateParams = { timezone };
 
   // Add FieldFormat instances for fields with custom formatters
-  if (_.has(indexPatternSavedObject, 'fieldFormatMap')) {
-    Object.keys(indexPatternSavedObject.fieldFormatMap!).forEach((fieldName) => {
-      const formatConfig: FieldFormatConfig = indexPatternSavedObject.fieldFormatMap![fieldName];
+  if (dataView) {
+    Object.keys(dataView.fieldFormatMap).forEach((fieldName) => {
+      const formatConfig: FieldFormatConfig = dataView.fieldFormatMap[fieldName];
       const formatParams = {
         ...formatConfig.params,
         ...serverDateParams,
@@ -47,12 +46,11 @@ export function fieldFormatMapFactory(
   }
 
   // Add default FieldFormat instances for non-custom formatted fields
-  const indexFields = _.get(indexPatternSavedObject, 'fields', []);
-  indexFields.forEach((field: any) => {
+  dataView?.fields.forEach((field) => {
     if (!formatsMap.has(field.name)) {
       formatsMap.set(
         field.name,
-        fieldFormatsRegistry.getDefaultInstance(field.type, [], serverDateParams)
+        fieldFormatsRegistry.getDefaultInstance(field.type as KBN_FIELD_TYPES, [], serverDateParams)
       );
     }
   });

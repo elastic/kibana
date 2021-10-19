@@ -306,6 +306,16 @@ export class ReportingCore {
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
   }
 
+  public async getDataViewsService(request: KibanaRequest) {
+    const { savedObjects } = await this.getPluginStartDeps();
+    const savedObjectsClient = savedObjects.getScopedClient(request);
+    const { indexPatterns } = await this.getDataService();
+    const { asCurrentUser: esClient } = (await this.getEsClient()).asScoped(request);
+    const dataViews = await indexPatterns.dataViewsServiceFactory(savedObjectsClient, esClient);
+
+    return dataViews;
+  }
+
   public async getDataService() {
     const startDeps = await this.getPluginStartDeps();
     return startDeps.data;
