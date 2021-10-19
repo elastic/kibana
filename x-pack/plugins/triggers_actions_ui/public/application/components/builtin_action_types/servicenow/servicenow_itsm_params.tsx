@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
-import { ServiceNowITSMActionParams, Choice, Fields } from './types';
+import { ServiceNowITSMActionParams, Choice, Fields, ServiceNowActionConnector } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { useGetChoices } from './use_get_choices';
@@ -240,7 +240,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!isDeprecatedConnector && (
+      {!isDeprecatedConnector(actionConnector as unknown as ServiceNowActionConnector) && (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>

@@ -161,13 +161,13 @@ describe('ServiceNowSIR Fields', () => {
     ]);
   });
 
-  test('it shows the deprecated callout when the connector uses the old API', async () => {
+  test('it shows the deprecated callout when the connector uses the table API', async () => {
     const tableApiConnector = { ...connector, config: { usesTableApi: true } };
     render(<Fields fields={fields} onChange={onChange} connector={tableApiConnector} />);
     expect(screen.getByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
-  test('it does not show the deprecated callout when the connector does not uses the old API', async () => {
+  test('it does not show the deprecated callout when the connector does not uses the table API', async () => {
     render(<Fields fields={fields} onChange={onChange} connector={connector} />);
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });

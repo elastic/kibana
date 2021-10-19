@@ -350,7 +350,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
           id: usesTableApiConnector.id,
           connector: {
             name: usesTableApiConnector.name,
-            config: { ...usesTableApiConnector.config, isLegacy: false },
+            config: { ...usesTableApiConnector.config, usesTableApi: false },
             secrets: usesTableApiConnector.secrets,
           },
         })

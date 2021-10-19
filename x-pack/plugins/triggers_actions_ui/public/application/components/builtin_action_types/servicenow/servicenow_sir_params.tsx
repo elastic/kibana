@@ -24,7 +24,7 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
-import { ServiceNowSIRActionParams, Fields, Choice } from './types';
+import { ServiceNowSIRActionParams, Fields, Choice, ServiceNowActionConnector } from './types';
 import { choicesToEuiOptions, isDeprecatedConnector, DEFAULT_CORRELATION_ID } from './helpers';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
@@ -225,7 +225,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!isDeprecatedConnector && (
+      {!isDeprecatedConnector(actionConnector as unknown as ServiceNowActionConnector) && (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>

@@ -72,7 +72,7 @@ export const connectorsMock: ActionConnector[] = [
     isPreconfigured: false,
   },
   {
-    id: 'servicenow-uses-old-api',
+    id: 'servicenow-uses-table-api',
     actionTypeId: '.servicenow',
     name: 'My Connector',
     config: {

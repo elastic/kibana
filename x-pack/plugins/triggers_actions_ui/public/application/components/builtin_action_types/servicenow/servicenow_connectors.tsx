@@ -38,7 +38,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     } = useKibana().services;
     const { apiUrl } = action.config;
     const { username, password } = action.secrets;
-    const requireNewApplication = !isDeprecatedConnector(action);
+    const requiresNewApplication = !isDeprecatedConnector(action);
 
     const [showUpdateConnector, setShowUpdateConnector] = useState(false);
 
@@ -46,11 +46,12 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
       actionTypeId: action.actionTypeId,
     });
 
-    const [applicationRequired, setApplicationRequired] = useState<boolean>(false);
+    const [showApplicationRequiredCallout, setShowApplicationRequiredCallout] =
+      useState<boolean>(false);
     const [applicationInfoErrorMsg, setApplicationInfoErrorMsg] = useState<string | null>(null);
 
     const getApplicationInfo = useCallback(async () => {
-      setApplicationRequired(false);
+      setShowApplicationRequiredCallout(false);
       setApplicationInfoErrorMsg(null);
 
       try {
@@ -61,7 +62,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
 
         return res;
       } catch (e) {
-        setApplicationRequired(true);
+        setShowApplicationRequiredCallout(true);
         setApplicationInfoErrorMsg(e.message);
         // We need to throw here so the connector will be not be saved.
         throw e;
@@ -69,10 +70,10 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     }, [action, fetchAppInfo]);
 
     const beforeActionConnectorSave = useCallback(async () => {
-      if (requireNewApplication) {
+      if (requiresNewApplication) {
         await getApplicationInfo();
       }
-    }, [getApplicationInfo, requireNewApplication]);
+    }, [getApplicationInfo, requiresNewApplication]);
 
     useEffect(
       () => setCallbacks({ beforeActionConnectorSave }),
@@ -90,13 +91,13 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
           http,
           connector: {
             name: action.name,
-            config: { apiUrl, isLegacy: false },
+            config: { apiUrl, usesTableApi: false },
             secrets: { username, password },
           },
           id: action.id,
         });
 
-        editActionConfig('isLegacy', false);
+        editActionConfig('usesTableApi', false);
         setShowUpdateConnector(false);
 
         toasts.addSuccess({
@@ -138,8 +139,8 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
             onCancel={onModalCancel}
           />
         )}
-        {requireNewApplication && <InstallationCallout />}
-        {!requireNewApplication && <DeprecatedCallout onMigrate={onMigrateClick} />}
+        {requiresNewApplication && <InstallationCallout />}
+        {!requiresNewApplication && <DeprecatedCallout onMigrate={onMigrateClick} />}
         <Credentials
           action={action}
           errors={errors}
@@ -148,7 +149,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
           editActionSecrets={editActionSecrets}
           editActionConfig={editActionConfig}
         />
-        {applicationRequired && requireNewApplication && (
+        {showApplicationRequiredCallout && requiresNewApplication && (
           <ApplicationRequiredCallout message={applicationInfoErrorMsg} />
         )}
       </>
