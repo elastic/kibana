@@ -68,6 +68,7 @@ export function getSyntheticsDistributionConfig({
         label: MONITORS_DURATION_LABEL,
         id: MONITOR_DURATION_US,
         field: MONITOR_DURATION_US,
+        showPercentileAnnotations: true,
       },
       {
         label: LCP_LABEL,

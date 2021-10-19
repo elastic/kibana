@@ -45,6 +45,7 @@ export interface MetricOption {
   columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
   columnFilters?: ColumnFilter[];
   timeScale?: string;
+  showPercentileAnnotations?: boolean;
 }
 
 export interface SeriesConfig {
