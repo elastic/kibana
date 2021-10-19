@@ -86,7 +86,7 @@ const i18nTexts = {
   quickResolveErrorTitle: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveErrorTitle',
     {
-      defaultMessage: 'Error resolving deprecation',
+      defaultMessage: 'Error resolving issue',
     }
   ),
   manualFixTitle: i18n.translate(

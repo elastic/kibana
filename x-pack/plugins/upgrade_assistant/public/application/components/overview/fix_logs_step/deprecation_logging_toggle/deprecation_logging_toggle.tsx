@@ -48,10 +48,10 @@ const i18nTexts = {
     defaultMessage: 'Error',
   }),
   buttonLabel: i18n.translate('xpack.upgradeAssistant.overview.deprecationLogs.buttonLabel', {
-    defaultMessage: 'Enable deprecation log collecting',
+    defaultMessage: 'Enable deprecation log collection',
   }),
   loadingLogsLabel: i18n.translate('xpack.upgradeAssistant.overview.loadingLogsLabel', {
-    defaultMessage: 'Loading log collection state…',
+    defaultMessage: 'Loading deprecation log collection state…',
   }),
 };
 

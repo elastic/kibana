@@ -66,7 +66,7 @@ const i18nTexts = {
     'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningBody',
     {
       defaultMessage:
-        'Go to your logs directory to view the deprecation logs or enable log collecting to see them in Kibana.',
+        'Go to your logs directory to view the deprecation logs or enable deprecation log collection to see them in Kibana.',
     }
   ),
   deniedPrivilegeTitle: i18n.translate(

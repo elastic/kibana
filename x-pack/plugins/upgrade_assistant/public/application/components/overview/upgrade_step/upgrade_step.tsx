@@ -25,7 +25,7 @@ const i18nTexts = {
   }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage:
-      'Once you’ve resolved all critical issues and verified that your applications are ready, you can upgrade to 8.0. Be sure to back up your data again before upgrading.',
+      'Once you’ve resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic Stack 8. Be sure to back up your data again before upgrading.',
   }),
   upgradeStepDescriptionForCloud: i18n.translate(
     'xpack.upgradeAssistant.overview.upgradeStepDescriptionForCloud',
