@@ -227,3 +227,28 @@ This is a non-exhaustive list of different error scenarios in Upgrade Assistant.
 - **Unauthorized error fetching ES deprecations.** Mock a `403` status code to `GET /api/upgrade_assistant/es_deprecations` with the response payload: `{ "statusCode": 403 }`
 - **Partially upgraded error fetching ES deprecations.** Mock a `426` status code to `GET /api/upgrade_assistant/es_deprecations` with the response payload: `{ "statusCode": 426, "attributes": { "allNodesUpgraded": false } }`
 - **Upgraded error fetching ES deprecations.** Mock a `426` status code to `GET /api/upgrade_assistant/es_deprecations` with the response payload: `{ "statusCode": 426, "attributes": { "allNodesUpgraded": true } }` 
+
+### Telemetry
+
+The Upgrade Assistant tracks several triggered events in the UI, using Kibana Usage Collection service's [UI counters](https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#ui-counters).
+
+**Overview page**
+- Component loaded
+- Click event for "Create snapshot" button
+- Click event for "View deprecation logs in Observability" link
+- Click event for "Analyze logs in Discover" link
+- Click event for "Reset counter" button
+
+**ES deprecations page**
+- Component loaded
+- Click events for starting and stopping reindex tasks
+- Click events for upgrading or deleting a Machine Learning snapshot
+- Click event for deleting a deprecated index setting
+
+**Kibana deprecations page**
+- Component loaded
+- Click event for "Quick resolve" button
+
+In addition to UI counters, the Upgrade Assistant has a [custom usage collector](https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#custom-collector). It currently is only responsible for tracking whether the user has deprecation logging enabled or not.
+
+For testing instructions, refer to the [Kibana Usage Collection service README](https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#testing).
