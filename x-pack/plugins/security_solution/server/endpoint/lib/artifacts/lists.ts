@@ -15,6 +15,7 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
@@ -65,6 +66,7 @@ export async function getFilteredEndpointExceptionList(
     | typeof ENDPOINT_LIST_ID
     | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
     | typeof ENDPOINT_EVENT_FILTERS_LIST_ID
+    | typeof ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
 ): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
   let page = 1;
@@ -148,6 +150,24 @@ export async function getEndpointEventFiltersList(
   );
 }
 
+export async function getHostIsolationExceptionsList(
+  eClient: ExceptionListClient,
+  schemaVersion: string,
+  os: string,
+  policyId?: string
+): Promise<WrappedTranslatedExceptionList> {
+  const osFilter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
+  const policyFilter = `(exception-list-agnostic.attributes.tags:\"policy:all\"${
+    policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
+  })`;
+
+  return getFilteredEndpointExceptionList(
+    eClient,
+    schemaVersion,
+    `${osFilter} and ${policyFilter}`,
+    ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
+  );
+}
 /**
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exceptions
