@@ -21,7 +21,6 @@ import {
   calculateInterval,
   calculateName,
   calculateVersion,
-  legacyMigrate,
   maybeMute,
   removeUndefined,
   transformToAlertThrottle,
@@ -93,12 +92,6 @@ export const patchRules = async ({
   if (rule == null) {
     return null;
   }
-
-  const { migratedActions, migratedThrottle, migratedNotifyWhen } = await legacyMigrate({
-    rulesClient,
-    savedObjectsClient,
-    id: rule.id,
-  });
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
     author,
@@ -204,15 +197,9 @@ export const patchRules = async ({
       interval: calculateInterval(interval, rule.schedule.interval),
     },
     params: removeUndefined(nextParams),
-    actions: actions?.map(transformRuleToAlertAction) ?? migratedActions ?? rule.actions,
-    throttle:
-      throttle !== undefined
-        ? transformToAlertThrottle(throttle)
-        : migratedThrottle ?? rule.throttle,
-    notifyWhen:
-      throttle !== undefined
-        ? transformToNotifyWhen(throttle)
-        : migratedNotifyWhen ?? rule.notifyWhen,
+    actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
+    throttle: throttle !== undefined ? transformToAlertThrottle(throttle) : rule.throttle,
+    notifyWhen: throttle !== undefined ? transformToNotifyWhen(throttle) : rule.notifyWhen,
   };
 
   const [validated, errors] = validate(newRule, internalRuleUpdate);

@@ -16,7 +16,7 @@ import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
-import { legacyMigrate, maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
+import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 class UpdateError extends Error {
   public readonly statusCode: number;
@@ -44,12 +44,6 @@ export const updateRules = async ({
   if (existingRule == null) {
     return null;
   }
-
-  const { migratedActions, migratedThrottle, migratedNotifyWhen } = await legacyMigrate({
-    rulesClient,
-    savedObjectsClient,
-    id: existingRule.id,
-  });
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
@@ -92,18 +86,9 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions:
-      ruleUpdate.actions != null
-        ? ruleUpdate.actions.map(transformRuleToAlertAction)
-        : migratedActions ?? [],
-    throttle:
-      ruleUpdate.throttle !== existingRule.throttle
-        ? transformToAlertThrottle(ruleUpdate.throttle)
-        : migratedThrottle ?? transformToAlertThrottle(ruleUpdate.throttle),
-    notifyWhen:
-      transformToNotifyWhen(ruleUpdate.throttle) !== transformToNotifyWhen(existingRule.throttle)
-        ? transformToNotifyWhen(ruleUpdate.throttle)
-        : migratedNotifyWhen ?? transformToNotifyWhen(ruleUpdate.throttle),
+    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
+    throttle: transformToAlertThrottle(ruleUpdate.throttle),
+    notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
   };
 
   const [validated, errors] = validate(newInternalRule, internalRuleUpdate);

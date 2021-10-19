@@ -24,6 +24,7 @@ import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
+import { legacyMigrate } from '../../rules/utils';
 
 export const patchRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
@@ -133,8 +134,14 @@ export const patchRulesBulkRoute = (
               throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
             }
 
-            const rule = await patchRules({
+            const migratedRule = await legacyMigrate({
+              rulesClient,
+              savedObjectsClient,
               rule: existingRule,
+            });
+
+            const rule = await patchRules({
+              rule: migratedRule,
               rulesClient,
               savedObjectsClient,
               author,

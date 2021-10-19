@@ -19,7 +19,6 @@ import type {
   ThreatMappingOrUndefined,
   ThreatQueryOrUndefined,
   ThreatsOrUndefined,
-  ThrottleOrUndefinedOrNull,
   TypeOrUndefined,
   LanguageOrUndefined,
   SeverityOrUndefined,
@@ -308,12 +307,11 @@ export const maybeMute = async ({
 export const legacyMigrate = async ({
   rulesClient,
   savedObjectsClient,
-  id,
-}: LegacyMigrateParams): Promise<{
-  migratedActions?: AlertAction[];
-  migratedThrottle?: ThrottleOrUndefinedOrNull;
-  migratedNotifyWhen?: AlertNotifyWhenType | null;
-}> => {
+  rule,
+}: LegacyMigrateParams): Promise<SanitizedAlert<RuleParams> | null | undefined> => {
+  if (rule == null || rule.id == null) {
+    return rule;
+  }
   /**
    * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
    * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actualy value (1hr etc..)
@@ -327,7 +325,7 @@ export const legacyMigrate = async ({
       options: {
         hasReference: {
           type: 'alert',
-          id,
+          id: rule.id,
         },
       },
     }),
@@ -339,16 +337,24 @@ export const legacyMigrate = async ({
   if (siemNotification != null && siemNotification.data.length > 0) {
     await Promise.all([
       rulesClient.delete({ id: siemNotification.data[0].id }),
-      savedObjectsClient.delete(
-        legacyRuleActionsSavedObjectType,
-        legacyRuleActionsSO.saved_objects[0].id
-      ),
+      legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0
+        ? savedObjectsClient.delete(
+            legacyRuleActionsSavedObjectType,
+            legacyRuleActionsSO.saved_objects[0].id
+          )
+        : null,
     ]);
-    return {
-      migratedActions: siemNotification.data[0].actions,
-      migratedThrottle: siemNotification.data[0].schedule.interval,
-      migratedNotifyWhen: transformToNotifyWhen(siemNotification.data[0].throttle),
+    const migratedRule = {
+      ...rule,
+      actions: siemNotification.data[0].actions,
+      throttle: siemNotification.data[0].schedule.interval,
+      notifyWhen: transformToNotifyWhen(siemNotification.data[0].throttle),
     };
+    await rulesClient.update({
+      id: rule.id,
+      data: migratedRule,
+    });
+    return migratedRule;
   }
-  return {};
+  return rule;
 };

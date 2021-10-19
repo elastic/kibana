@@ -14,6 +14,7 @@ import { readRules } from './read_rules';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import { legacyMigrate } from './utils';
 
 /**
  * How many rules to update at a time is set to 50 from errors coming from
@@ -150,6 +151,12 @@ export const createPromises = (
     // TODO: Fix these either with an is conversion or by better typing them within io-ts
     const filters: PartialFilter[] | undefined = filtersObject as PartialFilter[];
 
+    const migratedRule = await legacyMigrate({
+      rulesClient,
+      savedObjectsClient,
+      rule: existingRule,
+    });
+
     // Note: we do not pass down enabled as we do not want to suddenly disable
     // or enable rules on the user when they were not expecting it if a rule updates
     return patchRules({
@@ -165,7 +172,7 @@ export const createPromises = (
       language,
       license,
       outputIndex,
-      rule: existingRule,
+      rule: migratedRule,
       savedId,
       spaceId,
       ruleStatusClient,

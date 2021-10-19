@@ -19,6 +19,8 @@ import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRules } from '../../rules/update_rules';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { legacyMigrate } from '../../rules/utils';
+import { readRules } from '../../rules/read_rules';
 
 export const updateRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -59,6 +61,19 @@ export const updateRulesRoute = (
         throwHttpError(await mlAuthz.validateRuleType(request.body.type));
 
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+
+        const existingRule = await readRules({
+          isRuleRegistryEnabled,
+          rulesClient,
+          ruleId: request.body.rule_id,
+          id: request.body.id,
+        });
+
+        await legacyMigrate({
+          rulesClient,
+          savedObjectsClient,
+          rule: existingRule,
+        });
         const rule = await updateRules({
           defaultOutputIndex: siemClient.getSignalsIndex(),
           isRuleRegistryEnabled,

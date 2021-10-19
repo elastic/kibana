@@ -330,7 +330,7 @@ export interface PatchRulesOptions {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
-  rule: SanitizedAlert<RuleParams> | null;
+  rule: SanitizedAlert<RuleParams> | null | undefined;
   namespace?: NamespaceOrUndefined;
 }
 
@@ -362,5 +362,5 @@ export interface FindRuleOptions {
 export interface LegacyMigrateParams {
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
-  id: string;
+  rule: SanitizedAlert<RuleParams> | null | undefined;
 }
