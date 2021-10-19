@@ -5,16 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { SerializableRecord } from '@kbn/utility-types';
 
-import './index.scss';
-import { PluginInitializerContext } from 'src/core/public';
-
-import { ConsoleUIPlugin } from './plugin';
-
-export type { ConsoleUILocatorParams, ConsolePluginSetup } from './types';
-
-export { ConsoleUIPlugin as Plugin };
-
-export function plugin(ctx: PluginInitializerContext) {
-  return new ConsoleUIPlugin(ctx);
+export interface ConsoleUILocatorParams extends SerializableRecord {
+  loadFrom?: string;
 }
