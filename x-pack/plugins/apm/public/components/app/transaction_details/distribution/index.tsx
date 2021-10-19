@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import {
   EuiBadge,
@@ -21,27 +21,19 @@ import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import {
-  APM_SEARCH_STRATEGIES,
-  DEFAULT_PERCENTILE_THRESHOLD,
-} from '../../../../../common/search_strategies/constants';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/search_strategies/constants';
 
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
-import {
-  TransactionDistributionChart,
-  TransactionDistributionChartData,
-} from '../../../shared/charts/transaction_distribution_chart';
-import { isErrorMessage } from '../../correlations/utils/is_error_message';
+import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
 import { useTransactionColors } from '../../correlations/use_transaction_colors';
-import { getOverallHistogram } from '../../correlations/utils/get_overall_histogram';
 
 import type { TabContentProps } from '../types';
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
+
+import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
 
 // Enforce min height so it's consistent across all tabs on the same level
 // to prevent "flickering" behavior
@@ -75,13 +67,7 @@ export function TransactionDistribution({
   traceSamples,
 }: TransactionDistributionProps) {
   const transactionColors = useTransactionColors();
-
-  const {
-    core: { notifications },
-  } = useApmPluginContext();
-
   const { urlParams } = useUrlParams();
-
   const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
 
   const markerCurrentTransaction =
@@ -101,31 +87,6 @@ export function TransactionDistribution({
     }
   );
 
-  const { progress, response } = useSearchStrategy(
-    APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS,
-    {
-      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-    }
-  );
-  const { overallHistogram, hasData, status } = getOverallHistogram(
-    response,
-    progress.isRunning
-  );
-
-  useEffect(() => {
-    if (isErrorMessage(progress.error)) {
-      notifications.toasts.addDanger({
-        title: i18n.translate(
-          'xpack.apm.transactionDetails.distribution.errorTitle',
-          {
-            defaultMessage: 'An error occurred fetching the distribution',
-          }
-        ),
-        text: progress.error.toString(),
-      });
-    }
-  }, [progress.error, notifications.toasts]);
-
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
   const onTrackedChartSelection = (brushEvent: XYBrushEvent) => {
@@ -138,28 +99,8 @@ export function TransactionDistribution({
     trackApmEvent({ metric: 'transaction_distribution_chart_clear_selection' });
   };
 
-  const transactionDistributionChartData: TransactionDistributionChartData[] =
-    [];
-
-  if (Array.isArray(overallHistogram)) {
-    transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
-        { defaultMessage: 'All transactions' }
-      ),
-      histogram: overallHistogram,
-    });
-  }
-
-  if (Array.isArray(response.errorHistogram)) {
-    transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.allFailedTransactionsLabel',
-        { defaultMessage: 'All failed transactions' }
-      ),
-      histogram: response.errorHistogram,
-    });
-  }
+  const { chartData, hasData, percentileThresholdValue, status } =
+    useTransactionDistributionChartData();
 
   return (
     <div data-test-subj="apmTransactionDistributionTabContent">
@@ -255,10 +196,10 @@ export function TransactionDistribution({
       <EuiSpacer size="s" />
 
       <TransactionDistributionChart
-        data={transactionDistributionChartData}
+        data={chartData}
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-        markerValue={response.percentileThresholdValue ?? 0}
+        markerValue={percentileThresholdValue ?? 0}
         onChartSelection={onTrackedChartSelection as BrushEndListener}
         hasData={hasData}
         palette={[
