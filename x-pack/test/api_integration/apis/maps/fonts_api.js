@@ -11,26 +11,25 @@ import { copyFile, rm } from 'fs/promises';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('fonts', () => {
+    // [HACK]: On CI tests are run from the different directories than the built and running Kibana
+    // instance. To workaround that we use Kibana `process.cwd()` to construct font path manually.
+    // x-pack tests can be run from root directory or from within x-pack so need to cater for both possibilities.
     const fontPath = path.join(
-      process.cwd(),
-      'x-pack',
-      'plugins',
-      'maps',
-      'server',
-      'fonts',
-      'open_sans',
-      '0-255.pbf'
+      process.cwd().replace(/x-pack.*$/, ''),
+      'x-pack/plugins/maps/server/fonts/open_sans/0-255.pbf'
     );
     const destinationPath = path.join(path.dirname(fontPath), '..', path.basename(fontPath));
-    console.log({ fontPath, destinationPath });
 
     before(async () => {
+      log.debug(`Copying test file from '${fontPath}' to '${destinationPath}'`);
       await copyFile(fontPath, destinationPath);
     });
 
     after(async () => {
+      log.debug(`Removing test file '${destinationPath}'`);
       await rm(destinationPath);
     });
 
