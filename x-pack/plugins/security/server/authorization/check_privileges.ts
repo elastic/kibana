@@ -13,6 +13,7 @@ import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
 import type {
   CheckPrivileges,
+  CheckPrivilegesOptions,
   CheckPrivilegesPayload,
   CheckPrivilegesResponse,
   HasPrivilegesResponse,
@@ -41,14 +42,20 @@ export function checkPrivilegesWithRequestFactory(
   return function checkPrivilegesWithRequest(request: KibanaRequest): CheckPrivileges {
     const checkPrivilegesAtResources = async (
       resources: string[],
-      privileges: CheckPrivilegesPayload
+      privileges: CheckPrivilegesPayload,
+      { requireLoginAction = true }: CheckPrivilegesOptions = {}
     ): Promise<CheckPrivilegesResponse> => {
       const kibanaPrivileges = Array.isArray(privileges.kibana)
         ? privileges.kibana
         : privileges.kibana
         ? [privileges.kibana]
         : [];
-      const allApplicationPrivileges = uniq([actions.version, actions.login, ...kibanaPrivileges]);
+
+      const allApplicationPrivileges = uniq([
+        actions.version,
+        ...(requireLoginAction ? [actions.login] : []),
+        ...kibanaPrivileges,
+      ]);
 
       const clusterClient = await getClusterClient();
       const { body } = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
@@ -135,18 +142,26 @@ export function checkPrivilegesWithRequestFactory(
     };
 
     return {
-      async atSpace(spaceId: string, privileges: CheckPrivilegesPayload) {
+      async atSpace(
+        spaceId: string,
+        privileges: CheckPrivilegesPayload,
+        options?: CheckPrivilegesOptions
+      ) {
         const spaceResource = ResourceSerializer.serializeSpaceResource(spaceId);
-        return await checkPrivilegesAtResources([spaceResource], privileges);
+        return await checkPrivilegesAtResources([spaceResource], privileges, options);
       },
-      async atSpaces(spaceIds: string[], privileges: CheckPrivilegesPayload) {
+      async atSpaces(
+        spaceIds: string[],
+        privileges: CheckPrivilegesPayload,
+        options?: CheckPrivilegesOptions
+      ) {
         const spaceResources = spaceIds.map((spaceId) =>
           ResourceSerializer.serializeSpaceResource(spaceId)
         );
-        return await checkPrivilegesAtResources(spaceResources, privileges);
+        return await checkPrivilegesAtResources(spaceResources, privileges, options);
       },
-      async globally(privileges: CheckPrivilegesPayload) {
-        return await checkPrivilegesAtResources([GLOBAL_RESOURCE], privileges);
+      async globally(privileges: CheckPrivilegesPayload, options?: CheckPrivilegesOptions) {
+        return await checkPrivilegesAtResources([GLOBAL_RESOURCE], privileges, options);
       },
     };
   };

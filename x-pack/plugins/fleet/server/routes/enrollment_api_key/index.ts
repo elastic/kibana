@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
-
 import { PLUGIN_ID, ENROLLMENT_API_KEY_ROUTES } from '../../constants';
 import {
   GetEnrollmentAPIKeysRequestSchema,
@@ -14,6 +12,7 @@ import {
   DeleteEnrollmentAPIKeyRequestSchema,
   PostEnrollmentAPIKeyRequestSchema,
 } from '../../types';
+import type { FleetRouter } from '../../types/request_context';
 
 import {
   getEnrollmentApiKeysHandler,
@@ -22,17 +21,19 @@ import {
   postEnrollmentApiKeyHandler,
 } from './handler';
 
-export const registerRoutes = (router: IRouter) => {
-  router.get(
+export const registerRoutes = (routers: { superuser: FleetRouter; fleetSetup: FleetRouter }) => {
+  routers.fleetSetup.get(
     {
       path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN,
       validate: GetOneEnrollmentAPIKeyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      // Disable this tag and the automatic RBAC support until elastic/fleet-server access is removed in 8.0
+      // Required to allow elastic/fleet-server to access this API.
+      // options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getOneEnrollmentApiKeyHandler
   );
 
-  router.delete(
+  routers.superuser.delete(
     {
       path: ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN,
       validate: DeleteEnrollmentAPIKeyRequestSchema,
@@ -41,16 +42,18 @@ export const registerRoutes = (router: IRouter) => {
     deleteEnrollmentApiKeyHandler
   );
 
-  router.get(
+  routers.fleetSetup.get(
     {
       path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
       validate: GetEnrollmentAPIKeysRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      // Disable this tag and the automatic RBAC support until elastic/fleet-server access is removed in 8.0
+      // Required to allow elastic/fleet-server to access this API.
+      // options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getEnrollmentApiKeysHandler
   );
 
-  router.post(
+  routers.superuser.post(
     {
       path: ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN,
       validate: PostEnrollmentAPIKeyRequestSchema,
