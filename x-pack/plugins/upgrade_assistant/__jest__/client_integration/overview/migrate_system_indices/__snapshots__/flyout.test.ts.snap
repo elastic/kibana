@@ -14,5 +14,9 @@ Array [
     "Kibana",
     "Migration required",
   ],
+  Array [
+    "Logstash",
+    "Migration complete",
+  ],
 ]
 `;
