@@ -74,13 +74,13 @@ const SortableControlInner = forwardRef<
   return (
     <EuiFlexItem
       grow={width === 'auto'}
-      className={classNames('controlFrame--wrapper', {
-        'controlFrame--wrapper-isDragging': isDragging,
-        'controlFrame--wrapper-small': width === 'small',
-        'controlFrame--wrapper-medium': width === 'medium',
-        'controlFrame--wrapper-large': width === 'large',
-        'controlFrame--wrapper-insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
-        'controlFrame--wrapper-insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
+      className={classNames('controlFrameWrapper', {
+        'controlFrameWrapper-isDragging': isDragging,
+        'controlFrameWrapper--small': width === 'small',
+        'controlFrameWrapper--medium': width === 'medium',
+        'controlFrameWrapper--large': width === 'large',
+        'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
+        'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
       })}
       style={style}
     >
@@ -106,11 +106,11 @@ export const ControlClone = ({ draggingId }: { draggingId: string }) => {
   const title = panels[draggingId].explicitInput.title;
   return (
     <EuiFlexItem
-      className={classNames('controlFrame--cloneWrapper', {
-        'controlFrame--cloneWrapper-small': width === 'small',
-        'controlFrame--cloneWrapper-medium': width === 'medium',
-        'controlFrame--cloneWrapper-large': width === 'large',
-        'controlFrame--cloneWrapper-twoLine': controlStyle === 'twoLine',
+      className={classNames('controlFrameCloneWrapper', {
+        'controlFrameCloneWrapper--small': width === 'small',
+        'controlFrameCloneWrapper--medium': width === 'medium',
+        'controlFrameCloneWrapper--large': width === 'large',
+        'controlFrameCloneWrapper--twoLine': controlStyle === 'twoLine',
       })}
     >
       {controlStyle === 'twoLine' ? <EuiFormLabel>{title}</EuiFormLabel> : undefined}
