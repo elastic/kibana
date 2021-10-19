@@ -14,6 +14,7 @@ import {
   AvgIndexPatternColumn,
   MedianIndexPatternColumn,
   PercentileIndexPatternColumn,
+  LastValueIndexPatternColumn,
   OperationType,
   PersistedIndexPatternLayer,
   RangeIndexPatternColumn,
@@ -219,11 +220,50 @@ export class LensAttributes {
           columnFilter,
         });
       }
+      if (operationType === 'last_value') {
+        return this.getLastValueOperationColumn({
+          sourceField,
+          operationType,
+          label,
+          seriesConfig,
+          columnFilter,
+        });
+      }
       if (operationType?.includes('th')) {
         return this.getPercentileNumberColumn(sourceField, operationType, seriesConfig!);
       }
     }
     return this.getNumberRangeColumn(sourceField, seriesConfig!, label);
+  }
+
+  getLastValueOperationColumn({
+    sourceField,
+    label,
+    seriesConfig,
+    operationType,
+    columnFilter,
+  }: {
+    sourceField: string;
+    operationType: 'last_value';
+    label?: string;
+    seriesConfig: SeriesConfig;
+    columnFilter?: ColumnFilter;
+  }): LastValueIndexPatternColumn {
+    return {
+      ...buildNumberColumn(sourceField),
+      operationType,
+      label: i18n.translate('xpack.observability.expView.columns.operation.label', {
+        defaultMessage: '{operationType} of {sourceField}',
+        values: {
+          sourceField: label || seriesConfig.labels[sourceField],
+          operationType: capitalize(operationType),
+        },
+      }),
+      filter: columnFilter,
+      params: {
+        sortField: '@timestamp',
+      },
+    };
   }
 
   getNumberOperationColumn({

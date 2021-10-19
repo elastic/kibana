@@ -38,6 +38,7 @@ export function WaterfallMarkerTrend({ title, field }: { title: string; field: s
         'monitor.name': [activeStep.monitor.name!],
         'synthetics.step.name.keyword': [activeStep.synthetics.step?.name!],
       },
+      operationType: 'last_value',
     },
   ];
 
