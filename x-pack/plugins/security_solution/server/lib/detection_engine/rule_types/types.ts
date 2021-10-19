@@ -120,5 +120,3 @@ export interface CreateRuleOptions {
   ml?: SetupPlugins['ml'];
   version: string;
 }
-
-export type PreviewRuleOptions = CreateRuleOptions;

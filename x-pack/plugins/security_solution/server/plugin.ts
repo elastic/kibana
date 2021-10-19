@@ -303,22 +303,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
-    const previewRuleOptions = {
-      ...ruleOptions,
-      ruleDataClient: ruleDataService.initializeIndex({
-        feature: SERVER_APP_ID,
-        registrationContext: 'security.preview',
-        dataset: Dataset.alerts,
-        componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
-        componentTemplates: [
-          {
-            name: 'mappings',
-            mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
-          },
-        ],
-      }),
-    };
-
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,
@@ -329,7 +313,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ruleDataService,
       this.logger,
       isRuleRegistryEnabled,
-      previewRuleOptions
+      ruleOptions
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
