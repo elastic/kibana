@@ -8,8 +8,6 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { chunk } from 'lodash';
 
-import { IHttpFetchError } from 'src/core/public';
-
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
@@ -25,38 +23,15 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 
+import {
+  getInitialProgress,
+  getFailedTransactionsCorrelationsSortedByScore,
+  getInitialRawResponse,
+  getReducer,
+  CorrelationsProgress,
+} from './utils/analysis_hook_utils';
+
 type Response = FailedTransactionsCorrelationsRawResponse;
-
-interface CorrelationsProgress {
-  error?: Error | IHttpFetchError;
-  isRunning: boolean;
-  loaded: number;
-  total: number;
-}
-
-function getFailedTransactionsCorrelationsSortedByScore(
-  failedTransactionsCorrelations: FailedTransactionsCorrelation[]
-) {
-  return failedTransactionsCorrelations.sort((a, b) => b.score - a.score);
-}
-
-const getInitialRawResponse = (): Response =>
-  ({
-    ccsWarning: false,
-  } as Response);
-
-const getInitialProgress = (): CorrelationsProgress => ({
-  isRunning: false,
-  loaded: 0,
-  total: 100,
-});
-
-const getReducer =
-  <T>() =>
-  (prev: T, update: Partial<T>): T => ({
-    ...prev,
-    ...update,
-  });
 
 export function useFailedTransactionsCorrelations() {
   const { serviceName, transactionType } = useApmServiceContext();

@@ -8,8 +8,6 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { chunk } from 'lodash';
 
-import { IHttpFetchError } from 'src/core/public';
-
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FieldValuePair } from '../../../../common/correlations/types';
 import { getPrioritizedFieldValuePairs } from '../../../../common/correlations/utils';
@@ -25,38 +23,15 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 
+import {
+  getInitialProgress,
+  getLatencyCorrelationsSortedByCorrelation,
+  getInitialRawResponse,
+  getReducer,
+  CorrelationsProgress,
+} from './utils/analysis_hook_utils';
+
 type Response = LatencyCorrelationsRawResponse;
-
-interface CorrelationsProgress {
-  error?: Error | IHttpFetchError;
-  isRunning: boolean;
-  loaded: number;
-  total: number;
-}
-
-function getLatencyCorrelationsSortedByCorrelation(
-  latencyCorrelations: LatencyCorrelation[]
-) {
-  return latencyCorrelations.sort((a, b) => b.correlation - a.correlation);
-}
-
-const getInitialRawResponse = (): Response =>
-  ({
-    ccsWarning: false,
-  } as Response);
-
-const getInitialProgress = (): CorrelationsProgress => ({
-  isRunning: false,
-  loaded: 0,
-  total: 100,
-});
-
-const getReducer =
-  <T>() =>
-  (prev: T, update: Partial<T>): T => ({
-    ...prev,
-    ...update,
-  });
 
 export function useLatencyCorrelations() {
   const { serviceName, transactionType } = useApmServiceContext();
