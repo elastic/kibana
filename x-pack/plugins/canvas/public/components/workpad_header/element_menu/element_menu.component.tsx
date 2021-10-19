@@ -12,11 +12,11 @@ import { EuiContextMenu, EuiIcon, EuiContextMenuPanelItemDescriptor } from '@ela
 import { i18n } from '@kbn/i18n';
 import { PrimaryActionPopover } from '../../../../../../../src/plugins/presentation_util/public';
 import { getId } from '../../../lib/get_id';
-import { ClosePopoverFn } from '../../popover';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { AssetManager } from '../../asset_manager';
+import { ClosePopoverFn } from '../../popover';
 import { SavedElementsModal } from '../../saved_elements_modal';
 import { useLabsService } from '../../../services';
 
@@ -122,17 +122,9 @@ export interface Props {
    * Handler for adding a selected element to the workpad
    */
   addElement: (element: Partial<ElementSpec>) => void;
-  /**
-   * Crete new embeddable
-   */
-  createNewEmbeddable: () => void;
 }
 
-export const ElementMenu: FunctionComponent<Props> = ({
-  elements,
-  addElement,
-  createNewEmbeddable,
-}) => {
+export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) => {
   const labsService = useLabsService();
   const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);

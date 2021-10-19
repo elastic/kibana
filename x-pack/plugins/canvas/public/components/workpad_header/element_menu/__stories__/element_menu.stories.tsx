@@ -130,9 +130,5 @@ You can use standard Markdown in here, but you can also access your piped-in dat
 };
 
 storiesOf('components/WorkpadHeader/ElementMenu', module).add('default', () => (
-  <ElementMenu
-    elements={testElements}
-    addElement={action('addElement')}
-    createNewEmbeddable={action('createNewEmbeddable')}
-  />
+  <ElementMenu elements={testElements} addElement={action('addElement')} />
 ));
