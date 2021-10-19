@@ -18,6 +18,7 @@ import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { AssetManager } from '../../asset_manager';
 import { SavedElementsModal } from '../../saved_elements_modal';
+import { useLabsService } from '../../../services';
 
 interface CategorizedElementLists {
   [key: string]: ElementSpec[];
@@ -112,7 +113,7 @@ const categorizeElementsByType = (elements: ElementSpec[]): { [key: string]: Ele
   return categories;
 };
 
-interface Props {
+export interface Props {
   /**
    * Dictionary of elements from elements registry
    */
@@ -120,10 +121,20 @@ interface Props {
   /**
    * Handler for adding a selected element to the workpad
    */
-  addElement: (element: ElementSpec) => void;
+  addElement: (element: Partial<ElementSpec>) => void;
+  /**
+   * Crete new embeddable
+   */
+  createNewEmbeddable: () => void;
 }
 
-export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) => {
+export const ElementMenu: FunctionComponent<Props> = ({
+  elements,
+  addElement,
+  createNewEmbeddable,
+}) => {
+  const labsService = useLabsService();
+  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
 
@@ -199,6 +210,18 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
             closePopover();
           },
         },
+        // TODO: Remove this menu option. This is a temporary menu options just for testing,
+        // will be removed once toolbar is implemented
+        isByValueEnabled
+          ? {
+              name: 'Lens',
+              icon: <EuiIcon type="lensApp" size="m" />,
+              onClick: () => {
+                createNewEmbeddable();
+                closePopover();
+              },
+            }
+          : {},
       ],
     };
   };
