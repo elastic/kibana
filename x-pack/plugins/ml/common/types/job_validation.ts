@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export { validateJob } from './job_validation';
-export { validateCardinality } from './validate_cardinality';
-export {
-  validateDatafeedPreviewWithMessages,
-  validateDatafeedPreview,
-} from './validate_datafeed_preview';
+import type { ErrorType } from '../util/errors';
+
+export interface DatafeedValidationResponse {
+  valid: boolean;
+  documentsFound: boolean;
+  error?: ErrorType;
+}

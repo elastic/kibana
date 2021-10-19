@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export { validateJob } from './job_validation';
-export { validateCardinality } from './validate_cardinality';
-export {
-  validateDatafeedPreviewWithMessages,
-  validateDatafeedPreview,
-} from './validate_datafeed_preview';
+export { ChangeDataView } from './change_data_view_button';
