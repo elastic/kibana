@@ -25,7 +25,6 @@ import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context
 import { Job } from '../lib/job';
 import { InternalApiClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
 import { KibanaContextProvider } from '../shared_imports';
-import { ReportDownloadLink } from './components';
 
 interface PayloadMock {
   payload: Omit<ReportApiJSON['payload'], 'browserTimezone' | 'version' | 'layout'>;
@@ -314,9 +313,8 @@ describe('ReportListing', () => {
   });
 
   it('renders a listing with some items', () => {
-    const { actions } = testBed;
-    const table = actions.findListTable();
-    expect(table.find(ReportDownloadLink).length).toBe(mockJobs.length);
+    const { find } = testBed;
+    expect(find('reportDownloadLink').length).toBe(mockJobs.length);
   });
 
   it('subscribes to license changes, and unsubscribes on dismount', async () => {

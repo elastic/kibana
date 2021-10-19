@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiBasicTableColumn,
   EuiIconTip,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -317,10 +318,12 @@ class ReportListingUi extends Component<Props, State> {
         render: (objectTitle: string, job) => {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
-              {objectTitle ||
-                i18n.translate('xpack.reporting.listing.table.noTitleLabel', {
-                  defaultMessage: 'Untitled',
-                })}
+              <EuiLink onClick={() => this.setState({ selectedJob: job })}>
+                {objectTitle ||
+                  i18n.translate('xpack.reporting.listing.table.noTitleLabel', {
+                    defaultMessage: 'Untitled',
+                  })}
+              </EuiLink>
             </div>
           );
         },
@@ -383,6 +386,7 @@ class ReportListingUi extends Component<Props, State> {
         actions: [
           {
             isPrimary: true,
+            'data-test-subj': 'reportDownloadLink',
             type: 'icon',
             icon: 'download',
             name: i18n.translate('xpack.reporting.listing.table.downloadReportButtonLabel', {
