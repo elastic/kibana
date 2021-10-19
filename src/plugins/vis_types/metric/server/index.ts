@@ -13,7 +13,7 @@ import { configSchema, ConfigSchema } from '../config';
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('metric_vis.enabled', 'vis_type_metric.enabled'),
+    renameFromRoot('metric_vis.enabled', 'vis_type_metric.enabled', { level: 'critical' }),
   ],
 };
 
