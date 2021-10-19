@@ -495,7 +495,7 @@ describe('core deprecations', () => {
           });
           expect(messages).toMatchInlineSnapshot(`
             Array [
-              "It looks like you are using Kibana's built-in \`console\` appender, which uses the \\"pattern\\" layout by default. In 8.0, the default layout will switch to JSON, which is ECS-compliant. If you are relying on the default pattern layout for log ingestion, be sure to explicitly configure this in your Kibana configuration to prevent any disruption when upgrading to 8.0.",
+              "It looks like you are using Kibana's built-in \`console\` appender, which uses the \\"pattern\\" layout by default. In 8.0, the default layout will switch to JSON, which is ECS-compliant. If you are relying on the default pattern layout for log ingestion, be sure to explicitly configure this in your Kibana configuration to prevent any disruption when upgrading to 8.0. For more info on ECS, see https://elastic.co/what-is/ecs.",
             ]
           `);
         });
@@ -513,7 +513,7 @@ describe('core deprecations', () => {
           });
           expect(messages).toMatchInlineSnapshot(`
             Array [
-              "It looks like you are using Kibana's built-in \`console\` appender, which uses the \\"pattern\\" layout by default. In 8.0, the default layout will switch to JSON, which is ECS-compliant. If you are relying on the default pattern layout for log ingestion, be sure to explicitly configure this in your Kibana configuration to prevent any disruption when upgrading to 8.0.",
+              "It looks like you are using Kibana's built-in \`console\` appender, which uses the \\"pattern\\" layout by default. In 8.0, the default layout will switch to JSON, which is ECS-compliant. If you are relying on the default pattern layout for log ingestion, be sure to explicitly configure this in your Kibana configuration to prevent any disruption when upgrading to 8.0. For more info on ECS, see https://elastic.co/what-is/ecs.",
             ]
           `);
         });
