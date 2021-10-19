@@ -40,10 +40,7 @@ import {
   ReportDeleteButton,
   ReportDiagnostic,
   ReportStatusIndicator,
-  ViewInAppLink,
   ReportInfoFlyout,
-  ReportDownloadButton,
-  ReportMoreMenu,
 } from './components';
 import { guessAppIconTypeFromObjectType, jobHasIssues } from './utils';
 
@@ -389,17 +386,20 @@ class ReportListingUi extends Component<Props, State> {
         width: tableColumnWidths.actions,
         actions: [
           {
-            render: (job) => (
-              <ReportDownloadButton
-                disabled={
-                  job.status !== JOB_STATUSES.COMPLETED && job.status !== JOB_STATUSES.WARNINGS
-                }
-                job={job}
-              />
-            ),
+            isPrimary: true,
+            type: 'icon',
+            icon: 'download',
+            name: i18n.translate('xpack.reporting.listing.table.downloadReportButtonLabel', {
+              defaultMessage: 'Download report',
+            }),
+            description: i18n.translate('xpack.reporting.listing.table.downloadReportDescription', {
+              defaultMessage: 'Download this report in a new tab.',
+            }),
+            onClick: (job) => this.props.apiClient.downloadReport(job.id),
+            enabled: (job) =>
+              job.status === JOB_STATUSES.COMPLETED || job.status === JOB_STATUSES.WARNINGS,
           },
           {
-            render: (job) => <ReportMoreMenu job={job} />,
             name: i18n.translate(
               'xpack.reporting.listing.table.viewReportingInfoActionButtonLabel',
               {
@@ -412,11 +412,31 @@ class ReportListingUi extends Component<Props, State> {
                 defaultMessage: 'View additional information about this report.',
               }
             ),
-            type: 'button',
+            type: 'icon',
+            icon: 'iInCircle',
             onClick: (job) => this.setState({ selectedJob: job }),
           },
           {
-            render: (job) => <ViewInAppLink job={job} />,
+            name: i18n.translate('xpack.reporting.listing.table.openInKibanaAppLabel', {
+              defaultMessage: 'Open in Kibana App',
+            }),
+            description: i18n.translate(
+              'xpack.reporting.listing.table.openInKibanaAppDescription',
+              {
+                defaultMessage: 'Open the Kibana App where this report was generated.',
+              }
+            ),
+            enabled: (job) =>
+              [PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2].some(
+                (linkableJobType) => linkableJobType === job.jobtype
+              ),
+            type: 'icon',
+            icon: 'popout',
+            onClick: (job) => {
+              const href = this.props.apiClient.getKibanaAppHref(job);
+              window.open(href, '_blank');
+              window.focus();
+            },
           },
         ],
       },

@@ -21,7 +21,7 @@ export const ReportMoreMenu: FunctionComponent<Props> = ({ job }) => {
       isOpen={showPopover}
       button={
         <EuiButtonIcon
-          iconType="horizontalBlocks"
+          iconType="boxesHorizontal"
           onClick={() => setShowPopover((isShowing) => !isShowing)}
         />
       }
