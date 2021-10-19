@@ -20,7 +20,7 @@ export type {
   RunContext,
 } from './task';
 
-export { TaskStatus } from './task';
+export { TaskStatus, TaskPriority } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 

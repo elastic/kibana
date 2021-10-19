@@ -8,6 +8,7 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import type { estypes } from '@elastic/elasticsearch';
 import apm from 'elastic-apm-node';
 import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
@@ -265,6 +266,13 @@ export class TaskClaiming {
       tasksUpdated > 0
         ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, taskTypes, size)
         : [];
+    this.logger.info(
+      `Claimed the following tasks in order: ${JSON.stringify(
+        docs.map((a) => `${a.taskType} => ${a.id}`),
+        null,
+        2
+      )}`
+    );
 
     const [documentsReturnedById, documentsClaimedBySchedule] = partition(docs, (doc) =>
       claimTasksById.includes(doc.id)
@@ -389,7 +397,7 @@ export class TaskClaiming {
     // the score seems to favor newer documents rather than older documents, so
     // if there are not pinned tasks being queried, we do NOT want to sort by score
     // at all, just by runAt/retryAt.
-    const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
+    const sort: NonNullable<SearchOpts['sort']> = this.getClaimSort();
     if (claimTasksById && claimTasksById.length) {
       sort.unshift('_score');
     }
@@ -452,11 +460,35 @@ export class TaskClaiming {
           ? asPinnedQuery(claimTasksById, claimedTasksQuery)
           : claimedTasksQuery,
       size,
-      sort: SortByRunAtAndRetryAt,
+      sort: this.getClaimSort(),
       seq_no_primary_term: true,
     });
 
     return docs;
+  }
+
+  private getClaimSort(): Array<Record<string, estypes.SearchScriptSort | estypes.SearchSort>> {
+    return [
+      {
+        _script: {
+          type: 'number',
+          script: {
+            lang: 'painless',
+            source: `return params.priority_map[doc['task.taskType'].value]`,
+            params: {
+              priority_map: this.definitions.getAllDefinitions().reduce(
+                (acc, taskDefinition) => ({
+                  ...acc,
+                  [taskDefinition.type]: taskDefinition.priority,
+                }),
+                {}
+              ),
+            },
+          },
+        },
+      },
+      SortByRunAtAndRetryAt,
+    ];
   }
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
+import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction, TaskPriority } from './task';
 import { Logger } from '../../../../src/core/server';
 
 /**
@@ -24,6 +24,7 @@ export interface TaskRegisterDefinition {
    * the task will be re-attempted.
    */
   timeout?: string;
+  priority?: TaskPriority;
   /**
    * An optional more detailed description of what this task does.
    */

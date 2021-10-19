@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
+import { RunContext, TaskManagerSetupContract, TaskPriority } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
   AlertType,
@@ -247,6 +247,7 @@ export class RuleTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
+        priority: TaskPriority.AlertingRuleExecution,
         timeout: alertType.ruleTaskTimeout,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<

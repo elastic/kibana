@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
+import { RunContext, TaskManagerSetupContract, TaskPriority } from '../../task_manager/server';
 import { ActionType as CommonActionType } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -126,6 +126,7 @@ export class ActionTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
+        priority: TaskPriority.ActionExecution,
         maxAttempts: actionType.maxAttempts || 1,
         getRetry(attempts: number, error: unknown) {
           if (error instanceof ExecutorError) {

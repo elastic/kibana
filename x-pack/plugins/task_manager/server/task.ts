@@ -9,6 +9,12 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { isErr, tryAsResult } from './lib/result_type';
 
+export enum TaskPriority {
+  AlertingRuleExecution = 1,
+  ActionExecution = 2,
+  Other = 3,
+}
+
 /*
  * Type definitions and validations for tasks.
  */
@@ -137,6 +143,7 @@ export const taskDefinitionSchema = schema.object(
         min: 0,
       })
     ),
+    priority: schema.number({ defaultValue: TaskPriority.Other }),
   },
   {
     validate({ timeout }) {
