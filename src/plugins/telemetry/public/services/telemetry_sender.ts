@@ -61,7 +61,7 @@ export class TelemetrySender {
     this.isSending = true;
     try {
       const telemetryUrl = this.telemetryService.getTelemetryUrl();
-      const telemetryPayload = await this.telemetryService.fetchTelemetry();
+      const telemetryPayload = await this.telemetryService.fetchTelemetry({ unencrypted: false });
 
       await Promise.all(
         telemetryPayload.map(

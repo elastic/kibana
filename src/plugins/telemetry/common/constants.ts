@@ -30,7 +30,6 @@ export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-state
 /**
  * The telemetry payload content encryption encoding
  */
-
 export const PAYLOAD_CONTENT_ENCODING = 'aes256gcm';
 
 /**
