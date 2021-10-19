@@ -36,17 +36,25 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { core, chrome, embeddable, onAppLeave, uiSettings, data, spacesService, screenshotMode } =
-    useKibana<DashboardAppServices>().services;
+  const {
+    core,
+    chrome,
+    embeddable,
+    onAppLeave,
+    uiSettings,
+    data,
+    spacesService,
+    screenshotModeService,
+  } = useKibana<DashboardAppServices>().services;
 
-  const isScreenshotMode = screenshotMode.isScreenshotMode();
+  const isScreenshotMode = screenshotModeService.isScreenshotMode();
 
   // Print layout detected by current route
   const isOnPrintRoute = !!useRouteMatch(DashboardConstants.PRINT_DASHBOARD_URL);
 
   // Backwards compatible way of detecting that we are taking a screenshot
   const legacyPrintLayoutDetected =
-    isScreenshotMode && screenshotMode.getScreenshotLayout() === 'print';
+    isScreenshotMode && screenshotModeService.getScreenshotLayout() === 'print';
 
   const printLayoutDetected = isOnPrintRoute || legacyPrintLayoutDetected;
 

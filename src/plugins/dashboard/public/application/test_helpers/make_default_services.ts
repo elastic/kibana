@@ -73,8 +73,8 @@ export function makeDefaultServices(): DashboardAppServices {
   } as PluginInitializerContext;
 
   return {
+    screenshotModeService: screenshotModePluginMock.createSetupContract(),
     visualizations: visualizationsPluginMock.createStartContract(),
-    screenshotMode: screenshotModePluginMock.createSetupContract(),
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),
     uiSettings: uiSettingsServiceMock.createStartContract(),

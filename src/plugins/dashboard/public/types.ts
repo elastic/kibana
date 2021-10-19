@@ -202,9 +202,9 @@ export interface DashboardAppServices {
   onAppLeave: AppMountParameters['onAppLeave'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedObjectsClient: SavedObjectsClientContract;
+  screenshotModeService: ScreenshotModePluginStart;
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   spacesService?: SpacesPluginStart;
-  screenshotModeService?: ScreenshotModePluginStart;
 }
