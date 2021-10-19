@@ -365,7 +365,7 @@ The following is an example of an **error response** for an undefined action que
 == System requirements
 
 * {fleet-guide}/fleet-overview.html[Fleet] is enabled on your cluster, and
-one or more {fleet-guide}/elastic-agent-installation-configuration.html[Elastic Agents] is enrolled.
+one or more {fleet-guide}/elastic-agent-installation.html[Elastic Agents] is enrolled.
 * The https://docs.elastic.co/en/integrations/osquery_manager[*Osquery Manager*] integration
 has been added and configured
 for an agent policy through Fleet.

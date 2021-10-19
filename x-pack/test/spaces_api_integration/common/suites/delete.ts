@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { getTestScenariosForSpace } from '../lib/space_test_utils';
+import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -43,38 +43,15 @@ export function deleteTestSuiteFactory(
 
     // Query ES to ensure that we deleted everything we expected, and nothing we didn't
     // Grouping first by namespace, then by saved object type
-    const { body: response } = await es.search({
-      index: '.kibana',
-      body: {
-        size: 0,
-        query: {
-          terms: {
-            type: ['visualization', 'dashboard', 'space', 'index-pattern'],
-            // TODO: add assertions for config objects -- these assertions were removed because of flaky behavior in #92358, but we should
-            // consider adding them again at some point, especially if we convert config objects to `namespaceType: 'multiple-isolated'` in
-            // the future.
-          },
-        },
-        aggs: {
-          count: {
-            terms: {
-              field: 'namespace',
-              missing: 'default',
-              size: 10,
-            },
-            aggs: {
-              countByType: {
-                terms: {
-                  field: 'type',
-                  missing: 'UNKNOWN',
-                  size: 10,
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+    const { body: response } = await getAggregatedSpaceData(es, [
+      'visualization',
+      'dashboard',
+      'space',
+      'index-pattern',
+      // TODO: add assertions for config objects -- these assertions were removed because of flaky behavior in #92358, but we should
+      // consider adding them again at some point, especially if we convert config objects to `namespaceType: 'multiple-isolated'` in
+      // the future.
+    ]);
 
     // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
     const buckets = response.aggregations?.count.buckets;
