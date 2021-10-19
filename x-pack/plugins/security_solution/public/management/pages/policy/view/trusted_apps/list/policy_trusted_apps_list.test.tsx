@@ -205,7 +205,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     expect(appTestContext.coreStart.application.navigateToApp).toHaveBeenCalledWith(
       APP_ID,
       expect.objectContaining({
-        path: '/administration/trusted_apps?show=edit&id=89f72d8a-05b5-4350-8cad-0dc3661d6e67',
+        path: '/administration/trusted_apps?filter=89f72d8a-05b5-4350-8cad-0dc3661d6e67',
       })
     );
   });
