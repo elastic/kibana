@@ -40,6 +40,7 @@ import {
 } from '../utils';
 
 import { patchRules } from '../../rules/patch_rules';
+import { legacyMigrate } from '../../rules/utils';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -193,6 +194,7 @@ export const importRulesRoute = (
                       throttle,
                       version,
                       exceptions_list: exceptionsList,
+                      actions,
                     } = parsedRule;
 
                     try {
@@ -264,15 +266,21 @@ export const importRulesRoute = (
                           note,
                           version,
                           exceptionsList,
-                          actions: [], // Actions are not imported nor exported at this time
+                          actions,
                         });
                         resolve({
                           rule_id: ruleId,
                           status_code: 200,
                         });
                       } else if (rule != null && request.query.overwrite) {
+                        const migratedRule = await legacyMigrate({
+                          rulesClient,
+                          savedObjectsClient,
+                          rule,
+                        });
                         await patchRules({
                           rulesClient,
+                          savedObjectsClient,
                           author,
                           buildingBlockType,
                           spaceId: context.securitySolution.getSpaceId(),
@@ -291,7 +299,7 @@ export const importRulesRoute = (
                           timelineTitle,
                           meta,
                           filters,
-                          rule,
+                          rule: migratedRule,
                           index,
                           interval,
                           maxSignals,
@@ -321,7 +329,7 @@ export const importRulesRoute = (
                           exceptionsList,
                           anomalyThreshold,
                           machineLearningJobId,
-                          actions: undefined,
+                          actions,
                         });
                         resolve({
                           rule_id: ruleId,
