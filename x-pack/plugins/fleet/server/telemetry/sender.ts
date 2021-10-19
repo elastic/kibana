@@ -18,6 +18,10 @@ import type { TelemetryReceiver } from './receiver';
 export const TELEMETRY_MAX_BUFFER_SIZE = 100;
 export const FLEET_CHANNEL_NAME = 'fleet-stats';
 
+/**
+ * Simplified version of https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/server/lib/telemetry/sender.ts
+ * Sends batched events to telemetry v3 api
+ */
 export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 30 * 1000;
@@ -138,40 +142,6 @@ export class TelemetryEventsSender {
     }
     this.isSending = false;
   }
-
-  /**
-   * This function sends events to the elastic telemetry channel. Caution is required
-   * because it does no allowlist filtering at send time. The function call site is
-   * responsible for ensuring sure no sensitive material is in telemetry events.
-   *
-   * @param channel the elastic telemetry channel
-   * @param toSend telemetry events
-   */
-  // public async sendOnDemand(channel: string, toSend: unknown[]) {
-  //   try {
-  //     const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
-  //       this.fetchTelemetryUrl(channel),
-  //       this.receiver?.fetchClusterInfo(),
-  //       this.receiver?.fetchLicenseInfo(),
-  //     ]);
-
-  //     this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
-  //     this.logger.debug(
-  //       `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
-  //     );
-
-  //     await this.sendEvents(
-  //       toSend,
-  //       telemetryUrl,
-  //       channel,
-  //       clusterInfo?.cluster_uuid,
-  //       clusterInfo?.version?.number,
-  //       licenseInfo?.uid
-  //     );
-  //   } catch (err) {
-  //     this.logger.warn(`Error sending telemetry events data: ${err}`);
-  //   }
-  // }
 
   private async fetchTelemetryUrl(channel: string): Promise<string> {
     const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
