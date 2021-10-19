@@ -8,7 +8,6 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { IBrowserSimpleFields, ConfigKeys, DataStream } from '../types';
 import { defaultValues as commonDefaultValues } from '../common/default_values';
-import { defaultValues as tlsDefaultValues } from '../tls/default_values';
 
 interface IBrowserSimpleFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<IBrowserSimpleFields>>;
