@@ -18,32 +18,17 @@ import { IRuleSavedAttributesSavedObjectAttributes } from '../types';
 import { legacyGetRuleReference } from './legacy_utils';
 
 export const truncateMessageFields: SavedObjectMigrationFn<Record<string, unknown>> = (doc) => {
-  const { lastFailureMessage, lastSuccessMessage, ...restAttributes } = doc.attributes;
+  const { lastFailureMessage, lastSuccessMessage, ...otherAttributes } = doc.attributes;
 
   return {
     ...doc,
     attributes: {
+      ...otherAttributes,
       lastFailureMessage: truncateMessage(lastFailureMessage),
       lastSuccessMessage: truncateMessage(lastSuccessMessage),
-      ...restAttributes,
     },
     references: doc.references ?? [],
   };
-};
-
-/**
- * This side-car rule status SO is deprecated and is to be replaced by the RuleExecutionLog on Event-Log and
- * additional fields on the Alerting Framework Rule SO.
- *
- * @deprecated Remove this once we've fully migrated to event-log and no longer require addition status SO (8.x)
- */
-export const legacyRuleStatusSavedObjectMigration = {
-  '7.15.2': truncateMessageFields,
-  '7.16.0': (
-    doc: SavedObjectUnsanitizedDoc<IRuleSavedAttributesSavedObjectAttributes>
-  ): SavedObjectSanitizedDoc<IRuleSavedAttributesSavedObjectAttributes> => {
-    return legacyMigrateRuleAlertIdSOReferences(doc);
-  },
 };
 
 /**
@@ -62,29 +47,24 @@ export const legacyRuleStatusSavedObjectMigration = {
 export const legacyMigrateRuleAlertIdSOReferences = (
   doc: SavedObjectUnsanitizedDoc<IRuleSavedAttributesSavedObjectAttributes>
 ): SavedObjectSanitizedDoc<IRuleSavedAttributesSavedObjectAttributes> => {
-  const { references } = doc;
+  const { alertId, ...otherAttributes } = doc.attributes;
+  const existingReferences = doc.references ?? [];
 
-  // Isolate alertId from the doc
-  const { alertId, ...attributesWithoutAlertId } = doc.attributes;
-  const existingReferences = references ?? [];
-
+  // early return if alertId is not a string as expected
   if (!isString(alertId)) {
-    // early return if alertId is not a string as expected
     return { ...doc, references: existingReferences };
-  } else {
-    const alertReferences = legacyMigrateAlertId({
-      alertId,
-      existingReferences,
-    });
-
-    return {
-      ...doc,
-      attributes: {
-        ...attributesWithoutAlertId.attributes,
-      },
-      references: [...existingReferences, ...alertReferences],
-    };
   }
+
+  const alertReferences = legacyMigrateAlertId({
+    alertId,
+    existingReferences,
+  });
+
+  return {
+    ...doc,
+    attributes: otherAttributes,
+    references: [...existingReferences, ...alertReferences],
+  };
 };
 
 /**
@@ -112,4 +92,15 @@ export const legacyMigrateAlertId = ({
   } else {
     return [legacyGetRuleReference(alertId)];
   }
+};
+
+/**
+ * This side-car rule status SO is deprecated and is to be replaced by the RuleExecutionLog on Event-Log and
+ * additional fields on the Alerting Framework Rule SO.
+ *
+ * @deprecated Remove this once we've fully migrated to event-log and no longer require addition status SO (8.x)
+ */
+export const legacyRuleStatusSavedObjectMigration = {
+  '7.15.2': truncateMessageFields,
+  '7.16.0': legacyMigrateRuleAlertIdSOReferences,
 };
