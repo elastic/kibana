@@ -47,7 +47,7 @@ export const createThreatSignals = async ({
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
   const perPage = concurrentSearches * itemsPerSearch;
   const verifyExecutionCanProceed = buildExecutionIntervalValidator(
-    ruleSO.attributes.schedule.interval
+    completeRule.ruleConfig.schedule.interval
   );
 
   let results: SearchAfterAndBulkCreateReturnType = {
