@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  FieldValuePair,
-  HistogramItem,
-  RawResponseBase,
-  SearchStrategyClientParams,
-} from '../types';
+import { FieldValuePair, HistogramItem } from '../types';
 
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from './constants';
 import { FieldStats } from '../field_stats_types';
@@ -33,11 +28,7 @@ export interface FailedTransactionsCorrelationsParams {
   percentileThreshold: number;
 }
 
-export type FailedTransactionsCorrelationsRequestParams =
-  FailedTransactionsCorrelationsParams & SearchStrategyClientParams;
-
-export interface FailedTransactionsCorrelationsRawResponse
-  extends RawResponseBase {
+export interface FailedTransactionsCorrelationsRawResponse {
   log: string[];
   failedTransactionsCorrelations?: FailedTransactionsCorrelation[];
   percentileThresholdValue?: number;

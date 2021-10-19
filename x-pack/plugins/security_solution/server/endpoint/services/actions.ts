@@ -6,15 +6,28 @@
  */
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
+import { SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
+import { ApiResponse } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
   ActivityLog,
+  ActivityLogEntry,
   EndpointAction,
+  LogsEndpointAction,
   EndpointActionResponse,
   EndpointPendingActions,
+  LogsEndpointActionResponse,
 } from '../../../common/endpoint/types';
-import { catchAndWrapError } from '../utils';
+import {
+  catchAndWrapError,
+  categorizeActionResults,
+  categorizeResponseResults,
+  getActionRequestsResult,
+  getActionResponsesResult,
+  getTimeSortedData,
+  getUniqueLogData,
+} from '../utils';
 import { EndpointMetadataService } from './metadata';
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
@@ -38,9 +51,9 @@ export const getAuditLogResponse = async ({
 }): Promise<ActivityLog> => {
   const size = Math.floor(pageSize / 2);
   const from = page <= 1 ? 0 : page * size - size + 1;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   const data = await getActivityLog({
-    esClient,
+    context,
     from,
     size,
     startDate,
@@ -59,7 +72,7 @@ export const getAuditLogResponse = async ({
 };
 
 const getActivityLog = async ({
-  esClient,
+  context,
   size,
   from,
   startDate,
@@ -67,83 +80,39 @@ const getActivityLog = async ({
   elasticAgentId,
   logger,
 }: {
-  esClient: ElasticsearchClient;
+  context: SecuritySolutionRequestHandlerContext;
   elasticAgentId: string;
   size: number;
   from: number;
   startDate: string;
   endDate: string;
   logger: Logger;
-}) => {
-  const options = {
-    headers: {
-      'X-elastic-product-origin': 'fleet',
-    },
-    ignore: [404],
-  };
-
-  let actionsResult;
-  let responsesResult;
-  const dateFilters = [
-    { range: { '@timestamp': { gte: startDate } } },
-    { range: { '@timestamp': { lte: endDate } } },
-  ];
+}): Promise<ActivityLogEntry[]> => {
+  let actionsResult: ApiResponse<SearchResponse<unknown>, unknown>;
+  let responsesResult: ApiResponse<SearchResponse<unknown>, unknown>;
 
   try {
     // fetch actions with matching agent_id
-    const baseActionFilters = [
-      { term: { agents: elasticAgentId } },
-      { term: { input_type: 'endpoint' } },
-      { term: { type: 'INPUT_ACTION' } },
-    ];
-    const actionsFilters = [...baseActionFilters, ...dateFilters];
-    actionsResult = await esClient.search(
-      {
-        index: AGENT_ACTIONS_INDEX,
-        size,
-        from,
-        body: {
-          query: {
-            bool: {
-              // @ts-ignore
-              filter: actionsFilters,
-            },
-          },
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-        },
-      },
-      options
-    );
-    const actionIds = actionsResult?.body?.hits?.hits?.map(
-      (e) => (e._source as EndpointAction).action_id
-    );
+    const { actionIds, actionRequests } = await getActionRequestsResult({
+      context,
+      logger,
+      elasticAgentId,
+      startDate,
+      endDate,
+      size,
+      from,
+    });
+    actionsResult = actionRequests;
 
-    // fetch responses with matching `action_id`s
-    const baseResponsesFilter = [
-      { term: { agent_id: elasticAgentId } },
-      { terms: { action_id: actionIds } },
-    ];
-    const responsesFilters = [...baseResponsesFilter, ...dateFilters];
-    responsesResult = await esClient.search(
-      {
-        index: AGENT_ACTIONS_RESULTS_INDEX,
-        size: 1000,
-        body: {
-          query: {
-            bool: {
-              filter: responsesFilters,
-            },
-          },
-        },
-      },
-      options
-    );
+    // fetch responses with matching unique set of `action_id`s
+    responsesResult = await getActionResponsesResult({
+      actionIds: [...new Set(actionIds)], // de-dupe `action_id`s
+      context,
+      logger,
+      elasticAgentId,
+      startDate,
+      endDate,
+    });
   } catch (error) {
     logger.error(error);
     throw error;
@@ -153,21 +122,26 @@ const getActivityLog = async ({
     throw new Error(`Error fetching actions log for agent_id ${elasticAgentId}`);
   }
 
-  const responses = responsesResult?.body?.hits?.hits?.length
-    ? responsesResult?.body?.hits?.hits?.map((e) => ({
-        type: 'response',
-        item: { id: e._id, data: e._source },
-      }))
-    : [];
-  const actions = actionsResult?.body?.hits?.hits?.length
-    ? actionsResult?.body?.hits?.hits?.map((e) => ({
-        type: 'action',
-        item: { id: e._id, data: e._source },
-      }))
-    : [];
-  const sortedData = ([...responses, ...actions] as ActivityLog['data']).sort((a, b) =>
-    new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
-  );
+  // label record as `action`, `fleetAction`
+  const responses = categorizeResponseResults({
+    results: responsesResult?.body?.hits?.hits as Array<
+      SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
+    >,
+  });
+
+  // label record as `response`, `fleetResponse`
+  const actions = categorizeActionResults({
+    results: actionsResult?.body?.hits?.hits as Array<
+      SearchHit<EndpointAction | LogsEndpointAction>
+    >,
+  });
+
+  // filter out the duplicate endpoint actions that also have fleetActions
+  // include endpoint actions that have no fleet actions
+  const uniqueLogData = getUniqueLogData([...responses, ...actions]);
+
+  // sort by @timestamp in desc order, newest first
+  const sortedData = getTimeSortedData(uniqueLogData);
 
   return sortedData;
 };
