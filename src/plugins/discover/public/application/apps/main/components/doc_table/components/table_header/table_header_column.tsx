@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { SortOrder } from './helpers';
 import { DocViewTableScoreSortWarning } from './score_sort_warning';
 
@@ -66,6 +66,14 @@ export function TableHeaderColumn({
   const curSortWithoutCol = sortOrder.filter((pair) => pair[0] !== name);
   const curColSort = sortOrder.find((pair) => pair[0] === name);
   const curColSortDir = (curColSort && curColSort[1]) || '';
+
+  const primaryTimeAriaLabel = i18n.translate(
+    'discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel',
+    { defaultMessage: 'Primary time field.' }
+  );
+  const primaryTimeTooltip = i18n.translate('discover.docTable.tableHeader.timeFieldIconTooltip', {
+    defaultMessage: 'This field represents the time that events occurred.',
+  });
 
   // If this is the _score column, and _score is not one of the columns inside the sort, show a
   // warning that the _score will not be retrieved from Elasticsearch
@@ -187,14 +195,13 @@ export function TableHeaderColumn({
         {showScoreSortWarning && <DocViewTableScoreSortWarning />}
         {displayName}
         {isTimeColumn && (
-          <EuiToolTip
-            key="time-column"
-            content={i18n.translate('discover.docTable.tableHeader.timeFieldIconTooltip', {
-              defaultMessage: 'This column represents primary time field of the data view',
-            })}
-          >
-            <EuiIcon type="clock" color="primary" size="s" />
-          </EuiToolTip>
+          <EuiIconTip
+            key="time-icon"
+            type="clock"
+            color="primary"
+            aria-label={primaryTimeAriaLabel}
+            content={primaryTimeTooltip}
+          />
         )}
         {buttons
           .filter((button) => button.active)
