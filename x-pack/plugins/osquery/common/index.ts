@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110906
-/* eslint-disable @kbn/eslint/no_export_all */
-
-export * from './constants';
+export { DEFAULT_DARK_MODE, OSQUERY_INTEGRATION_NAME, BASE_PATH } from './constants';
 
 export const PLUGIN_ID = 'osquery';
 export const PLUGIN_NAME = 'Osquery';

@@ -33,14 +33,14 @@ export class Binder {
     destroyers.forEach((fn) => fn());
   }
 
-  jqOn(el: HTMLElement, ...args: [string, (event: JQueryEventObject) => void]) {
+  jqOn(el: HTMLElement, ...args: [string, (event: JQuery.Event) => void]) {
     const $el = $(el);
     $el.on(...args);
     this.disposal.push(() => $el.off(...args));
   }
 
-  fakeD3Bind(el: HTMLElement, event: string, handler: (event: JQueryEventObject) => void) {
-    this.jqOn(el, event, (e: JQueryEventObject) => {
+  fakeD3Bind(el: HTMLElement, event: string, handler: (event: JQuery.Event) => void) {
+    this.jqOn(el, event, (e: JQuery.Event) => {
       // mimic https://github.com/mbostock/d3/blob/3abb00113662463e5c19eb87cd33f6d0ddc23bc0/src/selection/on.js#L87-L94
       const o = d3.event; // Events can be reentrant (e.g., focus).
       d3.event = e;
