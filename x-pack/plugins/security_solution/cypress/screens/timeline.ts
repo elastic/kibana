@@ -28,6 +28,8 @@ export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
 export const COMBO_BOX = '.euiComboBoxOption__content';
 
+export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
+
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
