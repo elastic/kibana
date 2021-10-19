@@ -31,7 +31,14 @@ export function IncompleteBadge({ seriesConfig, series }: Props) {
   const incompleteDefinition = isEmpty(reportDefinitions)
     ? i18n.translate('xpack.observability.overview.exploratoryView.missingReportDefinition', {
         defaultMessage: 'Missing {reportDefinition}',
-        values: { reportDefinition: labels?.[definitionFields[0]] },
+        values: {
+          reportDefinition:
+            labels?.[
+              typeof definitionFields[0] === 'string'
+                ? definitionFields[0]
+                : definitionFields[0].field
+            ],
+        },
       })
     : '';
 

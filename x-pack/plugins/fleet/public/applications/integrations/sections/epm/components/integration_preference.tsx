@@ -54,7 +54,7 @@ const title = (
 const recommendedTooltip = (
   <FormattedMessage
     id="xpack.fleet.epm.integrationPreference.recommendedTooltip"
-    defaultMessage="Generally available (GA) integrations are recommended over beta and experimental."
+    defaultMessage="We recommend Elastic Agent integrations when they are generally available."
   />
 );
 
