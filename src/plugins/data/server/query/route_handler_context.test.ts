@@ -164,7 +164,9 @@ describe('saved query route handler context', () => {
 
     it('should throw an error if the saved query does not have a title', async () => {
       const response = context.create({ ...savedQueryAttributes, title: '' });
-      expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
+      expect(response).rejects.toMatchInlineSnapshot(
+        `[Error: Cannot create saved query without a title]`
+      );
     });
   });
 
@@ -209,7 +211,9 @@ describe('saved query route handler context', () => {
 
     it('should throw an error if the saved query does not have a title', async () => {
       const response = context.create({ ...savedQueryAttributes, title: '' });
-      expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
+      expect(response).rejects.toMatchInlineSnapshot(
+        `[Error: Cannot create saved query without a title]`
+      );
     });
   });
 
