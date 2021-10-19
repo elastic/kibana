@@ -7,12 +7,16 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiTitle,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiPageContent,
+  EuiText,
+  EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import { PolicyTrustedAppsEmptyUnassigned, PolicyTrustedAppsEmptyUnexisting } from '../empty';
 import {
@@ -21,13 +25,18 @@ import {
   policyDetails,
   doesPolicyHaveTrustedApps,
   doesTrustedAppExistsLoading,
+  getPolicyTrustedAppsListPagination,
 } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
 import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../../../common/constants';
+import { getTrustedAppsListPath } from '../../../../../common/routing';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
+  const { getAppUrl } = useAppUrl();
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const doesTrustedAppExists = usePolicyDetailsSelector(getDoesTrustedAppExists);
   const isDoesTrustedAppExistsLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
@@ -35,6 +44,9 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
   const navigateCallback = usePolicyDetailsNavigateCallback();
   const hasAssignedTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
   const { isPlatinumPlus } = useEndpointPrivileges();
+  const totalAssignedCount = usePolicyDetailsSelector(
+    getPolicyTrustedAppsListPagination
+  ).totalItemCount;
 
   const showListFlyout = location.show === 'list';
 
@@ -78,21 +90,57 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
     [hasAssignedTrustedApps.loading, isDoesTrustedAppExistsLoading]
   );
 
+  const aboutInfo = useMemo(() => {
+    const link = (
+      <EuiLink href={getAppUrl({ appId: APP_ID, path: getTrustedAppsListPath() })} target="_blank">
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.trustedApps.layout.about.viewAllLinkLabel"
+          defaultMessage="view all trusted applications"
+        />
+      </EuiLink>
+    );
+
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.policy.trustedApps.layout.about"
+        defaultMessage="There {count, plural, one {is} other {are}} {count} trusted {count, plural, =1 {application} other {applications}} associated with this policy. Click here to {link}"
+        values={{
+          count: totalAssignedCount,
+          link,
+        }}
+      />
+    );
+  }, [getAppUrl, totalAssignedCount]);
+
   return policyItem ? (
     <div>
       {!displaysEmptyStateIsLoading && !displaysEmptyState ? (
-        <EuiPageHeader alignItems="center">
-          <EuiPageHeaderSection>
-            <EuiTitle size="m">
-              <h2>
-                {i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.layout.title', {
-                  defaultMessage: 'Assigned trusted applications',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-          <EuiPageHeaderSection>{isPlatinumPlus && assignTrustedAppButton}</EuiPageHeaderSection>
-        </EuiPageHeader>
+        <>
+          <EuiPageHeader alignItems="center">
+            <EuiPageHeaderSection>
+              <EuiTitle size="m">
+                <h2>
+                  {i18n.translate(
+                    'xpack.securitySolution.endpoint.policy.trustedApps.layout.title',
+                    {
+                      defaultMessage: 'Assigned trusted applications',
+                    }
+                  )}
+                </h2>
+              </EuiTitle>
+
+              <EuiSpacer size="s" />
+
+              <EuiText size="xs">
+                <p>{aboutInfo}</p>
+              </EuiText>
+            </EuiPageHeaderSection>
+
+            <EuiPageHeaderSection>{isPlatinumPlus && assignTrustedAppButton}</EuiPageHeaderSection>
+          </EuiPageHeader>
+
+          <EuiSpacer size="m" />
+        </>
       ) : null}
       <EuiPageContent
         hasBorder={false}
@@ -114,7 +162,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
             />
           )
         ) : (
-          <PolicyTrustedAppsList />
+          <PolicyTrustedAppsList hideTotalShowingLabel={true} />
         )}
       </EuiPageContent>
       {isPlatinumPlus && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
