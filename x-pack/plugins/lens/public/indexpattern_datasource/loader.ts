@@ -232,13 +232,12 @@ export async function loadInitialState({
   const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
     ? loadIndexPatternRefs(indexPatternsService)
     : []);
+
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
+  const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
 
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
-
-  const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
-
   const usedPatterns = (
     initialContext
       ? [initialContext.indexPatternId]
@@ -281,10 +280,6 @@ export async function loadInitialState({
 
   if (currentIndexPatternId) {
     setLastUsedIndexPatternId(storage, currentIndexPatternId);
-
-    if (!usedPatterns.includes(currentIndexPatternId)) {
-      usedPatterns.push(currentIndexPatternId);
-    }
   }
 
   return {

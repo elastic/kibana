@@ -61,6 +61,9 @@ export function ChangeIndexPattern({
       <EuiPopover
         panelClassName="lnsChangeIndexPatternPopover"
         button={createTrigger()}
+        panelProps={{
+          ['data-test-subj']: 'lnsChangeIndexPatternPopover',
+        }}
         isOpen={isPopoverOpen}
         closePopover={() => setPopoverIsOpen(false)}
         display="block"
