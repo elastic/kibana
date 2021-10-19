@@ -24980,7 +24980,6 @@
     "xpack.triggersActionsUI.components.healthCheck.alertsErrorAction": "方法を確認してください。",
     "xpack.triggersActionsUI.components.healthCheck.alertsErrorTitle": "アラートとアクションを有効にする必要があります",
     "xpack.triggersActionsUI.components.healthCheck.encryptionErrorAction": "方法を確認してください。",
-    "xpack.triggersActionsUI.components.healthCheck.encryptionErrorAfterKey": " kibana.ymlファイルで、暗号化された保存されたプラグインが有効になっていることを確認してください。",
     "xpack.triggersActionsUI.components.healthCheck.encryptionErrorBeforeKey": "ルールを作成するには、値を設定します ",
     "xpack.triggersActionsUI.components.healthCheck.encryptionErrorTitle": "暗号化された保存されたオブジェクトがありません",
     "xpack.triggersActionsUI.connectors.breadcrumbTitle": "コネクター",

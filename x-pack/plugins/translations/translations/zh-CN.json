@@ -25406,7 +25406,6 @@
     "xpack.triggersActionsUI.components.healthCheck.alertsErrorAction": "了解操作方法。",
     "xpack.triggersActionsUI.components.healthCheck.alertsErrorTitle": "必须启用“告警和操作”",
     "xpack.triggersActionsUI.components.healthCheck.encryptionErrorAction": "了解操作方法。",
-    "xpack.triggersActionsUI.components.healthCheck.encryptionErrorAfterKey": " 设置值，并确保启用加密已保存对象插件。",
     "xpack.triggersActionsUI.components.healthCheck.encryptionErrorBeforeKey": "要创建规则，请在 kibana.yml 文件中为： ",
     "xpack.triggersActionsUI.components.healthCheck.encryptionErrorTitle": "加密已保存对象不可用",
     "xpack.triggersActionsUI.connectors.breadcrumbTitle": "连接器",
