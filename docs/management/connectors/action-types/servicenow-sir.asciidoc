@@ -36,7 +36,7 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
    name: preconfigured-servicenow-connector-type
    actionTypeId: .servicenow-sir
    config:
-     apiUrl: https://dev94428.service-now.com/
+     apiUrl: https://example.service-now.com/
    secrets:
      username: testuser
      password: passwordkeystorevalue
