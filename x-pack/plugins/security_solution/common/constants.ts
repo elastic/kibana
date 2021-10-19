@@ -306,15 +306,16 @@ export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
 */
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
-  '.slack',
+  '.index',
+  '.jira',
   '.pagerduty',
-  '.swimlane',
-  '.webhook',
+  '.resilient',
   '.servicenow',
   '.servicenow-sir',
-  '.jira',
-  '.resilient',
+  '.slack',
+  '.swimlane',
   '.teams',
+  '.webhook',
 ];
 
 if (ENABLE_CASE_CONNECTOR) {
