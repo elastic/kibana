@@ -59,7 +59,7 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     '**/*.d.ts',
   ].concat(additionalIgnore);
 
-  const entries = await globAsync('*.{js,jsx,ts,tsx,html}', {
+  const entries = await globAsync('*.{js,jsx,ts,tsx}', {
     cwd: inputPath,
     matchBase: true,
     ignore,
