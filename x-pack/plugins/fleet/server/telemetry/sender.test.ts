@@ -95,7 +95,7 @@ describe('getV3UrlFromV2', () => {
     const sender = new TelemetryEventsSender(logger);
     expect(
       sender.getV3UrlFromV2('https://telemetry-staging.elastic.co/xpack/v2/send', 'alerts-endpoint')
-    ).toBe('https://telemetry-staging.elastic.co/v3-dev/send/alerts-endpoint');
+    ).toBe('https://telemetry-staging.elastic.co/v3/send/alerts-endpoint');
   });
 
   it('should support ports and auth', () => {
