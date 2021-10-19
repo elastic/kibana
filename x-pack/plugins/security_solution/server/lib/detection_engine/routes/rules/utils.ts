@@ -103,8 +103,11 @@ export const transformAlertToRule = (
   return internalRuleToAPIResponse(alert, ruleStatus?.attributes, legacyRuleActions);
 };
 
-export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<RulesSchema>> => {
-  return alerts.map((alert) => transformAlertToRule(alert));
+export const transformAlertsToRules = (
+  alerts: RuleAlertType[],
+  legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
+): Array<Partial<RulesSchema>> => {
+  return alerts.map((alert) => transformAlertToRule(alert, undefined, legacyRuleActions[alert.id]));
 };
 
 export const transformFindAlerts = (

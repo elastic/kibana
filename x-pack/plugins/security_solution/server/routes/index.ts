@@ -91,12 +91,12 @@ export const initRoutes = (
   updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   patchRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesBulkRoute(router, isRuleRegistryEnabled);
-  performBulkActionRoute(router, ml, isRuleRegistryEnabled);
+  performBulkActionRoute(router, ml, logger, isRuleRegistryEnabled);
 
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);
   importRulesRoute(router, config, ml, isRuleRegistryEnabled);
-  exportRulesRoute(router, config, isRuleRegistryEnabled);
+  exportRulesRoute(router, config, logger, isRuleRegistryEnabled);
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
