@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { CcrShard } from './ccr_shard';
 export { CcrShardReact } from './ccr_shard_react';

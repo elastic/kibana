@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { ElasticsearchOverview } from './overview';
 export { ElasticsearchOverviewReact } from './overview';
 export { ElasticsearchNodes } from './nodes';
 export { NodeReact } from './node';

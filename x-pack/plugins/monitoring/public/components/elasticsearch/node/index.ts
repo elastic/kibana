@@ -6,5 +6,4 @@
  */
 
 export { NodeStatusIcon } from './status_icon';
-export { Node } from './node';
 export { NodeReact } from './node_react';
