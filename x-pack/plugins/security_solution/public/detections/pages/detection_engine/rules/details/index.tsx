@@ -300,10 +300,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   }, [rule, spacesApi]);
 
   const getLegacyUrlConflictCallout = useMemo(() => {
-    const outcome = rule?.outcome;
-    if (rule != null && spacesApi && outcome === 'conflict') {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const aliasTargetId = rule?.alias_target_id!; // This is always defined if outcome === 'conflict'
+    if (rule?.alias_target_id != null && spacesApi && rule.outcome === 'conflict') {
+      const aliasTargetId = rule.alias_target_id;
       // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
       // callout with a warning for the user, and provide a way for them to navigate to the other rule.
       const otherRulePath = `rules/id/${aliasTargetId}${window.location.search}${window.location.hash}`;

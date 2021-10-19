@@ -25,7 +25,7 @@ export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ 
         <h2>
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.listEmpty.title"
-            defaultMessage="Add your first Host Isolation Exception"
+            defaultMessage="Add your first Host isolation exception"
           />
         </h2>
       }
@@ -39,7 +39,7 @@ export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ 
         <EuiButton fill onClick={onAdd} data-test-subj="hostIsolationExceptions">
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.listEmpty.addButton"
-            defaultMessage="Add Host Isolation Exception"
+            defaultMessage="Add Host isolation exception"
           />
         </EuiButton>
       }
