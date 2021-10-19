@@ -44,6 +44,7 @@ describe('OverviewEmpty', () => {
     it('render with correct actions ', () => {
       expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
         elasticAgent: {
+          category: 'security',
           description:
             'Use Elastic Agent to collect security events and protect your endpoints from threats.',
           title: 'Add a Security integration',
@@ -64,6 +65,7 @@ describe('OverviewEmpty', () => {
     it('render with correct actions ', () => {
       expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
         elasticAgent: {
+          category: 'security',
           description:
             'Use Elastic Agent to collect security events and protect your endpoints from threats.',
           title: 'Add a Security integration',
