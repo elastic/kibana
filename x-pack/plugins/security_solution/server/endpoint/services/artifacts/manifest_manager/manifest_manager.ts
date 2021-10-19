@@ -26,6 +26,7 @@ import {
   getEndpointEventFiltersList,
   getEndpointExceptionList,
   getEndpointTrustedAppsList,
+  getHostIsolationExceptionsList,
   Manifest,
 } from '../../../lib/artifacts';
 import {
@@ -237,6 +238,46 @@ export class ManifestManager {
     );
   }
 
+  protected async buildHostIsolationExceptionsArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildHostIsolationExceptionForOs(os));
+    }
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(
+            await this.buildHostIsolationExceptionForOs(os, policyId)
+          );
+        }
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  protected async buildHostIsolationExceptionForOs(
+    os: string,
+    policyId?: string
+  ): Promise<InternalArtifactCompleteSchema> {
+    return buildArtifact(
+      await getHostIsolationExceptionsList(
+        this.exceptionListClient,
+        this.schemaVersion,
+        os,
+        policyId
+      ),
+      this.schemaVersion,
+      os,
+      ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME
+    );
+  }
+
   /**
    * Writes new artifact SO.
    *
@@ -381,6 +422,7 @@ export class ManifestManager {
       this.buildExceptionListArtifacts(),
       this.buildTrustedAppsArtifacts(),
       this.buildEventFiltersArtifacts(),
+      this.buildHostIsolationExceptionsArtifacts(),
     ]);
 
     const manifest = new Manifest({

@@ -145,6 +145,7 @@ export const scheduleThrottledNotificationActions = async ({
         ` "from": now-${throttle}`,
         ` "to": ${startedAt.toISOString()}.`,
         ' This will cause a reset of the notification throttle. Expect either missing alert notifications or alert notifications happening earlier than expected.',
+        ` Check your rule with ruleId: "${ruleId}" for data integrity issues`,
       ].join('')
     );
   }

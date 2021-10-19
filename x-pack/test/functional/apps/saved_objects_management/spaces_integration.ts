@@ -31,7 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     return bools.every((currBool) => currBool === true);
   };
 
-  describe('spaces integration', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/115303
+  describe.skip('spaces integration', () => {
     before(async () => {
       await spacesService.create({ id: spaceId, name: spaceId });
       await kibanaServer.importExport.load(
