@@ -15,7 +15,7 @@ export interface CurationSuggestion {
   status: 'pending' | 'applied' | 'automated' | 'rejected' | 'disabled';
   curation_id?: string; // The id of an existing curation that this suggestion would affect
   operation: 'create' | 'update' | 'delete';
-  override_curation_id?: string;
+  override_manual_curation?: boolean;
 }
 
 // A curation suggestion with linked ids hydrated with actual values
