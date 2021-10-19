@@ -14,14 +14,14 @@ import { SIGNIFICANT_VALUE_DIGITS } from '../../../../common/correlations/consta
 import type {
   FieldValuePair,
   ResponseHit,
-  SearchStrategyParams,
+  CorrelationsParams,
 } from '../../../../common/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 export const getTransactionDurationPercentilesRequest = (
-  params: SearchStrategyParams,
+  params: CorrelationsParams,
   percents?: number[],
   termFilters?: FieldValuePair[]
 ): estypes.SearchRequest => {
@@ -50,7 +50,7 @@ export const getTransactionDurationPercentilesRequest = (
 
 export const fetchTransactionDurationPercentiles = async (
   esClient: ElasticsearchClient,
-  params: SearchStrategyParams,
+  params: CorrelationsParams,
   percents?: number[],
   termFilters?: FieldValuePair[]
 ): Promise<{ totalDocs: number; percentiles: Record<string, number> }> => {

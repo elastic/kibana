@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { SearchStrategyParams } from '../../../../common/correlations/types';
+import type { CorrelationsParams } from '../../../../common/correlations/types';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 
@@ -20,7 +20,7 @@ import {
 
 export const fetchPValues = async (
   esClient: ElasticsearchClient,
-  paramsWithIndex: SearchStrategyParams,
+  paramsWithIndex: CorrelationsParams,
   fieldCandidates: string[]
 ) => {
   const histogramRangeSteps = await fetchTransactionDurationHistogramRangeSteps(

@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type {
   FieldValuePair,
-  SearchStrategyParams,
+  CorrelationsParams,
 } from '../../../../common/correlations/types';
 import { getCorrelationsFilters } from './get_filters';
 
@@ -17,7 +17,7 @@ export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
 };
 
 interface QueryParams {
-  params: SearchStrategyParams;
+  params: CorrelationsParams;
   termFilters?: FieldValuePair[];
 }
 export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {

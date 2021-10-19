@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type {
   FieldValuePair,
-  SearchStrategyParams,
+  CorrelationsParams,
 } from '../../../../common/correlations/types';
 import { TERMS_SIZE } from '../../../../common/correlations/constants';
 
@@ -19,7 +19,7 @@ import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 export const getTermsAggRequest = (
-  params: SearchStrategyParams,
+  params: CorrelationsParams,
   fieldName: string
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
@@ -39,7 +39,7 @@ export const getTermsAggRequest = (
 
 const fetchTransactionDurationFieldTerms = async (
   esClient: ElasticsearchClient,
-  params: SearchStrategyParams,
+  params: CorrelationsParams,
   fieldName: string
 ): Promise<FieldValuePair[]> => {
   const resp = await esClient.search(getTermsAggRequest(params, fieldName));
@@ -68,7 +68,7 @@ const fetchTransactionDurationFieldTerms = async (
 
 export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
-  params: SearchStrategyParams,
+  params: CorrelationsParams,
   fieldCandidates: string[]
 ): Promise<FieldValuePair[]> => {
   const responses = await Promise.all(

@@ -13,7 +13,7 @@ import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldname
 import type {
   FieldValuePair,
   ResponseHit,
-  SearchStrategyParams,
+  CorrelationsParams,
 } from '../../../../common/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
@@ -33,7 +33,7 @@ export interface BucketCorrelation {
 }
 
 export const getTransactionDurationCorrelationRequest = (
-  params: SearchStrategyParams,
+  params: CorrelationsParams,
   expectations: number[],
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
@@ -87,7 +87,7 @@ export const getTransactionDurationCorrelationRequest = (
 
 export const fetchTransactionDurationCorrelation = async (
   esClient: ElasticsearchClient,
-  params: SearchStrategyParams,
+  params: CorrelationsParams,
   expectations: number[],
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],

@@ -13,7 +13,6 @@ import { IHttpFetchError } from 'src/core/public';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
-import type { RawResponseBase } from '../../../../common/correlations/types';
 import type {
   FailedTransactionsCorrelation,
   FailedTransactionsCorrelationsRawResponse,
@@ -26,9 +25,9 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 
-type Response = FailedTransactionsCorrelationsRawResponse & RawResponseBase;
+type Response = FailedTransactionsCorrelationsRawResponse;
 
-interface SearchStrategyProgress {
+interface CorrelationsProgress {
   error?: Error | IHttpFetchError;
   isRunning: boolean;
   loaded: number;
@@ -46,7 +45,7 @@ const getInitialRawResponse = (): Response =>
     ccsWarning: false,
   } as Response);
 
-const getInitialProgress = (): SearchStrategyProgress => ({
+const getInitialProgress = (): CorrelationsProgress => ({
   isRunning: false,
   loaded: 0,
   total: 100,
@@ -77,7 +76,7 @@ export function useFailedTransactionsCorrelations() {
   );
 
   const [fetchState, setFetchState] = useReducer(
-    getReducer<SearchStrategyProgress>(),
+    getReducer<CorrelationsProgress>(),
     getInitialProgress()
   );
 

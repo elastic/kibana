@@ -14,14 +14,14 @@ import type {
   FieldValuePair,
   HistogramItem,
   ResponseHit,
-  SearchStrategyParams,
+  CorrelationsParams,
 } from '../../../../common/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 export const getTransactionDurationHistogramRequest = (
-  params: SearchStrategyParams,
+  params: CorrelationsParams,
   interval: number,
   termFilters?: FieldValuePair[]
 ): estypes.SearchRequest => ({
@@ -39,7 +39,7 @@ export const getTransactionDurationHistogramRequest = (
 
 export const fetchTransactionDurationHistogram = async (
   esClient: ElasticsearchClient,
-  params: SearchStrategyParams,
+  params: CorrelationsParams,
   interval: number,
   termFilters?: FieldValuePair[]
 ): Promise<HistogramItem[]> => {

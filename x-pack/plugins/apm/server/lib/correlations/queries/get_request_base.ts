@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SearchStrategyParams } from '../../../../common/correlations/types';
+import type { CorrelationsParams } from '../../../../common/correlations/types';
 
 export const getRequestBase = ({
   index,
   includeFrozen,
-}: SearchStrategyParams) => ({
+}: CorrelationsParams) => ({
   index,
   // matches APM's event client settings
   ignore_throttled: includeFrozen === undefined ? true : !includeFrozen,

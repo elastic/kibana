@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { SearchStrategyParams } from '../../../../common/correlations/types';
+import type { CorrelationsParams } from '../../../../common/correlations/types';
 import {
   FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
   FIELDS_TO_ADD_AS_CANDIDATE,
@@ -31,7 +31,7 @@ export const shouldBeExcluded = (fieldName: string) => {
 };
 
 export const getRandomDocsRequest = (
-  params: SearchStrategyParams
+  params: CorrelationsParams
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
   body: {
@@ -50,7 +50,7 @@ export const getRandomDocsRequest = (
 
 export const fetchTransactionDurationFieldCandidates = async (
   esClient: ElasticsearchClient,
-  params: SearchStrategyParams
+  params: CorrelationsParams
 ): Promise<{ fieldCandidates: string[] }> => {
   const { index } = params;
   // Get all fields with keyword mapping

@@ -26,34 +26,20 @@ export interface ResponseHit {
   _source: ResponseHitSource;
 }
 
-export interface RawResponseBase {
-  ccsWarning: boolean;
-}
-
-export interface SearchStrategyClientParamsBase {
+export interface CorrelationsClientParams {
   environment: string;
   kuery: string;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
-}
-
-export interface RawSearchStrategyClientParams
-  extends SearchStrategyClientParamsBase {
-  start?: string;
-  end?: string;
-}
-
-export interface SearchStrategyClientParams
-  extends SearchStrategyClientParamsBase {
   start: number;
   end: number;
 }
 
-export interface SearchStrategyServerParams {
+export interface CorrelationsServerParams {
   index: string;
   includeFrozen?: boolean;
 }
 
-export type SearchStrategyParams = SearchStrategyClientParams &
-  SearchStrategyServerParams;
+export type CorrelationsParams = CorrelationsClientParams &
+  CorrelationsServerParams;

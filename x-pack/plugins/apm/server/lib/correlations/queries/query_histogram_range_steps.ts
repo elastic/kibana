@@ -12,7 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
-import type { SearchStrategyParams } from '../../../../common/correlations/types';
+import type { CorrelationsParams } from '../../../../common/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
@@ -31,7 +31,7 @@ export const getHistogramRangeSteps = (
 };
 
 export const getHistogramIntervalRequest = (
-  params: SearchStrategyParams
+  params: CorrelationsParams
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
   body: {
@@ -46,7 +46,7 @@ export const getHistogramIntervalRequest = (
 
 export const fetchTransactionDurationHistogramRangeSteps = async (
   esClient: ElasticsearchClient,
-  params: SearchStrategyParams
+  params: CorrelationsParams
 ): Promise<number[]> => {
   const steps = 100;
 

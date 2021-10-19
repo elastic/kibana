@@ -11,10 +11,7 @@ import { chunk } from 'lodash';
 import { IHttpFetchError } from 'src/core/public';
 
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
-import type {
-  FieldValuePair,
-  RawResponseBase,
-} from '../../../../common/correlations/types';
+import type { FieldValuePair } from '../../../../common/correlations/types';
 import { getPrioritizedFieldValuePairs } from '../../../../common/correlations/utils';
 import type {
   LatencyCorrelation,
@@ -28,9 +25,9 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 
-type Response = LatencyCorrelationsRawResponse & RawResponseBase;
+type Response = LatencyCorrelationsRawResponse;
 
-interface SearchStrategyProgress {
+interface CorrelationsProgress {
   error?: Error | IHttpFetchError;
   isRunning: boolean;
   loaded: number;
@@ -48,7 +45,7 @@ const getInitialRawResponse = (): Response =>
     ccsWarning: false,
   } as Response);
 
-const getInitialProgress = (): SearchStrategyProgress => ({
+const getInitialProgress = (): CorrelationsProgress => ({
   isRunning: false,
   loaded: 0,
   total: 100,
@@ -79,7 +76,7 @@ export function useLatencyCorrelations() {
   );
 
   const [fetchState, setFetchState] = useReducer(
-    getReducer<SearchStrategyProgress>(),
+    getReducer<CorrelationsProgress>(),
     getInitialProgress()
   );
 

@@ -10,7 +10,7 @@ import { chunk } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   FieldValuePair,
-  SearchStrategyParams,
+  CorrelationsParams,
 } from '../../../../../common/correlations/types';
 import {
   FieldStats,
@@ -23,7 +23,7 @@ import { fetchBooleanFieldStats } from './get_boolean_field_stats';
 
 export const fetchFieldsStats = async (
   esClient: ElasticsearchClient,
-  params: SearchStrategyParams,
+  params: CorrelationsParams,
   fieldsToSample: string[],
   termFilters?: FieldValuePair[]
 ): Promise<{ stats: FieldStats[]; errors: any[] }> => {

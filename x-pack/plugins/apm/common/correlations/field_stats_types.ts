@@ -6,9 +6,9 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { SearchStrategyParams } from './types';
+import { CorrelationsParams } from './types';
 
-export interface FieldStatsCommonRequestParams extends SearchStrategyParams {
+export interface FieldStatsCommonRequestParams extends CorrelationsParams {
   samplerShardSize: number;
 }
 
