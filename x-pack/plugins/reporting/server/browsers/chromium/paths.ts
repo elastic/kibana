@@ -85,6 +85,7 @@ export class ChromiumArchivePaths {
   }
 
   public resolvePath(p: PackageInfo) {
+    // adding architecture to the path allows it to download two binaries that have the same name, but are different architecture
     return path.resolve(this.archivesPath, p.architecture, p.archiveFilename);
   }
 
