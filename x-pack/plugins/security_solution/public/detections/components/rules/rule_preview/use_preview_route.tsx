@@ -36,7 +36,7 @@ export const usePreviewRoute = ({
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
-  const [{ isLoading, response }, setRule] = usePreviewRule();
+  const { isLoading, response, rule, setRule } = usePreviewRule();
   const [warnings, setWarnings] = useState<string[]>(response.warnings ?? []);
 
   useEffect(() => {
@@ -51,6 +51,7 @@ export const usePreviewRoute = ({
   const clearPreview = useCallback(() => {
     setRule(null);
     setWarnings([]);
+    setIsRequestTriggered(false);
   }, [setRule]);
 
   useEffect(() => {
@@ -68,7 +69,7 @@ export const usePreviewRoute = ({
   ]);
 
   useEffect(() => {
-    if (isRequestTriggered) {
+    if (isRequestTriggered && rule === null) {
       setRule(
         formatPreviewRule({
           index,
@@ -80,15 +81,14 @@ export const usePreviewRoute = ({
           timeFrame,
         })
       );
-      setIsRequestTriggered(false);
     }
   }, [
-    setRule,
-    clearPreview,
     index,
     isRequestTriggered,
     query,
+    rule,
     ruleType,
+    setRule,
     threatIndex,
     threatMapping,
     threatQuery,

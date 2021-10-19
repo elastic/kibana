@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState, Dispatch } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
@@ -17,20 +17,13 @@ import { previewRule } from './api';
 import * as i18n from './translations';
 import { transformOutput } from './transforms';
 
-interface PreviewRuleReturn {
-  isLoading: boolean;
-  response: PreviewResponse;
-}
-
-export type ReturnPreviewRule = [PreviewRuleReturn, Dispatch<CreateRulesSchema | null>];
-
 const emptyPreviewRule: PreviewResponse = {
   previewId: undefined,
   errors: [],
   warnings: [],
 };
 
-export const usePreviewRule = (): ReturnPreviewRule => {
+export const usePreviewRule = () => {
   const [rule, setRule] = useState<CreateRulesSchema | null>(null);
   const [response, setResponse] = useState<PreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,5 +69,5 @@ export const usePreviewRule = (): ReturnPreviewRule => {
     };
   }, [rule, addError]);
 
-  return [{ isLoading, response }, setRule];
+  return { isLoading, response, rule, setRule };
 };

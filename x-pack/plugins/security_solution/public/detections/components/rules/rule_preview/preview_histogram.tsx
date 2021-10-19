@@ -31,6 +31,7 @@ interface PreviewHistogramProps {
   previewId: string;
   addNoiseWarning: () => void;
   isPreviewRequestInProgress: boolean;
+  spaceId: string;
 }
 
 const DEFAULT_HISTOGRAM_HEIGHT = 300;
@@ -40,11 +41,12 @@ export const PreviewHistogram = ({
   previewId,
   addNoiseWarning,
   isPreviewRequestInProgress,
+  spaceId,
 }: PreviewHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
 
-  const from = useMemo(() => `now-1${timeFrame}`, [timeFrame]);
-  const to = useMemo(() => 'now', []);
+  const from = `now-1${timeFrame}`;
+  const to = 'now';
   const startDate = useMemo(() => formatDate(from), [from]);
   const endDate = useMemo(() => formatDate(to), [to]);
 
@@ -52,6 +54,7 @@ export const PreviewHistogram = ({
     previewId,
     startDate,
     endDate,
+    spaceId,
   });
 
   useEffect(() => {
