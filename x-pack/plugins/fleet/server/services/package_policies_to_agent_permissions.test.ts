@@ -97,6 +97,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           lens: [],
           security_rule: [],
           ml_module: [],
+          tag: [],
         },
         elasticsearch: {
           component_template: [],
@@ -207,6 +208,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           lens: [],
           security_rule: [],
           ml_module: [],
+          tag: [],
         },
         elasticsearch: {
           component_template: [],
@@ -419,6 +421,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           lens: [],
           security_rule: [],
           ml_module: [],
+          tag: [],
         },
         elasticsearch: {
           component_template: [],
