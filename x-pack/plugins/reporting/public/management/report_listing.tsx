@@ -39,7 +39,7 @@ import {
   ReportStatusIndicator,
   ReportInfoFlyout,
 } from './components';
-import { guessAppIconTypeFromObjectType, jobHasIssues } from './utils';
+import { guessAppIconTypeFromObjectType } from './utils';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
