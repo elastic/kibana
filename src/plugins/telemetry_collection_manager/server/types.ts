@@ -65,13 +65,18 @@ export interface BasicStatsPayload {
   cluster_uuid: string;
   cluster_name: string;
   version: string;
-  cluster_stats: object;
+  cluster_stats: Record<string, unknown>;
   collection?: string;
   stack_stats: object;
 }
 
 export interface UsageStatsPayload extends BasicStatsPayload {
   collectionSource: string;
+}
+
+export interface OptInStatsPayload {
+  cluster_uuid: string;
+  opt_in_status: boolean;
 }
 
 export interface StatsCollectionContext {

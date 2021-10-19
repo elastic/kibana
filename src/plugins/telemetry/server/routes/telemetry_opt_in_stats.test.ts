@@ -12,9 +12,12 @@ import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 import { StatsGetterConfig } from 'src/plugins/telemetry_collection_manager/server';
 
 describe('sendTelemetryOptInStatus', () => {
+  const mockClusterUuid = 'mk_uuid';
   const mockStatsGetterConfig = { unencrypted: false } as StatsGetterConfig;
   const mockTelemetryCollectionManager = {
-    getOptInStats: jest.fn().mockResolvedValue(['mock_opt_in_hashed_value']),
+    getOptInStats: jest
+      .fn()
+      .mockResolvedValue([{ clusterUuid: mockClusterUuid, stats: 'mock_opt_in_hashed_value' }]),
   };
 
   beforeEach(() => {
@@ -39,8 +42,11 @@ describe('sendTelemetryOptInStatus', () => {
       Array [
         "https://telemetry.elastic.co/v3/send/kibana-opt_in_status",
         Object {
-          "body": "[\\"mock_opt_in_hashed_value\\"]",
+          "body": "\\"mock_opt_in_hashed_value\\"",
           "headers": Object {
+            "Content-Type": "application/json",
+            "X-Elastic-Cluster-ID": "mk_uuid",
+            "X-Elastic-Content-Encoding": "aes256gcm",
             "X-Elastic-Stack-Version": "mock_kibana_version",
           },
           "method": "post",
@@ -67,8 +73,11 @@ describe('sendTelemetryOptInStatus', () => {
       Array [
         "https://telemetry-staging.elastic.co/v3/send/kibana-opt_in_status",
         Object {
-          "body": "[\\"mock_opt_in_hashed_value\\"]",
+          "body": "\\"mock_opt_in_hashed_value\\"",
           "headers": Object {
+            "Content-Type": "application/json",
+            "X-Elastic-Cluster-ID": "mk_uuid",
+            "X-Elastic-Content-Encoding": "aes256gcm",
             "X-Elastic-Stack-Version": "mock_kibana_version",
           },
           "method": "post",

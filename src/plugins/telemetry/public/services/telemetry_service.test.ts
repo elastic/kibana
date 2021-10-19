@@ -251,7 +251,7 @@ describe('TelemetryService', () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },
       });
-      const mockPayload = ['mock_hashed_opt_in_status_payload'];
+      const mockPayload = [{ clusterUuid: 'mk_uuid', stats: 'mock_hashed_opt_in_status_payload' }];
       const mockUrl = 'mock_telemetry_optin_status_url';
 
       const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);
@@ -261,14 +261,21 @@ describe('TelemetryService', () => {
       expect(mockGetOptInStatusUrl).toBeCalledTimes(1);
       expect(mockFetch).toBeCalledTimes(1);
 
-      expect(mockFetch).toBeCalledWith(mockUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Elastic-Stack-Version': 'mockKibanaVersion',
-        },
-        body: JSON.stringify(mockPayload),
-      });
+      expect(mockFetch.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "mock_telemetry_optin_status_url",
+          Object {
+            "body": "mock_hashed_opt_in_status_payload",
+            "headers": Object {
+              "Content-Type": "application/json",
+              "X-Elastic-Cluster-ID": "mk_uuid",
+              "X-Elastic-Content-Encoding": "aes256gcm",
+              "X-Elastic-Stack-Version": "mockKibanaVersion",
+            },
+            "method": "POST",
+          },
+        ]
+      `);
     });
 
     it('swallows errors if fetch fails', async () => {

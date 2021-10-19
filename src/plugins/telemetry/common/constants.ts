@@ -28,6 +28,12 @@ export const PATH_TO_ADVANCED_SETTINGS = '/app/management/kibana/settings';
 export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-statement`;
 
 /**
+ * The telemetry payload content encryption encoding
+ */
+
+export const PAYLOAD_CONTENT_ENCODING = 'aes256gcm';
+
+/**
  * The endpoint version when hitting the remote telemetry service
  */
 export const ENDPOINT_VERSION = 'v3';
