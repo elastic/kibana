@@ -44,7 +44,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.ruleRegistry.write.cache.enabled=false',
         '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
-        '--xpack.securitySolution.enableExperimental=["riskyHostsEnabled", "ruleRegistryEnabled"]',
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'riskyHostsEnabled',
+          'ruleRegistryEnabled',
+        ])}`,
         `--home.disableWelcomeScreen=true`,
       ],
     },
