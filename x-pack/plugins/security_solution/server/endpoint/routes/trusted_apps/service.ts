@@ -15,13 +15,13 @@ import {
   DeleteTrustedAppsRequestParams,
   GetOneTrustedAppResponse,
   GetTrustedAppsListRequest,
-  GetTrustedAppsSummaryResponse,
   GetTrustedAppsListResponse,
+  GetTrustedAppsSummaryRequest,
+  GetTrustedAppsSummaryResponse,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
   PutTrustedAppUpdateRequest,
   PutTrustedAppUpdateResponse,
-  GetTrustedAppsSummaryRequest,
   TrustedApp,
 } from '../../../../common/endpoint/types';
 
@@ -33,8 +33,8 @@ import {
 } from './mapping';
 import {
   TrustedAppNotFoundError,
-  TrustedAppVersionConflictError,
   TrustedAppPolicyNotExistsError,
+  TrustedAppVersionConflictError,
 } from './errors';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { PackagePolicy } from '../../../../../fleet/common';
@@ -87,30 +87,61 @@ const isUserTryingToModifyEffectScopeWithoutPermissions = (
   }
 };
 
-export const deleteTrustedApp = async (
+/**
+ * Attempts to first fine the ExceptionItem using `item_id` and if not found, then a second attempt wil be done
+ * against the Saved Object `id`.
+ * @param exceptionsListClient
+ * @param id
+ */
+export const findTrustedAppExceptionItemByIdOrItemId = async (
   exceptionsListClient: ExceptionListClient,
-  { id }: DeleteTrustedAppsRequestParams
-) => {
-  const exceptionListItem = await exceptionsListClient.deleteExceptionListItem({
-    id,
-    itemId: undefined,
+  id: string
+): Promise<ExceptionListItemSchema | null> => {
+  const trustedAppExceptionItem = await exceptionsListClient.getExceptionListItem({
+    itemId: id,
+    id: undefined,
     namespaceType: 'agnostic',
   });
 
-  if (!exceptionListItem) {
+  if (trustedAppExceptionItem) {
+    return trustedAppExceptionItem;
+  }
+
+  return exceptionsListClient.getExceptionListItem({
+    itemId: undefined,
+    id,
+    namespaceType: 'agnostic',
+  });
+};
+
+export const deleteTrustedApp = async (
+  exceptionsListClient: ExceptionListClient,
+  { id }: DeleteTrustedAppsRequestParams
+): Promise<void> => {
+  const trustedAppExceptionItem = await findTrustedAppExceptionItemByIdOrItemId(
+    exceptionsListClient,
+    id
+  );
+
+  if (!trustedAppExceptionItem) {
     throw new TrustedAppNotFoundError(id);
   }
+
+  await exceptionsListClient.deleteExceptionListItem({
+    id: trustedAppExceptionItem.id,
+    itemId: undefined,
+    namespaceType: 'agnostic',
+  });
 };
 
 export const getTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
   id: string
 ): Promise<GetOneTrustedAppResponse> => {
-  const trustedAppExceptionItem = await exceptionsListClient.getExceptionListItem({
-    itemId: '',
-    id,
-    namespaceType: 'agnostic',
-  });
+  const trustedAppExceptionItem = await findTrustedAppExceptionItemByIdOrItemId(
+    exceptionsListClient,
+    id
+  );
 
   if (!trustedAppExceptionItem) {
     throw new TrustedAppNotFoundError(id);
@@ -189,19 +220,18 @@ export const updateTrustedApp = async (
   updatedTrustedApp: PutTrustedAppUpdateRequest,
   isAtLeastPlatinum: boolean
 ): Promise<PutTrustedAppUpdateResponse> => {
-  const currentTrustedApp = await exceptionsListClient.getExceptionListItem({
-    itemId: '',
-    id,
-    namespaceType: 'agnostic',
-  });
+  const currentTrustedAppExceptionItem = await findTrustedAppExceptionItemByIdOrItemId(
+    exceptionsListClient,
+    id
+  );
 
-  if (!currentTrustedApp) {
+  if (!currentTrustedAppExceptionItem) {
     throw new TrustedAppNotFoundError(id);
   }
 
   if (
     isUserTryingToModifyEffectScopeWithoutPermissions(
-      exceptionListItemToTrustedApp(currentTrustedApp),
+      exceptionListItemToTrustedApp(currentTrustedAppExceptionItem),
       updatedTrustedApp,
       isAtLeastPlatinum
     )
@@ -226,7 +256,10 @@ export const updateTrustedApp = async (
 
   try {
     updatedTrustedAppExceptionItem = await exceptionsListClient.updateExceptionListItem(
-      updatedTrustedAppToUpdateExceptionListItemOptions(currentTrustedApp, updatedTrustedApp)
+      updatedTrustedAppToUpdateExceptionListItemOptions(
+        currentTrustedAppExceptionItem,
+        updatedTrustedApp
+      )
     );
   } catch (e) {
     if (e?.output?.statusCode === 409) {

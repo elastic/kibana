@@ -52,7 +52,7 @@ jest.mock('../../../../common/hooks/use_license', () => {
   };
 });
 
-jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
