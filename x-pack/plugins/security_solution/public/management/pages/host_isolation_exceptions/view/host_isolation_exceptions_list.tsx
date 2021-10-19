@@ -148,12 +148,13 @@ export const HostIsolationExceptionsList = () => {
           []
         )
       }
+      hideHeader={isLoading || listItems.length === 0}
     >
       {showFlyout && <HostIsolationExceptionsFormFlyout />}
 
       {itemToDelete ? <HostIsolationExceptionDeleteModal /> : null}
 
-      {listItems.length ? (
+      {!isLoading && listItems.length ? (
         <SearchExceptions
           defaultValue={location.filter}
           onSearch={handleOnSearch}

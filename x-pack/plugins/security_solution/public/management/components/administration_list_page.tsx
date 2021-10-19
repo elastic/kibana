@@ -26,6 +26,7 @@ interface AdministrationListPageProps {
   actions?: React.ReactNode;
   restrictWidth?: boolean | number;
   hasBottomBorder?: boolean;
+  hideHeader?: boolean;
   headerBackComponent?: React.ReactNode;
 }
 
@@ -37,6 +38,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     children,
     restrictWidth = false,
     hasBottomBorder = true,
+    hideHeader = false,
     headerBackComponent,
     ...otherProps
   }) => {
@@ -61,7 +63,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
     const getTestId = useTestIdGenerator(otherProps['data-test-subj']);
 
-    return (
+    return !hideHeader ? (
       <div {...otherProps}>
         <EuiPageHeader
           pageTitle={header}
@@ -84,6 +86,8 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
         <SpyRoute pageName={SecurityPageName.administration} />
       </div>
+    ) : (
+      children
     );
   }
 );
