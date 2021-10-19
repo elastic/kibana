@@ -21,22 +21,20 @@ import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import {
-  APM_SEARCH_STRATEGIES,
-  DEFAULT_PERCENTILE_THRESHOLD,
-} from '../../../../../common/search_strategies/constants';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/search_strategies/constants';
 
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 import {
   TransactionDistributionChart,
   TransactionDistributionChartData,
 } from '../../../shared/charts/transaction_distribution_chart';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
-import { getOverallHistogram } from '../../correlations/utils/get_overall_histogram';
 
 import type { TabContentProps } from '../types';
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
@@ -73,11 +71,14 @@ export function TransactionDistribution({
   selection,
   traceSamples,
 }: TransactionDistributionProps) {
+  const { serviceName, transactionType } = useApmServiceContext();
+
   const {
     core: { notifications },
   } = useApmPluginContext();
 
   const { urlParams } = useUrlParams();
+  const { transactionName } = urlParams;
 
   const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
 
@@ -98,20 +99,56 @@ export function TransactionDistribution({
     }
   );
 
-  const { progress, response } = useSearchStrategy(
-    APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
-    {
-      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-      analyzeCorrelations: false,
-    }
-  );
-  const { overallHistogram, hasData, status } = getOverallHistogram(
-    response,
-    progress.isRunning
+  const {
+    query: { kuery, environment, rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/transactions/view');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const {
+    data = { log: [] },
+    status,
+    error,
+  } = useFetcher(
+    (callApmApi) => {
+      if (serviceName && environment && start && end) {
+        return callApmApi({
+          endpoint: 'GET /internal/apm/latency/overall_distribution',
+          params: {
+            query: {
+              serviceName,
+              transactionName,
+              transactionType,
+              kuery,
+              environment,
+              start,
+              end,
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+            },
+          },
+        });
+      }
+    },
+    [
+      serviceName,
+      transactionName,
+      transactionType,
+      kuery,
+      environment,
+      start,
+      end,
+    ]
   );
 
+  const overallHistogram =
+    data.overallHistogram === undefined && status !== FETCH_STATUS.LOADING
+      ? []
+      : data.overallHistogram;
+  const hasData =
+    Array.isArray(overallHistogram) && overallHistogram.length > 0;
+
   useEffect(() => {
-    if (isErrorMessage(progress.error)) {
+    if (isErrorMessage(error)) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.transactionDetails.distribution.errorTitle',
@@ -119,10 +156,10 @@ export function TransactionDistribution({
             defaultMessage: 'An error occurred fetching the distribution',
           }
         ),
-        text: progress.error.toString(),
+        text: error.toString(),
       });
     }
-  }, [progress.error, notifications.toasts]);
+  }, [error, notifications.toasts]);
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
@@ -213,7 +250,7 @@ export function TransactionDistribution({
         data={transactionDistributionChartData}
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-        markerValue={response.percentileThresholdValue ?? 0}
+        markerValue={data.percentileThresholdValue ?? 0}
         onChartSelection={onTrackedChartSelection as BrushEndListener}
         hasData={hasData}
         selection={selection}

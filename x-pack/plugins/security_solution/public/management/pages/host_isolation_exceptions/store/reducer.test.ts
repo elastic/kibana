@@ -13,7 +13,7 @@ import { hostIsolationExceptionsPageReducer } from './reducer';
 import { getCurrentLocation } from './selector';
 import { createEmptyHostIsolationException } from '../utils';
 
-describe('Host Isolation Exceptions Reducer', () => {
+describe('Host isolation exceptions Reducer', () => {
   let initialState: HostIsolationExceptionsPageState;
 
   beforeEach(() => {
