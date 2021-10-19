@@ -93,8 +93,7 @@ export const requestIndexFieldSearch = async (
     esClient.asCurrentUser
   );
 
-  let indicesExist: boolean[] = [];
-  let existingIndices: string[] = [];
+  let indicesExist: string[] = [];
   let indexFields: IndexField[] = [];
   let runtimeMappings = {};
 
@@ -117,8 +116,10 @@ export const requestIndexFieldSearch = async (
     }
 
     const patternList = dataView.title.split(',');
-    indicesExist = await findExistingIndices(patternList, esClient.asCurrentUser);
-    existingIndices = patternList.filter((index, i) => indicesExist[i]);
+    indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
+      (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
+      []
+    );
     if (!request.onlyCheckIfIndicesExist) {
       const dataViewSpec = dataView.toSpec();
       // type cast because index pattern type is FieldSpec and timeline type is FieldDescriptor, same diff
@@ -127,12 +128,14 @@ export const requestIndexFieldSearch = async (
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
   } else if ('indices' in request) {
-    const dedupeIndices = dedupeIndexName(request.indices);
-    indicesExist = await findExistingIndices(dedupeIndices, esClient.asCurrentUser);
-    existingIndices = dedupeIndices.filter((index, i) => indicesExist[i]);
+    const patternList = dedupeIndexName(request.indices);
+    indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
+      (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
+      []
+    );
     if (!request.onlyCheckIfIndicesExist) {
       const fieldDescriptor = await Promise.all(
-        existingIndices.map(async (index, n) => {
+        indicesExist.map(async (index, n) => {
           if (index.startsWith('.alerts-observability')) {
             return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
               pattern: index,
@@ -143,14 +146,14 @@ export const requestIndexFieldSearch = async (
           });
         })
       );
-      indexFields = await formatIndexFields(beatFields, fieldDescriptor, dedupeIndices);
+      indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
   }
 
   return {
     indexFields,
     runtimeMappings,
-    indicesExist: existingIndices,
+    indicesExist,
     rawResponse: {
       timed_out: false,
       took: -1,
