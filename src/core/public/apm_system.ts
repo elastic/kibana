@@ -76,8 +76,7 @@ export class ApmSystem {
       if (appId && apmInstance && typeof apmInstance.startTransaction === 'function') {
         // Close the page load transaction
         if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
-          // @ts-expect-error 2339
-          this.pageLoadTransaction.block(false);
+          this.pageLoadTransaction.end();
           this.pageLoadTransaction = undefined;
         }
         apmInstance.startTransaction(`/app/${appId}`, 'route-change', {
