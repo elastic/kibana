@@ -28,11 +28,14 @@ export const ControlGroupStrings = {
   },
   manageControl: {
     getFlyoutCreateTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.flyoutTitle', {
-        defaultMessage: 'Create control',
-      }),
+      i18n.translate(
+        'presentationUtil.inputControls.controlGroup.manageControl.createFlyoutTitle',
+        {
+          defaultMessage: 'Create control',
+        }
+      ),
     getFlyoutEditTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.flyoutTitle', {
+      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.editFlyoutTitle', {
         defaultMessage: 'Edit control',
       }),
     getTitleInputTitle: () =>
