@@ -17,8 +17,7 @@ If you are using an *on-premises* Elastic Stack deployment:
 
 If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-with-security, *security*>>:
 
-* You must enable Transport Layer Security (TLS) for communication <<configuring-tls-kib-es, between {es} and {kib}>>. {kib} alerting uses <<api-keys, API keys>> to secure background rule checks and actions, and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface]. A proxy will not suffice.
-* If you have enabled TLS and are still unable to access Alerting, ensure that you have not {ref}/security-settings.html#api-key-service-settings[explicitly disabled API keys].
+* If you are unable to access Alerting, ensure that you have not {ref}/security-settings.html#api-key-service-settings[explicitly disabled API keys].
 
 The Alerting framework uses queries that require the `search.allow_expensive_queries` setting to be `true`. See the scripts {ref}/query-dsl-script-query.html#_allow_expensive_queries_4[documentation]. 
 
