@@ -17,8 +17,11 @@ import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
 
+const REDIRECT_TO_INTEGRATIONS_TAB_IDS = ['all', 'logging', 'metrics', 'security'];
+
 export function HomeApp({ directories, solutions }) {
   const {
+    application,
     savedObjectsClient,
     getBasePath,
     addBasePath,
@@ -30,10 +33,17 @@ export function HomeApp({ directories, solutions }) {
   const isCloudEnabled = environment.cloud;
 
   const renderTutorialDirectory = (props) => {
+    // Redirect to integrations app unless a specific tab that is still supported was specified.
+    const tabId = props.match.params.tab;
+    if (!tabId || REDIRECT_TO_INTEGRATIONS_TAB_IDS.includes(tabId)) {
+      application.navigateToApp('integrations', { replace: true });
+      return null;
+    }
+
     return (
       <TutorialDirectory
         addBasePath={addBasePath}
-        openTab={props.match.params.tab}
+        openTab={tabId}
         isCloudEnabled={isCloudEnabled}
       />
     );
