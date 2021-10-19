@@ -14,9 +14,6 @@ import {
   EuiSpacer,
   EuiBasicTableColumn,
   EuiIconTip,
-  EuiButtonPopover,
-  EuiButtonIcon,
-  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
