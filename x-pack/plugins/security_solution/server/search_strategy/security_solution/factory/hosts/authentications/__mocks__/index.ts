@@ -2160,7 +2160,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             docvalue_fields: mockOptions.docValueFields,
             aggregations: {
@@ -2382,7 +2382,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   body: {
     docvalue_fields: mockOptions.docValueFields,
     aggregations: {

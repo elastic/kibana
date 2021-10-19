@@ -821,7 +821,7 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             aggregations: {
               top_n_flow_count: { cardinality: { field: 'source.ip' } },
@@ -889,7 +889,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   body: {
     aggregations: {
       top_n_flow_count: { cardinality: { field: 'source.ip' } },

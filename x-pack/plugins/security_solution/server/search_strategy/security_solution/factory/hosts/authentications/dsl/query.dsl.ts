@@ -63,7 +63,7 @@ export const buildQuery = ({
   const dslQuery = {
     allowNoIndices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {

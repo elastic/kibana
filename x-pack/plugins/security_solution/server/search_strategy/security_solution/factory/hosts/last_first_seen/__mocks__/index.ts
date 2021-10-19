@@ -135,7 +135,7 @@ export const formattedSearchStrategyFirstResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           track_total_hits: false,
           body: {
             query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
@@ -201,7 +201,7 @@ export const formattedSearchStrategyLastResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           track_total_hits: false,
           body: {
             query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
@@ -236,7 +236,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   track_total_hits: false,
   body: {
     _source: ['@timestamp'],

@@ -17,7 +17,7 @@ export async function getSavedObjectsCounts(
 
   const savedObjectCountSearchParams = {
     index: kibanaIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     filter_path: 'aggregations.types.buckets',
     body: {
       size: 0,

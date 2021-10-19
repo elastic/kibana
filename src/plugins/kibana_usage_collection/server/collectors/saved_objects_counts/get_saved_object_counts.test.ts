@@ -26,7 +26,7 @@ describe('getSavedObjectsCounts', () => {
     expect(results).toStrictEqual([]);
     expect(esClient.search).toHaveBeenCalledWith({
       index: '.kibana',
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       filter_path: 'aggregations.types.buckets',
       body: {
         size: 0,
@@ -41,7 +41,7 @@ describe('getSavedObjectsCounts', () => {
     await getSavedObjectsCounts(esClient, '.kibana');
     expect(esClient.search).toHaveBeenCalledWith({
       index: '.kibana',
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       filter_path: 'aggregations.types.buckets',
       body: {
         size: 0,
@@ -56,7 +56,7 @@ describe('getSavedObjectsCounts', () => {
     await getSavedObjectsCounts(esClient, '.kibana', ['type_one', 'type_two']);
     expect(esClient.search).toHaveBeenCalledWith({
       index: '.kibana',
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       filter_path: 'aggregations.types.buckets',
       body: {
         size: 0,

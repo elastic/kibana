@@ -23,7 +23,7 @@ export const getDatasetForField = async (
 ) => {
   const params = {
     allowNoIndices: true,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     terminateAfter: 1,
     index: indexPattern,
     body: {

@@ -624,7 +624,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             aggregations: {
               http_count: { cardinality: { field: 'url.path' } },
@@ -682,7 +682,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   body: {
     aggregations: {
       http_count: { cardinality: { field: 'url.path' } },

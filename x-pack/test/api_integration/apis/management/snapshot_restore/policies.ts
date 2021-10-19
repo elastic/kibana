@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
             repository: REPO_NAME,
             config: {
               indices: ['my_index'],
-              ignoreUnavailable: true,
+              ignore_unavailable: true,
               partial: false,
               metadata: {
                 meta: 'my_meta',
@@ -140,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         repository: REPO_NAME,
         config: {
           indices: ['my_index'],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           partial: false,
           metadata: {
             meta: 'my_meta',

@@ -32,7 +32,7 @@ export const buildUserRulesQuery = ({
   return {
     allowNoIndices: true,
     index: defaultIndex, // can stop getting this from sourcerer and assume default detections index if we want
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: true,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),

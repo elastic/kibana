@@ -27,7 +27,7 @@ export const getCloudMetricsMetadata = async (
 ): Promise<InfraCloudMetricsAdapterResponse> => {
   const metricQuery = {
     allowNoIndices: true,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index: sourceConfiguration.metricAlias,
     body: {
       query: {

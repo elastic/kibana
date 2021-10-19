@@ -32,7 +32,7 @@ export async function fetchRollupIndexPatterns(kibanaIndex: string, esClient: El
   const searchParams = {
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     filter_path: ['hits.hits._id'],
     body: {
       query: {

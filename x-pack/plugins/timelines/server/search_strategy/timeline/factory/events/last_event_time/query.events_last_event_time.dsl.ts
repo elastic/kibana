@@ -40,7 +40,7 @@ export const buildLastEventTimeQuery = ({
           return {
             allowNoIndices: true,
             index: indicesToQuery.network,
-            ignoreUnavailable: true,
+            ignore_unavailable: true,
             track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
@@ -63,7 +63,7 @@ export const buildLastEventTimeQuery = ({
           return {
             allowNoIndices: true,
             index: indicesToQuery.hosts,
-            ignoreUnavailable: true,
+            ignore_unavailable: true,
             track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
@@ -87,7 +87,7 @@ export const buildLastEventTimeQuery = ({
         return {
           allowNoIndices: true,
           index: indicesToQuery[indexKey],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           track_total_hits: false,
           body: {
             ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),

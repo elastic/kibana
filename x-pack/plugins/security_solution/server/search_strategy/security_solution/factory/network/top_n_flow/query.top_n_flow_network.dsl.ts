@@ -44,7 +44,7 @@ export const buildTopNFlowQuery = ({
   const dslQuery = {
     allowNoIndices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),

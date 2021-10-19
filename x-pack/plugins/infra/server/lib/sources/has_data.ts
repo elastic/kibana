@@ -12,7 +12,7 @@ export const hasData = async (index: string, client: ESSearchClient) => {
     index,
     allowNoIndices: true,
     terminate_after: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       size: 0,
     },

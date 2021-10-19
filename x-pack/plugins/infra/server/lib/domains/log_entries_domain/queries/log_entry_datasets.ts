@@ -66,7 +66,7 @@ export const createLogEntryDatasetsQuery = (
 
 const defaultRequestParameters = {
   allowNoIndices: true,
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   trackScores: false,
   trackTotalHits: false,
 };

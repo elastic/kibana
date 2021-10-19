@@ -142,7 +142,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             aggregations: {
               dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
@@ -214,7 +214,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   body: {
     aggregations: {
       dns_count: { cardinality: { field: 'dns.question.registered_domain' } },

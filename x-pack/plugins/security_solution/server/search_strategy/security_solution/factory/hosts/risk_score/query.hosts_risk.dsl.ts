@@ -33,7 +33,7 @@ export const buildHostsRiskScoreQuery = ({
   const dslQuery = {
     index: defaultIndex,
     allowNoIndices: false,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       query: {
