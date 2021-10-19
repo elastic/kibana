@@ -6,11 +6,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import React from 'react';
-import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
+import React, { useMemo } from 'react';
 import { ApmMainTemplate } from './apm_main_template';
 import { SpanIcon } from '../../shared/span_icon';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 interface Props {
   title: string;
@@ -19,14 +21,50 @@ interface Props {
 
 export function BackendDetailTemplate({ title, children }: Props) {
   const {
-    metadata: { data },
-  } = useApmBackendContext();
+    query: { backendName, rangeFrom, rangeTo },
+  } = useApmParams('/backends/overview');
 
-  const metadata = data?.metadata;
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const backendMetadataFetch = useFetcher(
+    (callApmApi) => {
+      if (!start || !end) {
+        return;
+      }
+
+      return callApmApi({
+        endpoint: 'GET /internal/apm/backends/{backendName}/metadata',
+        params: {
+          path: {
+            backendName,
+          },
+          query: {
+            start,
+            end,
+          },
+        },
+      });
+    },
+    [backendName, start, end]
+  );
+
+  const value = useMemo(() => {
+    return {
+      metadata: {
+        data: backendMetadataFetch.data,
+        status: backendMetadataFetch.status,
+      } as {
+        data?: APIReturnType<'GET /internal/apm/backends/{backendName}/metadata'>;
+        status?: FETCH_STATUS;
+      },
+    };
+  }, [backendMetadataFetch.data, backendMetadataFetch.status]);
 
   const {
-    query: { backendName },
-  } = useApmParams('/backends/overview');
+    metadata: { data },
+  } = value;
+
+  const metadata = data?.metadata;
 
   return (
     <ApmMainTemplate
