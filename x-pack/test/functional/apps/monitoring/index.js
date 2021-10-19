@@ -45,7 +45,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./enterprise_search/cluster'));
     loadTestFile(require.resolve('./enterprise_search/overview'));
 
-    // loadTestFile(require.resolve('./time_filter'));
+    loadTestFile(require.resolve('./time_filter'));
     loadTestFile(require.resolve('./enable_monitoring'));
 
     loadTestFile(require.resolve('./setup/metricbeat_migration'));

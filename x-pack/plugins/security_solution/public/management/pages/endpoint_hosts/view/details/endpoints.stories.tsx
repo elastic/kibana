@@ -8,7 +8,11 @@
 import React, { ComponentType } from 'react';
 import moment from 'moment';
 
-import { ActivityLog, Immutable } from '../../../../../../common/endpoint/types';
+import {
+  ActivityLog,
+  Immutable,
+  ActivityLogItemTypes,
+} from '../../../../../../common/endpoint/types';
 import { EndpointDetailsFlyoutTabs } from './components/endpoint_details_tabs';
 import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsFlyout } from '.';
@@ -26,7 +30,7 @@ export const dummyEndpointActivityLog = (
     endDate: moment().toString(),
     data: [
       {
-        type: 'action',
+        type: ActivityLogItemTypes.FLEET_ACTION,
         item: {
           id: '',
           data: {
@@ -44,7 +48,7 @@ export const dummyEndpointActivityLog = (
         },
       },
       {
-        type: 'action',
+        type: ActivityLogItemTypes.FLEET_ACTION,
         item: {
           id: '',
           data: {
@@ -63,7 +67,7 @@ export const dummyEndpointActivityLog = (
         },
       },
       {
-        type: 'action',
+        type: ActivityLogItemTypes.FLEET_ACTION,
         item: {
           id: '',
           data: {
@@ -82,7 +86,7 @@ export const dummyEndpointActivityLog = (
         },
       },
       {
-        type: 'action',
+        type: ActivityLogItemTypes.FLEET_ACTION,
         item: {
           id: '',
           data: {
