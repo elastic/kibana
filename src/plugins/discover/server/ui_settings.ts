@@ -210,7 +210,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     description: i18n.translate(
       'discover.advancedSettings.discover.showFieldStatisticsDescription',
       {
-        defaultMessage: `Enable Field statistics table in Discover.`,
+        defaultMessage: `Enable "Field statistics" table in Discover.`,
       }
     ),
     value: false,

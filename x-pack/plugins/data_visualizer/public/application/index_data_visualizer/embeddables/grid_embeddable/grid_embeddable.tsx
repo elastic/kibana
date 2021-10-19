@@ -170,7 +170,7 @@ export const IndexDataVisualizerViewWrapper = (props: {
           <p>
             <FormattedMessage
               id="xpack.dataVisualizer.index.embeddableErrorDescription"
-              defaultMessage="There was an error loading the embeddable. Please check if all the input required is valid."
+              defaultMessage="There was an error loading the embeddable. Please check if all the required input is valid."
             />
           </p>
         }
