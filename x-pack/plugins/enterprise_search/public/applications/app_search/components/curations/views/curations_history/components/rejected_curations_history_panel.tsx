@@ -53,7 +53,7 @@ export const RejectedCurationsHistoryPanel: React.FC = () => {
         columns={[
           {
             type: 'field',
-            field: 'appsearch.search_relevance_suggestions',
+            field: 'appsearch.search_relevance_suggestions.query',
             header: i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.curations.rejectedCurationsHistoryPanel.queryColumnHeader',
               { defaultMessage: 'Query' }
