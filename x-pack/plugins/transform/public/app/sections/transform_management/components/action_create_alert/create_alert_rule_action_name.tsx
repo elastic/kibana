@@ -25,7 +25,10 @@ export const crateAlertRuleActionNameText = i18n.translate(
 export const CreateAlertRuleActionName: FC<CreateAlertRuleActionProps> = ({ disabled }) => {
   if (disabled) {
     return (
-      <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>
+      <EuiToolTip
+        position="top"
+        content={createCapabilityFailureMessage('canCreateTransformAlerts')}
+      >
         <>{crateAlertRuleActionNameText}</>
       </EuiToolTip>
     );

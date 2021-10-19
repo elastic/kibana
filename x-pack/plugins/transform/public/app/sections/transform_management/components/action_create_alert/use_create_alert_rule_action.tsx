@@ -17,7 +17,7 @@ import { isContinuousTransform } from '../../../../../../common/types/transform'
 
 export type CreateAlertRuleAction = ReturnType<typeof useCreateAlertRuleAction>;
 export const useCreateAlertRuleAction = (forceDisable: boolean) => {
-  const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
+  const { canCreateTransformAlerts } = useContext(AuthorizationContext).capabilities;
   const { setCreateAlertRule } = useAlertRuleFlyout();
 
   const clickHandler = useCallback(
@@ -30,17 +30,17 @@ export const useCreateAlertRuleAction = (forceDisable: boolean) => {
   const action: TransformListAction = useMemo(
     () => ({
       name: (item: TransformListRow) => (
-        <CreateAlertRuleActionName disabled={!canCreateTransform} />
+        <CreateAlertRuleActionName disabled={!canCreateTransformAlerts} />
       ),
       available: (item: TransformListRow) => isContinuousTransform(item.config),
-      enabled: () => canCreateTransform && !forceDisable,
+      enabled: () => canCreateTransformAlerts && !forceDisable,
       description: crateAlertRuleActionNameText,
       type: 'icon',
       icon: 'bell',
       onClick: clickHandler,
       'data-test-subj': 'transformActionCreateAlertRule',
     }),
-    [canCreateTransform, forceDisable, clickHandler]
+    [canCreateTransformAlerts, forceDisable, clickHandler]
   );
 
   return { action };
