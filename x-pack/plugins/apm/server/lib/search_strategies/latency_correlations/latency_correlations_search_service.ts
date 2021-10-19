@@ -36,6 +36,7 @@ import { searchServiceLogProvider } from '../search_service_log';
 import type { SearchServiceProvider } from '../search_strategy_provider';
 
 import { latencyCorrelationsSearchServiceStateProvider } from './latency_correlations_search_service_state';
+import { fetchFieldsStats } from '../queries/field_stats/get_fields_stats';
 
 export type LatencyCorrelationsSearchServiceProvider = SearchServiceProvider<
   LatencyCorrelationsRequestParams,
@@ -196,6 +197,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
           `Loaded fractions and totalDocCount of ${totalDocCount}.`
         );
 
+        const fieldsToSample = new Set<string>();
         let loadedHistograms = 0;
         for await (const item of fetchTransactionDurationHistograms(
           esClient,
@@ -211,6 +213,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
         )) {
           if (item !== undefined) {
             state.addLatencyCorrelation(item);
+            fieldsToSample.add(item.fieldName);
           }
           loadedHistograms++;
           state.setProgress({
@@ -225,6 +228,19 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
             fieldValuePairs.length
           } field/value pairs.`
         );
+
+        addLogMessage(
+          `Identified ${fieldsToSample.size} fields to sample for field statistics.`
+        );
+
+        const { stats: fieldStats } = await fetchFieldsStats(esClient, params, [
+          ...fieldsToSample,
+        ]);
+
+        addLogMessage(
+          `Retrieved field statistics for ${fieldStats.length} fields out of ${fieldsToSample.size} fields.`
+        );
+        state.addFieldStats(fieldStats);
       } catch (e) {
         state.setError(e);
       }
@@ -251,6 +267,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
         overallHistogram,
         percentileThresholdValue,
         progress,
+        fieldStats,
       } = state.getState();
 
       return {
@@ -270,6 +287,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
             state.getLatencyCorrelationsSortedByCorrelation(),
           percentileThresholdValue,
           overallHistogram,
+          fieldStats,
         },
       };
     };

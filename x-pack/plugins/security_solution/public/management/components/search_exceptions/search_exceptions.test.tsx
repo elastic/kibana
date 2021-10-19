@@ -20,7 +20,6 @@ jest.mock('../../../common/components/user_privileges/use_endpoint_privileges');
 let onSearchMock: jest.Mock;
 const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
 
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 describe('Search exceptions', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;

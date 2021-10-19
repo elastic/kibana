@@ -10,7 +10,7 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
-import { PolicyTrustedAppsList } from './policy_trusted_apps_list';
+import { PolicyTrustedAppsList, PolicyTrustedAppsListProps } from './policy_trusted_apps_list';
 import React from 'react';
 import { policyDetailsPageAllApiHttpMocks } from '../../../test_utils';
 import {
@@ -38,6 +38,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   let render: (waitForLoadedState?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let mockedApis: ReturnType<typeof policyDetailsPageAllApiHttpMocks>;
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
+  let componentRenderProps: PolicyTrustedAppsListProps;
 
   const loadedUserEndpointPrivilegesState = (
     endpointOverrides: Partial<EndpointPrivileges> = {}
@@ -93,6 +94,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     mockedApis = policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
     appTestContext.setExperimentalFlag({ trustedAppsByPolicyEnabled: true });
     waitForAction = appTestContext.middlewareSpy.waitForAction;
+    componentRenderProps = {};
 
     render = async (waitForLoadedState: boolean = true) => {
       appTestContext.history.push(
@@ -106,7 +108,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
           })
         : Promise.resolve();
 
-      renderResult = appTestContext.render(<PolicyTrustedAppsList />);
+      renderResult = appTestContext.render(<PolicyTrustedAppsList {...componentRenderProps} />);
       await trustedAppDataReceived;
 
       return renderResult;
@@ -133,6 +135,13 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     expect(renderResult.getByTestId('policyDetailsTrustedAppsCount').textContent).toBe(
       'Showing 20 trusted applications'
     );
+  });
+
+  it('should NOT show total number if `hideTotalShowingLabel` prop is true', async () => {
+    componentRenderProps.hideTotalShowingLabel = true;
+    await render();
+
+    expect(renderResult.queryByTestId('policyDetailsTrustedAppsCount')).toBeNull();
   });
 
   it('should show card grid', async () => {
