@@ -85,23 +85,23 @@ export class ToolingLogTextWriter implements Writer {
         'ToolingLogTextWriter requires the `writeTo` option be set to a stream (like process.stdout)'
       );
     }
-    // this.patchStdout();
+    this.patchStdout();
   }
 
   patchStdout() {
     const origWrite = process.stdout.write;
-    Object.defineProperty(
-      process.stdout,
-      'write',
-      function (...args: [Uint8Array | string, BufferEncoding, (err?: Error) => void]): boolean {
-        // @ts-ignore
-        origWrite.call(process.stdout, ansiEscapes.eraseLine);
-        // @ts-ignore
-        origWrite.call(process.stdout, ansiEscapes.cursorLeft);
-        origWrite.apply(process.stdout, args);
-        return origWrite.call(process.stdout, 'status ' + Math.random());
-      }
-    );
+    // casting required to calm typescript
+    process.stdout.write = replace as typeof process.stdout.write;
+    function replace(
+      ...args: [Uint8Array | string, BufferEncoding, (err?: Error) => void]
+    ): boolean {
+      // @ts-ignore - Remove when using ansiEscapes module
+      origWrite.call(process.stdout, ansiEscapes.eraseLine);
+      // @ts-ignore - Remove when using ansiEscapes module
+      origWrite.call(process.stdout, ansiEscapes.cursorLeft);
+      origWrite.apply(process.stdout, args);
+      return origWrite.call(process.stdout, 'status ' + Math.random());
+    }
   }
 
   write(msg: Message) {
