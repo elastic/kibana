@@ -30,8 +30,7 @@ const i18nTexts = {
     defaultMessage: 'Kibana deprecation issues',
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageDescription', {
-    defaultMessage:
-      'Resolve all critical issues before upgrading. Click to view and resolve each issue.',
+    defaultMessage: 'Resolve all critical issues before upgrading.',
   }),
   docLinkText: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.docLinkText', {
     defaultMessage: 'Documentation',
