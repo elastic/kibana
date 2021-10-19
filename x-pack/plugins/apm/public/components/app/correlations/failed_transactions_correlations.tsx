@@ -541,7 +541,7 @@ export function FailedTransactionsCorrelations({
                   style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}
                 >
                   <FormattedMessage
-                    id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllTransactions"
+                    id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllFailedTransactions"
                     defaultMessage="all failed transactions"
                   />
                 </span>
