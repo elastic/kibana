@@ -13,10 +13,42 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import moment from 'moment';
 import uuid from 'uuid';
 import {
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
   EndpointAction,
   EndpointActionResponse,
   ISOLATION_ACTIONS,
 } from '../../../../common/endpoint/types';
+
+export interface Results {
+  _index: string;
+  _source:
+    | LogsEndpointAction
+    | LogsEndpointActionResponse
+    | EndpointAction
+    | EndpointActionResponse;
+}
+export const mockAuditLogSearchResult = (results?: Results[]) => {
+  const response = {
+    body: {
+      hits: {
+        total: { value: results?.length ?? 0, relation: 'eq' },
+        hits:
+          results?.map((a: Results) => ({
+            _index: a._index,
+            _id: Math.random().toString(36).split('.')[1],
+            _score: 0.0,
+            _source: a._source,
+          })) ?? [],
+      },
+    },
+    statusCode: 200,
+    headers: {},
+    warnings: [],
+    meta: {} as any,
+  };
+  return response;
+};
 
 export const mockSearchResult = (results: any = []): ApiResponse<any> => {
   return {

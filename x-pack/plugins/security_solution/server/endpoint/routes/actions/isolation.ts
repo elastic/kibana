@@ -17,6 +17,7 @@ import {
   ENDPOINT_ACTION_RESPONSES_DS,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
+  failedFleetActionErrorCode,
 } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import {
@@ -33,6 +34,7 @@ import { getMetadataForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 import { APP_ID } from '../../../../common/constants';
 import { userCanIsolate } from '../../../../common/endpoint/actions';
+import { doLogsEndpointActionDsExists } from '../../utils';
 
 /**
  * Registers the Host-(un-)isolation routes
@@ -78,38 +80,13 @@ const createFailedActionResponseEntry = async ({
       body: {
         ...doc,
         error: {
-          code: '424',
+          code: failedFleetActionErrorCode,
           message: 'Failed to deliver action request to fleet',
         },
       },
     });
   } catch (e) {
     logger.error(e);
-  }
-};
-
-const doLogsEndpointActionDsExists = async ({
-  context,
-  logger,
-  dataStreamName,
-}: {
-  context: SecuritySolutionRequestHandlerContext;
-  logger: Logger;
-  dataStreamName: string;
-}): Promise<boolean> => {
-  try {
-    const esClient = context.core.elasticsearch.client.asInternalUser;
-    const doesIndexTemplateExist = await esClient.indices.existsIndexTemplate({
-      name: dataStreamName,
-    });
-    return doesIndexTemplateExist.statusCode === 404 ? false : true;
-  } catch (error) {
-    const errorType = error?.type ?? '';
-    if (errorType !== 'resource_not_found_exception') {
-      logger.error(error);
-      throw error;
-    }
-    return false;
   }
 };
 
