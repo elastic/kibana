@@ -24,7 +24,17 @@ import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
 
-export const createAppContextStartContractMock = (): FleetAppContext => {
+export interface MockedFleetAppContext extends FleetAppContext {
+  elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
+  data: ReturnType<typeof dataPluginMock.createStartContract>;
+  encryptedSavedObjectsStart?: ReturnType<typeof encryptedSavedObjectsMock.createStart>;
+  savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
+  securitySetup?: ReturnType<typeof securityMock.createSetup>;
+  securityStart?: ReturnType<typeof securityMock.createStart>;
+  logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
+}
+
+export const createAppContextStartContractMock = (): MockedFleetAppContext => {
   const config = {
     agents: { enabled: true, elasticsearch: {} },
     enabled: true,
@@ -67,7 +77,7 @@ export const xpackMocks = {
 
 export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
   return {
-    compilePackagePolicyInputs: jest.fn(),
+    _compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
