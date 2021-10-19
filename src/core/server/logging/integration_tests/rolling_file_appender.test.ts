@@ -7,7 +7,7 @@
  */
 
 import { join } from 'path';
-import { rmdir, mkdtemp, readFile, readdir } from 'fs/promises';
+import { rm, mkdtemp, readFile, readdir } from 'fs/promises';
 import moment from 'moment-timezone';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { getNextRollingTime } from '../appenders/rolling_file/policies/time_interval/get_next_rolling_time';
@@ -48,7 +48,7 @@ describe('RollingFileAppender', () => {
 
   afterEach(async () => {
     if (testDir) {
-      await rmdir(testDir, { recursive: true });
+      await rm(testDir, { recursive: true });
     }
 
     if (root) {

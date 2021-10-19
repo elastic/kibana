@@ -25,6 +25,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
       const reporting = get(settings, fromPath);
       if (reporting?.roles?.enabled !== false) {
         addDeprecation({
+          configPath: `${fromPath}.roles.enabled`,
           level: 'warning',
           title: i18n.translate('xpack.reporting.deprecations.reportingRoles.title', {
             defaultMessage: 'Setting "{fromPath}.roles" is deprecated',

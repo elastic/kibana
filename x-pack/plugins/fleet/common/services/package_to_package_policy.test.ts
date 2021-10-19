@@ -42,6 +42,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         transform: [],
         ilm_policy: [],
         data_stream_ilm_policy: [],
+        ml_model: [],
       },
     },
     status: 'not_installed',
