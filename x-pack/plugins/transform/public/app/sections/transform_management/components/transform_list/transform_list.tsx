@@ -50,7 +50,7 @@ import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { transformFilters, filterTransforms } from './transform_search_bar_filters';
 import { useTableSettings } from './use_table_settings';
-import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
+import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 function getItemIdToExpandedRowMap(
@@ -82,7 +82,7 @@ export const TransformList: FC<TransformListProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
-  const [editAlertRule, setEditAlertRule] = useState<TransformHealthAlertRule | undefined>();
+  const { setEditAlertRule } = useAlertRuleFlyout();
 
   const [filterActive, setFilterActive] = useState(false);
 
@@ -311,13 +311,6 @@ export const TransformList: FC<TransformListProps> = ({
           isLoading || transformsLoading ? 'loading' : 'loaded'
         }`}
       />
-
-      {editAlertRule ? (
-        <TransformAlertFlyout
-          initialAlert={editAlertRule}
-          onCloseFlyout={setEditAlertRule.bind(null, undefined)}
-        />
-      ) : null}
     </div>
   );
 };
