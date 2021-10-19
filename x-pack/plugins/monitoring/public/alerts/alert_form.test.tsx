@@ -50,17 +50,13 @@ const initLegacyShims = () => {
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
   };
   const data = { query: { timefilter: { timefilter: {} } } } as any;
-  const ngInjector = {} as angular.auto.IInjectorService;
-  Legacy.init(
-    {
-      core: coreMock.createStart(),
-      data,
-      isCloud: false,
-      triggersActionsUi,
-      usageCollection: {},
-    } as any,
-    ngInjector
-  );
+  Legacy.init({
+    core: coreMock.createStart(),
+    data,
+    isCloud: false,
+    triggersActionsUi,
+    usageCollection: {},
+  } as any);
 };
 
 const ALERTS_FEATURE_ID = 'alerts';
