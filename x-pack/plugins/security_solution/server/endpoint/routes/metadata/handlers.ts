@@ -108,6 +108,7 @@ export const getMetadataListRequestHandler = function (
       request_page_size: 0,
       request_page_index: 0,
     };
+
     try {
       doesUnitedIndexExist = await endpointMetadataService.doesUnitedIndexExist(
         context.core.elasticsearch.client.asCurrentUser
@@ -117,6 +118,7 @@ export const getMetadataListRequestHandler = function (
       didUnitedIndexError = true;
     }
 
+    // If no unified Index present, then perform a search using the legacy approach
     if (!doesUnitedIndexExist || didUnitedIndexError) {
       const endpointPolicies = await getAllEndpointPackagePolicies(
         endpointAppContext.service.getPackagePolicyService(),
@@ -133,6 +135,7 @@ export const getMetadataListRequestHandler = function (
       return response.ok({ body });
     }
 
+    // Unified index is installed and being used - perform search using new approach
     try {
       const pagingProperties = await getPagingProperties(request, endpointAppContext);
       const { data, page, total, pageSize } = await endpointMetadataService.getHostMetadataList(
@@ -143,6 +146,7 @@ export const getMetadataListRequestHandler = function (
           filters: request.body?.filters || {},
         }
       );
+
       body = {
         hosts: data,
         request_page_index: page - 1,
