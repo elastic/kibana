@@ -22,7 +22,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function () {
-      this.tags('ciGroup10');
+      this.tags('ciGroup7');
 
       loadTestFile(require.resolve('./_create_index_pattern_wizard'));
       loadTestFile(require.resolve('./_index_pattern_create_delete'));
