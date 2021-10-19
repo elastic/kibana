@@ -31,7 +31,7 @@ exports[`ChecklistFlyout renders 1`] = `
     </EuiCallOut>
     <EuiSpacer />
     <ReindexProgress
-      cancelReindex={[MockFunction]}
+      cancelReindex={[Function]}
       reindexState={
         Object {
           "errorMessage": null,
@@ -73,7 +73,7 @@ exports[`ChecklistFlyout renders 1`] = `
           disabled={false}
           fill={true}
           isLoading={false}
-          onClick={[MockFunction]}
+          onClick={[Function]}
         >
           <FormattedMessage
             defaultMessage="Run reindex"
