@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { SnapshotRestoreServerPlugin } from './plugin';
-
-export { config } from './config';
-
-export const plugin = (ctx: PluginInitializerContext) => new SnapshotRestoreServerPlugin(ctx);
+export interface ClientConfigType {
+  ui: {
+    enabled: boolean;
+  };
+}
