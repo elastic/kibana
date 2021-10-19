@@ -13,7 +13,7 @@ export const nameParameterSchema = schema.object({
 
 const snapshotConfigSchema = schema.object({
   indices: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  ignore_unavailable: schema.maybe(schema.boolean()),
+  ignoreUnavailable: schema.maybe(schema.boolean()),
   includeGlobalState: schema.maybe(schema.boolean()),
   partial: schema.maybe(schema.boolean()),
   metadata: schema.maybe(schema.recordOf(schema.string(), schema.string())),
@@ -200,6 +200,6 @@ export const restoreSettingsSchema = schema.object({
   partial: schema.maybe(schema.boolean()),
   indexSettings: schema.maybe(schema.string()),
   ignoreIndexSettings: schema.maybe(schema.arrayOf(schema.string())),
-  ignore_unavailable: schema.maybe(schema.boolean()),
+  ignoreUnavailable: schema.maybe(schema.boolean()),
   includeAliases: schema.maybe(schema.boolean()),
 });
