@@ -66,7 +66,7 @@ import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
-import { createUpgradeUsage, sendTelemetryEvents } from './upgrade_usage';
+import { sendTelemetryEvents } from './upgrade_usage';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -578,12 +578,6 @@ class PackagePolicyService {
           success: true,
         });
         if (packagePolicy.package.version !== packageInfo.version) {
-          createUpgradeUsage(soClient, {
-            package_name: packageInfo.name,
-            current_version: packagePolicy.package.version,
-            new_version: packageInfo.version,
-            status: 'success',
-          });
           sendTelemetryEvents(
             appContextService.getLogger(),
             appContextService.getTelemetryEventsSender(),
@@ -649,14 +643,6 @@ class PackagePolicyService {
 
       if (packagePolicy.package.version !== packageInfo.version) {
         if (hasErrors) {
-          createUpgradeUsage(soClient, {
-            package_name: packageInfo.name,
-            current_version: packagePolicy.package.version,
-            new_version: packageInfo.version,
-            status: hasErrors ? 'failure' : 'success',
-            error: updatedPackagePolicy.errors,
-          });
-
           sendTelemetryEvents(
             appContextService.getLogger(),
             appContextService.getTelemetryEventsSender(),

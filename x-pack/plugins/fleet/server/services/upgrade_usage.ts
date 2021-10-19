@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
 import type { Logger } from 'src/core/server';
 
-import type { PackagePolicyUpgradeUsage } from '../collectors/package_upgrade_collectors';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 
-export function createUpgradeUsage(
-  soClient: SavedObjectsClientContract,
-  upgradeUsage: PackagePolicyUpgradeUsage
-) {
-  soClient.create('package-policy-upgrade-telemetry', upgradeUsage, {
-    id: `${upgradeUsage.package_name}_${upgradeUsage.current_version}_${upgradeUsage.new_version}_${upgradeUsage.status}`,
-    overwrite: true,
-  });
-}
-
-export function deleteUpgradeUsages(soClient: SavedObjectsClientContract, ids: string[]) {
-  for (const id of ids) {
-    soClient.delete('package-policy-upgrade-telemetry', id);
-  }
+export interface PackagePolicyUpgradeUsage {
+  package_name: string;
+  current_version: string;
+  new_version: string;
+  status: 'success' | 'failure';
+  error?: Array<{ key?: string; message: string }>;
 }
 
 export function sendTelemetryEvents(
