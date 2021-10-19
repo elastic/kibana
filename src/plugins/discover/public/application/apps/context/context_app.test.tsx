@@ -26,7 +26,6 @@ const mockNavigationPlugin = { ui: { TopNavMenu: mockTopNavMenu } };
 describe('ContextApp test', () => {
   const defaultProps = {
     indexPattern: indexPatternMock,
-    indexPatternId: 'the-index-pattern-id',
     anchorId: 'mocked_anchor_id',
   };
 

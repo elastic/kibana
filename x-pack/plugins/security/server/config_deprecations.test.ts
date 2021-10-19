@@ -106,7 +106,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "warning",
           "message": "Setting \\"xpack.security.sessionTimeout\\" has been replaced by \\"xpack.security.session.idleTimeout\\"",
         },
         Object {
@@ -136,7 +136,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "warning",
           "message": "Setting \\"xpack.security.audit.appender.kind\\" has been replaced by \\"xpack.security.audit.appender.type\\"",
         },
       ]
@@ -162,7 +162,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "warning",
           "message": "Setting \\"xpack.security.audit.appender.layout.kind\\" has been replaced by \\"xpack.security.audit.appender.layout.type\\"",
         },
       ]
@@ -188,7 +188,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "warning",
           "message": "Setting \\"xpack.security.audit.appender.policy.kind\\" has been replaced by \\"xpack.security.audit.appender.policy.type\\"",
         },
       ]
@@ -214,7 +214,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "warning",
           "message": "Setting \\"xpack.security.audit.appender.strategy.kind\\" has been replaced by \\"xpack.security.audit.appender.strategy.type\\"",
         },
       ]
@@ -241,7 +241,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "warning",
           "message": "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
         },
       ]
@@ -265,7 +265,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "warning",
           "message": "Setting \\"security.showInsecureClusterWarning\\" has been replaced by \\"xpack.security.showInsecureClusterWarning\\"",
         },
       ]
@@ -385,7 +385,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "warning",
           "message": "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
         },
       ]
@@ -409,7 +409,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "warning",
           "message": "You no longer need to configure \\"xpack.security.authorization.legacyFallback.enabled\\".",
         },
       ]
@@ -433,7 +433,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "warning",
           "message": "You no longer need to configure \\"xpack.security.authc.saml.maxRedirectURLSize\\".",
         },
       ]
@@ -461,8 +461,8 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
-          "message": "\\"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\\" is no longer used.",
+          "level": "warning",
+          "message": "This setting is no longer used.",
         },
       ]
     `);
@@ -486,8 +486,8 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
-          "message": "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
+          "level": "warning",
+          "message": "Use the new object format instead of an array of provider types.",
         },
       ]
     `);
@@ -509,12 +509,12 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
-          "message": "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
+          "level": "warning",
+          "message": "Use the new object format instead of an array of provider types.",
         },
         Object {
-          "level": undefined,
-          "message": "Enabling both \\"basic\\" and \\"token\\" authentication providers in \\"xpack.security.authc.providers\\" is deprecated. Login page will only use \\"token\\" provider.",
+          "level": "warning",
+          "message": "Use only one of these providers. When both providers are set, Kibana only uses the \\"token\\" provider.",
         },
       ]
     `);
@@ -534,7 +534,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "critical",
           "message": "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
         },
       ]
@@ -555,7 +555,7 @@ describe('Config Deprecations', () => {
     expect(deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": undefined,
+          "level": "critical",
           "message": "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
         },
       ]

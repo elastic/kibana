@@ -68,64 +68,6 @@ describe.skip('monitoring plugin deprecations', function () {
     });
   });
 
-  describe('elasticsearch.username', function () {
-    it('logs a warning if elasticsearch.username is set to "elastic"', () => {
-      const settings = { elasticsearch: { username: 'elastic' } };
-
-      const addDeprecation = jest.fn();
-      transformDeprecations(settings, fromPath, addDeprecation);
-      expect(addDeprecation).toHaveBeenCalled();
-    });
-
-    it('logs a warning if elasticsearch.username is set to "kibana"', () => {
-      const settings = { elasticsearch: { username: 'kibana' } };
-
-      const addDeprecation = jest.fn();
-      transformDeprecations(settings, fromPath, addDeprecation);
-      expect(addDeprecation).toHaveBeenCalled();
-    });
-
-    it('does not log a warning if elasticsearch.username is set to something besides "elastic" or "kibana"', () => {
-      const settings = { elasticsearch: { username: 'otheruser' } };
-
-      const addDeprecation = jest.fn();
-      transformDeprecations(settings, fromPath, addDeprecation);
-      expect(addDeprecation).not.toHaveBeenCalled();
-    });
-
-    it('does not log a warning if elasticsearch.username is unset', () => {
-      const settings = { elasticsearch: { username: undefined } };
-
-      const addDeprecation = jest.fn();
-      transformDeprecations(settings, fromPath, addDeprecation);
-      expect(addDeprecation).not.toHaveBeenCalled();
-    });
-
-    it('logs a warning if ssl.key is set and ssl.certificate is not', () => {
-      const settings = { elasticsearch: { ssl: { key: '' } } };
-
-      const addDeprecation = jest.fn();
-      transformDeprecations(settings, fromPath, addDeprecation);
-      expect(addDeprecation).toHaveBeenCalled();
-    });
-
-    it('logs a warning if ssl.certificate is set and ssl.key is not', () => {
-      const settings = { elasticsearch: { ssl: { certificate: '' } } };
-
-      const addDeprecation = jest.fn();
-      transformDeprecations(settings, fromPath, addDeprecation);
-      expect(addDeprecation).toHaveBeenCalled();
-    });
-
-    it('does not log a warning if both ssl.key and ssl.certificate are set', () => {
-      const settings = { elasticsearch: { ssl: { key: '', certificate: '' } } };
-
-      const addDeprecation = jest.fn();
-      transformDeprecations(settings, fromPath, addDeprecation);
-      expect(addDeprecation).not.toHaveBeenCalled();
-    });
-  });
-
   describe('xpack_api_polling_frequency_millis', () => {
     it('should call rename for this renamed config key', () => {
       const settings = { xpack_api_polling_frequency_millis: 30000 };
