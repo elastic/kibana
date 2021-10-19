@@ -35,6 +35,7 @@ import {
   IErrorObject,
   EditConectorTabs,
   UserConfiguredActionConnector,
+  ActionConnectorFieldsCallbacks,
 } from '../../../types';
 import { ConnectorReducer, createConnectorReducer } from './connector_reducer';
 import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
@@ -138,6 +139,8 @@ const ConnectorEditFlyout = ({
     [testExecutionResult]
   );
 
+  const [callbacks, setCallbacks] = useState<ActionConnectorFieldsCallbacks>(null);
+
   const closeFlyout = useCallback(() => {
     setConnector(getConnectorWithoutSecrets());
     setHasChanges(false);
@@ -236,23 +239,38 @@ const ConnectorEditFlyout = ({
       });
   };
 
+  const setConnectorWithErrors = () =>
+    setConnector(
+      getConnectorWithInvalidatedFields(
+        connector,
+        errors.configErrors,
+        errors.secretsErrors,
+        errors.connectorBaseErrors
+      )
+    );
+
   const onSaveClicked = async (closeAfterSave: boolean = true) => {
     if (hasErrors) {
-      setConnector(
-        getConnectorWithInvalidatedFields(
-          connector,
-          errors.configErrors,
-          errors.secretsErrors,
-          errors.connectorBaseErrors
-        )
-      );
+      setConnectorWithErrors();
       return;
     }
+
     setIsSaving(true);
+
+    // Do not allow to save the connector if there is an error
+    try {
+      await callbacks?.beforeActionConnectorSave?.();
+    } catch (e) {
+      setIsSaving(false);
+      return;
+    }
+
     const savedAction = await onActionConnectorSave();
     setIsSaving(false);
+
     if (savedAction) {
       setHasChanges(false);
+      await callbacks?.afterActionConnectorSave?.(savedAction);
       if (closeAfterSave) {
         closeFlyout();
       }
@@ -313,6 +331,8 @@ const ConnectorEditFlyout = ({
                 }}
                 actionTypeRegistry={actionTypeRegistry}
                 consumer={consumer}
+                setCallbacks={setCallbacks}
+                isEdit={true}
               />
               {isLoading ? (
                 <>

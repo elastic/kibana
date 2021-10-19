@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback } from 'react';
 
 import {
   EuiButton,
@@ -18,8 +18,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { ReindexStatus } from '../../../../../../../common/types';
+import {
+  uiMetricService,
+  UIM_REINDEX_START_CLICK,
+  UIM_REINDEX_STOP_CLICK,
+} from '../../../../../lib/ui_metric';
 import { LoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { ReindexProgress } from './progress';
@@ -47,6 +53,13 @@ const buttonLabel = (status?: ReindexStatus) => {
           defaultMessage="Resume"
         />
       );
+    case ReindexStatus.cancelled:
+      return (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.restartLabel"
+          defaultMessage="Restart reindex"
+        />
+      );
     default:
       return (
         <FormattedMessage
@@ -61,17 +74,26 @@ const buttonLabel = (status?: ReindexStatus) => {
  * Displays a flyout that shows the current reindexing status for a given index.
  */
 export const ChecklistFlyoutStep: React.FunctionComponent<{
-  renderGlobalCallouts: () => React.ReactNode;
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, renderGlobalCallouts }) => {
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
   const isCompleted = status === ReindexStatus.completed;
   const hasFetchFailed = status === ReindexStatus.fetchFailed;
   const hasReindexingFailed = status === ReindexStatus.failed;
+
+  const onStartReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_START_CLICK);
+    startReindex();
+  }, [startReindex]);
+
+  const onStopReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_STOP_CLICK);
+    cancelReindex();
+  }, [cancelReindex]);
 
   return (
     <Fragment>
@@ -116,7 +138,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             </EuiCallOut>
           </>
         )}
-        {renderGlobalCallouts()}
         <EuiCallOut
           title={
             <FormattedMessage
@@ -143,7 +164,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           </p>
         </EuiCallOut>
         <EuiSpacer />
-        <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
+        <ReindexProgress reindexState={reindexState} cancelReindex={onStopReindex} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -161,7 +182,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 fill
                 color={status === ReindexStatus.paused ? 'warning' : 'primary'}
                 iconType={status === ReindexStatus.paused ? 'play' : undefined}
-                onClick={startReindex}
+                onClick={onStartReindex}
                 isLoading={loading}
                 disabled={loading || !hasRequiredPrivileges}
                 data-test-subj="startReindexingButton"

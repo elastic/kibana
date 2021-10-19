@@ -13,18 +13,12 @@ import { ComponentProps } from '../../route_init';
 // @ts-ignore
 import { Listing } from '../../../components/logstash/listing';
 import { LogstashTemplate } from './logstash_template';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
-import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
+import { RULE_LOGSTASH_VERSION_MISMATCH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
 
 export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -84,7 +78,7 @@ export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
     >
       <div>
         <SetupModeRenderer
-          productName="logstash"
+          productName={LOGSTASH_SYSTEM_ID}
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}

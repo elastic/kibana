@@ -20,6 +20,8 @@ export type AddConfigDeprecation = (details: DeprecatedConfigDetails) => void;
  * @public
  */
 export interface DeprecatedConfigDetails {
+  /** The path of the deprecated config setting */
+  configPath: string;
   /** The title to be displayed for the deprecation. */
   title?: string;
   /** The message to be displayed for the deprecation. */
@@ -30,7 +32,7 @@ export interface DeprecatedConfigDetails {
    * - critical: needs to be addressed before upgrade.
    */
   level?: 'warning' | 'critical';
-  /** (optional) set false to prevent the config service from logging the deprecation message. */
+  /** (optional) set to `true` to prevent the config service from logging the deprecation message. */
   silent?: boolean;
   /** (optional) link to the documentation for more details on the deprecation. */
   documentationUrl?: string;

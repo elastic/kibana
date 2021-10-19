@@ -27,11 +27,11 @@ import { ViewContentHeader } from '../../../../components/shared/view_content_he
 import { NAV, RESET_BUTTON } from '../../../../constants';
 import { OBJECTS_AND_ASSETS_DOCS_URL } from '../../../../routes';
 import {
+  LEARN_MORE_LINK,
   SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL,
   SYNC_MANAGEMENT_THUMBNAILS_LABEL,
   SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL,
   SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION,
-  SYNC_OBJECTS_TYPES_LINK_LABEL,
   SOURCE_OBJECTS_AND_ASSETS_LABEL,
   SYNC_UNSAVED_CHANGES_MESSAGE,
 } from '../../constants';
@@ -47,7 +47,7 @@ export const ObjectsAndAssets: React.FC = () => {
   const {
     setThumbnailsChecked,
     setContentExtractionChecked,
-    updateSyncSettings,
+    updateObjectsAndAssetsSettings,
     resetSyncSettings,
   } = useActions(SynchronizationLogic({ contentSource }));
 
@@ -61,7 +61,11 @@ export const ObjectsAndAssets: React.FC = () => {
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton fill onClick={updateSyncSettings} disabled={!hasUnsavedObjectsAndAssetsChanges}>
+        <EuiButton
+          fill
+          onClick={updateObjectsAndAssetsSettings}
+          disabled={!hasUnsavedObjectsAndAssetsChanges}
+        >
           {SAVE_BUTTON_LABEL}
         </EuiButton>
       </EuiFlexItem>
@@ -80,12 +84,16 @@ export const ObjectsAndAssets: React.FC = () => {
       />
       <ViewContentHeader
         title={NAV.SYNCHRONIZATION_OBJECTS_AND_ASSETS}
-        description={SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION}
+        description={
+          <>
+            {SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION}{' '}
+            <EuiLink href={OBJECTS_AND_ASSETS_DOCS_URL} external>
+              {LEARN_MORE_LINK}
+            </EuiLink>
+          </>
+        }
         action={actions}
       />
-      <EuiLink href={OBJECTS_AND_ASSETS_DOCS_URL} external>
-        {SYNC_OBJECTS_TYPES_LINK_LABEL}
-      </EuiLink>
       <EuiHorizontalRule />
       <EuiText size="m">{SOURCE_OBJECTS_AND_ASSETS_LABEL}</EuiText>
       <EuiSpacer />

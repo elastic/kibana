@@ -158,12 +158,14 @@ describe('deprecateEndpointConfigs', () => {
     expect(mockAddDeprecation.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "configPath": "telemetry.url",
           "correctiveActions": Object {
             "manualSteps": Array [
               "Remove \\"telemetry.url\\" from the Kibana configuration.",
               "To send usage to the staging endpoint add \\"telemetry.sendUsageTo: staging\\" to the Kibana configuration.",
             ],
           },
+          "level": "critical",
           "message": "\\"telemetry.url\\" has been deprecated. Set \\"telemetry.sendUsageTo: staging\\" to the Kibana configurations to send usage to the staging endpoint.",
           "title": "Setting \\"telemetry.url\\" is deprecated",
         },
@@ -180,12 +182,14 @@ describe('deprecateEndpointConfigs', () => {
     expect(mockAddDeprecation.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "configPath": "telemetry.optInStatusUrl",
           "correctiveActions": Object {
             "manualSteps": Array [
               "Remove \\"telemetry.optInStatusUrl\\" from the Kibana configuration.",
               "To send usage to the staging endpoint add \\"telemetry.sendUsageTo: staging\\" to the Kibana configuration.",
             ],
           },
+          "level": "critical",
           "message": "\\"telemetry.optInStatusUrl\\" has been deprecated. Set \\"telemetry.sendUsageTo: staging\\" to the Kibana configurations to send usage to the staging endpoint.",
           "title": "Setting \\"telemetry.optInStatusUrl\\" is deprecated",
         },

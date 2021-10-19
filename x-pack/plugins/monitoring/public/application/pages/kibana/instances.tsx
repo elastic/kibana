@@ -87,12 +87,7 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   ]);
 
   return (
-    <KibanaTemplate
-      title={title}
-      pageTitle={pageTitle}
-      getPageData={getPageData}
-      data-test-subj="kibanaInstancesPage"
-    >
+    <KibanaTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
       <div data-test-subj="monitoringKibanaInstancesApp">
         <SetupModeRenderer
           productName={KIBANA_SYSTEM_ID}

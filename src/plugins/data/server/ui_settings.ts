@@ -288,6 +288,12 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         target="_blank" rel="noopener">frozen indices</a> in results if enabled. Searching through frozen indices
         might increase the search time.`,
       value: false,
+      deprecation: {
+        message: i18n.translate('data.advancedSettings.search.includeFrozenTextDeprecation', {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }),
+        docLinksKey: 'kibanaSearchSettings',
+      },
       category: ['search'],
       schema: schema.boolean(),
     },

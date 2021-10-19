@@ -9,8 +9,8 @@ import { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { ResponseError } from '../../../../../common/types';
 import { useAppContext } from '../../../app_context';
-import { ResponseError } from '../../../lib/api';
 import { DeprecationLoggingPreviewProps } from '../../types';
 
 const i18nTexts = {

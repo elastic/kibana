@@ -13,6 +13,7 @@ Review important information about the {kib} 7.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.15.1>>
 * <<release-notes-7.15.0>>
 * <<release-notes-7.14.2>>
 * <<release-notes-7.14.1>>
@@ -63,6 +64,74 @@ Review important information about the {kib} 7.x releases.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.15.1]]
+== {kib} 7.15.1
+
+Review the following information about the 7.15.1 release.
+
+[float]
+[[breaking-changes-v7.15.1]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.15.1, review the <<breaking-changes-7.15.0,7.15.0 breaking changes>>.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[enhancement-v7.15.1]]
+=== Enhancement
+Management::
+* Adds `max_primary_shard_size` input to shrink action {kibana-pull}111394[#111394]
+
+[float]
+[[fixes-v7.15.1]]
+=== Bug Fixes
+APM::
+* Return 200 instead of 404 when agent configuration does not exist {kibana-pull}113273[#113273]
+* Use oldest exit span instead of newest {kibana-pull}113133[#113133]
+Canvas::
+* Hide dashed border on embeddable panel {kibana-pull}113985[#113985]
+Discover::
+* Fixes CSV export problem with _source column {kibana-pull}114178[#114178]
+* Fixes too narrow columns when viewing document {kibana-pull}113124[#113124]
+* Fixes old saved query from becoming active when switching index patterns or creating new saved search {kibana-pull}112262[#112262]
+* Fixes `discover:searchOnPageLoad` not working correctly {kibana-pull}112262[#112262]
+Elastic Security::
+For the Elastic Security 7.15.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes policy upgrades for packages with multiple policy templates {kibana-pull}114011[#114011]
+* Fixes Step 1 in policy editor not loading when agent policy already contains an integration that can only be added once (such as Endpoint Security) {kibana-pull}113883[#113883]
+* Sets code editor height to solve an overlap in default policy settings {kibana-pull}113763[#113763]
+* Fixes issue where some variables from `xpack.fleet.agentPolicies` were not added to package policies {kibana-pull}113204[#113204]
+Lens & Visualizations::
+* Updates the series and metrics IDs that are numbers to strings in *TSVB* {kibana-pull}113619[#113619]
+* Fixes infinite loop when loading rejected data view in *Lens* {kibana-pull}113375[#113375]
+* Fixes error with percentiles on index with many docs {kibana-pull}113216[#113216]
+* Fixes map validation errors crashing *Vega* {kibana-pull}112700[#112700]
+* Fixes heatmap in dashboard with numeric color stops in *Lens* {kibana-pull}111117[#111117]
+* Fixes transition to custom palette inconsistency when in number mode in *Lens* {kibana-pull}110852[#110852]
+Management::
+* Transforms: Align privileges checks with ML plugin {kibana-pull}112970[#112970]
+* Don't show incomplete warning if search requests aren't in session {kibana-pull}112364[#112364]
+Maps::
+* Adds license querystring to EMS requests in Vega {kibana-pull}112765[#112765]
+* Fixes saved object (map) switching issue {kibana-pull}112001[#112001]
+Metrics::
+* Fixes metric threshold alert reason message for gte/lte comparator {kibana-pull}114080[#114080]
+* Removes rounding from Metric Threshold start time {kibana-pull}111634[#111634]
+* Fixes No Data alerts on Metric Threshold with groupBy {kibana-pull}111465[#111465]
+* Filter out APM nodes from the inventory view {kibana-pull}110300[#110300]
+Platform::
+* Removes executionLog to reduce memory consumption {kibana-pull}111911[#111911]
+Uptime::
+* Fixes waterfall chart top axis {kibana-pull}113281[#113281]
+
 [[release-notes-7.15.0]]
 == {kib} 7.15.0
 

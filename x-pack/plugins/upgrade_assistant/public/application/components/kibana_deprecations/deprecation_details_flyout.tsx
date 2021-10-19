@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiButtonEmpty,
@@ -20,12 +21,12 @@ import {
   EuiTitle,
   EuiText,
   EuiCallOut,
-  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 
+import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../shared';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
-import { DeprecationBadge } from '../shared';
 
 import './_deprecation_details_flyout.scss';
 
@@ -37,12 +38,6 @@ export interface DeprecationDetailsFlyoutProps {
 }
 
 const i18nTexts = {
-  learnMoreLinkLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.flyout.learnMoreLinkLabel',
-    {
-      defaultMessage: 'Learn more about this deprecation',
-    }
-  ),
   closeButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.closeButtonLabel',
     {
@@ -134,6 +129,11 @@ export const DeprecationDetailsFlyout = ({
   const isCurrent = deprecationResolutionState?.id === deprecation.id;
   const isResolved = isCurrent && deprecationResolutionState?.resolveDeprecationStatus === 'ok';
 
+  const onResolveDeprecation = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_KIBANA_QUICK_RESOLVE_CLICK);
+    resolveDeprecation(deprecation);
+  }, [deprecation, resolveDeprecation]);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -162,12 +162,9 @@ export const DeprecationDetailsFlyout = ({
 
         <EuiText>
           <p className="eui-textBreakWord">{message}</p>
-
           {documentationUrl && (
             <p>
-              <EuiLink target="_blank" href={documentationUrl}>
-                {i18nTexts.learnMoreLinkLabel}
-              </EuiLink>
+              <DeprecationFlyoutLearnMoreLink documentationUrl={documentationUrl} />
             </p>
           )}
         </EuiText>
@@ -192,31 +189,33 @@ export const DeprecationDetailsFlyout = ({
               </>
             )}
 
-            <EuiTitle size="s">
-              <h3>{i18nTexts.manualFixTitle}</h3>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            <EuiText>
-              {correctiveActions.manualSteps.length === 1 ? (
-                <p data-test-subj="manualStep" className="eui-textBreakWord">
-                  {correctiveActions.manualSteps[0]}
-                </p>
-              ) : (
-                <ol data-test-subj="manualStepsList">
-                  {correctiveActions.manualSteps.map((step, stepIndex) => (
-                    <li
-                      data-test-subj="manualStepsListItem"
-                      key={`step-${stepIndex}`}
-                      className="upgResolveStep eui-textBreakWord"
-                    >
-                      {step}
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </EuiText>
+            {correctiveActions.manualSteps.length > 0 && (
+              <>
+                <EuiTitle size="s" data-test-subj="manualStepsTitle">
+                  <h3>{i18nTexts.manualFixTitle}</h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  {correctiveActions.manualSteps.length === 1 ? (
+                    <p data-test-subj="manualStep" className="eui-textBreakWord">
+                      {correctiveActions.manualSteps[0]}
+                    </p>
+                  ) : (
+                    <ol data-test-subj="manualStepsList">
+                      {correctiveActions.manualSteps.map((step, stepIndex) => (
+                        <li
+                          data-test-subj="manualStepsListItem"
+                          key={`step-${stepIndex}`}
+                          className="upgResolveStep eui-textBreakWord"
+                        >
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </EuiText>
+              </>
+            )}
           </div>
         )}
       </EuiFlyoutBody>
@@ -235,7 +234,7 @@ export const DeprecationDetailsFlyout = ({
               <EuiButton
                 fill
                 data-test-subj="resolveButton"
-                onClick={() => resolveDeprecation(deprecation)}
+                onClick={onResolveDeprecation}
                 isLoading={Boolean(
                   deprecationResolutionState?.resolveDeprecationStatus === 'in_progress'
                 )}

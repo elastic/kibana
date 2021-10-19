@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { ResponseError } from '../lib/api';
+import { ResponseError } from '../../../common/types';
 
 export enum LoadingState {
+  Loading,
+  Success,
+  Error,
+}
+
+export enum CancelLoadingState {
+  Requested,
   Loading,
   Success,
   Error,

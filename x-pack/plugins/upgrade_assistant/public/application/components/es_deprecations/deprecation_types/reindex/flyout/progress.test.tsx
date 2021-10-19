@@ -67,17 +67,17 @@ describe('ReindexProgress', () => {
               },
               Object {
                 "status": "incomplete",
-                "title": <EuiFlexGroup
-                  alignItems="center"
-                >
-                  <EuiFlexItem>
-                    <FormattedMessage
-                      defaultMessage="Reindexing documents"
-                      id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
-                      values={Object {}}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>,
+                "title": <ReindexingDocumentsStepTitle
+                  cancelReindex={[MockFunction]}
+                  reindexState={
+                    Object {
+                      "errorMessage": null,
+                      "lastCompletedStep": 0,
+                      "reindexTaskPercComplete": null,
+                      "status": 0,
+                    }
+                  }
+                />,
               },
               Object {
                 "status": "incomplete",

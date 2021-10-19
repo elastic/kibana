@@ -33,15 +33,20 @@ describe('Index settings deprecation flyout', () => {
       testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
     });
 
-    const { find, exists, actions, component } = testBed;
-
+    const { actions, component } = testBed;
     component.update();
-
     await actions.table.clickDeprecationRowAt('indexSetting', 0);
+  });
+
+  test('renders a flyout with deprecation details', async () => {
+    const { find, exists } = testBed;
 
     expect(exists('indexSettingsDetails')).toBe(true);
     expect(find('indexSettingsDetails.flyoutTitle').text()).toContain(
       indexSettingDeprecation.message
+    );
+    expect(find('indexSettingsDetails.documentationLink').props().href).toBe(
+      indexSettingDeprecation.url
     );
     expect(exists('removeSettingsPrompt')).toBe(true);
   });

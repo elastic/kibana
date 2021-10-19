@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../../../../saved_objects/public';
-import { SavedSearch } from '../../../../../saved_searches';
+import { SavedSearch, SaveSavedSearchOptions } from '../../../../../saved_searches';
 import { IndexPattern } from '../../../../../../../data/common';
 import { DiscoverServices } from '../../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
@@ -27,11 +27,7 @@ async function saveDataSource({
   indexPattern: IndexPattern;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
-  saveOptions: {
-    confirmOverwrite: boolean;
-    isTitleDuplicateConfirmed: boolean;
-    onTitleDuplicate: () => void;
-  };
+  saveOptions: SaveSavedSearchOptions;
   services: DiscoverServices;
   state: GetStateReturn;
 }) {
@@ -47,14 +43,20 @@ async function saveDataSource({
         }),
         'data-test-subj': 'saveSearchSuccess',
       });
-
-      if (savedSearch.id !== prevSavedSearchId) {
-        navigateTo(`/view/${encodeURIComponent(savedSearch.id)}`);
+      if (id !== prevSavedSearchId) {
+        navigateTo(`/view/${encodeURIComponent(id)}`);
       } else {
         // Update defaults so that "reload saved query" functions correctly
         state.resetAppState();
-        services.chrome.docTitle.change(savedSearch.lastSavedTitle!);
-        setBreadcrumbsTitle(savedSearch, services.chrome);
+        services.chrome.docTitle.change(savedSearch.title!);
+
+        setBreadcrumbsTitle(
+          {
+            ...savedSearch,
+            id: prevSavedSearchId ?? id,
+          },
+          services.chrome
+        );
       }
     }
   }
@@ -96,21 +98,23 @@ export async function onSaveSearch({
   const onSave = async ({
     newTitle,
     newCopyOnSave,
+    newDescription,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: {
     newTitle: string;
     newCopyOnSave: boolean;
+    newDescription: string;
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
     const currentTitle = savedSearch.title;
     savedSearch.title = newTitle;
-    savedSearch.copyOnSave = newCopyOnSave;
-    const saveOptions = {
-      confirmOverwrite: false,
-      isTitleDuplicateConfirmed,
+    savedSearch.description = newDescription;
+    const saveOptions: SaveSavedSearchOptions = {
       onTitleDuplicate,
+      copyOnSave: newCopyOnSave,
+      isTitleDuplicateConfirmed,
     };
     const response = await saveDataSource({
       indexPattern,
@@ -133,16 +137,13 @@ export async function onSaveSearch({
     <SavedObjectSaveModal
       onSave={onSave}
       onClose={() => {}}
-      title={savedSearch.title}
+      title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
+      description={savedSearch.description}
       objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
         defaultMessage: 'search',
       })}
-      description={i18n.translate('discover.localMenu.saveSaveSearchDescription', {
-        defaultMessage:
-          'Save your Discover search so you can use it in visualizations and dashboards',
-      })}
-      showDescription={false}
+      showDescription={true}
     />
   );
   showSaveModal(saveModal, services.core.i18n.Context);

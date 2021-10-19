@@ -96,7 +96,7 @@ export function ChartPreview({
           position={Position.Left}
           tickFormat={yTickFormat}
           ticks={5}
-          domain={{ max: yMax }}
+          domain={{ max: yMax, min: NaN }}
         />
         <BarSeries
           color={theme.eui.euiColorVis1}

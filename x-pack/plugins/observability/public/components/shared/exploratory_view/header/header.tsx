@@ -11,21 +11,18 @@ import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@el
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { LastUpdated } from './last_updated';
-import { combineTimeRanges } from '../lens_embeddable';
 import { ExpViewActionMenu } from '../components/action_menu';
+import { useExpViewTimeRange } from '../hooks/use_time_range';
 
 interface Props {
-  seriesId?: number;
   lastUpdated?: number;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
-export function ExploratoryViewHeader({ seriesId, lensAttributes, lastUpdated }: Props) {
-  const { getSeries, allSeries, setLastRefresh, reportType } = useSeriesStorage();
+export function ExploratoryViewHeader({ lensAttributes, lastUpdated }: Props) {
+  const { setLastRefresh } = useSeriesStorage();
 
-  const series = seriesId ? getSeries(seriesId) : undefined;
-
-  const timeRange = combineTimeRanges(reportType, allSeries, series);
+  const timeRange = useExpViewTimeRange();
 
   return (
     <>

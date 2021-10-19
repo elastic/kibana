@@ -22,7 +22,9 @@ describe('interpreter/functions#kibanaFilter', () => {
           "disabled": false,
           "negate": false,
         },
-        "name": "test",
+        "query": Object {
+          "name": "test",
+        },
         "type": "kibana_filter",
       }
     `);

@@ -7,10 +7,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { EnrichedDeprecationInfo, ResponseError } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
-import type { ResponseError } from '../../../../lib/api';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { DeprecationTableColumns, Status } from '../../../types';
 import { IndexSettingsResolutionCell } from './resolution_table_cell';

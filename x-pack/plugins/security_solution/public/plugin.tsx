@@ -97,7 +97,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initTelemetry(
       {
         usageCollection: plugins.usageCollection,
-        telemetryManagementSection: plugins.telemetryManagementSection,
       },
       APP_ID
     );
@@ -293,7 +292,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
         network: new subPluginClasses.Network(),
-        ...(this.experimentalFeatures.uebaEnabled ? { ueba: new subPluginClasses.Ueba() } : {}),
+        ueba: new subPluginClasses.Ueba(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -319,9 +318,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
       network: subPlugins.network.start(storage),
-      ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-        ? { ueba: subPlugins.ueba.start(storage) }
-        : {}),
+      ueba: subPlugins.ueba.start(storage),
       timelines: subPlugins.timelines.start(),
       management: subPlugins.management.start(core, plugins),
     };
@@ -373,16 +370,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       const timelineInitialState = {
         timeline: {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           ...subPlugins.timelines.store.initialState.timeline!,
           timelineById: {
-            ...subPlugins.timelines.store.initialState.timeline!.timelineById,
+            ...subPlugins.timelines.store.initialState.timeline.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.alerts.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.rules.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.exceptions.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.hosts.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.network.storageTimelines!.timelineById,
             ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-              ? subPlugins.ueba.storageTimelines!.timelineById
+              ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                subPlugins.ueba.storageTimelines!.timelineById
               : {}),
           },
         },
@@ -400,9 +404,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           {
             ...subPlugins.hosts.store.initialState,
             ...subPlugins.network.store.initialState,
-            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-              ? subPlugins.ueba.store.initialState
-              : {}),
+            ...subPlugins.ueba.store.initialState,
             ...timelineInitialState,
             ...subPlugins.management.store.initialState,
           },

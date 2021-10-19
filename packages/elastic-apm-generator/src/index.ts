@@ -12,3 +12,4 @@ export { getTransactionMetrics } from './lib/utils/get_transaction_metrics';
 export { getSpanDestinationMetrics } from './lib/utils/get_span_destination_metrics';
 export { getObserverDefaults } from './lib/defaults/get_observer_defaults';
 export { toElasticsearchOutput } from './lib/output/to_elasticsearch_output';
+export { getBreakdownMetrics } from './lib/utils/get_breakdown_metrics';

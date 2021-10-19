@@ -330,7 +330,7 @@ function sampleArgs() {
   return { data, args };
 }
 
-function sampleArgsWithThreshold(thresholdValue: number = 150) {
+function sampleArgsWithReferenceLine(value: number = 150) {
   const { data, args } = sampleArgs();
 
   return {
@@ -338,16 +338,16 @@ function sampleArgsWithThreshold(thresholdValue: number = 150) {
       ...data,
       tables: {
         ...data.tables,
-        threshold: {
+        referenceLine: {
           type: 'datatable',
           columns: [
             {
-              id: 'threshold-a',
+              id: 'referenceLine-a',
               meta: { params: { id: 'number' }, type: 'number' },
               name: 'Static value',
             },
           ],
-          rows: [{ 'threshold-a': thresholdValue }],
+          rows: [{ 'referenceLine-a': value }],
         },
       },
     } as LensMultiTable,
@@ -356,16 +356,16 @@ function sampleArgsWithThreshold(thresholdValue: number = 150) {
       layers: [
         ...args.layers,
         {
-          layerType: layerTypes.THRESHOLD,
-          accessors: ['threshold-a'],
-          layerId: 'threshold',
+          layerType: layerTypes.REFERENCELINE,
+          accessors: ['referenceLine-a'],
+          layerId: 'referenceLine',
           seriesType: 'line',
           xScaleType: 'linear',
           yScaleType: 'linear',
           palette: mockPaletteOutput,
           isHistogram: false,
           hide: true,
-          yConfig: [{ axisMode: 'left', forAccessor: 'threshold-a', type: 'lens_xy_yConfig' }],
+          yConfig: [{ axisMode: 'left', forAccessor: 'referenceLine-a', type: 'lens_xy_yConfig' }],
         },
       ],
     } as XYArgs,
@@ -809,8 +809,8 @@ describe('xy_expression', () => {
         );
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
           fit: true,
-          min: undefined,
-          max: undefined,
+          min: NaN,
+          max: NaN,
         });
       });
 
@@ -838,6 +838,8 @@ describe('xy_expression', () => {
         );
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
           fit: false,
+          min: NaN,
+          max: NaN,
         });
       });
 
@@ -867,13 +869,13 @@ describe('xy_expression', () => {
         );
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
           fit: false,
-          min: undefined,
-          max: undefined,
+          min: NaN,
+          max: NaN,
         });
       });
 
-      test('it does include threshold values when in full extent mode', () => {
-        const { data, args } = sampleArgsWithThreshold();
+      test('it does include referenceLine values when in full extent mode', () => {
+        const { data, args } = sampleArgsWithReferenceLine();
 
         const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
@@ -883,8 +885,8 @@ describe('xy_expression', () => {
         });
       });
 
-      test('it should ignore threshold values when set to custom extents', () => {
-        const { data, args } = sampleArgsWithThreshold();
+      test('it should ignore referenceLine values when set to custom extents', () => {
+        const { data, args } = sampleArgsWithReferenceLine();
 
         const component = shallow(
           <XYChart
@@ -908,8 +910,8 @@ describe('xy_expression', () => {
         });
       });
 
-      test('it should work for negative values in thresholds', () => {
-        const { data, args } = sampleArgsWithThreshold(-150);
+      test('it should work for negative values in referenceLines', () => {
+        const { data, args } = sampleArgsWithReferenceLine(-150);
 
         const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
@@ -959,7 +961,11 @@ describe('xy_expression', () => {
           }}
         />
       );
-      expect(component.find(Settings).prop('xDomain')).toEqual({ minInterval: 101 });
+      expect(component.find(Settings).prop('xDomain')).toEqual({
+        minInterval: 101,
+        min: NaN,
+        max: NaN,
+      });
     });
 
     test('disabled legend extra by default', () => {
