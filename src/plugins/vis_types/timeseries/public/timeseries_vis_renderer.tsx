@@ -13,6 +13,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient } from 'kibana/public';
 
+import { EuiLoadingChart } from '@elastic/eui';
 import { fetchIndexPattern } from '../common/index_patterns_utils';
 import { VisualizationContainer, PersistedState } from '../../../visualizations/public';
 
@@ -51,33 +52,47 @@ export const getTimeseriesVisRenderer: (deps: {
     const { indexPatterns } = getDataStart();
 
     const showNoResult = !checkIfDataExists(visData, model);
-    const [palettesService, { indexPattern }] = await Promise.all([
+
+    let servicesLoaded;
+
+    Promise.all([
       palettes.getPalettes(),
       fetchIndexPattern(model.index_pattern, indexPatterns),
-    ]);
+    ]).then(([palettesService, { indexPattern }]) => {
+      servicesLoaded = true;
 
-    render(
-      <I18nProvider>
-        <VisualizationContainer
-          data-test-subj="timeseriesVis"
-          handlers={handlers}
-          showNoResult={showNoResult}
-          error={get(visData, [model.id, 'error'])}
-        >
-          <TimeseriesVisualization
-            // it is mandatory to bind uiSettings because of "this" usage inside "get" method
-            getConfig={uiSettings.get.bind(uiSettings)}
+      render(
+        <I18nProvider>
+          <VisualizationContainer
+            data-test-subj="timeseriesVis"
             handlers={handlers}
-            indexPattern={indexPattern}
-            model={model}
-            visData={visData as TimeseriesVisData}
-            syncColors={syncColors}
-            uiState={handlers.uiState! as PersistedState}
-            palettesService={palettesService}
-          />
-        </VisualizationContainer>
-      </I18nProvider>,
-      domNode
-    );
+            showNoResult={showNoResult}
+            error={get(visData, [model.id, 'error'])}
+          >
+            <TimeseriesVisualization
+              // it is mandatory to bind uiSettings because of "this" usage inside "get" method
+              getConfig={uiSettings.get.bind(uiSettings)}
+              handlers={handlers}
+              indexPattern={indexPattern}
+              model={model}
+              visData={visData as TimeseriesVisData}
+              syncColors={syncColors}
+              uiState={handlers.uiState! as PersistedState}
+              palettesService={palettesService}
+            />
+          </VisualizationContainer>
+        </I18nProvider>,
+        domNode
+      );
+    });
+
+    if (!servicesLoaded) {
+      render(
+        <div className="visChart__spinner">
+          <EuiLoadingChart mono size="l" />
+        </div>,
+        domNode
+      );
+    }
   },
 });
