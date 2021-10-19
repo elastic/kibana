@@ -41,7 +41,6 @@ import {
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
-  sendUpgradePackagePolicy,
   sendUpgradePackagePolicyDryRun,
 } from '../../../hooks';
 import {
@@ -364,29 +363,6 @@ export const EditPackagePolicyForm = memo<{
 
     const { error } = await savePackagePolicy();
     if (!error) {
-      if (isUpgrade) {
-        const { error: upgradeError } = await sendUpgradePackagePolicy([packagePolicyId]);
-
-        if (upgradeError) {
-          notifications.toasts.addError(upgradeError, {
-            title: i18n.translate('xpack.fleet.upgradePackagePolicy.failedNotificationTitle', {
-              defaultMessage: 'Error upgrading {packagePolicyName}',
-              values: {
-                packagePolicyName: packagePolicy.name,
-              },
-            }),
-            toastMessage: i18n.translate(
-              'xpack.fleet.editPackagePolicy.failedConflictNotificationMessage',
-              {
-                defaultMessage: `Data is out of date. Refresh the page to get the latest policy.`,
-              }
-            ),
-          });
-
-          return;
-        }
-      }
-
       application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {

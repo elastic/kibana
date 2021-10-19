@@ -146,7 +146,7 @@ export default function (providerContext: FtrProviderContext) {
 
       describe('upgrade', function () {
         it('should respond with an error when "dryRun: false" is provided', async function () {
-          const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+          await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
             .send({
@@ -154,10 +154,7 @@ export default function (providerContext: FtrProviderContext) {
               dryRun: false,
               packageVersion: '0.2.0-add-non-required-test-var',
             })
-            .expect(200);
-
-          expect(body.length).to.be(1);
-          expect(body[0].success).to.be(false);
+            .expect(400);
         });
       });
     });
