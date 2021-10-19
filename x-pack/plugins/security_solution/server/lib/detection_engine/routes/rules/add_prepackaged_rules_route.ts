@@ -171,6 +171,7 @@ export const createPrepackagedRules = async (
   );
   await updatePrepackagedRules(
     rulesClient,
+    savedObjectsClient,
     context.securitySolution.getSpaceId(),
     ruleStatusClient,
     rulesToUpdate,

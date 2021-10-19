@@ -6,16 +6,17 @@
  */
 
 import { act, renderHook, RenderHookResult, RenderResult } from '@testing-library/react-hooks';
-import { useHttp, useCurrentUser } from '../../lib/kibana';
+import { useHttp, useCurrentUser } from '../../../lib/kibana';
 import { EndpointPrivileges, useEndpointPrivileges } from './use_endpoint_privileges';
-import { securityMock } from '../../../../../security/public/mocks';
-import { appRoutesService } from '../../../../../fleet/common';
-import { AuthenticatedUser } from '../../../../../security/common';
-import { licenseService } from '../../hooks/use_license';
-import { fleetGetCheckPermissionsHttpMock } from '../../../management/pages/mocks';
+import { securityMock } from '../../../../../../security/public/mocks';
+import { appRoutesService } from '../../../../../../fleet/common';
+import { AuthenticatedUser } from '../../../../../../security/common';
+import { licenseService } from '../../../hooks/use_license';
+import { fleetGetCheckPermissionsHttpMock } from '../../../../management/pages/mocks';
+import { getEndpointPrivilegesInitialStateMock } from './mocks';
 
-jest.mock('../../lib/kibana');
-jest.mock('../../hooks/use_license', () => {
+jest.mock('../../../lib/kibana');
+jest.mock('../../../hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
   };
@@ -26,6 +27,8 @@ jest.mock('../../hooks/use_license', () => {
     },
   };
 });
+
+const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 
 describe('When using useEndpointPrivileges hook', () => {
   let authenticatedUser: AuthenticatedUser;
@@ -45,7 +48,7 @@ describe('When using useEndpointPrivileges hook', () => {
     fleetApiMock = fleetGetCheckPermissionsHttpMock(
       useHttp() as Parameters<typeof fleetGetCheckPermissionsHttpMock>[0]
     );
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
     render = () => {
       const hookRenderResponse = renderHook(() => useEndpointPrivileges());
@@ -69,34 +72,31 @@ describe('When using useEndpointPrivileges hook', () => {
     (useCurrentUser as jest.Mock).mockReturnValue(null);
 
     const { rerender } = render();
-    expect(result.current).toEqual({
-      canAccessEndpointManagement: false,
-      canAccessFleet: false,
-      loading: true,
-      isPlatinumPlus: true,
-    });
+    expect(result.current).toEqual(
+      getEndpointPrivilegesInitialStateMock({
+        canAccessEndpointManagement: false,
+        canAccessFleet: false,
+        loading: true,
+      })
+    );
 
     // Make user service available
     (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
     rerender();
-    expect(result.current).toEqual({
-      canAccessEndpointManagement: false,
-      canAccessFleet: false,
-      loading: true,
-      isPlatinumPlus: true,
-    });
+    expect(result.current).toEqual(
+      getEndpointPrivilegesInitialStateMock({
+        canAccessEndpointManagement: false,
+        canAccessFleet: false,
+        loading: true,
+      })
+    );
 
     // Release the API response
     await act(async () => {
       fleetApiMock.waitForApi();
       releaseApiResponse!();
     });
-    expect(result.current).toEqual({
-      canAccessEndpointManagement: true,
-      canAccessFleet: true,
-      loading: false,
-      isPlatinumPlus: true,
-    });
+    expect(result.current).toEqual(getEndpointPrivilegesInitialStateMock());
   });
 
   it('should call Fleet permissions api to determine user privilege to fleet', async () => {
@@ -113,12 +113,11 @@ describe('When using useEndpointPrivileges hook', () => {
     render();
     await waitForNextUpdate();
     await fleetApiMock.waitForApi();
-    expect(result.current).toEqual({
-      canAccessEndpointManagement: false,
-      canAccessFleet: true, // this is only true here because I did not adjust the API mock
-      loading: false,
-      isPlatinumPlus: true,
-    });
+    expect(result.current).toEqual(
+      getEndpointPrivilegesInitialStateMock({
+        canAccessEndpointManagement: false,
+      })
+    );
   });
 
   it('should set privileges to false if fleet api check returns failure', async () => {
@@ -130,11 +129,21 @@ describe('When using useEndpointPrivileges hook', () => {
     render();
     await waitForNextUpdate();
     await fleetApiMock.waitForApi();
-    expect(result.current).toEqual({
-      canAccessEndpointManagement: false,
-      canAccessFleet: false,
-      loading: false,
-      isPlatinumPlus: true,
-    });
+    expect(result.current).toEqual(
+      getEndpointPrivilegesInitialStateMock({
+        canAccessEndpointManagement: false,
+        canAccessFleet: false,
+      })
+    );
   });
+
+  it.each([['canIsolateHost'], ['canCreateArtifactsByPolicy']])(
+    'should set %s to false if license is not PlatinumPlus',
+    async (privilege) => {
+      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+      render();
+      await waitForNextUpdate();
+      expect(result.current).toEqual(expect.objectContaining({ [privilege]: false }));
+    }
+  );
 });
