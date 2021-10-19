@@ -50,4 +50,8 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
     key: 'typescript.tsserver.maxTsServerMemory',
     value: 4096,
   },
+  {
+    key: 'typescript.tsserver.log',
+    value: 'off',
+  },
 ];
