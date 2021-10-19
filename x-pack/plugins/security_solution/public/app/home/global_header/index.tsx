@@ -24,6 +24,10 @@ import { isDetectionsPath } from '../../../../public/helpers';
 import { Sourcerer } from '../../../common/components/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
+import { TimelineId } from '../../../../common/types/timeline';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add data',
@@ -52,6 +56,12 @@ export const GlobalHeader = React.memo(
     } = useKibana().services;
     const { pathname } = useLocation();
     const [{ pageName, detailName }] = useRouteSpy();
+
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const showTimeline = useShallowEqualSelector(
+      (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
+    );
+
     const isAlertsOrRulesDetailsPage =
       pageName === SecurityPageName.alerts ||
       (pageName === SecurityPageName.rules && detailName != null);
@@ -94,7 +104,9 @@ export const GlobalHeader = React.memo(
               >
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>
-              {showSourcerer && <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />}
+              {showSourcerer && !showTimeline && (
+                <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
+              )}
             </EuiHeaderLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
