@@ -57,8 +57,8 @@ export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
           </EuiMarkdownFormat>
           {action && (
             <>
+              <EuiSpacer size="s" />
               {action}
-              <EuiSpacer />
             </>
           )}
         </>
