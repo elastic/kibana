@@ -9,7 +9,14 @@ import React, { useEffect, useState } from 'react';
 import type { FunctionComponent } from 'react';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingElastic,
+} from '@elastic/eui';
 
 import type { ScopedHistory } from 'src/core/public';
 
@@ -18,6 +25,8 @@ import { LocatorParams } from '../../common/types';
 
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { SharePluginSetup } from '../shared_imports';
+
+import './redirect_app.scss';
 
 interface Props {
   apiClient: ReportingAPIClient;
@@ -74,14 +83,30 @@ export const RedirectApp: FunctionComponent<Props> = ({ share, apiClient }) => {
     })();
   }, [share, apiClient]);
 
-  return error ? (
-    <EuiCallOut title={i18nTexts.errorTitle} color="danger">
-      <p>{error.message}</p>
-      {error.stack && <EuiCodeBlock>{error.stack}</EuiCodeBlock>}
-    </EuiCallOut>
-  ) : (
-    <EuiTitle>
-      <h1>{i18nTexts.redirectingTitle}</h1>
-    </EuiTitle>
+  return (
+    <div className="reportingRedirectApp__interstitialPage">
+      {error ? (
+        <EuiCallOut title={i18nTexts.errorTitle} color="danger">
+          <p>{error.message}</p>
+          {error.stack && <EuiCodeBlock>{error.stack}</EuiCodeBlock>}
+        </EuiCallOut>
+      ) : (
+        <EuiFlexGroup
+          alignItems="center"
+          responsive={false}
+          justifyContent="center"
+          direction="column"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h1>{i18nTexts.redirectingTitle}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingElastic size="xxl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </div>
   );
 };

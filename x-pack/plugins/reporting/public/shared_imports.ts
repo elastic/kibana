@@ -7,6 +7,8 @@
 
 export type { SharePluginSetup, SharePluginStart, LocatorPublic } from 'src/plugins/share/public';
 
+export { AppNavLinkStatus } from '../../../../src/core/public';
+
 export { useRequest, UseRequestResponse } from '../../../../src/plugins/es_ui_shared/public';
 
 export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
