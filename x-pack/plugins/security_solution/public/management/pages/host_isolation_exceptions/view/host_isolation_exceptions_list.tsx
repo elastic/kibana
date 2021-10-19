@@ -127,7 +127,7 @@ export const HostIsolationExceptionsList = () => {
       title={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageTitle"
-          defaultMessage="Host Isolation Exceptions"
+          defaultMessage="Host isolation exceptions"
         />
       }
       actions={
@@ -141,7 +141,7 @@ export const HostIsolationExceptionsList = () => {
           >
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.list.addButton"
-              defaultMessage="Add Host Isolation Exception"
+              defaultMessage="Add Host isolation exception"
             />
           </EuiButton>
         ) : (
@@ -151,18 +151,23 @@ export const HostIsolationExceptionsList = () => {
     >
       {showFlyout && <HostIsolationExceptionsFormFlyout />}
 
-      <SearchExceptions
-        defaultValue={location.filter}
-        onSearch={handleOnSearch}
-        placeholder={i18n.translate(
-          'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
-          {
-            defaultMessage: 'Search on the fields below: name, description, ip',
-          }
-        )}
-      />
-      <EuiSpacer size="l" />
       {itemToDelete ? <HostIsolationExceptionDeleteModal /> : null}
+
+      {listItems.length ? (
+        <SearchExceptions
+          defaultValue={location.filter}
+          onSearch={handleOnSearch}
+          placeholder={i18n.translate(
+            'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
+            {
+              defaultMessage: 'Search on the fields below: name, description, ip',
+            }
+          )}
+        />
+      ) : null}
+
+      <EuiSpacer size="l" />
+
       <PaginatedContent<ExceptionListItemSchema, typeof ArtifactEntryCard>
         items={listItems}
         ItemComponent={ArtifactEntryCard}

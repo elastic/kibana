@@ -11,9 +11,10 @@ import { DeepReadonly } from 'utility-types';
 import { Capabilities } from '../../../../../../../src/core/public';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
-import { EndpointPrivileges, useEndpointPrivileges } from './use_endpoint_privileges';
+import { EndpointPrivileges, useEndpointPrivileges } from './endpoint';
 
 import { SERVER_APP_ID } from '../../../../common/constants';
+import { getEndpointPrivilegesInitialState } from './endpoint/utils';
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
   detectionEnginePrivileges: ReturnType<typeof useFetchDetectionEnginePrivileges>;
@@ -24,12 +25,7 @@ export interface UserPrivilegesState {
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   listPrivileges: { loading: false, error: undefined, result: undefined },
   detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
-  endpointPrivileges: {
-    loading: true,
-    canAccessEndpointManagement: false,
-    canAccessFleet: false,
-    isPlatinumPlus: false,
-  },
+  endpointPrivileges: getEndpointPrivilegesInitialState(),
   kibanaSecuritySolutionsPrivileges: { crud: false, read: false },
 });
 
