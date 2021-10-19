@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(
         await compareImages.checkIfPdfsMatch(pdfSessionFilePath, fixtures.baselineAPdf)
-      ).to.be.lessThan(0.09);
+      ).to.be.lessThan(0.001);
     });
 
     it('print-optimized PDF that matches the baseline', async () => {
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(
         await compareImages.checkIfPdfsMatch(pdfSessionFilePath, fixtures.baselineAPdfPrint)
-      ).to.be.lessThan(0.09);
+      ).to.be.lessThan(0.001);
     });
   });
 }
