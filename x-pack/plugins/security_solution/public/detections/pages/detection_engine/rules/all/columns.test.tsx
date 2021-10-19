@@ -103,7 +103,6 @@ describe('AllRulesTable Columns', () => {
   describe('getMonitoringColumns', () => {
     test('should not set truncated text option for name column', () => {
       const docsLinksStartMock = { links: { siem: { troubleshootGaps: 'mock' } } } as DocLinksStart;
-
       const [nameColumn] = getMonitoringColumns(navigateToApp, formatUrl, docsLinksStartMock);
 
       expect(nameColumn).toHaveProperty('field', 'name');
