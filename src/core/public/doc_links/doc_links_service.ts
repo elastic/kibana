@@ -159,6 +159,7 @@ export class DocLinksService {
         upgradeAssistant: {
           overview: `${KIBANA_DOCS}upgrade-assistant.html`,
           batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
+          remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
         },
         rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
         elasticsearch: {
@@ -647,6 +648,7 @@ export interface DocLinksStart {
     readonly upgradeAssistant: {
       readonly overview: string;
       readonly batchReindex: string;
+      readonly remoteReindex: string;
     };
     readonly rollupJobs: string;
     readonly elasticsearch: Record<string, string>;

@@ -136,6 +136,7 @@ readonly links: {
         readonly upgradeAssistant: {
             readonly overview: string;
             readonly batchReindex: string;
+            readonly remoteReindex: string;
         };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
