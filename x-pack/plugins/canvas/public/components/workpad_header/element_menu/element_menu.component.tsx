@@ -12,13 +12,12 @@ import { EuiContextMenu, EuiIcon, EuiContextMenuPanelItemDescriptor } from '@ela
 import { i18n } from '@kbn/i18n';
 import { PrimaryActionPopover } from '../../../../../../../src/plugins/presentation_util/public';
 import { getId } from '../../../lib/get_id';
-import { ClosePopoverFn } from '../../popover';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { AssetManager } from '../../asset_manager';
+import { ClosePopoverFn } from '../../popover';
 import { SavedElementsModal } from '../../saved_elements_modal';
-import { useLabsService } from '../../../services';
 
 interface CategorizedElementLists {
   [key: string]: ElementSpec[];
@@ -122,19 +121,9 @@ export interface Props {
    * Handler for adding a selected element to the workpad
    */
   addElement: (element: Partial<ElementSpec>) => void;
-  /**
-   * Crete new embeddable
-   */
-  createNewEmbeddable: () => void;
 }
 
-export const ElementMenu: FunctionComponent<Props> = ({
-  elements,
-  addElement,
-  createNewEmbeddable,
-}) => {
-  const labsService = useLabsService();
-  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
+export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) => {
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
 
@@ -210,18 +199,6 @@ export const ElementMenu: FunctionComponent<Props> = ({
             closePopover();
           },
         },
-        // TODO: Remove this menu option. This is a temporary menu options just for testing,
-        // will be removed once toolbar is implemented
-        isByValueEnabled
-          ? {
-              name: 'Lens',
-              icon: <EuiIcon type="lensApp" size="m" />,
-              onClick: () => {
-                createNewEmbeddable();
-                closePopover();
-              },
-            }
-          : {},
       ],
     };
   };
